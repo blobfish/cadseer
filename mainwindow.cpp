@@ -43,22 +43,7 @@ MainWindow::MainWindow(QWidget *parent) :
     aLayout->addWidget(viewWidget);
     ui->centralwidget->setLayout(aLayout);
 
-//    QTimer *aTimer = new QTimer(this);
-//    aTimer->setInterval(1000);
-//    connect(aTimer, SIGNAL(timeout()), this, SLOT(timeOutSlot()));
-//    aTimer->start();
-
     connect(ui->actionAppendBrep, SIGNAL(triggered()), this, SLOT(readBrepSlot()));
-}
-
-void MainWindow::timeOutSlot()
-{
-//    Spaceball::MotionEvent *event = new Spaceball::MotionEvent();
-//    event->setTranslations(1, 1, 1);
-//    event->setRotations(2,2,2);
-//    QWidget *currentWidget = qApp->focusWidget();
-//    if (currentWidget)
-//        qApp->postEvent(currentWidget, event);
 }
 
 MainWindow::~MainWindow()

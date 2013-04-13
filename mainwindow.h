@@ -24,9 +24,6 @@ public:
 
 public slots:
     void readBrepSlot();
-    void timeOutSlot();
-
-
     
 private:
     Ui::MainWindow *ui;
