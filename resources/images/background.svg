@@ -21,11 +21,11 @@
     <linearGradient
        id="linearGradient3820">
       <stop
-         style="stop-color:#eedbc6;stop-opacity:1"
+         style="stop-color:#a6e2fd;stop-opacity:1;"
          offset="0"
          id="stop3822" />
       <stop
-         style="stop-color:#ffffff;stop-opacity:1;"
+         style="stop-color:#d7f4ff;stop-opacity:1;"
          offset="1"
          id="stop3824" />
     </linearGradient>
@@ -102,7 +102,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.98994949"
-     inkscape:cx="893.94786"
+     inkscape:cx="724.74731"
      inkscape:cy="922.75062"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -136,7 +136,7 @@
        height="256"
        x="708.57141"
        y="-29.35199"
-       inkscape:export-filename="/home/tanderson/Programming/cadseer/source/background.png"
+       inkscape:export-filename="/home/tanderson/Programming/cadseer/source/resources/images/background.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90" />
   </g>
