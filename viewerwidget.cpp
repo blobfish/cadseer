@@ -9,6 +9,7 @@
 #include <osgDB/ReadFile>
 #include <osgQt/GraphicsWindowQt>
 #include <osg/PolygonMode>
+#include <osg/Depth>
 
 #include "viewerwidget.h"
 #include "gleventwidget.h"
@@ -36,8 +37,7 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
 //    view->setCameraManipulator(new osgGA::TrackballManipulator);
     view->setCameraManipulator(new osgGA::SpaceballManipulator(camera));
 
-//    SpaceballOSGEventHandler *eventHandler = new SpaceballOSGEventHandler(view);
-//    view->addEventHandler(eventHandler);
+    addBackground();
 
     osgQt::GraphicsWindowQt* gw = dynamic_cast<osgQt::GraphicsWindowQt*>(camera->getGraphicsContext());
     QHBoxLayout *layout = new QHBoxLayout();
@@ -114,4 +114,41 @@ osg::Camera* ViewerWidget::createCamera()
 void ViewerWidget::paintEvent( QPaintEvent* event )
 {
     frame();
+}
+
+void ViewerWidget::addBackground()
+{
+    //get background image and convert.
+    QImage qImageBase(":/images/background.png");
+    //I am hoping that osg will free this memory.
+    QImage *qImage = new QImage(QGLWidget::convertToGLFormat(qImageBase));
+    unsigned char *imageData = qImage->bits();
+    osg::ref_ptr<osg::Image> osgImage = new osg::Image();
+    osgImage->setImage(qImage->width(), qImage->height(), 1, GL_RGBA, GL_RGBA,
+                       GL_UNSIGNED_BYTE, imageData, osg::Image::USE_NEW_DELETE, 1);
+
+    osg::ref_ptr<osg::Texture2D> texture = new osg::Texture2D;
+
+    texture->setImage(osgImage.get());
+    osg::ref_ptr<osg::Drawable> quad = osg::createTexturedQuadGeometry
+            (osg::Vec3(), osg::Vec3(1.0f, 0.0f, 0.0f), osg::Vec3(0.0f, 1.0f, 0.0f));
+    quad->getOrCreateStateSet()->setTextureAttributeAndModes(0, texture.get());
+    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+    geode->addDrawable(quad.get());
+
+    osg::Camera *bgCamera = new osg::Camera();
+    bgCamera->setCullingActive(false);
+    bgCamera->setClearMask(0);
+    bgCamera->setAllowEventFocus(false);
+    bgCamera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
+    bgCamera->setRenderOrder(osg::Camera::POST_RENDER);
+    bgCamera->setProjectionMatrix(osg::Matrix::ortho2D(0.0, 1.0, 0.0, 1.0));
+    bgCamera->addChild(geode.get());
+
+    osg::StateSet* ss = bgCamera->getOrCreateStateSet();
+    ss->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+    ss->setAttributeAndModes(new osg::Depth(
+    osg::Depth::LEQUAL, 1.0, 1.0));
+
+    root->addChild(bgCamera);
 }

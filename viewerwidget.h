@@ -15,6 +15,7 @@ public:
     void addNode(osg::Node *node);
 
 protected:
+    void addBackground();
     QTimer _timer;
     osg::ref_ptr<osg::Group> root;
 };
