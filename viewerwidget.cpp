@@ -119,7 +119,7 @@ void ViewerWidget::paintEvent( QPaintEvent* event )
 void ViewerWidget::addBackground()
 {
     //get background image and convert.
-    QImage qImageBase(":/images/background.png");
+    QImage qImageBase(":/resources/images/background.png");
     //I am hoping that osg will free this memory.
     QImage *qImage = new QImage(QGLWidget::convertToGLFormat(qImageBase));
     unsigned char *imageData = qImage->bits();
