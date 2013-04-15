@@ -1,7 +1,7 @@
- 
 cmake_minimum_required(VERSION 2.8)
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 project(cadseer)
+SET(CMAKE_CXX_FLAGS "-std=c++0x")
 
 find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
 set(QT_USE_QTOPENGL TRUE)
@@ -29,8 +29,14 @@ SET(ADDITIONAL_INCLUDE_PATHS
     ${OCE_INCLUDE_DIRS}
     ${CMAKE_CURRENT_BINARY_DIR} #needed to find moc files.
     )
-
 INCLUDE_DIRECTORIES(${ADDITIONAL_INCLUDE_PATHS})
+
+SET(MODELVIZ_HDRS
+  ./modelviz/graph.h
+  )
+SET(MODELVIZ_SOURCES
+  ./modelviz/graph.cpp
+  )
 
 SET(CADSEER_SOURCES
     ./main.cpp
@@ -41,6 +47,7 @@ SET(CADSEER_SOURCES
     ./gleventwidget.cpp
     ./spaceballosgevent.cpp
     ./application.cpp
+    ${MODELVIZ_SOURCES}
     )
 
 SET(CADSEER_HDRS
@@ -48,6 +55,7 @@ SET(CADSEER_HDRS
     ./spaceballqevent.h
     ./gleventwidget.h
     ./spaceballosgevent.h
+    ${MODELVIZ_HDRS}
     )
 
 SET(CADSEER_MOC_HDRS
@@ -62,6 +70,7 @@ SET(CADSEER_LIBRARIES
     ${OPENSCENEGRAPH_LIBRARIES}
     ${OCE_LIBRARIES}
     ${SPNAV_LIBRARIES}
+    ${ModelViz}
     )
 
 SET(CADSEER_UIS

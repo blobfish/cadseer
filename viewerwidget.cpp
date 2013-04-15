@@ -94,7 +94,10 @@ osg::Camera* ViewerWidget::createCamera()
             samples = -1
           */
 //    osgQt::GLWidget *glWidget = new osgQt::GLWidget(QGLFormat::defaultFormat(), this);
-    GLEventWidget *glWidget = new GLEventWidget(QGLFormat::defaultFormat(), this);
+    QGLFormat format = QGLFormat::defaultFormat();
+    format.setSamples(4);
+
+    GLEventWidget *glWidget = new GLEventWidget(format, this);
     osgQt::GraphicsWindowQt *windowQt = new osgQt::GraphicsWindowQt(glWidget);
 
     osg::ref_ptr<osg::Camera> camera = new osg::Camera;
@@ -105,8 +108,8 @@ osg::Camera* ViewerWidget::createCamera()
 //    camera->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(glWidget->width()) /
 //                                             static_cast<double>(glWidget->height()), 1.0f, 10000.0f);
     camera->setProjectionMatrixAsOrtho
-            (static_cast<double>(glWidget->width()/-2.0d), static_cast<double>(glWidget->width()/2.0d),
-             static_cast<double>(glWidget->height()/-2.0d), static_cast<double>(glWidget->height()/2.0d),
+            (0.0d, static_cast<double>(glWidget->width()),
+             0.0d, static_cast<double>(glWidget->height()),
              1.0f, 10000.0f);
     return camera.release();
 }

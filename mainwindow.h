@@ -28,9 +28,6 @@ public slots:
 private:
     Ui::MainWindow *ui;
     ViewerWidget* viewWidget;
-
-    osg::ref_ptr<osg::Geode> meshFace(const TopoDS_Face &face);
-    osg::ref_ptr<osg::Group> buildModel(TopoDS_Shape &shape);
 };
 
 #endif // MAINWINDOW_H

@@ -76,11 +76,12 @@ void SpaceballManipulator::computeHomePosition(const osg::Camera *camera, bool u
         //possibly
         //camera->setComputeNearFar(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
 
-        double aspectFactor = cam->getViewport()->width() / cam->getViewport()->height() / 4.0d;
+        double aspectFactor = static_cast<double>(cam->getViewport()->width()) /
+                static_cast<double>(cam->getViewport()->height());
         projectionData.left = boundingSphere.radius() * -1.0d;
         projectionData.right = boundingSphere.radius();
-        projectionData.bottom = projectionData.left * aspectFactor;
-        projectionData.top = projectionData.right * aspectFactor;
+        projectionData.bottom = projectionData.left / aspectFactor;
+        projectionData.top = projectionData.right / aspectFactor;
         projectionData.near = 0.1;
         projectionData.far = camSphere.radius() * 2;
 

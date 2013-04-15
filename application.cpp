@@ -22,9 +22,13 @@ Application::~Application()
 void Application::quittingSlot()
 {
     if (!spnav_close())// the not seems goofy.
-        std::cout << "spaceball disconnected" << std::endl;
+    {
+//        std::cout << "spaceball disconnected" << std::endl;
+    }
     else
-        std::cout << "couldn't disconnect spaceball" << std::endl;
+    {
+//        std::cout << "couldn't disconnect spaceball" << std::endl;
+    }
 }
 
 bool Application::x11EventFilter(XEvent *event)
@@ -62,10 +66,12 @@ void Application::initializeSpaceball(MainWindow *mainWindowIn)
     Spaceball::registerEvents();
 
     if (spnav_x11_open(QX11Info::display(), mainWindow->winId()) == -1)
-        std::cout << "No spaceball found" << std::endl;
+    {
+//        std::cout << "No spaceball found" << std::endl;
+    }
     else
     {
-        std::cout << "Spaceball found" << std::endl;
+//        std::cout << "Spaceball found" << std::endl;
         spaceballPresent = true;
     }
 }
