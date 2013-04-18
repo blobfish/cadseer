@@ -51,7 +51,9 @@ void MainWindow::readBrepSlot()
     BRepTools::Read(base, file, junk);
 
     BRepTools::Clean(base);
-    BRepMesh_IncrementalMesh mesh(base, 0.25);
-    osg::ref_ptr<osg::Group> group = ModelViz::buildModel(base);
-    addNode(group.get());
+    ModelViz::Build builder(base);
+    if (builder.go(0.25, 0.5))
+        addNode(builder.getViz().get());
+//    builder.go(0.5, 1.0);
+//    builder.go(1.0, 2.0);
 }

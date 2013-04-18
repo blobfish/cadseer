@@ -23,6 +23,7 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     root = new osg::Group;
     osg::ref_ptr<osg::PolygonMode> pm = new osg::PolygonMode;
     pm->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL);
+//    pm->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
     root->getOrCreateStateSet()->setAttribute(pm.get());
 
     osg::Camera* camera = createCamera();
@@ -30,7 +31,6 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     osgViewer::View* view = new osgViewer::View;
     view->setCamera(camera);
     addView(view);
-
 
     view->setSceneData(root);
     view->addEventHandler(new osgViewer::StatsHandler);
@@ -111,6 +111,11 @@ osg::Camera* ViewerWidget::createCamera()
             (0.0d, static_cast<double>(glWidget->width()),
              0.0d, static_cast<double>(glWidget->height()),
              1.0f, 10000.0f);
+
+    //this allows us to see points.
+    camera->setCullingMode(camera->getCullingMode() &
+    ~osg::CullSettings::SMALL_FEATURE_CULLING);
+
     return camera.release();
 }
 
