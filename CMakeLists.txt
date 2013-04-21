@@ -47,6 +47,8 @@ SET(CADSEER_SOURCES
     ./gleventwidget.cpp
     ./spaceballosgevent.cpp
     ./application.cpp
+    ./selectioneventhandler.cpp
+    ./selectionintersector.cpp
     ${MODELVIZ_SOURCES}
     )
 
@@ -55,6 +57,8 @@ SET(CADSEER_HDRS
     ./spaceballqevent.h
     ./gleventwidget.h
     ./spaceballosgevent.h
+    ./selectioneventhandler.h
+    ./selectionintersector.h
     ${MODELVIZ_HDRS}
     )
 

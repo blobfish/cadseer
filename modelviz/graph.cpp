@@ -30,6 +30,7 @@
 #include <osg/Depth>
 
 #include "graph.h"
+#include "../nodemaskdefs.h"
 
 using namespace ModelViz;
 Build::Build(const TopoDS_Shape &shapeIn) : originalShape(shapeIn), success(false),
@@ -153,8 +154,8 @@ void Build::vertexConstruct(const TopoDS_Vertex &vertex)
     geom->addPrimitiveSet(new osg::DrawArrays
                           (osg::PrimitiveSet::POINTS, 0, vertices->size()));
 
-    osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(1);
-    (*colors)[0].set(1.0f, 1.0f, 0.0f, 1.0f);
+    osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array();
+    colors->push_back(osg::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
     geom->setColorArray(colors.get());
     geom->setColorBinding(osg::Geometry::BIND_OVERALL);
     geom->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
@@ -169,6 +170,8 @@ void Build::vertexConstruct(const TopoDS_Vertex &vertex)
 
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
     geode->addDrawable(geom.get());
+    geode->setNodeMask(NodeMask::vertex);
+    geode->setCullingActive(false);
     groupOut->addChild(geode.get());
 }
 
@@ -222,6 +225,7 @@ void Build::edgeConstruct(const TopoDS_Edge &edgeIn)
 
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
     geode->addDrawable(edgeViz.get());
+    geode->setNodeMask(NodeMask::edge);
     groupOut->addChild(geode.get());
 }
 
@@ -297,6 +301,7 @@ void Build::faceConstruct(const TopoDS_Face &faceIn)
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
 
     geode->addDrawable(geom.get());
+    geode->setNodeMask(NodeMask::face);
     groupOut->addChild(geode.get());
 }
 

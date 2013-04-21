@@ -14,6 +14,8 @@
 #include "viewerwidget.h"
 #include "gleventwidget.h"
 #include "spaceballmanipulator.h"
+#include "selectioneventhandler.h"
+#include "nodemaskdefs.h"
 
 ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel) : QWidget()
 {
@@ -34,6 +36,7 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
 
     view->setSceneData(root);
     view->addEventHandler(new osgViewer::StatsHandler);
+    view->addEventHandler(new SelectionEventHandler());
 //    view->setCameraManipulator(new osgGA::TrackballManipulator);
     view->setCameraManipulator(new osgGA::SpaceballManipulator(camera));
 
@@ -103,6 +106,10 @@ osg::Camera* ViewerWidget::createCamera()
     osg::ref_ptr<osg::Camera> camera = new osg::Camera;
     camera->setGraphicsContext(windowQt);
 
+    QPixmap cursorImage(":/resources/images/cursor.png");
+    QCursor cursor(cursorImage.scaled(32, 32));//hot point defaults to center.
+    glWidget->setCursor(cursor);
+
     camera->setClearColor(osg::Vec4(0.2, 0.2, 0.6, 1.0));
     camera->setViewport(new osg::Viewport(0, 0, glWidget->width(), glWidget->height()));
 //    camera->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(glWidget->width()) /
@@ -152,6 +159,7 @@ void ViewerWidget::addBackground()
     bgCamera->setRenderOrder(osg::Camera::POST_RENDER);
     bgCamera->setProjectionMatrix(osg::Matrix::ortho2D(0.0, 1.0, 0.0, 1.0));
     bgCamera->addChild(geode.get());
+    bgCamera->setNodeMask(NodeMask::noSelect);
 
     osg::StateSet* ss = bgCamera->getOrCreateStateSet();
     ss->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
