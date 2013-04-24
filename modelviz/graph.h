@@ -13,6 +13,7 @@
 #include <TopTools_MapOfShape.hxx>
 
 #include <osg/Group>
+#include <osg/Geometry>
 
 namespace ModelViz
 {
@@ -24,7 +25,14 @@ public:
     osg::ref_ptr<osg::Group> getViz();
     bool go(const Standard_Real &deflection, const Standard_Real &angle);
 private:
-    int getVertexIndex(const gp_Pnt &pointIn);
+    void setUpGraph();
+    osg::ref_ptr<osg::Geometry> createGeometryVertex();
+    osg::ref_ptr<osg::Geometry> createGeometryEdge();
+    osg::ref_ptr<osg::Geometry> createGeometryFace();
+    osg::ref_ptr<osg::Geode> createGeodeVertex();
+    osg::ref_ptr<osg::Geode> createGeodeEdge();
+    osg::ref_ptr<osg::Geode> createGeodeFace();
+
     void recursiveConstruct(const TopoDS_Shape &shapeIn);
     void vertexConstruct(const TopoDS_Vertex &vertex);
     void edgeConstruct(const TopoDS_Edge &edgeIn);
@@ -35,6 +43,9 @@ private:
     Bnd_Box bound;
     TopTools_IndexedDataMapOfShapeListOfShape edgeToFace;
     osg::ref_ptr<osg::Group> groupOut;
+    osg::ref_ptr<osg::Group> groupVertices;
+    osg::ref_ptr<osg::Group> groupEdges;
+    osg::ref_ptr<osg::Group> groupFaces;
     bool success;
     bool initialized;
 

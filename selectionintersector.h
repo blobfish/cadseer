@@ -16,7 +16,15 @@ public:
     double getPickRadius(){return pickRadius;}
 
 protected:
+    void setScale(osgUtil::IntersectionVisitor &iv);
+    bool getLocalStartEnd();
+    void goPoints(const osg::ref_ptr<osg::PrimitiveSet> primitive, Intersection &hitBase);
+    double scale;
     double pickRadius;
+    osg::Geometry *currentGeometry;
+    osg::Vec3Array *currentVertices;
+    osg::Vec3d localStart;
+    osg::Vec3d localEnd;
 };
 
 #endif // SELECTIONINTERSECTOR_H

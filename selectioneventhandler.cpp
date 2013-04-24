@@ -26,7 +26,7 @@ bool SelectionEventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
            Vec4Array *colors = dynamic_cast<Vec4Array*>(lastPrehighlightGeometry->getColorArray());
            if (colors && colors->size() > 0)
            {
-               colors->front() = lastPrehighlightColor;
+               (*colors)[lastPrehighlightColorIndex] = lastPrehighlightColor;
                colors->dirty();
                lastPrehighlightGeometry->dirtyDisplayList();
            }
@@ -43,7 +43,7 @@ bool SelectionEventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
         picker->setPickRadius(16.0); //32 x 32 cursor
 
         osgUtil::IntersectionVisitor iv(picker);
-        iv.setTraversalMask(~NodeMask::noSelect);
+        iv.setTraversalMask(~NodeMask::edge & ~NodeMask::vertex & ~NodeMask::noSelect);
         view->getCamera()->accept(iv);
         if (picker->containsIntersections())
         {
@@ -60,8 +60,9 @@ bool SelectionEventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
             Vec4Array *colors = dynamic_cast<Vec4Array*>(lastPrehighlightGeometry->getColorArray());
             if (colors && colors->size() > 0)
             {
-                lastPrehighlightColor = colors->front();
-                colors->front() = preHighlightColor;
+                lastPrehighlightColorIndex = 0;
+                lastPrehighlightColor = (*colors)[lastPrehighlightColorIndex];
+                (*colors)[lastPrehighlightColorIndex] = preHighlightColor;
                 colors->dirty();
                 lastPrehighlightGeometry->dirtyDisplayList();
             }

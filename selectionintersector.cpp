@@ -62,70 +62,86 @@ osgUtil::Intersector* SelectionIntersector::clone(osgUtil::IntersectionVisitor &
 
 void SelectionIntersector::intersect(osgUtil::IntersectionVisitor &iv, osg::Drawable *drawable)
 {
-    Geometry *geometry = drawable->asGeometry();
-    if (!geometry)
+    currentGeometry = drawable->asGeometry();
+    if (!currentGeometry)
         return;
 
-    bool hasPoints = false;
-    bool hasEdges = false;
-    bool hasFaces = false;
-
-    Geometry::PrimitiveSetList set = geometry->getPrimitiveSetList();
-    Geometry::PrimitiveSetList::const_iterator setIt;
-    for (setIt = set.begin(); setIt != set.end(); ++setIt)
-    {
-        if ((*setIt)->getMode() == GL_POINTS)
-            hasPoints = true;
-        if ((*setIt)->getMode() == GL_LINE_STRIP)
-            hasEdges = true;
-        if ((*setIt)->getMode() == GL_TRIANGLES)
-            hasFaces = true;
-    }
-
-    if (hasFaces)
-        LineSegmentIntersector::intersect(iv, drawable);
-
-    if (!hasEdges && !hasPoints)
+    currentVertices = dynamic_cast<Vec3Array *>(currentGeometry->getVertexArray());
+    if (!currentVertices)
         return;
 
-    Matrixd pMatrix = *iv.getProjectionMatrix();
-    Matrixd wMatrix = *iv.getWindowMatrix();
-    double scale = (pMatrix * wMatrix).getScale().length();
-
-    BoundingBox box = drawable->getBound();
-    Vec3d cornerProject(1.0d, 1.0d, 1.0d);
-    cornerProject.normalize();
-    box._min = box._min + (cornerProject * -pickRadius / scale);
-    box._max = box._max + (cornerProject * pickRadius / scale);
-
-    Vec3d localStart(_start);
-    Vec3d localEnd(_end);
-    if (!intersectAndClip(localStart, localEnd, box))
+    setScale(iv);
+    if (isnan(scale))
+        return;
+    if (!getLocalStartEnd())
         return;
     if (iv.getDoDummyTraversal())//not sure what this does.
         return;
 
-    Vec3Array *vertices = dynamic_cast<Vec3Array *>(geometry->getVertexArray());
-    if (!vertices)
-        return;
-
-    Vec3d intersectionVector = localEnd - localStart;
-    Vec3Array::const_iterator it;
-    for (it = vertices->begin(); it != vertices->end(); ++it)
+    Geometry::PrimitiveSetList set = currentGeometry->getPrimitiveSetList();
+    Geometry::PrimitiveSetList::const_iterator setIt;
+    Intersection hitBase;
+    hitBase.nodePath = iv.getNodePath();
+    hitBase.drawable = drawable;
+    hitBase.matrix = iv.getModelMatrix();
+    for (setIt = set.begin(); setIt != set.end(); ++setIt)
     {
-        Vec3d vertexVector = (*it) - localStart;
-        double dot = vertexVector * intersectionVector;
-        double distance = sqrt(vertexVector.length2() - pow(dot, 2));
-
-        if (isnan(distance) || distance <= pickRadius / scale)
+        hitBase.primitiveIndex = setIt - set.begin();
+        if ((*setIt)->getMode() == GL_POINTS)
         {
-            Intersection hit;
-            hit.ratio = distance;
-            hit.nodePath = iv.getNodePath();
-            hit.drawable = drawable;
-            hit.matrix = iv.getModelMatrix();
-            hit.localIntersectionPoint = *it;
-            insertIntersection(hit);
+            goPoints(*setIt, hitBase);
         }
+//        if ((*setIt)->getMode() == GL_LINE_STRIP)
+//            hasEdges = true;
+        if ((*setIt)->getMode() == GL_TRIANGLES)
+            LineSegmentIntersector::intersect(iv, drawable);
     }
+}
+
+void SelectionIntersector::goPoints(const osg::ref_ptr<osg::PrimitiveSet> primitive, Intersection &hitBase)
+{
+    ref_ptr<DrawArrays> drawArray = dynamic_pointer_cast<DrawArrays>(primitive);
+    if (!drawArray.valid())
+    {
+        std::cout << "couldn't do cast in goPoints";
+        return;
+    }
+
+    Vec3d currentVertex = currentVertices->at(drawArray->getFirst());
+    Vec3d intersectionVector = localEnd - localStart;
+    Vec3d vertexVector = currentVertex - localStart;
+    double dot = vertexVector * intersectionVector;
+    Vec3d projectionVector =  intersectionVector * (dot / intersectionVector.length2());
+    projectionVector += localStart;
+    double distance = (projectionVector - currentVertex).length();
+
+    if (isnan(distance) || distance <= pickRadius / scale)
+    {
+//        std::cout << "distance: " << distance << std::endl;
+        Intersection hit = hitBase;
+        hit.ratio = distance;
+        hit.localIntersectionPoint = currentVertex;
+        insertIntersection(hit);
+    }
+}
+
+void SelectionIntersector::setScale(osgUtil::IntersectionVisitor &iv)
+{
+    Matrixd pMatrix = *iv.getProjectionMatrix();
+    Matrixd wMatrix = *iv.getWindowMatrix();
+    scale = (pMatrix * wMatrix).getScale().length();
+}
+
+bool SelectionIntersector::getLocalStartEnd()
+{
+    localStart = _start;
+    localEnd = _end;
+    BoundingBox box = currentGeometry->getBound();
+    Vec3d cornerProject(1.0d, 1.0d, 1.0d);
+    cornerProject.normalize();
+    box._min = box._min + (cornerProject * -pickRadius / scale);
+    box._max = box._max + (cornerProject * pickRadius / scale);
+    if (!intersectAndClip(localStart, localEnd, box))
+        return false;
+    return true;
 }

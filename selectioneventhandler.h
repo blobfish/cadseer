@@ -13,6 +13,7 @@ protected:
                         osg::NodeVisitor *nodeVistor);
     osg::observer_ptr<osg::Geometry> lastPrehighlightGeometry;
     osg::Vec4 lastPrehighlightColor;
+    int lastPrehighlightColorIndex;
     osg::Vec4 preHighlightColor;
 };
 

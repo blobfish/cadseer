@@ -10,6 +10,7 @@
 #include <osgQt/GraphicsWindowQt>
 #include <osg/PolygonMode>
 #include <osg/Depth>
+#include <osgUtil/Optimizer>
 
 #include "viewerwidget.h"
 #include "gleventwidget.h"
@@ -65,6 +66,9 @@ void ViewerWidget::addNode(osg::Node *node)
     osgViewer::View* view = this->getView(0);
     osgGA::CameraManipulator *camManip = view->getCameraManipulator();
     camManip->home(1.0);
+
+    osgUtil::Optimizer opt;
+    opt.optimize(root);
 
 
 //    osg::Vec3d eye, center, up;

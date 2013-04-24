@@ -43,7 +43,6 @@ Build::Build(const TopoDS_Shape &shapeIn) : originalShape(shapeIn), success(fals
         copiedShape = copier.Shape();
         BRepBndLib::Add(copiedShape, bound);
         TopExp::MapShapesAndAncestors(copiedShape, TopAbs_EDGE, TopAbs_FACE, edgeToFace);
-        groupOut = new osg::Group();
     //    groupOut->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);
     //    groupOut->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
 
@@ -66,6 +65,8 @@ bool Build::go(const Standard_Real &deflection, const Standard_Real &angle)
     if (!initialized)
         return false;
 
+    setUpGraph();
+
     try
     {
         BRepTools::Clean(copiedShape);//might call this several times for same shape;
@@ -82,8 +83,8 @@ bool Build::go(const Standard_Real &deflection, const Standard_Real &angle)
                 (deflection, copiedShape, bound, angle, Standard_True, Standard_True,
                  Standard_False, Standard_True);
 
-        recursiveConstruct(copiedShape);
         processed.Add(copiedShape);
+        recursiveConstruct(copiedShape);
         success = true;
 
         return true;
@@ -105,6 +106,99 @@ bool Build::go(const Standard_Real &deflection, const Standard_Real &angle)
         std::cout << "Unknown Error: failure building model vizualization. Message: " << std::endl;
     }
     return false;
+}
+
+void Build::setUpGraph()
+{
+    groupOut = new osg::Group();
+    groupVertices = new osg::Group();
+    groupEdges = new osg::Group();
+    groupFaces = new osg::Group();
+    groupOut->addChild(groupVertices);
+    groupOut->addChild(groupEdges);
+    groupOut->addChild(groupFaces);
+}
+
+osg::ref_ptr<osg::Geometry> Build::createGeometryVertex()
+{
+    //vertex
+    osg::ref_ptr<osg::Geometry> geomVertices = new osg::Geometry();
+    geomVertices->setVertexArray(new osg::Vec3Array());
+
+    osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array();
+    geomVertices->setColorArray(colors.get());
+    geomVertices->setColorBinding(osg::Geometry::BIND_OVERALL);
+    geomVertices->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+
+    osg::Point *point = new osg::Point;
+    point->setSize(10.0);
+    geomVertices->getOrCreateStateSet()->setAttribute(point);
+
+    osg::Depth *depth = new osg::Depth();
+    depth->setRange(-0.001, 0.998);
+    geomVertices->getOrCreateStateSet()->setAttribute(depth);
+
+    return geomVertices;
+}
+
+osg::ref_ptr<osg::Geometry> Build::createGeometryEdge()
+{
+    //edges
+    osg::ref_ptr<osg::Geometry> geomEdges = new osg::Geometry();
+    geomEdges->setVertexArray(new osg::Vec3Array);
+
+    osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array();
+    geomEdges->setColorArray(colors.get());
+    geomEdges->setColorBinding(osg::Geometry::BIND_OVERALL);
+
+    geomEdges->getOrCreateStateSet()->setAttribute(new osg::LineWidth(2.0f));
+    geomEdges->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+
+    osg::Depth *depth = new osg::Depth();
+    depth->setRange(0.000, 0.999);
+    geomEdges->getOrCreateStateSet()->setAttribute(depth);
+
+    return geomEdges;
+}
+
+osg::ref_ptr<osg::Geometry> Build::createGeometryFace()
+{
+    //faces
+    osg::ref_ptr<osg::Geometry> geomFaces = new osg::Geometry();
+    geomFaces->setVertexArray(new osg::Vec3Array);
+    geomFaces->setUseDisplayList(false);
+    geomFaces->setUseVertexBufferObjects(true);
+
+    osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array;
+    geomFaces->setColorArray(colors.get());
+    geomFaces->setColorBinding(osg::Geometry::BIND_OVERALL);
+
+    geomFaces->setNormalArray(new osg::Vec3Array);
+    geomFaces->setNormalBinding(osg::Geometry::BIND_PER_VERTEX);
+
+    return geomFaces;
+}
+
+osg::ref_ptr<osg::Geode> Build::createGeodeVertex()
+{
+    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+    geode->setNodeMask(NodeMask::vertex);
+    geode->setCullingActive(false);//so we can select. Might not need in a non "points only" environment.
+    return geode;
+}
+
+osg::ref_ptr<osg::Geode> Build::createGeodeEdge()
+{
+    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+    geode->setNodeMask(NodeMask::edge);
+    return geode;
+}
+
+osg::ref_ptr<osg::Geode> Build::createGeodeFace()
+{
+    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+    geode->setNodeMask(NodeMask::face);
+    return geode;
 }
 
 void Build::recursiveConstruct(const TopoDS_Shape &shapeIn)
@@ -145,41 +239,25 @@ void Build::recursiveConstruct(const TopoDS_Shape &shapeIn)
 
 void Build::vertexConstruct(const TopoDS_Vertex &vertex)
 {
-    osg::ref_ptr<osg::Geometry> geom = new osg::Geometry;
+    osg::ref_ptr<osg::Geode> geode = createGeodeVertex();
+    osg::ref_ptr<osg::Geometry> geometry = createGeometryVertex();
+    geode->addDrawable(geometry);
+    groupVertices->addChild(geode);
 
     gp_Pnt vPoint = BRep_Tool::Pnt(vertex);
-    osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array(1);
-    (*vertices)[0] = osg::Vec3Array::value_type(vPoint.X(), vPoint.Y(), vPoint.Z());
-    geom->setVertexArray(vertices.get());
-    geom->addPrimitiveSet(new osg::DrawArrays
-                          (osg::PrimitiveSet::POINTS, 0, vertices->size()));
-
-    osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array();
+    osg::Vec3Array *vertices = dynamic_cast<osg::Vec3Array *>(geometry->getVertexArray());
+    vertices->push_back(osg::Vec3Array::value_type(vPoint.X(), vPoint.Y(), vPoint.Z()));
+    geometry->addPrimitiveSet(new osg::DrawArrays
+                          (osg::PrimitiveSet::POINTS, vertices->size() - 1, 1));
+    osg::Vec4Array *colors= dynamic_cast<osg::Vec4Array *>(geometry->getColorArray());
     colors->push_back(osg::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
-    geom->setColorArray(colors.get());
-    geom->setColorBinding(osg::Geometry::BIND_OVERALL);
-    geom->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-
-    osg::Point *point = new osg::Point;
-    point->setSize(10.0);
-    geom->getOrCreateStateSet()->setAttribute(point);
-
-    osg::Depth *depth = new osg::Depth();
-    depth->setRange(-0.001, 0.998);
-    geom->getOrCreateStateSet()->setAttribute(depth);
-
-    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
-    geode->addDrawable(geom.get());
-    geode->setNodeMask(NodeMask::vertex);
-    geode->setCullingActive(false);
-    groupOut->addChild(geode.get());
 }
 
 void Build::edgeConstruct(const TopoDS_Edge &edgeIn)
 {
     TopoDS_Face face = TopoDS::Face(edgeToFace.FindFromKey(edgeIn).First());
     if (face.IsNull())
-        return;
+        throw std::runtime_error("face is null in edge construction");
 
     TopLoc_Location location;
     Handle(Poly_Triangulation) triangulation;
@@ -188,7 +266,7 @@ void Build::edgeConstruct(const TopoDS_Edge &edgeIn)
     const Handle(Poly_PolygonOnTriangulation) &segments =
             BRep_Tool::PolygonOnTriangulation(edgeIn, triangulation, location);
     if (segments.IsNull())
-        return;
+        throw std::runtime_error("edge triangulation is null in edge construction");
 
     gp_Trsf transformation;
     bool identity = true;
@@ -198,9 +276,15 @@ void Build::edgeConstruct(const TopoDS_Edge &edgeIn)
         transformation = location.Transformation();
     }
 
+    osg::ref_ptr<osg::Geode> geode = createGeodeEdge();
+    osg::ref_ptr<osg::Geometry> geometry = createGeometryEdge();
+    geode->addDrawable(geometry);
+    groupEdges->addChild(geode);
+
     const TColStd_Array1OfInteger& indexes = segments->Nodes();
     const TColgp_Array1OfPnt& nodes = triangulation->Nodes();
-    osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
+    osg::Vec3Array *vertices = dynamic_cast<osg::Vec3Array *>(geometry->getVertexArray());
+    int startIndex = vertices->size();
     for (int index(indexes.Lower()); index < indexes.Upper() + 1; ++index)
     {
         gp_Pnt point = nodes(indexes(index));
@@ -208,25 +292,9 @@ void Build::edgeConstruct(const TopoDS_Edge &edgeIn)
             point.Transform(transformation);
         vertices->push_back(osg::Vec3(point.X(), point.Y(), point.Z()));
     }
-
-    osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(1);
-    (*colors)[0].set(0.0f, 0.0f, 0.0f, 1.0f);
-    osg::ref_ptr<osg::Geometry> edgeViz = new osg::Geometry;
-    edgeViz->setVertexArray(vertices.get());
-    edgeViz->setColorArray(colors.get());
-    edgeViz->setColorBinding(osg::Geometry::BIND_OVERALL);
-    edgeViz->addPrimitiveSet(new osg::DrawArrays(GL_LINE_STRIP, 0, vertices->size()));
-    edgeViz->getOrCreateStateSet()->setAttribute(new osg::LineWidth(2.0f));
-    edgeViz->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-
-    osg::Depth *depth = new osg::Depth();
-    depth->setRange(0.000, 0.999);
-    edgeViz->getOrCreateStateSet()->setAttribute(depth);
-
-    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
-    geode->addDrawable(edgeViz.get());
-    geode->setNodeMask(NodeMask::edge);
-    groupOut->addChild(geode.get());
+    geometry->addPrimitiveSet(new osg::DrawArrays(GL_LINE_STRIP, startIndex, vertices->size()-startIndex));
+    osg::Vec4Array *colors= dynamic_cast<osg::Vec4Array *>(geometry->getColorArray());
+    colors->push_back(osg::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
 void Build::faceConstruct(const TopoDS_Face &faceIn)
@@ -236,10 +304,8 @@ void Build::faceConstruct(const TopoDS_Face &faceIn)
     triangulation = BRep_Tool::Triangulation(faceIn, location);
 
     if (triangulation.IsNull())
-    {
-        std::cout << "null face triangulation" << std::endl;//not sure what to do just yet.
-        return;
-    }
+        throw std::runtime_error("null triangulation in face construction");
+
     bool signalOrientation(false);
     if (faceIn.Orientation() == TopAbs_FORWARD)
         signalOrientation = true;
@@ -252,15 +318,22 @@ void Build::faceConstruct(const TopoDS_Face &faceIn)
         transformation = location.Transformation();
     }
 
+    osg::ref_ptr<osg::Geode> geode = createGeodeFace();
+    osg::ref_ptr<osg::Geometry> geometry = createGeometryFace();
+    geode->addDrawable(geometry);
+    groupFaces->addChild(geode);
+
     //vertices.
     const TColgp_Array1OfPnt& nodes = triangulation->Nodes();
-    osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array(nodes.Length());
+    osg::Vec3Array *vertices = dynamic_cast<osg::Vec3Array *>(geometry->getVertexArray());
+    osg::Vec3Array *normals = dynamic_cast<osg::Vec3Array *>(geometry->getNormalArray());
     for (int index(nodes.Lower()); index < nodes.Upper() + 1; ++index)
     {
         gp_Pnt point = nodes.Value(index);
         if(!identity)
             point.Transform(transformation);
-        (*vertices)[index - 1] = osg::Vec3(point.X(), point.Y(), point.Z());
+        vertices->push_back(osg::Vec3(point.X(), point.Y(), point.Z()));
+        normals->push_back(osg::Vec3(0.0, 0.0, 0.0));
     }
 
     const Poly_Array1OfTriangle& triangles = triangulation->Triangles();
@@ -271,8 +344,8 @@ void Build::faceConstruct(const TopoDS_Face &faceIn)
     {
         int N1, N2, N3;
         triangles(index).Get(N1, N2, N3);
-        int factor = (index - 1) * 3;
 
+        int factor = (index - 1) * 3;
         if (!signalOrientation)
         {
             (*indices)[factor] = N3 - 1;
@@ -285,24 +358,39 @@ void Build::faceConstruct(const TopoDS_Face &faceIn)
             (*indices)[factor + 1] = N2 - 1;
             (*indices)[factor + 2] = N3 - 1;
         }
+
+        //calculate normal.
+        osg::Vec3 pointOne(vertices->at((*indices)[factor]));
+        osg::Vec3 pointTwo(vertices->at((*indices)[factor + 1]));
+        osg::Vec3 pointThree(vertices->at((*indices)[factor + 2]));
+
+        osg::Vec3 axisOne(pointTwo - pointOne);
+        osg::Vec3 axisTwo(pointThree - pointOne);
+        osg::Vec3 currentNormal(axisOne ^ axisTwo);
+        if (currentNormal.isNaN())
+            continue;
+        currentNormal.normalize();
+
+        osg::Vec3 tempNormal;
+
+        tempNormal = (*normals)[(*indices)[factor]];
+        tempNormal += currentNormal;
+        tempNormal.normalize();
+        (*normals)[(*indices)[factor]] = tempNormal;
+
+        tempNormal = (*normals)[(*indices)[factor + 1]];
+        tempNormal += currentNormal;
+        tempNormal.normalize();
+        (*normals)[(*indices)[factor + 1]] = tempNormal;
+
+        tempNormal = (*normals)[(*indices)[factor + 2]];
+        tempNormal += currentNormal;
+        tempNormal.normalize();
+        (*normals)[(*indices)[factor + 2]] = tempNormal;
     }
-
-    osg::ref_ptr<osg::Geometry> geom = new osg::Geometry;
-    geom->setUseDisplayList(false);
-    geom->setUseVertexBufferObjects(true);
-    geom->setVertexArray(vertices.get());
-    geom->addPrimitiveSet(indices.get());
-
-    osg::ref_ptr<osg::Vec4Array> colorArray = new osg::Vec4Array;
-    colorArray->push_back(osg::Vec4(.1f, .7f, .1f, .5f));
-    geom->setColorArray(colorArray);
-    geom->setColorBinding(osg::Geometry::BIND_OVERALL);
-    osgUtil::SmoothingVisitor::smooth(*geom);
-    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
-
-    geode->addDrawable(geom.get());
-    geode->setNodeMask(NodeMask::face);
-    groupOut->addChild(geode.get());
+    geometry->addPrimitiveSet(indices.get());
+    osg::Vec4Array *colors= dynamic_cast<osg::Vec4Array *>(geometry->getColorArray());
+    colors->push_back(osg::Vec4(.1f, .7f, .1f, .5f));
 }
 
 osg::ref_ptr<osg::Group> Build::getViz()
@@ -311,5 +399,4 @@ osg::ref_ptr<osg::Group> Build::getViz()
         return groupOut;
     else
         return osg::ref_ptr<osg::Group>();
-
 }
