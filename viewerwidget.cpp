@@ -17,6 +17,7 @@
 #include "spaceballmanipulator.h"
 #include "selectioneventhandler.h"
 #include "nodemaskdefs.h"
+#include "./testing/plotter.h"
 
 ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel) : QWidget()
 {
@@ -28,6 +29,7 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     pm->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL);
 //    pm->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
     root->getOrCreateStateSet()->setAttribute(pm.get());
+    Plotter::getReference().setBase(root);
 
     osg::Camera* camera = createCamera();
 

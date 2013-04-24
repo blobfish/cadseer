@@ -38,6 +38,14 @@ SET(MODELVIZ_SOURCES
   ./modelviz/graph.cpp
   )
 
+SET(TESTING_HDRS
+    ./testing/plotter.h
+    )
+
+SET(TESTING_SOURCES
+    ./testing/plotter.cpp
+    )
+
 SET(CADSEER_SOURCES
     ./main.cpp
     ./viewerwidget.cpp
@@ -50,6 +58,7 @@ SET(CADSEER_SOURCES
     ./selectioneventhandler.cpp
     ./selectionintersector.cpp
     ${MODELVIZ_SOURCES}
+    ${TESTING_SOURCES}
     )
 
 SET(CADSEER_HDRS
@@ -60,6 +69,7 @@ SET(CADSEER_HDRS
     ./selectioneventhandler.h
     ./selectionintersector.h
     ${MODELVIZ_HDRS}
+    ${TESTING_HDRS}
     )
 
 SET(CADSEER_MOC_HDRS
