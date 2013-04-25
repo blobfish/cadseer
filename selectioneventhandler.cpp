@@ -43,7 +43,7 @@ bool SelectionEventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
         picker->setPickRadius(16.0); //32 x 32 cursor
 
         osgUtil::IntersectionVisitor iv(picker);
-        iv.setTraversalMask(~NodeMask::edge & ~NodeMask::vertex & ~NodeMask::noSelect);
+        iv.setTraversalMask(~NodeMask::face & ~NodeMask::vertex & ~NodeMask::noSelect);
         view->getCamera()->accept(iv);
         if (picker->containsIntersections())
         {

@@ -1,11 +1,16 @@
 #include <iostream>
+#include <assert.h>
 
 #include <osg/Geometry>
 #include <osg/PrimitiveSet>
 
+#include <eigen3/Eigen/Eigen>
+
 #include "selectionintersector.h"
+#include "./testing/plotter.h"
 
 using namespace osg;
+using namespace Eigen;
 
 SelectionIntersector::SelectionIntersector(CoordinateFrame frame, double x, double y) :
     LineSegmentIntersector(frame, x, y), pickRadius(1.0)
@@ -63,12 +68,10 @@ osgUtil::Intersector* SelectionIntersector::clone(osgUtil::IntersectionVisitor &
 void SelectionIntersector::intersect(osgUtil::IntersectionVisitor &iv, osg::Drawable *drawable)
 {
     currentGeometry = drawable->asGeometry();
-    if (!currentGeometry)
-        return;
+    assert(currentGeometry);
 
     currentVertices = dynamic_cast<Vec3Array *>(currentGeometry->getVertexArray());
-    if (!currentVertices)
-        return;
+    assert(currentVertices);
 
     setScale(iv);
     if (isnan(scale))
@@ -78,6 +81,9 @@ void SelectionIntersector::intersect(osgUtil::IntersectionVisitor &iv, osg::Draw
     if (iv.getDoDummyTraversal())//not sure what this does.
         return;
 
+
+    //doing primitive sets are overkill now because we have only object(vertex, line, edge) per geom node.
+    //I am leaving in case we go back to a merged geom node.
     Geometry::PrimitiveSetList set = currentGeometry->getPrimitiveSetList();
     Geometry::PrimitiveSetList::const_iterator setIt;
     Intersection hitBase;
@@ -88,11 +94,9 @@ void SelectionIntersector::intersect(osgUtil::IntersectionVisitor &iv, osg::Draw
     {
         hitBase.primitiveIndex = setIt - set.begin();
         if ((*setIt)->getMode() == GL_POINTS)
-        {
             goPoints(*setIt, hitBase);
-        }
-//        if ((*setIt)->getMode() == GL_LINE_STRIP)
-//            hasEdges = true;
+        if ((*setIt)->getMode() == GL_LINE_STRIP)
+            goEdges(*setIt, hitBase);
         if ((*setIt)->getMode() == GL_TRIANGLES)
             LineSegmentIntersector::intersect(iv, drawable);
     }
@@ -125,6 +129,57 @@ void SelectionIntersector::goPoints(const osg::ref_ptr<osg::PrimitiveSet> primit
     }
 }
 
+void SelectionIntersector::goEdges(const osg::ref_ptr<osg::PrimitiveSet> primitive, Intersection &hitBase)
+{
+    ref_ptr<DrawArrays> drawArray = dynamic_pointer_cast<DrawArrays>(primitive);
+    assert(drawArray);
+
+    int first = drawArray->getFirst();
+    int count = drawArray->getCount();
+    for (int index = first; index < first + count - 1; ++index)
+    {
+        Vec3d lineStart = currentVertices->at(index);
+        Vec3d lineEnd =  currentVertices->at(index + 1);
+        Vec3d segmentVector = lineEnd - lineStart;
+
+        Vec3d intersectionVector = localEnd - localStart;
+        Vec3d tempIntersectVector = intersectionVector + (localEnd - lineStart);
+
+        Vec3d testPoint;
+        double segmentDot = segmentVector * tempIntersectVector;
+        double segmentScalar = segmentDot / segmentVector.length2();
+        testPoint = segmentVector * segmentScalar + lineStart;
+
+        Vec3d connection = localStart - lineStart;
+        Matrix2d matrix;
+        Vector2d solution;
+        matrix << segmentVector * segmentVector, - (segmentVector * intersectionVector),
+                intersectionVector * segmentVector, - (intersectionVector * intersectionVector);
+        solution << segmentVector * connection, intersectionVector * connection;
+        FullPivLU<Matrix2d> lu1(matrix);
+        Vector2d parameters = lu1.solve(solution);
+        if(lu1.rank() != matrix.cols())
+            continue;
+
+        Vec3d segmentPoint = lineStart + (segmentVector * parameters.x());
+        Vec3d intersectionPoint = localStart + (intersectionVector * parameters.y());
+
+//        Plotter::getReference().plotPoint(segmentPoint);
+//        Plotter::getReference().plotPoint(intersectionPoint);
+
+        double distance = (segmentPoint - intersectionPoint).length();
+//        std::cout << "distance: " << distance << std::endl;
+        if (isnan(distance) || distance <= pickRadius / scale)
+        {
+            Intersection hit = hitBase;
+            hit.ratio = distance;
+            hit.localIntersectionPoint = segmentPoint;
+            insertIntersection(hit);
+            break;//only one intersection for primitive.
+        }
+    }
+}
+
 void SelectionIntersector::setScale(osgUtil::IntersectionVisitor &iv)
 {
     Matrixd pMatrix = *iv.getProjectionMatrix();
@@ -138,7 +193,6 @@ bool SelectionIntersector::getLocalStartEnd()
     localEnd = _end;
     BoundingBox box = currentGeometry->getBound();
     Vec3d cornerProject(1.0d, 1.0d, 1.0d);
-    cornerProject.normalize();
     box._min = box._min + (cornerProject * -pickRadius / scale);
     box._max = box._max + (cornerProject * pickRadius / scale);
     if (!intersectAndClip(localStart, localEnd, box))

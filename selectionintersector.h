@@ -19,6 +19,7 @@ protected:
     void setScale(osgUtil::IntersectionVisitor &iv);
     bool getLocalStartEnd();
     void goPoints(const osg::ref_ptr<osg::PrimitiveSet> primitive, Intersection &hitBase);
+    void goEdges(const osg::ref_ptr<osg::PrimitiveSet> primitive, Intersection &hitBase);
     double scale;
     double pickRadius;
     osg::Geometry *currentGeometry;
