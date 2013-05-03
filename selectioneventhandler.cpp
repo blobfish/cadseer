@@ -21,18 +21,6 @@ bool SelectionEventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
 {
     if (eventAdapter.getEventType() == osgGA::GUIEventAdapter::MOVE)
     {
-        if (lastPrehighlightGeometry.valid())
-        {
-           Vec4Array *colors = dynamic_cast<Vec4Array*>(lastPrehighlightGeometry->getColorArray());
-           if (colors && colors->size() > 0)
-           {
-               (*colors)[lastPrehighlightColorIndex] = lastPrehighlightColor;
-               colors->dirty();
-               lastPrehighlightGeometry->dirtyDisplayList();
-           }
-           lastPrehighlightGeometry = NULL;
-        }
-
         osg::View* view = actionAdapter.asView();
         if (!view)
             return false;
@@ -43,31 +31,68 @@ bool SelectionEventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
         picker->setPickRadius(16.0); //32 x 32 cursor
 
         osgUtil::IntersectionVisitor iv(picker);
-        iv.setTraversalMask(~NodeMask::face & ~NodeMask::vertex & ~NodeMask::noSelect);
+        iv.setTraversalMask(~NodeMask::noSelect);
         view->getCamera()->accept(iv);
         if (picker->containsIntersections())
         {
-//            std::cout << picker->getIntersections().size() << " objects" << std::endl;
-            osgUtil::LineSegmentIntersector::Intersection intersection = picker->getFirstIntersection();
-//            osg::Vec3d point = intersection.localIntersectionPoint;
-//            std::cout << "Picked " << point.x() << "   " << point.y() << "   " << point.z() << std::endl;
+           osgUtil::LineSegmentIntersector::Intersections intersections = picker->getIntersections();
+           osgUtil::LineSegmentIntersector::Intersections::const_iterator itIt;
 
-            ref_ptr<Geometry> geometry = dynamic_pointer_cast<Geometry>(intersection.drawable);
-            if (!geometry.valid())
-                return false;
+           //don't change from something selected if it is already selected.
+           for (itIt = intersections.begin(); itIt != intersections.end(); ++itIt)
+           {
+               ref_ptr<Geometry> geometry = dynamic_pointer_cast<Geometry>(itIt->drawable);
+               if (!geometry.valid())
+               {
+                   clearPrehighlight();
+                   return false;
+               }
 
-            lastPrehighlightGeometry = geometry;
-            Vec4Array *colors = dynamic_cast<Vec4Array*>(lastPrehighlightGeometry->getColorArray());
-            if (colors && colors->size() > 0)
-            {
-                lastPrehighlightColorIndex = 0;
-                lastPrehighlightColor = (*colors)[lastPrehighlightColorIndex];
-                (*colors)[lastPrehighlightColorIndex] = preHighlightColor;
-                colors->dirty();
-                lastPrehighlightGeometry->dirtyDisplayList();
-            }
+               if (geometry.get() == lastPrehighlightGeometry.get())
+                   return false;
+           }
+
+           osgUtil::LineSegmentIntersector::Intersection intersection = picker->getFirstIntersection();
+           ref_ptr<Geometry> geometry = dynamic_pointer_cast<Geometry>(intersection.drawable);
+           if (!geometry.valid())
+           {
+               clearPrehighlight();
+               return false;
+           }
+
+           clearPrehighlight();
+           setPrehighlight(geometry.get());
         }
+        else
+            clearPrehighlight();
     }
 
     return false;
+}
+void SelectionEventHandler::setPrehighlight(osg::Geometry *geometry)
+{
+    lastPrehighlightGeometry = geometry;
+    Vec4Array *colors = dynamic_cast<Vec4Array*>(lastPrehighlightGeometry->getColorArray());
+    if (colors && colors->size() > 0)
+    {
+        lastPrehighlightColorIndex = 0;
+        lastPrehighlightColor = (*colors)[lastPrehighlightColorIndex];
+        (*colors)[lastPrehighlightColorIndex] = preHighlightColor;
+        colors->dirty();
+        lastPrehighlightGeometry->dirtyDisplayList();
+    }
+}
+
+void SelectionEventHandler::clearPrehighlight()
+{
+    if (!lastPrehighlightGeometry.valid())
+        return;
+    Vec4Array *colors = dynamic_cast<Vec4Array*>(lastPrehighlightGeometry->getColorArray());
+    if (colors && colors->size() > 0)
+    {
+        (*colors)[lastPrehighlightColorIndex] = lastPrehighlightColor;
+        colors->dirty();
+        lastPrehighlightGeometry->dirtyDisplayList();
+    }
+    lastPrehighlightGeometry = NULL;
 }

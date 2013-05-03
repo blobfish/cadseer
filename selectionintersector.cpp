@@ -102,7 +102,7 @@ void SelectionIntersector::intersect(osgUtil::IntersectionVisitor &iv, osg::Draw
     }
 }
 
-void SelectionIntersector::goPoints(const osg::ref_ptr<osg::PrimitiveSet> primitive, Intersection &hitBase)
+void SelectionIntersector::goPoints(const osg::ref_ptr<osg::PrimitiveSet> primitive, const Intersection &hitBase)
 {
     ref_ptr<DrawArrays> drawArray = dynamic_pointer_cast<DrawArrays>(primitive);
     if (!drawArray.valid())
@@ -129,7 +129,7 @@ void SelectionIntersector::goPoints(const osg::ref_ptr<osg::PrimitiveSet> primit
     }
 }
 
-void SelectionIntersector::goEdges(const osg::ref_ptr<osg::PrimitiveSet> primitive, Intersection &hitBase)
+void SelectionIntersector::goEdges(const osg::ref_ptr<osg::PrimitiveSet> primitive, const Intersection &hitBase)
 {
     ref_ptr<DrawArrays> drawArray = dynamic_pointer_cast<DrawArrays>(primitive);
     assert(drawArray);
