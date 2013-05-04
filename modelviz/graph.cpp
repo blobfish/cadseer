@@ -135,7 +135,7 @@ osg::ref_ptr<osg::Geometry> Build::createGeometryVertex()
     geomVertices->getOrCreateStateSet()->setAttribute(point);
 
     osg::Depth *depth = new osg::Depth();
-    depth->setRange(-0.001, 0.998);
+    depth->setRange(0.0, 1.0);
     geomVertices->getOrCreateStateSet()->setAttribute(depth);
 
     return geomVertices;
@@ -155,7 +155,7 @@ osg::ref_ptr<osg::Geometry> Build::createGeometryEdge()
     geomEdges->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 
     osg::Depth *depth = new osg::Depth();
-    depth->setRange(0.000, 0.999);
+    depth->setRange(0.001, 1.001);
     geomEdges->getOrCreateStateSet()->setAttribute(depth);
 
     return geomEdges;
@@ -175,6 +175,10 @@ osg::ref_ptr<osg::Geometry> Build::createGeometryFace()
 
     geomFaces->setNormalArray(new osg::Vec3Array);
     geomFaces->setNormalBinding(osg::Geometry::BIND_PER_VERTEX);
+
+    osg::Depth *depth = new osg::Depth();
+    depth->setRange(0.002, 1.002);
+    geomFaces->getOrCreateStateSet()->setAttribute(depth);
 
     return geomFaces;
 }

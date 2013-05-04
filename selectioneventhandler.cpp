@@ -13,6 +13,7 @@ using namespace osg;
 SelectionEventHandler::SelectionEventHandler() : osgGA::GUIEventHandler()
 {
     preHighlightColor = Vec4(1.0, 1.0, 0.0, 1.0);
+    selectionColor = Vec4(1.0, 1.0, 1.0, 1.0);
 }
 
 bool SelectionEventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
@@ -38,37 +39,89 @@ bool SelectionEventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
            osgUtil::LineSegmentIntersector::Intersections intersections = picker->getIntersections();
            osgUtil::LineSegmentIntersector::Intersections::const_iterator itIt;
 
-           //don't change from something selected if it is already selected.
+           ref_ptr<Geometry> selectedGeometry;
            for (itIt = intersections.begin(); itIt != intersections.end(); ++itIt)
            {
                ref_ptr<Geometry> geometry = dynamic_pointer_cast<Geometry>(itIt->drawable);
                if (!geometry.valid())
-               {
-                   clearPrehighlight();
-                   return false;
-               }
+                   continue;
+
+               if (alreadySelected(geometry.get()))
+                   continue;
 
                if (geometry.get() == lastPrehighlightGeometry.get())
                    return false;
+
+               selectedGeometry = geometry;
+               break;
            }
 
-           osgUtil::LineSegmentIntersector::Intersection intersection = picker->getFirstIntersection();
-           ref_ptr<Geometry> geometry = dynamic_pointer_cast<Geometry>(intersection.drawable);
-           if (!geometry.valid())
+           if (!selectedGeometry.valid())
            {
                clearPrehighlight();
                return false;
            }
 
            clearPrehighlight();
-           setPrehighlight(geometry.get());
+           setPrehighlight(selectedGeometry.get());
         }
         else
             clearPrehighlight();
     }
 
+    if (eventAdapter.getButtonMask() == osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON &&
+            eventAdapter.getEventType() == osgGA::GUIEventAdapter::PUSH)
+    {
+        if (lastPrehighlightGeometry.valid())
+        {
+            Selected selected;
+            selected.geometry = lastPrehighlightGeometry;
+            selected.color = lastPrehighlightColor;
+            selected.colorIndex = lastPrehighlightColorIndex;
+            selections.push_back(selected);
+
+            Vec4Array *colors = dynamic_cast<Vec4Array*>(selected.geometry->getColorArray());
+            if (colors && colors->size() > 0)
+            {
+                (*colors)[selected.colorIndex] = selectionColor;
+                colors->dirty();
+                selected.geometry->dirtyDisplayList();
+            }
+            lastPrehighlightGeometry = NULL;
+        }
+        else
+        {
+            std::vector<Selected>::iterator it;
+            for (it = selections.begin(); it != selections.end(); ++it)
+            {
+                if (!(it->geometry.valid()))
+                    continue;
+                Vec4Array *colors = dynamic_cast<Vec4Array*>(it->geometry->getColorArray());
+                if (colors && colors->size() > 0)
+                {
+                    (*colors)[it->colorIndex] = it->color;
+                    colors->dirty();
+                    it->geometry->dirtyDisplayList();
+                }
+            }
+            selections.clear();
+        }
+    }
+
     return false;
 }
+
+bool SelectionEventHandler::alreadySelected(osg::Geometry *geometry)
+{
+    std::vector<Selected>::iterator it;
+    for (it = selections.begin(); it != selections.end(); ++it)
+    {
+        if (geometry == it->geometry.get())
+            return true;
+    }
+    return false;
+}
+
 void SelectionEventHandler::setPrehighlight(osg::Geometry *geometry)
 {
     lastPrehighlightGeometry = geometry;

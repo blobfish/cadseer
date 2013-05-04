@@ -123,7 +123,7 @@ void SelectionIntersector::goPoints(const osg::ref_ptr<osg::PrimitiveSet> primit
     {
 //        std::cout << "distance: " << distance << std::endl;
         Intersection hit = hitBase;
-        hit.ratio = distance;
+        hit.ratio = (projectionVector - _start).length() / ((_end - _start).length() * 1.02);
         hit.localIntersectionPoint = currentVertex;
         insertIntersection(hit);
     }
@@ -162,6 +162,12 @@ void SelectionIntersector::goEdges(const osg::ref_ptr<osg::PrimitiveSet> primiti
             continue;
 
         Vec3d segmentPoint = lineStart + (segmentVector * parameters.x());
+        if (parameters.x() < 0)
+            segmentPoint = lineStart;
+
+        if (parameters.x() > 1)
+            segmentPoint = lineEnd;
+
         Vec3d intersectionPoint = localStart + (intersectionVector * parameters.y());
 
 //        Plotter::getReference().plotPoint(segmentPoint);
@@ -172,7 +178,7 @@ void SelectionIntersector::goEdges(const osg::ref_ptr<osg::PrimitiveSet> primiti
         if (isnan(distance) || distance <= pickRadius / scale)
         {
             Intersection hit = hitBase;
-            hit.ratio = distance;
+            hit.ratio = (segmentPoint - _start).length() / ((_end - _start).length() * 1.01);
             hit.localIntersectionPoint = segmentPoint;
             insertIntersection(hit);
             break;//only one intersection for primitive.
