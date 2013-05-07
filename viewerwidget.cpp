@@ -177,5 +177,32 @@ void ViewerWidget::addBackground()
 
 void ViewerWidget::setSelectionMask(const int &maskIn)
 {
+    //check for points.
+    int originalPoint = selectionHandler->nodeMask & NodeMask::vertex;
+    int newPoint = maskIn & NodeMask::vertex;
+
+    if (originalPoint ^ newPoint)
+    {
+        VisibleVisitor visitor(maskIn & NodeMask::vertex);
+        root->accept(visitor);
+    }
     selectionHandler->nodeMask = maskIn;
+}
+
+
+VisibleVisitor::VisibleVisitor(bool visIn) : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), visibility(visIn)
+{
+}
+
+void VisibleVisitor::apply(osg::Switch &aSwitch)
+{
+    traverse(aSwitch);
+
+    if (aSwitch.getNodeMask() & NodeMask::vertex)
+    {
+        if (visibility)
+            aSwitch.setAllChildrenOn();
+        else
+            aSwitch.setAllChildrenOff();
+    }
 }

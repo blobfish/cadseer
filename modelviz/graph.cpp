@@ -111,9 +111,13 @@ bool Build::go(const Standard_Real &deflection, const Standard_Real &angle)
 void Build::setUpGraph()
 {
     groupOut = new osg::Switch();
+    groupOut->setNodeMask(NodeMask::object);
     groupVertices = new osg::Switch();
+    groupVertices->setNodeMask(NodeMask::vertex);
     groupEdges = new osg::Switch();
+    groupEdges->setNodeMask(NodeMask::edge);
     groupFaces = new osg::Switch();
+    groupFaces->setNodeMask(NodeMask::face);
     groupOut->addChild(groupVertices);
     groupOut->addChild(groupEdges);
     groupOut->addChild(groupFaces);
@@ -186,7 +190,6 @@ osg::ref_ptr<osg::Geometry> Build::createGeometryFace()
 osg::ref_ptr<osg::Geode> Build::createGeodeVertex()
 {
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
-    geode->setNodeMask(NodeMask::vertex);
     geode->setCullingActive(false);//so we can select. Might not need in a non "points only" environment.
     return geode;
 }
@@ -194,14 +197,12 @@ osg::ref_ptr<osg::Geode> Build::createGeodeVertex()
 osg::ref_ptr<osg::Geode> Build::createGeodeEdge()
 {
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
-    geode->setNodeMask(NodeMask::edge);
     return geode;
 }
 
 osg::ref_ptr<osg::Geode> Build::createGeodeFace()
 {
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
-    geode->setNodeMask(NodeMask::face);
     return geode;
 }
 

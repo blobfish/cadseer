@@ -25,4 +25,14 @@ protected:
     osg::ref_ptr<SelectionEventHandler> selectionHandler;
 };
 
+class VisibleVisitor : public osg::NodeVisitor
+{
+public:
+    VisibleVisitor(bool visIn);
+    virtual void apply(osg::Switch &aSwitch);
+protected:
+    bool visibility;
+};
+
+
 #endif // VIEWERWIDGET_H
