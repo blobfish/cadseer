@@ -16,6 +16,7 @@ class SelectionEventHandler : public osgGA::GUIEventHandler
 {
 public:
     SelectionEventHandler();
+    int nodeMask;
 protected:
     virtual bool handle(const osgGA::GUIEventAdapter& eventAdapter,
                         osgGA::GUIActionAdapter& actionAdapter, osg::Object *object,

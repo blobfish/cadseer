@@ -15,7 +15,6 @@
 #include "viewerwidget.h"
 #include "gleventwidget.h"
 #include "spaceballmanipulator.h"
-#include "selectioneventhandler.h"
 #include "nodemaskdefs.h"
 #include "./testing/plotter.h"
 
@@ -39,7 +38,8 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
 
     view->setSceneData(root);
     view->addEventHandler(new osgViewer::StatsHandler);
-    view->addEventHandler(new SelectionEventHandler());
+    selectionHandler = new SelectionEventHandler();
+    view->addEventHandler(selectionHandler);
 //    view->setCameraManipulator(new osgGA::TrackballManipulator);
     view->setCameraManipulator(new osgGA::SpaceballManipulator(camera));
 
@@ -173,4 +173,9 @@ void ViewerWidget::addBackground()
     osg::Depth::LEQUAL, 1.0, 1.0));
 
     root->addChild(bgCamera);
+}
+
+void ViewerWidget::setSelectionMask(const int &maskIn)
+{
+    selectionHandler->nodeMask = maskIn;
 }

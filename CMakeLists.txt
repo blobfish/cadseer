@@ -60,6 +60,8 @@ SET(CADSEER_SOURCES
     ./application.cpp
     ./selectioneventhandler.cpp
     ./selectionintersector.cpp
+    ./selectionmanager.cpp
+    ./selectionstate.cpp
     ${MODELVIZ_SOURCES}
     ${TESTING_SOURCES}
     )
@@ -71,6 +73,7 @@ SET(CADSEER_HDRS
     ./spaceballosgevent.h
     ./selectioneventhandler.h
     ./selectionintersector.h
+    ./selectionstate.h
     ${MODELVIZ_HDRS}
     ${TESTING_HDRS}
     )
@@ -79,6 +82,7 @@ SET(CADSEER_MOC_HDRS
     ./viewerwidget.h
     ./mainwindow.h
     ./application.h
+    ./selectionmanager.h
     )
 
 SET(CADSEER_LIBRARIES

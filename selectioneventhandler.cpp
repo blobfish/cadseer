@@ -14,6 +14,7 @@ SelectionEventHandler::SelectionEventHandler() : osgGA::GUIEventHandler()
 {
     preHighlightColor = Vec4(1.0, 1.0, 0.0, 1.0);
     selectionColor = Vec4(1.0, 1.0, 1.0, 1.0);
+    nodeMask = ~NodeMask::noSelect;
 }
 
 bool SelectionEventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
@@ -32,7 +33,7 @@ bool SelectionEventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
         picker->setPickRadius(16.0); //32 x 32 cursor
 
         osgUtil::IntersectionVisitor iv(picker);
-        iv.setTraversalMask(~NodeMask::noSelect);
+        iv.setTraversalMask(nodeMask);
         view->getCamera()->accept(iv);
         if (picker->containsIntersections())
         {

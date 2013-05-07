@@ -5,6 +5,7 @@
 #include <osg/Node>
 
 class ViewerWidget;
+class SelectionManager;
 
 namespace Ui {
 class MainWindow;
@@ -28,6 +29,7 @@ public slots:
 private:
     Ui::MainWindow *ui;
     ViewerWidget* viewWidget;
+    SelectionManager *selectionManager;
 };
 
 #endif // MAINWINDOW_H
