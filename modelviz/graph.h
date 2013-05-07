@@ -12,7 +12,7 @@
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
 
-#include <osg/Group>
+#include <osg/Switch>
 #include <osg/Geometry>
 
 namespace ModelViz
@@ -42,10 +42,10 @@ private:
     TopTools_MapOfShape processed;
     Bnd_Box bound;
     TopTools_IndexedDataMapOfShapeListOfShape edgeToFace;
-    osg::ref_ptr<osg::Group> groupOut;
-    osg::ref_ptr<osg::Group> groupVertices;
-    osg::ref_ptr<osg::Group> groupEdges;
-    osg::ref_ptr<osg::Group> groupFaces;
+    osg::ref_ptr<osg::Switch> groupOut;
+    osg::ref_ptr<osg::Switch> groupVertices;
+    osg::ref_ptr<osg::Switch> groupEdges;
+    osg::ref_ptr<osg::Switch> groupFaces;
     bool success;
     bool initialized;
 

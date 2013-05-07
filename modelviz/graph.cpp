@@ -110,10 +110,10 @@ bool Build::go(const Standard_Real &deflection, const Standard_Real &angle)
 
 void Build::setUpGraph()
 {
-    groupOut = new osg::Group();
-    groupVertices = new osg::Group();
-    groupEdges = new osg::Group();
-    groupFaces = new osg::Group();
+    groupOut = new osg::Switch();
+    groupVertices = new osg::Switch();
+    groupEdges = new osg::Switch();
+    groupFaces = new osg::Switch();
     groupOut->addChild(groupVertices);
     groupOut->addChild(groupEdges);
     groupOut->addChild(groupFaces);
