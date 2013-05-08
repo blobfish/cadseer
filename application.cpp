@@ -4,6 +4,7 @@
 #include "application.h"
 #include "mainwindow.h"
 #include "spaceballqevent.h"
+#include "document.h"
 
 #include <spnav.h>
 

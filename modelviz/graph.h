@@ -22,7 +22,7 @@ class Build
 {
 public:
     Build(const TopoDS_Shape &shapeIn);
-    osg::ref_ptr<osg::Group> getViz();
+    osg::ref_ptr<osg::Switch> getViz();
     bool go(const Standard_Real &deflection, const Standard_Real &angle);
 private:
     void setUpGraph();

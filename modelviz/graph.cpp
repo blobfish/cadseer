@@ -28,9 +28,11 @@
 #include <osg/LineWidth>
 #include <osgUtil/SmoothingVisitor>
 #include <osg/Depth>
+#include <osg/ValueObject>
 
 #include "graph.h"
 #include "../nodemaskdefs.h"
+#include "../globalutilities.h"
 
 using namespace ModelViz;
 Build::Build(const TopoDS_Shape &shapeIn) : originalShape(shapeIn), success(false),
@@ -112,6 +114,7 @@ void Build::setUpGraph()
 {
     groupOut = new osg::Switch();
     groupOut->setNodeMask(NodeMask::object);
+    groupOut->setUserValue("ShapeHash", GU::getShapeHash(originalShape));
     groupVertices = new osg::Switch();
     groupVertices->setNodeMask(NodeMask::vertex);
     groupEdges = new osg::Switch();
@@ -398,10 +401,10 @@ void Build::faceConstruct(const TopoDS_Face &faceIn)
     colors->push_back(osg::Vec4(.1f, .7f, .1f, .5f));
 }
 
-osg::ref_ptr<osg::Group> Build::getViz()
+osg::ref_ptr<osg::Switch> Build::getViz()
 {
     if (success)
         return groupOut;
     else
-        return osg::ref_ptr<osg::Group>();
+        return osg::ref_ptr<osg::Switch>();
 }

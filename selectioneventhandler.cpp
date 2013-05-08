@@ -89,6 +89,18 @@ bool SelectionEventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
                 selected.geometry->dirtyDisplayList();
             }
             lastPrehighlightGeometry = NULL;
+
+            osg::Node *parent = selected.geometry->getParent(0);
+            while (parent && parent->getNodeMask() != NodeMask::object)
+                parent = parent->getParent(0);
+            if (parent)
+            {
+                int hash;
+                if (!parent->getUserValue("ShapeHash", hash))
+                    std::cout << "no hash value" << std::endl;
+                else
+                    std::cout << "hash: " << hash << std::endl;
+            }
         }
         else
         {

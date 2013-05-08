@@ -62,9 +62,8 @@ void dumpLookAt(const osg::Vec3d &eye, const osg::Vec3d &center, const osg::Vec3
 
 }
 
-void ViewerWidget::addNode(osg::Node *node)
+void ViewerWidget::update()
 {
-    root->addChild(node);
     osgViewer::View* view = this->getView(0);
     osgGA::CameraManipulator *camManip = view->getCameraManipulator();
     camManip->home(1.0);

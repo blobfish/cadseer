@@ -6,6 +6,7 @@
 
 class ViewerWidget;
 class SelectionManager;
+class Document;
 
 namespace Ui {
 class MainWindow;
@@ -21,7 +22,6 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    void addNode(osg::Node *node);
 
 public slots:
     void readBrepSlot();
@@ -30,6 +30,7 @@ private:
     Ui::MainWindow *ui;
     ViewerWidget* viewWidget;
     SelectionManager *selectionManager;
+    Document *document;
 };
 
 #endif // MAINWINDOW_H

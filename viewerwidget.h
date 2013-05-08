@@ -13,7 +13,8 @@ public:
     ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel=osgViewer::CompositeViewer::SingleThreaded);
     osg::Camera* createCamera();
     virtual void paintEvent(QPaintEvent* event);
-    void addNode(osg::Node *node);
+    void update();
+    osg::Group* getRoot(){return root;}
 
 public slots:
     void setSelectionMask(const int &maskIn);
