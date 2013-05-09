@@ -17,6 +17,8 @@ class SelectionEventHandler : public osgGA::GUIEventHandler
 public:
     SelectionEventHandler();
     int nodeMask;
+    std::vector<Selected> getSelections(){return selections;}
+    void clearSelections();
 protected:
     virtual bool handle(const osgGA::GUIEventAdapter& eventAdapter,
                         osgGA::GUIActionAdapter& actionAdapter, osg::Object *object,

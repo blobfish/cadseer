@@ -188,6 +188,34 @@ void ViewerWidget::setSelectionMask(const int &maskIn)
     selectionHandler->nodeMask = maskIn;
 }
 
+void ViewerWidget::hideSelected()
+{
+    std::vector<Selected> selections = selectionHandler->getSelections();
+    if (selections.empty())
+        return;
+    selectionHandler->clearSelections();
+
+    osg::Node *parent = selections.at(0).geometry->getParent(0);
+    while (parent && parent->getNodeMask() != NodeMask::object)
+        parent = parent->getParent(0);
+    if (parent)
+    {
+        int hash;
+        if (parent->getUserValue("ShapeHash", hash))
+        {
+            VisitorHide visitor(false, hash);
+            root->accept(visitor);
+        }
+
+    }
+}
+
+void ViewerWidget::showAll()
+{
+    VisitorShowAll visitor;
+    root->accept(visitor);
+}
+
 
 VisibleVisitor::VisibleVisitor(bool visIn) : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), visibility(visIn)
 {
@@ -204,4 +232,42 @@ void VisibleVisitor::apply(osg::Switch &aSwitch)
         else
             aSwitch.setAllChildrenOff();
     }
+}
+
+VisitorHide::VisitorHide(bool visIn, int hashIn) : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN),
+    visibility(visIn), hash(hashIn)
+{
+}
+
+void VisitorHide::apply(osg::Switch &aSwitch)
+{
+    traverse(aSwitch);
+
+    if ((aSwitch.getNodeMask() & NodeMask::object))
+    {
+        int switchHash;
+        if (aSwitch.getUserValue("ShapeHash", switchHash))
+        {
+            if (switchHash == hash)
+            {
+                if (visibility)
+                    aSwitch.setAllChildrenOn();
+                else
+                    aSwitch.setAllChildrenOff();
+            }
+        }
+    }
+}
+
+VisitorShowAll::VisitorShowAll() : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
+{
+
+}
+
+void VisitorShowAll::apply(osg::Switch &aSwitch)
+{
+    traverse(aSwitch);
+
+    if ((aSwitch.getNodeMask() & NodeMask::object))
+        aSwitch.setAllChildrenOn();
 }

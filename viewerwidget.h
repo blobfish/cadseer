@@ -18,6 +18,8 @@ public:
 
 public slots:
     void setSelectionMask(const int &maskIn);
+    void hideSelected();
+    void showAll();
 
 protected:
     void addBackground();
@@ -33,6 +35,23 @@ public:
     virtual void apply(osg::Switch &aSwitch);
 protected:
     bool visibility;
+};
+
+class VisitorHide : public osg::NodeVisitor
+{
+public:
+    VisitorHide(bool visIn, int hashIn);
+    virtual void apply(osg::Switch &aSwitch);
+protected:
+    bool visibility;
+    int hash;
+};
+
+class VisitorShowAll : public osg::NodeVisitor
+{
+public:
+    VisitorShowAll();
+    virtual void apply(osg::Switch &aSwitch);
 };
 
 

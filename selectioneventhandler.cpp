@@ -89,39 +89,31 @@ bool SelectionEventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
                 selected.geometry->dirtyDisplayList();
             }
             lastPrehighlightGeometry = NULL;
-
-            osg::Node *parent = selected.geometry->getParent(0);
-            while (parent && parent->getNodeMask() != NodeMask::object)
-                parent = parent->getParent(0);
-            if (parent)
-            {
-                int hash;
-                if (!parent->getUserValue("ShapeHash", hash))
-                    std::cout << "no hash value" << std::endl;
-                else
-                    std::cout << "hash: " << hash << std::endl;
-            }
         }
         else
-        {
-            std::vector<Selected>::iterator it;
-            for (it = selections.begin(); it != selections.end(); ++it)
-            {
-                if (!(it->geometry.valid()))
-                    continue;
-                Vec4Array *colors = dynamic_cast<Vec4Array*>(it->geometry->getColorArray());
-                if (colors && colors->size() > 0)
-                {
-                    (*colors)[it->colorIndex] = it->color;
-                    colors->dirty();
-                    it->geometry->dirtyDisplayList();
-                }
-            }
-            selections.clear();
-        }
+            clearSelections();
+
     }
 
     return false;
+}
+
+void SelectionEventHandler::clearSelections()
+{
+    std::vector<Selected>::iterator it;
+    for (it = selections.begin(); it != selections.end(); ++it)
+    {
+        if (!(it->geometry.valid()))
+            continue;
+        Vec4Array *colors = dynamic_cast<Vec4Array*>(it->geometry->getColorArray());
+        if (colors && colors->size() > 0)
+        {
+            (*colors)[it->colorIndex] = it->color;
+            colors->dirty();
+            it->geometry->dirtyDisplayList();
+        }
+    }
+    selections.clear();
 }
 
 bool SelectionEventHandler::alreadySelected(osg::Geometry *geometry)

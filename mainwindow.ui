@@ -36,6 +36,8 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionAppendBrep"/>
+   <addaction name="actionHide"/>
+   <addaction name="actionShowAll"/>
   </widget>
   <widget class="QToolBar" name="toolBar_2">
    <property name="windowTitle">
@@ -117,6 +119,16 @@
    </property>
    <property name="toolTip">
     <string>Vertices on/off</string>
+   </property>
+  </action>
+  <action name="actionHide">
+   <property name="text">
+    <string>Hide</string>
+   </property>
+  </action>
+  <action name="actionShowAll">
+   <property name="text">
+    <string>showAll</string>
    </property>
   </action>
  </widget>
