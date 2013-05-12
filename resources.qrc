@@ -5,5 +5,6 @@
         <file>resources/images/selectFaces.svg</file>
         <file>resources/images/selectEdges.svg</file>
         <file>resources/images/selectVertices.svg</file>
+        <file>resources/images/viewBase.svg</file>
     </qresource>
 </RCC>

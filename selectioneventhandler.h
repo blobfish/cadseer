@@ -34,4 +34,13 @@ protected:
     std::vector<Selected> selections;
 };
 
+class FadeVisitor : public osg::NodeVisitor
+{
+public:
+    FadeVisitor(bool visIn);
+    virtual void apply(osg::Switch &aSwitch);
+protected:
+    bool visibility;
+};
+
 #endif // SELECTIONEVENTHANDLER_H

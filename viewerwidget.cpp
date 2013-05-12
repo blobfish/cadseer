@@ -11,12 +11,14 @@
 #include <osg/PolygonMode>
 #include <osg/Depth>
 #include <osgUtil/Optimizer>
+#include <osg/BlendFunc>
 
 #include "viewerwidget.h"
 #include "gleventwidget.h"
 #include "spaceballmanipulator.h"
 #include "nodemaskdefs.h"
 #include "./testing/plotter.h"
+#include "gesturehandler.h"
 
 ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel) : QWidget()
 {
@@ -30,24 +32,33 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     root->getOrCreateStateSet()->setAttribute(pm.get());
     Plotter::getReference().setBase(root);
 
-    osg::Camera* camera = createCamera();
-
+    osg::Camera *mainCamera = createMainCamera();
     osgViewer::View* view = new osgViewer::View;
-    view->setCamera(camera);
-    addView(view);
+    view->setCamera(mainCamera);
+
+    osg::Camera *backGroundCamera = createBackgroundCamera();
+    backGroundCamera->setViewport(new osg::Viewport(0, 0, glWidgetWidth, glWidgetHeight));
+    backGroundCamera->setProjectionResizePolicy(osg::Camera::ProjectionResizePolicy::FIXED);
+    view->addSlave(backGroundCamera, false);
+
+    osg::Camera *gestureCamera = createGestureCamera();
+    gestureCamera->setViewport(new osg::Viewport(0, 0, glWidgetWidth, glWidgetHeight));
+    gestureCamera->setProjectionResizePolicy(osg::Camera::ProjectionResizePolicy::FIXED);
+    view->addSlave(gestureCamera, false);
+
 
     view->setSceneData(root);
     view->addEventHandler(new osgViewer::StatsHandler);
     selectionHandler = new SelectionEventHandler();
     view->addEventHandler(selectionHandler);
+    view->addEventHandler(new GestureHandler());
 //    view->setCameraManipulator(new osgGA::TrackballManipulator);
-    view->setCameraManipulator(new osgGA::SpaceballManipulator(camera));
+    view->setCameraManipulator(new osgGA::SpaceballManipulator(mainCamera));
 
-    addBackground();
+    addView(view);
 
-    osgQt::GraphicsWindowQt* gw = dynamic_cast<osgQt::GraphicsWindowQt*>(camera->getGraphicsContext());
     QHBoxLayout *layout = new QHBoxLayout();
-    layout->addWidget(gw->getGLWidget());
+    layout->addWidget(windowQt->getGLWidget());
     setLayout(layout);
 
     _timer.start( 10 );
@@ -85,7 +96,7 @@ void ViewerWidget::update()
 
 }
 
-osg::Camera* ViewerWidget::createCamera()
+osg::Camera* ViewerWidget::createMainCamera()
 {
     /*
      comparison osg::GraphicsContext::Traits to QGLFormat
@@ -106,7 +117,7 @@ osg::Camera* ViewerWidget::createCamera()
     format.setSamples(4);
 
     GLEventWidget *glWidget = new GLEventWidget(format, this);
-    osgQt::GraphicsWindowQt *windowQt = new osgQt::GraphicsWindowQt(glWidget);
+    windowQt = new osgQt::GraphicsWindowQt(glWidget);
 
     osg::ref_ptr<osg::Camera> camera = new osg::Camera;
     camera->setGraphicsContext(windowQt);
@@ -128,6 +139,10 @@ osg::Camera* ViewerWidget::createCamera()
     camera->setCullingMode(camera->getCullingMode() &
     ~osg::CullSettings::SMALL_FEATURE_CULLING);
 
+    //use this for fade specs
+    glWidgetWidth = glWidget->width();
+    glWidgetHeight = glWidget->height();
+
     return camera.release();
 }
 
@@ -136,7 +151,7 @@ void ViewerWidget::paintEvent( QPaintEvent* event )
     frame();
 }
 
-void ViewerWidget::addBackground()
+osg::Camera* ViewerWidget::createBackgroundCamera()
 {
     //get background image and convert.
     QImage qImageBase(":/resources/images/background.png");
@@ -157,6 +172,7 @@ void ViewerWidget::addBackground()
     geode->addDrawable(quad.get());
 
     osg::Camera *bgCamera = new osg::Camera();
+    bgCamera->setGraphicsContext(windowQt);
     bgCamera->setCullingActive(false);
     bgCamera->setClearMask(0);
     bgCamera->setAllowEventFocus(false);
@@ -168,10 +184,58 @@ void ViewerWidget::addBackground()
 
     osg::StateSet* ss = bgCamera->getOrCreateStateSet();
     ss->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-    ss->setAttributeAndModes(new osg::Depth(
-    osg::Depth::LEQUAL, 1.0, 1.0));
+    ss->setAttributeAndModes(new osg::Depth(osg::Depth::LEQUAL, 1.0, 1.0));
 
-    root->addChild(bgCamera);
+    return bgCamera;
+}
+
+osg::Camera* ViewerWidget::createGestureCamera()
+{
+    double localWidgetWidth = static_cast<double>(glWidgetWidth);
+    double localWidgetHeight = static_cast<double>(glWidgetHeight);
+
+    double projectionHeight = 1000.0; //height is constant
+    double projectionWidth = projectionHeight * localWidgetWidth / localWidgetHeight;
+    double quadSize = 10000;
+
+
+    osg::ref_ptr<osg::Geometry> quad = osg::createTexturedQuadGeometry
+//            (osg::Vec3(), osg::Vec3(localWidgetWidth, 0.0, 0.0), osg::Vec3(0.0, localWidgetHeight, 0.0));
+    (osg::Vec3(), osg::Vec3(quadSize, 0.0, 0.0), osg::Vec3(0.0, quadSize, 0.0));
+//    quad->getOrCreateStateSet()->setTextureAttributeAndModes(0, texture.get());
+    osg::Vec4Array *colorArray = new osg::Vec4Array();
+    colorArray->push_back(osg::Vec4(0.0, 0.0, 0.0, 0.8));
+    quad->setColorArray(colorArray);
+    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+    geode->addDrawable(quad.get());
+
+    osg::Camera *fadeCamera = new osg::Camera();
+    fadeCamera->setCullingActive(false);
+    fadeCamera->setClearMask(GL_DEPTH_BUFFER_BIT);
+    fadeCamera->setAllowEventFocus(false);
+    fadeCamera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
+    fadeCamera->setRenderOrder(osg::Camera::POST_RENDER);
+//    fadeCamera->setProjectionMatrix(osg::Matrix::ortho2D(0.0, localWidgetWidth, 0.0, localWidgetHeight));
+    fadeCamera->setProjectionMatrix(osg::Matrix::ortho2D(0.0, 1000.0, 0.0, 1000.0));
+//    fadeCamera->setProjectionMatrix(osg::Matrix::ortho2D(0.0, 100.0, 0.0, 100.0));
+    fadeCamera->setViewMatrix(osg::Matrix::identity());
+    fadeCamera->setGraphicsContext(windowQt);
+    fadeCamera->setNodeMask(NodeMask::noSelect);
+
+    osg::StateSet* ss = fadeCamera->getOrCreateStateSet();
+    ss->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+    ss->setAttributeAndModes(new osg::Depth(osg::Depth::LEQUAL, 0.0, 0.0));
+    osg::ref_ptr<osg::BlendFunc> blend = new osg::BlendFunc();
+    blend->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    ss->setAttributeAndModes(blend);
+
+    osg::Switch *aSwitch = new osg::Switch();
+    aSwitch->setNodeMask(NodeMask::fade);
+    aSwitch->addChild(geode.get());
+    aSwitch->setAllChildrenOff();
+    fadeCamera->addChild(aSwitch);
+
+    return fadeCamera;
 }
 
 void ViewerWidget::setSelectionMask(const int &maskIn)

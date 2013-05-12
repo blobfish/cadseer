@@ -3,6 +3,7 @@
 #include <osgUtil/LineSegmentIntersector>
 #include <osg/Geometry>
 #include <osg/View>
+#include <osgViewer/View>
 
 #include "selectioneventhandler.h"
 #include "nodemaskdefs.h"
@@ -70,8 +71,8 @@ bool SelectionEventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
             clearPrehighlight();
     }
 
-    if (eventAdapter.getButtonMask() == osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON &&
-            eventAdapter.getEventType() == osgGA::GUIEventAdapter::PUSH)
+    if (eventAdapter.getButton() == osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON &&
+            eventAdapter.getEventType() == osgGA::GUIEventAdapter::RELEASE)
     {
         if (lastPrehighlightGeometry.valid())
         {
@@ -93,6 +94,35 @@ bool SelectionEventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
         else
             clearSelections();
 
+    }
+
+    if (eventAdapter.getButton() == osgGA::GUIEventAdapter::RIGHT_MOUSE_BUTTON)
+    {
+        osg::View* view = actionAdapter.asView();
+        if (!view)
+            return false;
+        osgViewer::View *viewerView = dynamic_cast<osgViewer::View *>(view);
+        if (!viewerView)
+            return false;
+        osg::Group *root = viewerView->getSceneData()->asGroup();
+        if (!root)
+            return false;
+        if (eventAdapter.getEventType() == osgGA::GUIEventAdapter::PUSH)
+        {
+            clearPrehighlight();
+            FadeVisitor visitor(true);
+            root->accept(visitor);
+        }
+        if (eventAdapter.getEventType() == osgGA::GUIEventAdapter::RELEASE)
+        {
+            FadeVisitor visitor(false);
+            root->accept(visitor);
+        }
+    }
+
+    if (eventAdapter.getEventType() == osgGA::GUIEventAdapter::DRAG)
+    {
+        //don't get button info here, need to cache.
     }
 
     return false;
@@ -153,4 +183,21 @@ void SelectionEventHandler::clearPrehighlight()
         lastPrehighlightGeometry->dirtyDisplayList();
     }
     lastPrehighlightGeometry = NULL;
+}
+
+FadeVisitor::FadeVisitor(bool visIn) : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), visibility(visIn)
+{
+}
+
+void FadeVisitor::apply(osg::Switch &aSwitch)
+{
+    traverse(aSwitch);
+
+    if (aSwitch.getNodeMask() & NodeMask::fade)
+    {
+        if (visibility)
+            aSwitch.setAllChildrenOn();
+        else
+            aSwitch.setAllChildrenOff();
+    }
 }

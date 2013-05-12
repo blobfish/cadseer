@@ -64,6 +64,7 @@ SET(CADSEER_SOURCES
     ./selectionstate.cpp
     ./document.cpp
     ./globalutilities.cpp
+    ./gesturehandler.cpp
     ${MODELVIZ_SOURCES}
     ${TESTING_SOURCES}
     )
@@ -77,6 +78,8 @@ SET(CADSEER_HDRS
     ./selectionintersector.h
     ./selectionstate.h
     ./globalutilities.h
+    ./nodemasksdef.h
+    ./gesturehandler.h
     ${MODELVIZ_HDRS}
     ${TESTING_HDRS}
     )

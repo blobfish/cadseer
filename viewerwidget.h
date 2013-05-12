@@ -6,12 +6,16 @@
 #include <osgViewer/CompositeViewer>
 #include "selectioneventhandler.h"
 
+namespace osgQt
+{
+class GraphicsWindowQt;
+}
+
 class ViewerWidget : public QWidget, public osgViewer::CompositeViewer
 {
     Q_OBJECT
 public:
     ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel=osgViewer::CompositeViewer::SingleThreaded);
-    osg::Camera* createCamera();
     virtual void paintEvent(QPaintEvent* event);
     void update();
     osg::Group* getRoot(){return root;}
@@ -22,10 +26,16 @@ public slots:
     void showAll();
 
 protected:
-    void addBackground();
+    osg::Camera* createMainCamera();
+    osg::Camera* createBackgroundCamera();
+    osg::Camera* createGestureCamera();
+    void addFade();
     QTimer _timer;
     osg::ref_ptr<osg::Group> root;
     osg::ref_ptr<SelectionEventHandler> selectionHandler;
+    int glWidgetWidth;
+    int glWidgetHeight;
+    osgQt::GraphicsWindowQt *windowQt;
 };
 
 class VisibleVisitor : public osg::NodeVisitor
