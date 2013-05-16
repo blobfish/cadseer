@@ -18,7 +18,7 @@
 #include "spaceballmanipulator.h"
 #include "nodemaskdefs.h"
 #include "./testing/plotter.h"
-#include "gesturehandler.h"
+#include "./gesture/gesturehandler.h"
 
 ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel) : QWidget()
 {
@@ -51,7 +51,7 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     view->addEventHandler(new osgViewer::StatsHandler);
     selectionHandler = new SelectionEventHandler();
     view->addEventHandler(selectionHandler);
-    view->addEventHandler(new GestureHandler());
+    view->addEventHandler(new GestureHandler(gestureCamera));
 //    view->setCameraManipulator(new osgGA::TrackballManipulator);
     view->setCameraManipulator(new osgGA::SpaceballManipulator(mainCamera));
 
@@ -208,6 +208,7 @@ osg::Camera* ViewerWidget::createGestureCamera()
     quad->setColorArray(colorArray);
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
     geode->addDrawable(quad.get());
+    geode->setNodeMask(NodeMask::noSelect);
 
     osg::Camera *fadeCamera = new osg::Camera();
     fadeCamera->setCullingActive(false);
@@ -230,7 +231,6 @@ osg::Camera* ViewerWidget::createGestureCamera()
     ss->setAttributeAndModes(blend);
 
     osg::Switch *aSwitch = new osg::Switch();
-    aSwitch->setNodeMask(NodeMask::fade);
     aSwitch->addChild(geode.get());
     aSwitch->setAllChildrenOff();
     fadeCamera->addChild(aSwitch);

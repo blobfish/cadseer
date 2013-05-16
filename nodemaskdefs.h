@@ -10,7 +10,8 @@ namespace NodeMask
     const int face = 0x8;
     const int object = 0x10;
 
-    const int fade = 0x100;//not using this yet?
+    const int gestureMenu = 0x100;
+    const int gestureCommand = 0x200;
 }
 
 

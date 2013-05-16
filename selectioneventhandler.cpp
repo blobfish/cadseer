@@ -28,12 +28,12 @@ bool SelectionEventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
         if (!view)
             return false;
 
-        SelectionIntersector* picker = new SelectionIntersector(
+        osg::ref_ptr<SelectionIntersector>picker = new SelectionIntersector(
                     osgUtil::Intersector::WINDOW, eventAdapter.getX(),
                     eventAdapter.getY());
         picker->setPickRadius(16.0); //32 x 32 cursor
 
-        osgUtil::IntersectionVisitor iv(picker);
+        osgUtil::IntersectionVisitor iv(picker.get());
         iv.setTraversalMask(nodeMask);
         view->getCamera()->accept(iv);
         if (picker->containsIntersections())
@@ -96,28 +96,10 @@ bool SelectionEventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
 
     }
 
-    if (eventAdapter.getButton() == osgGA::GUIEventAdapter::RIGHT_MOUSE_BUTTON)
+    if (eventAdapter.getButton() == osgGA::GUIEventAdapter::RIGHT_MOUSE_BUTTON &&
+            eventAdapter.getEventType() == osgGA::GUIEventAdapter::PUSH)
     {
-        osg::View* view = actionAdapter.asView();
-        if (!view)
-            return false;
-        osgViewer::View *viewerView = dynamic_cast<osgViewer::View *>(view);
-        if (!viewerView)
-            return false;
-        osg::Group *root = viewerView->getSceneData()->asGroup();
-        if (!root)
-            return false;
-        if (eventAdapter.getEventType() == osgGA::GUIEventAdapter::PUSH)
-        {
-            clearPrehighlight();
-            FadeVisitor visitor(true);
-            root->accept(visitor);
-        }
-        if (eventAdapter.getEventType() == osgGA::GUIEventAdapter::RELEASE)
-        {
-            FadeVisitor visitor(false);
-            root->accept(visitor);
-        }
+        clearPrehighlight();
     }
 
     if (eventAdapter.getEventType() == osgGA::GUIEventAdapter::DRAG)
@@ -183,21 +165,4 @@ void SelectionEventHandler::clearPrehighlight()
         lastPrehighlightGeometry->dirtyDisplayList();
     }
     lastPrehighlightGeometry = NULL;
-}
-
-FadeVisitor::FadeVisitor(bool visIn) : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), visibility(visIn)
-{
-}
-
-void FadeVisitor::apply(osg::Switch &aSwitch)
-{
-    traverse(aSwitch);
-
-    if (aSwitch.getNodeMask() & NodeMask::fade)
-    {
-        if (visibility)
-            aSwitch.setAllChildrenOn();
-        else
-            aSwitch.setAllChildrenOff();
-    }
 }

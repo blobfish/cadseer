@@ -6,5 +6,10 @@
         <file>resources/images/selectEdges.svg</file>
         <file>resources/images/selectVertices.svg</file>
         <file>resources/images/viewBase.svg</file>
+        <file>resources/images/start.svg</file>
+        <file>resources/images/viewTop.svg</file>
+        <file>resources/images/viewRight.svg</file>
+        <file>resources/images/viewFront.svg</file>
+        <file>resources/images/viewStandard.svg</file>
     </qresource>
 </RCC>

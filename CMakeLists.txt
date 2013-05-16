@@ -44,9 +44,17 @@ SET(MODELVIZ_SOURCES
 SET(TESTING_HDRS
     ./testing/plotter.h
     )
-
 SET(TESTING_SOURCES
     ./testing/plotter.cpp
+    )
+
+SET(GESTURE_HDRS
+    ./gesture/gesturehandler.h
+    ./gesture/gesturenode.h
+    )
+SET(GESTURE_SOURCES
+    ./gesture/gesturehandler.cpp
+    ./gesture/gesturenode.cpp
     )
 
 SET(CADSEER_SOURCES
@@ -64,9 +72,9 @@ SET(CADSEER_SOURCES
     ./selectionstate.cpp
     ./document.cpp
     ./globalutilities.cpp
-    ./gesturehandler.cpp
     ${MODELVIZ_SOURCES}
     ${TESTING_SOURCES}
+    ${GESTURE_SOURCES}
     )
 
 SET(CADSEER_HDRS
@@ -79,9 +87,9 @@ SET(CADSEER_HDRS
     ./selectionstate.h
     ./globalutilities.h
     ./nodemasksdef.h
-    ./gesturehandler.h
     ${MODELVIZ_HDRS}
     ${TESTING_HDRS}
+    ${GESTURE_HDRS}
     )
 
 SET(CADSEER_MOC_HDRS
