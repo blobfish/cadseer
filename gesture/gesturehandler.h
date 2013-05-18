@@ -25,9 +25,12 @@ protected:
     osg::ref_ptr<osg::MatrixTransform> currentNode;
     osg::Matrixd aggregateMatrix;
     bool currentNodeLeft;
+    osg::Vec3 lastHitPoint;
 
     double iconRadius;
     double includedAngle; //in degrees
+    double mininumSprayRadius;
+    double nodeSpread;
 };
 
 class GestureAllSwitchesOffVisitor : public osg::NodeVisitor

@@ -25,6 +25,8 @@ GestureHandler::GestureHandler(osg::Camera *cameraIn) : osgGA::GUIEventHandler()
     if (!gestureSwitch.valid())
         return;
 
+    mininumSprayRadius = iconRadius * 7.0;
+    nodeSpread = iconRadius * 3.0;
     constructMenu();
 }
 
@@ -96,6 +98,7 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
             osg::ref_ptr<osg::MatrixTransform> node = dynamic_cast<osg::MatrixTransform*>
                     (intersector->getFirstIntersection().drawable->getParent(0)->getParent(0)->getParent(0));
             assert(node.valid());
+            lastHitPoint = intersector->getFirstIntersection().getLocalIntersectPoint();
             if (node == currentNode)
             {
                 if (currentNodeLeft == true)
@@ -153,9 +156,11 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
 void GestureHandler::spraySubNodes(osg::Vec3 cursorLocation)
 {
     cursorLocation = cursorLocation * osg::Matrixd::inverse(aggregateMatrix);
+    osg::Vec3 direction = cursorLocation - lastHitPoint;
+
     int childCount = currentNode->getNumChildren();
     assert(childCount > 2);//line, icon and sub items.
-    std::vector<osg::Vec3> locations = buildNodeLocations(cursorLocation, childCount - 2);
+    std::vector<osg::Vec3> locations = buildNodeLocations(direction, childCount - 2);
     for (int index = 0; index < locations.size(); ++index)
     {
         osg::MatrixTransform *tempLocation = dynamic_cast<osg::MatrixTransform *>
@@ -249,9 +254,17 @@ std::vector<osg::Vec3> GestureHandler::buildNodeLocations(osg::Vec3 direction, i
     point.normalize();
     point *= sprayRadius;
 
+    double localIncludedAngle = includedAngle;
+    if (sprayRadius == mininumSprayRadius)
+    {
+        //now we limit the angle to get node separation.
+        double singleAngle = osg::RadiansToDegrees(2 * asin(nodeSpread / (sprayRadius * 2)));
+        localIncludedAngle = singleAngle * (nodeCount -1);
+    }
 
-    double incrementAngle = includedAngle / (nodeCount - 1);
-    double startAngle = includedAngle / 2.0;
+
+    double incrementAngle = localIncludedAngle / (nodeCount - 1);
+    double startAngle = localIncludedAngle / 2.0;
     if (nodeCount < 2)
         startAngle = 0;
     //I am missing something why are the following 2 vectors are opposite of what I would expect?
@@ -270,13 +283,11 @@ std::vector<osg::Vec3> GestureHandler::buildNodeLocations(osg::Vec3 direction, i
 
 double GestureHandler::calculateSprayRadius(int nodeCount)
 {
-    double mininumSprayRadius = iconRadius * 5.0;
-    double chordLength = iconRadius * 3.0;
     double segmentCount = nodeCount - 1;
     if (segmentCount < 1)
         return mininumSprayRadius;
     double sprayRadius;
-    sprayRadius = (chordLength * segmentCount / 2.0) / sin (includedAngle / 2.0);
+    sprayRadius = (nodeSpread * segmentCount / 2.0) / sin (includedAngle / 2.0);
     if (mininumSprayRadius > sprayRadius)
         return mininumSprayRadius;
     return sprayRadius;
