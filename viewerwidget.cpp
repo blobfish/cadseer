@@ -1,7 +1,10 @@
 #include <iostream>
 #include <iomanip>
+
 #include <QtCore/QTimer>
 #include <QHBoxLayout>
+#include <QApplication>
+
 #include <osgViewer/ViewerEventHandlers>
 #include <osgGA/TrackballManipulator>
 #include <osgGA/StandardManipulator>
@@ -15,10 +18,10 @@
 
 #include "viewerwidget.h"
 #include "gleventwidget.h"
-#include "spaceballmanipulator.h"
 #include "nodemaskdefs.h"
 #include "./testing/plotter.h"
 #include "./gesture/gesturehandler.h"
+#include "./command/commandmanager.h"
 
 ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel) : QWidget()
 {
@@ -53,13 +56,16 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     view->addEventHandler(selectionHandler);
     view->addEventHandler(new GestureHandler(gestureCamera));
 //    view->setCameraManipulator(new osgGA::TrackballManipulator);
-    view->setCameraManipulator(new osgGA::SpaceballManipulator(mainCamera));
+    spaceballManipulator = new osgGA::SpaceballManipulator(mainCamera);
+    view->setCameraManipulator(spaceballManipulator);
 
     addView(view);
 
     QHBoxLayout *layout = new QHBoxLayout();
     layout->addWidget(windowQt->getGLWidget());
     setLayout(layout);
+
+    setupCommands();
 
     _timer.start( 10 );
 }
@@ -278,6 +284,52 @@ void ViewerWidget::showAll()
 {
     VisitorShowAll visitor;
     root->accept(visitor);
+}
+
+void ViewerWidget::setupCommands()
+{
+    QAction *topAction = new QAction(qApp);
+    connect(topAction, SIGNAL(triggered()), this, SLOT(viewTopSlot()));
+    Command topCommand(CommandConstants::StandardViewTop, "View Top", topAction);
+    CommandManager::getManager().addCommand(topCommand);
+
+    QAction *frontAction = new QAction(qApp);
+    connect(frontAction, SIGNAL(triggered()), this, SLOT(viewFrontSlot()));
+    Command frontCommand(CommandConstants::StandardViewFront, "View Front", frontAction);
+    CommandManager::getManager().addCommand(frontCommand);
+
+    QAction *rightAction = new QAction(qApp);
+    connect(rightAction, SIGNAL(triggered()), this, SLOT(viewRightSlot()));
+    Command rightCommand(CommandConstants::StandardViewRight, "View Right", rightAction);
+    CommandManager::getManager().addCommand(rightCommand);
+
+    QAction *fitAction = new QAction(qApp);
+    connect(fitAction, SIGNAL(triggered()), this, SLOT(viewFitSlot()));
+    Command fitCommand(CommandConstants::ViewFit, "View Fit", fitAction);
+    CommandManager::getManager().addCommand(fitCommand);
+}
+
+void ViewerWidget::viewTopSlot()
+{
+    spaceballManipulator->setView(osg::Vec3d(0.0, 0.0, -1.0), osg::Vec3d(0.0, 1.0, 0.0));
+    spaceballManipulator->viewFit();
+}
+
+void ViewerWidget::viewFrontSlot()
+{
+    spaceballManipulator->setView(osg::Vec3d(0.0, 1.0, 0.0), osg::Vec3d(0.0, 0.0, 1.0));
+    spaceballManipulator->viewFit();
+}
+
+void ViewerWidget::viewRightSlot()
+{
+    spaceballManipulator->setView(osg::Vec3d(-1.0, 0.0, 0.0), osg::Vec3d(0.0, 0.0, 1.0));
+    spaceballManipulator->viewFit();
+}
+
+void ViewerWidget::viewFitSlot()
+{
+    spaceballManipulator->viewFit();
 }
 
 

@@ -75,18 +75,6 @@ void SpaceballManipulator::computeHomePosition(const osg::Camera *camera, bool u
 
         //possibly
         //camera->setComputeNearFar(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
-
-        double aspectFactor = static_cast<double>(cam->getViewport()->width()) /
-                static_cast<double>(cam->getViewport()->height());
-        projectionData.left = boundingSphere.radius() * -1.0d;
-        projectionData.right = boundingSphere.radius();
-        projectionData.bottom = projectionData.left / aspectFactor;
-        projectionData.top = projectionData.right / aspectFactor;
-        projectionData.near = 0.1;
-        projectionData.far = camSphere.radius() * 2;
-
-        cam->setProjectionMatrixAsOrtho(projectionData.left, projectionData.right, projectionData.bottom,
-                                        projectionData.top, projectionData.near, projectionData.far);
     }
 }
 
@@ -109,6 +97,7 @@ void SpaceballManipulator::home(const osgGA::GUIEventAdapter& ea, osgGA::GUIActi
     spaceEye = _homeEye;
     spaceCenter = _homeCenter;
     spaceUp = _homeUp;
+    scaleFit();
 
     us.requestRedraw();
     us.requestContinuousUpdate(false);
@@ -122,6 +111,7 @@ void SpaceballManipulator::home(double)
     spaceEye = _homeEye;
     spaceCenter = _homeCenter;
     spaceUp = _homeUp;
+    scaleFit();
 }
 
 bool SpaceballManipulator::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &us)
@@ -308,4 +298,57 @@ void SpaceballManipulator::goPerspective(const SpaceballOSGEvent *event)
     spaceEye = newEye;
     spaceCenter = newCenter;
     spaceUp = newUp;
+}
+
+void SpaceballManipulator::setView(osg::Vec3d lookDirection, osg::Vec3d upDirection)
+{
+    if (projectionData.isCamOrtho)
+    {
+        spaceEye = -lookDirection * camSphere.radius() + camSphere.center();
+        spaceCenter = camSphere.center();
+        spaceUp = upDirection;
+    }
+}
+
+void SpaceballManipulator::scaleFit()
+{
+    if (projectionData.isCamOrtho)
+    {
+        double viewportWidth = static_cast<double>(cam->getViewport()->width());
+        double viewportHeight = static_cast<double>(cam->getViewport()->height());
+        double aspectFactor =  viewportWidth / viewportHeight;
+
+        if (aspectFactor < 1)
+        {
+            projectionData.bottom = boundingSphere.radius() * -1.0d;
+            projectionData.top = boundingSphere.radius();
+            projectionData.left = projectionData.bottom * aspectFactor;
+            projectionData.right = projectionData.top * aspectFactor;
+            projectionData.near = 0.1;
+            projectionData.far = camSphere.radius() * 2;
+        }
+        else
+        {
+            projectionData.left = boundingSphere.radius() * -1.0d;
+            projectionData.right = boundingSphere.radius();
+            projectionData.bottom = projectionData.left / aspectFactor;
+            projectionData.top = projectionData.right / aspectFactor;
+            projectionData.near = 0.1;
+            projectionData.far = camSphere.radius() * 2;
+        }
+
+        cam->setProjectionMatrixAsOrtho(projectionData.left, projectionData.right, projectionData.bottom,
+                                        projectionData.top, projectionData.near, projectionData.far);
+    }
+}
+
+void SpaceballManipulator::viewFit()
+{
+    osg::Vec3d moveVector = boundingSphere.center() - spaceCenter;
+    spaceCenter += moveVector;
+    spaceEye += moveVector;
+    if (projectionData.isCamOrtho)
+        spaceEye = projectToBound(spaceEye, spaceCenter);
+
+    scaleFit();
 }

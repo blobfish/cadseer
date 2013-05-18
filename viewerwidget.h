@@ -5,6 +5,7 @@
 #include <QTimer>
 #include <osgViewer/CompositeViewer>
 #include "selectioneventhandler.h"
+#include "spaceballmanipulator.h"
 
 namespace osgQt
 {
@@ -24,15 +25,21 @@ public slots:
     void setSelectionMask(const int &maskIn);
     void hideSelected();
     void showAll();
+    void viewTopSlot();
+    void viewFrontSlot();
+    void viewRightSlot();
+    void viewFitSlot();
 
 protected:
     osg::Camera* createMainCamera();
     osg::Camera* createBackgroundCamera();
     osg::Camera* createGestureCamera();
+    void setupCommands();
     void addFade();
     QTimer _timer;
     osg::ref_ptr<osg::Group> root;
     osg::ref_ptr<SelectionEventHandler> selectionHandler;
+    osg::ref_ptr<osgGA::SpaceballManipulator> spaceballManipulator;
     int glWidgetWidth;
     int glWidgetHeight;
     osgQt::GraphicsWindowQt *windowQt;

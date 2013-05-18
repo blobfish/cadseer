@@ -57,6 +57,16 @@ SET(GESTURE_SOURCES
     ./gesture/gesturenode.cpp
     )
 
+SET(COMMAND_HDRS
+    ./command/commandconstants.h
+    ./command/command.h
+    ./command/commandmanager.h
+    )
+SET(COMMAND_SOURCES
+    ./command/command.cpp
+    ./command/commandmanager.cpp
+    )
+
 SET(CADSEER_SOURCES
     ./main.cpp
     ./viewerwidget.cpp
@@ -75,6 +85,7 @@ SET(CADSEER_SOURCES
     ${MODELVIZ_SOURCES}
     ${TESTING_SOURCES}
     ${GESTURE_SOURCES}
+    ${COMMAND_SOURCES}
     )
 
 SET(CADSEER_HDRS
@@ -90,6 +101,7 @@ SET(CADSEER_HDRS
     ${MODELVIZ_HDRS}
     ${TESTING_HDRS}
     ${GESTURE_HDRS}
+    ${COMMAND_HDRS}
     )
 
 SET(CADSEER_MOC_HDRS

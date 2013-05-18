@@ -30,7 +30,8 @@ public:
     virtual void init(const GUIEventAdapter &ea, GUIActionAdapter &us);
 
     void dump();
-
+    void setView(osg::Vec3d lookDirection, osg::Vec3d upDirection);
+    void viewFit();
 
 protected:
     //both ortho and perspective contain some magic numbers. translations and rotations
@@ -42,6 +43,7 @@ protected:
     void getProjectionData();
     void getViewData();
     void scaleView(double scaleFactor);//used for ortho zoom.
+    void scaleFit();
     osg::Vec3d projectToBound(osg::Vec3d eye, osg::Vec3d lookCenter) const;
     osg::ref_ptr<osg::Node> node;
     osg::BoundingSphere boundingSphere;

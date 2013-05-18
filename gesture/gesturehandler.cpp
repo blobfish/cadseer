@@ -8,10 +8,12 @@
 #include <osg/Texture2D>
 #include <osg/MatrixTransform>
 #include <osgUtil/LineSegmentIntersector>
+#include <osg/ValueObject>
 
 #include "gesturenode.h"
 #include "gesturehandler.h"
 #include "../nodemaskdefs.h"
+#include "../command/commandmanager.h"
 
 GestureHandler::GestureHandler(osg::Camera *cameraIn) : osgGA::GUIEventHandler(), rightButtonDown(false),
     iconRadius(32.0), includedAngle(90.0), currentNodeLeft(false)
@@ -50,6 +52,18 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
             rightButtonDown = false;
             dragStarted = false;
             gestureSwitch->setAllChildrenOff();
+            if (currentNode->getNodeMask() & NodeMask::gestureCommand)
+            {
+                int temp;
+                if (!currentNode->getUserValue(CommandConstants::attributeTitle, temp))
+                {
+                    std::cout << "couldn't get commandid" << std::endl;
+                    return false;
+                }
+                CommandConstants::Constants commandId = static_cast<CommandConstants::Constants>(temp);
+
+                CommandManager::getManager().trigger(commandId);
+            }
         }
     }
 
@@ -209,15 +223,23 @@ void GestureHandler::constructMenu()
 
     osg::MatrixTransform *viewTop = GestureNode::buildCommandNode(":/resources/images/viewTop.svg");
     viewTop->setMatrix(dummy);
+    viewTop->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::StandardViewTop));
     viewStandard->insertChild(viewStandard->getNumChildren() - 2, viewTop);
 
     osg::MatrixTransform *viewFront = GestureNode::buildCommandNode(":/resources/images/viewFront.svg");
     viewFront->setMatrix(dummy);
+    viewFront->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::StandardViewFront));
     viewStandard->insertChild(viewStandard->getNumChildren() - 2, viewFront);
 
     osg::MatrixTransform *viewRight = GestureNode::buildCommandNode(":/resources/images/viewRight.svg");
     viewRight->setMatrix(dummy);
+    viewRight->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::StandardViewRight));
     viewStandard->insertChild(viewStandard->getNumChildren() - 2, viewRight);
+
+    osg::MatrixTransform *viewFit = GestureNode::buildCommandNode(":/resources/images/viewFit.svg");
+    viewFit->setMatrix(dummy);
+    viewFit->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::ViewFit));
+    viewBase->insertChild(viewBase->getNumChildren() - 2, viewFit);
 }
 
 std::vector<osg::Vec3> GestureHandler::buildNodeLocations(osg::Vec3 direction, int nodeCount)
