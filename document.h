@@ -11,12 +11,12 @@
 
 #include <osg/Switch>
 
+class ShapeObject;
+
 //this is kind of goofy. Store all shapes in a vector that uses romans custom allocator.
 //then use a map from hash to index into vector. this is to avoid writing a custom
 //allocator for standard map.
-typedef std::map<int, int> ShapeHashIndexMap; //first is hash of shape, second is vector index.
-typedef std::vector<TopoDS_Shape, Standard_StdAllocator<TopoDS_Shape> > ShapeVector;
-typedef std::map<int, osg::ref_ptr<osg::Switch> > ShapeHashSwitchMap;
+typedef std::map<int, ShapeObject*> HashShapeObjectMap; //first is hash of shape, second is vector index.
 
 class Document : public QObject
 {
@@ -24,13 +24,9 @@ class Document : public QObject
 public:
     explicit Document(QObject *parent = 0);
     void readOCC(const std::string &fileName, osg::Group *root);
-    TopoDS_Shape vizToShape(const osg::ref_ptr<osg::Switch> switchIn);
-    osg::ref_ptr<osg::Switch> shapeToViz(const TopoDS_Shape &shape);
     
 private:
-    ShapeHashIndexMap map;
-    ShapeVector shapeVector;
-    ShapeHashSwitchMap switchMap;
+    HashShapeObjectMap map;
 };
 
 #endif // DOCUMENT_H

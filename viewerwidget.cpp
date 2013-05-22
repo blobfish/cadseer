@@ -22,6 +22,7 @@
 #include "./testing/plotter.h"
 #include "./gesture/gesturehandler.h"
 #include "./command/commandmanager.h"
+#include "globalutilities.h"
 
 ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel) : QWidget()
 {
@@ -271,7 +272,7 @@ void ViewerWidget::hideSelected()
     if (parent)
     {
         int hash;
-        if (parent->getUserValue("ShapeHash", hash))
+        if (parent->getUserValue(GU::hashAttributeTitle, hash))
         {
             VisitorHide visitor(false, hash);
             root->accept(visitor);
@@ -362,7 +363,7 @@ void VisitorHide::apply(osg::Switch &aSwitch)
     if ((aSwitch.getNodeMask() & NodeMask::object))
     {
         int switchHash;
-        if (aSwitch.getUserValue("ShapeHash", switchHash))
+        if (aSwitch.getUserValue(GU::hashAttributeTitle, switchHash))
         {
             if (switchHash == hash)
             {

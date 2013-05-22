@@ -86,6 +86,12 @@ bool Build::go(const Standard_Real &deflection, const Standard_Real &angle)
                  Standard_False, Standard_True);
 
         processed.Add(copiedShape);
+        if (copiedShape.ShapeType() == TopAbs_FACE)
+            faceConstruct(TopoDS::Face(copiedShape));
+        if (copiedShape.ShapeType() == TopAbs_EDGE)
+            edgeConstruct(TopoDS::Edge(copiedShape));
+        if (copiedShape.ShapeType() == TopAbs_VERTEX)
+            vertexConstruct(TopoDS::Vertex(copiedShape));
         recursiveConstruct(copiedShape);
         success = true;
 
@@ -113,8 +119,8 @@ bool Build::go(const Standard_Real &deflection, const Standard_Real &angle)
 void Build::setUpGraph()
 {
     groupOut = new osg::Switch();
-    groupOut->setNodeMask(NodeMask::object);
-    groupOut->setUserValue("ShapeHash", GU::getShapeHash(originalShape));
+    groupOut->setNodeMask(NodeMask::lod);
+    groupOut->setUserValue(GU::hashAttributeTitle, GU::getShapeHash(originalShape));
     groupVertices = new osg::Switch();
     groupVertices->setNodeMask(NodeMask::vertex);
     groupEdges = new osg::Switch();

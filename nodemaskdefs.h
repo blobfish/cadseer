@@ -8,7 +8,8 @@ namespace NodeMask
     const int vertex = 0x2;
     const int edge = 0x4;
     const int face = 0x8;
-    const int object = 0x10;
+    const int lod = 0x10;
+    const int object = 0x20;
 
     const int gestureMenu = 0x100;
     const int gestureCommand = 0x200;

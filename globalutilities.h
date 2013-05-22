@@ -6,6 +6,7 @@
 namespace GU
 {
 int getShapeHash(const TopoDS_Shape &shape);
+static std::string hashAttributeTitle = "ShapeHash";
 
 }
 

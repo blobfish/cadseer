@@ -8,7 +8,7 @@ set(QT_USE_QTOPENGL TRUE)
 INCLUDE(${QT_USE_FILE})
 ADD_DEFINITIONS(${QT_DEFINITIONS})
 
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS system graph)
 
 find_package(OCE REQUIRED COMPONENTS TKernel TKBRep TKMesh)
 #override the libraries settings.
@@ -36,9 +36,12 @@ INCLUDE_DIRECTORIES(${ADDITIONAL_INCLUDE_PATHS})
 
 SET(MODELVIZ_HDRS
   ./modelviz/graph.h
+  ./modelviz/connector.h
+  ./modelviz/connectorgraph.h
   )
 SET(MODELVIZ_SOURCES
   ./modelviz/graph.cpp
+  ./modelviz/connector.cpp
   )
 
 SET(TESTING_HDRS
@@ -82,6 +85,7 @@ SET(CADSEER_SOURCES
     ./selectionstate.cpp
     ./document.cpp
     ./globalutilities.cpp
+    ./shapeobject.cpp
     ${MODELVIZ_SOURCES}
     ${TESTING_SOURCES}
     ${GESTURE_SOURCES}
@@ -110,6 +114,7 @@ SET(CADSEER_MOC_HDRS
     ./application.h
     ./selectionmanager.h
     ./document.h
+    ./shapeobject.h
     )
 
 SET(CADSEER_LIBRARIES
