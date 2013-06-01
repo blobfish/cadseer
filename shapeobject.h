@@ -18,6 +18,7 @@ public:
     TopoDS_Shape getShape(){return shape;}
     osg::Switch* getMainSwitch(){return mainSwitch.get();}
     int getShapeHash(){return shapeHash;}
+    const ModelViz::Connector& getConnector(){return connector;}
     
 signals:
     

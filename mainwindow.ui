@@ -55,7 +55,12 @@
    <attribute name="toolBarBreak">
     <bool>true</bool>
    </attribute>
+   <addaction name="actionSelectObjects"/>
+   <addaction name="actionSelectFeatures"/>
+   <addaction name="actionSelectSolids"/>
+   <addaction name="actionSelectShells"/>
    <addaction name="actionSelectFaces"/>
+   <addaction name="actionSelectWires"/>
    <addaction name="actionSelectEdges"/>
    <addaction name="actionSelectVertices"/>
   </widget>
@@ -129,6 +134,81 @@
   <action name="actionShowAll">
    <property name="text">
     <string>showAll</string>
+   </property>
+  </action>
+  <action name="actionSelectWires">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/images/selectWires.svg</normaloff>:/resources/images/selectWires.svg</iconset>
+   </property>
+   <property name="text">
+    <string>SelectWires</string>
+   </property>
+   <property name="toolTip">
+    <string>Wire selection on/off</string>
+   </property>
+  </action>
+  <action name="actionSelectShells">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/images/selectShells.svg</normaloff>:/resources/images/selectShells.svg</iconset>
+   </property>
+   <property name="text">
+    <string>SelectShells</string>
+   </property>
+   <property name="toolTip">
+    <string>Shell selection on/off</string>
+   </property>
+  </action>
+  <action name="actionSelectSolids">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/images/selectSolids.svg</normaloff>:/resources/images/selectSolids.svg</iconset>
+   </property>
+   <property name="text">
+    <string>SelectSolids</string>
+   </property>
+   <property name="toolTip">
+    <string>Solid selection on/off</string>
+   </property>
+  </action>
+  <action name="actionSelectFeatures">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/images/selectFeatures.svg</normaloff>:/resources/images/selectFeatures.svg</iconset>
+   </property>
+   <property name="text">
+    <string>SelectFeatures</string>
+   </property>
+   <property name="toolTip">
+    <string>Feature selection on/off</string>
+   </property>
+  </action>
+  <action name="actionSelectObjects">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/images/selectObjects.svg</normaloff>:/resources/images/selectObjects.svg</iconset>
+   </property>
+   <property name="text">
+    <string>SelectObjects</string>
+   </property>
+   <property name="toolTip">
+    <string>Object selection on/off</string>
    </property>
   </action>
  </widget>

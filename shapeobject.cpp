@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "globalutilities.h"
 #include "nodemaskdefs.h"
 #include "shapeobject.h"
@@ -14,6 +16,7 @@ void ShapeObject::setShape(const TopoDS_Shape &shapeIn)
 {
     shape = shapeIn;
     shapeHash = GU::getShapeHash(shape);
+    mainSwitch->setUserValue(GU::hashAttributeTitle, shapeHash);
 
     ModelViz::BuildConnector connectBuilder(shape);
     connector = connectBuilder.getConnector();

@@ -14,6 +14,7 @@
 #include "ui_mainwindow.h"
 #include "viewerwidget.h"
 #include "selectionmanager.h"
+#include "selectiondefs.h"
 #include "document.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -31,25 +32,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->centralwidget->setLayout(aLayout);
 
     selectionManager = new SelectionManager(this);
-    connect(ui->actionSelectFaces, SIGNAL(toggled(bool)), selectionManager, SLOT(toggledFaces(bool)));
-    connect(ui->actionSelectEdges, SIGNAL(toggled(bool)), selectionManager, SLOT(toggledEdges(bool)));
-    connect(ui->actionSelectVertices, SIGNAL(toggled(bool)), selectionManager, SLOT(toggledVertices(bool)));
-    connect(selectionManager, SIGNAL(guiFacesEnabled(bool)), ui->actionSelectFaces, SLOT(setEnabled(bool)));
-    connect(selectionManager, SIGNAL(guiEdgesEnabled(bool)), ui->actionSelectEdges, SLOT(setEnabled(bool)));
-    connect(selectionManager, SIGNAL(guiVerticesEnabled(bool)), ui->actionSelectVertices, SLOT(setEnabled(bool)));
-    connect(selectionManager, SIGNAL(guiFacesSelectable(bool)), ui->actionSelectFaces, SLOT(setChecked(bool)));
-    connect(selectionManager, SIGNAL(guiEdgesSelectable(bool)), ui->actionSelectEdges, SLOT(setChecked(bool)));
-    connect(selectionManager, SIGNAL(guiVerticesSelectable(bool)), ui->actionSelectVertices, SLOT(setChecked(bool)));
+    setupSelectionToolbar();
     connect(selectionManager, SIGNAL(setSelectionMask(int)), viewWidget, SLOT(setSelectionMask(int)));
-
-    SelectionState state;
-    state.facesEnabled = true;
-    state.edgesEnabled = true;
-    state.verticesEnabled = true;
-    state.facesSelectable = true;
-    state.edgesSelectable = true;
-    state.verticesSelectable = true;
-    selectionManager->setState(state);
+    selectionManager->setState(SelectionMask::all);
 
     connect(ui->actionAppendBrep, SIGNAL(triggered()), this, SLOT(readBrepSlot()));
 }
@@ -65,7 +50,29 @@ void MainWindow::readBrepSlot()
     if (fileName.isEmpty())
         return;
 
-    document = new Document(qApp);
+    Document *document = new Document(qApp);
+    dynamic_cast<Application *>(qApp)->setDocument(document);
     document->readOCC(fileName.toStdString(), viewWidget->getRoot());
     viewWidget->update();
+}
+
+void MainWindow::setupSelectionToolbar()
+{
+    selectionManager->actionSelectObjects = ui->actionSelectObjects;
+    selectionManager->actionSelectFeatures = ui->actionSelectFeatures;
+    selectionManager->actionSelectSolids = ui->actionSelectSolids;
+    selectionManager->actionSelectShells = ui->actionSelectShells;
+    selectionManager->actionSelectFaces = ui->actionSelectFaces;
+    selectionManager->actionSelectWires = ui->actionSelectWires;
+    selectionManager->actionSelectEdges = ui->actionSelectEdges;
+    selectionManager->actionSelectVertices = ui->actionSelectVertices;
+
+    connect(ui->actionSelectObjects, SIGNAL(triggered(bool)), selectionManager, SLOT(triggeredObjects(bool)));
+    connect(ui->actionSelectFeatures, SIGNAL(triggered(bool)), selectionManager, SLOT(triggeredFeatures(bool)));
+    connect(ui->actionSelectSolids, SIGNAL(triggered(bool)), selectionManager, SLOT(triggeredSolids(bool)));
+    connect(ui->actionSelectShells, SIGNAL(triggered(bool)), selectionManager, SLOT(triggeredShells(bool)));
+    connect(ui->actionSelectFaces, SIGNAL(triggered(bool)), selectionManager, SLOT(triggeredFaces(bool)));
+    connect(ui->actionSelectWires, SIGNAL(triggered(bool)), selectionManager, SLOT(triggeredWires(bool)));
+    connect(ui->actionSelectEdges, SIGNAL(triggered(bool)), selectionManager, SLOT(triggeredEdges(bool)));
+    connect(ui->actionSelectVertices, SIGNAL(triggered(bool)), selectionManager, SLOT(triggeredVertices(bool)));
 }

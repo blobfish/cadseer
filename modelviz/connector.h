@@ -14,8 +14,9 @@ public:
     Connector();
     void buildStartNode(const TopoDS_Shape &shapeIn);
     void buildEndNode();
-    std::vector<int> useGetParentsOfType(const int &shapeHash, const TopAbs_ShapeEnum &shapeType);
-    std::vector<int> useGetChildrenOfType(const int &shapeHash, const TopAbs_ShapeEnum &shapeType);
+    std::vector<int> useGetParentsOfType(const int &shapeHash, const TopAbs_ShapeEnum &shapeType) const;
+    std::vector<int> useGetChildrenOfType(const int &shapeHash, const TopAbs_ShapeEnum &shapeType) const;
+    int useGetWire(const int &edgeHash, const int &faceHash) const;
     TopoDS_Shape getShape(const int &shapeHash);
     void outputGraphviz(const std::string &name);
 private:

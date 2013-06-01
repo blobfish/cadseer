@@ -40,9 +40,14 @@ Build::Build(const TopoDS_Shape &shapeIn) : originalShape(shapeIn), success(fals
 {
     try
     {
-        BRepBuilderAPI_Copy copier;
-        copier.Perform(originalShape);
-        copiedShape = copier.Shape();
+        //copying shape changes the hash values. need consistency to connector.
+//        BRepBuilderAPI_Copy copier;
+//        copier.Perform(originalShape);
+//        copiedShape = copier.Shape();
+
+        copiedShape = originalShape;
+
+
         BRepBndLib::Add(copiedShape, bound);
         TopExp::MapShapesAndAncestors(copiedShape, TopAbs_EDGE, TopAbs_FACE, edgeToFace);
     //    groupOut->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);
@@ -120,7 +125,6 @@ void Build::setUpGraph()
 {
     groupOut = new osg::Switch();
     groupOut->setNodeMask(NodeMask::lod);
-    groupOut->setUserValue(GU::hashAttributeTitle, GU::getShapeHash(originalShape));
     groupVertices = new osg::Switch();
     groupVertices->setNodeMask(NodeMask::vertex);
     groupEdges = new osg::Switch();
@@ -254,6 +258,8 @@ void Build::recursiveConstruct(const TopoDS_Shape &shapeIn)
 void Build::vertexConstruct(const TopoDS_Vertex &vertex)
 {
     osg::ref_ptr<osg::Geode> geode = createGeodeVertex();
+    geode->setUserValue(GU::hashAttributeTitle, GU::getShapeHash(vertex));
+
     osg::ref_ptr<osg::Geometry> geometry = createGeometryVertex();
     geode->addDrawable(geometry);
     groupVertices->addChild(geode);
@@ -291,6 +297,7 @@ void Build::edgeConstruct(const TopoDS_Edge &edgeIn)
     }
 
     osg::ref_ptr<osg::Geode> geode = createGeodeEdge();
+    geode->setUserValue(GU::hashAttributeTitle, GU::getShapeHash(edgeIn));
     osg::ref_ptr<osg::Geometry> geometry = createGeometryEdge();
     geode->addDrawable(geometry);
     groupEdges->addChild(geode);
@@ -333,6 +340,7 @@ void Build::faceConstruct(const TopoDS_Face &faceIn)
     }
 
     osg::ref_ptr<osg::Geode> geode = createGeodeFace();
+    geode->setUserValue(GU::hashAttributeTitle, GU::getShapeHash(faceIn));
     osg::ref_ptr<osg::Geometry> geometry = createGeometryFace();
     geode->addDrawable(geometry);
     groupFaces->addChild(geode);

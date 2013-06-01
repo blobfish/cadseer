@@ -1,3 +1,6 @@
+#include <assert.h>
+#include <iostream>
+
 #include <BRep_Builder.hxx>
 #include <BRepTools.hxx>
 #include <TopoDS_Iterator.hxx>
@@ -48,4 +51,12 @@ void Document::readOCC(const std::string &fileName, osg::Group *root)
 //        ModelViz::BuildConnector connectBuilder(current);
 //        connectBuilder.getConnector().outputGraphviz("graphTest");
     }
+}
+
+ShapeObject* Document::findShapeObjectFromHash(const int &hashIn)
+{
+    HashShapeObjectMap::iterator it;
+    it = map.find(hashIn);
+    assert(it != map.end());
+    return it->second;
 }

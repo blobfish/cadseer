@@ -3,10 +3,18 @@
 
 #include <TopoDS_Shape.hxx>
 
+namespace osg
+{
+class Geometry;
+class Node;
+}
+
 namespace GU
 {
 int getShapeHash(const TopoDS_Shape &shape);
-static std::string hashAttributeTitle = "ShapeHash";
+int getHash(const osg::Geometry *geometry);
+int getHash(const osg::Node *node);
+static const std::string hashAttributeTitle = "ShapeHash";
 
 }
 

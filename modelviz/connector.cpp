@@ -1,3 +1,4 @@
+#include <iostream>
 #include <assert.h>
 #include <boost/graph/graphviz.hpp>
 
@@ -56,26 +57,69 @@ void Connector::connectVertices(ConnectorGraph::Vertex from, ConnectorGraph::Ver
     assert(edgeResult);
 }
 
-std::vector<int> Connector::useGetParentsOfType(const int &shapeHash, const TopAbs_ShapeEnum &shapeType)
+std::vector<int> Connector::useGetParentsOfType(const int &shapeHash, const TopAbs_ShapeEnum &shapeType) const
 {
+    ConnectorGraph::Graph temp = graph;
+    ConnectorGraph::GraphReversed reversed = boost::make_reverse_graph(temp);
 
+    ConnectorGraph::HashVertexMap::const_iterator it;
+    it = vertexMap.find(shapeHash);
+    assert(it != vertexMap.end());
+
+    std::vector<ConnectorGraph::Vertex> vertices;
+    TypeCollectionVisitor vis(shapeType, vertices);
+    boost::breadth_first_search(reversed, it->second, boost::visitor(vis));
+
+    std::vector<ConnectorGraph::Vertex>::const_iterator vit;
+    std::vector<int> hashesOut;
+    for (vit = vertices.begin(); vit != vertices.end(); ++vit)
+        hashesOut.push_back(reversed[*vit].hash);
+    return hashesOut;
 }
 
-std::vector<int> Connector::useGetChildrenOfType(const int &shapeHash, const TopAbs_ShapeEnum &shapeType)
+std::vector<int> Connector::useGetChildrenOfType(const int &shapeHash, const TopAbs_ShapeEnum &shapeType) const
 {
     ConnectorGraph::HashVertexMap::const_iterator it;
     it = vertexMap.find(shapeHash);
     assert(it != vertexMap.end());
 
-    TypeCollectionVisitor vis(shapeType);
+    std::vector<ConnectorGraph::Vertex> vertices;
+    TypeCollectionVisitor vis(shapeType, vertices);
     boost::breadth_first_search(graph, it->second, boost::visitor(vis));
 
-    std::vector<ConnectorGraph::Vertex> vertices = vis.getVertices();
     std::vector<ConnectorGraph::Vertex>::const_iterator vit;
     std::vector<int> hashesOut;
     for (vit = vertices.begin(); vit != vertices.end(); ++vit)
         hashesOut.push_back(graph[*vit].hash);
     return hashesOut;
+}
+
+int Connector::useGetWire(const int &edgeHash, const int &faceHash) const
+{
+    ConnectorGraph::HashVertexMap::const_iterator it;
+    it = vertexMap.find(edgeHash);
+    assert(it != vertexMap.end());
+    ConnectorGraph::Vertex edgeVertex = it->second;
+
+    it = vertexMap.find(faceHash);
+    assert(it != vertexMap.end());
+    ConnectorGraph::Vertex faceVertex = it->second;
+
+    ConnectorGraph::Vertex wireVertex;
+    ConnectorGraph::VertexAdjacencyIterator wireIt, wireItEnd;
+    for (boost::tie(wireIt, wireItEnd) = boost::adjacent_vertices(faceVertex, graph); wireIt != wireItEnd; ++wireIt)
+    {
+        ConnectorGraph::VertexAdjacencyIterator edgeIt, edgeItEnd;
+        for (boost::tie(edgeIt, edgeItEnd) = boost::adjacent_vertices((*wireIt), graph); edgeIt != edgeItEnd; ++edgeIt)
+        {
+            if (edgeVertex == (*edgeIt))
+            {
+                wireVertex = *wireIt;
+                return graph[wireVertex].hash;
+            }
+        }
+    }
+    return 0;
 }
 
 TopoDS_Shape Connector::getShape(const int &shapeHash)

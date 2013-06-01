@@ -19,6 +19,7 @@
 #include "viewerwidget.h"
 #include "gleventwidget.h"
 #include "nodemaskdefs.h"
+#include "selectiondefs.h"
 #include "./testing/plotter.h"
 #include "./gesture/gesturehandler.h"
 #include "./command/commandmanager.h"
@@ -247,38 +248,34 @@ osg::Camera* ViewerWidget::createGestureCamera()
 
 void ViewerWidget::setSelectionMask(const int &maskIn)
 {
-    //check for points.
-    int originalPoint = selectionHandler->nodeMask & NodeMask::vertex;
-    int newPoint = maskIn & NodeMask::vertex;
+    //turn points on or off.
 
-    if (originalPoint ^ newPoint)
-    {
-        VisibleVisitor visitor(maskIn & NodeMask::vertex);
-        root->accept(visitor);
-    }
-    selectionHandler->nodeMask = maskIn;
+    VisibleVisitor visitor((SelectionMask::verticesSelectable & maskIn) == SelectionMask::verticesSelectable);
+    root->accept(visitor);
+
+    selectionHandler->setSelectionMask(maskIn);
 }
 
 void ViewerWidget::hideSelected()
 {
-    std::vector<Selected> selections = selectionHandler->getSelections();
-    if (selections.empty())
-        return;
-    selectionHandler->clearSelections();
+//    std::vector<Selected> selections = selectionHandler->getSelections();
+//    if (selections.empty())
+//        return;
+//    selectionHandler->clearSelections();
 
-    osg::Node *parent = selections.at(0).geometry->getParent(0);
-    while (parent && parent->getNodeMask() != NodeMask::object)
-        parent = parent->getParent(0);
-    if (parent)
-    {
-        int hash;
-        if (parent->getUserValue(GU::hashAttributeTitle, hash))
-        {
-            VisitorHide visitor(false, hash);
-            root->accept(visitor);
-        }
+//    osg::Node *parent = selections.at(0).geometry->getParent(0);
+//    while (parent && parent->getNodeMask() != NodeMask::object)
+//        parent = parent->getParent(0);
+//    if (parent)
+//    {
+//        int hash;
+//        if (parent->getUserValue(GU::hashAttributeTitle, hash))
+//        {
+//            VisitorHide visitor(false, hash);
+//            root->accept(visitor);
+//        }
 
-    }
+//    }
 }
 
 void ViewerWidget::showAll()

@@ -27,10 +27,10 @@ public slots:
     void readBrepSlot();
     
 private:
+    void setupSelectionToolbar();
     Ui::MainWindow *ui;
     ViewerWidget* viewWidget;
     SelectionManager *selectionManager;
-    Document *document;
 };
 
 #endif // MAINWINDOW_H

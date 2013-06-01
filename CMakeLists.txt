@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 project(cadseer)
-SET(CMAKE_CXX_FLAGS "-std=c++0x")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -fno-omit-frame-pointer" )
 
 find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
 set(QT_USE_QTOPENGL TRUE)
@@ -82,7 +82,6 @@ SET(CADSEER_SOURCES
     ./selectioneventhandler.cpp
     ./selectionintersector.cpp
     ./selectionmanager.cpp
-    ./selectionstate.cpp
     ./document.cpp
     ./globalutilities.cpp
     ./shapeobject.cpp
@@ -99,7 +98,7 @@ SET(CADSEER_HDRS
     ./spaceballosgevent.h
     ./selectioneventhandler.h
     ./selectionintersector.h
-    ./selectionstate.h
+    ./selectiondefs.h
     ./globalutilities.h
     ./nodemasksdef.h
     ${MODELVIZ_HDRS}

@@ -34,18 +34,18 @@ typedef std::map<int, Vertex> HashVertexMap;
 class TypeCollectionVisitor : public boost::default_bfs_visitor
 {
 public:
-    TypeCollectionVisitor(const TopAbs_ShapeEnum &shapeTypeIn){shapeType = shapeTypeIn;}
+    TypeCollectionVisitor(const TopAbs_ShapeEnum &shapeTypeIn, std::vector<Vertex> &vertIn) : shapeType(shapeTypeIn),
+        typedVertices(vertIn){}
     template <typename VisitorVertex, typename VisitorGraph>
     void discover_vertex(VisitorVertex u, const VisitorGraph &g)
     {
         if (g[u].shapeType == this->shapeType)
             typedVertices.push_back(u);
     }
-    std::vector<Vertex> getVertices(){return typedVertices;}
 
 private:
     TopAbs_ShapeEnum shapeType;
-    std::vector<Vertex> typedVertices;
+    std::vector<Vertex> &typedVertices;
 };
 
 static std::vector<std::string> shapeStrings
