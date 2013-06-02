@@ -45,13 +45,14 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
             GestureAllSwitchesOffVisitor visitor;
             gestureCamera->accept(visitor);
 
-//            gestureSwitch->setAllChildrenOn();
             rightButtonDown = true;
         }
 
         if (eventAdapter.getEventType() == osgGA::GUIEventAdapter::RELEASE)
         {
             rightButtonDown = false;
+            if (!dragStarted)
+                return false;
             dragStarted = false;
             gestureSwitch->setAllChildrenOff();
             if (currentNode->getNodeMask() & NodeMask::gestureCommand)
