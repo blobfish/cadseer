@@ -47,9 +47,6 @@ void Document::readOCC(const std::string &fileName, osg::Group *root)
         object->setShape(current);
         map.insert(std::make_pair(object->getShapeHash(), object));
         root->addChild(object->getMainSwitch());
-
-//        ModelViz::BuildConnector connectBuilder(current);
-//        connectBuilder.getConnector().outputGraphviz("graphTest");
     }
 }
 
@@ -59,4 +56,12 @@ ShapeObject* Document::findShapeObjectFromHash(const int &hashIn)
     it = map.find(hashIn);
     assert(it != map.end());
     return it->second;
+}
+
+void Document::addOCCShape(const TopoDS_Shape &shapeIn, osg::Group *root)
+{
+    ShapeObject *object = new ShapeObject(this);
+    object->setShape(shapeIn);
+    map.insert(std::make_pair(object->getShapeHash(), object));
+    root->addChild(object->getMainSwitch());
 }

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <assert.h>
 
 #include <QHBoxLayout>
 #include <QFileDialog>
@@ -8,6 +9,9 @@
 #include <BRepTools.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <BRepMesh.hxx>
+#include <BRepPrimAPI_MakeBox.hxx>
+#include <BRepPrimAPI_MakeSphere.hxx>
+#include <BRepPrimAPI_MakeCone.hxx>
 
 #include "mainwindow.h"
 #include "application.h"
@@ -16,6 +20,7 @@
 #include "selectionmanager.h"
 #include "selectiondefs.h"
 #include "document.h"
+#include "command/commandmanager.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -37,6 +42,13 @@ MainWindow::MainWindow(QWidget *parent) :
     selectionManager->setState(SelectionMask::all);
 
     connect(ui->actionAppendBrep, SIGNAL(triggered()), this, SLOT(readBrepSlot()));
+
+    Document *document = new Document(qApp);
+    Application *application = dynamic_cast<Application *>(qApp);
+    assert(application);
+    application->setDocument(document);
+
+    setupCommands();
 }
 
 MainWindow::~MainWindow()
@@ -50,8 +62,9 @@ void MainWindow::readBrepSlot()
     if (fileName.isEmpty())
         return;
 
-    Document *document = new Document(qApp);
-    dynamic_cast<Application *>(qApp)->setDocument(document);
+    Application *application = dynamic_cast<Application *>(qApp);
+    assert(application);
+    Document *document = application->getDocument();
     document->readOCC(fileName.toStdString(), viewWidget->getRoot());
     viewWidget->update();
 }
@@ -75,4 +88,64 @@ void MainWindow::setupSelectionToolbar()
     connect(ui->actionSelectWires, SIGNAL(triggered(bool)), selectionManager, SLOT(triggeredWires(bool)));
     connect(ui->actionSelectEdges, SIGNAL(triggered(bool)), selectionManager, SLOT(triggeredEdges(bool)));
     connect(ui->actionSelectVertices, SIGNAL(triggered(bool)), selectionManager, SLOT(triggeredVertices(bool)));
+}
+
+void MainWindow::setupCommands()
+{
+    QAction *constructionBoxAction = new QAction(qApp);
+    connect(constructionBoxAction, SIGNAL(triggered()), this, SLOT(contructionBoxSlot()));
+    Command constructionBoxCommand(CommandConstants::ConstructionBox, "Construct Box", constructionBoxAction);
+    CommandManager::getManager().addCommand(constructionBoxCommand);
+
+    QAction *constructionSphereAction = new QAction(qApp);
+    connect(constructionSphereAction, SIGNAL(triggered()), this, SLOT(contructionSphereSlot()));
+    Command constructionSphereCommand(CommandConstants::ConstructionSphere, "Construct Sphere", constructionSphereAction);
+    CommandManager::getManager().addCommand(constructionSphereCommand);
+
+    QAction *constructionConeAction = new QAction(qApp);
+    connect(constructionConeAction, SIGNAL(triggered()), this, SLOT(contructionConeSlot()));
+    Command constructionConeCommand(CommandConstants::ConstructionCone, "Construct Cone", constructionConeAction);
+    CommandManager::getManager().addCommand(constructionConeCommand);
+}
+
+void MainWindow::contructionBoxSlot()
+{
+    BRepPrimAPI_MakeBox boxMaker(10.0, 10.0, 10.0);
+    boxMaker.Build();
+    assert(boxMaker.IsDone());
+    TopoDS_Shape boxShape = boxMaker.Shape();
+
+    Application *application = dynamic_cast<Application *>(qApp);
+    assert(application);
+    Document *document = application->getDocument();
+    document->addOCCShape(boxShape, viewWidget->getRoot());
+    viewWidget->update();
+}
+
+void MainWindow::contructionSphereSlot()
+{
+    BRepPrimAPI_MakeSphere sphereMaker(5.0);
+    sphereMaker.Build();
+    assert(sphereMaker.IsDone());
+    TopoDS_Shape sphereShape = sphereMaker.Shape();
+
+    Application *application = dynamic_cast<Application *>(qApp);
+    assert(application);
+    Document *document = application->getDocument();
+    document->addOCCShape(sphereShape, viewWidget->getRoot());
+    viewWidget->update();
+}
+
+void MainWindow::contructionConeSlot()
+{
+    BRepPrimAPI_MakeCone coneMaker(8.0, 0.0, 10.0);
+    coneMaker.Build();
+    assert(coneMaker.IsDone());
+    TopoDS_Shape coneShape = coneMaker.Shape();
+
+    Application *application = dynamic_cast<Application *>(qApp);
+    assert(application);
+    Document *document = application->getDocument();
+    document->addOCCShape(coneShape, viewWidget->getRoot());
+    viewWidget->update();
 }

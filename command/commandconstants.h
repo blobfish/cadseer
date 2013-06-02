@@ -11,7 +11,10 @@ enum Constants
     StandardViewTop,
     StandardViewFront,
     StandardViewRight,
-    ViewFit
+    ViewFit,
+    ConstructionBox,
+    ConstructionSphere,
+    ConstructionCone
 };
 }
 

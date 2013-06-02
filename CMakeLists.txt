@@ -10,10 +10,10 @@ ADD_DEFINITIONS(${QT_DEFINITIONS})
 
 find_package(Boost REQUIRED COMPONENTS system graph)
 
-find_package(OCE REQUIRED COMPONENTS TKernel TKBRep TKMesh)
+find_package(OCE REQUIRED COMPONENTS TKernel TKBRep TKMesh TKFeat)
 #override the libraries settings.
 #message(${OCE_LIBRARIES})
-SET(OCE_LIBRARIES "TKernel;TKBRep;TKMesh")
+SET(OCE_LIBRARIES "TKernel;TKBRep;TKMesh;TKFeat")
 
 FIND_PACKAGE(OpenSceneGraph REQUIRED)
 SET(OPENSCENEGRAPH_LIBRARIES "OpenThreads;osg;osgDB;osgUtil;osgViewer;osgQt;osgGA")

@@ -25,9 +25,13 @@ public:
 
 public slots:
     void readBrepSlot();
+    void contructionBoxSlot();
+    void contructionSphereSlot();
+    void contructionConeSlot();
     
 private:
     void setupSelectionToolbar();
+    void setupCommands();
     Ui::MainWindow *ui;
     ViewerWidget* viewWidget;
     SelectionManager *selectionManager;

@@ -17,5 +17,10 @@
         <file>resources/images/selectShells.svg</file>
         <file>resources/images/selectSolids.svg</file>
         <file>resources/images/selectWires.svg</file>
+        <file>resources/images/constructionBase.svg</file>
+        <file>resources/images/constructionPrimitives.svg</file>
+        <file>resources/images/constructionBox.svg</file>
+        <file>resources/images/constructionSphere.svg</file>
+        <file>resources/images/constructionCone.svg</file>
     </qresource>
 </RCC>

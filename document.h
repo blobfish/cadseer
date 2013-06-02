@@ -24,6 +24,7 @@ class Document : public QObject
 public:
     explicit Document(QObject *parent = 0);
     void readOCC(const std::string &fileName, osg::Group *root);
+    void addOCCShape(const TopoDS_Shape &shapeIn, osg::Group *root);
     ShapeObject* findShapeObjectFromHash(const int &hashIn);
     
 private:

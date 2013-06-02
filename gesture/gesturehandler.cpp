@@ -245,6 +245,32 @@ void GestureHandler::constructMenu()
     viewFit->setMatrix(dummy);
     viewFit->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::ViewFit));
     viewBase->insertChild(viewBase->getNumChildren() - 2, viewFit);
+
+    //construction base
+    osg::MatrixTransform *constructionBase;
+    constructionBase = GestureNode::buildMenuNode(":/resources/images/constructionBase.svg");
+    constructionBase->setMatrix(dummy);
+    startNode->insertChild(startNode->getNumChildren() - 2, constructionBase);
+
+    osg::MatrixTransform *constructionPrimitives;
+    constructionPrimitives = GestureNode::buildMenuNode(":/resources/images/constructionPrimitives.svg");
+    constructionPrimitives->setMatrix(dummy);
+    constructionBase->insertChild(constructionBase->getNumChildren() - 2, constructionPrimitives);
+
+    osg::MatrixTransform *constructionBox = GestureNode::buildCommandNode(":/resources/images/constructionBox.svg");
+    constructionBox->setMatrix(dummy);
+    constructionBox->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::ConstructionBox));
+    constructionPrimitives->insertChild(constructionPrimitives->getNumChildren() - 2, constructionBox);
+
+    osg::MatrixTransform *constructionSphere = GestureNode::buildCommandNode(":/resources/images/constructionSphere.svg");
+    constructionSphere->setMatrix(dummy);
+    constructionSphere->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::ConstructionSphere));
+    constructionPrimitives->insertChild(constructionPrimitives->getNumChildren() - 2, constructionSphere);
+
+    osg::MatrixTransform *constructionCone = GestureNode::buildCommandNode(":/resources/images/constructionCone.svg");
+    constructionCone->setMatrix(dummy);
+    constructionCone->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::ConstructionCone));
+    constructionPrimitives->insertChild(constructionPrimitives->getNumChildren() - 2, constructionCone);
 }
 
 std::vector<osg::Vec3> GestureHandler::buildNodeLocations(osg::Vec3 direction, int nodeCount)
