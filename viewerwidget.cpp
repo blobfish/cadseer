@@ -24,6 +24,7 @@
 #include "./gesture/gesturehandler.h"
 #include "./command/commandmanager.h"
 #include "globalutilities.h"
+#include "coordinatesystem.h"
 
 ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel) : QWidget()
 {
@@ -36,6 +37,8 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
 //    pm->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
     root->getOrCreateStateSet()->setAttribute(pm.get());
     Plotter::getReference().setBase(root);
+    
+    root->addChild(CoordinateSystem::buildCoordinateSystemNode());
 
     osg::Camera *mainCamera = createMainCamera();
     osgViewer::View* view = new osgViewer::View;

@@ -85,6 +85,7 @@ SET(CADSEER_SOURCES
     ./document.cpp
     ./globalutilities.cpp
     ./shapeobject.cpp
+    ./coordinatesystem.cpp
     ${MODELVIZ_SOURCES}
     ${TESTING_SOURCES}
     ${GESTURE_SOURCES}
@@ -101,6 +102,7 @@ SET(CADSEER_HDRS
     ./selectiondefs.h
     ./globalutilities.h
     ./nodemasksdef.h
+    ./coordinatesystem.h
     ${MODELVIZ_HDRS}
     ${TESTING_HDRS}
     ${GESTURE_HDRS}
