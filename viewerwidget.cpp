@@ -33,8 +33,8 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
 
     root = new osg::Group;
     osg::ref_ptr<osg::PolygonMode> pm = new osg::PolygonMode;
-    pm->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL);
-//    pm->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
+//     pm->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL);
+   pm->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
     root->getOrCreateStateSet()->setAttribute(pm.get());
     Plotter::getReference().setBase(root);
     
