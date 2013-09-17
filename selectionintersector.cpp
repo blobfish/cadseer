@@ -151,12 +151,12 @@ void SelectionIntersector::goEdges(const osg::ref_ptr<osg::PrimitiveSet> primiti
         testPoint = segmentVector * segmentScalar + lineStart;
 
         Vec3d connection = localStart - lineStart;
-        Matrix2d matrix;
+        Eigen::Matrix2d matrix;
         Vector2d solution;
         matrix << segmentVector * segmentVector, - (segmentVector * intersectionVector),
                 intersectionVector * segmentVector, - (intersectionVector * intersectionVector);
         solution << segmentVector * connection, intersectionVector * connection;
-        FullPivLU<Matrix2d> lu1(matrix);
+        FullPivLU<Eigen::Matrix2d> lu1(matrix);
         Vector2d parameters = lu1.solve(solution);
         if(lu1.rank() != matrix.cols())
             continue;
