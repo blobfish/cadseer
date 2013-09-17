@@ -15,6 +15,7 @@ find_package(OCE REQUIRED COMPONENTS TKernel TKBRep TKMesh TKFeat)
 #message(${OCE_LIBRARIES})
 SET(OCE_LIBRARIES "TKernel;TKBRep;TKMesh;TKFeat")
 
+set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS ON)
 FIND_PACKAGE(OpenSceneGraph REQUIRED)
 SET(OPENSCENEGRAPH_LIBRARIES "OpenThreads;osg;osgDB;osgUtil;osgViewer;osgQt;osgGA")
 
