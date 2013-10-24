@@ -33,8 +33,8 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
 
     root = new osg::Group;
     osg::ref_ptr<osg::PolygonMode> pm = new osg::PolygonMode;
-//     pm->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL);
-   pm->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
+    pm->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL);
+//     pm->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
     root->getOrCreateStateSet()->setAttribute(pm.get());
     Plotter::getReference().setBase(root);
     
@@ -44,10 +44,12 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     osgViewer::View* view = new osgViewer::View;
     view->setCamera(mainCamera);
 
-    osg::Camera *backGroundCamera = createBackgroundCamera();
-    backGroundCamera->setViewport(new osg::Viewport(0, 0, glWidgetWidth, glWidgetHeight));
-    backGroundCamera->setProjectionResizePolicy(osg::Camera::ProjectionResizePolicy::FIXED);
-    view->addSlave(backGroundCamera, false);
+    //background was covering scene. don't know if it was the upgrade to osg 3.2
+    //or the switch to the open source ati driver. I am guessing the driver.
+//     osg::Camera *backGroundCamera = createBackgroundCamera();
+//     backGroundCamera->setViewport(new osg::Viewport(0, 0, glWidgetWidth, glWidgetHeight));
+//     backGroundCamera->setProjectionResizePolicy(osg::Camera::ProjectionResizePolicy::FIXED);
+//     view->addSlave(backGroundCamera, false);
 
     osg::Camera *gestureCamera = createGestureCamera();
     gestureCamera->setViewport(new osg::Viewport(0, 0, glWidgetWidth, glWidgetHeight));
