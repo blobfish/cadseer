@@ -15,8 +15,17 @@ find_package(OCE REQUIRED COMPONENTS TKernel TKBRep TKMesh TKFeat)
 #message(${OCE_LIBRARIES})
 SET(OCE_LIBRARIES "TKernel;TKBRep;TKMesh;TKFeat")
 
+#begin hack for non-installed openscenegraph.
+LINK_DIRECTORIES("/home/tanderson/Programming/OpenSceneGraph/OpenSceneGraphGit/build/lib")
+SET(OPENSCENEGRAPH_INCLUDE_DIRS
+    "/home/tanderson/Programming/OpenSceneGraph/OpenSceneGraphGit/build/include"
+    "/home/tanderson/Programming/OpenSceneGraph/OpenSceneGraphGit/source/include"
+    )
+INCLUDE_DIRECTORIES(${ADDITIONAL_INCLUDE_PATHS})
+#end hack for non-installed openscenegraph.
+
 set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS ON)
-FIND_PACKAGE(OpenSceneGraph REQUIRED)
+# FIND_PACKAGE(OpenSceneGraph REQUIRED)
 SET(OPENSCENEGRAPH_LIBRARIES "OpenThreads;osg;osgDB;osgUtil;osgViewer;osgQt;osgGA")
 
 find_package(Spnav)
