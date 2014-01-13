@@ -236,7 +236,7 @@ osg::Camera* ViewerWidget::createGestureCamera()
     ss->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
     ss->setAttributeAndModes(new osg::Depth(osg::Depth::LEQUAL, 0.0, 0.0));
     osg::ref_ptr<osg::BlendFunc> blend = new osg::BlendFunc();
-    blend->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    blend->setFunction(GL_SRC_COLOR, GL_ONE_MINUS_DST_ALPHA);
     ss->setAttributeAndModes(blend);
     ss->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
 
