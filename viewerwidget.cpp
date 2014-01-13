@@ -238,6 +238,7 @@ osg::Camera* ViewerWidget::createGestureCamera()
     osg::ref_ptr<osg::BlendFunc> blend = new osg::BlendFunc();
     blend->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     ss->setAttributeAndModes(blend);
+    ss->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
 
     osg::Switch *aSwitch = new osg::Switch();
     aSwitch->addChild(geode.get());
