@@ -58,7 +58,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::readBrepSlot()
 {
-    QString fileName = QFileDialog::getOpenFileName(ui->centralwidget, tr("Open File"), "/home", tr("brep (*.brep *.brp)"));
+    QString fileName = QFileDialog::getOpenFileName(ui->centralwidget, tr("Open File"),
+                                                    "/home/tanderson/Programming/cadseer/test/files", tr("brep (*.brep *.brp)"));
     if (fileName.isEmpty())
         return;
 
