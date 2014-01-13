@@ -31,7 +31,7 @@ public slots:
     void viewFitSlot();
 
 protected:
-    osg::Camera* createMainCamera();
+    void createMainCamera(osg::Camera *camera);
     osg::Camera* createBackgroundCamera();
     osg::Camera* createGestureCamera();
     void setupCommands();

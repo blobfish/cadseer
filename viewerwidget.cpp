@@ -40,9 +40,8 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     
     root->addChild(CoordinateSystem::buildCoordinateSystemNode());
 
-    osg::Camera *mainCamera = createMainCamera();
     osgViewer::View* view = new osgViewer::View;
-    view->setCamera(mainCamera);
+    createMainCamera(view->getCamera());
 
     //background was covering scene. don't know if it was the upgrade to osg 3.2
     //or the switch to the open source ati driver. I am guessing the driver.
@@ -63,7 +62,7 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     view->addEventHandler(selectionHandler);
     view->addEventHandler(new GestureHandler(gestureCamera));
 //    view->setCameraManipulator(new osgGA::TrackballManipulator);
-    spaceballManipulator = new osgGA::SpaceballManipulator(mainCamera);
+    spaceballManipulator = new osgGA::SpaceballManipulator(view->getCamera());
     view->setCameraManipulator(spaceballManipulator);
 
     addView(view);
@@ -109,7 +108,7 @@ void ViewerWidget::update()
 
 }
 
-osg::Camera* ViewerWidget::createMainCamera()
+void ViewerWidget::createMainCamera(osg::Camera *camera)
 {
     /*
      comparison osg::GraphicsContext::Traits to QGLFormat
@@ -132,7 +131,6 @@ osg::Camera* ViewerWidget::createMainCamera()
     GLEventWidget *glWidget = new GLEventWidget(format, this);
     windowQt = new osgQt::GraphicsWindowQt(glWidget);
 
-    osg::ref_ptr<osg::Camera> camera = new osg::Camera;
     camera->setGraphicsContext(windowQt);
 
     QPixmap cursorImage(":/resources/images/cursor.png");
@@ -155,8 +153,6 @@ osg::Camera* ViewerWidget::createMainCamera()
     //use this for fade specs
     glWidgetWidth = glWidget->width();
     glWidgetHeight = glWidget->height();
-
-    return camera.release();
 }
 
 void ViewerWidget::paintEvent( QPaintEvent* event )
