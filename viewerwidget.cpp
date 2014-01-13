@@ -45,10 +45,10 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
 
     //background was covering scene. don't know if it was the upgrade to osg 3.2
     //or the switch to the open source ati driver. I am guessing the driver.
-//     osg::Camera *backGroundCamera = createBackgroundCamera();
-//     backGroundCamera->setViewport(new osg::Viewport(0, 0, glWidgetWidth, glWidgetHeight));
-//     backGroundCamera->setProjectionResizePolicy(osg::Camera::ProjectionResizePolicy::FIXED);
-//     view->addSlave(backGroundCamera, false);
+    osg::Camera *backGroundCamera = createBackgroundCamera();
+    backGroundCamera->setViewport(new osg::Viewport(0, 0, glWidgetWidth, glWidgetHeight));
+    backGroundCamera->setProjectionResizePolicy(osg::Camera::ProjectionResizePolicy::FIXED);
+    view->addSlave(backGroundCamera, false);
 
     osg::Camera *gestureCamera = createGestureCamera();
     gestureCamera->setViewport(new osg::Viewport(0, 0, glWidgetWidth, glWidgetHeight));
