@@ -15,6 +15,7 @@
 #include <osg/Depth>
 #include <osgUtil/Optimizer>
 #include <osg/BlendFunc>
+#include <osg/ValueObject>
 
 #include "viewerwidget.h"
 #include "gleventwidget.h"

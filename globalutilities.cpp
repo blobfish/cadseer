@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <osg/Geode>
 #include <osg/Geometry>
+#include <osg/ValueObject>
 #include "globalutilities.h"
 
 int GU::getShapeHash(const TopoDS_Shape &shape)
