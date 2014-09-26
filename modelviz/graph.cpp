@@ -134,6 +134,22 @@ void Build::setUpGraph()
     groupOut->addChild(groupVertices);
     groupOut->addChild(groupEdges);
     groupOut->addChild(groupFaces);
+    
+    osg::Point *point = new osg::Point;
+    point->setSize(10.0);
+    groupVertices->getOrCreateStateSet()->setAttribute(point);
+
+    osg::Depth *depth = new osg::Depth();
+    depth->setRange(0.0, 1.0);
+    groupVertices->getOrCreateStateSet()->setAttribute(depth);
+    
+    depth = new osg::Depth();
+    depth->setRange(0.001, 1.001);
+    groupEdges->getOrCreateStateSet()->setAttribute(depth);
+    
+    depth = new osg::Depth();
+    depth->setRange(0.002, 1.002);
+    groupFaces->getOrCreateStateSet()->setAttribute(depth);
 }
 
 osg::ref_ptr<osg::Geometry> Build::createGeometryVertex()
@@ -146,14 +162,6 @@ osg::ref_ptr<osg::Geometry> Build::createGeometryVertex()
     geomVertices->setColorArray(colors.get());
     geomVertices->setColorBinding(osg::Geometry::BIND_OVERALL);
     geomVertices->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-
-    osg::Point *point = new osg::Point;
-    point->setSize(10.0);
-    geomVertices->getOrCreateStateSet()->setAttribute(point);
-
-    osg::Depth *depth = new osg::Depth();
-    depth->setRange(0.0, 1.0);
-    geomVertices->getOrCreateStateSet()->setAttribute(depth);
 
     return geomVertices;
 }
@@ -170,10 +178,6 @@ osg::ref_ptr<osg::Geometry> Build::createGeometryEdge()
 
     geomEdges->getOrCreateStateSet()->setAttribute(new osg::LineWidth(2.0f));
     geomEdges->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-
-    osg::Depth *depth = new osg::Depth();
-    depth->setRange(0.001, 1.001);
-    geomEdges->getOrCreateStateSet()->setAttribute(depth);
 
     return geomEdges;
 }
@@ -192,10 +196,6 @@ osg::ref_ptr<osg::Geometry> Build::createGeometryFace()
 
     geomFaces->setNormalArray(new osg::Vec3Array);
     geomFaces->setNormalBinding(osg::Geometry::BIND_PER_VERTEX);
-
-    osg::Depth *depth = new osg::Depth();
-    depth->setRange(0.002, 1.002);
-    geomFaces->getOrCreateStateSet()->setAttribute(depth);
 
     return geomFaces;
 }
