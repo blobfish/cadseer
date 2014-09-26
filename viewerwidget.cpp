@@ -4,12 +4,16 @@
 #include <QtCore/QTimer>
 #include <QHBoxLayout>
 #include <QApplication>
+#include <QDir>
+#include <QString>
+#include <QFileDialog>
 
 #include <osgViewer/ViewerEventHandlers>
 #include <osgGA/TrackballManipulator>
 #include <osgGA/StandardManipulator>
 #include <osgGA/OrbitManipulator>
 #include <osgDB/ReadFile>
+#include <osgDB/WriteFile>
 #include <osgQt/GraphicsWindowQt>
 #include <osg/PolygonMode>
 #include <osg/Depth>
@@ -333,6 +337,14 @@ void ViewerWidget::viewFitSlot()
     spaceballManipulator->viewFit();
 }
 
+void ViewerWidget::writeOSGSlot()
+{
+  QString start = QDir::homePath() + "/OpenSceneGraph.osgt";
+  QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), start, tr("Scene (*.osgt)"));
+  if (fileName.isEmpty())
+    return;
+  osgDB::writeNodeFile(*root, fileName.toStdString());
+}
 
 VisibleVisitor::VisibleVisitor(bool visIn) : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), visibility(visIn)
 {

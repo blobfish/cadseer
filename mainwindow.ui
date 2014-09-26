@@ -20,7 +20,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
@@ -38,6 +38,7 @@
    <addaction name="actionAppendBrep"/>
    <addaction name="actionHide"/>
    <addaction name="actionShowAll"/>
+   <addaction name="actionExportOSG"/>
   </widget>
   <widget class="QToolBar" name="toolBar_2">
    <property name="windowTitle">
@@ -209,6 +210,14 @@
    </property>
    <property name="toolTip">
     <string>Object selection on/off</string>
+   </property>
+  </action>
+  <action name="actionExportOSG">
+   <property name="text">
+    <string>Export OSG</string>
+   </property>
+   <property name="toolTip">
+    <string>Save an OSG file</string>
    </property>
   </action>
  </widget>

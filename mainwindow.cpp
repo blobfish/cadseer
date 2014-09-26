@@ -32,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
     viewWidget->setGeometry( 100, 100, 800, 600 );
     connect(ui->actionHide, SIGNAL(triggered()), viewWidget, SLOT(hideSelected()));
     connect(ui->actionShowAll, SIGNAL(triggered()), viewWidget, SLOT(showAll()));
+    connect(ui->actionExportOSG, SIGNAL(triggered()), viewWidget, SLOT(writeOSGSlot()));
     QHBoxLayout *aLayout = new QHBoxLayout();
     aLayout->addWidget(viewWidget);
     ui->centralwidget->setLayout(aLayout);

@@ -29,6 +29,7 @@ public slots:
     void viewFrontSlot();
     void viewRightSlot();
     void viewFitSlot();
+    void writeOSGSlot();
 
 protected:
     void createMainCamera(osg::Camera *camera);
