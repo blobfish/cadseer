@@ -135,6 +135,7 @@ void Build::setUpGraph()
     groupOut->addChild(groupEdges);
     groupOut->addChild(groupFaces);
     
+    //vertex state
     osg::Point *point = new osg::Point;
     point->setSize(10.0);
     groupVertices->getOrCreateStateSet()->setAttribute(point);
@@ -143,10 +144,16 @@ void Build::setUpGraph()
     depth->setRange(0.0, 1.0);
     groupVertices->getOrCreateStateSet()->setAttribute(depth);
     
+    groupVertices->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+    
+    //edge state
     depth = new osg::Depth();
     depth->setRange(0.001, 1.001);
     groupEdges->getOrCreateStateSet()->setAttribute(depth);
+    groupEdges->getOrCreateStateSet()->setAttribute(new osg::LineWidth(2.0f));
+    groupEdges->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
     
+    //face state
     depth = new osg::Depth();
     depth->setRange(0.002, 1.002);
     groupFaces->getOrCreateStateSet()->setAttribute(depth);
@@ -161,7 +168,6 @@ osg::ref_ptr<osg::Geometry> Build::createGeometryVertex()
     osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array();
     geomVertices->setColorArray(colors.get());
     geomVertices->setColorBinding(osg::Geometry::BIND_OVERALL);
-    geomVertices->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 
     return geomVertices;
 }
@@ -175,9 +181,6 @@ osg::ref_ptr<osg::Geometry> Build::createGeometryEdge()
     osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array();
     geomEdges->setColorArray(colors.get());
     geomEdges->setColorBinding(osg::Geometry::BIND_OVERALL);
-
-    geomEdges->getOrCreateStateSet()->setAttribute(new osg::LineWidth(2.0f));
-    geomEdges->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 
     return geomEdges;
 }
