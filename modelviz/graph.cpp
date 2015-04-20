@@ -87,8 +87,8 @@ bool Build::go(const Standard_Real &deflection, const Standard_Real &angle)
         //to access the mesh and create the viz? how?
 
         Handle(BRepMesh_FastDiscret) mesher = new BRepMesh_FastDiscret
-                (deflection, copiedShape, bound, angle, Standard_True, Standard_True,
-                 Standard_False, Standard_True);
+                (copiedShape, deflection, angle, bound, Standard_True, Standard_True,
+                 Standard_True, Standard_True, Standard_True);
 
         processed.Add(copiedShape);
         if (copiedShape.ShapeType() == TopAbs_FACE)

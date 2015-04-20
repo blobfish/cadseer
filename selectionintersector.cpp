@@ -197,7 +197,7 @@ bool SelectionIntersector::getLocalStartEnd()
 {
     localStart = _start;
     localEnd = _end;
-    BoundingBox box = currentGeometry->getBound();
+    BoundingBox box = currentGeometry->computeBoundingBox();
     Vec3d cornerProject(1.0d, 1.0d, 1.0d);
     box._min = box._min + (cornerProject * -pickRadius / scale);
     box._max = box._max + (cornerProject * pickRadius / scale);
