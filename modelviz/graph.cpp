@@ -86,9 +86,8 @@ bool Build::go(const Standard_Real &deflection, const Standard_Real &angle)
         //I have store in shape set to false (2nd to last param) but yet I am able
         //to access the mesh and create the viz? how?
 
-        Handle(BRepMesh_FastDiscret) mesher = new BRepMesh_FastDiscret
-                (copiedShape, deflection, angle, bound, Standard_True, Standard_True,
-                 Standard_True, Standard_True, Standard_True);
+        BRepMesh_IncrementalMesh(copiedShape,deflection,Standard_False,
+                angle,Standard_True);
 
         processed.Add(copiedShape);
         if (copiedShape.ShapeType() == TopAbs_FACE)
