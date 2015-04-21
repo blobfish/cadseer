@@ -318,7 +318,7 @@ void SpaceballManipulator::scaleFit()
         double viewportHeight = static_cast<double>(cam->getViewport()->height());
         double aspectFactor =  viewportWidth / viewportHeight;
 
-        if (aspectFactor < 1)
+        if (aspectFactor < 1) //this had to be "(aspectFactor > 1)" on osgtreeview project.
         {
             projectionData.bottom = boundingSphere.radius() * -1.0d;
             projectionData.top = boundingSphere.radius();
