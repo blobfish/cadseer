@@ -29,18 +29,24 @@ void SelectionEventHandler::setSelectionMask(const unsigned int &maskIn)
 {
     selectionMask = maskIn;
 
-    if ((SelectionMask::facesSelectable & selectionMask) == SelectionMask::facesSelectable |
-            (SelectionMask::wiresSelectable & selectionMask) == SelectionMask::wiresSelectable |
-            (SelectionMask::shellsSelectable & selectionMask) == SelectionMask::shellsSelectable |
-            (SelectionMask::solidsSelectable & selectionMask) == SelectionMask::solidsSelectable |
-            (SelectionMask::featuresSelectable & selectionMask) == SelectionMask::featuresSelectable |
-            (SelectionMask::objectsSelectable & selectionMask) == SelectionMask::objectsSelectable)
+    if
+    (
+      ((SelectionMask::facesSelectable & selectionMask) == SelectionMask::facesSelectable) |
+      ((SelectionMask::wiresSelectable & selectionMask) == SelectionMask::wiresSelectable) |
+      ((SelectionMask::shellsSelectable & selectionMask) == SelectionMask::shellsSelectable) |
+      ((SelectionMask::solidsSelectable & selectionMask) == SelectionMask::solidsSelectable) |
+      ((SelectionMask::featuresSelectable & selectionMask) == SelectionMask::featuresSelectable) |
+      ((SelectionMask::objectsSelectable & selectionMask) == SelectionMask::objectsSelectable)
+    )
         nodeMask |= NodeMask::face;
     else
         nodeMask &= ~NodeMask::face;
 
-    if ((SelectionMask::edgesSelectable & selectionMask) == SelectionMask::edgesSelectable |
-            (SelectionMask::wiresSelectable & selectionMask) == SelectionMask::wiresSelectable)
+    if
+    (
+      ((SelectionMask::edgesSelectable & selectionMask) == SelectionMask::edgesSelectable) |
+      ((SelectionMask::wiresSelectable & selectionMask) == SelectionMask::wiresSelectable)
+    )
         nodeMask |= NodeMask::edge;
     else
         nodeMask &= ~NodeMask::edge;

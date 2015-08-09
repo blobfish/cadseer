@@ -16,7 +16,7 @@
 #include "../command/commandmanager.h"
 
 GestureHandler::GestureHandler(osg::Camera *cameraIn) : osgGA::GUIEventHandler(), rightButtonDown(false),
-    iconRadius(32.0), includedAngle(90.0), currentNodeLeft(false)
+    currentNodeLeft(false), iconRadius(32.0), includedAngle(90.0)
 {
     gestureCamera = cameraIn;
     if (!gestureCamera.valid())
@@ -118,8 +118,8 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
                 assert(geometrySwitch);
                 geometrySwitch->setAllChildrenOff();
 
-                int childIndex = parentNode->getChildIndex(currentNode);
-                for (int index = 0; index < parentNode->getNumChildren() - 2; ++index)
+                unsigned int childIndex = parentNode->getChildIndex(currentNode);
+                for (unsigned int index = 0; index < parentNode->getNumChildren() - 2; ++index)
                 {
                     osg::MatrixTransform *childNode = dynamic_cast<osg::MatrixTransform*>(parentNode->getChild(index));
                     assert(childNode);
@@ -162,7 +162,7 @@ void GestureHandler::spraySubNodes(osg::Vec3 cursorLocation)
     int childCount = currentNode->getNumChildren();
     assert(childCount > 2);//line, icon and sub items.
     std::vector<osg::Vec3> locations = buildNodeLocations(direction, childCount - 2);
-    for (int index = 0; index < locations.size(); ++index)
+    for (unsigned int index = 0; index < locations.size(); ++index)
     {
         osg::MatrixTransform *tempLocation = dynamic_cast<osg::MatrixTransform *>
                 (currentNode->getChild(index));

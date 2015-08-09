@@ -205,11 +205,10 @@ osg::Camera* ViewerWidget::createBackgroundCamera()
 
 osg::Camera* ViewerWidget::createGestureCamera()
 {
-    double localWidgetWidth = static_cast<double>(glWidgetWidth);
-    double localWidgetHeight = static_cast<double>(glWidgetHeight);
+//     double localWidgetWidth = static_cast<double>(glWidgetWidth);
+//     double localWidgetHeight = static_cast<double>(glWidgetHeight);
 
-    double projectionHeight = 1000.0; //height is constant
-    double projectionWidth = projectionHeight * localWidgetWidth / localWidgetHeight;
+//     double projectionHeight = 1000.0; //height is constant
     double quadSize = 10000;
 
 
