@@ -173,7 +173,7 @@ void GestureHandler::spraySubNodes(osg::Vec3 cursorLocation)
                 (tempLocation->getChild(tempLocation->getNumChildren() - 1));
         assert(tempSwitch);
         tempSwitch->setAllChildrenOn();
-
+        
         tempSwitch = dynamic_cast<osg::Switch *>
                 (tempLocation->getChild(tempLocation->getNumChildren() - 2));
         assert(tempSwitch);
