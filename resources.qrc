@@ -22,5 +22,6 @@
         <file>resources/images/constructionBox.svg</file>
         <file>resources/images/constructionSphere.svg</file>
         <file>resources/images/constructionCone.svg</file>
+        <file>resources/images/constructionCylinder.svg</file>
     </qresource>
 </RCC>

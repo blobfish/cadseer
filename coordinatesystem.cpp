@@ -21,7 +21,9 @@
 #include <osg/ShapeDrawable>
 #include <osg/Group>
 #include <osg/Geode>
+#include <osg/LightModel>
 #include <osg/Geometry>
+#include <osg/Material>
 #include <osg/PositionAttitudeTransform>
 #include <osg/BlendFunc>
 
@@ -36,7 +38,9 @@ osg::Node* CoordinateSystem::buildCoordinateSystemNode()
   osg::ref_ptr<osg::Switch> theSwitch = new osg::Switch();
   base->addChild(theSwitch);
   base->setNodeMask(NodeMask::noSelect);//temp
-  
+  osg::LightModel* lightModel = new osg::LightModel;
+  lightModel->setTwoSided(true);
+  base->getOrCreateStateSet()->setAttributeAndModes(lightModel, osg::StateAttribute::ON);
   
   double size = 100.0; 
   
@@ -76,15 +80,24 @@ osg::Node* CoordinateSystem::buildArrow(const double &size, const osg::Vec4 &col
 {
   osg::ref_ptr<osg::Group> arrowGroup = new osg::Group();
   
+  //not sure what is happening, but not getting much difference from material settings.
+  //try generating own geometry? We will anyway because this is adding a ton of geometry
+  //to the scene.
+  osg::Material *material = new osg::Material();
+  material->setColorMode(osg::Material::AMBIENT);
+  material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4(0.8f, 0.8f, 0.8f, 1.0f));
+  material->setDiffuse(osg::Material::FRONT_AND_BACK, color * 0.8);
+  material->setSpecular(osg::Material::FRONT_AND_BACK, color);
+  material->setShininess(osg::Material::FRONT_AND_BACK, 1.0);
+  arrowGroup->getOrCreateStateSet()->setAttribute(material);
+  
   osg::ref_ptr<osg::ShapeDrawable> arrowCylinderDrawable = new osg::ShapeDrawable
     (new osg::Cylinder(osg::Vec3(0.0, 0.0, size/2.0), size/40.0, size));
-  arrowCylinderDrawable->setColor(color);
   osg::ref_ptr<osg::Geode> arrowCylinderGeode = new osg::Geode();
   arrowCylinderGeode->addDrawable(arrowCylinderDrawable);
   
   osg::ref_ptr<osg::ShapeDrawable> arrowConeDrawable = new osg::ShapeDrawable
-    (new osg::Cone(osg::Vec3(0.0, 0.0, size), size/20.0, size/10.0));
-  arrowConeDrawable->setColor(color);
+    (new osg::Cone(osg::Vec3(0.0, 0.0, size), size/10.0, size/5.0));
   osg::ref_ptr<osg::Geode> arrowConeGeode = new osg::Geode();
   arrowConeGeode->addDrawable(arrowConeDrawable);
   
@@ -108,10 +121,19 @@ osg::Node* CoordinateSystem::buildPlane(const double &size, const osg::Vec4 &col
   geomFaces->setUseDisplayList(false);
   geomFaces->setUseVertexBufferObjects(true);
   
-  osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array;
-  colors->push_back(color);
-  geomFaces->setColorArray(colors.get());
-  geomFaces->setColorBinding(osg::Geometry::BIND_OVERALL);
+  osg::Material *material = new osg::Material();
+  material->setDiffuse(osg::Material::FRONT_AND_BACK, color);
+//   material->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4(1.0, 1.0, 1.0, 1.0));
+//   material->setShininess(osg::Material::FRONT_AND_BACK, 63.0);
+  material->setTransparency(osg::Material::FRONT_AND_BACK, 0.6);
+  
+//   osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array;
+//   colors->push_back(color);
+//   colors->push_back(color);
+//   colors->push_back(color);
+//   colors->push_back(color);
+//   geomFaces->setColorArray(colors.get());
+//   geomFaces->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
   
   osg::ref_ptr<osg::Vec3Array> normals = new osg::Vec3Array();
   normals->push_back(osg::Vec3(0.0, 0.0, 1.0));
@@ -131,10 +153,10 @@ osg::Node* CoordinateSystem::buildPlane(const double &size, const osg::Vec4 &col
   osg::ref_ptr<osg::Geode> geode = new osg::Geode;
   geode->addDrawable(geomFaces);
   osg::StateSet* ss = geode->getOrCreateStateSet();
-  ss->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-  osg::ref_ptr<osg::BlendFunc> blend = new osg::BlendFunc();
-  blend->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  ss->setAttributeAndModes(blend);
+  ss->setMode(GL_BLEND, osg::StateAttribute::ON);
+  ss->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+  ss->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
+  ss->setAttribute(material);
   
   return geode.release();
 }

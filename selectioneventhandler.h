@@ -1,6 +1,7 @@
 #ifndef SELECTIONEVENTHANDLER_H
 #define SELECTIONEVENTHANDLER_H
 
+#include <boost/uuid/uuid.hpp>
 
 #include <osgGA/GUIEventHandler>
 #include <osgUtil/LineSegmentIntersector>
@@ -22,9 +23,9 @@ public:
     SelectionContainer(){}
     SelectionTypes::Type selectionType;
     std::vector<Selected> selections;
-    int hash;
+    boost::uuids::uuid id;
 };
-inline bool operator==(const SelectionContainer& lhs, const SelectionContainer& rhs){return (lhs.hash == rhs.hash);}
+inline bool operator==(const SelectionContainer& lhs, const SelectionContainer& rhs){return (lhs.id == rhs.id);}
 
 typedef std::vector<SelectionContainer> SelectionContainers;
 
@@ -56,13 +57,13 @@ protected:
     osgUtil::LineSegmentIntersector::Intersections currentIntersections;
 };
 
-class getGeometryFromHashes : public osg::NodeVisitor
+class getGeometryFromIds : public osg::NodeVisitor
 {
 public:
-    getGeometryFromHashes(const std::vector<int> &hashesIn, std::vector<osg::Geometry *> &geometryIn);
+    getGeometryFromIds(const std::vector<boost::uuids::uuid> &idsIn, std::vector<osg::Geometry *> &geometryIn);
     virtual void apply(osg::Geode &aGeode);
 protected:
-    const std::vector<int> &hashes;
+    const std::vector<boost::uuids::uuid> &ids;
     std::vector<osg::Geometry *> &geometry;
 };
 

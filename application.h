@@ -4,7 +4,7 @@
 #include <QApplication>
 
 class MainWindow;
-class Document;
+class Project;
 
 class Application : public QApplication
 {
@@ -14,14 +14,14 @@ public:
     ~Application();
     bool x11EventFilter(XEvent *event);
     void initializeSpaceball(MainWindow *mainWindowIn);
-    void setDocument(Document *documentIn){document = documentIn;}
-    Document *getDocument(){return document;}
+    void setProject(Project *projectIn){project = projectIn;}
+    Project *getProject(){return project;}
 
 public slots:
     void quittingSlot();
 private:
-    MainWindow *mainWindow;
-    Document *document;
+    MainWindow *mainWindow = nullptr;
+    Project *project = nullptr;
     bool spaceballPresent;
 };
 

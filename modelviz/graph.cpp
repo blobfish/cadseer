@@ -34,9 +34,12 @@
 #include "../nodemaskdefs.h"
 #include "../globalutilities.h"
 
+
+using namespace boost::uuids;
 using namespace ModelViz;
-Build::Build(const TopoDS_Shape &shapeIn) : originalShape(shapeIn), success(false),
-    initialized(false)
+
+Build::Build(const TopoDS_Shape &shapeIn, const Feature::ResultContainer &resultContainerIn) :
+  originalShape(shapeIn), resultContainer(resultContainerIn), success(false), initialized(false)
 {
     try
     {
@@ -260,7 +263,8 @@ void Build::recursiveConstruct(const TopoDS_Shape &shapeIn)
 void Build::vertexConstruct(const TopoDS_Vertex &vertex)
 {
     osg::ref_ptr<osg::Geode> geode = createGeodeVertex();
-    geode->setUserValue(GU::hashAttributeTitle, GU::getShapeHash(vertex));
+    uuid id = Feature::findResultByShape(resultContainer, vertex).id;
+    geode->setUserValue(GU::idAttributeTitle, GU::idToString(id));
 
     osg::ref_ptr<osg::Geometry> geometry = createGeometryVertex();
     geode->addDrawable(geometry);
@@ -299,7 +303,8 @@ void Build::edgeConstruct(const TopoDS_Edge &edgeIn)
     }
 
     osg::ref_ptr<osg::Geode> geode = createGeodeEdge();
-    geode->setUserValue(GU::hashAttributeTitle, GU::getShapeHash(edgeIn));
+    uuid id = Feature::findResultByShape(resultContainer, edgeIn).id;
+    geode->setUserValue(GU::idAttributeTitle, GU::idToString(id));
     osg::ref_ptr<osg::Geometry> geometry = createGeometryEdge();
     geode->addDrawable(geometry);
     groupEdges->addChild(geode);
@@ -342,7 +347,8 @@ void Build::faceConstruct(const TopoDS_Face &faceIn)
     }
 
     osg::ref_ptr<osg::Geode> geode = createGeodeFace();
-    geode->setUserValue(GU::hashAttributeTitle, GU::getShapeHash(faceIn));
+    uuid id = Feature::findResultByShape(resultContainer, faceIn).id;
+    geode->setUserValue(GU::idAttributeTitle, GU::idToString(id));
     osg::ref_ptr<osg::Geometry> geometry = createGeometryFace();
     geode->addDrawable(geometry);
     groupFaces->addChild(geode);

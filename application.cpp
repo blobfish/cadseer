@@ -4,7 +4,7 @@
 #include "application.h"
 #include "mainwindow.h"
 #include "spaceballqevent.h"
-#include "document.h"
+#include "project/project.h"
 
 #include <spnav.h>
 
@@ -17,7 +17,9 @@ Application::Application(int &argc, char **argv) :
 
 Application::~Application()
 {
-
+  if (project)
+    delete project;
+  project = nullptr;
 }
 
 void Application::quittingSlot()

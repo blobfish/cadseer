@@ -6,7 +6,7 @@
 
 class ViewerWidget;
 class SelectionManager;
-class Document;
+class Project;
 
 namespace Ui {
 class MainWindow;
@@ -25,9 +25,10 @@ public:
 
 public slots:
     void readBrepSlot();
-    void contructionBoxSlot();
-    void contructionSphereSlot();
-    void contructionConeSlot();
+    void constructionBoxSlot();
+    void constructionSphereSlot();
+    void constructionConeSlot();
+    void constructionCylinderSlot();
     
 private:
     void setupSelectionToolbar();

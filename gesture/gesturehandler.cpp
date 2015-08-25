@@ -272,6 +272,11 @@ void GestureHandler::constructMenu()
     constructionCone->setMatrix(dummy);
     constructionCone->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::ConstructionCone));
     constructionPrimitives->insertChild(constructionPrimitives->getNumChildren() - 2, constructionCone);
+
+    osg::MatrixTransform *constructionCylinder = GestureNode::buildCommandNode(":/resources/images/constructionCylinder.svg");
+    constructionCylinder->setMatrix(dummy);
+    constructionCylinder->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::ConstructionCylinder));
+    constructionPrimitives->insertChild(constructionPrimitives->getNumChildren() - 2, constructionCylinder);
 }
 
 std::vector<osg::Vec3> GestureHandler::buildNodeLocations(osg::Vec3 direction, int nodeCount)

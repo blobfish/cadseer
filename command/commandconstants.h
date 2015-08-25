@@ -14,7 +14,8 @@ enum Constants
     ViewFit,
     ConstructionBox,
     ConstructionSphere,
-    ConstructionCone
+    ConstructionCone,
+    ConstructionCylinder
 };
 }
 

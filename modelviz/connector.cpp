@@ -9,15 +9,12 @@
 
 using namespace ModelViz;
 using namespace ConnectorGraph;
+using namespace boost::uuids;
 
-Connector::Connector()
+void Connector::buildStartNode(const TopoDS_Shape &shapeIn, const Feature::ResultContainer &resultContainerIn)
 {
-}
-
-void Connector::buildStartNode(const TopoDS_Shape &shapeIn)
-{
-    int shapeHash = GU::getShapeHash(shapeIn);
-    ConnectorGraph::HashVertexMap::iterator it = vertexMap.find(shapeHash);
+    uuid shapeId = Feature::findResultByShape(resultContainerIn, shapeIn).id;
+    ConnectorGraph::IdVertexMap::iterator it = vertexMap.find(shapeId);
     Vertex previous;
     bool firstNode = vertexStack.empty();
     if (!firstNode)
@@ -26,7 +23,7 @@ void Connector::buildStartNode(const TopoDS_Shape &shapeIn)
     {
         Vertex newVertex = boost::add_vertex(graph);
         vertexStack.push(newVertex);
-        buildAddShape(shapeIn);
+        buildAddShape(shapeIn, resultContainerIn);
     }
     else
         vertexStack.push(it->second);
@@ -34,14 +31,13 @@ void Connector::buildStartNode(const TopoDS_Shape &shapeIn)
         connectVertices(previous, vertexStack.top());
 }
 
-void Connector::buildAddShape(const TopoDS_Shape &shapeIn)
+void Connector::buildAddShape(const TopoDS_Shape &shapeIn, const Feature::ResultContainer &resultContainerIn)
 {
     assert(!vertexStack.empty());
-    int shapeHash = GU::getShapeHash(shapeIn);
-    graph[vertexStack.top()].hash = shapeHash;
+    graph[vertexStack.top()].id = Feature::findResultByShape(resultContainerIn, shapeIn).id;
     graph[vertexStack.top()].shapeType = shapeIn.ShapeType();
     graph[vertexStack.top()].shape = shapeIn;
-    vertexMap.insert(std::make_pair(shapeHash, vertexStack.top()));
+    vertexMap.insert(std::make_pair(graph[vertexStack.top()].id, vertexStack.top()));
 }
 
 void Connector::buildEndNode()
@@ -57,30 +53,32 @@ void Connector::connectVertices(ConnectorGraph::Vertex from, ConnectorGraph::Ver
     assert(edgeResult);
 }
 
-std::vector<int> Connector::useGetParentsOfType(const int &shapeHash, const TopAbs_ShapeEnum &shapeType) const
+std::vector<boost::uuids::uuid> Connector::useGetParentsOfType
+  (const boost::uuids::uuid &idIn, const TopAbs_ShapeEnum &shapeTypeIn) const
 {
     ConnectorGraph::Graph temp = graph;
     ConnectorGraph::GraphReversed reversed = boost::make_reverse_graph(temp);
 
-    ConnectorGraph::HashVertexMap::const_iterator it;
-    it = vertexMap.find(shapeHash);
+    ConnectorGraph::IdVertexMap::const_iterator it;
+    it = vertexMap.find(idIn);
     assert(it != vertexMap.end());
 
     std::vector<ConnectorGraph::Vertex> vertices;
-    TypeCollectionVisitor vis(shapeType, vertices);
+    TypeCollectionVisitor vis(shapeTypeIn, vertices);
     boost::breadth_first_search(reversed, it->second, boost::visitor(vis));
 
     std::vector<ConnectorGraph::Vertex>::const_iterator vit;
-    std::vector<int> hashesOut;
+    std::vector<uuid> idsOut;
     for (vit = vertices.begin(); vit != vertices.end(); ++vit)
-        hashesOut.push_back(reversed[*vit].hash);
-    return hashesOut;
+        idsOut.push_back(reversed[*vit].id);
+    return idsOut;
 }
 
-std::vector<int> Connector::useGetChildrenOfType(const int &shapeHash, const TopAbs_ShapeEnum &shapeType) const
+std::vector<boost::uuids::uuid> Connector::useGetChildrenOfType
+  (const boost::uuids::uuid &idIn, const TopAbs_ShapeEnum &shapeType) const
 {
-    ConnectorGraph::HashVertexMap::const_iterator it;
-    it = vertexMap.find(shapeHash);
+    ConnectorGraph::IdVertexMap::const_iterator it;
+    it = vertexMap.find(idIn);
     assert(it != vertexMap.end());
 
     std::vector<ConnectorGraph::Vertex> vertices;
@@ -88,20 +86,21 @@ std::vector<int> Connector::useGetChildrenOfType(const int &shapeHash, const Top
     boost::breadth_first_search(graph, it->second, boost::visitor(vis));
 
     std::vector<ConnectorGraph::Vertex>::const_iterator vit;
-    std::vector<int> hashesOut;
+    std::vector<uuid> idsOut;
     for (vit = vertices.begin(); vit != vertices.end(); ++vit)
-        hashesOut.push_back(graph[*vit].hash);
-    return hashesOut;
+        idsOut.push_back(graph[*vit].id);
+    return idsOut;
 }
 
-int Connector::useGetWire(const int &edgeHash, const int &faceHash) const
+boost::uuids::uuid Connector::useGetWire
+  (const boost::uuids::uuid &edgeIdIn, const boost::uuids::uuid &faceIdIn) const
 {
-    ConnectorGraph::HashVertexMap::const_iterator it;
-    it = vertexMap.find(edgeHash);
+    ConnectorGraph::IdVertexMap::const_iterator it;
+    it = vertexMap.find(edgeIdIn);
     assert(it != vertexMap.end());
     ConnectorGraph::Vertex edgeVertex = it->second;
 
-    it = vertexMap.find(faceHash);
+    it = vertexMap.find(faceIdIn);
     assert(it != vertexMap.end());
     ConnectorGraph::Vertex faceVertex = it->second;
 
@@ -115,17 +114,18 @@ int Connector::useGetWire(const int &edgeHash, const int &faceHash) const
             if (edgeVertex == (*edgeIt))
             {
                 wireVertex = *wireIt;
-                return graph[wireVertex].hash;
+                return graph[wireVertex].id;
             }
         }
     }
-    return 0;
+    return boost::uuids::nil_generator()();
 }
 
-TopoDS_Shape Connector::getShape(const int &shapeHash)
+//do I really  need this?
+TopoDS_Shape Connector::getShape(const boost::uuids::uuid &idIn)
 {
-    ConnectorGraph::HashVertexMap::const_iterator it;
-    it = vertexMap.find(shapeHash);
+    ConnectorGraph::IdVertexMap::const_iterator it;
+    it = vertexMap.find(idIn);
     assert(it != vertexMap.end());
     return graph[it->second].shape;
 }
@@ -147,22 +147,22 @@ void Connector::outputGraphviz(const std::string &name)
 }
 
 
-BuildConnector::BuildConnector(const TopoDS_Shape &root)
+BuildConnector::BuildConnector(const TopoDS_Shape &shapeIn, const Feature::ResultContainer &resultContainerIn) : connector()
 {
-    connector.buildStartNode(root);
-    buildRecursiveConnector(root);
+    connector.buildStartNode(shapeIn, resultContainerIn);
+    buildRecursiveConnector(shapeIn, resultContainerIn);
     connector.buildEndNode();
 }
 
-void BuildConnector::buildRecursiveConnector(const TopoDS_Shape &shapeIn)
+void BuildConnector::buildRecursiveConnector(const TopoDS_Shape &shapeIn, const Feature::ResultContainer &resultContainerIn)
 {
     for (TopoDS_Iterator it(shapeIn); it.More(); it.Next())
     {
         const TopoDS_Shape &currentShape = it.Value();
 
-        connector.buildStartNode(currentShape);
+        connector.buildStartNode(currentShape, resultContainerIn);
         if (currentShape.ShapeType() != TopAbs_VERTEX)
-            buildRecursiveConnector(currentShape);
+            buildRecursiveConnector(currentShape, resultContainerIn);
         connector.buildEndNode();
     }
 }

@@ -3,15 +3,6 @@
 
 #include <QHBoxLayout>
 #include <QFileDialog>
-#include <QTimer>
-
-#include <BRep_Builder.hxx>
-#include <BRepTools.hxx>
-#include <BRepMesh_IncrementalMesh.hxx>
-#include <BRepMesh.hxx>
-#include <BRepPrimAPI_MakeBox.hxx>
-#include <BRepPrimAPI_MakeSphere.hxx>
-#include <BRepPrimAPI_MakeCone.hxx>
 
 #include "mainwindow.h"
 #include "application.h"
@@ -19,8 +10,12 @@
 #include "viewerwidget.h"
 #include "selectionmanager.h"
 #include "selectiondefs.h"
-#include "document.h"
+#include "project/project.h"
 #include "command/commandmanager.h"
+#include "feature/box.h"
+#include "feature/sphere.h"
+#include "feature/cone.h"
+#include "feature/cylinder.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -44,10 +39,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->actionAppendBrep, SIGNAL(triggered()), this, SLOT(readBrepSlot()));
 
-    Document *document = new Document(qApp);
+    Project *project = new Project();
     Application *application = dynamic_cast<Application *>(qApp);
     assert(application);
-    application->setDocument(document);
+    application->setProject(project);
 
     setupCommands();
 }
@@ -66,8 +61,10 @@ void MainWindow::readBrepSlot()
 
     Application *application = dynamic_cast<Application *>(qApp);
     assert(application);
-    Document *document = application->getDocument();
-    document->readOCC(fileName.toStdString(), viewWidget->getRoot());
+    Project *project = application->getProject();
+    project->readOCC(fileName.toStdString(), viewWidget->getRoot());
+    project->update();
+    project->updateVisual();
     viewWidget->update();
 }
 
@@ -95,59 +92,83 @@ void MainWindow::setupSelectionToolbar()
 void MainWindow::setupCommands()
 {
     QAction *constructionBoxAction = new QAction(qApp);
-    connect(constructionBoxAction, SIGNAL(triggered()), this, SLOT(contructionBoxSlot()));
+    connect(constructionBoxAction, SIGNAL(triggered()), this, SLOT(constructionBoxSlot()));
     Command constructionBoxCommand(CommandConstants::ConstructionBox, "Construct Box", constructionBoxAction);
     CommandManager::getManager().addCommand(constructionBoxCommand);
 
     QAction *constructionSphereAction = new QAction(qApp);
-    connect(constructionSphereAction, SIGNAL(triggered()), this, SLOT(contructionSphereSlot()));
+    connect(constructionSphereAction, SIGNAL(triggered()), this, SLOT(constructionSphereSlot()));
     Command constructionSphereCommand(CommandConstants::ConstructionSphere, "Construct Sphere", constructionSphereAction);
     CommandManager::getManager().addCommand(constructionSphereCommand);
 
     QAction *constructionConeAction = new QAction(qApp);
-    connect(constructionConeAction, SIGNAL(triggered()), this, SLOT(contructionConeSlot()));
+    connect(constructionConeAction, SIGNAL(triggered()), this, SLOT(constructionConeSlot()));
     Command constructionConeCommand(CommandConstants::ConstructionCone, "Construct Cone", constructionConeAction);
     CommandManager::getManager().addCommand(constructionConeCommand);
+    
+    QAction *constructionCylinderAction = new QAction(qApp);
+    connect(constructionCylinderAction, SIGNAL(triggered(bool)), this, SLOT(constructionCylinderSlot()));
+    Command constructionCylinderCommand(CommandConstants::ConstructionCylinder, "Construct Cylinder", constructionCylinderAction);
+    CommandManager::getManager().addCommand(constructionCylinderCommand);
 }
 
-void MainWindow::contructionBoxSlot()
+void MainWindow::constructionBoxSlot()
 {
-    BRepPrimAPI_MakeBox boxMaker(10.0, 10.0, 10.0);
-    boxMaker.Build();
-    assert(boxMaker.IsDone());
-    TopoDS_Shape boxShape = boxMaker.Shape();
-
     Application *application = dynamic_cast<Application *>(qApp);
     assert(application);
-    Document *document = application->getDocument();
-    document->addOCCShape(boxShape, viewWidget->getRoot());
+    Project *project = application->getProject();
+    
+    std::shared_ptr<Feature::Box> box(new Feature::Box());
+    box->setParameters(20.0, 10.0, 2.0);
+    project->addFeature(box, viewWidget->getRoot());
+    project->update();
+    project->updateVisual();
+    
+    box->setParameters(10.0, 6.0, 1.0);
+    project->update();
+
     viewWidget->update();
 }
 
-void MainWindow::contructionSphereSlot()
+void MainWindow::constructionSphereSlot()
 {
-    BRepPrimAPI_MakeSphere sphereMaker(5.0);
-    sphereMaker.Build();
-    assert(sphereMaker.IsDone());
-    TopoDS_Shape sphereShape = sphereMaker.Shape();
-
     Application *application = dynamic_cast<Application *>(qApp);
     assert(application);
-    Document *document = application->getDocument();
-    document->addOCCShape(sphereShape, viewWidget->getRoot());
+    Project *project = application->getProject();
+    
+    std::shared_ptr<Feature::Sphere> sphere(new Feature::Sphere());
+    project->addFeature(sphere, viewWidget->getRoot());
+    project->update();
+    project->updateVisual();
+
     viewWidget->update();
 }
 
-void MainWindow::contructionConeSlot()
+void MainWindow::constructionConeSlot()
 {
-    BRepPrimAPI_MakeCone coneMaker(8.0, 0.0, 10.0);
-    coneMaker.Build();
-    assert(coneMaker.IsDone());
-    TopoDS_Shape coneShape = coneMaker.Shape();
-
     Application *application = dynamic_cast<Application *>(qApp);
     assert(application);
-    Document *document = application->getDocument();
-    document->addOCCShape(coneShape, viewWidget->getRoot());
+    Project *project = application->getProject();
+    
+    std::shared_ptr<Feature::Cone> cone(new Feature::Cone());
+    project->addFeature(cone, viewWidget->getRoot());
+    project->update();
+    project->updateVisual();
+
     viewWidget->update();
 }
+
+void MainWindow::constructionCylinderSlot()
+{
+  Application *application = dynamic_cast<Application *>(qApp);
+  assert(application);
+  Project *project = application->getProject();
+  
+  std::shared_ptr<Feature::Cylinder> cylinder(new Feature::Cylinder());
+  project->addFeature(cylinder, viewWidget->getRoot());
+  project->update();
+  project->updateVisual();
+
+  viewWidget->update();
+}
+

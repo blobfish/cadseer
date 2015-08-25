@@ -41,6 +41,7 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     pm->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL);
 //     pm->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
     root->getOrCreateStateSet()->setAttribute(pm.get());
+    root->getOrCreateStateSet()->setMode(GL_MULTISAMPLE_ARB, osg::StateAttribute::ON); 
     Plotter::getReference().setBase(root);
     
     root->addChild(CoordinateSystem::buildCoordinateSystemNode());
@@ -65,7 +66,7 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     view->addEventHandler(new osgViewer::StatsHandler);
     selectionHandler = new SelectionEventHandler();
     view->addEventHandler(selectionHandler);
-    view->addEventHandler(new GestureHandler(gestureCamera));
+    view->addEventHandler(new GestureHandler(gestureCamera)); //This creates an additional thread. why?
 //    view->setCameraManipulator(new osgGA::TrackballManipulator);
     spaceballManipulator = new osgGA::SpaceballManipulator(view->getCamera());
     view->setCameraManipulator(spaceballManipulator);
@@ -374,7 +375,7 @@ void VisitorHide::apply(osg::Switch &aSwitch)
     if ((aSwitch.getNodeMask() & NodeMask::object))
     {
         int switchHash;
-        if (aSwitch.getUserValue(GU::hashAttributeTitle, switchHash))
+        if (aSwitch.getUserValue(GU::idAttributeTitle, switchHash))
         {
             if (switchHash == hash)
             {

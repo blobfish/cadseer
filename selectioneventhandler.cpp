@@ -12,11 +12,11 @@
 #include "selectionintersector.h"
 #include "globalutilities.h"
 #include "application.h"
-#include "document.h"
-#include "shapeobject.h"
+#include "./project/project.h"
 #include "./modelviz/connector.h"
 
 using namespace osg;
+using namespace boost::uuids;
 
 SelectionEventHandler::SelectionEventHandler() : osgGA::GUIEventHandler()
 {
@@ -162,12 +162,12 @@ bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
 
     assert(((*intersection).nodePath.size() - 4) >= 0);
     int nodeMask = (*intersection).nodePath[(*intersection).nodePath.size() - 2]->getNodeMask();
-    int selectedHash = GU::getHash((*intersection).nodePath.back());
-    int objectHash = GU::getHash((*intersection).nodePath[(*intersection).nodePath.size() - 4]);
+    uuid selectedId = GU::getId((*intersection).nodePath.back());
+    uuid featureId = GU::getId((*intersection).nodePath[(*intersection).nodePath.size() - 4]);
 
 //    std::cout << std::endl << "buildPreselection: " << std::endl << "   nodeMask is: " << nodeMask << std::endl <<
-//                 "   selectedHash is: " << selectedHash << std::endl <<
-//                 "   objectHash is: " << objectHash << std::endl;
+//                 "   selectedId is: " << selectedId << std::endl <<
+//                 "   featureId is: " << featureId << std::endl;
 
     switch (nodeMask)
     {
@@ -178,20 +178,20 @@ bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
             newSelection.initialize(geometry);
             container.selections.push_back(newSelection);
             container.selectionType = SelectionTypes::Face;
-            container.hash = selectedHash;
+            container.id = selectedId;
         }
         else if ((selectionMask & SelectionMask::shellsSelectable) == SelectionMask::shellsSelectable)
         {
-            ShapeObject *shapeObject = dynamic_cast<Application *>(qApp)->getDocument()->findShapeObjectFromHash(objectHash);
-            assert(shapeObject);
-            const ModelViz::Connector &connector = shapeObject->getConnector();
-            std::vector<int> shells = connector.useGetParentsOfType(selectedHash, TopAbs_SHELL);
+            const Feature::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(featureId);
+            assert(feature);
+            const ModelViz::Connector &connector = feature->getConnector();
+            std::vector<uuid> shells = connector.useGetParentsOfType(selectedId, TopAbs_SHELL);
             //should be only 1 shell
             if (shells.size() == 1)
             {
-                std::vector<int> faces = connector.useGetChildrenOfType(shells.at(0), TopAbs_FACE);
+                std::vector<uuid> faces = connector.useGetChildrenOfType(shells.at(0), TopAbs_FACE);
                 std::vector<osg::Geometry *> faceGeometry;
-                getGeometryFromHashes visit(faces, faceGeometry);
+                getGeometryFromIds visit(faces, faceGeometry);
                 (*intersection).nodePath[(*intersection).nodePath.size() - 2]->accept(visit);
                 std::vector<osg::Geometry *>::const_iterator geomIt;
                 for (geomIt = faceGeometry.begin(); geomIt != faceGeometry.end(); ++geomIt)
@@ -201,21 +201,21 @@ bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
                     container.selections.push_back(newSelection);
                 }
                 container.selectionType = SelectionTypes::Shell;
-                container.hash = shells.at(0);
+                container.id = shells.at(0);
             }
         }
         else if ((selectionMask & SelectionMask::solidsSelectable) == SelectionMask::solidsSelectable)
         {
-            ShapeObject *shapeObject = dynamic_cast<Application *>(qApp)->getDocument()->findShapeObjectFromHash(objectHash);
-            assert(shapeObject);
-            const ModelViz::Connector &connector = shapeObject->getConnector();
-            std::vector<int> solids = connector.useGetParentsOfType(selectedHash, TopAbs_SOLID);
+            const Feature::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(featureId);
+            assert(feature);
+            const ModelViz::Connector &connector = feature->getConnector();
+            std::vector<uuid> solids = connector.useGetParentsOfType(selectedId, TopAbs_SOLID);
             //should be only 1 solid
             if (solids.size() == 1)
             {
-                std::vector<int> faces = connector.useGetChildrenOfType(solids.at(0), TopAbs_FACE);
+                std::vector<uuid> faces = connector.useGetChildrenOfType(solids.at(0), TopAbs_FACE);
                 std::vector<osg::Geometry *> faceGeometry;
-                getGeometryFromHashes visit(faces, faceGeometry);
+                getGeometryFromIds visit(faces, faceGeometry);
                 (*intersection).nodePath[(*intersection).nodePath.size() - 2]->accept(visit);
                 std::vector<osg::Geometry *>::const_iterator geomIt;
                 for (geomIt = faceGeometry.begin(); geomIt != faceGeometry.end(); ++geomIt)
@@ -225,7 +225,7 @@ bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
                     container.selections.push_back(newSelection);
                 }
                 container.selectionType = SelectionTypes::Solid;
-                container.hash = solids.at(0);
+                container.id = solids.at(0);
             }
         }
         break;
@@ -235,7 +235,7 @@ bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
             Selected newSelection;
             newSelection.initialize(geometry);
             container.selectionType = SelectionTypes::Edge;
-            container.hash = selectedHash;
+            container.id = selectedId;
             container.selections.push_back(newSelection);
         }
         else if ((selectionMask & SelectionMask::wiresSelectable) == SelectionMask::wiresSelectable)
@@ -245,31 +245,31 @@ bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
             osgUtil::LineSegmentIntersector::Intersections::const_iterator faceIt = intersection;
             faceIt++;
 
-            int faceHash = 0;
+            uuid faceId = boost::uuids::nil_generator()();
             while(faceIt != currentIntersections.end())
             {
                 assert((*faceIt).nodePath.size() - 2 >= 0);
                 int faceNodeMask = (*faceIt).nodePath[(*faceIt).nodePath.size() - 2]->getNodeMask();
                 if (faceNodeMask == NodeMask::face)
                 {
-                    faceHash = GU::getHash((*faceIt).nodePath.back());
+                    faceId = GU::getId((*faceIt).nodePath.back());
                     break;
                 }
                 faceIt++;
             }
-            if (faceHash == 0)
+            if (faceId.is_nil())
                 break;
 
-            ShapeObject *shapeObject = dynamic_cast<Application *>(qApp)->getDocument()->findShapeObjectFromHash(objectHash);
-            assert(shapeObject);
-            const ModelViz::Connector &connector = shapeObject->getConnector();
-            int wireHash = connector.useGetWire(selectedHash, faceHash);
-            if (wireHash == 0)
+            const Feature::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(featureId);
+            assert(feature);
+            const ModelViz::Connector &connector = feature->getConnector();
+            uuid wireId = connector.useGetWire(selectedId, faceId);
+            if (wireId == boost::uuids::nil_generator()())
                 break;
 
-            std::vector<int> edges = connector.useGetChildrenOfType(wireHash, TopAbs_EDGE);
+            std::vector<uuid> edges = connector.useGetChildrenOfType(wireId, TopAbs_EDGE);
             std::vector<osg::Geometry *> edgeGeometry;
-            getGeometryFromHashes visit(edges, edgeGeometry);
+            getGeometryFromIds visit(edges, edgeGeometry);
             (*intersection).nodePath[(*intersection).nodePath.size() - 2]->accept(visit);
             std::vector<osg::Geometry *>::const_iterator geomIt;
             for (geomIt = edgeGeometry.begin(); geomIt != edgeGeometry.end(); ++geomIt)
@@ -279,7 +279,7 @@ bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
                 container.selections.push_back(newSelection);
             }
             container.selectionType = SelectionTypes::Wire;
-            container.hash = wireHash;
+            container.id = wireId;
         }
         break;
     case NodeMask::vertex:
@@ -287,7 +287,7 @@ bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
         Selected newSelection;
         newSelection.initialize(geometry);
         container.selectionType = SelectionTypes::Vertex;
-        container.hash = selectedHash;
+        container.id = selectedId;
         container.selections.push_back(newSelection);
         break;
     }
@@ -362,19 +362,20 @@ void Selected::initialize(osg::Geometry *geometryIn)
     this->color = (*colors)[0];
 }
 
-getGeometryFromHashes::getGeometryFromHashes(const std::vector<int> &hashesIn, std::vector<osg::Geometry *> &geometryIn) :
-    osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), hashes(hashesIn), geometry(geometryIn)
+getGeometryFromIds::getGeometryFromIds(const std::vector<boost::uuids::uuid> &idsIn, std::vector<osg::Geometry *> &geometryIn) :
+    osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), ids(idsIn), geometry(geometryIn)
 {
 
 }
 
-void getGeometryFromHashes::apply(osg::Geode &aGeode)
+void getGeometryFromIds::apply(osg::Geode &aGeode)
 {
-    int selectedHash;
-    if (!aGeode.getUserValue(GU::hashAttributeTitle, selectedHash))
+    std::string selectedIdString;
+    if (!aGeode.getUserValue(GU::idAttributeTitle, selectedIdString))
         assert(0);
+    uuid selectedId = GU::stringToId(selectedIdString);
     //consider switching connector and this visitor to a std::set instead of a vector for speed here.
-    if (std::find(hashes.begin(), hashes.end(), selectedHash) == hashes.end())
+    if (std::find(ids.begin(), ids.end(), selectedId) == ids.end())
     {
         traverse(aGeode);
         return;

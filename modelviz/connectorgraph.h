@@ -6,6 +6,7 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/reverse_graph.hpp>
 #include <boost/graph/breadth_first_search.hpp>
+#include <boost/uuid/uuid.hpp>
 
 #include <TopAbs_ShapeEnum.hxx>
 #include <TopoDS_Shape.hxx>
@@ -14,7 +15,7 @@ namespace ConnectorGraph
 {
 struct VertexProperty
 {
-    int hash;
+    boost::uuids::uuid id;
     TopAbs_ShapeEnum shapeType;
     TopoDS_Shape shape;
 };
@@ -29,7 +30,7 @@ typedef boost::graph_traits<Graph>::out_edge_iterator OutEdgeIterator;
 typedef boost::graph_traits<Graph>::adjacency_iterator VertexAdjacencyIterator;
 typedef boost::reverse_graph<Graph, Graph&> GraphReversed;
 
-typedef std::map<int, Vertex> HashVertexMap;
+typedef std::map<boost::uuids::uuid, Vertex> IdVertexMap;
 
 class TypeCollectionVisitor : public boost::default_bfs_visitor
 {
@@ -48,7 +49,7 @@ private:
     std::vector<Vertex> &typedVertices;
 };
 
-static std::vector<std::string> shapeStrings
+static const std::vector<std::string> shapeStrings
 ({
      "Compound",
      "Compound Solid",

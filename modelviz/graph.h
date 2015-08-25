@@ -1,8 +1,6 @@
 #ifndef MODELVIZ_GRAPH_H
 #define MODELVIZ_GRAPH_H
 
-#include <map>
-
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Edge.hxx>
@@ -15,13 +13,15 @@
 #include <osg/Switch>
 #include <osg/Geometry>
 
+#include "../feature/maps.h"
+
 namespace ModelViz
 {
 
 class Build
 {
 public:
-    Build(const TopoDS_Shape &shapeIn);
+    Build(const TopoDS_Shape &, const Feature::ResultContainer &);
     osg::ref_ptr<osg::Switch> getViz();
     bool go(const Standard_Real &deflection, const Standard_Real &angle);
 private:
@@ -38,6 +38,7 @@ private:
     void edgeConstruct(const TopoDS_Edge &edgeIn);
     void faceConstruct(const TopoDS_Face &faceIn);
     const TopoDS_Shape &originalShape;
+    const Feature::ResultContainer &resultContainer;
     TopoDS_Shape copiedShape;
     TopTools_MapOfShape processed;
     Bnd_Box bound;

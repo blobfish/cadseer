@@ -10,10 +10,10 @@ ADD_DEFINITIONS(${QT_DEFINITIONS})
 
 find_package(Boost REQUIRED COMPONENTS system graph)
 
-find_package(OCE REQUIRED COMPONENTS TKernel TKBRep TKMesh TKFeat)
+find_package(OCE REQUIRED COMPONENTS TKernel TKBRep TKMesh TKFeat TKFillet)
 #override the libraries settings.
 #message(${OCE_LIBRARIES})
-SET(OCE_LIBRARIES "TKernel;TKBRep;TKMesh;TKFeat")
+SET(OCE_LIBRARIES "TKernel;TKBRep;TKMesh;TKFeat;TKFillet")
 
 FIND_PACKAGE(OpenSceneGraph REQUIRED)
 SET(OPENSCENEGRAPH_LIBRARIES "OpenThreads;osg;osgDB;osgUtil;osgViewer;osgQt;osgGA")
@@ -34,11 +34,6 @@ SET(ADDITIONAL_INCLUDE_PATHS
     )
 INCLUDE_DIRECTORIES(${ADDITIONAL_INCLUDE_PATHS})
 
-SET(MODELVIZ_HDRS
-  ./modelviz/graph.h
-  ./modelviz/connector.h
-  ./modelviz/connectorgraph.h
-  )
 SET(MODELVIZ_SOURCES
   ./modelviz/graph.cpp
   ./modelviz/connector.cpp
@@ -51,23 +46,30 @@ SET(TESTING_SOURCES
     ./testing/plotter.cpp
     )
 
-SET(GESTURE_HDRS
-    ./gesture/gesturehandler.h
-    ./gesture/gesturenode.h
-    )
 SET(GESTURE_SOURCES
     ./gesture/gesturehandler.cpp
     ./gesture/gesturenode.cpp
     )
 
-SET(COMMAND_HDRS
-    ./command/commandconstants.h
-    ./command/command.h
-    ./command/commandmanager.h
-    )
 SET(COMMAND_SOURCES
     ./command/command.cpp
     ./command/commandmanager.cpp
+    )
+    
+SET(FEATURE_SOURCES
+    ./feature/base.cpp
+    ./feature/box.cpp
+    ./feature/boxbuilder.cpp
+    ./feature/sphere.cpp
+    ./feature/inert.cpp
+    ./feature/cone.cpp
+    ./feature/cylinder.cpp
+    ./feature/blend.cpp
+    ./feature/maps.cpp
+    )
+    
+SET(PROJECT_SOURCES
+    ./project/project.cpp
     )
 
 SET(CADSEER_SOURCES
@@ -82,31 +84,14 @@ SET(CADSEER_SOURCES
     ./selectioneventhandler.cpp
     ./selectionintersector.cpp
     ./selectionmanager.cpp
-    ./document.cpp
     ./globalutilities.cpp
-    ./shapeobject.cpp
     ./coordinatesystem.cpp
     ${MODELVIZ_SOURCES}
     ${TESTING_SOURCES}
     ${GESTURE_SOURCES}
     ${COMMAND_SOURCES}
-    )
-
-SET(CADSEER_HDRS
-    ./spaceballmanipulator.h
-    ./spaceballqevent.h
-    ./gleventwidget.h
-    ./spaceballosgevent.h
-    ./selectioneventhandler.h
-    ./selectionintersector.h
-    ./selectiondefs.h
-    ./globalutilities.h
-    ./nodemasksdef.h
-    ./coordinatesystem.h
-    ${MODELVIZ_HDRS}
-    ${TESTING_HDRS}
-    ${GESTURE_HDRS}
-    ${COMMAND_HDRS}
+    ${FEATURE_SOURCES}
+    ${PROJECT_SOURCES}
     )
 
 SET(CADSEER_MOC_HDRS
@@ -114,8 +99,6 @@ SET(CADSEER_MOC_HDRS
     ./mainwindow.h
     ./application.h
     ./selectionmanager.h
-    ./document.h
-    ./shapeobject.h
     )
 
 SET(CADSEER_LIBRARIES
