@@ -54,13 +54,16 @@ void Base::updateVisual()
 {
   //clear all the children from the main switch.
   mainSwitch->removeChildren(0, mainSwitch->getNumChildren());
+  
+  if (shape.IsNull())
+    return;
 
   ModelViz::BuildConnector connectBuilder(shape, resultContainer);
   connector = connectBuilder.getConnector();
   connector.outputGraphviz("connectorGraph");
 
   ModelViz::Build builder(shape, resultContainer);
-  if (builder.go(0.25, 0.5))
+  if (builder.go(0.01, 0.05))
   {
       mainSwitch->addChild(builder.getViz().get());
   }

@@ -20,7 +20,8 @@
 #include <string>
 #include <map>
 
-#include <BRepPrimAPI_MakeBox.hxx>
+#include <boost/uuid/random_generator.hpp>
+
 #include <TopoDS_Iterator.hxx>
 
 #include "../globalutilities.h"
@@ -114,7 +115,7 @@ static const std::map<FeatureTag, std::string> featureTagMap =
 
 Box::Box() : Base(), length(10.0), width(10.0), height(10.0)
 {
-  
+  initializeMaps();
 }
 
 void Box::setLength(const double &lengthIn)
@@ -162,21 +163,15 @@ void Box::getParameters(double &lengthOut, double &widthOut, double &heightOut) 
 
 void Box::update(const UpdateMap& mapIn)
 {
+  //clear shape so if we fail the feature will be empty.
+  shape = TopoDS_Shape();
+  
   try
   {
     BoxBuilder boxMaker(length, width, height);
     TopoDS_Compound wrapper = compoundWrap(boxMaker.getSolid());
     shape = wrapper;
-    if (resultContainer.empty()) //very first time, need to build ids.
-    {
-      createResult();
-      createFeature(boxMaker);
-      createEvolution(boxMaker);
-    }
-    else
-      updateResult(boxMaker);
-      //don't need to update evolution as a primitive like this
-      //won't every have a different set of out ids.
+    updateResult(boxMaker);
     setClean();
   }
   catch (Standard_Failure)
@@ -185,14 +180,79 @@ void Box::update(const UpdateMap& mapIn)
     std::cout << std::endl << "Error in box update. " << e->GetMessageString() << std::endl;
   }
 }
-  
-void Box::createResult()
-{
-  assert(resultContainer.empty());
-  buildResultContainer(shape, resultContainer);
-//   std::cout << std::endl << "creation result:" << std::endl << resultContainer << std::endl;
-}
 
+//the quantity of cone shapes can change so generating maps from first update can lead to missing
+//ids and shapes. So here we will generate the maps with all necessary rows.
+void Box::initializeMaps()
+{
+  //result 
+  std::vector<uuid> tempIds; //save ids for later.
+  for (unsigned int index = 0; index < 35; ++index)
+  {
+    uuid tempId = boost::uuids::basic_random_generator<boost::mt19937>()();
+    tempIds.push_back(tempId);
+    
+    ResultRecord resultRecord;
+    resultRecord.id = tempId;
+    resultRecord.shape = TopoDS_Shape();
+    resultContainer.insert(resultRecord);
+    
+    EvolutionRecord evolutionRecord;
+    evolutionRecord.outId = tempId;
+    evolutionContainer.insert(evolutionRecord);
+  }
+  
+  //helper lamda
+  auto insertIntoFeatureMap = [this](const uuid &idIn, FeatureTag featureTagIn)
+  {
+    FeatureRecord record;
+    record.id = idIn;
+    record.tag = featureTagMap.at(featureTagIn);
+    featureContainer.insert(record);
+  };
+  
+  insertIntoFeatureMap(tempIds.at(0), FeatureTag::Root);
+  insertIntoFeatureMap(tempIds.at(1), FeatureTag::Solid);
+  insertIntoFeatureMap(tempIds.at(2), FeatureTag::Shell);
+  insertIntoFeatureMap(tempIds.at(3), FeatureTag::FaceXP);
+  insertIntoFeatureMap(tempIds.at(4), FeatureTag::FaceXN);
+  insertIntoFeatureMap(tempIds.at(5), FeatureTag::FaceYP);
+  insertIntoFeatureMap(tempIds.at(6), FeatureTag::FaceYN);
+  insertIntoFeatureMap(tempIds.at(7), FeatureTag::FaceZP);
+  insertIntoFeatureMap(tempIds.at(8), FeatureTag::FaceZN);
+  insertIntoFeatureMap(tempIds.at(9), FeatureTag::WireXP);
+  insertIntoFeatureMap(tempIds.at(10), FeatureTag::WireXN);
+  insertIntoFeatureMap(tempIds.at(11), FeatureTag::WireYP);
+  insertIntoFeatureMap(tempIds.at(12), FeatureTag::WireYN);
+  insertIntoFeatureMap(tempIds.at(13), FeatureTag::WireZP);
+  insertIntoFeatureMap(tempIds.at(14), FeatureTag::WireZN);
+  insertIntoFeatureMap(tempIds.at(15), FeatureTag::EdgeXPYP);
+  insertIntoFeatureMap(tempIds.at(16), FeatureTag::EdgeXPZP);
+  insertIntoFeatureMap(tempIds.at(17), FeatureTag::EdgeXPYN);
+  insertIntoFeatureMap(tempIds.at(18), FeatureTag::EdgeXPZN);
+  insertIntoFeatureMap(tempIds.at(19), FeatureTag::EdgeXNYN);
+  insertIntoFeatureMap(tempIds.at(20), FeatureTag::EdgeXNZP);
+  insertIntoFeatureMap(tempIds.at(21), FeatureTag::EdgeXNYP);
+  insertIntoFeatureMap(tempIds.at(22), FeatureTag::EdgeXNZN);
+  insertIntoFeatureMap(tempIds.at(23), FeatureTag::EdgeYPZP);
+  insertIntoFeatureMap(tempIds.at(24), FeatureTag::EdgeYPZN);
+  insertIntoFeatureMap(tempIds.at(25), FeatureTag::EdgeYNZP);
+  insertIntoFeatureMap(tempIds.at(26), FeatureTag::EdgeYNZN);
+  insertIntoFeatureMap(tempIds.at(27), FeatureTag::VertexXPYPZP);
+  insertIntoFeatureMap(tempIds.at(28), FeatureTag::VertexXPYNZP);
+  insertIntoFeatureMap(tempIds.at(29), FeatureTag::VertexXPYNZN);
+  insertIntoFeatureMap(tempIds.at(30), FeatureTag::VertexXPYPZN);
+  insertIntoFeatureMap(tempIds.at(31), FeatureTag::VertexXNYNZP);
+  insertIntoFeatureMap(tempIds.at(32), FeatureTag::VertexXNYPZP);
+  insertIntoFeatureMap(tempIds.at(33), FeatureTag::VertexXNYPZN);
+  insertIntoFeatureMap(tempIds.at(34), FeatureTag::VertexXNYNZN);
+  
+//   std::cout << std::endl << std::endl <<
+//     "result Container: " << std::endl << resultContainer << std::endl << std::endl <<
+//     "feature Container:" << std::endl << featureContainer << std::endl << std::endl <<
+//     "evolution Container:" << std::endl << evolutionContainer << std::endl << std::endl;
+}
+  
 void Box::updateResult(const BoxBuilder& boxMakerIn)
 {
   //helper lamda
@@ -241,76 +301,3 @@ void Box::updateResult(const BoxBuilder& boxMakerIn)
 //   std::cout << std::endl << "update result:" << std::endl << resultContainer << std::endl;
 }
 
-void Box::createFeature(const BoxBuilder& boxMakerIn)
-{
-  assert(!resultContainer.empty());
-  assert(featureContainer.empty());
-  
-  //helper lamda
-  auto insertIntoFeatureMap = [this](const TopoDS_Shape &shapeIn, FeatureTag featureTagIn)
-  {
-    FeatureRecord record;
-    record.id = findResultByShape(resultContainer, shapeIn).id;
-    record.tag = featureTagMap.at(featureTagIn);
-    featureContainer.insert(record);
-  };
-  
-  //first we do the compound that is root. this is not in box maker.
-  insertIntoFeatureMap(shape, FeatureTag::Root);
-  insertIntoFeatureMap(boxMakerIn.getSolid(), FeatureTag::Solid);
-  insertIntoFeatureMap(boxMakerIn.getShell(), FeatureTag::Shell);
-  insertIntoFeatureMap(boxMakerIn.getFaceXP(), FeatureTag::FaceXP);
-  insertIntoFeatureMap(boxMakerIn.getFaceXN(), FeatureTag::FaceXN);
-  insertIntoFeatureMap(boxMakerIn.getFaceYP(), FeatureTag::FaceYP);
-  insertIntoFeatureMap(boxMakerIn.getFaceYN(), FeatureTag::FaceYN);
-  insertIntoFeatureMap(boxMakerIn.getFaceZP(), FeatureTag::FaceZP);
-  insertIntoFeatureMap(boxMakerIn.getFaceZN(), FeatureTag::FaceZN);
-  insertIntoFeatureMap(boxMakerIn.getWireXP(), FeatureTag::WireXP);
-  insertIntoFeatureMap(boxMakerIn.getWireXN(), FeatureTag::WireXN);
-  insertIntoFeatureMap(boxMakerIn.getWireYP(), FeatureTag::WireYP);
-  insertIntoFeatureMap(boxMakerIn.getWireYN(), FeatureTag::WireYN);
-  insertIntoFeatureMap(boxMakerIn.getWireZP(), FeatureTag::WireZP);
-  insertIntoFeatureMap(boxMakerIn.getWireZN(), FeatureTag::WireZN);
-  insertIntoFeatureMap(boxMakerIn.getEdgeXPYP(), FeatureTag::EdgeXPYP);
-  insertIntoFeatureMap(boxMakerIn.getEdgeXPZP(), FeatureTag::EdgeXPZP);
-  insertIntoFeatureMap(boxMakerIn.getEdgeXPYN(), FeatureTag::EdgeXPYN);
-  insertIntoFeatureMap(boxMakerIn.getEdgeXPZN(), FeatureTag::EdgeXPZN);
-  insertIntoFeatureMap(boxMakerIn.getEdgeXNYN(), FeatureTag::EdgeXNYN);
-  insertIntoFeatureMap(boxMakerIn.getEdgeXNZP(), FeatureTag::EdgeXNZP);
-  insertIntoFeatureMap(boxMakerIn.getEdgeXNYP(), FeatureTag::EdgeXNYP);
-  insertIntoFeatureMap(boxMakerIn.getEdgeXNZN(), FeatureTag::EdgeXNZN);
-  insertIntoFeatureMap(boxMakerIn.getEdgeYPZP(), FeatureTag::EdgeYPZP);
-  insertIntoFeatureMap(boxMakerIn.getEdgeYPZN(), FeatureTag::EdgeYPZN);
-  insertIntoFeatureMap(boxMakerIn.getEdgeYNZP(), FeatureTag::EdgeYNZP);
-  insertIntoFeatureMap(boxMakerIn.getEdgeYNZN(), FeatureTag::EdgeYNZN);
-  insertIntoFeatureMap(boxMakerIn.getVertexXPYPZP(), FeatureTag::VertexXPYPZP);
-  insertIntoFeatureMap(boxMakerIn.getVertexXPYNZP(), FeatureTag::VertexXPYNZP);
-  insertIntoFeatureMap(boxMakerIn.getVertexXPYNZN(), FeatureTag::VertexXPYNZN);
-  insertIntoFeatureMap(boxMakerIn.getVertexXPYPZN(), FeatureTag::VertexXPYPZN);
-  insertIntoFeatureMap(boxMakerIn.getVertexXNYNZP(), FeatureTag::VertexXNYNZP);
-  insertIntoFeatureMap(boxMakerIn.getVertexXNYPZP(), FeatureTag::VertexXNYPZP);
-  insertIntoFeatureMap(boxMakerIn.getVertexXNYPZN(), FeatureTag::VertexXNYPZN);
-  insertIntoFeatureMap(boxMakerIn.getVertexXNYNZN(), FeatureTag::VertexXNYNZN);
-  
-//   std::cout << std::endl << featureContainer << std::endl;
-}
-
-void Box::createEvolution(const Feature::BoxBuilder&)
-{
-  evolutionContainer.clear();
-  
-  auto insertIntoEvolutionMap = [this](const uuid &idIn)
-  {
-    EvolutionRecord record;
-    record.outId = idIn;
-    evolutionContainer.insert(record);
-  };
-  
-  
-  for (const auto &current : resultContainer)
-  {
-    insertIntoEvolutionMap(current.id);
-  }
-  
-//   std::cout << std::endl << "evolution: " << std::endl << evolutionContainer << std::endl;
-}

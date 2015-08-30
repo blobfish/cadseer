@@ -17,10 +17,39 @@
  *
  */
 
+#include <boost/uuid/random_generator.hpp>
+
+#include <TopExp.hxx>
+#include <TopTools_IndexedMapOfShape.hxx>
+
 #include "inert.h"
 
 using namespace Feature;
+using namespace boost::uuids;
+
 Inert::Inert(const TopoDS_Shape &shapeIn)
 {
-  shape = shapeIn;
+  if (shapeIn.ShapeType() == TopAbs_COMPOUND)
+    shape = shapeIn;
+  else
+    shape = compoundWrap(shapeIn);
+  
+  TopTools_IndexedMapOfShape shapeMap;
+  TopExp::MapShapes(shape, shapeMap);
+  
+  for (int index = 1; index <= shapeMap.Extent(); ++index)
+  {
+    uuid tempId = basic_random_generator<boost::mt19937>()();
+    
+    ResultRecord record;
+    record.id = tempId;
+    record.shape = shapeMap(index);
+    resultContainer.insert(record);
+    
+    EvolutionRecord evolutionRecord;
+    evolutionRecord.outId = tempId;
+    evolutionContainer.insert(evolutionRecord);
+  }
+  
+  //not using feature container;
 }

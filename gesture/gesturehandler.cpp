@@ -277,6 +277,17 @@ void GestureHandler::constructMenu()
     constructionCylinder->setMatrix(dummy);
     constructionCylinder->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::ConstructionCylinder));
     constructionPrimitives->insertChild(constructionPrimitives->getNumChildren() - 2, constructionCylinder);
+    
+    //construction finishing base
+    osg::MatrixTransform *constructionFinishing;
+    constructionFinishing = GestureNode::buildMenuNode(":/resources/images/constructionFinishing.svg");
+    constructionFinishing->setMatrix(dummy);
+    constructionBase->insertChild(constructionBase->getNumChildren() - 2, constructionFinishing);
+    
+    osg::MatrixTransform *constructionBlend = GestureNode::buildCommandNode(":/resources/images/constructionBlend.svg");
+    constructionBlend->setMatrix(dummy);
+    constructionBlend->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::ConstructionBlend));
+    constructionFinishing->insertChild(constructionFinishing->getNumChildren() - 2, constructionBlend);
 }
 
 std::vector<osg::Vec3> GestureHandler::buildNodeLocations(osg::Vec3 direction, int nodeCount)

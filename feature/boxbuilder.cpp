@@ -48,101 +48,48 @@ BoxBuilder::BoxBuilder(double lengthIn, double widthIn, double heightIn)
   solid = boxMaker.Shape();
   assert(solid.ShapeType() == TopAbs_SOLID);
   
+  BRepPrim_Wedge &boxSubMaker = boxMaker.Wedge();
+  shell = boxSubMaker.Shell();
+  
+  //remove me
   TopoDS_Iterator it(solid);
-  shell = it.Value();
-  assert(shell.ShapeType() == TopAbs_SHELL);
+  TopoDS_Shape testShell = it.Value();
+  assert(testShell.ShapeType() == TopAbs_SHELL);
+  assert(shell.IsEqual(testShell));
   
-  faceXP = boxMaker.FrontFace();
-  assert(faceXP.ShapeType() == TopAbs_FACE);
-  faceXN = boxMaker.BackFace();
-  assert(faceXN.ShapeType() == TopAbs_FACE);
-  faceYP = boxMaker.RightFace();
-  assert(faceYP.ShapeType() == TopAbs_FACE);
-  faceYN = boxMaker.LeftFace();
-  assert(faceYN.ShapeType() == TopAbs_FACE);
-  faceZP = boxMaker.TopFace();
-  assert(faceZP.ShapeType() == TopAbs_FACE);
-  faceZN = boxMaker.BottomFace();
-  assert(faceZN.ShapeType() == TopAbs_FACE);
+  faceXP = boxSubMaker.Face(BRepPrim_XMax);
+  faceXN = boxSubMaker.Face(BRepPrim_XMin);
+  faceYP = boxSubMaker.Face(BRepPrim_YMax);
+  faceYN = boxSubMaker.Face(BRepPrim_YMin);
+  faceZP = boxSubMaker.Face(BRepPrim_ZMax);
+  faceZN = boxSubMaker.Face(BRepPrim_ZMin);
   
-  wireXP = BRepTools::OuterWire(TopoDS::Face(faceXP));
-  assert(!wireXP.IsNull());
-  wireXN = BRepTools::OuterWire(TopoDS::Face(faceXN));
-  assert(!wireXN.IsNull());
-  wireYP = BRepTools::OuterWire(TopoDS::Face(faceYP));
-  assert(!wireYP.IsNull());
-  wireYN = BRepTools::OuterWire(TopoDS::Face(faceYN));
-  assert(!wireYN.IsNull());
-  wireZP = BRepTools::OuterWire(TopoDS::Face(faceZP));
-  assert(!wireZP.IsNull());
-  wireZN = BRepTools::OuterWire(TopoDS::Face(faceZN));
-  assert(!wireZN.IsNull());
+  wireXP = boxSubMaker.Wire(BRepPrim_XMax);
+  wireXN = boxSubMaker.Wire(BRepPrim_XMin);
+  wireYP = boxSubMaker.Wire(BRepPrim_YMax);
+  wireYN = boxSubMaker.Wire(BRepPrim_YMin);
+  wireZP = boxSubMaker.Wire(BRepPrim_ZMax);
+  wireZN = boxSubMaker.Wire(BRepPrim_ZMin);
   
-  edgeXPYP = sharedEdge(faceXP, faceYP);
-  edgeXPZP = sharedEdge(faceXP, faceZP);
-  edgeXPYN = sharedEdge(faceXP, faceYN);
-  edgeXPZN = sharedEdge(faceXP, faceZN);
-  edgeXNYN = sharedEdge(faceXN, faceYN);
-  edgeXNZP = sharedEdge(faceXN, faceZP);
-  edgeXNYP = sharedEdge(faceXN, faceYP);
-  edgeXNZN = sharedEdge(faceXN, faceZN);
-  edgeYPZP = sharedEdge(faceYP, faceZP);
-  edgeYPZN = sharedEdge(faceYP, faceZN);
-  edgeYNZP = sharedEdge(faceYN, faceZP);
-  edgeYNZN = sharedEdge(faceYN, faceZN);
+  edgeXPYP = boxSubMaker.Edge(BRepPrim_XMax, BRepPrim_YMax);
+  edgeXPZP = boxSubMaker.Edge(BRepPrim_XMax, BRepPrim_ZMax);
+  edgeXPYN = boxSubMaker.Edge(BRepPrim_XMax, BRepPrim_YMin);
+  edgeXPZN = boxSubMaker.Edge(BRepPrim_XMax, BRepPrim_ZMin);
+  edgeXNYN = boxSubMaker.Edge(BRepPrim_XMin, BRepPrim_YMin);
+  edgeXNZP = boxSubMaker.Edge(BRepPrim_XMin, BRepPrim_ZMax);
+  edgeXNYP = boxSubMaker.Edge(BRepPrim_XMin, BRepPrim_YMax);
+  edgeXNZN = boxSubMaker.Edge(BRepPrim_XMin, BRepPrim_ZMin);
+  edgeYPZP = boxSubMaker.Edge(BRepPrim_YMax, BRepPrim_ZMax);
+  edgeYPZN = boxSubMaker.Edge(BRepPrim_YMax, BRepPrim_ZMin);
+  edgeYNZP = boxSubMaker.Edge(BRepPrim_YMin, BRepPrim_ZMax);
+  edgeYNZN = boxSubMaker.Edge(BRepPrim_YMin, BRepPrim_ZMin);
   
-  vertexXPYPZP = sharedVertex(faceXP, faceYP, faceZP);
-  vertexXPYNZP = sharedVertex(faceXP, faceYN, faceZP);
-  vertexXPYNZN = sharedVertex(faceXP, faceYN, faceZN);
-  vertexXPYPZN = sharedVertex(faceXP, faceYP, faceZN);
-  vertexXNYNZP = sharedVertex(faceXN, faceYN, faceZP);
-  vertexXNYPZP = sharedVertex(faceXN, faceYP, faceZP);
-  vertexXNYPZN = sharedVertex(faceXN, faceYP, faceZN);
-  vertexXNYNZN = sharedVertex(faceXN, faceYN, faceZN);
+  vertexXPYPZP = boxSubMaker.Vertex(BRepPrim_XMax, BRepPrim_YMax, BRepPrim_ZMax);
+  vertexXPYNZP = boxSubMaker.Vertex(BRepPrim_XMax, BRepPrim_YMin, BRepPrim_ZMax);
+  vertexXPYNZN = boxSubMaker.Vertex(BRepPrim_XMax, BRepPrim_YMin, BRepPrim_ZMin);
+  vertexXPYPZN = boxSubMaker.Vertex(BRepPrim_XMax, BRepPrim_YMax, BRepPrim_ZMin);
+  vertexXNYNZP = boxSubMaker.Vertex(BRepPrim_XMin, BRepPrim_YMin, BRepPrim_ZMax);
+  vertexXNYPZP = boxSubMaker.Vertex(BRepPrim_XMin, BRepPrim_YMax, BRepPrim_ZMax);
+  vertexXNYPZN = boxSubMaker.Vertex(BRepPrim_XMin, BRepPrim_YMax, BRepPrim_ZMin);
+  vertexXNYNZN = boxSubMaker.Vertex(BRepPrim_XMin, BRepPrim_YMin, BRepPrim_ZMin);
 }
-
-TopoDS_Shape BoxBuilder::sharedEdge(const TopoDS_Shape& face1, const TopoDS_Shape& face2)
-{
-  TopoDS_Face testFace = TopoDS::Face(face2);
-  TopoDS_Edge out;
-  
-  TopTools_IndexedMapOfShape shapeMap;
-  TopExp::MapShapes(face1, TopAbs_EDGE, shapeMap);
-  for (int index = 1; index <= shapeMap.Extent(); ++index)
-  {
-    const TopoDS_Edge &currentEdge = TopoDS::Edge(shapeMap(index));
-    if (BOPTools_AlgoTools::GetEdgeOff(currentEdge, testFace, out))
-      break;
-  }
-  
-  assert(!out.IsNull());
-  return out;
-}
-
-TopoDS_Shape BoxBuilder::sharedVertex(const TopoDS_Shape& face1, const TopoDS_Shape& face2, const TopoDS_Shape& face3)
-{
-  TopoDS_Shape out;
-  
-  TopTools_IndexedMapOfShape shapeMap1;
-  TopExp::MapShapes(face1, TopAbs_VERTEX, shapeMap1);
-  
-  TopTools_IndexedMapOfShape shapeMap2;
-  TopExp::MapShapes(face2, TopAbs_VERTEX, shapeMap2);
-  
-  TopTools_IndexedMapOfShape shapeMap3;
-  TopExp::MapShapes(face3, TopAbs_VERTEX, shapeMap3);
-  
-  for (int index = 1; index <= shapeMap1.Extent(); ++index)
-  {
-    const TopoDS_Shape& current = shapeMap1(index);
-    if (shapeMap2.Contains(current) && shapeMap3.Contains(current))
-    {
-      out = current;
-      break;
-    }
-  }
-  
-  assert(!out.IsNull());
-  return out;
-}
-

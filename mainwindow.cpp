@@ -16,6 +16,9 @@
 #include "feature/sphere.h"
 #include "feature/cone.h"
 #include "feature/cylinder.h"
+#include "feature/blend.h"
+
+using boost::uuids::uuid;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -110,6 +113,11 @@ void MainWindow::setupCommands()
     connect(constructionCylinderAction, SIGNAL(triggered(bool)), this, SLOT(constructionCylinderSlot()));
     Command constructionCylinderCommand(CommandConstants::ConstructionCylinder, "Construct Cylinder", constructionCylinderAction);
     CommandManager::getManager().addCommand(constructionCylinderCommand);
+    
+    QAction *constructionBlendAction = new QAction(qApp);
+    connect(constructionBlendAction, SIGNAL(triggered(bool)), this, SLOT(constructionBlendSlot()));
+    Command constructionBlendCommand(CommandConstants::ConstructionBlend, "Construct Blend", constructionBlendAction);
+    CommandManager::getManager().addCommand(constructionBlendCommand);
 }
 
 void MainWindow::constructionBoxSlot()
@@ -124,9 +132,6 @@ void MainWindow::constructionBoxSlot()
     project->update();
     project->updateVisual();
     
-    box->setParameters(10.0, 6.0, 1.0);
-    project->update();
-
     viewWidget->update();
 }
 
@@ -170,5 +175,44 @@ void MainWindow::constructionCylinderSlot()
   project->updateVisual();
 
   viewWidget->update();
+}
+
+void MainWindow::constructionBlendSlot()
+{
+  const SelectionContainers &selections = viewWidget->getSelections();
+  if (selections.empty())
+    return;
+  
+  //get targetId and filter out edges not belonging to first target.
+  uuid targetFeatureId = selections.at(0).featureId;
+  std::vector<uuid> edgeIds;
+  for (const auto &currentSelection : selections)
+  {
+    if
+    (
+      currentSelection.featureId != targetFeatureId ||
+      currentSelection.selectionType != SelectionTypes::Edge //just edges for now.
+    )
+      continue;
+    
+    edgeIds.push_back(currentSelection.shapeId);
+  }
+  
+  Application *application = dynamic_cast<Application *>(qApp);
+  assert(application);
+  Project *project = application->getProject();
+  
+  std::shared_ptr<Feature::Blend> blend(new Feature::Blend());
+  project->addFeature(blend, viewWidget->getRoot());
+  project->connect(targetFeatureId, blend->getId(), Feature::InputTypes::target);
+  blend->setEdgeIds(edgeIds);
+  
+  const Feature::Base *targetFeature = project->findFeature(targetFeatureId);
+  osg::Switch *targetSwitch = targetFeature->getMainSwitch();
+  targetSwitch->setAllChildrenOff();
+  viewWidget->clearSelections();
+  
+  project->update();
+  project->updateVisual();
 }
 

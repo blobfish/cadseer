@@ -16,6 +16,7 @@
 #include <osgDB/WriteFile>
 #include <osgQt/GraphicsWindowQt>
 #include <osg/PolygonMode>
+#include <osg/ShadeModel>
 #include <osg/Depth>
 #include <osgUtil/Optimizer>
 #include <osg/BlendFunc>
@@ -37,11 +38,18 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     connect(&_timer, SIGNAL(timeout()), this, SLOT(update()));
 
     root = new osg::Group;
+    
     osg::ref_ptr<osg::PolygonMode> pm = new osg::PolygonMode;
     pm->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL);
 //     pm->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
     root->getOrCreateStateSet()->setAttribute(pm.get());
-    root->getOrCreateStateSet()->setMode(GL_MULTISAMPLE_ARB, osg::StateAttribute::ON); 
+    
+    osg::ShadeModel *shadeModel = new osg::ShadeModel(osg::ShadeModel::SMOOTH);
+    root->getOrCreateStateSet()->setAttribute(shadeModel);
+    
+    root->getOrCreateStateSet()->setMode(GL_MULTISAMPLE_ARB, osg::StateAttribute::ON);
+    root->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::ON);
+    
     Plotter::getReference().setBase(root);
     
     root->addChild(CoordinateSystem::buildCoordinateSystemNode());
@@ -66,7 +74,11 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     view->addEventHandler(new osgViewer::StatsHandler);
     selectionHandler = new SelectionEventHandler();
     view->addEventHandler(selectionHandler);
-    view->addEventHandler(new GestureHandler(gestureCamera)); //This creates an additional thread. why?
+    //why does the following line create an additional thread. why?
+    //not sure why it does, but it happens down inside librsvg and doesn't
+    //come into play for application. I have proven out that our qactions
+    //between gesture camera a mainwindlow slots are synchronized.
+    view->addEventHandler(new GestureHandler(gestureCamera));
 //    view->setCameraManipulator(new osgGA::TrackballManipulator);
     spaceballManipulator = new osgGA::SpaceballManipulator(view->getCamera());
     view->setCameraManipulator(spaceballManipulator);
@@ -132,7 +144,7 @@ void ViewerWidget::createMainCamera(osg::Camera *camera)
           */
 //    osgQt::GLWidget *glWidget = new osgQt::GLWidget(QGLFormat::defaultFormat(), this);
     QGLFormat format = QGLFormat::defaultFormat();
-    format.setSamples(4);
+    format.setSamples(4); //big slowdown.
 
     GLEventWidget *glWidget = new GLEventWidget(format, this);
     windowQt = new osgQt::GraphicsWindowQt(glWidget);
@@ -339,8 +351,8 @@ void ViewerWidget::viewFitSlot()
 
 void ViewerWidget::writeOSGSlot()
 {
-  QString start = QDir::homePath() + "/OpenSceneGraph.osgt";
-  QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), start, tr("Scene (*.osgt)"));
+  QString start = QDir::homePath() + "/OpenSceneGraph.osg";
+  QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), start, tr("Scene (*.osg)"));
   if (fileName.isEmpty())
     return;
   osgDB::writeNodeFile(*root, fileName.toStdString());

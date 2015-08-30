@@ -45,7 +45,7 @@ namespace ProjectGraph
       void operator()(std::ostream& out, const EdgeW& edgeW) const
       {
         out << "[label=\"";
-        out << "edge";
+        out << Feature::getInputTypeString(graphEW[edgeW].inputType);
         out << "\"]";
       }
     private:

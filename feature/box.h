@@ -22,10 +22,11 @@
 
 #include "base.h"
 
-class BoxBuilder;
 
 namespace Feature
 {
+class BoxBuilder;
+
 class Box : public Base
 {
 public:
@@ -47,10 +48,8 @@ protected:
   double width;
   double height;
   
-  void createResult();
+  void initializeMaps();
   void updateResult(const BoxBuilder&);
-  void createFeature(const BoxBuilder&);
-  void createEvolution(const BoxBuilder&);
 };
 }
 

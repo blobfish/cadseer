@@ -29,6 +29,7 @@ public slots:
     void constructionSphereSlot();
     void constructionConeSlot();
     void constructionCylinderSlot();
+    void constructionBlendSlot();
     
 private:
     void setupSelectionToolbar();

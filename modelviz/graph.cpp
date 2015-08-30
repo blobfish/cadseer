@@ -233,6 +233,8 @@ void Build::recursiveConstruct(const TopoDS_Shape &shapeIn)
         if (processed.Contains(currentShape))
             continue;
         processed.Add(currentShape);
+        if (!(hasResult(resultContainer, currentShape)))
+          continue; //probably seam edge.
 
         if (currentType == TopAbs_COMPOUND || currentType == TopAbs_COMPSOLID ||
                 currentType == TopAbs_SOLID || currentType == TopAbs_SHELL ||
@@ -390,6 +392,7 @@ void Build::faceConstruct(const TopoDS_Face &faceIn)
         }
 
         //calculate normal.
+        /* let osg::smoothing visitor calc normals.
         osg::Vec3 pointOne(vertices->at((*indices)[factor]));
         osg::Vec3 pointTwo(vertices->at((*indices)[factor + 1]));
         osg::Vec3 pointThree(vertices->at((*indices)[factor + 2]));
@@ -417,10 +420,13 @@ void Build::faceConstruct(const TopoDS_Face &faceIn)
         tempNormal += currentNormal;
         tempNormal.normalize();
         (*normals)[(*indices)[factor + 2]] = tempNormal;
+        */
     }
     geometry->addPrimitiveSet(indices.get());
     osg::Vec4Array *colors= dynamic_cast<osg::Vec4Array *>(geometry->getColorArray());
     colors->push_back(osg::Vec4(.1f, .7f, .1f, .5f));
+    
+    osgUtil::SmoothingVisitor::smooth(*geometry);
 }
 
 osg::ref_ptr<osg::Switch> Build::getViz()

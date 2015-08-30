@@ -17,15 +17,42 @@
  *
  */
 
+#include <boost/uuid/random_generator.hpp>
+
 #include <BRepPrimAPI_MakeSphere.hxx>
 
 #include "sphere.h"
 
 using namespace Feature;
+using namespace boost::uuids;
+
+enum class FeatureTag
+{
+  Root,         //!< compound
+  Solid,        //!< solid
+  Shell,        //!< shell
+  Face,
+  Wire,
+  Edge,
+  VertexBottom,
+  VertexTop
+};
+
+static const std::map<FeatureTag, std::string> featureTagMap = 
+{
+  {FeatureTag::Root, "Root"},
+  {FeatureTag::Solid, "Solid"},
+  {FeatureTag::Shell, "Shell"},
+  {FeatureTag::Face, "Face"},
+  {FeatureTag::Wire, "Wire"},
+  {FeatureTag::Edge, "Edge"},
+  {FeatureTag::VertexBottom, "VertexBottom"},
+  {FeatureTag::VertexTop, "VertexTop"}
+};
 
 Sphere::Sphere() : Base(), radius(5.0)
 {
-
+  initializeMaps();
 }
 
 void Sphere::setRadius(const double& radiusIn)
@@ -39,12 +66,16 @@ void Sphere::setRadius(const double& radiusIn)
 
 void Sphere::update(const UpdateMap& mapIn)
 {
+  //clear shape so if we fail the feature will be empty.
+  shape = TopoDS_Shape();
+  
   try
   {
     BRepPrimAPI_MakeSphere sphereMaker(radius);
     sphereMaker.Build();
     assert(sphereMaker.IsDone());
-    shape = sphereMaker.Shape();
+    shape = compoundWrap(sphereMaker.Shape());
+    updateResult(sphereMaker);
     setClean();
   }
   catch (Standard_Failure)
@@ -52,4 +83,72 @@ void Sphere::update(const UpdateMap& mapIn)
     Handle_Standard_Failure e = Standard_Failure::Caught();
     std::cout << std::endl << "Error in sphere update. " << e->GetMessageString() << std::endl;
   }
+}
+
+void Sphere::initializeMaps()
+{
+  //result 
+  std::vector<uuid> tempIds; //save ids for later.
+  for (unsigned int index = 0; index < 8; ++index)
+  {
+    uuid tempId = boost::uuids::basic_random_generator<boost::mt19937>()();
+    tempIds.push_back(tempId);
+    
+    ResultRecord resultRecord;
+    resultRecord.id = tempId;
+    resultRecord.shape = TopoDS_Shape();
+    resultContainer.insert(resultRecord);
+    
+    EvolutionRecord evolutionRecord;
+    evolutionRecord.outId = tempId;
+    evolutionContainer.insert(evolutionRecord);
+  }
+  
+  //helper lamda
+  auto insertIntoFeatureMap = [this](const uuid &idIn, FeatureTag featureTagIn)
+  {
+    FeatureRecord record;
+    record.id = idIn;
+    record.tag = featureTagMap.at(featureTagIn);
+    featureContainer.insert(record);
+  };
+  
+  insertIntoFeatureMap(tempIds.at(0), FeatureTag::Root);
+  insertIntoFeatureMap(tempIds.at(1), FeatureTag::Solid);
+  insertIntoFeatureMap(tempIds.at(2), FeatureTag::Shell);
+  insertIntoFeatureMap(tempIds.at(3), FeatureTag::Face);
+  insertIntoFeatureMap(tempIds.at(4), FeatureTag::Wire);
+  insertIntoFeatureMap(tempIds.at(5), FeatureTag::Edge);
+  insertIntoFeatureMap(tempIds.at(6), FeatureTag::VertexBottom);
+  insertIntoFeatureMap(tempIds.at(7), FeatureTag::VertexTop);
+  
+//   std::cout << std::endl << std::endl <<
+//     "result Container: " << std::endl << resultContainer << std::endl << std::endl <<
+//     "feature Container:" << std::endl << featureContainer << std::endl << std::endl <<
+//     "evolution Container:" << std::endl << evolutionContainer << std::endl << std::endl;
+}
+
+void Sphere::updateResult(BRepPrimAPI_MakeSphere &sphereMaker)
+{
+  //helper lamda
+  auto updateShapeByTag = [this](const TopoDS_Shape &shapeIn, FeatureTag featureTagIn)
+  {
+    uuid id = findFeatureByTag(featureContainer, featureTagMap.at(featureTagIn)).id;
+    updateShapeById(resultContainer, id, shapeIn);
+  };
+  
+  updateShapeByTag(shape, FeatureTag::Root);
+  updateShapeByTag(sphereMaker.Shape(), FeatureTag::Solid);
+  
+  BRepPrim_Sphere &sphereSubMaker = sphereMaker.Sphere();
+  
+  updateShapeByTag(sphereSubMaker.Shell(), FeatureTag::Shell);
+  updateShapeByTag(sphereSubMaker.LateralFace(), FeatureTag::Face);
+  updateShapeByTag(sphereSubMaker.LateralWire(), FeatureTag::Wire);
+  updateShapeByTag(sphereSubMaker.StartEdge(), FeatureTag::Edge);
+  updateShapeByTag(sphereSubMaker.BottomStartVertex(), FeatureTag::VertexBottom);
+  updateShapeByTag(sphereSubMaker.TopStartVertex(), FeatureTag::VertexTop);
+  
+//   std::cout << std::endl << "update result:" << std::endl << resultContainer << std::endl;
+
 }

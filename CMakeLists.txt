@@ -63,9 +63,11 @@ SET(FEATURE_SOURCES
     ./feature/sphere.cpp
     ./feature/inert.cpp
     ./feature/cone.cpp
+    ./feature/conebuilder.cpp
     ./feature/cylinder.cpp
     ./feature/blend.cpp
     ./feature/maps.cpp
+    ./feature/cylinderbuilder.cpp
     )
     
 SET(PROJECT_SOURCES

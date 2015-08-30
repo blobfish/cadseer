@@ -23,17 +23,23 @@ public:
     SelectionContainer(){}
     SelectionTypes::Type selectionType;
     std::vector<Selected> selections;
-    boost::uuids::uuid id;
+    boost::uuids::uuid featureId;
+    boost::uuids::uuid shapeId;
 };
-inline bool operator==(const SelectionContainer& lhs, const SelectionContainer& rhs){return (lhs.id == rhs.id);}
+inline bool operator==(const SelectionContainer& lhs, const SelectionContainer& rhs)
+{
+  return ((lhs.featureId == rhs.featureId) && (lhs.shapeId == rhs.shapeId));
+}
+std::ostream& operator<<(std::ostream& os, const SelectionContainer& container);
 
 typedef std::vector<SelectionContainer> SelectionContainers;
+std::ostream& operator<<(std::ostream& os, const SelectionContainers& containers);
 
 class SelectionEventHandler : public osgGA::GUIEventHandler
 {
 public:
     SelectionEventHandler();
-    SelectionContainers getSelections(){return selectionContainers;}
+    const SelectionContainers& getSelections() const {return selectionContainers;}
     void clearSelections();
     void setSelectionMask(const unsigned int &maskIn);
 protected:

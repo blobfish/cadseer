@@ -19,7 +19,7 @@ boost::uuids::uuid getId(const osg::Node *node);
 std::string idToString(const boost::uuids::uuid &);
 boost::uuids::uuid stringToId(const std::string &);
 static const std::string idAttributeTitle = "id";
-
+std::string getShapeTypeString(const TopoDS_Shape&);
 }
 
 #endif // GLOBALUTILITIES_H

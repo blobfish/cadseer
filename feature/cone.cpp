@@ -17,15 +17,55 @@
  *
  */
 
-#include <BRepPrimAPI_MakeCone.hxx>
+#include <boost/uuid/random_generator.hpp>
 
+#include "conebuilder.h"
 #include "cone.h"
 
 using namespace Feature;
+using boost::uuids::uuid;
 
+enum class FeatureTag
+{
+  Root,         //!< compound
+  Solid,        //!< solid
+  Shell,        //!< shell
+  FaceBottom,   //!< bottom of cone
+  FaceConical,  //!< conical face
+  FaceTop,      //!< might be empty
+  WireBottom,   //!< wire on base face
+  WireConical,  //!< wire along conical face
+  WireTop,      //!< wire along top
+  EdgeBottom,   //!< bottom edge.
+  EdgeConical,  //!< edge on conical face
+  EdgeTop,      //!< top edge
+  VertexBottom, //!< bottom vertex
+  VertexTop     //!< top vertex
+};
+
+static const std::map<FeatureTag, std::string> featureTagMap = 
+{
+  {FeatureTag::Root, "Root"},
+  {FeatureTag::Solid, "Solid"},
+  {FeatureTag::Shell, "Shell"},
+  {FeatureTag::FaceBottom, "FaceBase"},
+  {FeatureTag::FaceConical, "FaceConical"},
+  {FeatureTag::FaceTop, "FaceTop"},
+  {FeatureTag::WireBottom, "WireBottom"},
+  {FeatureTag::WireConical, "WireConical"},
+  {FeatureTag::WireTop, "WireTop"},
+  {FeatureTag::EdgeBottom, "EdgeBottom"},
+  {FeatureTag::EdgeConical, "EdgeConical"},
+  {FeatureTag::EdgeTop, "EdgeTop"},
+  {FeatureTag::VertexBottom, "VertexBottom"},
+  {FeatureTag::VertexTop, "VertexTop"}
+};
+
+//only complete rotational cone. no partials. because top or bottom radius
+//maybe 0.0, faces and wires might be null and edges maybe degenerate.
 Cone::Cone() : Base(), radius1(5.0), radius2(0.0), height(10.0)
 {
-
+  initializeMaps();
 }
 
 void Cone::setRadius1(const double& radius1In)
@@ -72,12 +112,14 @@ void Cone::getParameters(double& radius1Out, double& radius2Out, double& heightO
 
 void Cone::update(const UpdateMap& mapIn)
 {
+  //clear shape so if we fail the feature will be empty.
+  shape = TopoDS_Shape();
+  
   try
   {
-    BRepPrimAPI_MakeCone coneMaker(radius1, radius2, height);
-    coneMaker.Build();
-    assert(coneMaker.IsDone());
-    shape = coneMaker.Solid();
+    ConeBuilder coneBuilder(radius1, radius2, height);
+    shape = compoundWrap(coneBuilder.getSolid());
+    updateResult(coneBuilder);
     setClean();
   }
   catch (Standard_Failure)
@@ -85,4 +127,84 @@ void Cone::update(const UpdateMap& mapIn)
     Handle_Standard_Failure e = Standard_Failure::Caught();
     std::cout << std::endl << "Error in cone update. " << e->GetMessageString() << std::endl;
   }
+}
+
+void Cone::updateResult(const ConeBuilder& coneBuilderIn)
+{
+  //helper lamda
+  auto updateShapeByTag = [this](const TopoDS_Shape &shapeIn, FeatureTag featureTagIn)
+  {
+    uuid id = findFeatureByTag(featureContainer, featureTagMap.at(featureTagIn)).id;
+    updateShapeById(resultContainer, id, shapeIn);
+  };
+  
+  updateShapeByTag(shape, FeatureTag::Root);
+  updateShapeByTag(coneBuilderIn.getSolid(), FeatureTag::Solid);
+  updateShapeByTag(coneBuilderIn.getShell(), FeatureTag::Shell);
+  updateShapeByTag(coneBuilderIn.getFaceBottom(), FeatureTag::FaceBottom);
+  updateShapeByTag(coneBuilderIn.getFaceConical(), FeatureTag::FaceConical);
+  updateShapeByTag(coneBuilderIn.getFaceTop(), FeatureTag::FaceTop);
+  updateShapeByTag(coneBuilderIn.getWireBottom(), FeatureTag::WireBottom);
+  updateShapeByTag(coneBuilderIn.getWireConical(), FeatureTag::WireConical);
+  updateShapeByTag(coneBuilderIn.getWireTop(), FeatureTag::WireTop);
+  updateShapeByTag(coneBuilderIn.getEdgeBottom(), FeatureTag::EdgeBottom);
+  updateShapeByTag(coneBuilderIn.getEdgeConical(), FeatureTag::EdgeConical);
+  updateShapeByTag(coneBuilderIn.getEdgeTop(), FeatureTag::EdgeTop);
+  updateShapeByTag(coneBuilderIn.getVertexBottom(), FeatureTag::VertexBottom);
+  updateShapeByTag(coneBuilderIn.getVertexTop(), FeatureTag::VertexTop);
+  
+//   std::cout << std::endl << "update result:" << std::endl << resultContainer << std::endl;
+}
+
+//the quantity of cone shapes can change so generating maps from first update can lead to missing
+//ids and shapes. So here we will generate the maps with all necessary rows.
+void Cone::initializeMaps()
+{
+  //result 
+  std::vector<uuid> tempIds; //save ids for later.
+  for (unsigned int index = 0; index < 14; ++index)
+  {
+    uuid tempId = boost::uuids::basic_random_generator<boost::mt19937>()();
+    tempIds.push_back(tempId);
+    
+    ResultRecord resultRecord;
+    resultRecord.id = tempId;
+    resultRecord.shape = TopoDS_Shape();
+    resultContainer.insert(resultRecord);
+    
+    EvolutionRecord evolutionRecord;
+    evolutionRecord.outId = tempId;
+    evolutionContainer.insert(evolutionRecord);
+  }
+  
+  //helper lamda
+  auto insertIntoFeatureMap = [this](const uuid &idIn, FeatureTag featureTagIn)
+  {
+    FeatureRecord record;
+    record.id = idIn;
+    record.tag = featureTagMap.at(featureTagIn);
+    featureContainer.insert(record);
+  };
+  
+  //first we do the compound that is root. this is not in box maker.
+  insertIntoFeatureMap(tempIds.at(0), FeatureTag::Root);
+  insertIntoFeatureMap(tempIds.at(1), FeatureTag::Solid);
+  insertIntoFeatureMap(tempIds.at(2), FeatureTag::Shell);
+  insertIntoFeatureMap(tempIds.at(3), FeatureTag::FaceBottom);
+  insertIntoFeatureMap(tempIds.at(4), FeatureTag::FaceConical);
+  insertIntoFeatureMap(tempIds.at(5), FeatureTag::FaceTop);
+  insertIntoFeatureMap(tempIds.at(6), FeatureTag::WireBottom);
+  insertIntoFeatureMap(tempIds.at(7), FeatureTag::WireConical);
+  insertIntoFeatureMap(tempIds.at(8), FeatureTag::WireTop);
+  insertIntoFeatureMap(tempIds.at(9), FeatureTag::EdgeBottom);
+  insertIntoFeatureMap(tempIds.at(10), FeatureTag::EdgeConical);
+  insertIntoFeatureMap(tempIds.at(11), FeatureTag::EdgeTop);
+  insertIntoFeatureMap(tempIds.at(12), FeatureTag::VertexBottom);
+  insertIntoFeatureMap(tempIds.at(13), FeatureTag::VertexTop);
+  
+  
+//   std::cout << std::endl << std::endl <<
+//     "result Container: " << std::endl << resultContainer << std::endl << std::endl <<
+//     "feature Container:" << std::endl << featureContainer << std::endl << std::endl <<
+//     "evolution Container:" << std::endl << evolutionContainer << std::endl << std::endl;
 }

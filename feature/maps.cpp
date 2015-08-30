@@ -21,9 +21,6 @@
 
 #include <boost/uuid/random_generator.hpp>
 
-#include <TopExp.hxx>
-#include <TopTools_IndexedMapOfShape.hxx>
-
 #include "../globalutilities.h"
 #include "maps.h"
 
@@ -44,6 +41,22 @@ ostream& Feature::operator<<(ostream& os, const EvolutionContainer& container)
   return os;
 }
 
+bool Feature::hasInId(const EvolutionContainer& containerIn, const boost::uuids::uuid& inIdIn)
+{
+  typedef EvolutionContainer::index<EvolutionRecord::ByInId>::type List;
+  const List &list = containerIn.get<EvolutionRecord::ByInId>();
+  List::const_iterator it = list.find(inIdIn);
+  return (it != list.end());
+}
+
+const EvolutionRecord& Feature::findRecordByIn(const EvolutionContainer& containerIn, const boost::uuids::uuid& inIdIn)
+{
+  typedef EvolutionContainer::index<EvolutionRecord::ByInId>::type List;
+  const List &list = containerIn.get<EvolutionRecord::ByInId>();
+  List::const_iterator it = list.find(inIdIn);
+  return *it;
+}
+
 std::ostream& Feature::operator<<(std::ostream& os, const ResultRecord& record)
 {
   os << boost::uuids::to_string(record.id) << "      " << GU::getShapeHash(record.shape) << std::endl;
@@ -59,22 +72,6 @@ std::ostream& Feature::operator<<(std::ostream& os, const ResultContainer& conta
   return os;
 }
 
-void Feature::buildResultContainer(const TopoDS_Shape &shapeIn, ResultContainer &containerInOut)
-{
-  TopTools_IndexedMapOfShape shapeMap;
-  TopExp::MapShapes(shapeIn, shapeMap);
-  
-  assert(shapeMap.Contains(shapeIn));
-  
-  for (int index = 1; index <= shapeMap.Extent(); ++index)
-  {
-    ResultRecord record;
-    record.id = boost::uuids::basic_random_generator<boost::mt19937>()();
-    record.shape = shapeMap(index);
-    containerInOut.insert(record);
-  }
-}
-
 const ResultRecord& Feature::findResultByShape(const ResultContainer& containerIn, const TopoDS_Shape& shapeIn)
 {
   typedef ResultContainer::index<ResultRecord::ByShape>::type List;
@@ -82,6 +79,22 @@ const ResultRecord& Feature::findResultByShape(const ResultContainer& containerI
   List::const_iterator it = list.find(shapeIn);
   assert(it != list.end());
   return *it;
+}
+
+bool Feature::hasResult(const ResultContainer& containerIn, const TopoDS_Shape& shapeIn)
+{
+  typedef ResultContainer::index<ResultRecord::ByShape>::type List;
+  const List &list = containerIn.get<ResultRecord::ByShape>();
+  List::const_iterator it = list.find(shapeIn);
+  return (it != list.end());
+}
+
+bool Feature::hasResult(const ResultContainer& containerIn, const boost::uuids::uuid& idIn)
+{
+  typedef ResultContainer::index<ResultRecord::ById>::type List;
+  const List &list = containerIn.get<ResultRecord::ById>();
+  List::const_iterator it = list.find(idIn);
+  return (it != list.end());
 }
 
 const ResultRecord& Feature::findResultById(const ResultContainer& containerIn, const boost::uuids::uuid& idIn)
@@ -104,6 +117,16 @@ void Feature::updateShapeById(ResultContainer& containerIn, const boost::uuids::
   list.replace(it, record);
 }
 
+void Feature::updateId(ResultContainer& containerIn, const boost::uuids::uuid& idIn, const TopoDS_Shape& shapeIn)
+{
+  typedef ResultContainer::index<ResultRecord::ByShape>::type List;
+  List &list = containerIn.get<ResultRecord::ByShape>();
+  List::iterator it = list.find(shapeIn);
+  assert(it != list.end());
+  ResultRecord record = *it;
+  record.id = idIn;
+  list.replace(it, record);
+}
 
 ostream& Feature::operator<<(ostream& os, const FeatureRecord& record)
 {

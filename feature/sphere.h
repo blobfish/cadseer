@@ -22,6 +22,8 @@
 
 #include "base.h"
 
+class BRepPrimAPI_MakeSphere;
+
 namespace Feature
 {
   class Sphere : public Base
@@ -36,6 +38,9 @@ namespace Feature
     
   protected:
     double radius;
+    
+    void initializeMaps();
+    void updateResult(BRepPrimAPI_MakeSphere&);
   };
 }
 

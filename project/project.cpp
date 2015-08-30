@@ -17,6 +17,7 @@
 #include "../feature/inert.h"
 
 using namespace ProjectGraph;
+using boost::uuids::uuid;
 
 Project::Project()
 {
@@ -24,7 +25,7 @@ Project::Project()
 
 void Project::update()
 {
-  writeGraphViz("/home/tanderson/temp/cadseer.dot"); //temp
+  writeGraphViz("/home/tanderson/temp/cadseer.dot");
   
   Path sorted;
   try
@@ -132,6 +133,15 @@ void Project::addFeature(std::shared_ptr<Feature::Base> feature, osg::Group *roo
   map.insert(std::make_pair(feature->getId(), newVertex));
   root->addChild(feature->getMainSwitch());
 }
+
+void Project::connect(const boost::uuids::uuid& parentIn, const boost::uuids::uuid& childIn, Feature::InputTypes type)
+{
+  Vertex parent = map.at(parentIn);
+  Vertex child = map.at(childIn);
+  Edge edge = connectVertices(parent, child, type);
+  projectGraph[edge].inputType = type;
+}
+
 
 Edge Project::connectVertices(Vertex parent, Vertex child, Feature::InputTypes type)
 {

@@ -20,6 +20,8 @@ public:
     virtual void paintEvent(QPaintEvent* event);
     void update();
     osg::Group* getRoot(){return root;}
+    const SelectionContainers& getSelections() const {return selectionHandler->getSelections();}
+    void clearSelections() const {selectionHandler->clearSelections();}
 
 public slots:
     void setSelectionMask(const int &maskIn);

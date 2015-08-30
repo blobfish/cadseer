@@ -22,6 +22,7 @@
 
 #include <map>
 
+#include <TopoDS_Compound.hxx> //used in for wrapper.
 #include <Standard_Failure.hxx> //used in derived classes.
 #include <Precision.hxx> //used in derived classes.
 
@@ -31,8 +32,6 @@
 #include "types.h"
 #include "inputtypes.h"
 #include "../modelviz/connector.h"
-
-class TopoDS_Compound;
 
 namespace Feature
 {

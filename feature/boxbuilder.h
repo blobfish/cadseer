@@ -75,9 +75,6 @@ namespace Feature
     const TopoDS_Shape& getVertexXNYNZN() const {return vertexXNYNZN;}
     
   private:
-    TopoDS_Shape sharedEdge(const TopoDS_Shape &face1, const TopoDS_Shape &face2); //assert if not found.
-    TopoDS_Shape sharedVertex(const TopoDS_Shape &face1, const TopoDS_Shape &face2, const TopoDS_Shape &face3); //assert if not found.
-    
     TopoDS_Shape solid;
     TopoDS_Shape shell;
     TopoDS_Shape faceXP;

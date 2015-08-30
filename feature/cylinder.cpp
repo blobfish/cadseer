@@ -19,15 +19,53 @@
 
 #include <assert.h>
 
-#include <BRepPrimAPI_MakeCylinder.hxx>
+#include <boost/uuid/random_generator.hpp>
 
+#include "cylinderbuilder.h"
 #include "cylinder.h"
 
 using namespace Feature;
+using boost::uuids::uuid;
+
+enum class FeatureTag
+{
+  Root,         //!< compound
+  Solid,        //!< solid
+  Shell,        //!< shell
+  FaceBottom,   //!< bottom of cone
+  FaceCylindrical,  //!< conical face
+  FaceTop,      //!< might be empty
+  WireBottom,   //!< wire on base face
+  WireCylindrical,  //!< wire along conical face
+  WireTop,      //!< wire along top
+  EdgeBottom,   //!< bottom edge.
+  EdgeCylindrical,  //!< edge on conical face
+  EdgeTop,      //!< top edge
+  VertexBottom, //!< bottom vertex
+  VertexTop     //!< top vertex
+};
+
+static const std::map<FeatureTag, std::string> featureTagMap = 
+{
+  {FeatureTag::Root, "Root"},
+  {FeatureTag::Solid, "Solid"},
+  {FeatureTag::Shell, "Shell"},
+  {FeatureTag::FaceBottom, "FaceBase"},
+  {FeatureTag::FaceCylindrical, "FaceCylindrical"},
+  {FeatureTag::FaceTop, "FaceTop"},
+  {FeatureTag::WireBottom, "WireBottom"},
+  {FeatureTag::WireCylindrical, "WireCylindrical"},
+  {FeatureTag::WireTop, "WireTop"},
+  {FeatureTag::EdgeBottom, "EdgeBottom"},
+  {FeatureTag::EdgeCylindrical, "EdgeCylindrical"},
+  {FeatureTag::EdgeTop, "EdgeTop"},
+  {FeatureTag::VertexBottom, "VertexBottom"},
+  {FeatureTag::VertexTop, "VertexTop"}
+};
 
 Cylinder::Cylinder() : Base(), radius(5.0), height(20.0)
 {
-
+  initializeMaps();
 }
 
 void Cylinder::setRadius(const double& radiusIn)
@@ -63,12 +101,14 @@ void Cylinder::getParameters(double& radiusOut, double& heightOut) const
 
 void Cylinder::update(const UpdateMap& mapIn)
 {
+  //clear shape so if we fail the feature will be empty.
+  shape = TopoDS_Shape();
+  
   try
   {
-    BRepPrimAPI_MakeCylinder cylinderMaker(radius, height);
-    cylinderMaker.Build();
-    assert(cylinderMaker.IsDone());
-    shape = cylinderMaker.Shape();
+    CylinderBuilder cylinderMaker(radius, height);
+    shape = compoundWrap(cylinderMaker.getSolid());
+    updateResult(cylinderMaker);
     setClean();
   }
   catch (Standard_Failure)
@@ -76,4 +116,83 @@ void Cylinder::update(const UpdateMap& mapIn)
     Handle_Standard_Failure e = Standard_Failure::Caught();
     std::cout << std::endl << "Error in cylinder update. " << e->GetMessageString() << std::endl;
   }
+}
+
+//the quantity of cone shapes can change so generating maps from first update can lead to missing
+//ids and shapes. So here we will generate the maps with all necessary rows.
+void Cylinder::initializeMaps()
+{
+  //result 
+  std::vector<uuid> tempIds; //save ids for later.
+  for (unsigned int index = 0; index < 14; ++index)
+  {
+    uuid tempId = boost::uuids::basic_random_generator<boost::mt19937>()();
+    tempIds.push_back(tempId);
+    
+    ResultRecord resultRecord;
+    resultRecord.id = tempId;
+    resultRecord.shape = TopoDS_Shape();
+    resultContainer.insert(resultRecord);
+    
+    EvolutionRecord evolutionRecord;
+    evolutionRecord.outId = tempId;
+    evolutionContainer.insert(evolutionRecord);
+  }
+  
+  //helper lamda
+  auto insertIntoFeatureMap = [this](const uuid &idIn, FeatureTag featureTagIn)
+  {
+    FeatureRecord record;
+    record.id = idIn;
+    record.tag = featureTagMap.at(featureTagIn);
+    featureContainer.insert(record);
+  };
+  
+  //first we do the compound that is root. this is not in box maker.
+  insertIntoFeatureMap(tempIds.at(0), FeatureTag::Root);
+  insertIntoFeatureMap(tempIds.at(1), FeatureTag::Solid);
+  insertIntoFeatureMap(tempIds.at(2), FeatureTag::Shell);
+  insertIntoFeatureMap(tempIds.at(3), FeatureTag::FaceBottom);
+  insertIntoFeatureMap(tempIds.at(4), FeatureTag::FaceCylindrical);
+  insertIntoFeatureMap(tempIds.at(5), FeatureTag::FaceTop);
+  insertIntoFeatureMap(tempIds.at(6), FeatureTag::WireBottom);
+  insertIntoFeatureMap(tempIds.at(7), FeatureTag::WireCylindrical);
+  insertIntoFeatureMap(tempIds.at(8), FeatureTag::WireTop);
+  insertIntoFeatureMap(tempIds.at(9), FeatureTag::EdgeBottom);
+  insertIntoFeatureMap(tempIds.at(10), FeatureTag::EdgeCylindrical);
+  insertIntoFeatureMap(tempIds.at(11), FeatureTag::EdgeTop);
+  insertIntoFeatureMap(tempIds.at(12), FeatureTag::VertexBottom);
+  insertIntoFeatureMap(tempIds.at(13), FeatureTag::VertexTop);
+  
+//   std::cout << std::endl << std::endl <<
+//     "result Container: " << std::endl << resultContainer << std::endl << std::endl <<
+//     "feature Container:" << std::endl << featureContainer << std::endl << std::endl <<
+//     "evolution Container:" << std::endl << evolutionContainer << std::endl << std::endl;
+}
+
+void Cylinder::updateResult(const CylinderBuilder &cylinderBuilderIn)
+{
+  //helper lamda
+  auto updateShapeByTag = [this](const TopoDS_Shape &shapeIn, FeatureTag featureTagIn)
+  {
+    uuid id = findFeatureByTag(featureContainer, featureTagMap.at(featureTagIn)).id;
+    updateShapeById(resultContainer, id, shapeIn);
+  };
+  
+  updateShapeByTag(shape, FeatureTag::Root);
+  updateShapeByTag(cylinderBuilderIn.getSolid(), FeatureTag::Solid);
+  updateShapeByTag(cylinderBuilderIn.getShell(), FeatureTag::Shell);
+  updateShapeByTag(cylinderBuilderIn.getFaceBottom(), FeatureTag::FaceBottom);
+  updateShapeByTag(cylinderBuilderIn.getFaceCylindrical(), FeatureTag::FaceCylindrical);
+  updateShapeByTag(cylinderBuilderIn.getFaceTop(), FeatureTag::FaceTop);
+  updateShapeByTag(cylinderBuilderIn.getWireBottom(), FeatureTag::WireBottom);
+  updateShapeByTag(cylinderBuilderIn.getWireCylindrical(), FeatureTag::WireCylindrical);
+  updateShapeByTag(cylinderBuilderIn.getWireTop(), FeatureTag::WireTop);
+  updateShapeByTag(cylinderBuilderIn.getEdgeBottom(), FeatureTag::EdgeBottom);
+  updateShapeByTag(cylinderBuilderIn.getEdgeCylindrical(), FeatureTag::EdgeCylindrical);
+  updateShapeByTag(cylinderBuilderIn.getEdgeTop(), FeatureTag::EdgeTop);
+  updateShapeByTag(cylinderBuilderIn.getVertexBottom(), FeatureTag::VertexBottom);
+  updateShapeByTag(cylinderBuilderIn.getVertexTop(), FeatureTag::VertexTop);
+  
+//   std::cout << std::endl << "update result:" << std::endl << resultContainer << std::endl;
 }

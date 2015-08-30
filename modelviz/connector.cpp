@@ -147,6 +147,10 @@ void Connector::outputGraphviz(const std::string &name)
 }
 
 
+//when we build the ids in features we treat seam edges as one edge
+//through maps. However, here we are using topods_iterator which finds both
+//edges of a seam. so when we look for the shape in the
+//result map we fail as one of the 2 seam edges isn't in the map.
 BuildConnector::BuildConnector(const TopoDS_Shape &shapeIn, const Feature::ResultContainer &resultContainerIn) : connector()
 {
     connector.buildStartNode(shapeIn, resultContainerIn);
@@ -159,6 +163,8 @@ void BuildConnector::buildRecursiveConnector(const TopoDS_Shape &shapeIn, const 
     for (TopoDS_Iterator it(shapeIn); it.More(); it.Next())
     {
         const TopoDS_Shape &currentShape = it.Value();
+        if (!(Feature::hasResult(resultContainerIn, currentShape)))
+          continue; //yuck. see note above. probably seam edge.
 
         connector.buildStartNode(currentShape, resultContainerIn);
         if (currentShape.ShapeType() != TopAbs_VERTEX)

@@ -24,6 +24,8 @@
 
 namespace Feature
 {
+  class CylinderBuilder;
+  
   class Cylinder : public Base
   {
   public:
@@ -42,6 +44,9 @@ namespace Feature
   protected:
     double radius;
     double height;
+    
+    void initializeMaps();
+    void updateResult(const CylinderBuilder &);
   };
 }
 

@@ -22,6 +22,8 @@
 
 #include "base.h"
 
+class BRepFilletAPI_MakeFillet;
+
 namespace Feature
 {
 class Blend : public Base
@@ -40,6 +42,25 @@ class Blend : public Base
   protected:
     double radius;
     std::vector<boost::uuids::uuid> edgeIds;
+    
+    /*! used to map the edges that are blended away to the face generated.
+     * used to map new generated face to outer wire.
+     */ 
+    EvolutionContainer shapeMap;
+    
+    /*! map from known faces to new blended faces' edges and vertices.*/
+    DerivedContainer derivedContainer;
+    
+private:
+    void shapeMatch(const Feature::Base* targetFeatureIn);
+    void modifiedMatch(BRepFilletAPI_MakeFillet&, const Base *);
+    void generatedMatch(BRepFilletAPI_MakeFillet&, const Base *);
+    void uniqueTypeMatch(const Base *);
+    void outerWireMatch(const Base *);
+    void derivedMatch(BRepFilletAPI_MakeFillet&, const Base *);
+    
+    void dumpInfo(BRepFilletAPI_MakeFillet&, const Base *);
+    void dumpResultStats();
 };
 }
 

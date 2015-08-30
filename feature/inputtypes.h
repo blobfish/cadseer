@@ -19,14 +19,32 @@
 #ifndef INPUTTYPES_H
 #define INPUTTYPES_H
 
+#include <assert.h>
+#include <vector>
+#include <string>
+
 namespace Feature
 {
   enum class InputTypes
+  {
+    none = 0,
+    target,
+    tool
+  };
+    
+  inline const static std::string& getInputTypeString(InputTypes typeIn)
+  {
+    const static std::vector<std::string> strings = 
     {
-      none = 0,
-      target,
-      tool
+      "None",
+      "Target",
+      "Tool"
     };
+    
+    std::size_t casted = static_cast<std::size_t>(typeIn);
+    assert(casted < strings.size());
+    return strings.at(casted);
+  }
 }
 
 #endif //INPUTTYPES_H

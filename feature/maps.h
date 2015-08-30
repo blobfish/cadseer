@@ -21,6 +21,7 @@
 #define MAPS_H
 
 #include <limits.h>
+#include <set>
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -76,6 +77,8 @@ namespace Feature
   > EvolutionContainer;
   
   std::ostream& operator<<(std::ostream& os, const EvolutionContainer& container);
+  bool hasInId(const EvolutionContainer &containerIn, const boost::uuids::uuid &inIdIn);
+  const EvolutionRecord& findRecordByIn(const EvolutionContainer &containerIn, const boost::uuids::uuid &inIdIn);
 
 
   //ResultShapeContainer
@@ -118,12 +121,12 @@ namespace Feature
     ResultRecord,
     BMI::indexed_by
     <
-      BMI::ordered_unique
+      BMI::ordered_non_unique
       <
         BMI::tag<ResultRecord::ById>,
         BMI::member<ResultRecord, boost::uuids::uuid, &ResultRecord::id>
       >,
-      BMI::hashed_unique
+      BMI::hashed_non_unique
       <
         BMI::tag<ResultRecord::ByShape>,
         BMI::member<ResultRecord, TopoDS_Shape, &ResultRecord::shape>,
@@ -134,10 +137,13 @@ namespace Feature
   > ResultContainer;
 
   std::ostream& operator<<(std::ostream& os, const ResultContainer& container);
-  void buildResultContainer(const TopoDS_Shape &shapeIn, ResultContainer &containerInOut);
+  bool hasResult(const ResultContainer &containerIn, const TopoDS_Shape &shapeIn);
+  bool hasResult(const ResultContainer &containerIn, const boost::uuids::uuid &idIn);
   const ResultRecord& findResultByShape(const ResultContainer &containerIn, const TopoDS_Shape &shapeIn);
   const ResultRecord& findResultById(const ResultContainer &containerIn, const boost::uuids::uuid &idIn);
   void updateShapeById(ResultContainer& containerIn, const boost::uuids::uuid &idIn, const TopoDS_Shape &shapeIn);
+  //! update the id in the container by the shape.
+  void updateId(ResultContainer& containerIn, const boost::uuids::uuid &idIn, const TopoDS_Shape &shapeIn);
   
   //FeatureMap
   struct FeatureRecord
@@ -177,6 +183,9 @@ namespace Feature
   std::ostream& operator<<(std::ostream& os, const FeatureContainer& container);
   const FeatureRecord& findFeatureByTag(const FeatureContainer &containerIn, const std::string &featureTagIn);
   
+  //maping a set of ids to one id. this is for deriving an id from multiple shapes.
+  typedef std::set<boost::uuids::uuid> IdSet;
+  typedef std::map<IdSet, boost::uuids::uuid> DerivedContainer;
 }
 
 #endif //MAPS_H

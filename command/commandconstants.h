@@ -15,7 +15,8 @@ enum Constants
     ConstructionBox,
     ConstructionSphere,
     ConstructionCone,
-    ConstructionCylinder
+    ConstructionCylinder,
+    ConstructionBlend
 };
 }
 

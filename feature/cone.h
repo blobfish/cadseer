@@ -24,6 +24,8 @@
 
 namespace Feature
 {
+  class ConeBuilder;
+  
   class Cone : public Base
   {
   public:
@@ -45,8 +47,8 @@ namespace Feature
     double radius2; //!< maybe zero.
     double height;
     
-    
-    
+    void initializeMaps();
+    void updateResult(const ConeBuilder &);
   };
 }
 

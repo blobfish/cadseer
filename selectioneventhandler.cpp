@@ -18,6 +18,22 @@
 using namespace osg;
 using namespace boost::uuids;
 
+std::ostream& operator<<(std::ostream& os, const SelectionContainer& container)
+{
+  os << 
+    "type is: " << getNameOfType(container.selectionType) << 
+    "      featureid is: " << GU::idToString(container.featureId) <<
+    "      id is: " << GU::idToString(container.shapeId) << std::endl;
+  return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const SelectionContainers& containers)
+{
+  for (const auto &current : containers)
+    os << current;
+  return os;
+}
+
 SelectionEventHandler::SelectionEventHandler() : osgGA::GUIEventHandler()
 {
     preHighlightColor = Vec4(1.0, 1.0, 0.0, 1.0);
@@ -169,6 +185,7 @@ bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
 //                 "   selectedId is: " << selectedId << std::endl <<
 //                 "   featureId is: " << featureId << std::endl;
 
+    container.featureId = featureId;
     switch (nodeMask)
     {
     case NodeMask::face:
@@ -178,7 +195,7 @@ bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
             newSelection.initialize(geometry);
             container.selections.push_back(newSelection);
             container.selectionType = SelectionTypes::Face;
-            container.id = selectedId;
+            container.shapeId = selectedId;
         }
         else if ((selectionMask & SelectionMask::shellsSelectable) == SelectionMask::shellsSelectable)
         {
@@ -201,7 +218,7 @@ bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
                     container.selections.push_back(newSelection);
                 }
                 container.selectionType = SelectionTypes::Shell;
-                container.id = shells.at(0);
+                container.shapeId = shells.at(0);
             }
         }
         else if ((selectionMask & SelectionMask::solidsSelectable) == SelectionMask::solidsSelectable)
@@ -225,7 +242,7 @@ bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
                     container.selections.push_back(newSelection);
                 }
                 container.selectionType = SelectionTypes::Solid;
-                container.id = solids.at(0);
+                container.shapeId = solids.at(0);
             }
         }
         break;
@@ -235,7 +252,7 @@ bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
             Selected newSelection;
             newSelection.initialize(geometry);
             container.selectionType = SelectionTypes::Edge;
-            container.id = selectedId;
+            container.shapeId = selectedId;
             container.selections.push_back(newSelection);
         }
         else if ((selectionMask & SelectionMask::wiresSelectable) == SelectionMask::wiresSelectable)
@@ -279,7 +296,7 @@ bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
                 container.selections.push_back(newSelection);
             }
             container.selectionType = SelectionTypes::Wire;
-            container.id = wireId;
+            container.shapeId = wireId;
         }
         break;
     case NodeMask::vertex:
@@ -287,7 +304,7 @@ bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
         Selected newSelection;
         newSelection.initialize(geometry);
         container.selectionType = SelectionTypes::Vertex;
-        container.id = selectedId;
+        container.shapeId = selectedId;
         container.selections.push_back(newSelection);
         break;
     }
