@@ -33,9 +33,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     viewWidget = new ViewerWidget(osgViewer::ViewerBase::SingleThreaded);
     viewWidget->setGeometry( 100, 100, 800, 600 );
-    connect(ui->actionHide, SIGNAL(triggered()), viewWidget, SLOT(hideSelected()));
-    connect(ui->actionShowAll, SIGNAL(triggered()), viewWidget, SLOT(showAll()));
-    connect(ui->actionExportOSG, SIGNAL(triggered()), viewWidget, SLOT(writeOSGSlot()));
     
     dagModel = new DAG::Model(this);
     dagView = new DAG::View(this);
@@ -136,6 +133,16 @@ void MainWindow::setupCommands()
     connect(constructionBlendAction, SIGNAL(triggered(bool)), this, SLOT(constructionBlendSlot()));
     Command constructionBlendCommand(CommandConstants::ConstructionBlend, "Construct Blend", constructionBlendAction);
     CommandManager::getManager().addCommand(constructionBlendCommand);
+    
+    QAction *fileImportOCCAction = new QAction(qApp);
+    connect(fileImportOCCAction, SIGNAL(triggered(bool)), this, SLOT(readBrepSlot()));
+    Command fileImportOCCCommand(CommandConstants::FileImportOCC, "Import BRep", fileImportOCCAction);
+    CommandManager::getManager().addCommand(fileImportOCCCommand);
+    
+    QAction *fileExportOSGAction = new QAction(qApp);
+    connect(fileExportOSGAction, SIGNAL(triggered(bool)), viewWidget, SLOT(writeOSGSlot()));
+    Command fileExportOSGCommand(CommandConstants::FileExportOSG, "Export OSG", fileExportOSGAction);
+    CommandManager::getManager().addCommand(fileExportOSGCommand);
 }
 
 void MainWindow::constructionBoxSlot()

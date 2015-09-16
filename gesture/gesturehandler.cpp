@@ -288,6 +288,32 @@ void GestureHandler::constructMenu()
     constructionBlend->setMatrix(dummy);
     constructionBlend->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::ConstructionBlend));
     constructionFinishing->insertChild(constructionFinishing->getNumChildren() - 2, constructionBlend);
+    
+    //file base
+    osg::MatrixTransform *fileBase;
+    fileBase = GestureNode::buildMenuNode(":/resources/images/fileBase.svg");
+    fileBase->setMatrix(dummy);
+    startNode->insertChild(startNode->getNumChildren() - 2, fileBase);
+    
+    osg::MatrixTransform *fileImport;
+    fileImport = GestureNode::buildMenuNode(":/resources/images/fileImport.svg");
+    fileImport->setMatrix(dummy);
+    fileBase->insertChild(fileBase->getNumChildren() - 2, fileImport);
+    
+    osg::MatrixTransform *fileImportOCC = GestureNode::buildCommandNode(":/resources/images/fileOCC.svg");
+    fileImportOCC->setMatrix(dummy);
+    fileImportOCC->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::FileImportOCC));
+    fileImport->insertChild(fileImport->getNumChildren() - 2, fileImportOCC);
+    
+    osg::MatrixTransform *fileExport;
+    fileExport = GestureNode::buildMenuNode(":/resources/images/fileExport.svg");
+    fileExport->setMatrix(dummy);
+    fileBase->insertChild(fileBase->getNumChildren() - 2, fileExport);
+    
+    osg::MatrixTransform *fileExportOSG = GestureNode::buildCommandNode(":/resources/images/fileOSG.svg");
+    fileExportOSG->setMatrix(dummy);
+    fileExportOSG->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::FileExportOSG));
+    fileExport->insertChild(fileExport->getNumChildren() - 2, fileExportOSG);
 }
 
 std::vector<osg::Vec3> GestureHandler::buildNodeLocations(osg::Vec3 direction, int nodeCount)

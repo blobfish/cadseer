@@ -25,8 +25,6 @@ public:
 
 public Q_SLOTS:
     void setSelectionMask(const int &maskIn);
-    void hideSelected();
-    void showAll();
     void viewTopSlot();
     void viewFrontSlot();
     void viewRightSlot();
@@ -56,23 +54,5 @@ public:
 protected:
     bool visibility;
 };
-
-class VisitorHide : public osg::NodeVisitor
-{
-public:
-    VisitorHide(bool visIn, int hashIn);
-    virtual void apply(osg::Switch &aSwitch);
-protected:
-    bool visibility;
-    int hash;
-};
-
-class VisitorShowAll : public osg::NodeVisitor
-{
-public:
-    VisitorShowAll();
-    virtual void apply(osg::Switch &aSwitch);
-};
-
 
 #endif // VIEWERWIDGET_H
