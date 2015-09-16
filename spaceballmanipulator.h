@@ -44,7 +44,7 @@ protected:
     void getViewData();
     void scaleView(double scaleFactor);//used for ortho zoom.
     void scaleFit();
-    osg::Vec3d projectToBound(osg::Vec3d eye, osg::Vec3d lookCenter) const;
+    osg::Vec3d projectToBound(const osg::Vec3d &eye, osg::Vec3d lookCenter) const;
     osg::ref_ptr<osg::Node> node;
     osg::BoundingSphere boundingSphere;
     osg::BoundingSphere camSphere;

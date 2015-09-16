@@ -113,8 +113,15 @@ static const std::map<FeatureTag, std::string> featureTagMap =
   {FeatureTag::VertexXNYNZN, "VertexXNYNZN"}
 };
 
+QIcon Box::icon;
+
 Box::Box() : Base(), length(10.0), width(10.0), height(10.0)
 {
+  if (icon.isNull())
+    icon = QIcon(":/resources/images/constructionBox.svg");
+  
+  name = QObject::tr("Box");
+  
   initializeMaps();
 }
 
@@ -123,7 +130,7 @@ void Box::setLength(const double &lengthIn)
   if (lengthIn == length)
     return;
   assert(lengthIn > Precision::Confusion());
-  setDirty();
+  setModelDirty();
   length = lengthIn;
 }
 
@@ -132,7 +139,7 @@ void Box::setWidth(const double &widthIn)
   if (widthIn == width)
     return;
   assert(widthIn > Precision::Confusion());
-  setDirty();
+  setModelDirty();
   width = widthIn;
 }
 
@@ -141,7 +148,7 @@ void Box::setHeight(const double &heightIn)
   if (heightIn == height)
     return;
   assert(heightIn > Precision::Confusion());
-  setDirty();
+  setModelDirty();
   height = heightIn;
 }
 
@@ -165,6 +172,7 @@ void Box::update(const UpdateMap& mapIn)
 {
   //clear shape so if we fail the feature will be empty.
   shape = TopoDS_Shape();
+  setFailure();
   
   try
   {
@@ -172,7 +180,8 @@ void Box::update(const UpdateMap& mapIn)
     TopoDS_Compound wrapper = compoundWrap(boxMaker.getSolid());
     shape = wrapper;
     updateResult(boxMaker);
-    setClean();
+    setModelClean();
+    setSuccess();
   }
   catch (Standard_Failure)
   {

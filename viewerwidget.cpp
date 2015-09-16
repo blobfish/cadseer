@@ -207,7 +207,7 @@ osg::Camera* ViewerWidget::createBackgroundCamera()
     bgCamera->setRenderOrder(osg::Camera::POST_RENDER);
     bgCamera->setProjectionMatrix(osg::Matrix::ortho2D(0.0, 1.0, 0.0, 1.0));
     bgCamera->addChild(geode.get());
-    bgCamera->setNodeMask(NodeMask::noSelect);
+    bgCamera->setNodeMask(NodeMaskDef::backGroundCamera);
 
     osg::StateSet* ss = bgCamera->getOrCreateStateSet();
     ss->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
@@ -234,7 +234,7 @@ osg::Camera* ViewerWidget::createGestureCamera()
     quad->setColorArray(colorArray);
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
     geode->addDrawable(quad.get());
-    geode->setNodeMask(NodeMask::noSelect);
+    geode->setNodeMask(NodeMaskDef::gestureCamera);
 
     osg::Camera *fadeCamera = new osg::Camera();
     fadeCamera->setCullingActive(false);
@@ -247,7 +247,7 @@ osg::Camera* ViewerWidget::createGestureCamera()
 //    fadeCamera->setProjectionMatrix(osg::Matrix::ortho2D(0.0, 100.0, 0.0, 100.0));
     fadeCamera->setViewMatrix(osg::Matrix::identity());
     fadeCamera->setGraphicsContext(windowQt);
-    fadeCamera->setNodeMask(NodeMask::noSelect);
+    fadeCamera->setNodeMask(NodeMaskDef::gestureCamera);
 
     osg::StateSet* ss = fadeCamera->getOrCreateStateSet();
     ss->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
@@ -366,7 +366,7 @@ void VisibleVisitor::apply(osg::Switch &aSwitch)
 {
     traverse(aSwitch);
 
-    if (aSwitch.getNodeMask() & NodeMask::vertex)
+    if (aSwitch.getNodeMask() & NodeMaskDef::vertex)
     {
         if (visibility)
             aSwitch.setAllChildrenOn();
@@ -384,7 +384,7 @@ void VisitorHide::apply(osg::Switch &aSwitch)
 {
     traverse(aSwitch);
 
-    if ((aSwitch.getNodeMask() & NodeMask::object))
+    if ((aSwitch.getNodeMask() & NodeMaskDef::object))
     {
         int switchHash;
         if (aSwitch.getUserValue(GU::idAttributeTitle, switchHash))
@@ -409,6 +409,6 @@ void VisitorShowAll::apply(osg::Switch &aSwitch)
 {
     traverse(aSwitch);
 
-    if ((aSwitch.getNodeMask() & NodeMask::object))
+    if ((aSwitch.getNodeMask() & NodeMaskDef::object))
         aSwitch.setAllChildrenOn();
 }

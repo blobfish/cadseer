@@ -55,7 +55,7 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
                 return false;
             dragStarted = false;
             gestureSwitch->setAllChildrenOff();
-            if (currentNode->getNodeMask() & NodeMask::gestureCommand)
+            if (currentNode->getNodeMask() & NodeMaskDef::gestureCommand)
             {
                 int temp;
                 if (!currentNode->getUserValue(CommandConstants::attributeTitle, temp))
@@ -91,7 +91,7 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
         osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector = new osgUtil::LineSegmentIntersector
                 (osgUtil::Intersector::MODEL, temp.x(), temp.y());
         osgUtil::IntersectionVisitor iv(intersector);
-        iv.setTraversalMask(~NodeMask::noSelect);
+        iv.setTraversalMask(~NodeMaskDef::gestureCamera);
         gestureSwitch->accept(iv);
 
         if(intersector->containsIntersections())
@@ -105,7 +105,7 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
                 if (currentNodeLeft == true)
                 {
                     currentNodeLeft = false;
-                    if (currentNode->getNodeMask() & NodeMask::gestureMenu)
+                    if (currentNode->getNodeMask() & NodeMaskDef::gestureMenu)
                         contractSubNodes();
                 }
             }
@@ -145,7 +145,7 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
             if (currentNodeLeft == false)
             {
                 currentNodeLeft = true;
-                if (currentNode->getNodeMask() & NodeMask::gestureMenu)
+                if (currentNode->getNodeMask() & NodeMaskDef::gestureMenu)
                     spraySubNodes(temp);
             }
         }

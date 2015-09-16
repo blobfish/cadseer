@@ -17,32 +17,30 @@
  *
  */
 
-#ifndef INERT_H
-#define INERT_H
+#ifndef BOXDIALOG_H
+#define BOXDIALOG_H
 
-#include "base.h"
+#include <QDialog>
+#include <QLineEdit>
 
-namespace Feature
+class BoxDialog : public QDialog
 {
-  /*! @brief static feature.
-   * 
-   * feature that has no real parameters or update.
-   * for example, used for import geometry.
-   */
-  class Inert : public Base
-  {
-  public:
-    Inert(const TopoDS_Shape &shapeIn);
-    virtual void update(const UpdateMap&) override {}
-    virtual Type getType() const override {return Type::Inert;}
-    virtual const std::string& getTypeString() const override {return Feature::getTypeString(Type::Inert);}
-    virtual const QIcon& getIcon() const override {return icon;}
-    virtual Descriptor getDescriptor() const override {return Descriptor::Create;}
-    
-  private:
-    Inert(){};
-    static QIcon icon;
-  };
-}
+  Q_OBJECT
+public:
+  explicit BoxDialog(QWidget *parent = 0);
+  
+  QLineEdit *lengthEdit;
+  QLineEdit *widthEdit;
+  QLineEdit *heightEdit;
+  
+  void setLength(const double &lengthIn);
+  void setWidth(const double &widthIn);
+  void setHeight(const double &heightIn);
+  void setParameters(const double &lengthIn, const double &widthIn, const double &heightIn);
+  
+private:
+  void buildGui();
+  QString cleanFormat(const double &valueIn);
+};
 
-#endif // INERT_H
+#endif // BOXDIALOG_H

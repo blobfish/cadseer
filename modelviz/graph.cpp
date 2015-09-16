@@ -126,13 +126,13 @@ bool Build::go(const Standard_Real &deflection, const Standard_Real &angle)
 void Build::setUpGraph()
 {
     groupOut = new osg::Switch();
-    groupOut->setNodeMask(NodeMask::lod);
+    groupOut->setNodeMask(NodeMaskDef::lod);
     groupVertices = new osg::Switch();
-    groupVertices->setNodeMask(NodeMask::vertex);
+    groupVertices->setNodeMask(NodeMaskDef::vertex);
     groupEdges = new osg::Switch();
-    groupEdges->setNodeMask(NodeMask::edge);
+    groupEdges->setNodeMask(NodeMaskDef::edge);
     groupFaces = new osg::Switch();
-    groupFaces->setNodeMask(NodeMask::face);
+    groupFaces->setNodeMask(NodeMaskDef::face);
     groupOut->addChild(groupVertices);
     groupOut->addChild(groupEdges);
     groupOut->addChild(groupFaces);

@@ -38,6 +38,8 @@ class Blend : public Base
     virtual void update(const UpdateMap&) override;
     virtual Type getType() const override {return Type::Blend;}
     virtual const std::string& getTypeString() const override {return Feature::getTypeString(Type::Blend);}
+    virtual const QIcon& getIcon() const override {return icon;}
+    virtual Descriptor getDescriptor() const override {return Descriptor::Alter;}
   
   protected:
     double radius;
@@ -61,6 +63,8 @@ private:
     
     void dumpInfo(BRepFilletAPI_MakeFillet&, const Base *);
     void dumpResultStats();
+    
+    static QIcon icon;
 };
 }
 

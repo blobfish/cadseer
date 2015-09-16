@@ -22,6 +22,11 @@
 
 #include <map>
 
+#include <boost/signals2.hpp>
+
+#include <QIcon>
+#include <QString>
+
 #include <TopoDS_Compound.hxx> //used in for wrapper.
 #include <Standard_Failure.hxx> //used in derived classes.
 #include <Precision.hxx> //used in derived classes.
@@ -32,6 +37,7 @@
 #include "types.h"
 #include "inputtypes.h"
 #include "../modelviz/connector.h"
+#include "states.h"
 
 namespace Feature
 {
@@ -43,15 +49,31 @@ class Base
 public:
   Base();
   virtual ~Base();
-  bool isDirty() const {return dirty;}
-  bool isClean() const {return !dirty;}
-  void setDirty(){dirty = true; visualDirty = true;}
-  bool isVisualDirty() const {return visualDirty;}
-  bool isVisualClean() const {return !visualDirty;}
+  bool isModelDirty() const {return state.test(StateOffset::ModelDirty);}
+  bool isModelClean() const {return !(state.test(StateOffset::ModelDirty));}
+  void setModelDirty();
+  bool isVisualDirty() const {return state.test(StateOffset::VisualDirty);}
+  bool isVisualClean() const {return !(state.test(StateOffset::VisualDirty));}
+  void show3D();
+  void hide3D();
+  void toggle3D();
+  bool isVisible3D() const {return !(state.test(StateOffset::Hidden3D));}
+  bool isHidden3D() const {return state.test(StateOffset::Hidden3D);}
+  bool isSuccess() const {return !(state.test(StateOffset::Failure));}
+  bool isFailure() const {return state.test(StateOffset::Failure);}
+  void setActive();
+  void setInActive();
+  bool isActive() const {return !(state.test(StateOffset::Inactive));}
+  bool isInactive() const {return state.test(StateOffset::Inactive);}
+  void setName(const QString &nameIn){name = nameIn;}
+  QString getName() const {return name;}
+  State getState() const {return state;}
   virtual void update(const UpdateMap&) = 0;
   virtual void updateVisual(); //called after update.
   virtual Type getType() const = 0;
   virtual const std::string& getTypeString() const = 0;
+  virtual const QIcon& getIcon() const = 0;
+  virtual Descriptor getDescriptor() const = 0;
   const EvolutionContainer& getEvolutioncontainer() const {return evolutionContainer;}
   const ResultContainer& getResultContainer() const {return resultContainer;}
   boost::uuids::uuid getId() const {return id;}
@@ -60,14 +82,28 @@ public:
   osg::Switch* getMainSwitch() const {return mainSwitch.get();}
   const ModelViz::Connector& getConnector() const {return connector;}
   
-protected:
-  void setClean(){dirty = false;} //!< clean can only set through virtual update.
-  void setVisualClean(){visualDirty = false;} //!< clean can only set through virtual visul update.
+  static std::size_t nextConstructionIndex;
   
-  bool dirty = true;
-  bool visualDirty = true;
+  typedef boost::signals2::signal<void (boost::uuids::uuid, std::size_t)> StateChangedSignal;
+  boost::signals2::connection connectState(const StateChangedSignal::slot_type &subscriber) const
+  {
+    return stateChangedSignal.connect(subscriber);
+  }
+  
+protected:
+  void setModelClean(); //!< clean can only set through virtual update.
+  void setVisualClean(); //!< clean can only set through virtual visual update.
+  void setFailure(); //!< set only through virtual update.
+  void setSuccess(); //!< set only through virtual update.
+  
+  QString name;
+  
+  //mutable allows us to connect to the signal through a const object. neat!
+  mutable StateChangedSignal stateChangedSignal;
   
   boost::uuids::uuid id;
+  State state;
+  std::size_t constructionIndex; //!< for consistently ordered iteration. @see DAGView
   
   TopoDS_Shape shape;
   

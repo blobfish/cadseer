@@ -8,6 +8,8 @@ class ViewerWidget;
 class SelectionManager;
 class Project;
 
+namespace DAG{class View; class Model;}
+
 namespace Ui {
 class MainWindow;
 }
@@ -23,7 +25,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-public slots:
+public Q_SLOTS:
     void readBrepSlot();
     void constructionBoxSlot();
     void constructionSphereSlot();
@@ -36,6 +38,8 @@ private:
     void setupCommands();
     Ui::MainWindow *ui;
     ViewerWidget* viewWidget;
+    DAG::Model *dagModel;
+    DAG::View *dagView;
     SelectionManager *selectionManager;
 };
 

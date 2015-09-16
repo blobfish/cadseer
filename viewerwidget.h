@@ -23,7 +23,7 @@ public:
     const SelectionContainers& getSelections() const {return selectionHandler->getSelections();}
     void clearSelections() const {selectionHandler->clearSelections();}
 
-public slots:
+public Q_SLOTS:
     void setSelectionMask(const int &maskIn);
     void hideSelected();
     void showAll();

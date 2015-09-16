@@ -17,36 +17,25 @@
  *
  */
 
-#ifndef SPHERE_H
-#define SPHERE_H
+#ifndef DAGVIEW_H
+#define DAGVIEW_H
 
-#include "base.h"
+#include <memory>
 
-class BRepPrimAPI_MakeSphere;
+#include <QtGui/QGraphicsView>
 
-namespace Feature
+// #include "dagmodel.h"
+
+namespace DAG
 {
-  class Sphere : public Base
+  //! @brief view for DAG viewer
+  class View : public QGraphicsView
   {
+    Q_OBJECT
   public:
-    Sphere();
-    void setRadius(const double &radiusIn);
-    double getRadius() const {return radius;}
-    virtual void update(const UpdateMap&) override;
-    virtual Type getType() const override {return Type::Sphere;}
-    virtual const std::string& getTypeString() const override {return Feature::getTypeString(Type::Sphere);}
-    virtual const QIcon& getIcon() const override {return icon;}
-    virtual Descriptor getDescriptor() const override {return Descriptor::Create;}
-    
-  protected:
-    double radius;
-    
-    void initializeMaps();
-    void updateResult(BRepPrimAPI_MakeSphere&);
-    
-  private:
-    static QIcon icon;
+    View(QWidget *parentIn = 0);
+    virtual ~View() override;
   };
 }
 
-#endif // SPHERE_H
+#endif // DAGVIEW_H

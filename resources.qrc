@@ -25,5 +25,10 @@
         <file>resources/images/constructionCylinder.svg</file>
         <file>resources/images/constructionFinishing.svg</file>
         <file>resources/images/constructionBlend.svg</file>
+        <file>resources/images/constructionInert.svg</file>
+        <file>resources/images/dagViewFail.svg</file>
+        <file>resources/images/dagViewPass.svg</file>
+        <file>resources/images/dagViewPending.svg</file>
+        <file>resources/images/dagViewVisible.svg</file>
     </qresource>
 </RCC>

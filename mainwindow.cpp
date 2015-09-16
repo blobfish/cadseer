@@ -1,10 +1,14 @@
 #include <iostream>
 #include <assert.h>
+#include <limits>
 
 #include <QHBoxLayout>
 #include <QFileDialog>
+#include <QSplitter>
 
 #include "mainwindow.h"
+#include "dagview/dagmodel.h"
+#include "dagview/dagview.h"
 #include "application.h"
 #include "ui_mainwindow.h"
 #include "viewerwidget.h"
@@ -17,6 +21,7 @@
 #include "feature/cone.h"
 #include "feature/cylinder.h"
 #include "feature/blend.h"
+#include "dialogs/boxdialog.h"
 
 using boost::uuids::uuid;
 
@@ -31,8 +36,17 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionHide, SIGNAL(triggered()), viewWidget, SLOT(hideSelected()));
     connect(ui->actionShowAll, SIGNAL(triggered()), viewWidget, SLOT(showAll()));
     connect(ui->actionExportOSG, SIGNAL(triggered()), viewWidget, SLOT(writeOSGSlot()));
+    
+    dagModel = new DAG::Model(this);
+    dagView = new DAG::View(this);
+    dagView->setScene(dagModel);
+    
+    QSplitter *splitter = new QSplitter(Qt::Horizontal, this);
+    splitter->addWidget(viewWidget);
+    splitter->addWidget(dagView);
+    
     QHBoxLayout *aLayout = new QHBoxLayout();
-    aLayout->addWidget(viewWidget);
+    aLayout->addWidget(splitter);
     ui->centralwidget->setLayout(aLayout);
 
     selectionManager = new SelectionManager(this);
@@ -46,6 +60,10 @@ MainWindow::MainWindow(QWidget *parent) :
     Application *application = dynamic_cast<Application *>(qApp);
     assert(application);
     application->setProject(project);
+    
+    project->connectFeatureAdded(boost::bind(&DAG::Model::featureAddedSlot, dagModel, _1));
+    project->connectProjectUpdated(boost::bind(&DAG::Model::projectUpdatedSlot, dagModel));
+    project->connectConnectionAdded(boost::bind(&DAG::Model::connectionAddedSlot, dagModel, _1, _2, _3));
 
     setupCommands();
 }
@@ -126,9 +144,51 @@ void MainWindow::constructionBoxSlot()
     assert(application);
     Project *project = application->getProject();
     
-    std::shared_ptr<Feature::Box> box(new Feature::Box());
-    box->setParameters(20.0, 10.0, 2.0);
-    project->addFeature(box, viewWidget->getRoot());
+    Feature::Box *box = nullptr;
+    const SelectionContainers &selections = viewWidget->getSelections();
+    //find first box.
+    for (const auto &currentSelection : selections)
+    {
+      Feature::Base *feature = project->findFeature(currentSelection.featureId);
+      assert(feature);
+      if (feature->getType() != Feature::Type::Box)
+        continue;
+      
+      box = dynamic_cast<Feature::Box*>(feature);
+      assert(box);
+      break;
+    }
+    
+    viewWidget->clearSelections();
+    
+    BoxDialog dialog;
+    dialog.setModal(true);
+    if (box)
+    {
+      //editing.
+      dialog.setParameters(box->getLength(), box->getWidth(), box->getHeight());
+      if (!dialog.exec())
+        return;
+    }
+    else
+    {
+      //constructing.
+      dialog.setParameters(20.0, 10.0, 2.0);
+      
+      if (!dialog.exec())
+        return;
+      
+      box = new Feature::Box();
+      std::shared_ptr<Feature::Box> boxTemp(box);
+      project->addFeature(boxTemp, viewWidget->getRoot());
+    }
+    
+    box->setParameters
+    (
+      dialog.lengthEdit->text().toDouble(),
+      dialog.widthEdit->text().toDouble(),
+      dialog.heightEdit->text().toDouble()
+    );
     project->update();
     project->updateVisual();
     
@@ -207,9 +267,8 @@ void MainWindow::constructionBlendSlot()
   project->connect(targetFeatureId, blend->getId(), Feature::InputTypes::target);
   blend->setEdgeIds(edgeIds);
   
-  const Feature::Base *targetFeature = project->findFeature(targetFeatureId);
-  osg::Switch *targetSwitch = targetFeature->getMainSwitch();
-  targetSwitch->setAllChildrenOff();
+  Feature::Base *targetFeature = project->findFeature(targetFeatureId);
+  targetFeature->hide3D();
   viewWidget->clearSelections();
   
   project->update();

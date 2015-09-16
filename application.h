@@ -17,7 +17,7 @@ public:
     void setProject(Project *projectIn){project = projectIn;}
     Project *getProject(){return project;}
 
-public slots:
+public Q_SLOTS:
     void quittingSlot();
 private:
     MainWindow *mainWindow = nullptr;

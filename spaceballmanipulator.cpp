@@ -1,12 +1,15 @@
 #include <iostream>
 
-#include "spaceballmanipulator.h"
+#include <osg/ComputeBoundsVisitor>
+
+#include "nodemaskdefs.h"
 #include "spaceballosgevent.h"
+#include "spaceballmanipulator.h"
 
 using namespace osgGA;
 
 SpaceballManipulator::SpaceballManipulator(osg::Camera *camIn) : inherited(), boundingSphere(),
-    cam(camIn)
+    cam(camIn), spaceEye(0.0, 0.0, 1.0), spaceCenter(0.0, 0.0, 0.0), spaceUp(0.0, 1.0, 0.0)
 {
 }
 
@@ -61,17 +64,37 @@ void SpaceballManipulator::setNode(osg::Node *nodeIn)
 
 void SpaceballManipulator::computeHomePosition(const osg::Camera *camera, bool useBoundingBox)
 {
-    inherited::computeHomePosition(camera, useBoundingBox);
-    boundingSphere = node->getBound();
+    if (useBoundingBox)
+    {
+      // (bounding box computes model center more precisely than bounding sphere)
+      osg::ComputeBoundsVisitor cbVisitor;
+      cbVisitor.setTraversalMask(~(NodeMaskDef::csys));
+      node->accept(cbVisitor);
+      osg::BoundingBox &boundingBox = cbVisitor.getBoundingBox();
+      if (boundingBox.valid())
+        boundingSphere = osg::BoundingSphere(boundingBox);
+      else
+        boundingSphere = node->getBound();
+    }
+    else
+      boundingSphere = node->getBound();
+    
+    //when there is nothing in scene getBound returns -1 and the view is screwy.
+    if (boundingSphere.radius() < 0)
+      boundingSphere.radius() = 1.0;
     camSphere = osg::BoundingSphere(boundingSphere.center(), boundingSphere.radius() * 2.0d);
     getProjectionData();//this is needed to test camera type ortho vs perspective.
     getViewData();//this is needed to viewport width and height.
     if (projectionData.isCamOrtho)
     {
-        osg::Vec3d offset(0.0d, -camSphere.radius(), 0.0d);
-        _homeEye = camSphere.center() + offset;
-        _homeCenter = camSphere.center();
-        _homeUp = osg::Vec3d(0.0d, 0.0d, 1.0d);
+      if (((spaceCenter - boundingSphere.center()).length2()) > (0.01 * boundingSphere.radius()))
+      {
+        osg::Vec3d diffVector = boundingSphere.center() - spaceCenter;
+        //don't change up vector.
+        spaceCenter += diffVector;
+        spaceEye += diffVector;
+        spaceEye = projectToBound(spaceEye, spaceCenter);
+      }
 
         //possibly
         //camera->setComputeNearFar(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
@@ -92,11 +115,8 @@ void SpaceballManipulator::scaleView(double scaleFactor)
 void SpaceballManipulator::home(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us)
 {
     if (getAutoComputeHomePosition())
-        computeHomePosition(cam, false);
+        computeHomePosition(cam, true);
 
-    spaceEye = _homeEye;
-    spaceCenter = _homeCenter;
-    spaceUp = _homeUp;
     scaleFit();
 
     us.requestRedraw();
@@ -106,11 +126,8 @@ void SpaceballManipulator::home(const osgGA::GUIEventAdapter& ea, osgGA::GUIActi
 void SpaceballManipulator::home(double)
 {
     if (getAutoComputeHomePosition())
-        computeHomePosition(cam, false);
-
-    spaceEye = _homeEye;
-    spaceCenter = _homeCenter;
-    spaceUp = _homeUp;
+        computeHomePosition(cam, true);
+    
     scaleFit();
 }
 
@@ -228,7 +245,7 @@ void dumpVector(const osg::Vec3d &vector)
 
 }
 
-osg::Vec3d SpaceballManipulator::projectToBound(osg::Vec3d eye, osg::Vec3d lookCenter) const
+osg::Vec3d SpaceballManipulator::projectToBound(const osg::Vec3d &eye, osg::Vec3d lookCenter) const
 {
     osg::Vec3d boundCenter = camSphere.center();
     boundCenter -= eye;
@@ -318,7 +335,7 @@ void SpaceballManipulator::scaleFit()
         double viewportHeight = static_cast<double>(cam->getViewport()->height());
         double aspectFactor =  viewportWidth / viewportHeight;
 
-        if (aspectFactor < 1) //this had to be "(aspectFactor > 1)" on osgtreeview project.
+        if (aspectFactor > 1)
         {
             projectionData.bottom = boundingSphere.radius() * -1.0d;
             projectionData.top = boundingSphere.radius();

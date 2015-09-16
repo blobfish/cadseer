@@ -27,8 +27,15 @@
 using namespace Feature;
 using namespace boost::uuids;
 
+QIcon Inert::icon;
+
 Inert::Inert(const TopoDS_Shape &shapeIn)
 {
+  if (icon.isNull())
+    icon = QIcon(":/resources/images/constructionInert.svg");
+  
+  name = QObject::tr("Inert");
+  
   if (shapeIn.ShapeType() == TopAbs_COMPOUND)
     shape = shapeIn;
   else

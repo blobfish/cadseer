@@ -93,7 +93,7 @@ void SelectionManager::sendState()
 //        out &= ~NodeMask::vertex;
 //    emit setSelectionMask(out);
 
-    emit setSelectionMask(selectionMask);
+    Q_EMIT setSelectionMask(selectionMask);
 }
 
 void SelectionManager::popState()

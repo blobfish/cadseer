@@ -3,6 +3,7 @@ SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 project(cadseer)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall" )
 
+add_definitions(-DQT_NO_KEYWORDS) #macros clashing
 find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
 set(QT_USE_QTOPENGL TRUE)
 INCLUDE(${QT_USE_FILE})
@@ -39,9 +40,6 @@ SET(MODELVIZ_SOURCES
   ./modelviz/connector.cpp
   )
 
-SET(TESTING_HDRS
-    ./testing/plotter.h
-    )
 SET(TESTING_SOURCES
     ./testing/plotter.cpp
     )
@@ -70,6 +68,10 @@ SET(FEATURE_SOURCES
     ./feature/cylinderbuilder.cpp
     )
     
+SET(DIALOG_SOURCES
+    ./dialogs/boxdialog.cpp
+    )
+    
 SET(PROJECT_SOURCES
     ./project/project.cpp
     )
@@ -78,6 +80,10 @@ SET(CADSEER_SOURCES
     ./main.cpp
     ./viewerwidget.cpp
     ./mainwindow.cpp
+    ./dagview/dagview.cpp
+    ./dagview/dagmodel.cpp
+    ./dagview/dagmodelgraph.cpp
+    ./dagview/dagrectitem.cpp
     ./spaceballmanipulator.cpp
     ./spaceballqevent.cpp
     ./gleventwidget.cpp
@@ -93,14 +99,18 @@ SET(CADSEER_SOURCES
     ${GESTURE_SOURCES}
     ${COMMAND_SOURCES}
     ${FEATURE_SOURCES}
+    ${DIALOG_SOURCES}
     ${PROJECT_SOURCES}
     )
 
 SET(CADSEER_MOC_HDRS
     ./viewerwidget.h
     ./mainwindow.h
+    ./dagview/dagview.h
+    ./dagview/dagmodel.h
     ./application.h
     ./selectionmanager.h
+    ./dialogs/boxdialog.h
     )
 
 SET(CADSEER_LIBRARIES

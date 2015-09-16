@@ -28,17 +28,62 @@
 
 using namespace Feature;
 
+std::size_t Base::nextConstructionIndex = 0;
+
 Base::Base()
 {
   id = boost::uuids::basic_random_generator<boost::mt19937>()();
+  constructionIndex = nextConstructionIndex;
+  nextConstructionIndex++;
+  
+  name = QObject::tr("Empty");
   
   mainSwitch = new osg::Switch();
-  mainSwitch->setNodeMask(NodeMask::object);
+  mainSwitch->setNodeMask(NodeMaskDef::object);
   mainSwitch->setUserValue(GU::idAttributeTitle, GU::idToString(id));
+  
+  state.set(StateOffset::ModelDirty, true);
+  state.set(StateOffset::VisualDirty, true);
+  state.set(StateOffset::Hidden3D, false);
+  state.set(StateOffset::Failure, false);
+  state.set(StateOffset::Inactive, false);
 }
 
 Base::~Base()
 {
+}
+
+//the visual is dependent on the model.
+//so if model is set dirty so is the visual.
+void Base::setModelDirty()
+{
+  //ensure model and visual are in sync.
+  if (isModelClean())
+  {
+    state.set(StateOffset::ModelDirty, true);
+    stateChangedSignal(id, StateOffset::ModelDirty);
+  }
+  if (isVisualClean())
+  {
+    state.set(StateOffset::VisualDirty, true);
+    stateChangedSignal(id, StateOffset::VisualDirty);
+  }
+}
+
+void Base::setModelClean()
+{
+  if (isModelClean())
+    return;
+  state.set(StateOffset::ModelDirty, false);
+  stateChangedSignal(id, StateOffset::ModelDirty);
+}
+
+void Base::setVisualClean()
+{
+  if (isVisualClean())
+    return;
+  state.set(StateOffset::VisualDirty, false);
+  stateChangedSignal(id, StateOffset::VisualDirty);
 }
 
 TopoDS_Compound Base::compoundWrap(const TopoDS_Shape& shapeIn)
@@ -70,3 +115,69 @@ void Base::updateVisual()
   
   setVisualClean();
 }
+
+void Base::show3D()
+{
+  assert(mainSwitch->getNumChildren());
+  if (isVisible3D())
+    return; //already on.
+  if (isVisualDirty())
+    updateVisual();
+  mainSwitch->setAllChildrenOn();
+  state.set(StateOffset::Hidden3D, false);
+  stateChangedSignal(id, StateOffset::Hidden3D);
+}
+
+void Base::hide3D()
+{
+  assert(mainSwitch->getNumChildren());
+  if (isHidden3D())
+    return; //already off.
+  mainSwitch->setAllChildrenOff();
+  state.set(StateOffset::Hidden3D, true);
+  stateChangedSignal(id, StateOffset::Hidden3D);
+}
+
+void Base::toggle3D()
+{
+  assert(mainSwitch->getNumChildren());
+  if (isVisible3D())
+    hide3D();
+  else
+    show3D();
+  stateChangedSignal(id, StateOffset::Hidden3D);
+}
+
+void Base::setSuccess()
+{
+  if (isSuccess())
+    return; //already success
+  state.set(StateOffset::Failure, false);
+  stateChangedSignal(id, StateOffset::Failure);
+}
+
+void Base::setFailure()
+{
+  if (isFailure())
+    return; //already failure
+  state.set(StateOffset::Failure, true);
+  stateChangedSignal(id, StateOffset::Failure);
+}
+
+void Base::setActive()
+{
+  if (isActive())
+    return; //already active.
+  state.set(StateOffset::Inactive, false);
+  stateChangedSignal(id, StateOffset::Inactive);
+}
+
+void Base::setInActive()
+{
+  if (isInactive())
+    return; //already inactive.
+  state.set(StateOffset::Inactive, true);
+  stateChangedSignal(id, StateOffset::Inactive);
+}
+
+

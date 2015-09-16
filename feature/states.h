@@ -17,36 +17,41 @@
  *
  */
 
-#ifndef SPHERE_H
-#define SPHERE_H
+#ifndef STATES_H
+#define STATES_H
 
-#include "base.h"
-
-class BRepPrimAPI_MakeSphere;
+#include <bitset>
+#include <vector>
+#include <string>
+#include <assert.h>
 
 namespace Feature
 {
-  class Sphere : public Base
+  typedef std::bitset<sizeof(int) * 8> State;
+  
+  namespace StateOffset
   {
-  public:
-    Sphere();
-    void setRadius(const double &radiusIn);
-    double getRadius() const {return radius;}
-    virtual void update(const UpdateMap&) override;
-    virtual Type getType() const override {return Type::Sphere;}
-    virtual const std::string& getTypeString() const override {return Feature::getTypeString(Type::Sphere);}
-    virtual const QIcon& getIcon() const override {return icon;}
-    virtual Descriptor getDescriptor() const override {return Descriptor::Create;}
+    static const std::size_t ModelDirty = 0;
+    static const std::size_t VisualDirty = 1;
+    static const std::size_t Hidden3D = 2;
+    static const std::size_t Failure = 3;
+    static const std::size_t Inactive = 4;
     
-  protected:
-    double radius;
-    
-    void initializeMaps();
-    void updateResult(BRepPrimAPI_MakeSphere&);
-    
-  private:
-    static QIcon icon;
+    inline std::string toString(std::size_t offsetIn)
+    {
+      static const std::vector<std::string> strings =
+      {
+        "Model Dirty",
+        "Visual Dirty",
+        "Visibility3D",
+        "Failure",
+        "Inactive"
+      };
+      
+      assert(offsetIn < strings.size());
+      return strings[offsetIn];
+    }
   };
 }
 
-#endif // SPHERE_H
+#endif // STATES_H

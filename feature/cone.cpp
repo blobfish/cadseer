@@ -61,10 +61,17 @@ static const std::map<FeatureTag, std::string> featureTagMap =
   {FeatureTag::VertexTop, "VertexTop"}
 };
 
+QIcon Cone::icon;
+
 //only complete rotational cone. no partials. because top or bottom radius
 //maybe 0.0, faces and wires might be null and edges maybe degenerate.
 Cone::Cone() : Base(), radius1(5.0), radius2(0.0), height(10.0)
 {
+  if (icon.isNull())
+    icon = QIcon(":/resources/images/constructionCone.svg");
+  
+  name = QObject::tr("Cone");
+  
   initializeMaps();
 }
 
@@ -73,7 +80,7 @@ void Cone::setRadius1(const double& radius1In)
   if (radius1 == radius1In)
     return;
   assert(radius1In > Precision::Confusion());
-  setDirty();
+  setModelDirty();
   radius1 = radius1In;
 }
 
@@ -82,7 +89,7 @@ void Cone::setRadius2(const double& radius2In)
   if (radius2 == radius2In)
     return;
   assert(radius2In >= 0.0); //radius2 can be zero. a point.
-  setDirty();
+  setModelDirty();
   radius2 = radius2In;
 }
 
@@ -91,7 +98,7 @@ void Cone::setHeight(const double& heightIn)
   if (height == heightIn)
     return;
   assert(heightIn > Precision::Confusion());
-  setDirty();
+  setModelDirty();
   height = heightIn;
 }
 
@@ -114,13 +121,15 @@ void Cone::update(const UpdateMap& mapIn)
 {
   //clear shape so if we fail the feature will be empty.
   shape = TopoDS_Shape();
+  setFailure();
   
   try
   {
     ConeBuilder coneBuilder(radius1, radius2, height);
     shape = compoundWrap(coneBuilder.getSolid());
     updateResult(coneBuilder);
-    setClean();
+    setModelClean();
+    setSuccess();
   }
   catch (Standard_Failure)
   {

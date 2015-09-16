@@ -36,9 +36,14 @@
 using namespace Feature;
 using boost::uuids::uuid;
 
+QIcon Blend::icon;
+
 Blend::Blend() : Base(), radius(1.0)
 {
-
+  if (icon.isNull())
+    icon = QIcon(":/resources/images/constructionBlend.svg");
+  
+  name = QObject::tr("Blend");
 }
 
 void Blend::setRadius(const double& radiusIn)
@@ -46,20 +51,21 @@ void Blend::setRadius(const double& radiusIn)
   if (radius == radiusIn)
     return;
   assert(radiusIn > Precision::Confusion());
-  setDirty();
+  setModelDirty();
   radius = radiusIn;
 }
 
 void Blend::setEdgeIds(const std::vector<boost::uuids::uuid>& edgeIdsIn)
 {
   edgeIds = edgeIdsIn;
-  setDirty();
+  setModelDirty();
 }
 
 void Blend::update(const UpdateMap& mapIn)
 {
   //clear shape so if we fail the feature will be empty. what about maps?
   shape = TopoDS_Shape();
+  setFailure(); //assume failure until succes.
   
   if (mapIn.count(InputTypes::target) < 1)
     return; //much better error handeling.
@@ -101,7 +107,8 @@ void Blend::update(const UpdateMap& mapIn)
     
     //at this point the only thing left should be new edges and vertices created by
     //the blend feature. We will use derivedContainer to map these to known faces.
-    setClean();
+    setModelClean();
+    setSuccess();
   }
   catch (Standard_Failure)
   {

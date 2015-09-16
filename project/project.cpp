@@ -9,12 +9,12 @@
 
 #include <osg/ValueObject>
 
-#include "project.h"
+#include "../globalutilities.h"
 #include "../modelviz/graph.h"
 #include "../modelviz/connector.h"
-#include "../globalutilities.h"
 #include "../feature/base.h"
 #include "../feature/inert.h"
+#include "project.h"
 
 using namespace ProjectGraph;
 using boost::uuids::uuid;
@@ -38,9 +38,21 @@ void Project::update()
     return;
   }
   
-  for (const auto &currentVertex : sorted)
+  //the update of a feature will trigger a state change signal.
+  //we don't want to handle that state change here in the project
+  //so we block.
+  std::vector<boost::signals2::shared_connection_block> blockVector;
+  BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
   {
-    if (projectGraph[currentVertex].feature->isClean())
+    boost::signals2::shared_connection_block currentBlock(projectGraph[currentVertex].connection);
+    blockVector.push_back(currentBlock);
+  }
+  
+  //loop through and update each feature.
+  for (auto it = sorted.rbegin(); it != sorted.rend(); ++it)
+  {
+    Vertex currentVertex = *it;
+    if (projectGraph[currentVertex].feature->isModelClean())
       continue;
     
     Feature::UpdateMap updateMap;
@@ -53,6 +65,8 @@ void Project::update()
     }
     projectGraph[currentVertex].feature->update(updateMap);
   }
+  
+  projectUpdatedSignal();
 }
 
 void Project::updateVisual()
@@ -68,11 +82,17 @@ void Project::updateVisual()
     return;
   }
   
-  for (const auto &currentVertex : sorted)
+  for(auto it = sorted.rbegin(); it != sorted.rend(); ++it)
   {
-    if (projectGraph[currentVertex].feature->isVisualClean())
-      continue;
-    projectGraph[currentVertex].feature->updateVisual();
+    auto feature = projectGraph[*it].feature;
+    if
+    (
+      feature->isVisible3D() &&
+      feature->isActive() &&
+      feature->isSuccess() &&
+      feature->isVisualDirty()
+    )
+      feature->updateVisual();
   }
 }
 
@@ -111,12 +131,17 @@ void Project::readOCC(const std::string &fileName, osg::Group *root)
     }
 }
 
-const Feature::Base* Project::findFeature(const boost::uuids::uuid &idIn)
+Feature::Base* Project::findFeature(const uuid &idIn)
 {
-    IdVertexMap::const_iterator it;
-    it = map.find(idIn);
-    assert(it != map.end());
-    return projectGraph[it->second].feature.get();
+  return projectGraph[findVertex(idIn)].feature.get();
+}
+
+ProjectGraph::Vertex Project::findVertex(const uuid& idIn)
+{
+  IdVertexMap::const_iterator it;
+  it = map.find(idIn);
+  assert(it != map.end());
+  return it->second;
 }
 
 void Project::addOCCShape(const TopoDS_Shape &shapeIn, osg::Group *root)
@@ -129,9 +154,12 @@ void Project::addFeature(std::shared_ptr<Feature::Base> feature, osg::Group *roo
 {
   Vertex newVertex = boost::add_vertex(projectGraph);
   projectGraph[newVertex].feature = feature;
-  
   map.insert(std::make_pair(feature->getId(), newVertex));
+  featureAddedSignal(feature);
+  
   root->addChild(feature->getMainSwitch());
+  
+  projectGraph[newVertex].connection = feature->connectState(boost::bind(&Project::stateChangedSlot, this, _1, _2));
 }
 
 void Project::connect(const boost::uuids::uuid& parentIn, const boost::uuids::uuid& childIn, Feature::InputTypes type)
@@ -140,8 +168,29 @@ void Project::connect(const boost::uuids::uuid& parentIn, const boost::uuids::uu
   Vertex child = map.at(childIn);
   Edge edge = connectVertices(parent, child, type);
   projectGraph[edge].inputType = type;
+  
+  connectionAddedSignal(parentIn, childIn, type);
 }
 
+void Project::stateChangedSlot(const uuid& featureIdIn, std::size_t stateIn)
+{
+  if (stateIn != Feature::StateOffset::ModelDirty)
+    return;
+  
+  //the visitor will be setting features to a dirty state which
+  //trigger the signal and we would end up back in this function recursively.
+  //so we block all the connections to avoid this recursion.
+  std::vector<boost::signals2::shared_connection_block> blockVector;
+  BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
+  {
+    boost::signals2::shared_connection_block currentBlock(projectGraph[currentVertex].connection);
+    blockVector.push_back(currentBlock);
+  }
+  
+  ProjectGraph::Vertex vertex = findVertex(featureIdIn);
+  SetDirtyVisitor visitor;
+  boost::breadth_first_search(projectGraph, vertex, boost::visitor(visitor));
+}
 
 Edge Project::connectVertices(Vertex parent, Vertex child, Feature::InputTypes type)
 {

@@ -28,10 +28,10 @@ public:
     QAction *actionSelectEdges;
     QAction *actionSelectVertices;
     
-signals:
+Q_SIGNALS:
     void setSelectionMask(const int &mask);
     
-public slots:
+public Q_SLOTS:
     void triggeredObjects(bool objectStateIn);
     void triggeredFeatures(bool featureStateIn);
     void triggeredSolids(bool solidStateIn);

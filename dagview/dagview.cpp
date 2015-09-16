@@ -17,32 +17,19 @@
  *
  */
 
-#ifndef INERT_H
-#define INERT_H
+// #include "dagmodel.h"
+#include "dagview.h"
 
-#include "base.h"
+using namespace DAG;
 
-namespace Feature
+View::View(QWidget* parentIn): QGraphicsView(parentIn)
 {
-  /*! @brief static feature.
-   * 
-   * feature that has no real parameters or update.
-   * for example, used for import geometry.
-   */
-  class Inert : public Base
-  {
-  public:
-    Inert(const TopoDS_Shape &shapeIn);
-    virtual void update(const UpdateMap&) override {}
-    virtual Type getType() const override {return Type::Inert;}
-    virtual const std::string& getTypeString() const override {return Feature::getTypeString(Type::Inert);}
-    virtual const QIcon& getIcon() const override {return icon;}
-    virtual Descriptor getDescriptor() const override {return Descriptor::Create;}
-    
-  private:
-    Inert(){};
-    static QIcon icon;
-  };
+  this->setRenderHint(QPainter::Antialiasing, true);
+  this->setRenderHint(QPainter::TextAntialiasing, true);
 }
 
-#endif // INERT_H
+View::~View()
+{
+}
+
+// #include "dagview/moc_dagview.cxx"

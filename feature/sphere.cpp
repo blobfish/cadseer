@@ -50,8 +50,15 @@ static const std::map<FeatureTag, std::string> featureTagMap =
   {FeatureTag::VertexTop, "VertexTop"}
 };
 
+QIcon Sphere::icon;
+
 Sphere::Sphere() : Base(), radius(5.0)
 {
+  if (icon.isNull())
+    icon = QIcon(":/resources/images/constructionSphere.svg");
+  
+  name = QObject::tr("Sphere");
+  
   initializeMaps();
 }
 
@@ -60,7 +67,7 @@ void Sphere::setRadius(const double& radiusIn)
   if (radius == radiusIn)
     return;
   assert(radiusIn > Precision::Confusion());
-  setDirty();
+  setModelDirty();
   radius = radiusIn;
 }
 
@@ -68,6 +75,7 @@ void Sphere::update(const UpdateMap& mapIn)
 {
   //clear shape so if we fail the feature will be empty.
   shape = TopoDS_Shape();
+  setFailure();
   
   try
   {
@@ -76,7 +84,8 @@ void Sphere::update(const UpdateMap& mapIn)
     assert(sphereMaker.IsDone());
     shape = compoundWrap(sphereMaker.Shape());
     updateResult(sphereMaker);
-    setClean();
+    setModelClean();
+    setSuccess();
   }
   catch (Standard_Failure)
   {

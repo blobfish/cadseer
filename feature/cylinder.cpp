@@ -63,8 +63,15 @@ static const std::map<FeatureTag, std::string> featureTagMap =
   {FeatureTag::VertexTop, "VertexTop"}
 };
 
+QIcon Cylinder::icon;
+
 Cylinder::Cylinder() : Base(), radius(5.0), height(20.0)
 {
+  if (icon.isNull())
+    icon = QIcon(":/resources/images/constructionCylinder.svg");
+  
+  name = QObject::tr("Cylinder");
+  
   initializeMaps();
 }
 
@@ -73,7 +80,7 @@ void Cylinder::setRadius(const double& radiusIn)
   if (radius == radiusIn)
     return;
   assert(radiusIn > Precision::Confusion());
-  setDirty();
+  setModelDirty();
   radius = radiusIn;
 }
 
@@ -82,7 +89,7 @@ void Cylinder::setHeight(const double& heightIn)
   if (height == heightIn)
     return;
   assert(heightIn > Precision::Confusion());
-  setDirty();
+  setModelDirty();
   height = heightIn;
 }
 
@@ -103,13 +110,15 @@ void Cylinder::update(const UpdateMap& mapIn)
 {
   //clear shape so if we fail the feature will be empty.
   shape = TopoDS_Shape();
+  setFailure();
   
   try
   {
     CylinderBuilder cylinderMaker(radius, height);
     shape = compoundWrap(cylinderMaker.getSolid());
     updateResult(cylinderMaker);
-    setClean();
+    setModelClean();
+    setSuccess();
   }
   catch (Standard_Failure)
   {

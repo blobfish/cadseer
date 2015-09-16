@@ -19,6 +19,7 @@ namespace ProjectGraph
     //boost graph will call destructor when expanding vector
     //so we need to keep from deleting when this happens.
     std::shared_ptr<Feature::Base> feature;
+    boost::signals2::connection connection;
   };
 
   struct EdgeProperty
@@ -32,7 +33,7 @@ namespace ProjectGraph
   typedef boost::graph_traits<Graph>::vertex_iterator VertexIterator;
   // typedef boost::graph_traits<Graph>::edge_iterator EdgeIterator;
   typedef boost::graph_traits<Graph>::in_edge_iterator InEdgeIterator;
-  // typedef boost::graph_traits<Graph>::out_edge_iterator OutEdgeIterator;
+  typedef boost::graph_traits<Graph>::out_edge_iterator OutEdgeIterator;
   typedef boost::graph_traits<Graph>::adjacency_iterator VertexAdjacencyIterator;
   // typedef boost::reverse_graph<Graph, Graph&> GraphReversed;
   typedef std::vector<Vertex> Path;
@@ -74,6 +75,17 @@ namespace ProjectGraph
       boost::write_graphviz(file, graphIn, Vertex_writer<GraphIn>(graphIn),
                             Edge_writer<GraphIn>(graphIn));
     }
+    
+    class SetDirtyVisitor : public boost::default_bfs_visitor
+    {
+    public:
+    
+      template <typename VertexTypeIn, typename GraphTypeIn>
+      void discover_vertex(VertexTypeIn vertexIn, const GraphTypeIn &graphIn) const
+      {
+        graphIn[vertexIn].feature->setModelDirty();
+      }
+    };
 
 }
 

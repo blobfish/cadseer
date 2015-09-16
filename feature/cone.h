@@ -41,6 +41,8 @@ namespace Feature
     virtual void update(const UpdateMap&) override;
     virtual Type getType() const override {return Type::Cone;}
     virtual const std::string& getTypeString() const override {return Feature::getTypeString(Type::Cone);}
+    virtual const QIcon& getIcon() const override {return icon;}
+    virtual Descriptor getDescriptor() const override {return Descriptor::Create;}
     
   protected:
     double radius1;
@@ -49,6 +51,9 @@ namespace Feature
     
     void initializeMaps();
     void updateResult(const ConeBuilder &);
+    
+  private:
+    static QIcon icon;
   };
 }
 

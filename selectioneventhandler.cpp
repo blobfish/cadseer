@@ -38,7 +38,7 @@ SelectionEventHandler::SelectionEventHandler() : osgGA::GUIEventHandler()
 {
     preHighlightColor = Vec4(1.0, 1.0, 0.0, 1.0);
     selectionColor = Vec4(1.0, 1.0, 1.0, 1.0);
-    nodeMask = ~NodeMask::noSelect;
+    nodeMask = ~(NodeMaskDef::backGroundCamera | NodeMaskDef::gestureCamera | NodeMaskDef::csys);
 }
 
 void SelectionEventHandler::setSelectionMask(const unsigned int &maskIn)
@@ -54,23 +54,23 @@ void SelectionEventHandler::setSelectionMask(const unsigned int &maskIn)
       ((SelectionMask::featuresSelectable & selectionMask) == SelectionMask::featuresSelectable) |
       ((SelectionMask::objectsSelectable & selectionMask) == SelectionMask::objectsSelectable)
     )
-        nodeMask |= NodeMask::face;
+        nodeMask |= NodeMaskDef::face;
     else
-        nodeMask &= ~NodeMask::face;
+        nodeMask &= ~NodeMaskDef::face;
 
     if
     (
       ((SelectionMask::edgesSelectable & selectionMask) == SelectionMask::edgesSelectable) |
       ((SelectionMask::wiresSelectable & selectionMask) == SelectionMask::wiresSelectable)
     )
-        nodeMask |= NodeMask::edge;
+        nodeMask |= NodeMaskDef::edge;
     else
-        nodeMask &= ~NodeMask::edge;
+        nodeMask &= ~NodeMaskDef::edge;
 
     if ((SelectionMask::verticesSelectable & selectionMask) == SelectionMask::verticesSelectable)
-        nodeMask |= NodeMask::vertex;
+        nodeMask |= NodeMaskDef::vertex;
     else
-        nodeMask &= ~NodeMask::vertex;
+        nodeMask &= ~NodeMaskDef::vertex;
 }
 
 bool SelectionEventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
@@ -177,18 +177,18 @@ bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
         return false;
 
     assert(((*intersection).nodePath.size() - 4) >= 0);
-    int nodeMask = (*intersection).nodePath[(*intersection).nodePath.size() - 2]->getNodeMask();
+    int localNodeMask = (*intersection).nodePath[(*intersection).nodePath.size() - 2]->getNodeMask();
     uuid selectedId = GU::getId((*intersection).nodePath.back());
     uuid featureId = GU::getId((*intersection).nodePath[(*intersection).nodePath.size() - 4]);
 
-//    std::cout << std::endl << "buildPreselection: " << std::endl << "   nodeMask is: " << nodeMask << std::endl <<
+//    std::cout << std::endl << "buildPreselection: " << std::endl << "   localNodeMask is: " << localNodeMask << std::endl <<
 //                 "   selectedId is: " << selectedId << std::endl <<
 //                 "   featureId is: " << featureId << std::endl;
 
     container.featureId = featureId;
-    switch (nodeMask)
+    switch (localNodeMask)
     {
-    case NodeMask::face:
+    case NodeMaskDef::face:
         if ((selectionMask & SelectionMask::facesSelectable) == SelectionMask::facesSelectable)
         {
             Selected newSelection;
@@ -246,7 +246,7 @@ bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
             }
         }
         break;
-    case NodeMask::edge:
+    case NodeMaskDef::edge:
         if ((selectionMask & SelectionMask::edgesSelectable) == SelectionMask::edgesSelectable)
         {
             Selected newSelection;
@@ -267,7 +267,7 @@ bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
             {
                 assert((*faceIt).nodePath.size() - 2 >= 0);
                 int faceNodeMask = (*faceIt).nodePath[(*faceIt).nodePath.size() - 2]->getNodeMask();
-                if (faceNodeMask == NodeMask::face)
+                if (faceNodeMask == NodeMaskDef::face)
                 {
                     faceId = GU::getId((*faceIt).nodePath.back());
                     break;
@@ -299,7 +299,7 @@ bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
             container.shapeId = wireId;
         }
         break;
-    case NodeMask::vertex:
+    case NodeMaskDef::vertex:
     {
         Selected newSelection;
         newSelection.initialize(geometry);
@@ -325,7 +325,12 @@ void SelectionEventHandler::clearSelections()
     {
         std::vector<Selected>::iterator selectedIt;
         for (selectedIt = it->selections.begin(); selectedIt != it->selections.end(); ++selectedIt)
-            setGeometryColor(selectedIt->geometry.get(), selectedIt->color);
+        {
+          if (!selectedIt->geometry.valid())
+            continue;
+          //should I lock the geometry observer point?
+          setGeometryColor(selectedIt->geometry.get(), selectedIt->color);
+        }
     }
     selectionContainers.clear();
 }
@@ -355,7 +360,12 @@ void SelectionEventHandler::clearPrehighlight()
         return;
     std::vector<Selected>::const_iterator it;
     for (it = lastPrehighlight.selections.begin(); it != lastPrehighlight.selections.end(); ++it)
-        setGeometryColor(it->geometry.get(), it->color);
+    {
+      if (!it->geometry.valid())
+        continue;
+      //should I lock the geometry observer point?
+      setGeometryColor(it->geometry.get(), it->color);
+    }
     lastPrehighlight = SelectionContainer();
 }
 
