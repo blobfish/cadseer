@@ -17,32 +17,23 @@
  *
  */
 
-#ifndef INERT_H
-#define INERT_H
+#include <gp_Trsf.hxx>
+#include <gp_Pnt.hxx>
+#include <gp_Ax2.hxx>
 
+#include <osg/MatrixTransform>
+
+#include "../nodemaskdefs.h"
 #include "csysbase.h"
 
-namespace Feature
+using namespace Feature;
+
+CSysBase::CSysBase() : Base(), system()
 {
-  /*! @brief static feature.
-   * 
-   * feature that has no real parameters or update.
-   * for example, used for import geometry.
-   */
-  class Inert : public CSysBase
-  {
-  public:
-    Inert(const TopoDS_Shape &shapeIn);
-    virtual void update(const UpdateMap&) override {}
-    virtual Type getType() const override {return Type::Inert;}
-    virtual const std::string& getTypeString() const override {return Feature::getTypeString(Type::Inert);}
-    virtual const QIcon& getIcon() const override {return icon;}
-    virtual Descriptor getDescriptor() const override {return Descriptor::Create;}
-    
-  private:
-    Inert(){};
-    static QIcon icon;
-  };
 }
 
-#endif // INERT_H
+void CSysBase::setSystem(const gp_Ax2& systemIn)
+{
+  system = systemIn;
+  setModelDirty();
+}

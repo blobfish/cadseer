@@ -26,9 +26,9 @@
 
 using namespace Feature;
 
-CylinderBuilder::CylinderBuilder(const double& radiusIn, const double& heightIn)
+CylinderBuilder::CylinderBuilder(const double& radiusIn, const double& heightIn, gp_Ax2 axis2)
 {
-  BRepPrimAPI_MakeCylinder cylinderMaker(radiusIn, heightIn);
+  BRepPrimAPI_MakeCylinder cylinderMaker(axis2, radiusIn, heightIn);
   cylinderMaker.Build();
   assert(cylinderMaker.IsDone());
   

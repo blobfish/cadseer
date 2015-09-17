@@ -127,12 +127,16 @@ void Build::setUpGraph()
 {
     groupOut = new osg::Switch();
     groupOut->setNodeMask(NodeMaskDef::lod);
+    groupOut->setName("lod");
     groupVertices = new osg::Switch();
     groupVertices->setNodeMask(NodeMaskDef::vertex);
+    groupVertices->setName("vertices");
     groupEdges = new osg::Switch();
     groupEdges->setNodeMask(NodeMaskDef::edge);
+    groupEdges->setName("edges");
     groupFaces = new osg::Switch();
     groupFaces->setNodeMask(NodeMaskDef::face);
+    groupFaces->setName("faces");
     groupOut->addChild(groupVertices);
     groupOut->addChild(groupEdges);
     groupOut->addChild(groupFaces);

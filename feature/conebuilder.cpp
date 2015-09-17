@@ -36,9 +36,9 @@
 
 using namespace Feature;
 
-ConeBuilder::ConeBuilder(const double& radius1, const double& radius2, const double& height)
+ConeBuilder::ConeBuilder(const double& radius1, const double& radius2, const double& height, gp_Ax2 axis2)
 {
-  BRepPrimAPI_MakeCone coneMaker(radius1, radius2, height);
+  BRepPrimAPI_MakeCone coneMaker(axis2, radius1, radius2, height);
   coneMaker.Build();
   assert(coneMaker.IsDone());
   

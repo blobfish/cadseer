@@ -20,13 +20,13 @@
 #ifndef CYLINDER_H
 #define CYLINDER_H
 
-#include "base.h"
+#include "csysbase.h"
 
 namespace Feature
 {
   class CylinderBuilder;
   
-  class Cylinder : public Base
+  class Cylinder : public CSysBase
   {
   public:
     Cylinder();

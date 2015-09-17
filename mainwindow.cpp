@@ -185,9 +185,12 @@ void MainWindow::constructionBoxSlot()
       if (!dialog.exec())
         return;
       
-      box = new Feature::Box();
-      std::shared_ptr<Feature::Box> boxTemp(box);
-      project->addFeature(boxTemp, viewWidget->getRoot());
+      std::shared_ptr<Feature::Box> boxPtr(new Feature::Box());
+      box = boxPtr.get();
+      gp_Ax2 location;
+      location.SetLocation(gp_Pnt(1.0, 1.0, 1.0));
+      boxPtr->setSystem(location);
+      project->addFeature(boxPtr, viewWidget->getRoot());
     }
     
     box->setParameters
@@ -209,6 +212,11 @@ void MainWindow::constructionSphereSlot()
     Project *project = application->getProject();
     
     std::shared_ptr<Feature::Sphere> sphere(new Feature::Sphere());
+    sphere->setRadius(2.0);
+    gp_Ax2 location;
+    location.SetLocation(gp_Pnt(6.0, 6.0, 5.0));
+    sphere->setSystem(location);
+    
     project->addFeature(sphere, viewWidget->getRoot());
     project->update();
     project->updateVisual();
@@ -223,6 +231,13 @@ void MainWindow::constructionConeSlot()
     Project *project = application->getProject();
     
     std::shared_ptr<Feature::Cone> cone(new Feature::Cone());
+    cone->setRadius1(2.0);
+    cone->setRadius2(0.5);
+    cone->setHeight(8.0);
+    gp_Ax2 location;
+    location.SetLocation(gp_Pnt(11.0, 6.0, 3.0));
+    cone->setSystem(location);
+    
     project->addFeature(cone, viewWidget->getRoot());
     project->update();
     project->updateVisual();
@@ -237,6 +252,13 @@ void MainWindow::constructionCylinderSlot()
   Project *project = application->getProject();
   
   std::shared_ptr<Feature::Cylinder> cylinder(new Feature::Cylinder());
+  cylinder->setRadius(2.0);
+  cylinder->setHeight(8.0);
+  gp_Ax2 location;
+  location.SetLocation(gp_Pnt(16.0, 6.0, 3.0));
+  cylinder->setSystem(location);
+  
+  
   project->addFeature(cylinder, viewWidget->getRoot());
   project->update();
   project->updateVisual();

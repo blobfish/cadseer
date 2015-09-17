@@ -21,13 +21,14 @@
 #define CYLINDERBUILDER_H
 
 #include <TopoDS_Shape.hxx>
+#include <gp_Ax2.hxx>
 
 namespace Feature
 {
   class CylinderBuilder
   {
   public:
-    CylinderBuilder(const double &radiusIn, const double &heightIn);
+    CylinderBuilder(const double &radiusIn, const double &heightIn, gp_Ax2 axis2 = gp_Ax2());
     const TopoDS_Shape& getSolid() const {return solid;}
     const TopoDS_Shape& getShell() const {return shell;}
     const TopoDS_Shape& getFaceBottom() const {return faceBottom;}

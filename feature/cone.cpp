@@ -65,7 +65,7 @@ QIcon Cone::icon;
 
 //only complete rotational cone. no partials. because top or bottom radius
 //maybe 0.0, faces and wires might be null and edges maybe degenerate.
-Cone::Cone() : Base(), radius1(5.0), radius2(0.0), height(10.0)
+Cone::Cone() : CSysBase(), radius1(5.0), radius2(0.0), height(10.0)
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionCone.svg");
@@ -125,7 +125,7 @@ void Cone::update(const UpdateMap& mapIn)
   
   try
   {
-    ConeBuilder coneBuilder(radius1, radius2, height);
+    ConeBuilder coneBuilder(radius1, radius2, height, system);
     shape = compoundWrap(coneBuilder.getSolid());
     updateResult(coneBuilder);
     setModelClean();

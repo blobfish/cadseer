@@ -144,6 +144,8 @@ namespace Feature
   void updateShapeById(ResultContainer& containerIn, const boost::uuids::uuid &idIn, const TopoDS_Shape &shapeIn);
   //! update the id in the container by the shape.
   void updateId(ResultContainer& containerIn, const boost::uuids::uuid &idIn, const TopoDS_Shape &shapeIn);
+  //! stats/count of shape against conatiner shapes. this is basically for testing/debug. equal, same, partner, respectively.
+  std::tuple<int, int, int> stats(ResultContainer& containerIn, const TopoDS_Shape &shapeIn);
   
   //FeatureMap
   struct FeatureRecord

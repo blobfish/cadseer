@@ -52,7 +52,7 @@ static const std::map<FeatureTag, std::string> featureTagMap =
 
 QIcon Sphere::icon;
 
-Sphere::Sphere() : Base(), radius(5.0)
+Sphere::Sphere() : CSysBase(), radius(5.0)
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionSphere.svg");
@@ -79,7 +79,7 @@ void Sphere::update(const UpdateMap& mapIn)
   
   try
   {
-    BRepPrimAPI_MakeSphere sphereMaker(radius);
+    BRepPrimAPI_MakeSphere sphereMaker(system, radius);
     sphereMaker.Build();
     assert(sphereMaker.IsDone());
     shape = compoundWrap(sphereMaker.Shape());

@@ -38,6 +38,7 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     connect(&_timer, SIGNAL(timeout()), this, SLOT(update()));
 
     root = new osg::Group;
+    root->setName("viewer root");
     
     osg::ref_ptr<osg::PolygonMode> pm = new osg::PolygonMode;
     pm->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL);

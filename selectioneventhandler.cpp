@@ -172,14 +172,26 @@ bool SelectionEventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
 bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
                                               const osgUtil::LineSegmentIntersector::Intersections::const_iterator &intersection)
 {
+    auto walkUpToMask = [intersection](unsigned int maskIn) -> osg::Node*
+    {
+      auto nodePath = (*intersection).nodePath; //vector
+      for (auto it = nodePath.rbegin(); it != nodePath.rend(); ++it)
+      {
+        if ((*it)->getNodeMask() == maskIn)
+          return *it;
+      }
+      return nullptr;
+    };
+  
     osg::Geometry *geometry = dynamic_cast<Geometry *>((*intersection).drawable.get());
     if (!geometry)
         return false;
 
-    assert(((*intersection).nodePath.size() - 4) >= 0);
     int localNodeMask = (*intersection).nodePath[(*intersection).nodePath.size() - 2]->getNodeMask();
     uuid selectedId = GU::getId((*intersection).nodePath.back());
-    uuid featureId = GU::getId((*intersection).nodePath[(*intersection).nodePath.size() - 4]);
+    osg::Node *featureRoot = walkUpToMask(NodeMaskDef::object);
+    assert(featureRoot);
+    uuid featureId = GU::getId(featureRoot);
 
 //    std::cout << std::endl << "buildPreselection: " << std::endl << "   localNodeMask is: " << localNodeMask << std::endl <<
 //                 "   selectedId is: " << selectedId << std::endl <<

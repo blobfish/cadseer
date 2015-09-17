@@ -29,6 +29,7 @@ namespace Feature
   enum class Type
   {
     Base, //!< feature base class.
+    CSys, //!< feature base class.
     Box, //!< feature box class.
     Sphere, //!< feature sphere class.
     Cone, //!< feature sphere class.
@@ -43,6 +44,7 @@ namespace Feature
     const static LocalMap strings = 
     {
       {Type::Base, "Base"},
+      {Type::CSys, "CSys"},
       {Type::Box, "Box"},
       {Type::Sphere, "Sphere"},
       {Type::Cone, "Cone"},

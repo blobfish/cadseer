@@ -21,6 +21,7 @@
 #define BOXBUILDER_H
 
 #include <TopoDS_Shape.hxx>
+#include <gp_Ax2.hxx>
 
 /* was having crashes in TopoDS_Shape::HashCode trying to use const refs
  * out of the BRepPrimAPI_MakeBox object. copying shapes to new topods_shape
@@ -36,7 +37,7 @@ namespace Feature
   class BoxBuilder
   {
   public:
-    BoxBuilder(double lengthIn, double widthIn, double heightIn);
+    BoxBuilder(double lengthIn, double widthIn, double heightIn, gp_Ax2 axis2 = gp_Ax2());
     const TopoDS_Shape& getSolid() const {return solid;}
     const TopoDS_Shape& getShell() const {return shell;}
     const TopoDS_Shape& getFaceXP() const {return faceXP;}

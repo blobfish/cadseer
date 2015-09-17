@@ -20,13 +20,13 @@
 #ifndef SPHERE_H
 #define SPHERE_H
 
-#include "base.h"
+#include "csysbase.h"
 
 class BRepPrimAPI_MakeSphere;
 
 namespace Feature
 {
-  class Sphere : public Base
+  class Sphere : public CSysBase
   {
   public:
     Sphere();

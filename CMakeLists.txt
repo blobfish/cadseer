@@ -56,6 +56,7 @@ SET(COMMAND_SOURCES
     
 SET(FEATURE_SOURCES
     ./feature/base.cpp
+    ./feature/csysbase.cpp
     ./feature/box.cpp
     ./feature/boxbuilder.cpp
     ./feature/sphere.cpp

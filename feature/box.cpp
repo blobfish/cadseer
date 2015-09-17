@@ -22,8 +22,6 @@
 
 #include <boost/uuid/random_generator.hpp>
 
-#include <TopoDS_Iterator.hxx>
-
 #include "../globalutilities.h"
 #include "boxbuilder.h"
 #include "box.h"
@@ -115,7 +113,7 @@ static const std::map<FeatureTag, std::string> featureTagMap =
 
 QIcon Box::icon;
 
-Box::Box() : Base(), length(10.0), width(10.0), height(10.0)
+Box::Box() : CSysBase(), length(10.0), width(10.0), height(10.0)
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionBox.svg");
@@ -176,7 +174,7 @@ void Box::update(const UpdateMap& mapIn)
   
   try
   {
-    BoxBuilder boxMaker(length, width, height);
+    BoxBuilder boxMaker(length, width, height, system);
     TopoDS_Compound wrapper = compoundWrap(boxMaker.getSolid());
     shape = wrapper;
     updateResult(boxMaker);

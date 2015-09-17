@@ -40,9 +40,9 @@ using namespace Feature;
    * to be screwing up the shapes, I am suspicious.
   */
 
-BoxBuilder::BoxBuilder(double lengthIn, double widthIn, double heightIn)
+BoxBuilder::BoxBuilder(double lengthIn, double widthIn, double heightIn, gp_Ax2 axis2)
 {
-  BRepPrimAPI_MakeBox boxMaker(lengthIn, widthIn, heightIn);
+  BRepPrimAPI_MakeBox boxMaker(axis2, lengthIn, widthIn, heightIn);
   boxMaker.Build();
   assert(boxMaker.IsDone());
   solid = boxMaker.Shape();

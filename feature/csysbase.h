@@ -17,32 +17,31 @@
  *
  */
 
-#ifndef INERT_H
-#define INERT_H
+#ifndef CSYSBASE_H
+#define CSYSBASE_H
 
-#include "csysbase.h"
+#include <gp_Ax2.hxx>
+
+#include "base.h"
 
 namespace Feature
 {
-  /*! @brief static feature.
-   * 
-   * feature that has no real parameters or update.
-   * for example, used for import geometry.
-   */
-  class Inert : public CSysBase
+  /*! Base class for features dependent on a coordinate system*/
+  class CSysBase : public Base
   {
   public:
-    Inert(const TopoDS_Shape &shapeIn);
-    virtual void update(const UpdateMap&) override {}
-    virtual Type getType() const override {return Type::Inert;}
-    virtual const std::string& getTypeString() const override {return Feature::getTypeString(Type::Inert);}
-    virtual const QIcon& getIcon() const override {return icon;}
-    virtual Descriptor getDescriptor() const override {return Descriptor::Create;}
+    CSysBase();
+    virtual Type getType() const override {return Type::CSys;}
+    virtual const std::string& getTypeString() const override {return Feature::getTypeString(Type::CSys);}
+    virtual const QIcon& getIcon() const override {static QIcon junk; return junk;}
+    virtual Descriptor getDescriptor() const override {return Descriptor::None;}
     
-  private:
-    Inert(){};
-    static QIcon icon;
+    void setSystem(const gp_Ax2 &systemIn);
+    const gp_Ax2& getSystem() const {return system;}
+    
+  protected:
+    gp_Ax2 system;
   };
 }
 
-#endif // INERT_H
+#endif // CSYSBASE_H

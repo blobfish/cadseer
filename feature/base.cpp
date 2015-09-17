@@ -39,6 +39,7 @@ Base::Base()
   name = QObject::tr("Empty");
   
   mainSwitch = new osg::Switch();
+  mainSwitch->setName("feature");
   mainSwitch->setNodeMask(NodeMaskDef::object);
   mainSwitch->setUserValue(GU::idAttributeTitle, GU::idToString(id));
   

@@ -128,6 +128,27 @@ void Feature::updateId(ResultContainer& containerIn, const boost::uuids::uuid& i
   list.replace(it, record);
 }
 
+std::tuple<int, int, int> Feature::stats(ResultContainer& containerIn, const TopoDS_Shape &shapeIn)
+{
+  int equalCount = 0;
+  int sameCount = 0;
+  int partnerCount = 0;
+  
+  typedef ResultContainer::index<ResultRecord::ById>::type List;
+  const List &list = containerIn.get<ResultRecord::ById>();
+  for (List::const_iterator it = list.begin(); it != list.end(); ++it)
+  {
+    const TopoDS_Shape &currentRecordShape = it->shape;
+    if (currentRecordShape.IsEqual(shapeIn))
+      equalCount++;
+    if (currentRecordShape.IsSame(shapeIn))
+      sameCount++;
+    if (currentRecordShape.IsPartner(shapeIn))
+      partnerCount++;
+  }
+  return std::make_tuple(equalCount, sameCount, partnerCount);
+}
+
 ostream& Feature::operator<<(ostream& os, const FeatureRecord& record)
 {
   os << boost::uuids::to_string(record.id) << "      " << record.tag << std::endl;

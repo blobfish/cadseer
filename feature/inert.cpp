@@ -29,7 +29,7 @@ using namespace boost::uuids;
 
 QIcon Inert::icon;
 
-Inert::Inert(const TopoDS_Shape &shapeIn)
+Inert::Inert(const TopoDS_Shape &shapeIn) : CSysBase()
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionInert.svg");

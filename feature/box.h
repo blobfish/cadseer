@@ -20,14 +20,14 @@
 #ifndef BOX_H
 #define BOX_H
 
-#include "base.h"
+#include "csysbase.h"
 
 
 namespace Feature
 {
 class BoxBuilder;
 
-class Box : public Base
+class Box : public CSysBase
 {
 public:
   Box();

@@ -65,7 +65,7 @@ static const std::map<FeatureTag, std::string> featureTagMap =
 
 QIcon Cylinder::icon;
 
-Cylinder::Cylinder() : Base(), radius(5.0), height(20.0)
+Cylinder::Cylinder() : CSysBase(), radius(5.0), height(20.0)
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionCylinder.svg");
@@ -114,7 +114,7 @@ void Cylinder::update(const UpdateMap& mapIn)
   
   try
   {
-    CylinderBuilder cylinderMaker(radius, height);
+    CylinderBuilder cylinderMaker(radius, height, system);
     shape = compoundWrap(cylinderMaker.getSolid());
     updateResult(cylinderMaker);
     setModelClean();

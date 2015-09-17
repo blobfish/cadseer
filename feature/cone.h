@@ -20,13 +20,13 @@
 #ifndef CONE_H
 #define CONE_H
 
-#include "base.h"
+#include "csysbase.h"
 
 namespace Feature
 {
   class ConeBuilder;
   
-  class Cone : public Base
+  class Cone : public CSysBase
   {
   public:
     Cone();
