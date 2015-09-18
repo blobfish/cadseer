@@ -276,6 +276,29 @@ bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
                 container.shapeId = solids.at(0);
             }
         }
+        else if ((selectionMask & SelectionMask::objectsSelectable) == SelectionMask::objectsSelectable)
+        {
+          const Feature::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(featureId);
+          assert(feature);
+          const ModelViz::Connector &connector = feature->getConnector();
+          uuid object = connector.useGetRoot();
+          if (!object.is_nil())
+          {
+            std::vector<uuid> faces = connector.useGetChildrenOfType(object, TopAbs_FACE);
+            std::vector<osg::Geometry *> faceGeometry;
+            getGeometryFromIds visit(faces, faceGeometry);
+            (*intersection).nodePath[(*intersection).nodePath.size() - 2]->accept(visit);
+            std::vector<osg::Geometry *>::const_iterator geomIt;
+            for (geomIt = faceGeometry.begin(); geomIt != faceGeometry.end(); ++geomIt)
+            {
+                Selected newSelection;
+                newSelection.initialize(*geomIt);
+                container.selections.push_back(newSelection);
+            }
+            container.selectionType = SelectionTypes::Object;
+            container.shapeId = object;
+          }
+        }
         break;
     case NodeMaskDef::edge:
         if ((selectionMask & SelectionMask::edgesSelectable) == SelectionMask::edgesSelectable)
