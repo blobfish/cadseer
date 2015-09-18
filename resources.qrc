@@ -26,6 +26,8 @@
         <file>resources/images/constructionFinishing.svg</file>
         <file>resources/images/constructionBlend.svg</file>
         <file>resources/images/constructionInert.svg</file>
+        <file>resources/images/constructionBoolean.svg</file>
+        <file>resources/images/constructionUnion.svg</file>
         <file>resources/images/fileBase.svg</file>
         <file>resources/images/fileImport.svg</file>
         <file>resources/images/fileExport.svg</file>
