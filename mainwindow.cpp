@@ -331,32 +331,37 @@ void MainWindow::constructionBlendSlot()
 
 void MainWindow::constructionUnionSlot()
 {
-  std::cout << "inside construction union slot" << std::endl;
+  const SelectionContainers &selections = viewWidget->getSelections();
+  if (selections.size() < 2)
+    return;
   
-  //some of this temp.
+  //for now only accept objects.
+  if
+  (
+    selections.at(0).selectionType != SelectionTypes::Object ||
+    selections.at(1).selectionType != SelectionTypes::Object
+  )
+    return;
+    
+  uuid targetFeatureId = selections.at(0).featureId;
+  uuid toolFeatureId = selections.at(1).featureId; //only 1 tool right now.
+  
   Application *application = dynamic_cast<Application *>(qApp);
   assert(application);
   Project *project = application->getProject();
   
-  std::shared_ptr<Feature::Cylinder> cylinder(new Feature::Cylinder());
-  cylinder->setRadius(2.0);
-  cylinder->setHeight(10.0);
-  project->addFeature(cylinder, viewWidget->getRoot());
-  
-  std::shared_ptr<Feature::Box> box(new Feature::Box());
-  box->setParameters(10.0, 10.0, 10.0);
-  project->addFeature(box, viewWidget->getRoot());
+  project->findFeature(targetFeatureId)->hide3D();
+  project->findFeature(toolFeatureId)->hide3D();
+  viewWidget->clearSelections();
   
   //union keyword. whoops
   std::shared_ptr<Feature::Union> onion(new Feature::Union());
   project->addFeature(onion, viewWidget->getRoot());
-  project->connect(box->getId(), onion->getId(), Feature::InputTypes::target);
-  project->connect(cylinder->getId(), onion->getId(), Feature::InputTypes::tool);
+  project->connect(targetFeatureId, onion->getId(), Feature::InputTypes::target);
+  project->connect(toolFeatureId, onion->getId(), Feature::InputTypes::tool);
   
   project->update();
   project->updateVisual();
 
   viewWidget->update();
-
 }
-
