@@ -372,6 +372,19 @@ void Model::projectUpdatedSlot()
 //     std::cout << testSet.to_string() << std::endl;
 //   };
   
+  auto columnNumberFromMask = [] (const ColumnMask& columnMaskIn)
+  {
+    //if we probe for a column before it is set, Error!
+    if (columnMaskIn.count() != 1)
+      assert(0); //toposort problem?
+    //we can't use to_ulong or to_ullong. They are to small.
+    //this might be slow?
+    std::string buffer = columnMaskIn.to_string();
+    std::size_t position = buffer.find_last_of('1');
+    return (columnMaskIn.size() - position - 1);
+  };
+  
+  
   //this obsoletes the passed in sortedIds.
   TopoSortVisitor<Graph> visitor(graph);
   ControlledDFS<Graph, TopoSortVisitor<Graph> > dfs(visitor);
@@ -413,7 +426,7 @@ void Model::projectUpdatedSlot()
         std::tie(currentEdge, results) = boost::edge(currentVertex, *parentIt, rGraph);
         assert(results);
         if (rGraph[currentEdge].inputType == Feature::InputTypes::target)
-          currentColumn = static_cast<std::size_t>(std::log2(rGraph[*parentIt].columnMask.to_ulong()));
+          currentColumn = columnNumberFromMask(rGraph[*parentIt].columnMask);
         
         auto parentSortedIndex = rGraph[*parentIt].sortedIndex;
         auto currentSortedIndex = rGraph[*currentIt].sortedIndex;
@@ -532,7 +545,7 @@ void Model::projectUpdatedSlot()
       //know what the column is going to be.
       if (!rGraph[*parentIt].dagVisible)
         continue; //we don't make it here if source isn't visible. So don't have to worry about that.
-      float dependentX = pointSpacing * static_cast<int>(std::log2(rGraph[*parentIt].columnMask.to_ulong())) + pointSize / 2.0; //on center.
+      float dependentX = pointSpacing * static_cast<int>(columnNumberFromMask(rGraph[*parentIt].columnMask)) + pointSize / 2.0; //on center.
       float dependentY = rowHeight * rGraph[*parentIt].row + rowHeight / 2.0;
       
       bool results;
@@ -543,7 +556,7 @@ void Model::projectUpdatedSlot()
       pathItem->setBrush(Qt::NoBrush);
       QPainterPath path;
       path.moveTo(currentX, currentY);
-      if (currentColumn == static_cast<std::size_t>(std::log2(rGraph[*parentIt].columnMask.to_ulong())))
+      if (currentColumn == columnNumberFromMask(rGraph[*parentIt].columnMask))
         path.lineTo(currentX, dependentY); //straight connector in y.
       else
       {

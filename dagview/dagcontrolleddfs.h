@@ -57,7 +57,8 @@ namespace DAG
   public:
     typedef typename boost::graph_traits<GraphT>::vertex_descriptor VertexT;
     typedef typename boost::graph_traits<GraphT>::edge_descriptor EdgeT;
-    typedef typename boost::graph_traits<GraphT>::adjacency_iterator AdjacencyIterator;
+    typedef typename boost::graph_traits<GraphT>::adjacency_iterator AdjacencyIteratorT;
+    typedef typename boost::graph_traits<GraphT>::in_edge_iterator InEdgeIteratorT;
     typedef typename std::vector<VertexT> VerticesT;
     typedef typename std::vector<VertexT>::iterator VerticesTIterator;
     typedef typename std::tuple<VertexT, VerticesT, VerticesTIterator, VerticesTIterator> IterationRecord;
@@ -109,8 +110,11 @@ namespace DAG
           if (colorMap.at(*currentChildIt) == Color::White)
           {
             auto currentChild = *currentChildIt;
-            
             currentChildIt++;
+            
+            if (!parentScan(currentChild)) //has parents not visited yet. don't continue;
+              continue;
+            
             recordStack.push(std::make_tuple(currentParent, currentChildren, currentChildIt, currentChildItEnd));
             
             colorMap.at(currentChild) = Color::Gray;
@@ -129,10 +133,24 @@ namespace DAG
       }
     }
     
+    bool parentScan(VertexT childIn)
+    {
+      //if we are to continue no parent should be white.
+      InEdgeIteratorT it, itEnd;
+      std::tie(it, itEnd) = boost::in_edges(childIn, graph);
+      for (; it != itEnd; ++it)
+      {
+        VertexT currentParent = boost::source(*it, graph);
+        if (colorMap.at(currentParent) == Color::White)
+          return false;
+      }
+      return true;
+    }
+    
     VerticesT getSortedChildren(VertexT parentIn)
     {
       VerticesT children;
-      AdjacencyIterator it, itEnd;
+      AdjacencyIteratorT it, itEnd;
       std::tie(it, itEnd) = boost::adjacent_vertices(parentIn, graph);
       for (; it != itEnd; ++it)
         children.push_back(*it);
