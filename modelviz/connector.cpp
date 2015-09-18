@@ -160,6 +160,17 @@ uuid Connector::useGetRoot() const
   return graph[roots.at(0)].id;
 }
 
+bool Connector::useIsEdgeOfFace(const uuid& edgeIn, const uuid& faceIn) const
+{
+  //note edge and face might belong to totally different solids.
+  
+  //we know the edge will be here.
+  assert(vertexMap.count(edgeIn) > 0);
+  std::vector<uuid> faceParents = useGetParentsOfType(edgeIn, TopAbs_FACE);
+  std::vector<uuid>::const_iterator it = std::find(faceParents.begin(), faceParents.end(), faceIn);
+  return (it != faceParents.end());
+}
+
 //do I really  need this?
 TopoDS_Shape Connector::getShape(const boost::uuids::uuid &idIn)
 {

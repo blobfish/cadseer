@@ -313,6 +313,11 @@ bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
         {
             //try to find face.
             //for now assume the face is the next object in selection list.
+            //bad assumption!
+            const Feature::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(featureId);
+            assert(feature);
+            const ModelViz::Connector &connector = feature->getConnector();
+            
             osgUtil::LineSegmentIntersector::Intersections::const_iterator faceIt = intersection;
             faceIt++;
 
@@ -323,19 +328,20 @@ bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
                 int faceNodeMask = (*faceIt).nodePath[(*faceIt).nodePath.size() - 2]->getNodeMask();
                 if (faceNodeMask == NodeMaskDef::face)
                 {
-                    faceId = GU::getId((*faceIt).nodePath.back());
-                    break;
+                    uuid temp = GU::getId((*faceIt).nodePath.back());
+                    if (connector.useIsEdgeOfFace(selectedId, temp))
+                    {
+                      faceId = temp;
+                      break;
+                    }
                 }
                 faceIt++;
             }
             if (faceId.is_nil())
                 break;
 
-            const Feature::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(featureId);
-            assert(feature);
-            const ModelViz::Connector &connector = feature->getConnector();
             uuid wireId = connector.useGetWire(selectedId, faceId);
-            if (wireId == boost::uuids::nil_generator()())
+            if (wireId.is_nil())
                 break;
 
             std::vector<uuid> edges = connector.useGetChildrenOfType(wireId, TopAbs_EDGE);
