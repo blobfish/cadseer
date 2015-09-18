@@ -38,7 +38,8 @@ enum Constants
     ConstructionBlend,
     ConstructionUnion,
     FileImportOCC,
-    FileExportOSG
+    FileExportOSG,
+    FileExportOCC
 };
 }
 

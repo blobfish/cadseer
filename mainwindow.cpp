@@ -21,6 +21,8 @@
 #include <assert.h>
 #include <limits>
 
+#include <BRepTools.hxx>
+
 #include <QHBoxLayout>
 #include <QFileDialog>
 #include <QSplitter>
@@ -106,6 +108,33 @@ void MainWindow::readBrepSlot()
     viewWidget->update();
 }
 
+void MainWindow::writeBrepSlot()
+{
+  QString fileName = QFileDialog::getSaveFileName(ui->centralwidget, tr("Save File"),
+                           "/home/tanderson/temp", tr("brep (*.brep *.brp)"));
+
+    if (fileName.isEmpty())
+        return;
+    
+  const SelectionContainers &selections = viewWidget->getSelections();
+  if (selections.empty())
+    return;
+  if(selections.at(0).selectionType != SelectionTypes::Object)
+  {
+    viewWidget->clearSelections();
+    return;
+  }
+  
+  Application *application = dynamic_cast<Application *>(qApp);
+  assert(application);
+  Project *project = application->getProject();
+  
+  BRepTools::Write(project->findFeature(selections.at(0).featureId)->getShape(), fileName.toStdString().c_str());
+  
+  viewWidget->clearSelections();
+}
+
+
 void MainWindow::setupSelectionToolbar()
 {
     selectionManager->actionSelectObjects = ui->actionSelectObjects;
@@ -168,6 +197,11 @@ void MainWindow::setupCommands()
     connect(fileExportOSGAction, SIGNAL(triggered(bool)), viewWidget, SLOT(writeOSGSlot()));
     Command fileExportOSGCommand(CommandConstants::FileExportOSG, "Export OSG", fileExportOSGAction);
     CommandManager::getManager().addCommand(fileExportOSGCommand);
+    
+    QAction *fileExportOCCAction = new QAction(qApp);
+    connect(fileExportOCCAction, SIGNAL(triggered(bool)), this, SLOT(writeBrepSlot()));
+    Command fileExportOCCCommand(CommandConstants::FileExportOCC, "Export BRep", fileExportOCCAction);
+    CommandManager::getManager().addCommand(fileExportOCCCommand);
 }
 
 void MainWindow::constructionBoxSlot()

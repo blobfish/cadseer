@@ -344,6 +344,11 @@ void GestureHandler::constructMenu()
     fileExportOSG->setMatrix(dummy);
     fileExportOSG->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::FileExportOSG));
     fileExport->insertChild(fileExport->getNumChildren() - 2, fileExportOSG);
+    
+    osg::MatrixTransform *fileExportOCC = GestureNode::buildCommandNode(":/resources/images/fileOCC.svg");
+    fileExportOCC->setMatrix(dummy);
+    fileExportOCC->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::FileExportOCC));
+    fileExport->insertChild(fileExport->getNumChildren() - 2, fileExportOCC);
 }
 
 std::vector<osg::Vec3> GestureHandler::buildNodeLocations(osg::Vec3 direction, int nodeCount)

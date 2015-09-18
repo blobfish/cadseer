@@ -46,6 +46,7 @@ public:
 
 public Q_SLOTS:
     void readBrepSlot();
+    void writeBrepSlot();
     void constructionBoxSlot();
     void constructionSphereSlot();
     void constructionConeSlot();
