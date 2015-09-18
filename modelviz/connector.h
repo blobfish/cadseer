@@ -37,6 +37,7 @@ public:
     std::vector<boost::uuids::uuid> useGetParentsOfType(const boost::uuids::uuid &, const TopAbs_ShapeEnum &shapeType) const;
     std::vector<boost::uuids::uuid> useGetChildrenOfType(const boost::uuids::uuid &, const TopAbs_ShapeEnum &shapeType) const;
     boost::uuids::uuid useGetWire(const boost::uuids::uuid &, const boost::uuids::uuid &) const;
+    boost::uuids::uuid useGetRoot() const;
     TopoDS_Shape getShape(const boost::uuids::uuid &);
     void outputGraphviz(const std::string &name);
 private:

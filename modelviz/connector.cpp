@@ -19,8 +19,9 @@
 
 #include <iostream>
 #include <assert.h>
-#include <boost/graph/graphviz.hpp>
 
+#include <boost/graph/graphviz.hpp>
+#include <boost/graph/iteration_macros.hpp>
 #include <TopoDS_Iterator.hxx>
 
 #include "../globalutilities.h"
@@ -138,6 +139,25 @@ boost::uuids::uuid Connector::useGetWire
         }
     }
     return boost::uuids::nil_generator()();
+}
+
+uuid Connector::useGetRoot() const
+{
+  std::vector<ConnectorGraph::Vertex> roots;
+  BGL_FORALL_VERTICES(currentVertex, graph, ConnectorGraph::Graph)
+  {
+    if (boost::in_degree(currentVertex, graph) == 0)
+      roots.push_back(currentVertex);
+  }
+  
+  //all features/objects are expected to have 1 root shape
+  //of the type compound. If this isn't the case something is wrong.
+  //shape might be empty though. Like a failed update.
+  assert(roots.size() < 2);
+  
+  if (roots.empty())
+    return boost::uuids::nil_generator()();
+  return graph[roots.at(0)].id;
 }
 
 //do I really  need this?
