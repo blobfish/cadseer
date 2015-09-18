@@ -32,6 +32,7 @@ public Q_SLOTS:
     void constructionConeSlot();
     void constructionCylinderSlot();
     void constructionBlendSlot();
+    void constructionUnionSlot();
     
 private:
     void setupSelectionToolbar();

@@ -21,6 +21,7 @@
 #include "feature/cone.h"
 #include "feature/cylinder.h"
 #include "feature/blend.h"
+#include "feature/union.h"
 #include "dialogs/boxdialog.h"
 
 using boost::uuids::uuid;
@@ -133,6 +134,11 @@ void MainWindow::setupCommands()
     connect(constructionBlendAction, SIGNAL(triggered(bool)), this, SLOT(constructionBlendSlot()));
     Command constructionBlendCommand(CommandConstants::ConstructionBlend, "Construct Blend", constructionBlendAction);
     CommandManager::getManager().addCommand(constructionBlendCommand);
+    
+    QAction *constructionUnionAction = new QAction(qApp);
+    connect(constructionUnionAction, SIGNAL(triggered(bool)), this, SLOT(constructionUnionSlot()));
+    Command constructionUnionCommand(CommandConstants::ConstructionUnion, "Construct Union", constructionUnionAction);
+    CommandManager::getManager().addCommand(constructionUnionCommand);
     
     QAction *fileImportOCCAction = new QAction(qApp);
     connect(fileImportOCCAction, SIGNAL(triggered(bool)), this, SLOT(readBrepSlot()));
@@ -302,5 +308,36 @@ void MainWindow::constructionBlendSlot()
   
   project->update();
   project->updateVisual();
+}
+
+void MainWindow::constructionUnionSlot()
+{
+  std::cout << "inside construction union slot" << std::endl;
+  
+  //some of this temp.
+  Application *application = dynamic_cast<Application *>(qApp);
+  assert(application);
+  Project *project = application->getProject();
+  
+  std::shared_ptr<Feature::Cylinder> cylinder(new Feature::Cylinder());
+  cylinder->setRadius(2.0);
+  cylinder->setHeight(10.0);
+  project->addFeature(cylinder, viewWidget->getRoot());
+  
+  std::shared_ptr<Feature::Box> box(new Feature::Box());
+  box->setParameters(10.0, 10.0, 10.0);
+  project->addFeature(box, viewWidget->getRoot());
+  
+  //union keyword. whoops
+  std::shared_ptr<Feature::Union> onion(new Feature::Union());
+  project->addFeature(onion, viewWidget->getRoot());
+  project->connect(box->getId(), onion->getId(), Feature::InputTypes::target);
+  project->connect(cylinder->getId(), onion->getId(), Feature::InputTypes::tool);
+  
+  project->update();
+  project->updateVisual();
+
+  viewWidget->update();
+
 }
 

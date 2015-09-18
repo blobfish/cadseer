@@ -17,6 +17,7 @@ enum Constants
     ConstructionCone,
     ConstructionCylinder,
     ConstructionBlend,
+    ConstructionUnion,
     FileImportOCC,
     FileExportOSG
 };

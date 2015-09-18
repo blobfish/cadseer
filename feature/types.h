@@ -36,6 +36,7 @@ namespace Feature
     Cylinder, //!< feature sphere class.
     Blend, //!< feature blend class.
     Inert, //!< feature box class.
+    Union //!< feature box class.
   };
   
   inline const static std::string& getTypeString(Type typeIn)
@@ -50,7 +51,8 @@ namespace Feature
       {Type::Cone, "Cone"},
       {Type::Cylinder, "Cylinder"},
       {Type::Blend, "Blend"},
-      {Type::Inert, "Inert"}
+      {Type::Inert, "Inert"},
+      {Type::Union, "Union"}
     };
     
     assert(strings.count(typeIn) > 0);

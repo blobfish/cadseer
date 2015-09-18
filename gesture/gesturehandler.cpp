@@ -289,6 +289,17 @@ void GestureHandler::constructMenu()
     constructionBlend->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::ConstructionBlend));
     constructionFinishing->insertChild(constructionFinishing->getNumChildren() - 2, constructionBlend);
     
+    //booleans
+    osg::MatrixTransform *constructionBoolean;
+    constructionBoolean = GestureNode::buildMenuNode(":/resources/images/constructionBoolean.svg");
+    constructionBoolean->setMatrix(dummy);
+    constructionBase->insertChild(constructionBase->getNumChildren() - 2, constructionBoolean);
+    
+    osg::MatrixTransform *constructionUnion = GestureNode::buildCommandNode(":/resources/images/constructionUnion.svg");
+    constructionUnion->setMatrix(dummy);
+    constructionUnion->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::ConstructionUnion));
+    constructionBoolean->insertChild(constructionBoolean->getNumChildren() - 2, constructionUnion);
+    
     //file base
     osg::MatrixTransform *fileBase;
     fileBase = GestureNode::buildMenuNode(":/resources/images/fileBase.svg");

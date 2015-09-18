@@ -67,6 +67,7 @@ SET(FEATURE_SOURCES
     ./feature/blend.cpp
     ./feature/maps.cpp
     ./feature/cylinderbuilder.cpp
+    ./feature/union.cpp
     )
     
 SET(DIALOG_SOURCES
