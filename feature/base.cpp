@@ -110,7 +110,7 @@ void Base::updateVisual()
   connector.outputGraphviz("connectorGraph");
 
   ModelViz::Build builder(shape, resultContainer);
-  if (builder.go(0.01, 0.05))
+  if (builder.go(0.25, 0.5))
   {
       mainSwitch->addChild(builder.getViz().get());
   }
