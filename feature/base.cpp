@@ -19,6 +19,10 @@
 
 #include <boost/uuid/random_generator.hpp>
 
+#include "../application.h"
+#include "../preferences/preferencesXML.h"
+#include "../preferences/manager.h"
+
 #include <BRep_Builder.hxx>
 #include <TopoDS_Compound.hxx>
 
@@ -65,11 +69,7 @@ void Base::setModelDirty()
     state.set(StateOffset::ModelDirty, true);
     stateChangedSignal(id, StateOffset::ModelDirty);
   }
-  if (isVisualClean())
-  {
-    state.set(StateOffset::VisualDirty, true);
-    stateChangedSignal(id, StateOffset::VisualDirty);
-  }
+  setVisualDirty();
 }
 
 void Base::setModelClean()
@@ -87,6 +87,15 @@ void Base::setVisualClean()
   state.set(StateOffset::VisualDirty, false);
   stateChangedSignal(id, StateOffset::VisualDirty);
 }
+
+void Base::setVisualDirty()
+{
+  if(isVisualDirty())
+    return;
+  state.set(StateOffset::VisualDirty, true);
+  stateChangedSignal(id, StateOffset::VisualDirty);
+}
+
 
 TopoDS_Compound Base::compoundWrap(const TopoDS_Shape& shapeIn)
 {
@@ -108,9 +117,15 @@ void Base::updateVisual()
   ModelViz::BuildConnector connectBuilder(shape, resultContainer);
   connector = connectBuilder.getConnector();
   connector.outputGraphviz("connectorGraph");
+  
+  //get deflection values.
+  Application *app = dynamic_cast<Application*>(qApp);
+  assert(app);
+  double linear = app->getPreferencesManager()->rootPtr->visual().mesh().linearDeflection();
+  double angular = app->getPreferencesManager()->rootPtr->visual().mesh().angularDeflection();
 
   ModelViz::Build builder(shape, resultContainer);
-  if (builder.go(0.25, 0.5))
+  if (builder.go(linear, angular))
   {
       mainSwitch->addChild(builder.getViz().get());
   }

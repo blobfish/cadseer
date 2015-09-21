@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <visual>
+    <mesh>
+      <linearDeflection>0.25</linearDeflection>
+      <angularDeflection>0.5</angularDeflection>
+    </mesh>
+  </visual>
+</root>

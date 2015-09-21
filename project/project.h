@@ -41,6 +41,7 @@ public:
     void update();
     void updateVisual();
     void writeGraphViz(const std::string &fileName);
+    void setAllVisualDirty();
     
     void addFeature(std::shared_ptr<Feature::Base> feature, osg::Group *root);
     void connect(const boost::uuids::uuid &parentIn, const boost::uuids::uuid &childIn, Feature::InputTypes type);

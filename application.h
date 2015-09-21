@@ -21,6 +21,11 @@
 #define APPLICATION_H
 
 #include <QApplication>
+#include <QDir>
+
+#include <memory>
+
+namespace Preferences{class Manager;}
 
 class MainWindow;
 class Project;
@@ -35,6 +40,8 @@ public:
     void initializeSpaceball(MainWindow *mainWindowIn);
     void setProject(Project *projectIn){project = projectIn;}
     Project *getProject(){return project;}
+    Preferences::Manager* getPreferencesManager(){return preferenceManager.get();}
+    QDir getApplicationDirectory();
 
 public Q_SLOTS:
     void quittingSlot();
@@ -42,6 +49,7 @@ private:
     MainWindow *mainWindow = nullptr;
     Project *project = nullptr;
     bool spaceballPresent;
+    std::unique_ptr<Preferences::Manager> preferenceManager;
 };
 
 #endif // APPLICATION_H

@@ -27,11 +27,16 @@ ENDIF(SPNAV_FOUND)
 
 find_package(Eigen3 REQUIRED)
 
+find_package(XercesC REQUIRED)
+find_package(XSDCXX REQUIRED)
+
 SET(ADDITIONAL_INCLUDE_PATHS
     ${OPENSCENEGRAPH_INCLUDE_DIRS}
     ${OCE_INCLUDE_DIRS}
     ${CMAKE_CURRENT_BINARY_DIR} #needed to find moc files.
     ${EIGEN3_INCLUDE_DIR}
+    ${XSDCXX_INCLUDE_DIR}
+    ${XERCESC_INCLUDE_DIR}
     )
 INCLUDE_DIRECTORIES(${ADDITIONAL_INCLUDE_PATHS})
 
@@ -74,6 +79,12 @@ SET(DIALOG_SOURCES
     ./dialogs/boxdialog.cpp
     )
     
+SET(PREFERENCE_SOURCES
+    ./preferences/preferencesXML.cpp
+    ./preferences/manager.cpp
+    ./preferences/dialog.cpp
+    )
+    
 SET(PROJECT_SOURCES
     ./project/project.cpp
     )
@@ -102,6 +113,7 @@ SET(CADSEER_SOURCES
     ${COMMAND_SOURCES}
     ${FEATURE_SOURCES}
     ${DIALOG_SOURCES}
+    ${PREFERENCE_SOURCES}
     ${PROJECT_SOURCES}
     )
 
@@ -113,6 +125,7 @@ SET(CADSEER_MOC_HDRS
     ./application.h
     ./selectionmanager.h
     ./dialogs/boxdialog.h
+    ./preferences/dialog.h
     )
 
 SET(CADSEER_LIBRARIES
@@ -120,12 +133,14 @@ SET(CADSEER_LIBRARIES
     ${Boost_LIBRARIES}
     ${OPENSCENEGRAPH_LIBRARIES}
     ${OCE_LIBRARIES}
+    ${XERCESC_LIBRARIES}
     ${SPNAV_LIBRARIES}
     ${ModelViz}
     )
 
 SET(CADSEER_UIS
     ./mainwindow.ui
+    ./preferences/dialog.ui
     )
 
 SET(CADSEER_RESOURCES

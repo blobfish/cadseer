@@ -18,12 +18,17 @@
  */
 
 #include <iostream>
+
 #include <QX11Info>
+#include <QTimer>
+#include <QMessageBox>
 
 #include "application.h"
 #include "mainwindow.h"
 #include "spaceballqevent.h"
 #include "project/project.h"
+#include "preferences/preferencesXML.h"
+#include "preferences/manager.h"
 
 #include <spnav.h>
 
@@ -32,6 +37,16 @@ Application::Application(int &argc, char **argv) :
 {
     mainWindow = 0;
     spaceballPresent = false;
+    //some day pass the preferences file from user home directory to the manager constructor.
+    std::unique_ptr<Preferences::Manager> temp(new Preferences::Manager());
+    preferenceManager = std::move(temp);
+    
+    if (!preferenceManager->isOk())
+    {
+      QMessageBox::critical(0, tr("CadSeer"), tr("Preferences failed to load"));
+      QTimer::singleShot(0, this, SLOT(quit()));
+      return;
+    }
 }
 
 Application::~Application()
@@ -97,3 +112,15 @@ void Application::initializeSpaceball(MainWindow *mainWindowIn)
         spaceballPresent = true;
     }
 }
+
+QDir Application::getApplicationDirectory()
+{
+  //if windows wants hidden, somebody else will have to do it.
+  QString appDirName = ".CadSeer";
+  QString homeDirName = QDir::homePath();
+  QDir appDir(homeDirName + QDir::separator() + appDirName);
+  if (!appDir.exists())
+    appDir.mkpath(homeDirName + QDir::separator() + appDirName);
+  return appDir;
+}
+

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  
+<xs:simpleType name="DecPositive">
+  <xs:restriction base="xs:decimal">
+    <xs:minExclusive value="0.0"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:complexType name="Mesh">
+  <xs:sequence minOccurs="1" maxOccurs="1">
+    <xs:element name="linearDeflection" type="DecPositive" default="0.25"/>
+    <xs:element name="angularDeflection" type="DecPositive" default="0.5"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="Visual">
+  <xs:sequence minOccurs="1" maxOccurs="1">
+    <xs:element name="mesh" type="Mesh"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="Root">
+  <xs:sequence minOccurs="1" maxOccurs="1">
+    <xs:element name="visual" type="Visual"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:element name="root" type="Root"/>
+  
+</xs:schema> 

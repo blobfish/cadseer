@@ -220,3 +220,12 @@ Edge Project::connectVertices(Vertex parent, Vertex child, Feature::InputTypes t
   projectGraph[newEdge].inputType = type;
   return newEdge;
 }
+
+void Project::setAllVisualDirty()
+{
+  BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
+  {
+    projectGraph[currentVertex].feature->setVisualDirty();
+  }
+}
+

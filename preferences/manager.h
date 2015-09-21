@@ -17,31 +17,34 @@
  *
  */
 
-#ifndef COMMANDCONSTANTS_H
-#define COMMANDCONSTANTS_H
+#ifndef MANAGER_H
+#define MANAGER_H
 
-#include <string>
+#include <memory>
 
-namespace CommandConstants
+#include <QDir>
+
+class Root;
+
+namespace Preferences
 {
-static std::string attributeTitle = "CommandAttributeTitle";
-enum Constants
-{
-    StandardViewTop,
-    StandardViewFront,
-    StandardViewRight,
-    ViewFit,
-    ConstructionBox,
-    ConstructionSphere,
-    ConstructionCone,
-    ConstructionCylinder,
-    ConstructionBlend,
-    ConstructionUnion,
-    FileImportOCC,
-    FileExportOSG,
-    FileExportOCC,
-    Preferences
-};
+  class Manager
+  {
+  public:
+    Manager();
+    std::unique_ptr<Root> rootPtr;
+    void saveConfig();
+    bool isOk(){return ok;}
+  private:
+    bool createDefault();
+    void setup();
+    bool readConfig();
+    QDir appDirectory;
+    QString fileNameXML;
+    QString filePathXML;
+    QString filePathXSD;
+    bool ok;
+  };
 }
 
-#endif // COMMANDCONSTANTS_H
+#endif // MANAGER_H

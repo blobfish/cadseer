@@ -55,6 +55,7 @@ public:
   void setModelDirty();
   bool isVisualDirty() const {return state.test(StateOffset::VisualDirty);}
   bool isVisualClean() const {return !(state.test(StateOffset::VisualDirty));}
+  void setVisualDirty();
   void show3D();
   void hide3D();
   void toggle3D();

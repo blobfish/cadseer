@@ -53,6 +53,7 @@ public Q_SLOTS:
     void constructionCylinderSlot();
     void constructionBlendSlot();
     void constructionUnionSlot();
+    void preferencesSlot();
     
 private:
     void setupSelectionToolbar();

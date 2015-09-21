@@ -17,31 +17,33 @@
  *
  */
 
-#ifndef COMMANDCONSTANTS_H
-#define COMMANDCONSTANTS_H
+#ifndef DIALOG_H
+#define DIALOG_H
 
-#include <string>
+#include <qt4/QtGui/QDialog>
 
-namespace CommandConstants
+namespace Ui{ class dialog; }
+
+namespace Preferences
 {
-static std::string attributeTitle = "CommandAttributeTitle";
-enum Constants
-{
-    StandardViewTop,
-    StandardViewFront,
-    StandardViewRight,
-    ViewFit,
-    ConstructionBox,
-    ConstructionSphere,
-    ConstructionCone,
-    ConstructionCylinder,
-    ConstructionBlend,
-    ConstructionUnion,
-    FileImportOCC,
-    FileExportOSG,
-    FileExportOCC,
-    Preferences
-};
+  class Manager;
+  
+  class Dialog : public QDialog
+  {
+      Q_OBJECT
+  public:
+    Dialog(Manager *);
+    ~Dialog();
+    bool isVisualDirty(){return visualDirty;}
+  public Q_SLOTS:
+    virtual void accept() override;
+  private:
+    void initialize();
+    void updateDeflections();
+    Ui::dialog* ui;
+    Manager *manager;
+    bool visualDirty = false;
+  };
 }
 
-#endif // COMMANDCONSTANTS_H
+#endif // DIALOG_H

@@ -21,11 +21,12 @@
 #include <assert.h>
 #include <limits>
 
-#include <BRepTools.hxx>
 
 #include <QHBoxLayout>
 #include <QFileDialog>
 #include <QSplitter>
+
+#include <BRepTools.hxx>
 
 #include "mainwindow.h"
 #include "dagview/dagmodel.h"
@@ -44,6 +45,7 @@
 #include "feature/blend.h"
 #include "feature/union.h"
 #include "dialogs/boxdialog.h"
+#include "preferences/dialog.h"
 
 using boost::uuids::uuid;
 
@@ -202,6 +204,11 @@ void MainWindow::setupCommands()
     connect(fileExportOCCAction, SIGNAL(triggered(bool)), this, SLOT(writeBrepSlot()));
     Command fileExportOCCCommand(CommandConstants::FileExportOCC, "Export BRep", fileExportOCCAction);
     CommandManager::getManager().addCommand(fileExportOCCCommand);
+    
+    QAction *preferencesAction = new QAction(qApp);
+    connect(preferencesAction, SIGNAL(triggered(bool)), this, SLOT(preferencesSlot()));
+    Command preferencesCommand(CommandConstants::Preferences, "Preferences", preferencesAction);
+    CommandManager::getManager().addCommand(preferencesCommand);
 }
 
 void MainWindow::constructionBoxSlot()
@@ -399,3 +406,20 @@ void MainWindow::constructionUnionSlot()
 
   viewWidget->update();
 }
+
+void MainWindow::preferencesSlot()
+{
+  std::unique_ptr<Preferences::Dialog> dialog(new Preferences::Dialog(dynamic_cast<Application *>(qApp)->getPreferencesManager()));
+  dialog->setModal(true);
+  if (!dialog->exec())
+    return;
+  if (dialog->isVisualDirty())
+  {
+    Application *application = dynamic_cast<Application *>(qApp);
+    assert(application);
+    Project *project = application->getProject();
+    project->setAllVisualDirty();
+    project->updateVisual();
+  }
+}
+
