@@ -201,7 +201,60 @@ bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
       }
       return nullptr;
     };
-  
+    
+    auto processWire = [this, &container, &intersection](const uuid &featureId) -> bool
+    {
+      const Feature::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(featureId);
+      assert(feature);
+      const ModelViz::Connector &connector = feature->getConnector();
+      
+      osgUtil::LineSegmentIntersector::Intersections::const_iterator it = intersection;
+
+      uuid faceId = boost::uuids::nil_generator()();
+      uuid edgeId = boost::uuids::nil_generator()();
+      osgUtil::LineSegmentIntersector::Intersections::const_iterator edgeIt = currentIntersections.end();
+      for(; it != currentIntersections.end(); ++it)
+      {
+          assert((*it).nodePath.size() - 2 >= 0);
+          int currentNodeMask = (*it).nodePath[(*it).nodePath.size() - 2]->getNodeMask();
+          if (currentNodeMask == NodeMaskDef::face && faceId.is_nil())
+              faceId = GU::getId((*it).nodePath.back());
+          if (currentNodeMask == NodeMaskDef::edge)
+          {
+              edgeId = GU::getId((*it).nodePath.back());
+              edgeIt = it;
+          }
+          if (faceId.is_nil() || edgeId.is_nil())
+            continue;
+          if (connector.useIsEdgeOfFace(edgeId, faceId))
+            break;
+      }
+      if (it == currentIntersections.end())
+        return false;
+
+      uuid wireId = connector.useGetWire(edgeId, faceId);
+      if (wireId.is_nil())
+        return false;
+      assert(edgeIt != currentIntersections.end());
+
+      std::vector<uuid> edges = connector.useGetChildrenOfType(wireId, TopAbs_EDGE);
+      std::vector<osg::Geometry *> edgeGeometry;
+      getGeometryFromIds visit(edges, edgeGeometry);
+      edgeIt->nodePath[edgeIt->nodePath.size() - 2]->accept(visit);
+      
+      std::vector<osg::Geometry *>::const_iterator geomIt;
+      for (geomIt = edgeGeometry.begin(); geomIt != edgeGeometry.end(); ++geomIt)
+      {
+          Selected newSelection;
+          newSelection.initialize(*geomIt);
+          container.selections.push_back(newSelection);
+      }
+      container.selectionType = SelectionTypes::Wire;
+      container.shapeId = wireId;
+      
+      return true;
+    };
+    
     osg::Geometry *geometry = dynamic_cast<Geometry *>((*intersection).drawable.get());
     if (!geometry)
         return false;
@@ -220,13 +273,20 @@ bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
     switch (localNodeMask)
     {
     case NodeMaskDef::face:
-        if ((selectionMask & SelectionMask::facesSelectable) == SelectionMask::facesSelectable)
+    {
+        bool wireSignal = false;
+        if (selectionMask & SelectionMask::wiresSelectable)
         {
-            Selected newSelection;
-            newSelection.initialize(geometry);
-            container.selections.push_back(newSelection);
-            container.selectionType = SelectionTypes::Face;
-            container.shapeId = selectedId;
+          if (processWire(featureId))
+            break;
+        }
+        if ((selectionMask & SelectionMask::facesSelectable) && !wireSignal)
+        {
+          Selected newSelection;
+          newSelection.initialize(geometry);
+          container.selections.push_back(newSelection);
+          container.selectionType = SelectionTypes::Face;
+          container.shapeId = selectedId;
         }
         else if ((selectionMask & SelectionMask::shellsSelectable) == SelectionMask::shellsSelectable)
         {
@@ -300,6 +360,7 @@ bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
           }
         }
         break;
+    }
     case NodeMaskDef::edge:
         if ((selectionMask & SelectionMask::edgesSelectable) == SelectionMask::edgesSelectable)
         {
@@ -310,54 +371,7 @@ bool SelectionEventHandler::buildPreSelection(SelectionContainer &container,
             container.selections.push_back(newSelection);
         }
         else if ((selectionMask & SelectionMask::wiresSelectable) == SelectionMask::wiresSelectable)
-        {
-            //try to find face.
-            //for now assume the face is the next object in selection list.
-            //bad assumption!
-            const Feature::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(featureId);
-            assert(feature);
-            const ModelViz::Connector &connector = feature->getConnector();
-            
-            osgUtil::LineSegmentIntersector::Intersections::const_iterator faceIt = intersection;
-            faceIt++;
-
-            uuid faceId = boost::uuids::nil_generator()();
-            while(faceIt != currentIntersections.end())
-            {
-                assert((*faceIt).nodePath.size() - 2 >= 0);
-                int faceNodeMask = (*faceIt).nodePath[(*faceIt).nodePath.size() - 2]->getNodeMask();
-                if (faceNodeMask == NodeMaskDef::face)
-                {
-                    uuid temp = GU::getId((*faceIt).nodePath.back());
-                    if (connector.useIsEdgeOfFace(selectedId, temp))
-                    {
-                      faceId = temp;
-                      break;
-                    }
-                }
-                faceIt++;
-            }
-            if (faceId.is_nil())
-                break;
-
-            uuid wireId = connector.useGetWire(selectedId, faceId);
-            if (wireId.is_nil())
-                break;
-
-            std::vector<uuid> edges = connector.useGetChildrenOfType(wireId, TopAbs_EDGE);
-            std::vector<osg::Geometry *> edgeGeometry;
-            getGeometryFromIds visit(edges, edgeGeometry);
-            (*intersection).nodePath[(*intersection).nodePath.size() - 2]->accept(visit);
-            std::vector<osg::Geometry *>::const_iterator geomIt;
-            for (geomIt = edgeGeometry.begin(); geomIt != edgeGeometry.end(); ++geomIt)
-            {
-                Selected newSelection;
-                newSelection.initialize(*geomIt);
-                container.selections.push_back(newSelection);
-            }
-            container.selectionType = SelectionTypes::Wire;
-            container.shapeId = wireId;
-        }
+          processWire(featureId);
         break;
     case NodeMaskDef::vertex:
     {

@@ -26,6 +26,19 @@
 
 using namespace Feature;
 
+static const std::vector<std::string> shapeStrings
+({
+     "Compound",
+     "Compound Solid",
+     "Solid",
+     "Shell",
+     "Face",
+     "Wire",
+     "Edge",
+     "Vertex",
+     "Shape",
+ });
+
 ostream& Feature::operator<<(ostream& os, const EvolutionRecord& record)
 {
   os << boost::uuids::to_string(record.inId) << "      " << boost::uuids::to_string(record.outId) << std::endl;
@@ -59,7 +72,9 @@ const EvolutionRecord& Feature::findRecordByIn(const EvolutionContainer& contain
 
 std::ostream& Feature::operator<<(std::ostream& os, const ResultRecord& record)
 {
-  os << boost::uuids::to_string(record.id) << "      " << GU::getShapeHash(record.shape) << std::endl;
+  os << boost::uuids::to_string(record.id) << "      " << 
+    GU::getShapeHash(record.shape) << "      " <<
+    shapeStrings.at(record.shape.ShapeType()) << std::endl;
   return os;
 }
 

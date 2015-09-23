@@ -28,6 +28,8 @@
 #include <TopExp.hxx> //maybe temp.
 #include <TopTools_IndexedMapOfShape.hxx> //maybe temp.
 #include <TopTools_ListIteratorOfListOfShape.hxx>
+#include <TopExp_Explorer.hxx>
+#include <BOPTools_AlgoTools.hxx>
 #include <BRepTools.hxx>
 
 #include "../globalutilities.h"
@@ -100,6 +102,8 @@ void Blend::update(const UpdateMap& mapIn)
 //     std::cout << std::endl << "after unique type match:"; dumpResultStats();
     outerWireMatch(mapIn.at(InputTypes::target));
 //     std::cout << std::endl << "after outer wire match:"; dumpResultStats();
+    innerWireMatch(blendMaker, mapIn.at(InputTypes::target));
+//     std::cout << std::endl << "after inner wire match:"; dumpResultStats();
     derivedMatch(blendMaker, mapIn.at(InputTypes::target));
 //     std::cout << std::endl << "after derived match:"; dumpResultStats();
     
@@ -331,11 +335,95 @@ void Blend::outerWireMatch(const Base *targetFeatureIn)
   }
 }
 
+//what a mess! this is not maintainable!
+void Blend::innerWireMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *targetFeatureIn)
+{
+  /* loop edges of target that were blended away.
+   * loop faces of target that contain the current target edge.
+   * get wire of target that belongs to the face that contains the edge
+   * check wire id in result map.
+   * find result face from target face.
+   * in result find common edge belonging to target face and blended face.
+   * in result find wire in target face contains commen edge.
+   * assign id of wire.
+   */
+  
+  //get all edges that were blended away.
+  const TopoDS_Shape &targetShape = targetFeatureIn->getShape();
+  const ResultContainer &targetResultContainer = targetFeatureIn->getResultContainer();
+  for (const auto &currentId : edgeIds)
+  {
+    assert(Feature::hasResult(targetResultContainer, currentId));
+    const TopoDS_Shape &currentEdge = Feature::findResultById(targetResultContainer, currentId).shape;
+    
+    TopTools_ListOfShape generated = blendMakerIn.Generated(currentEdge);
+    assert(generated.Extent() == 1);
+    const TopoDS_Shape &blendedFace = generated.First();
+    assert(!blendedFace.IsNull());
+    assert(blendedFace.ShapeType() == TopAbs_FACE);
+    
+    //find faces and wires of target that contain edge that was blended away.
+    //face is first, wire is second.
+//     typedef std::vector<std::pair<TopoDS_Shape, TopoDS_Shape> > FaceWirePair;
+//     FaceWirePair faceWirePair;
+    TopTools_IndexedDataMapOfShapeListOfShape edgeToWireMap, wireToFaceMap;
+    TopExp::MapShapesAndAncestors(targetShape, TopAbs_EDGE, TopAbs_WIRE, edgeToWireMap);
+    TopExp::MapShapesAndAncestors(targetShape, TopAbs_WIRE, TopAbs_FACE, wireToFaceMap);
+    const TopTools_ListOfShape &wireList = edgeToWireMap.FindFromKey(currentEdge);
+    TopTools_ListIteratorOfListOfShape wireListIt(wireList);
+    for (; wireListIt.More(); wireListIt.Next())
+    {
+      const TopoDS_Shape &currentWire = wireListIt.Value();
+      const TopTools_ListOfShape &faceList = wireToFaceMap.FindFromKey(currentWire);
+      assert(faceList.Extent() == 1);
+      const TopoDS_Shape &currentFace = faceList.First();
+//       faceWirePair.push_back(std::make_pair(currentFace, currentWire));
+      uuid targetFaceId = Feature::findResultByShape(targetResultContainer, currentFace).id;
+      uuid targetWireId = Feature::findResultByShape(targetResultContainer, currentWire).id;
+      //skip if the wire id has already by added to this' result container. Possibly by outerWireMatch.
+      if (Feature::hasResult(resultContainer, targetWireId))
+        continue;
+      
+      //now find the face of this' feature that matches the targetFace.
+      assert(Feature::hasResult(resultContainer, targetFaceId));
+      const TopoDS_Shape &resultFace = Feature::findResultById(resultContainer, targetFaceId).shape;
+      
+      //now find the common edge that belongs to the resultFace and the blended face.
+      TopExp_Explorer exp;
+      for (exp.Init(blendedFace, TopAbs_EDGE); exp.More(); exp.Next())
+      {
+        TopoDS_Edge partnerEdge;
+        if (!BOPTools_AlgoTools::GetEdgeOnFace(TopoDS::Edge(exp.Current()), TopoDS::Face(resultFace), partnerEdge))
+          continue;
+        //now find wire that is contained in result face that contains partner edge.
+        TopExp_Explorer wireIt;
+        for (wireIt.Init(resultFace, TopAbs_WIRE); wireIt.More(); wireIt.Next())
+        {
+          const TopoDS_Shape &goalWire = wireIt.Current();
+          TopExp_Explorer edgeIt;
+          for (edgeIt.Init(wireIt.Current(), TopAbs_EDGE); edgeIt.More(); edgeIt.Next())
+          {
+            if (edgeIt.Current().IsEqual(partnerEdge))
+            {
+              //we have the fucking wire.
+              Feature::updateId(resultContainer, targetWireId, goalWire);
+              goto getOut; //glorified break.
+            }
+          }
+        }
+      }
+      getOut: ;
+    }
+  }
+}
+
+
 /* after all of the above the only shapes left are the new edges and
  * vertices created on the new blend faces. We need to id these.
  * the ids for these are based upon a set of faces. Usually 2 faces
  * for edges and 3 faces for vertices. This might not be enough and we
- * to have the shape type involved. we will see.
+ * to have the shape type involved. we will see.....
+ * Yeah we will see alright! vertices now mapped to edges instead of face.
  */
 void Blend::derivedMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *targetFeatureIn)
 {
@@ -395,18 +483,18 @@ void Blend::derivedMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *tar
     Feature::updateId(resultContainer, edgeId, edgeShapes(edgeIndex));
   }
   
-  TopTools_IndexedDataMapOfShapeListOfShape vToF; //edges to face
-  TopExp::MapShapesAndAncestors(shape, TopAbs_VERTEX, TopAbs_FACE, vToF);
+  TopTools_IndexedDataMapOfShapeListOfShape vToE; //edges to face
+  TopExp::MapShapesAndAncestors(shape, TopAbs_VERTEX, TopAbs_EDGE, vToE);
   for (int vertexIndex = 1; vertexIndex <= vertexShapes.Extent(); ++vertexIndex)
   {
     IdSet idSet;
-    const TopTools_ListOfShape& faceList = vToF.FindFromKey(vertexShapes(vertexIndex));
-    assert(!faceList.IsEmpty());
+    const TopTools_ListOfShape& edgeList = vToE.FindFromKey(vertexShapes(vertexIndex));
+    assert(!edgeList.IsEmpty());
     TopTools_ListIteratorOfListOfShape it;
-    for (it.Initialize(faceList); it.More(); it.Next())
+    for (it.Initialize(edgeList); it.More(); it.Next())
     {
-      uuid faceId = Feature::findResultByShape(resultContainer, it.Value()).id;
-      idSet.insert(faceId);
+      uuid edgeId = Feature::findResultByShape(resultContainer, it.Value()).id;
+      idSet.insert(edgeId);
     }
     
     uuid vertexId;

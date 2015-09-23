@@ -21,6 +21,7 @@
 #define SELECTIONEVENTHANDLER_H
 
 #include <boost/uuid/uuid.hpp>
+#include <boost/uuid/nil_generator.hpp>
 
 #include <osgGA/GUIEventHandler>
 #include <osgUtil/LineSegmentIntersector>
@@ -42,8 +43,8 @@ public:
     SelectionContainer(){}
     SelectionTypes::Type selectionType;
     std::vector<Selected> selections;
-    boost::uuids::uuid featureId;
-    boost::uuids::uuid shapeId;
+    boost::uuids::uuid featureId = boost::uuids::nil_generator()();
+    boost::uuids::uuid shapeId = boost::uuids::nil_generator()();
 };
 inline bool operator==(const SelectionContainer& lhs, const SelectionContainer& rhs)
 {

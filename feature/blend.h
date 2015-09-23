@@ -59,6 +59,7 @@ private:
     void generatedMatch(BRepFilletAPI_MakeFillet&, const Base *);
     void uniqueTypeMatch(const Base *);
     void outerWireMatch(const Base *);
+    void innerWireMatch(BRepFilletAPI_MakeFillet &, const Base *);
     void derivedMatch(BRepFilletAPI_MakeFillet&, const Base *);
     
     void dumpInfo(BRepFilletAPI_MakeFillet&, const Base *);
