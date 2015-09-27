@@ -22,11 +22,14 @@
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/nil_generator.hpp>
+#include <boost/signals2.hpp>
 
 #include <osgGA/GUIEventHandler>
 #include <osgUtil/LineSegmentIntersector>
 
 #include "selectiondefs.h"
+
+class SelectionMessage;
 
 class Selected
 {
@@ -62,6 +65,12 @@ public:
     const SelectionContainers& getSelections() const {return selectionContainers;}
     void clearSelections();
     void setSelectionMask(const unsigned int &maskIn);
+    
+    typedef boost::signals2::signal<void (const SelectionMessage &)> SelectionChangedSignal;
+    boost::signals2::connection connectSelectionChanged(const SelectionChangedSignal::slot_type &subscriber)
+    {
+      return selectionChangedSignal.connect(subscriber);
+    }
 protected:
     virtual bool handle(const osgGA::GUIEventAdapter& eventAdapter,
                         osgGA::GUIActionAdapter& actionAdapter, osg::Object *object,
@@ -81,6 +90,8 @@ protected:
     unsigned int selectionMask;
 
     osgUtil::LineSegmentIntersector::Intersections currentIntersections;
+    
+    SelectionChangedSignal selectionChangedSignal;
 };
 
 class getGeometryFromIds : public osg::NodeVisitor

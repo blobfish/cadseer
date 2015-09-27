@@ -17,7 +17,7 @@ find_package(OCE REQUIRED COMPONENTS TKernel TKBRep TKMesh TKFeat TKFillet)
 SET(OCE_LIBRARIES "TKernel;TKBRep;TKMesh;TKFeat;TKFillet")
 
 FIND_PACKAGE(OpenSceneGraph REQUIRED)
-SET(OPENSCENEGRAPH_LIBRARIES "OpenThreads;osg;osgDB;osgUtil;osgViewer;osgQt;osgGA")
+SET(OPENSCENEGRAPH_LIBRARIES "OpenThreads;osg;osgDB;osgUtil;osgViewer;osgQt;osgGA;osgText")
 
 find_package(Spnav)
 IF(SPNAV_FOUND)
@@ -105,8 +105,10 @@ SET(CADSEER_SOURCES
     ./selectioneventhandler.cpp
     ./selectionintersector.cpp
     ./selectionmanager.cpp
+    ./selectionmessage.cpp
     ./globalutilities.cpp
     ./coordinatesystem.cpp
+    ./textcamera.cpp
     ${MODELVIZ_SOURCES}
     ${TESTING_SOURCES}
     ${GESTURE_SOURCES}

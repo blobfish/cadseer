@@ -50,6 +50,7 @@
 #include "./command/commandmanager.h"
 #include "globalutilities.h"
 #include "coordinatesystem.h"
+#include "textcamera.h"
 
 ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel) : QWidget()
 {
@@ -88,7 +89,11 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     gestureCamera->setViewport(new osg::Viewport(0, 0, glWidgetWidth, glWidgetHeight));
     gestureCamera->setProjectionResizePolicy(osg::Camera::ProjectionResizePolicy::FIXED);
     view->addSlave(gestureCamera, false);
-
+    
+    TextCamera *infoCamera = new TextCamera(windowQt);
+    infoCamera->setViewport(0, 0, glWidgetWidth, glWidgetHeight);
+    infoCamera->setProjectionResizePolicy(osg::Camera::ProjectionResizePolicy::FIXED);
+    view->addSlave(infoCamera, false);
 
     view->setSceneData(root);
     view->addEventHandler(new osgViewer::StatsHandler);
@@ -100,8 +105,11 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     //between gesture camera a mainwindlow slots are synchronized.
     view->addEventHandler(new GestureHandler(gestureCamera));
 //    view->setCameraManipulator(new osgGA::TrackballManipulator);
+    view->addEventHandler(new ResizeEventHandler(infoCamera));
     spaceballManipulator = new osgGA::SpaceballManipulator(view->getCamera());
     view->setCameraManipulator(spaceballManipulator);
+    
+    selectionHandler->connectSelectionChanged(boost::bind(&TextCamera::selectionChangedSlot, infoCamera, _1));
 
     addView(view);
 
@@ -261,7 +269,7 @@ osg::Camera* ViewerWidget::createGestureCamera()
     fadeCamera->setClearMask(GL_DEPTH_BUFFER_BIT);
     fadeCamera->setAllowEventFocus(false);
     fadeCamera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
-    fadeCamera->setRenderOrder(osg::Camera::POST_RENDER);
+    fadeCamera->setRenderOrder(osg::Camera::POST_RENDER, 1);
 //    fadeCamera->setProjectionMatrix(osg::Matrix::ortho2D(0.0, localWidgetWidth, 0.0, localWidgetHeight));
     fadeCamera->setProjectionMatrix(osg::Matrix::ortho2D(0.0, 1000.0, 0.0, 1000.0));
 //    fadeCamera->setProjectionMatrix(osg::Matrix::ortho2D(0.0, 100.0, 0.0, 100.0));

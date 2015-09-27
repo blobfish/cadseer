@@ -164,8 +164,11 @@ bool Connector::useIsEdgeOfFace(const uuid& edgeIn, const uuid& faceIn) const
 {
   //note edge and face might belong to totally different solids.
   
-  //we know the edge will be here.
-  assert(vertexMap.count(edgeIn) > 0);
+  //we know the edge will be here. Not anymore. we are now selecting
+  //wires with the face first. so 'this' maybe the face feature and not the edge.
+//   assert(vertexMap.count(edgeIn) > 0);
+  if(vertexMap.count(edgeIn) < 1)
+    return false;
   std::vector<uuid> faceParents = useGetParentsOfType(edgeIn, TopAbs_FACE);
   std::vector<uuid>::const_iterator it = std::find(faceParents.begin(), faceParents.end(), faceIn);
   return (it != faceParents.end());

@@ -55,9 +55,9 @@ protected:
     osg::Camera* createBackgroundCamera();
     osg::Camera* createGestureCamera();
     void setupCommands();
-    void addFade();
     QTimer _timer;
     osg::ref_ptr<osg::Group> root;
+    osg::ref_ptr<osg::Switch> infoSwitch;
     osg::ref_ptr<SelectionEventHandler> selectionHandler;
     osg::ref_ptr<osgGA::SpaceballManipulator> spaceballManipulator;
     int glWidgetWidth;

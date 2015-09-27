@@ -33,6 +33,7 @@
 #include "application.h"
 #include "./project/project.h"
 #include "./modelviz/connector.h"
+#include "selectionmessage.h"
 
 using namespace osg;
 using namespace boost::uuids;
@@ -167,6 +168,13 @@ bool SelectionEventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
                 setGeometryColor(currentSelected.geometry.get(), selectionColor);
             }
             selectionContainers.push_back(lastPrehighlight);
+            SelectionMessage message;
+            message.type = SelectionMessage::Type::Selection;
+            message.action = SelectionMessage::Action::Addition;
+            message.objectType = lastPrehighlight.selectionType;
+            message.featureId = lastPrehighlight.featureId;
+            message.shapeId = lastPrehighlight.shapeId;
+            selectionChangedSignal(message);
             lastPrehighlight = SelectionContainer();
         }
         else
@@ -405,6 +413,13 @@ void SelectionEventHandler::clearSelections()
           //should I lock the geometry observer point?
           setGeometryColor(selectedIt->geometry.get(), selectedIt->color);
         }
+        SelectionMessage message;
+        message.type = SelectionMessage::Type::Selection;
+        message.action = SelectionMessage::Action::Subtraction;
+        message.objectType = it->selectionType;
+        message.featureId = it->featureId;
+        message.shapeId = it->shapeId;
+        selectionChangedSignal(message);
     }
     selectionContainers.clear();
 }
@@ -426,12 +441,29 @@ void SelectionEventHandler::setPrehighlight(SelectionContainer &selected)
     std::vector<Selected>::const_iterator it;
     for (it = selected.selections.begin(); it != selected.selections.end(); ++it)
         setGeometryColor(it->geometry.get(), preHighlightColor);
+    
+    SelectionMessage message;
+    message.type = SelectionMessage::Type::Preselection;
+    message.action = SelectionMessage::Action::Addition;
+    message.objectType = lastPrehighlight.selectionType;
+    message.featureId = lastPrehighlight.featureId;
+    message.shapeId = lastPrehighlight.shapeId;
+    selectionChangedSignal(message);
 }
 
 void SelectionEventHandler::clearPrehighlight()
 {
     if (lastPrehighlight.selections.size() < 1)
         return;
+    
+    SelectionMessage message;
+    message.type = SelectionMessage::Type::Preselection;
+    message.action = SelectionMessage::Action::Subtraction;
+    message.objectType = lastPrehighlight.selectionType;
+    message.featureId = lastPrehighlight.featureId;
+    message.shapeId = lastPrehighlight.shapeId;
+    selectionChangedSignal(message);
+    
     std::vector<Selected>::const_iterator it;
     for (it = lastPrehighlight.selections.begin(); it != lastPrehighlight.selections.end(); ++it)
     {
