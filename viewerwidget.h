@@ -23,8 +23,10 @@
 #include <QWidget>
 #include <QTimer>
 #include <osgViewer/CompositeViewer>
+#ifndef Q_MOC_RUN
 #include "selectioneventhandler.h"
 #include "spaceballmanipulator.h"
+#endif
 
 namespace osgQt
 {

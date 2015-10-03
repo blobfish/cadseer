@@ -24,17 +24,19 @@
 #include <vector>
 #include <bitset>
 
+#include <QGraphicsScene>
+#include <QBrush>
+#include <QLineEdit>
+
+#ifndef Q_MOC_RUN
 #include <boost/uuid/uuid.hpp>
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/composite_key.hpp>
 
-#include <QGraphicsScene>
-#include <QBrush>
-#include <QLineEdit>
-
 #include "dagmodelgraph.h"
+#endif
 // #include "DAGFilter.h"
 
 class QGraphicsSceneHoverEvent;
