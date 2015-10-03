@@ -160,6 +160,17 @@ bool SelectionEventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
     {
         if (lastPrehighlight.selections.size() > 0)
         {
+	  //prehighlight gets 'moved' into selections so can't call
+	  //clear prehighlight, but we still clear the prehighlight
+	  //selections we need to make observers aware of this 'hidden' change.
+	    SelectionMessage preMessage;
+	    preMessage.type = SelectionMessage::Type::Preselection;
+	    preMessage.action = SelectionMessage::Action::Subtraction;
+	    preMessage.objectType = lastPrehighlight.selectionType;
+	    preMessage.featureId = lastPrehighlight.featureId;
+	    preMessage.shapeId = lastPrehighlight.shapeId;
+	    selectionChangedSignal(preMessage);
+	  
             std::vector<Selected>::iterator it;
             for (it = lastPrehighlight.selections.begin(); it != lastPrehighlight.selections.end(); ++it)
             {
