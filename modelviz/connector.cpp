@@ -22,7 +22,14 @@
 
 #include <boost/graph/graphviz.hpp>
 #include <boost/graph/iteration_macros.hpp>
+
 #include <TopoDS_Iterator.hxx>
+#include <BRepAdaptor_Curve.hxx>
+#include <TopoDS.hxx>
+#include <gp_Circ.hxx>
+#include <gp_Elips.hxx>
+#include <BRepBuilderAPI_MakeVertex.hxx>
+#include <BRepExtrema_DistShapeShape.hxx>
 
 #include "../globalutilities.h"
 #include "connector.h"
@@ -175,7 +182,7 @@ bool Connector::useIsEdgeOfFace(const uuid& edgeIn, const uuid& faceIn) const
 }
 
 //do I really  need this?
-TopoDS_Shape Connector::getShape(const boost::uuids::uuid &idIn)
+TopoDS_Shape Connector::getShape(const boost::uuids::uuid &idIn) const
 {
     ConnectorGraph::IdVertexMap::const_iterator it;
     it = vertexMap.find(idIn);
@@ -198,6 +205,123 @@ void Connector::outputGraphviz(const std::string &name)
 //    ConnectorGraph::GraphReversed reversed = boost::make_reverse_graph(graph);
 //    boost::write_graphviz(file, reversed, Node_writer<ConnectorGraph::GraphReversed>(reversed), boost::default_writer());
 }
+
+std::vector<osg::Vec3d> Connector::useGetEndPoints(const boost::uuids::uuid &edgeIdIn) const
+{
+  TopoDS_Shape shape = getShape(edgeIdIn);
+  assert(!shape.IsNull());
+  assert(shape.ShapeType() == TopAbs_EDGE);
+  BRepAdaptor_Curve curveAdaptor(TopoDS::Edge(shape));
+  
+  std::vector<osg::Vec3d> out;
+  GeomAbs_CurveType curveType = curveAdaptor.GetType();
+  //no end points for conics
+  if (curveType == GeomAbs_Circle || curveType == GeomAbs_Ellipse)
+    return out;
+  
+  gp_Pnt tempPoint;
+  tempPoint = curveAdaptor.Value(curveAdaptor.FirstParameter());
+  out.push_back(osg::Vec3d(tempPoint.X(), tempPoint.Y(), tempPoint.Z()));
+  tempPoint = curveAdaptor.Value(curveAdaptor.LastParameter());
+  out.push_back(osg::Vec3d(tempPoint.X(), tempPoint.Y(), tempPoint.Z()));
+  
+  return out;
+}
+
+std::vector<osg::Vec3d> Connector::useGetMidPoint(const uuid &edgeIdIn) const
+{
+  //all types of curves for mid point?
+  TopoDS_Shape shape = getShape(edgeIdIn);
+  assert(!shape.IsNull());
+  assert(shape.ShapeType() == TopAbs_EDGE);
+  BRepAdaptor_Curve curveAdaptor(TopoDS::Edge(shape));
+  
+  std::vector<osg::Vec3d> out;
+  GeomAbs_CurveType curveType = curveAdaptor.GetType();
+  //no end points for conics
+  if (curveType == GeomAbs_Circle || curveType == GeomAbs_Ellipse)
+    return out;
+  
+  Standard_Real firstParameter = curveAdaptor.FirstParameter();
+  Standard_Real lastParameter = curveAdaptor.LastParameter();
+  Standard_Real midParameter = (lastParameter - firstParameter) / 2.0 + firstParameter;
+  gp_Pnt tempPoint = curveAdaptor.Value(midParameter);
+  out.push_back(osg::Vec3d(tempPoint.X(), tempPoint.Y(), tempPoint.Z()));
+  
+  return out;
+}
+
+std::vector< osg::Vec3d > Connector::useGetCenterPoint(const uuid& edgeIdIn) const
+{
+  TopoDS_Shape shape = getShape(edgeIdIn);
+  assert(!shape.IsNull());
+  assert(shape.ShapeType() == TopAbs_EDGE);
+  BRepAdaptor_Curve curveAdaptor(TopoDS::Edge(shape));
+  
+  std::vector<osg::Vec3d> out;
+  GeomAbs_CurveType curveType = curveAdaptor.GetType();
+  if (curveType == GeomAbs_Circle)
+  {
+    gp_Circ circle = curveAdaptor.Circle();
+    gp_Pnt tempPoint = circle.Location();
+    out.push_back(osg::Vec3d(tempPoint.X(), tempPoint.Y(), tempPoint.Z()));
+  }
+  if (curveType == GeomAbs_Ellipse)
+  {
+    gp_Elips ellipse = curveAdaptor.Ellipse();
+    gp_Pnt tempPoint = ellipse.Location();
+    out.push_back(osg::Vec3d(tempPoint.X(), tempPoint.Y(), tempPoint.Z()));
+  }
+  
+  return out;
+}
+
+std::vector< osg::Vec3d > Connector::useGetQuadrantPoints(const uuid &edgeIdIn) const
+{
+  TopoDS_Shape shape = getShape(edgeIdIn);
+  assert(!shape.IsNull());
+  assert(shape.ShapeType() == TopAbs_EDGE);
+  BRepAdaptor_Curve curveAdaptor(TopoDS::Edge(shape));
+  
+  std::vector<osg::Vec3d> out;
+  GeomAbs_CurveType curveType = curveAdaptor.GetType();
+  if (curveType == GeomAbs_Circle || curveType == GeomAbs_Ellipse)
+  {
+    gp_Pnt tempPoint;
+    tempPoint = curveAdaptor.Value(0.0);
+    out.push_back(osg::Vec3d(tempPoint.X(), tempPoint.Y(), tempPoint.Z()));
+    tempPoint = curveAdaptor.Value(M_PI / 2.0);
+    out.push_back(osg::Vec3d(tempPoint.X(), tempPoint.Y(), tempPoint.Z()));
+    tempPoint = curveAdaptor.Value(M_PI);
+    out.push_back(osg::Vec3d(tempPoint.X(), tempPoint.Y(), tempPoint.Z()));
+    tempPoint = curveAdaptor.Value(3.0 * M_PI / 2.0);
+    out.push_back(osg::Vec3d(tempPoint.X(), tempPoint.Y(), tempPoint.Z()));
+  }
+  
+  return out;
+}
+
+std::vector< osg::Vec3d > Connector::useGetNearestPoint(const uuid &shapeIn, const osg::Vec3d &pointIn) const
+{
+  TopoDS_Shape shape = getShape(shapeIn);
+  assert(!shape.IsNull());
+  TopAbs_ShapeEnum type = shape.ShapeType();
+  assert((type == TopAbs_EDGE) || (type == TopAbs_FACE));
+  
+  TopoDS_Vertex vertex = BRepBuilderAPI_MakeVertex(gp_Pnt(pointIn.x(), pointIn.y(), pointIn.z()));
+  std::vector<osg::Vec3d> out;
+  
+  BRepExtrema_DistShapeShape dist(shape, vertex, Extrema_ExtFlag_MIN);
+  if (!dist.IsDone())
+    return out;
+  if (dist.NbSolution() < 1)
+    return out;
+  gp_Pnt tempPoint = dist.PointOnShape1(1);
+  out.push_back(osg::Vec3d(tempPoint.X(), tempPoint.Y(), tempPoint.Z()));
+  
+  return out;
+}
+
 
 
 //when we build the ids in features we treat seam edges as one edge
@@ -225,3 +349,4 @@ void BuildConnector::buildRecursiveConnector(const TopoDS_Shape &shapeIn, const 
         connector.buildEndNode();
     }
 }
+

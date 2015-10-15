@@ -44,7 +44,7 @@
 #include "viewerwidget.h"
 #include "gleventwidget.h"
 #include "nodemaskdefs.h"
-#include "selectiondefs.h"
+#include <selection/definitions.h>
 #include "./testing/plotter.h"
 #include "./gesture/gesturehandler.h"
 #include "./command/commandmanager.h"
@@ -97,7 +97,7 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
 
     view->setSceneData(root);
     view->addEventHandler(new osgViewer::StatsHandler);
-    selectionHandler = new SelectionEventHandler();
+    selectionHandler = new Selection::EventHandler();
     view->addEventHandler(selectionHandler);
     //why does the following line create an additional thread. why?
     //not sure why it does, but it happens down inside librsvg and doesn't
@@ -297,9 +297,9 @@ void ViewerWidget::setSelectionMask(const int &maskIn)
 {
     //turn points on or off.
 
-    VisibleVisitor visitor((SelectionMask::verticesSelectable & maskIn) == SelectionMask::verticesSelectable);
-    root->accept(visitor);
-
+//     VisibleVisitor visitor((Selection::verticesSelectable & maskIn) == Selection::verticesSelectable);
+//     root->accept(visitor);
+// 
     selectionHandler->setSelectionMask(maskIn);
 }
 

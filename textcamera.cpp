@@ -31,8 +31,8 @@
 #include <osgText/Text>
 #include <osgQt/QFontImplementation>
 
-#include "selectiondefs.h"
-#include "selectionmessage.h"
+#include <selection/definitions.h>
+#include <selection/message.h>
 #include "textcamera.h"
 
 ResizeEventHandler::ResizeEventHandler(const osg::observer_ptr< osg::Camera > slaveCameraIn) :
@@ -125,32 +125,34 @@ TextCamera::TextCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
   infoSwitch->setAllChildrenOn();
 }
 
-void TextCamera::selectionChangedSlot(const SelectionMessage &messageIn)
+void TextCamera::selectionChangedSlot(const Selection::Message &messageIn)
 {
-  if (messageIn.type == SelectionMessage::Type::Preselection)
+  if (messageIn.type == Selection::Message::Type::Preselection)
   {
     preselectionText.clear();
     std::ostringstream preselectStream;
     preselectStream << "Pre-Selection:" << std::endl;
-    if (messageIn.action == SelectionMessage::Action::Addition)
+    if (messageIn.action == Selection::Message::Action::Addition)
     {
-      preselectStream << "object type: " << getNameOfType(messageIn.objectType) << std::endl <<
+      preselectStream << "object type: " << Selection::getNameOfType(messageIn.objectType) << std::endl <<
         "Feature id: " << messageIn.featureId << std::endl <<
         "Shape id: " << messageIn.shapeId << std::endl;
     }
     preselectionText = preselectStream.str();
   }
-  if (messageIn.type == SelectionMessage::Type::Selection)
+  if (messageIn.type == Selection::Message::Type::Selection)
   {
     auto key = std::make_pair(messageIn.featureId, messageIn.shapeId);
-    if (messageIn.action == SelectionMessage::Action::Addition)
+    if (messageIn.action == Selection::Message::Action::Addition)
     {
-      assert(selectionMap.count(key) == 0);
+      //snap points will have duplicates. what to do?
+//       assert(selectionMap.count(key) == 0);
       selectionMap.insert(std::make_pair(key, messageIn));
     }
-    if (messageIn.action == SelectionMessage::Action::Subtraction)
+    if (messageIn.action == Selection::Message::Action::Subtraction)
     {
-      assert(selectionMap.count(key) == 1);
+      //snap points will have duplicates. what to do?
+//       assert(selectionMap.count(key) == 1);
       selectionMap.erase(key);
     }
   }
@@ -166,7 +168,7 @@ void TextCamera::updateSelectionLabel()
   for (SelectionMap::const_iterator it = selectionMap.begin(); it != selectionMap.end(); ++it)
   {
     labelStream << std::endl <<
-      "object type: " << getNameOfType(it->second.objectType) << std::endl <<
+      "object type: " << Selection::getNameOfType(it->second.objectType) << std::endl <<
       "Feature id: " << it->second.featureId << std::endl <<
       "Shape id: " << it->second.shapeId << std::endl;
   }

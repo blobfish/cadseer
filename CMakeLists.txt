@@ -31,9 +31,10 @@ find_package(XercesC REQUIRED)
 find_package(XSDCXX REQUIRED)
 
 SET(ADDITIONAL_INCLUDE_PATHS
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR} #needed to find moc files.
     ${OPENSCENEGRAPH_INCLUDE_DIRS}
     ${OCE_INCLUDE_DIRS}
-    ${CMAKE_CURRENT_BINARY_DIR} #needed to find moc files.
     ${EIGEN3_INCLUDE_DIR}
     ${XSDCXX_INCLUDE_DIR}
     ${XERCESC_INCLUDE_DIR}
@@ -75,6 +76,13 @@ SET(FEATURE_SOURCES
     ./feature/union.cpp
     )
     
+SET(SELECTION_SOURCES
+    ./selection/eventhandler.cpp
+    ./selection/intersector.cpp
+    ./selection/manager.cpp
+    ./selection/message.cpp
+    )
+
 SET(DIALOG_SOURCES
     ./dialogs/boxdialog.cpp
     )
@@ -102,10 +110,6 @@ SET(CADSEER_SOURCES
     ./gleventwidget.cpp
     ./spaceballosgevent.cpp
     ./application.cpp
-    ./selectioneventhandler.cpp
-    ./selectionintersector.cpp
-    ./selectionmanager.cpp
-    ./selectionmessage.cpp
     ./globalutilities.cpp
     ./coordinatesystem.cpp
     ./textcamera.cpp
@@ -114,6 +118,7 @@ SET(CADSEER_SOURCES
     ${GESTURE_SOURCES}
     ${COMMAND_SOURCES}
     ${FEATURE_SOURCES}
+    ${SELECTION_SOURCES}
     ${DIALOG_SOURCES}
     ${PREFERENCE_SOURCES}
     ${PROJECT_SOURCES}
@@ -125,7 +130,7 @@ SET(CADSEER_MOC_HDRS
     ./dagview/dagview.h
     ./dagview/dagmodel.h
     ./application.h
-    ./selectionmanager.h
+    selection/manager.h
     ./dialogs/boxdialog.h
     ./preferences/dialog.h
     )

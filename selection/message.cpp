@@ -19,9 +19,11 @@
 
 #include <boost/uuid/nil_generator.hpp>
 
-#include "selectionmessage.h"
+#include <selection/message.h>
 
-SelectionMessage::SelectionMessage()
+using namespace Selection;
+
+Message::Message()
 {
   featureId = boost::uuids::nil_generator()();
   shapeId = boost::uuids::nil_generator()();

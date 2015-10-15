@@ -23,15 +23,17 @@
 #include <QObject>
 #include <QStack>
 
-#include "selectiondefs.h"
+#include <selection/definitions.h>
 
 class QAction;
 
-class SelectionManager : public QObject
+namespace Selection
+{
+class Manager : public QObject
 {
     Q_OBJECT
 public:
-    explicit SelectionManager(QObject *parent = 0);
+    explicit Manager(QObject *parent = 0);
     void sendState();
     void startCommand(const unsigned int &stateIn); //uses stack for restoration of selection state
     void endCommand(); //uses stack for restoration of selection state
@@ -46,6 +48,12 @@ public:
     QAction *actionSelectWires;
     QAction *actionSelectEdges;
     QAction *actionSelectVertices;
+    QAction *actionSelectEndPoints;
+    QAction *actionSelectMidPoints;
+    QAction *actionSelectCenterPoints;
+    QAction *actionSelectQuadrantPoints;
+    QAction *actionSelectNearestPoints;
+    QAction *actionSelectScreenPoints;
     
 Q_SIGNALS:
     void setSelectionMask(const int &mask);
@@ -59,6 +67,12 @@ public Q_SLOTS:
     void triggeredWires(bool wireStateIn);
     void triggeredEdges(bool edgeStateIn);
     void triggeredVertices(bool vertexStateIn);
+    void triggeredEndPoints(bool endPointStateIn);
+    void triggeredMidPoints(bool midPointStateIn);
+    void triggeredCenterPoints(bool centerPointStateIn);
+    void triggeredQuadrantPoints(bool quadrantPointStateIn);
+    void triggeredNearestPoints(bool nearestPointStateIn);
+    void triggeredScreenPoints(bool screenPointStateIn);
 
 private:
     void popState();
@@ -68,5 +82,6 @@ private:
     unsigned int selectionMask;
     QStack<unsigned int> stateStack;
 };
+}
 
 #endif // SELECTIONMANAGER_H

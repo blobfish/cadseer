@@ -21,6 +21,9 @@
 #define CONNECTOR_H
 
 #include <stack>
+#include <vector>
+
+#include <osg/Vec3d>
 
 #include "../feature/maps.h"
 #include "connectorgraph.h"
@@ -39,8 +42,13 @@ public:
     boost::uuids::uuid useGetWire(const boost::uuids::uuid &, const boost::uuids::uuid &) const;
     boost::uuids::uuid useGetRoot() const;
     bool useIsEdgeOfFace(const boost::uuids::uuid &edgeIn, const boost::uuids::uuid &faceIn) const;
-    TopoDS_Shape getShape(const boost::uuids::uuid &);
+    TopoDS_Shape getShape(const boost::uuids::uuid &) const;
     void outputGraphviz(const std::string &name);
+    std::vector<osg::Vec3d> useGetEndPoints(const boost::uuids::uuid &) const;
+    std::vector<osg::Vec3d> useGetMidPoint(const boost::uuids::uuid &) const;
+    std::vector<osg::Vec3d> useGetCenterPoint(const boost::uuids::uuid &) const;
+    std::vector<osg::Vec3d> useGetQuadrantPoints(const boost::uuids::uuid &) const;
+    std::vector<osg::Vec3d> useGetNearestPoint(const boost::uuids::uuid &, const osg::Vec3d&) const;
 private:
     void buildAddShape(const TopoDS_Shape &shapeIn, const Feature::ResultContainer &resultContainerIn);
     void connectVertices(ConnectorGraph::Vertex from, ConnectorGraph::Vertex to);

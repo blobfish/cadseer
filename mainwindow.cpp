@@ -34,8 +34,7 @@
 #include "application.h"
 #include "ui_mainwindow.h"
 #include "viewerwidget.h"
-#include "selectionmanager.h"
-#include "selectiondefs.h"
+#include <selection/manager.h>
 #include "project/project.h"
 #include "command/commandmanager.h"
 #include "feature/box.h"
@@ -70,12 +69,25 @@ MainWindow::MainWindow(QWidget *parent) :
     aLayout->addWidget(splitter);
     ui->centralwidget->setLayout(aLayout);
 
-    selectionManager = new SelectionManager(this);
+    selectionManager = new Selection::Manager(this);
     setupSelectionToolbar();
     connect(selectionManager, SIGNAL(setSelectionMask(int)), viewWidget, SLOT(setSelectionMask(int)));
-    selectionManager->setState(SelectionMask::all);
-
-    connect(ui->actionAppendBrep, SIGNAL(triggered()), this, SLOT(readBrepSlot()));
+    selectionManager->setState
+    (
+      Selection::All &
+      ~Selection::ObjectsSelectable &
+      ~Selection::FeaturesSelectable &
+      ~Selection::SolidsSelectable &
+      ~Selection::ShellsSelectable &
+      ~Selection::FacesSelectable &
+      ~Selection::WiresSelectable &
+      ~Selection::EdgesSelectable &
+      ~Selection::MidPointsSelectable &
+      ~Selection::CenterPointsSelectable &
+      ~Selection::QuadrantPointsSelectable &
+      ~Selection::NearestPointsSelectable &
+      ~Selection::ScreenPointsSelectable
+    );
 
     Project *project = new Project();
     Application *application = dynamic_cast<Application *>(qApp);
@@ -118,10 +130,10 @@ void MainWindow::writeBrepSlot()
     if (fileName.isEmpty())
         return;
     
-  const SelectionContainers &selections = viewWidget->getSelections();
+  const Selection::Containers &selections = viewWidget->getSelections();
   if (selections.empty())
     return;
-  if(selections.at(0).selectionType != SelectionTypes::Object)
+  if(selections.at(0).selectionType != Selection::Type::Object)
   {
     viewWidget->clearSelections();
     return;
@@ -147,6 +159,12 @@ void MainWindow::setupSelectionToolbar()
     selectionManager->actionSelectWires = ui->actionSelectWires;
     selectionManager->actionSelectEdges = ui->actionSelectEdges;
     selectionManager->actionSelectVertices = ui->actionSelectVertices;
+    selectionManager->actionSelectEndPoints = ui->actionSelectEndPoints;
+    selectionManager->actionSelectMidPoints = ui->actionSelectMidPoints;
+    selectionManager->actionSelectCenterPoints = ui->actionSelectCenterPoints;
+    selectionManager->actionSelectQuadrantPoints = ui->actionSelectQuandrantPoints;
+    selectionManager->actionSelectNearestPoints = ui->actionSelectNearestPoints;
+    selectionManager->actionSelectScreenPoints = ui->actionSelectScreenPoints;
 
     connect(ui->actionSelectObjects, SIGNAL(triggered(bool)), selectionManager, SLOT(triggeredObjects(bool)));
     connect(ui->actionSelectFeatures, SIGNAL(triggered(bool)), selectionManager, SLOT(triggeredFeatures(bool)));
@@ -156,6 +174,12 @@ void MainWindow::setupSelectionToolbar()
     connect(ui->actionSelectWires, SIGNAL(triggered(bool)), selectionManager, SLOT(triggeredWires(bool)));
     connect(ui->actionSelectEdges, SIGNAL(triggered(bool)), selectionManager, SLOT(triggeredEdges(bool)));
     connect(ui->actionSelectVertices, SIGNAL(triggered(bool)), selectionManager, SLOT(triggeredVertices(bool)));
+    connect(ui->actionSelectEndPoints, SIGNAL(triggered(bool)), selectionManager, SLOT(triggeredEndPoints(bool)));
+    connect(ui->actionSelectMidPoints, SIGNAL(triggered(bool)), selectionManager, SLOT(triggeredMidPoints(bool)));
+    connect(ui->actionSelectCenterPoints, SIGNAL(triggered(bool)), selectionManager, SLOT(triggeredCenterPoints(bool)));
+    connect(ui->actionSelectQuandrantPoints, SIGNAL(triggered(bool)), selectionManager, SLOT(triggeredQuadrantPoints(bool)));
+    connect(ui->actionSelectNearestPoints, SIGNAL(triggered(bool)), selectionManager, SLOT(triggeredNearestPoints(bool)));
+    connect(ui->actionSelectScreenPoints, SIGNAL(triggered(bool)), selectionManager, SLOT(triggeredScreenPoints(bool)));
 }
 
 void MainWindow::setupCommands()
@@ -218,7 +242,7 @@ void MainWindow::constructionBoxSlot()
     Project *project = application->getProject();
     
     Feature::Box *box = nullptr;
-    const SelectionContainers &selections = viewWidget->getSelections();
+    const Selection::Containers &selections = viewWidget->getSelections();
     //find first box.
     for (const auto &currentSelection : selections)
     {
@@ -334,7 +358,7 @@ void MainWindow::constructionCylinderSlot()
 
 void MainWindow::constructionBlendSlot()
 {
-  const SelectionContainers &selections = viewWidget->getSelections();
+  const Selection::Containers &selections = viewWidget->getSelections();
   if (selections.empty())
     return;
   
@@ -346,7 +370,7 @@ void MainWindow::constructionBlendSlot()
     if
     (
       currentSelection.featureId != targetFeatureId ||
-      currentSelection.selectionType != SelectionTypes::Edge //just edges for now.
+      currentSelection.selectionType != Selection::Type::Edge //just edges for now.
     )
       continue;
     
@@ -372,15 +396,15 @@ void MainWindow::constructionBlendSlot()
 
 void MainWindow::constructionUnionSlot()
 {
-  const SelectionContainers &selections = viewWidget->getSelections();
+  const Selection::Containers &selections = viewWidget->getSelections();
   if (selections.size() < 2)
     return;
   
   //for now only accept objects.
   if
   (
-    selections.at(0).selectionType != SelectionTypes::Object ||
-    selections.at(1).selectionType != SelectionTypes::Object
+    selections.at(0).selectionType != Selection::Type::Object ||
+    selections.at(1).selectionType != Selection::Type::Object
   )
     return;
     

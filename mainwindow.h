@@ -24,7 +24,7 @@
 #include <osg/Node>
 
 class ViewerWidget;
-class SelectionManager;
+namespace Selection{class Manager;}
 class Project;
 
 namespace DAG{class View; class Model;}
@@ -62,7 +62,7 @@ private:
     ViewerWidget* viewWidget;
     DAG::Model *dagModel;
     DAG::View *dagView;
-    SelectionManager *selectionManager;
+    Selection::Manager *selectionManager;
 };
 
 #endif // MAINWINDOW_H

@@ -24,7 +24,7 @@
 #include <QTimer>
 #include <osgViewer/CompositeViewer>
 #ifndef Q_MOC_RUN
-#include "selectioneventhandler.h"
+#include <selection/eventhandler.h>
 #include "spaceballmanipulator.h"
 #endif
 
@@ -41,7 +41,7 @@ public:
     virtual void paintEvent(QPaintEvent* event);
     void update();
     osg::Group* getRoot(){return root;}
-    const SelectionContainers& getSelections() const {return selectionHandler->getSelections();}
+    const Selection::Containers& getSelections() const {return selectionHandler->getSelections();}
     void clearSelections() const {selectionHandler->clearSelections();}
 
 public Q_SLOTS:
@@ -60,7 +60,7 @@ protected:
     QTimer _timer;
     osg::ref_ptr<osg::Group> root;
     osg::ref_ptr<osg::Switch> infoSwitch;
-    osg::ref_ptr<SelectionEventHandler> selectionHandler;
+    osg::ref_ptr<Selection::EventHandler> selectionHandler;
     osg::ref_ptr<osgGA::SpaceballManipulator> spaceballManipulator;
     int glWidgetWidth;
     int glWidgetHeight;

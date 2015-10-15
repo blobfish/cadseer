@@ -22,9 +22,12 @@
 
 #include <boost/uuid/uuid.hpp>
 
-#include "selectiondefs.h"
+#include <selection/definitions.h>
 
-struct SelectionMessage
+namespace Selection
+{
+
+struct Message
 {
   enum class Type
   {
@@ -40,12 +43,14 @@ struct SelectionMessage
     Subtraction
   };
   
-  SelectionMessage();
-  Type type;
+  Message();
+  Message::Type type;
   Action action;
-  SelectionTypes::Type objectType;
+  Selection::Type objectType;
   boost::uuids::uuid featureId;
   boost::uuids::uuid shapeId;
 };
+
+}
 
 #endif // SELECTIONMESSAGE_H

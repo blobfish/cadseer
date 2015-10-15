@@ -25,30 +25,31 @@
 
 #include <eigen3/Eigen/Eigen>
 
-#include "selectionintersector.h"
-#include "./testing/plotter.h"
+#include <selection/intersector.h>
+#include <testing/plotter.h>
 
 using namespace osg;
 using namespace Eigen;
+using namespace Selection;
 
-SelectionIntersector::SelectionIntersector(CoordinateFrame frame, double x, double y) :
+Intersector::Intersector(CoordinateFrame frame, double x, double y) :
     LineSegmentIntersector(frame, x, y), pickRadius(1.0)
 {
 
 }
 
-SelectionIntersector::SelectionIntersector(const osg::Vec3& startIn, const osg::Vec3& endIn) :
+Intersector::Intersector(const osg::Vec3& startIn, const osg::Vec3& endIn) :
     LineSegmentIntersector(startIn, endIn), pickRadius(1.0)
 {
 
 }
 
 
-osgUtil::Intersector* SelectionIntersector::clone(osgUtil::IntersectionVisitor &iv)
+osgUtil::Intersector* Intersector::clone(osgUtil::IntersectionVisitor &iv)
 {
     if ( _coordinateFrame==MODEL && iv.getModelMatrix()==0 )
     {
-        osg::ref_ptr<SelectionIntersector> cloned = new SelectionIntersector( _start, _end );
+        osg::ref_ptr<Intersector> cloned = new Intersector( _start, _end );
         cloned->_parent = this;
         cloned->pickRadius = this->pickRadius;
         return cloned.release();
@@ -78,13 +79,13 @@ osgUtil::Intersector* SelectionIntersector::clone(osgUtil::IntersectionVisitor &
     }
 
     osg::Matrix inverse = osg::Matrix::inverse(matrix);
-    osg::ref_ptr<SelectionIntersector> cloned = new SelectionIntersector( _start*inverse, _end*inverse );
+    osg::ref_ptr<Intersector> cloned = new Intersector( _start*inverse, _end*inverse );
     cloned->_parent = this;
     cloned->pickRadius = this->pickRadius;
     return cloned.release();
 }
 
-void SelectionIntersector::intersect(osgUtil::IntersectionVisitor &iv, osg::Drawable *drawable)
+void Intersector::intersect(osgUtil::IntersectionVisitor &iv, osg::Drawable *drawable)
 {
     currentGeometry = drawable->asGeometry();
     assert(currentGeometry);
@@ -121,7 +122,7 @@ void SelectionIntersector::intersect(osgUtil::IntersectionVisitor &iv, osg::Draw
     }
 }
 
-void SelectionIntersector::goPoints(const osg::ref_ptr<osg::PrimitiveSet> primitive, const Intersection &hitBase)
+void Intersector::goPoints(const osg::ref_ptr<osg::PrimitiveSet> primitive, const Intersection &hitBase)
 {
     ref_ptr<DrawArrays> drawArray = dynamic_pointer_cast<DrawArrays>(primitive);
     if (!drawArray.valid())
@@ -148,7 +149,7 @@ void SelectionIntersector::goPoints(const osg::ref_ptr<osg::PrimitiveSet> primit
     }
 }
 
-void SelectionIntersector::goEdges(const osg::ref_ptr<osg::PrimitiveSet> primitive, const Intersection &hitBase)
+void Intersector::goEdges(const osg::ref_ptr<osg::PrimitiveSet> primitive, const Intersection &hitBase)
 {
     ref_ptr<DrawArrays> drawArray = dynamic_pointer_cast<DrawArrays>(primitive);
     assert(drawArray);
@@ -205,14 +206,14 @@ void SelectionIntersector::goEdges(const osg::ref_ptr<osg::PrimitiveSet> primiti
     }
 }
 
-void SelectionIntersector::setScale(osgUtil::IntersectionVisitor &iv)
+void Intersector::setScale(osgUtil::IntersectionVisitor &iv)
 {
     Matrixd pMatrix = *iv.getProjectionMatrix();
     Matrixd wMatrix = *iv.getWindowMatrix();
     scale = (pMatrix * wMatrix).getScale().length();
 }
 
-bool SelectionIntersector::getLocalStartEnd()
+bool Intersector::getLocalStartEnd()
 {
     localStart = _start;
     localEnd = _end;

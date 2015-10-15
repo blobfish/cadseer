@@ -116,8 +116,6 @@ bool Build::go(const Standard_Real &deflection, const Standard_Real &angle)
             faceConstruct(TopoDS::Face(copiedShape));
         if (copiedShape.ShapeType() == TopAbs_EDGE)
             edgeConstruct(TopoDS::Edge(copiedShape));
-        if (copiedShape.ShapeType() == TopAbs_VERTEX)
-            vertexConstruct(TopoDS::Vertex(copiedShape));
         recursiveConstruct(copiedShape);
         success = true;
 
@@ -147,31 +145,17 @@ void Build::setUpGraph()
     groupOut = new osg::Switch();
     groupOut->setNodeMask(NodeMaskDef::lod);
     groupOut->setName("lod");
-    groupVertices = new osg::Switch();
-    groupVertices->setNodeMask(NodeMaskDef::vertex);
-    groupVertices->setName("vertices");
     groupEdges = new osg::Switch();
     groupEdges->setNodeMask(NodeMaskDef::edge);
     groupEdges->setName("edges");
     groupFaces = new osg::Switch();
     groupFaces->setNodeMask(NodeMaskDef::face);
     groupFaces->setName("faces");
-    groupOut->addChild(groupVertices);
     groupOut->addChild(groupEdges);
     groupOut->addChild(groupFaces);
     
-    //vertex state
-    osg::Point *point = new osg::Point;
-    point->setSize(10.0);
-    groupVertices->getOrCreateStateSet()->setAttribute(point);
-
-    osg::Depth *depth = new osg::Depth();
-    depth->setRange(0.0, 1.0);
-    groupVertices->getOrCreateStateSet()->setAttribute(depth);
-    
-    groupVertices->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-    
     //edge state
+    osg::Depth *depth = new osg::Depth();
     depth = new osg::Depth();
     depth->setRange(0.001, 1.001);
     groupEdges->getOrCreateStateSet()->setAttribute(depth);
@@ -182,19 +166,6 @@ void Build::setUpGraph()
     depth = new osg::Depth();
     depth->setRange(0.002, 1.002);
     groupFaces->getOrCreateStateSet()->setAttribute(depth);
-}
-
-osg::ref_ptr<osg::Geometry> Build::createGeometryVertex()
-{
-    //vertex
-    osg::ref_ptr<osg::Geometry> geomVertices = new osg::Geometry();
-    geomVertices->setVertexArray(new osg::Vec3Array());
-
-    osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array();
-    geomVertices->setColorArray(colors.get());
-    geomVertices->setColorBinding(osg::Geometry::BIND_OVERALL);
-
-    return geomVertices;
 }
 
 osg::ref_ptr<osg::Geometry> Build::createGeometryEdge()
@@ -226,13 +197,6 @@ osg::ref_ptr<osg::Geometry> Build::createGeometryFace()
     geomFaces->setNormalBinding(osg::Geometry::BIND_PER_VERTEX);
 
     return geomFaces;
-}
-
-osg::ref_ptr<osg::Geode> Build::createGeodeVertex()
-{
-    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
-    geode->setCullingActive(false);//so we can select. Might not need in a non "points only" environment.
-    return geode;
 }
 
 osg::ref_ptr<osg::Geode> Build::createGeodeEdge()
@@ -278,30 +242,7 @@ void Build::recursiveConstruct(const TopoDS_Shape &shapeIn)
             edgeConstruct(TopoDS::Edge(currentShape));
             recursiveConstruct(currentShape);
         }
-        if (currentType == TopAbs_VERTEX)
-        {
-            vertexConstruct(TopoDS::Vertex(currentShape));
-        }
     }
-}
-
-void Build::vertexConstruct(const TopoDS_Vertex &vertex)
-{
-    osg::ref_ptr<osg::Geode> geode = createGeodeVertex();
-    uuid id = Feature::findResultByShape(resultContainer, vertex).id;
-    geode->setUserValue(GU::idAttributeTitle, GU::idToString(id));
-
-    osg::ref_ptr<osg::Geometry> geometry = createGeometryVertex();
-    geode->addDrawable(geometry);
-    groupVertices->addChild(geode);
-
-    gp_Pnt vPoint = BRep_Tool::Pnt(vertex);
-    osg::Vec3Array *vertices = dynamic_cast<osg::Vec3Array *>(geometry->getVertexArray());
-    vertices->push_back(osg::Vec3Array::value_type(vPoint.X(), vPoint.Y(), vPoint.Z()));
-    geometry->addPrimitiveSet(new osg::DrawArrays
-                          (osg::PrimitiveSet::POINTS, vertices->size() - 1, 1));
-    osg::Vec4Array *colors= dynamic_cast<osg::Vec4Array *>(geometry->getColorArray());
-    colors->push_back(osg::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
 void Build::edgeConstruct(const TopoDS_Edge &edgeIn)

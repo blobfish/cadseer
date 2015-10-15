@@ -28,7 +28,7 @@
 #include <osg/observer_ptr>
 #include <osgGA/GUIEventHandler>
 
-#include "selectionmessage.h"
+#include <selection/message.h>
 
 class ResizeEventHandler : public osgGA::GUIEventHandler
 {
@@ -50,7 +50,7 @@ class TextCamera : public osg::Camera
 {
 public:
     TextCamera(osgViewer::GraphicsWindow *);
-    void selectionChangedSlot(const SelectionMessage &);
+    void selectionChangedSlot(const Selection::Message &);
 private:
   osg::ref_ptr<osg::Switch> infoSwitch;
   //indexes for children
@@ -61,7 +61,7 @@ private:
   std::string preselectionText;
   
   typedef std::pair<boost::uuids::uuid, boost::uuids::uuid> SelectionMapKey;
-  typedef std::map<SelectionMapKey, SelectionMessage> SelectionMap;
+  typedef std::map<SelectionMapKey, Selection::Message> SelectionMap;
   SelectionMap selectionMap;
 };
 

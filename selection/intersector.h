@@ -22,13 +22,15 @@
 
 #include <osgUtil/LineSegmentIntersector>
 
-class SelectionIntersector : public osgUtil::LineSegmentIntersector
+namespace Selection
+{
+class Intersector : public osgUtil::LineSegmentIntersector
 {
 public:
-    SelectionIntersector(CoordinateFrame frame, double x, double y);
-    SelectionIntersector(const osg::Vec3& startIn, const osg::Vec3& endIn);
+    Intersector(CoordinateFrame frame, double x, double y);
+    Intersector(const osg::Vec3& startIn, const osg::Vec3& endIn);
 
-    virtual Intersector* clone(osgUtil::IntersectionVisitor &iv);
+    virtual osgUtil::Intersector* clone(osgUtil::IntersectionVisitor &iv) override;
     virtual void intersect(osgUtil::IntersectionVisitor &iv, osg::Drawable *drawable);
 
     void setPickRadius(const double &radiusIn){pickRadius = radiusIn;}
@@ -46,5 +48,6 @@ protected:
     osg::Vec3d localStart;
     osg::Vec3d localEnd;
 };
+}
 
 #endif // SELECTIONINTERSECTOR_H

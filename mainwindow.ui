@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>863</width>
     <height>600</height>
    </rect>
   </property>
@@ -38,15 +38,13 @@
    <addaction name="actionSelectWires"/>
    <addaction name="actionSelectEdges"/>
    <addaction name="actionSelectVertices"/>
+   <addaction name="actionSelectEndPoints"/>
+   <addaction name="actionSelectMidPoints"/>
+   <addaction name="actionSelectCenterPoints"/>
+   <addaction name="actionSelectQuandrantPoints"/>
+   <addaction name="actionSelectNearestPoints"/>
+   <addaction name="actionSelectScreenPoints"/>
   </widget>
-  <action name="actionAppendBrep">
-   <property name="text">
-    <string>Append Brep</string>
-   </property>
-   <property name="toolTip">
-    <string>Add Brep To Display</string>
-   </property>
-  </action>
   <action name="actionSelectFaces">
    <property name="checkable">
     <bool>true</bool>
@@ -99,16 +97,6 @@
    </property>
    <property name="toolTip">
     <string>Vertices on/off</string>
-   </property>
-  </action>
-  <action name="actionHide">
-   <property name="text">
-    <string>Hide</string>
-   </property>
-  </action>
-  <action name="actionShowAll">
-   <property name="text">
-    <string>showAll</string>
    </property>
   </action>
   <action name="actionSelectWires">
@@ -186,12 +174,94 @@
     <string>Object selection on/off</string>
    </property>
   </action>
-  <action name="actionExportOSG">
+  <action name="actionSelectEndPoints">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/images/selectPointsEnd.svg</normaloff>:/resources/images/selectPointsEnd.svg</iconset>
+   </property>
    <property name="text">
-    <string>Export OSG</string>
+    <string>SelectEndPoints</string>
    </property>
    <property name="toolTip">
-    <string>Save an OSG file</string>
+    <string>End point selection on/off</string>
+   </property>
+  </action>
+  <action name="actionSelectMidPoints">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/images/selectPointsMid.svg</normaloff>:/resources/images/selectPointsMid.svg</iconset>
+   </property>
+   <property name="text">
+    <string>SelectMidPoints</string>
+   </property>
+   <property name="toolTip">
+    <string>Mid point selection on/off</string>
+   </property>
+  </action>
+  <action name="actionSelectCenterPoints">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/images/selectPointsCenter.svg</normaloff>:/resources/images/selectPointsCenter.svg</iconset>
+   </property>
+   <property name="text">
+    <string>SelectCenterPoints</string>
+   </property>
+   <property name="toolTip">
+    <string>Center point selection on/off</string>
+   </property>
+  </action>
+  <action name="actionSelectQuandrantPoints">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/images/selectPointsQuandrant.svg</normaloff>:/resources/images/selectPointsQuandrant.svg</iconset>
+   </property>
+   <property name="text">
+    <string>SelectQuandrantPoints</string>
+   </property>
+   <property name="toolTip">
+    <string>Quandrant point selection on/off</string>
+   </property>
+  </action>
+  <action name="actionSelectNearestPoints">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/images/selectPointsNearest.svg</normaloff>:/resources/images/selectPointsNearest.svg</iconset>
+   </property>
+   <property name="text">
+    <string>SelectNearestPoints</string>
+   </property>
+   <property name="toolTip">
+    <string>Nearest point selection on/off</string>
+   </property>
+  </action>
+  <action name="actionSelectScreenPoints">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/images/selectPointsScreen.svg</normaloff>:/resources/images/selectPointsScreen.svg</iconset>
+   </property>
+   <property name="text">
+    <string>SelectScreenPoints</string>
+   </property>
+   <property name="toolTip">
+    <string>Screen point selection on/off</string>
    </property>
   </action>
  </widget>

@@ -27,9 +27,11 @@
 #include <osgGA/GUIEventHandler>
 #include <osgUtil/LineSegmentIntersector>
 
-#include "selectiondefs.h"
+#include <selection/definitions.h>
 
-class SelectionMessage;
+namespace Selection
+{
+class Message;
 
 class Selected
 {
@@ -40,33 +42,40 @@ public:
     osg::Vec4 color;
 };
 
-class SelectionContainer
+class Container
 {
 public:
-    SelectionContainer(){}
-    SelectionTypes::Type selectionType;
+    Container(){}
+    Type selectionType = Type::None;
     std::vector<Selected> selections;
     boost::uuids::uuid featureId = boost::uuids::nil_generator()();
     boost::uuids::uuid shapeId = boost::uuids::nil_generator()();
+    osg::Vec3d pointLocation;
 };
-inline bool operator==(const SelectionContainer& lhs, const SelectionContainer& rhs)
+inline bool operator==(const Container& lhs, const Container& rhs)
 {
-  return ((lhs.featureId == rhs.featureId) && (lhs.shapeId == rhs.shapeId));
+  return
+  (
+    (lhs.selectionType == rhs.selectionType) &&
+    (lhs.featureId == rhs.featureId) &&
+    (lhs.shapeId == rhs.shapeId) &&
+    (lhs.pointLocation == rhs.pointLocation)
+  );
 }
-std::ostream& operator<<(std::ostream& os, const SelectionContainer& container);
+std::ostream& operator<<(std::ostream& os, const Container& container);
 
-typedef std::vector<SelectionContainer> SelectionContainers;
-std::ostream& operator<<(std::ostream& os, const SelectionContainers& containers);
+typedef std::vector<Container> Containers;
+std::ostream& operator<<(std::ostream& os, const Containers& containers);
 
-class SelectionEventHandler : public osgGA::GUIEventHandler
+class EventHandler : public osgGA::GUIEventHandler
 {
 public:
-    SelectionEventHandler();
-    const SelectionContainers& getSelections() const {return selectionContainers;}
+    EventHandler();
+    const Containers& getSelections() const {return selectionContainers;}
     void clearSelections();
     void setSelectionMask(const unsigned int &maskIn);
     
-    typedef boost::signals2::signal<void (const SelectionMessage &)> SelectionChangedSignal;
+    typedef boost::signals2::signal<void (const Message &)> SelectionChangedSignal;
     boost::signals2::connection connectSelectionChanged(const SelectionChangedSignal::slot_type &subscriber)
     {
       return selectionChangedSignal.connect(subscriber);
@@ -75,16 +84,17 @@ protected:
     virtual bool handle(const osgGA::GUIEventAdapter& eventAdapter,
                         osgGA::GUIActionAdapter& actionAdapter, osg::Object *object,
                         osg::NodeVisitor *nodeVistor);
-    void setPrehighlight(SelectionContainer &selected);
+    void setPrehighlight(Container &selected);
     void clearPrehighlight();
-    bool alreadySelected(const SelectionContainer &testContainer);
+    bool alreadySelected(const Container &testContainer);
     void setGeometryColor(osg::Geometry *geometryIn, const osg::Vec4 &colorIn);
-    bool buildPreSelection(SelectionContainer &container,
+    bool buildPreSelection(Container &container,
                            const osgUtil::LineSegmentIntersector::Intersections::const_iterator &intersection);
-    SelectionContainer lastPrehighlight;
+    Container lastPrehighlight;
     osg::Vec4 preHighlightColor;
     osg::Vec4 selectionColor;
-    SelectionContainers selectionContainers;
+    Containers selectionContainers;
+    osg::Geode* buildTempPoint(const osg::Vec3d &pointIn);
 
     unsigned int nodeMask;
     unsigned int selectionMask;
@@ -103,5 +113,6 @@ protected:
     const std::vector<boost::uuids::uuid> &ids;
     std::vector<osg::Geometry *> &geometry;
 };
+}
 
 #endif // SELECTIONEVENTHANDLER_H
