@@ -67,6 +67,10 @@ public:
   void setInActive();
   bool isActive() const {return !(state.test(StateOffset::Inactive));}
   bool isInactive() const {return state.test(StateOffset::Inactive);}
+  void setLeaf();
+  void setNonLeaf();
+  bool isLeaf() const {return !(state.test(StateOffset::NonLeaf));}
+  bool isNonLeaf() const {return (state.test(StateOffset::NonLeaf));}
   void setName(const QString &nameIn){name = nameIn;}
   QString getName() const {return name;}
   State getState() const {return state;}

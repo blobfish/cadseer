@@ -95,8 +95,16 @@ MainWindow::MainWindow(QWidget *parent) :
     application->setProject(project);
     
     project->connectFeatureAdded(boost::bind(&DAG::Model::featureAddedSlot, dagModel, _1));
+    project->connectFeatureRemoved(boost::bind(&DAG::Model::featureRemovedSlot, dagModel, _1));
     project->connectProjectUpdated(boost::bind(&DAG::Model::projectUpdatedSlot, dagModel));
     project->connectConnectionAdded(boost::bind(&DAG::Model::connectionAddedSlot, dagModel, _1, _2, _3));
+    project->connectConnectionRemoved(boost::bind(&DAG::Model::connectionRemovedSlot, dagModel, _1, _2, _3));
+    dagModel->connectProjectMessageSignal(boost::bind(&Project::messageInSlot, project, _1));
+    
+    dagModel->connectSelectionChanged(boost::bind
+      (&Selection::EventHandler::selectionMessageInSlot, viewWidget->getSelectionEventHandler(), _1));
+    viewWidget->getSelectionEventHandler()->connectSelectionChanged(boost::bind(
+      &DAG::Model::selectionMessageInSlot, dagModel, _1));
 
     setupCommands();
 }
@@ -233,6 +241,11 @@ void MainWindow::setupCommands()
     connect(preferencesAction, SIGNAL(triggered(bool)), this, SLOT(preferencesSlot()));
     Command preferencesCommand(CommandConstants::Preferences, "Preferences", preferencesAction);
     CommandManager::getManager().addCommand(preferencesCommand);
+    
+    QAction *removeAction = new QAction(qApp);
+    connect(removeAction, SIGNAL(triggered(bool)), this, SLOT(removeSlot()));
+    Command removeCommand(CommandConstants::Remove, "Remove", removeAction);
+    CommandManager::getManager().addCommand(removeCommand);
 }
 
 void MainWindow::constructionBoxSlot()
@@ -446,4 +459,20 @@ void MainWindow::preferencesSlot()
     project->updateVisual();
   }
 }
+
+void MainWindow::removeSlot()
+{
+  Application *application = dynamic_cast<Application *>(qApp);
+  assert(application);
+  Project *project = application->getProject();
+  
+  Selection::Containers selections = viewWidget->getSelections();
+  viewWidget->clearSelections();
+  for (const auto &current : selections)
+    project->removeFeature(current.featureId, viewWidget->getRoot());
+  
+  project->update();
+  project->updateVisual();
+}
+
 

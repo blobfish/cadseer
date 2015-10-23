@@ -74,6 +74,7 @@ public:
     const Containers& getSelections() const {return selectionContainers;}
     void clearSelections();
     void setSelectionMask(const unsigned int &maskIn);
+    void selectionMessageInSlot(const Message &);
     
     typedef boost::signals2::signal<void (const Message &)> SelectionChangedSignal;
     boost::signals2::connection connectSelectionChanged(const SelectionChangedSignal::slot_type &subscriber)

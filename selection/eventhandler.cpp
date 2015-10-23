@@ -402,7 +402,7 @@ bool EventHandler::buildPreSelection(Selection::Container &container,
                 container.selections.push_back(newSelection);
             }
             container.selectionType = Type::Object;
-            container.shapeId = object;
+            container.shapeId = nil_generator()();
           }
         }
         break;
@@ -593,6 +593,93 @@ void EventHandler::clearPrehighlight()
     }
     
     lastPrehighlight = Container();
+}
+
+void EventHandler::selectionMessageInSlot(const Message &messageIn)
+{
+  //this function doesn't consider the selection mask.
+  
+  auto buildContainer = [](const Message &messageIn)
+  {
+    Selection::Container container;
+    const Feature::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(messageIn.featureId);
+    assert(feature);
+    const ModelViz::Connector &connector = feature->getConnector();
+    if (messageIn.objectType == Selection::Type::Object)
+    {
+      uuid object = connector.useGetRoot();
+      assert(!object.is_nil());
+      std::vector<uuid> faces = connector.useGetChildrenOfType(object, TopAbs_FACE);
+      std::vector<osg::Geometry *> faceGeometry;
+      getGeometryFromIds visit(faces, faceGeometry);
+      feature->getMainSwitch()->accept(visit); //starting higher than I need. FYI.
+      std::vector<osg::Geometry *>::const_iterator geomIt;
+      for (geomIt = faceGeometry.begin(); geomIt != faceGeometry.end(); ++geomIt)
+      {
+	  Selected newSelection;
+	  newSelection.initialize(*geomIt);
+	  container.selections.push_back(newSelection);
+      }
+      container.selectionType = Type::Object;
+      container.featureId = messageIn.featureId;
+      container.shapeId = nil_generator()();
+    }
+    return container;
+  };
+  
+  //clear prehighlight for all conditions with an external message.
+  clearPrehighlight();
+  
+  if (messageIn.action == Message::Action::RequestClear)
+  {
+    clearSelections();
+    return;
+  }
+  
+  assert(!messageIn.featureId.is_nil());
+  
+  if (messageIn.type == Message::Type::Preselection)
+  {
+    if (messageIn.action == Message::Action::Addition)
+    {
+      Selection::Container container = buildContainer(messageIn);
+      if (!container.selections.empty())
+	setPrehighlight(container);
+    }
+  }
+  else // selection
+  {
+    Selection::Container container = buildContainer(messageIn);
+    if (messageIn.action == Message::Action::Addition)
+    {
+      if (!alreadySelected(container))
+      {
+	std::vector<Selected>::iterator it;
+	for (it = container.selections.begin(); it != container.selections.end(); ++it)
+	{
+	    Selected currentSelected = *it;
+	    assert(currentSelected.geometry.valid());
+	    setGeometryColor(currentSelected.geometry.get(), selectionColor);
+	}
+	selectionContainers.push_back(container);
+      }
+    }
+    else if (messageIn.action == Message::Action::Subtraction)
+    {
+      Containers::iterator containIt = std::find(selectionContainers.begin(), selectionContainers.end(), container);
+      assert(containIt != selectionContainers.end());
+      
+      std::vector<Selected>::iterator it;
+      for (it = containIt->selections.begin(); it != containIt->selections.end(); ++it)
+      {
+	assert(it->geometry.valid());
+	setGeometryColor(it->geometry.get(), it->color);
+      }
+      
+      selectionContainers.erase(containIt);
+    }
+    selectionChangedSignal(messageIn);
+  }
 }
 
 void EventHandler::setGeometryColor(osg::Geometry *geometryIn, const osg::Vec4 &colorIn)

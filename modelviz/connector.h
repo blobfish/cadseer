@@ -43,7 +43,7 @@ public:
     boost::uuids::uuid useGetRoot() const;
     bool useIsEdgeOfFace(const boost::uuids::uuid &edgeIn, const boost::uuids::uuid &faceIn) const;
     TopoDS_Shape getShape(const boost::uuids::uuid &) const;
-    void outputGraphviz(const std::string &name);
+    void outputGraphviz();
     std::vector<osg::Vec3d> useGetEndPoints(const boost::uuids::uuid &) const;
     std::vector<osg::Vec3d> useGetMidPoint(const boost::uuids::uuid &) const;
     std::vector<osg::Vec3d> useGetCenterPoint(const boost::uuids::uuid &) const;

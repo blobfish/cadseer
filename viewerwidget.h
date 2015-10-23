@@ -41,6 +41,7 @@ public:
     virtual void paintEvent(QPaintEvent* event);
     void update();
     osg::Group* getRoot(){return root;}
+    Selection::EventHandler* getSelectionEventHandler(){return selectionHandler.get();}
     const Selection::Containers& getSelections() const {return selectionHandler->getSelections();}
     void clearSelections() const {selectionHandler->clearSelections();}
 

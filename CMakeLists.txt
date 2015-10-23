@@ -95,6 +95,7 @@ SET(PREFERENCE_SOURCES
     
 SET(PROJECT_SOURCES
     ./project/project.cpp
+    ./project/message.cpp
     )
 
 SET(CADSEER_SOURCES

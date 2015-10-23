@@ -34,9 +34,13 @@
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/composite_key.hpp>
+#include <boost/signals2.hpp>
 
 #include "dagmodelgraph.h"
 #endif
+
+#include <selection/message.h>
+#include <project/message.h>
 // #include "DAGFilter.h"
 
 class QGraphicsSceneHoverEvent;
@@ -64,16 +68,36 @@ namespace DAG
     virtual ~Model() override;
     
     void featureAddedSlot(std::shared_ptr<Feature::Base>); //!<received from the project.
+    void featureRemovedSlot(std::shared_ptr<Feature::Base>); //!<received from the project.
     void connectionAddedSlot(const boost::uuids::uuid&, const boost::uuids::uuid&, Feature::InputTypes);
+    void connectionRemovedSlot(const boost::uuids::uuid&, const boost::uuids::uuid&, Feature::InputTypes);
     void projectUpdatedSlot(); //!<received from the project.
+    
+    //selection messages out of dagview.
+    typedef boost::signals2::signal<void (const Selection::Message &)> SelectionChangedSignal;
+    boost::signals2::connection connectSelectionChanged(const SelectionChangedSignal::slot_type &subscriber)
+    {
+      return selectionChangedSignal.connect(subscriber);
+    }
+    
+    typedef boost::signals2::signal<void (const ProjectSpace::Message &)> ProjectMessageSignal;
+    boost::signals2::connection connectProjectMessageSignal(const ProjectMessageSignal::slot_type &subscriber)
+    {
+      return projectMessageSignal.connect(subscriber);
+    }
+    
+    //selection message in to dagview
+    void selectionMessageInSlot(const Selection::Message &);
     
   protected:
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     virtual void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 //     virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
-//     virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
+    virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
     
-//   private Q_SLOTS:
+  private Q_SLOTS:
+    void setCurrentLeafSlot();
+    void removeFeatureSlot();
 //     void updateSlot();
 //     void onRenameSlot();
 //     void renameAcceptedSlot();
@@ -83,7 +107,10 @@ namespace DAG
     
   private:
     Model(){}
-    void stateChangedSlot(const boost::uuids::uuid &featureIdIn, std::size_t stateIn); //!< received from each feature.
+    void indexVerticesEdges();
+    void stateChangedSlot(const uuid& featureIdIn, std::size_t); //!< received from each feature.
+    SelectionChangedSignal selectionChangedSignal;
+    ProjectMessageSignal projectMessageSignal;
     
     Graph graph;
     GraphLinkContainer graphLink;
@@ -123,17 +150,18 @@ namespace DAG
 //       Multiple
 //     };
 //     SelectionMode selectionMode;
-//     std::vector<Vertex> getAllSelected();
+    std::vector<Vertex> getAllSelected();
 //     void visiblyIsolate(Vertex sourceIn); //!< hide any connected feature and turn on sourceIn.
 //     
-//     QPointF lastPick;
-//     bool lastPickValid = false;
+    QPointF lastPick;
+    bool lastPickValid = false;
 //     
     QPixmap visiblePixmapEnabled;
     QPixmap visiblePixmapDisabled;
     QPixmap passPixmap;
     QPixmap failPixmap;
     QPixmap pendingPixmap;
+    QPixmap inactivePixmap;
 //     
 //     QAction *renameAction;
 //     QAction *editingFinishedAction;

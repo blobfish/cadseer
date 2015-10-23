@@ -40,21 +40,25 @@ namespace ProjectGraph
     std::shared_ptr<Feature::Base> feature;
     boost::signals2::connection connection;
   };
+  /*! @brief needed to create an internal index for vertex. needed for listS.*/
+  typedef boost::property<boost::vertex_index_t, std::size_t, VertexProperty> vertex_prop;
 
   struct EdgeProperty
   {
     Feature::InputTypes inputType;
   };
+  /*! @brief needed to create an internal index for graph edges. needed for setS. Not needed upon implementation*/
+  typedef boost::property<boost::edge_index_t, std::size_t, EdgeProperty> edge_prop;
 
-  typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS, VertexProperty, EdgeProperty> Graph;
+  typedef boost::adjacency_list<boost::setS, boost::listS, boost::bidirectionalS, vertex_prop, edge_prop> Graph;
   typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
   typedef boost::graph_traits<Graph>::edge_descriptor Edge;
   typedef boost::graph_traits<Graph>::vertex_iterator VertexIterator;
-  // typedef boost::graph_traits<Graph>::edge_iterator EdgeIterator;
+  typedef boost::graph_traits<Graph>::edge_iterator EdgeIterator;
   typedef boost::graph_traits<Graph>::in_edge_iterator InEdgeIterator;
   typedef boost::graph_traits<Graph>::out_edge_iterator OutEdgeIterator;
   typedef boost::graph_traits<Graph>::adjacency_iterator VertexAdjacencyIterator;
-  // typedef boost::reverse_graph<Graph, Graph&> GraphReversed;
+  typedef boost::reverse_graph<Graph, Graph&> GraphReversed;
   typedef std::vector<Vertex> Path;
   
   template <class GraphEW>
@@ -79,9 +83,11 @@ namespace ProjectGraph
       template <class VertexW>
       void operator()(std::ostream& out, const VertexW& vertexW) const
       {
-        out << "[label=\"";
-        out << graphVW[vertexW].feature->getTypeString().c_str(); 
-        out << "\"]";
+        out << 
+	  "[label=\"" <<
+	  graphVW[vertexW].feature->getName().toAscii().data() << "\\n" <<
+	  graphVW[vertexW].feature->getId() <<
+	  "\"]";
       }
     private:
       const GraphVW &graphVW;
@@ -105,7 +111,53 @@ namespace ProjectGraph
         graphIn[vertexIn].feature->setModelDirty();
       }
     };
-
+    
+    class SetInactiveVisitor : public boost::default_bfs_visitor
+    {
+    public:
+    
+      template <typename VertexTypeIn, typename GraphTypeIn>
+      void discover_vertex(VertexTypeIn vertexIn, const GraphTypeIn &graphIn) const
+      {
+        graphIn[vertexIn].feature->setInActive();
+      }
+    };
+    
+    class SetActiveVisitor : public boost::default_bfs_visitor
+    {
+    public:
+    
+      template <typename VertexTypeIn, typename GraphTypeIn>
+      void discover_vertex(VertexTypeIn vertexIn, const GraphTypeIn &graphIn) const
+      {
+        graphIn[vertexIn].feature->setActive();
+      }
+    };
+    
+    class SetHiddenVisitor : public boost::default_bfs_visitor
+    {
+    public:
+      
+      template <typename VertexTypeIn, typename GraphTypeIn>
+      void discover_vertex(VertexTypeIn vertexIn, const GraphTypeIn &graphIn) const
+      {
+        graphIn[vertexIn].feature->hide3D();
+      }
+    };
+    
+    template <typename GraphTypeIn>
+    struct ActiveFilter {
+      ActiveFilter() : graph(nullptr) { }
+      ActiveFilter(const GraphTypeIn &graphIn) : graph(&graphIn) { }
+      template <typename VertexType>
+      bool operator()(const VertexType& vertexIn) const
+      {
+	if(!graph)
+	  return false;
+	return (*graph)[vertexIn].feature->isActive();
+      }
+      const GraphTypeIn *graph;
+    };
 }
 
 #endif // PROJECTGRAPH_H

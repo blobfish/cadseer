@@ -76,6 +76,25 @@ const VertexProperty& DAG::findRecordByVisible(const GraphLinkContainer &contain
   return *it;
 }
 
+const VertexProperty& DAG::findRecord(const GraphLinkContainer &containerIn, const uuid &idIn)
+{
+  typedef GraphLinkContainer::index<VertexProperty::ByFeatureId>::type List;
+  const List &list = containerIn.get<VertexProperty::ByFeatureId>();
+  List::const_iterator it = list.find(idIn);
+  assert(it != list.end());
+  return *it;
+}
+
+void DAG::eraseRecord(GraphLinkContainer& containerIn, const uuid& idIn)
+{
+  typedef GraphLinkContainer::index<VertexProperty::ByFeatureId>::type List;
+  List &list = containerIn.get<VertexProperty::ByFeatureId>();
+  List::const_iterator it = list.find(idIn);
+  assert(it != list.end());
+  list.erase(it);
+}
+
+
 // const GraphLinkRecord& Gui::DAG::findRecord(Vertex vertexIn, const GraphLinkContainer &containerIn)
 // {
 //   typedef GraphLinkContainer::index<GraphLinkRecord::ByVertex>::type List;
@@ -103,14 +122,14 @@ const VertexProperty& DAG::findRecordByVisible(const GraphLinkContainer &contain
 //   return *it;
 // }
 // 
-// const GraphLinkRecord& Gui::DAG::findRecord(const RectItem* rectIn, const GraphLinkContainer &containerIn)
-// {
-//   typedef GraphLinkContainer::index<GraphLinkRecord::ByRectItem>::type List;
-//   const List &list = containerIn.get<GraphLinkRecord::ByRectItem>();
-//   List::const_iterator it = list.find(rectIn);
-//   assert(it != list.end());
-//   return *it;
-// }
+const VertexProperty& DAG::findRecord(const GraphLinkContainer &containerIn, RectItem* rectIn)
+{
+  typedef GraphLinkContainer::index<VertexProperty::ByRect>::type List;
+  const List &list = containerIn.get<VertexProperty::ByRect>();
+  List::const_iterator it = list.find(rectIn);
+  assert(it != list.end());
+  return *it;
+}
 // 
 // const GraphLinkRecord& Gui::DAG::findRecord(const std::string &stringIn, const GraphLinkContainer &containerIn)
 // {

@@ -190,13 +190,9 @@ TopoDS_Shape Connector::getShape(const boost::uuids::uuid &idIn) const
     return graph[it->second].shape;
 }
 
-void Connector::outputGraphviz(const std::string &name)
+void Connector::outputGraphviz()
 {
-    std::string fileName;
-    fileName += "./";
-    fileName += name;
-    fileName += ".dot";
-    std::ofstream file(fileName);
+    std::ofstream file("/home/tanderson/temp/connector.dot");
 
     //forward graph
     boost::write_graphviz(file, graph, Node_writer<ConnectorGraph::Graph>(graph), boost::default_writer());

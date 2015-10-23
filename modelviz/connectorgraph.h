@@ -82,18 +82,20 @@ static const std::vector<std::string> shapeStrings
  });
 
 
-template <class Name>
+template <class GraphTypeIn>
 class Node_writer {
 public:
-  Node_writer(Name _name) : name(_name) {}
+  Node_writer(GraphTypeIn graphIn) : graph(graphIn) {}
   template <class NodeW>
   void operator()(std::ostream& out, const NodeW& v) const {
-    out << "[label=\"";
-    out << shapeStrings.at(static_cast<int>(name[v].shapeType));
-    out << "\"]";
+    out << 
+      "[label=\"" <<
+      shapeStrings.at(static_cast<int>(graph[v].shapeType)) << "\\n" <<
+      graph[v].id <<
+      "\"]";
   }
 private:
-  Name name;
+  const GraphTypeIn &graph;
 };
 
 }

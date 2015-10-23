@@ -40,7 +40,8 @@ struct Message
   {
     None = 0,
     Addition,
-    Subtraction
+    Subtraction,
+    RequestClear
   };
   
   Message();

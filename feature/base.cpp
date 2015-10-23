@@ -53,6 +53,7 @@ Base::Base()
   state.set(StateOffset::Hidden3D, false);
   state.set(StateOffset::Failure, false);
   state.set(StateOffset::Inactive, false);
+  state.set(StateOffset::NonLeaf, false);
 }
 
 Base::~Base()
@@ -116,7 +117,7 @@ void Base::updateVisual()
 
   ModelViz::BuildConnector connectBuilder(shape, resultContainer);
   connector = connectBuilder.getConnector();
-  connector.outputGraphviz("connectorGraph");
+  connector.outputGraphviz();
   
   //get deflection values.
   Application *app = dynamic_cast<Application*>(qApp);
@@ -197,4 +198,18 @@ void Base::setInActive()
   stateChangedSignal(id, StateOffset::Inactive);
 }
 
+void Base::setLeaf()
+{
+  if (isLeaf())
+    return; //already a leaf.
+  state.set(StateOffset::NonLeaf, false);
+  stateChangedSignal(id, StateOffset::NonLeaf);
+}
 
+void Base::setNonLeaf()
+{
+  if (isNonLeaf())
+    return; //already nonLeaf.
+  state.set(StateOffset::NonLeaf, true);
+  stateChangedSignal(id, StateOffset::NonLeaf);
+}

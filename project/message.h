@@ -17,32 +17,34 @@
  *
  */
 
-#ifndef COMMANDCONSTANTS_H
-#define COMMANDCONSTANTS_H
+#include <boost/uuid/uuid.hpp>
 
-#include <string>
+#ifndef MESSAGE_H
+#define MESSAGE_H
 
-namespace CommandConstants
+namespace ProjectSpace
 {
-static std::string attributeTitle = "CommandAttributeTitle";
-enum Constants
-{
-    StandardViewTop,
-    StandardViewFront,
-    StandardViewRight,
-    ViewFit,
-    ConstructionBox,
-    ConstructionSphere,
-    ConstructionCone,
-    ConstructionCylinder,
-    ConstructionBlend,
-    ConstructionUnion,
-    FileImportOCC,
-    FileExportOSG,
-    FileExportOCC,
-    Preferences,
-    Remove
-};
+  struct Message
+  {
+    enum class Type
+    {
+      None = 0,
+      Request,
+      Response
+    };
+    
+    enum class Action
+    {
+      None = 0,
+      SetCurrentLeaf,
+      RemoveFeature
+    };
+    
+    Message();
+    Message::Type type;
+    Action action;
+    boost::uuids::uuid featureId;
+  };
 }
 
-#endif // COMMANDCONSTANTS_H
+#endif // MESSAGE_H

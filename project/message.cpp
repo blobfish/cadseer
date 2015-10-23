@@ -17,32 +17,13 @@
  *
  */
 
-#ifndef COMMANDCONSTANTS_H
-#define COMMANDCONSTANTS_H
+#include <boost/uuid/nil_generator.hpp>
 
-#include <string>
+#include "message.h"
 
-namespace CommandConstants
+using namespace ProjectSpace;
+
+Message::Message()
 {
-static std::string attributeTitle = "CommandAttributeTitle";
-enum Constants
-{
-    StandardViewTop,
-    StandardViewFront,
-    StandardViewRight,
-    ViewFit,
-    ConstructionBox,
-    ConstructionSphere,
-    ConstructionCone,
-    ConstructionCylinder,
-    ConstructionBlend,
-    ConstructionUnion,
-    FileImportOCC,
-    FileExportOSG,
-    FileExportOCC,
-    Preferences,
-    Remove
-};
+  featureId = boost::uuids::nil_generator()();
 }
-
-#endif // COMMANDCONSTANTS_H

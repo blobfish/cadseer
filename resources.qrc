@@ -34,6 +34,7 @@
         <file>resources/images/constructionInert.svg</file>
         <file>resources/images/constructionBoolean.svg</file>
         <file>resources/images/constructionUnion.svg</file>
+        <file>resources/images/remove.svg</file>
         <file>resources/images/fileBase.svg</file>
         <file>resources/images/fileImport.svg</file>
         <file>resources/images/fileExport.svg</file>
@@ -43,6 +44,9 @@
         <file>resources/images/dagViewPass.svg</file>
         <file>resources/images/dagViewPending.svg</file>
         <file>resources/images/dagViewVisible.svg</file>
+        <file>resources/images/dagViewInactive.svg</file>
+        <file>resources/images/dagViewLeaf.svg</file>
+        <file>resources/images/dagViewRemove.svg</file>
         <file>resources/images/preferences.svg</file>
         <file>preferences/preferences.xml</file>
         <file>preferences/preferencesXML.xsd</file>

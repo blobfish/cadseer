@@ -36,6 +36,7 @@ namespace Feature
     static const std::size_t Hidden3D = 2;
     static const std::size_t Failure = 3;
     static const std::size_t Inactive = 4;
+    static const std::size_t NonLeaf = 5; //keeping consistently negative.
     
     inline std::string toString(std::size_t offsetIn)
     {
@@ -45,7 +46,8 @@ namespace Feature
         "Visual Dirty",
         "Visibility3D",
         "Failure",
-        "Inactive"
+        "Inactive",
+        "NonLeaf"
       };
       
       assert(offsetIn < strings.size());

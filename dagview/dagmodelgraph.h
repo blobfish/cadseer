@@ -72,6 +72,7 @@ namespace DAG
     bool dagVisible; //!< should entry be visible in the DAG view.
 //     VisibilityState lastVisibleState; //!< visibility test.
 //     FeatureState lastFeatureState; //!< feature state test.
+    boost::signals2::connection connection;
     
     //keeping raw pointer for indexing.
     std::shared_ptr<RectItem> rectShared;
@@ -100,6 +101,8 @@ namespace DAG
     //@}
     
   };
+  /*! @brief needed to create an internal index for vertex. needed for listS.*/
+  typedef boost::property<boost::vertex_index_t, std::size_t, VertexProperty> vertex_prop;
   
   /*! @brief Graph edge information
   *
@@ -111,8 +114,10 @@ namespace DAG
     std::shared_ptr <QGraphicsPathItem> connector; //!< line representing link between nodes.
     Feature::InputTypes inputType;
   };
+  /*! @brief needed to create an internal index for graph edges. needed for setS. Not needed upon implementation*/
+  typedef boost::property<boost::edge_index_t, std::size_t, EdgeProperty> edge_prop;
   
-  typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS, VertexProperty, EdgeProperty> Graph;
+  typedef boost::adjacency_list<boost::setS, boost::listS, boost::bidirectionalS, vertex_prop, edge_prop> Graph;
   typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
   typedef boost::graph_traits<Graph>::edge_descriptor Edge;
   typedef boost::graph_traits<Graph>::vertex_iterator VertexIterator;
@@ -130,9 +135,10 @@ namespace DAG
     template <class EdgeW>
     void operator()(std::ostream& out, const EdgeW& edgeW) const
     {
-      out << "[label=\"";
-      out << "edge";
-      out << "\"]";
+      out << 
+	"[label=\"" <<
+        Feature::getInputTypeString(graphEW[edgeW].inputType) <<
+        "\"]";
     }
   private:
     const GraphEW &graphEW;
@@ -145,9 +151,11 @@ namespace DAG
     template <class VertexW>
     void operator()(std::ostream& out, const VertexW& vertexW) const
     {
-      out << "[label=\"";
-      out << graphVW[vertexW].textRaw->toPlainText().toAscii().data(); 
-      out << "\"]";
+      out <<
+	"[label=\"" <<
+        graphVW[vertexW].textRaw->toPlainText().toAscii().data() << "\\n" <<
+        graphVW[vertexW].feature.lock()->getId() <<
+        "\"]";
     }
   private:
     const GraphVW &graphVW;
@@ -246,9 +254,11 @@ namespace DAG
   > GraphLinkContainer;
   
   const VertexProperty& findRecordByVisible(const GraphLinkContainer &containerIn, QGraphicsPixmapItem *itemIn);
+  const VertexProperty& findRecord(const GraphLinkContainer &containerIn, const uuid &idIn);
+  void eraseRecord(GraphLinkContainer &containerIn, const uuid &idIn);
 //   const GraphLinkRecord& findRecord(const App::DocumentObject* dObjectIn, const GraphLinkContainer &containerIn);
 //   const GraphLinkRecord& findRecord(const Gui::ViewProviderDocumentObject* VPDObjectIn, const GraphLinkContainer &containerIn);
-//   const GraphLinkRecord& findRecord(const RectItem* rectIn, const GraphLinkContainer &containerIn);
+  const VertexProperty& findRecord(const GraphLinkContainer &containerIn, RectItem* rectIn);
 //   const GraphLinkRecord& findRecord(const std::string &stringIn, const GraphLinkContainer &containerIn);
 //   void eraseRecord(const Gui::ViewProviderDocumentObject* VPDObjectIn, GraphLinkContainer &containerIn);
   
@@ -299,6 +309,15 @@ namespace DAG
     List::const_iterator it = list.find(featureIdIn);
     assert(it != list.end());
     return *it;
+  }
+  
+  inline void eraseRecord(VertexIdContainer &containerIn, const uuid &featureIdIn)
+  {
+    typedef VertexIdContainer::index<VertexIdRecord::ByFeatureId>::type List;
+    List &list = containerIn.get<VertexIdRecord::ByFeatureId>();
+    List::const_iterator it = list.find(featureIdIn);
+    assert(it != list.end());
+    list.erase(it);
   }
 }
 

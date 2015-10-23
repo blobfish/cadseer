@@ -319,6 +319,11 @@ void GestureHandler::constructMenu()
     constructionUnion->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::ConstructionUnion));
     constructionBoolean->insertChild(constructionBoolean->getNumChildren() - 2, constructionUnion);
     
+    osg::MatrixTransform *remove = GestureNode::buildCommandNode(":/resources/images/remove.svg");
+    remove->setMatrix(dummy);
+    remove->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::Remove));
+    startNode->insertChild(constructionBoolean->getNumChildren() - 2, remove);
+    
     //file base
     osg::MatrixTransform *fileBase;
     fileBase = GestureNode::buildMenuNode(":/resources/images/fileBase.svg");

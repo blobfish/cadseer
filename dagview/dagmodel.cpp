@@ -102,6 +102,8 @@ Model::Model(QObject *parentIn) : QGraphicsScene(parentIn)
   failPixmap = failIcon.pixmap(iconSize, iconSize);
   QIcon pendingIcon(":/resources/images/dagViewPending.svg");
   pendingPixmap = pendingIcon.pixmap(iconSize, iconSize);
+  QIcon inactiveIcon(":/resources/images/dagViewInactive.svg");
+  inactivePixmap = inactiveIcon.pixmap(iconSize, iconSize);
 //   
 //   renameAction = new QAction(this);
 //   renameAction->setText(tr("Rename"));
@@ -162,6 +164,26 @@ void Model::setupViewConstants()
   }; //reserve some of the these for highlight stuff.
 }
 
+void Model::indexVerticesEdges()
+{
+  std::size_t index = 0;
+  
+  //index vertices.
+  BGL_FORALL_VERTICES(currentVertex, graph, Graph)
+  {
+    boost::put(boost::vertex_index, graph, currentVertex, index);
+    index++;
+  }
+
+  //index edges.
+  index = 0;
+  BGL_FORALL_EDGES(currentEdge, graph, Graph)
+  {
+    boost::put(boost::edge_index, graph, currentEdge, index);
+    index++;
+  }
+}
+
 void Model::featureAddedSlot(std::shared_ptr<Feature::Base> featureIn)
 {
   Vertex virginVertex = boost::add_vertex(graph);
@@ -182,12 +204,25 @@ void Model::featureAddedSlot(std::shared_ptr<Feature::Base> featureIn)
   record.vertex = virginVertex;
   vertexIdContainer.insert(record);
   
-  featureIn->connectState(boost::bind(&Model::stateChangedSlot, this, _1, _2));
+  graph[virginVertex].connection = featureIn->connectState(boost::bind(&Model::stateChangedSlot, this, _1, _2));
   
   addVertexItemsToScene(virginVertex);
   
   this->invalidate(); //temp.
 }
+
+void Model::featureRemovedSlot(std::shared_ptr< Feature::Base > featureIn)
+{
+  Vertex vertex = findRecord(vertexIdContainer, featureIn->getId()).vertex;
+  eraseRecord(graphLink, featureIn->getId());
+  eraseRecord(vertexIdContainer, featureIn->getId());
+  removeVertexItemsFromScene(vertex);
+  graph[vertex].connection.disconnect();
+  assert(boost::in_degree(vertex, graph) == 0);
+  assert(boost::out_degree(vertex, graph) == 0);
+  boost::remove_vertex(vertex, graph);
+}
+
 
 void Model::connectionAddedSlot(const boost::uuids::uuid &parentIdIn, const boost::uuids::uuid &childIdIn, Feature::InputTypes typeIn)
 {
@@ -208,37 +243,122 @@ void Model::connectionAddedSlot(const boost::uuids::uuid &parentIdIn, const boos
   addEdgeItemsToScene(edge);
 }
 
-void Model::stateChangedSlot(const boost::uuids::uuid &featureIdIn, std::size_t stateIn)
+void Model::connectionRemovedSlot(const uuid &parentIdIn, const uuid &childIdIn, Feature::InputTypes typeIn)
+{
+  Vertex parentVertex = findRecord(vertexIdContainer, parentIdIn).vertex;
+  Vertex childVertex = findRecord(vertexIdContainer, childIdIn).vertex;
+  
+  bool results;
+  Edge edge;
+  std::tie(edge, results) = boost::edge(parentVertex, childVertex, graph);
+  assert(results);
+  assert(graph[edge].inputType == typeIn);
+  
+  removeEdgeItemsFromScene(edge);
+  boost::remove_edge(edge, graph);
+}
+
+
+void Model::stateChangedSlot(const boost::uuids::uuid &featureIdIn, std::size_t stateOffsetChanged)
 {
   Vertex vertex = findRecord(vertexIdContainer, featureIdIn).vertex;
-  bool currentState = (graph[vertex].feature.lock()->getState().test(stateIn));
+
+  assert(!graph[vertex].feature.expired());
   
-  if (stateIn == Feature::StateOffset::ModelDirty)
+  Feature::State featureState = graph[vertex].feature.lock()->getState();
+  bool currentChangedState = featureState.test(stateOffsetChanged);
+  
+  if (stateOffsetChanged == Feature::StateOffset::ModelDirty)
   {
-    if (currentState)
+    if (currentChangedState)
       graph[vertex].stateIconRaw->setPixmap(pendingPixmap);
   }
   
-  if (stateIn == Feature::StateOffset::Hidden3D)
+  if (stateOffsetChanged == Feature::StateOffset::Hidden3D)
   {
-    if (currentState)
+    if (currentChangedState)
       graph[vertex].visibleIconRaw->setPixmap(visiblePixmapDisabled);
     else
       graph[vertex].visibleIconRaw->setPixmap(visiblePixmapEnabled);
   }
   
-  if (stateIn == Feature::StateOffset::Failure)
+  if (stateOffsetChanged == Feature::StateOffset::Failure)
   {
-    if (currentState)
+    if (currentChangedState)
       graph[vertex].stateIconRaw->setPixmap(failPixmap);
     else
       graph[vertex].stateIconRaw->setPixmap(passPixmap);
-      
+  }
+  
+  if (stateOffsetChanged == Feature::StateOffset::Inactive)
+  {
+    if (currentChangedState)
+    {
+      graph[vertex].stateIconRaw->setPixmap(inactivePixmap);
+    }
+    else
+    {
+      if (featureState.test(Feature::StateOffset::ModelDirty))
+	graph[vertex].stateIconRaw->setPixmap(pendingPixmap);
+      else if (featureState.test(Feature::StateOffset::Failure))
+	graph[vertex].stateIconRaw->setPixmap(failPixmap);
+      else
+	graph[vertex].stateIconRaw->setPixmap(passPixmap);
+    }
+  }
+  
+  if (stateOffsetChanged == Feature::StateOffset::NonLeaf)
+  {
+    if (currentChangedState)
+    {
+      if (graph[vertex].visibleIconRaw->scene())
+	removeItem(graph[vertex].visibleIconRaw);
+    }
+    else
+    {
+      if (!graph[vertex].visibleIconRaw->scene())
+	addItem(graph[vertex].visibleIconRaw);
+    }
   }
 //   std::cout <<
 //     "state changed. Feature id is: " << featureIdIn <<
 //     "      state offset is: " << Feature::StateOffset::toString(stateIn) <<
 //     "      state value is: " << ((currentState) ? "true" : "false") <<  std::endl;
+}
+
+void Model::selectionMessageInSlot(const Selection::Message &messageIn)
+{
+  const VertexProperty& record = findRecord(graphLink, messageIn.featureId);
+  
+  if (messageIn.type == Selection::Message::Type::Preselection)
+  {
+    //clear the current highlight if it exists requardless of whether
+    //we are adding or subtracting highlight.
+    if (currentPrehighlight)
+    {
+      currentPrehighlight->preHighlightOff();
+      currentPrehighlight = nullptr;
+    }
+    if (messageIn.action == Selection::Message::Action::Addition)
+    {
+      currentPrehighlight = record.rectRaw;
+      currentPrehighlight->preHighlightOn();
+    }
+  }
+  else // = selection
+  {
+    Vertex vertex = findRecord(vertexIdContainer, messageIn.featureId).vertex;
+    if (messageIn.action == Selection::Message::Action::Addition)
+    {
+      graph[vertex].rectRaw->selectionOn();
+    }
+    else // = subtraction.
+    {
+      graph[vertex].rectRaw->selectionOff();
+    }
+  }
+  
+  invalidate();
 }
 
 // void Model::selectionChanged(const SelectionChanges& msg)
@@ -360,6 +480,7 @@ void Model::stateChangedSlot(const boost::uuids::uuid &featureIdIn, std::size_t 
 
 void Model::projectUpdatedSlot()
 {
+  indexVerticesEdges();
   outputGraphviz<Graph>(graph, "/home/tanderson/temp/dagview.dot");
   
   
@@ -637,29 +758,36 @@ void Model::removeAllItems()
 
 void Model::addVertexItemsToScene(Vertex vertexIn)
 {
-  //these are either all in or all out. so just test rectangle.
-  if (graph[vertexIn].rectRaw->scene()) //already in the scene.
-    return;
-  this->addItem(graph[vertexIn].rectRaw);
-  this->addItem(graph[vertexIn].pointRaw);
-  this->addItem(graph[vertexIn].visibleIconRaw);
-  this->addItem(graph[vertexIn].stateIconRaw);
-  this->addItem(graph[vertexIn].featureIconRaw);
-  this->addItem(graph[vertexIn].textRaw);
+  //check if already in scene.
+  if (!graph[vertexIn].rectRaw->scene())
+    this->addItem(graph[vertexIn].rectRaw);
+  if (!graph[vertexIn].pointRaw->scene())
+    this->addItem(graph[vertexIn].pointRaw);
+  if (!graph[vertexIn].visibleIconRaw->scene())
+    this->addItem(graph[vertexIn].visibleIconRaw);
+  if (!graph[vertexIn].stateIconRaw->scene())
+    this->addItem(graph[vertexIn].stateIconRaw);
+  if (!graph[vertexIn].featureIconRaw->scene())
+    this->addItem(graph[vertexIn].featureIconRaw);
+  if (!graph[vertexIn].textRaw->scene())
+    this->addItem(graph[vertexIn].textRaw);
 }
 
 void Model::removeVertexItemsFromScene(Vertex vertexIn)
 {
-  //these are either all in or all out. so just test rectangle.
-  if (!(graph[vertexIn].rectRaw->scene())) //not in the scene.
-    return;
-  
-  this->removeItem(graph[vertexIn].rectRaw);
-  this->removeItem(graph[vertexIn].pointRaw);
-  this->removeItem(graph[vertexIn].visibleIconRaw);
-  this->removeItem(graph[vertexIn].stateIconRaw);
-  this->removeItem(graph[vertexIn].featureIconRaw);
-  this->removeItem(graph[vertexIn].textRaw);
+  //check if in scene.
+  if (graph[vertexIn].rectRaw->scene())
+    this->removeItem(graph[vertexIn].rectRaw);
+  if (graph[vertexIn].pointRaw->scene())
+    this->removeItem(graph[vertexIn].pointRaw);
+  if (graph[vertexIn].visibleIconRaw->scene())
+    this->removeItem(graph[vertexIn].visibleIconRaw);
+  if (graph[vertexIn].stateIconRaw->scene())
+    this->removeItem(graph[vertexIn].stateIconRaw);
+  if (graph[vertexIn].featureIconRaw->scene())
+    this->removeItem(graph[vertexIn].featureIconRaw);
+  if (graph[vertexIn].textRaw->scene())
+    this->removeItem(graph[vertexIn].textRaw);
 }
 
 void Model::addEdgeItemsToScene(Edge edgeIn)
@@ -688,55 +816,83 @@ void Model::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
   auto clearPrehighlight = [this]()
   {
-    if (currentPrehighlight)
-    {
-      currentPrehighlight->preHighlightOff();
-      currentPrehighlight = nullptr;
-    }
+    if (!currentPrehighlight)
+      return;
+    Selection::Message messageOut;
+    const VertexProperty& record = findRecord(graphLink, currentPrehighlight);
+    messageOut.type = Selection::Message::Type::Preselection;
+    messageOut.action = Selection::Message::Action::Subtraction;
+    messageOut.objectType = Selection::Type::Object;
+    messageOut.featureId = record.featureId;
+    messageOut.shapeId = boost::uuids::nil_generator()();
+    selectionChangedSignal(messageOut);
+  };
+  
+  auto setPrehighlight = [this](RectItem *rectIn)
+  {
+    Selection::Message messageOut;
+    const VertexProperty& record = findRecord(graphLink, rectIn);
+    messageOut.type = Selection::Message::Type::Preselection;
+    messageOut.action = Selection::Message::Action::Addition;
+    messageOut.objectType = Selection::Type::Object;
+    messageOut.featureId = record.featureId;
+    messageOut.shapeId = boost::uuids::nil_generator()();
+    selectionChangedSignal(messageOut);
   };
   
   RectItem *rect = getRectFromPosition(event->scenePos());
-  if (!rect)
-  {
-    clearPrehighlight();
-    return;
-  }
-  
   if (rect == currentPrehighlight)
     return;
-  
   clearPrehighlight();
-  rect->preHighlightOn();
-  currentPrehighlight = rect;
-  invalidate();
+  if (!rect)
+    return;
+  
+  setPrehighlight(rect);
   
   QGraphicsScene::mouseMoveEvent(event);
 }
 
 void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
-//   auto goShiftSelect = [this, event]()
-//   {
-//     QPointF currentPickPoint = event->scenePos();
-//     QGraphicsLineItem intersectionLine(QLineF(lastPick, currentPickPoint));
-//     QList<QGraphicsItem *>selection = collidingItems(&intersectionLine);
-//     for (auto currentItem = selection.begin(); currentItem != selection.end(); ++currentItem)
-//     {
-//       RectItem *rect = dynamic_cast<RectItem *>(*currentItem);
-//       if (!rect) continue;
-//       const GraphLinkRecord &selectionRecord = findRecord(rect, *graphLink);
-//       Gui::Selection().addSelection(selectionRecord.DObject->getDocument()->getName(),
-//                                     selectionRecord.DObject->getNameInDocument());
-//     }
-//   };
-//   
-//   auto toggleSelect = [](const App::DocumentObject *dObjectIn, RectItem *rectIn)
-//   {
-//     if (rectIn->isSelected())
-//       Gui::Selection().rmvSelection(dObjectIn->getDocument()->getName(), dObjectIn->getNameInDocument());
-//     else
-//       Gui::Selection().addSelection(dObjectIn->getDocument()->getName(), dObjectIn->getNameInDocument());
-//   };
+  auto select = [this](const uuid &featureIdIn, Selection::Message::Action actionIn)
+  {
+    Selection::Message messageOut;
+    messageOut.type = Selection::Message::Type::Selection;
+    messageOut.action = actionIn;
+    messageOut.objectType = Selection::Type::Object;
+    messageOut.featureId = featureIdIn;
+    messageOut.shapeId = boost::uuids::nil_generator()();
+    selectionChangedSignal(messageOut);
+  };
+  
+  auto getFeatureIdFromRect = [this](RectItem *rectIn)
+  {
+    assert(rectIn);
+    const VertexProperty &selectionRecord = findRecord(graphLink, rectIn);
+    return selectionRecord.featureId;
+  };
+  
+  auto goShiftSelect = [this, event, select, getFeatureIdFromRect]()
+  {
+    QPointF currentPickPoint = event->scenePos();
+    QGraphicsLineItem intersectionLine(QLineF(lastPick, currentPickPoint));
+    QList<QGraphicsItem *>selection = collidingItems(&intersectionLine);
+    for (auto currentItem = selection.begin(); currentItem != selection.end(); ++currentItem)
+    {
+      RectItem *rect = dynamic_cast<RectItem *>(*currentItem);
+      if (!rect || rect->isSelected())
+	continue;
+      select(getFeatureIdFromRect(rect), Selection::Message::Action::Addition);
+    }
+  };
+  
+  auto toggleSelect = [this, select, getFeatureIdFromRect](RectItem *rectIn)
+  {
+    if (rectIn->isSelected())
+      select(getFeatureIdFromRect(rectIn), Selection::Message::Action::Subtraction);
+    else
+      select(getFeatureIdFromRect(rectIn), Selection::Message::Action::Addition);
+  };
 //   
 //   if (proxy)
 //     renameAcceptedSlot();
@@ -745,74 +901,42 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
   {
     auto theItems = this->items(event->scenePos(), Qt::IntersectsItemBoundingRect, Qt::DescendingOrder);
     if (theItems.isEmpty())
-      return; //TODO clear selection.
-    for (auto it = theItems.constBegin(); it != theItems.constEnd(); ++it)
+      return;
+
+    int currentType = theItems.front()->data(QtData::key).toInt();
+    if (currentType == QtData::visibleIcon)
     {
-      int currentType = (*it)->data(QtData::key).toInt();
-      if (currentType == QtData::visibleIcon)
-      {
-        QGraphicsPixmapItem *currentPixmap = dynamic_cast<QGraphicsPixmapItem *>(*it);
-        //this is kind of ugly. we are index the actual vertex property. so can't vertex
-        //without and extra search into vertex id container. ?????
-        Vertex vertex = findRecord(vertexIdContainer, findRecordByVisible(graphLink, currentPixmap).featureId).vertex;
-        graph[vertex].feature.lock()->toggle3D();
-      }
+      QGraphicsPixmapItem *currentPixmap = dynamic_cast<QGraphicsPixmapItem *>(theItems.front());
+      assert(currentPixmap);
+      //this is kind of ugly. we are indexing the actual vertex PROPERTY. so we
+      //can't get the vertex without and extra search into vertex id container. ?????
+      Vertex vertex = findRecord(vertexIdContainer, findRecordByVisible(graphLink, currentPixmap).featureId).vertex;
+      graph[vertex].feature.lock()->toggle3D();
+      return;
     }
-//     RectItem *rect = getRectFromPosition(event->scenePos());
-//     if (rect)
-//     {
-//         const GraphLinkRecord &record = findRecord(rect, *graphLink);
-//         
-//         //don't like that I am doing this again here after getRectFromPosition call.
-//         QGraphicsItem *item = itemAt(event->scenePos());
-//         QGraphicsPixmapItem *pixmapItem = dynamic_cast<QGraphicsPixmapItem *>(item);
-//         if (pixmapItem && (pixmapItem == (*theGraph)[record.vertex].visibleIcon.get()))
-//         {
-//           //get all selections, but for now just the current pick.
-//           if ((*theGraph)[record.vertex].lastVisibleState == VisibilityState::Off)
-//             const_cast<ViewProviderDocumentObject *>(record.VPDObject)->show(); //const hack
-//           else
-//             const_cast<ViewProviderDocumentObject *>(record.VPDObject)->hide(); //const hack
-//             
-//           return;
-//         }
-//         
-//         const App::DocumentObject *dObject = record.DObject;
-//         if (selectionMode == SelectionMode::Single)
-//         {
-//           if (event->modifiers() & Qt::ControlModifier)
-//           {
-//             toggleSelect(dObject, rect);
-//           }
-//           else if((event->modifiers() & Qt::ShiftModifier) && lastPickValid)
-//           {
-//             goShiftSelect();
-//           }
-//           else
-//           {
-//             Gui::Selection().clearSelection(dObject->getDocument()->getName());
-//             Gui::Selection().addSelection(dObject->getDocument()->getName(), dObject->getNameInDocument());
-//           }
-//         }
-//         if (selectionMode == SelectionMode::Multiple)
-//         {
-//           if((event->modifiers() & Qt::ShiftModifier) && lastPickValid)
-//           {
-//             goShiftSelect();
-//           }
-//           else
-//           {
-//             toggleSelect(dObject, rect);
-//           }
-//         }
-//         lastPickValid = true;
-//         lastPick = event->scenePos();
-//     }
-//     else
-//     {
-//       lastPickValid = false;
-//       Gui::Selection().clearSelection(); //get document name?
-//     }
+    
+    RectItem *rect = getRectFromPosition(event->scenePos());
+    if (rect)
+    {
+      if((event->modifiers() & Qt::ShiftModifier) && lastPickValid)
+      {
+	goShiftSelect();
+      }
+      else
+      {
+	toggleSelect(rect);
+      }
+      lastPickValid = true;		//move these to a response coming in.
+      lastPick = event->scenePos();
+    }
+  }
+  
+  if (event->button() == Qt::MiddleButton)
+  {
+    lastPickValid = false;
+    Selection::Message messageOut;
+    messageOut.action = Selection::Message::Action::RequestClear;
+    selectionChangedSignal(messageOut);
   }
   
   QGraphicsScene::mousePressEvent(event);
@@ -836,26 +960,51 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
 //   QGraphicsScene::mouseDoubleClickEvent(event);
 // }
 
+std::vector<Vertex> Model::getAllSelected()
+{
+  std::vector<Vertex> out;
+  
+  BGL_FORALL_VERTICES(currentVertex, graph, Graph)
+  {
+    if (graph[currentVertex].rectRaw->isSelected())
+      out.push_back(currentVertex);
+  }
+  
+  return out;
+}
 
-// std::vector<Gui::DAG::Vertex> Model::getAllSelected()
-// {
-//   std::vector<Gui::DAG::Vertex> out;
-//   
-//   BGL_FORALL_VERTICES(currentVertex, *theGraph, Graph)
-//   {
-//     if ((*theGraph)[currentVertex].rectangle->isSelected())
-//       out.push_back(currentVertex);
-//   }
-//   
-//   return out;
-// }
-
-// void Model::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
-// {
-//   RectItem *rect = getRectFromPosition(event->scenePos());
-//   if (rect)
-//   {
-//     const GraphLinkRecord &record = findRecord(rect, *graphLink);
+void Model::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
+{
+  RectItem *rect = getRectFromPosition(event->scenePos());
+  if (rect)
+  {
+    const VertexProperty &record = findRecord(graphLink, rect);
+    
+    if (!rect->isSelected() || getAllSelected().size() > 1)
+    {
+      Selection::Message messageOut;
+      messageOut.action = Selection::Message::Action::RequestClear;
+      selectionChangedSignal(messageOut);
+      
+      messageOut.type = Selection::Message::Type::Selection;
+      messageOut.action = Selection::Message::Action::Addition;
+      messageOut.objectType = Selection::Type::Object;
+      messageOut.featureId = record.featureId;
+      messageOut.shapeId = boost::uuids::nil_generator()();
+      selectionChangedSignal(messageOut);
+      
+      lastPickValid = true;
+      lastPick = event->scenePos();
+    }
+    
+    QMenu contextMenu;
+    static QIcon leafIcon(":/resources/images/dagViewLeaf.svg");
+    QAction* setCurrentLeafAction = contextMenu.addAction(leafIcon, tr("Set Current Leaf"));
+    connect(setCurrentLeafAction, SIGNAL(triggered()), this, SLOT(setCurrentLeafSlot()));
+    static QIcon removeIcon(":/resources/images/dagViewRemove.svg");
+    QAction* removeFeatureAction = contextMenu.addAction(removeIcon, tr("Remove Feature"));
+    connect(removeFeatureAction, SIGNAL(triggered()), this, SLOT(removeFeatureSlot()));
+    contextMenu.exec(event->screenPos());
 //     
 //     //don't like that I am doing this again here after getRectFromPosition call.
 //     QGraphicsItem *item = itemAt(event->scenePos());
@@ -866,13 +1015,6 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
 //       return;
 //     }
 //     
-//     if (!rect->isSelected())
-//     {
-//       Gui::Selection().clearSelection(record.DObject->getDocument()->getName());
-//       Gui::Selection().addSelection(record.DObject->getDocument()->getName(), record.DObject->getNameInDocument());
-//       lastPickValid = true;
-//       lastPick = event->scenePos();
-//     }
 //     
 //     MenuItem view;
 //     Gui::Application::Instance->setupContextMenu("Tree", &view);
@@ -894,10 +1036,37 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
 //     
 //     if (contextMenu.actions().count() > 0)
 //         contextMenu.exec(event->screenPos());
-//   }
-//   
-//   QGraphicsScene::contextMenuEvent(event);
-// }
+  }
+  
+  QGraphicsScene::contextMenuEvent(event);
+}
+
+void Model::setCurrentLeafSlot()
+{
+  auto currentSelections = getAllSelected();
+  assert(currentSelections.size() == 1);
+  
+  ProjectSpace::Message pMessageOut;
+  pMessageOut.type = ProjectSpace::Message::Type::Request;
+  pMessageOut.action = ProjectSpace::Message::Action::SetCurrentLeaf;
+  pMessageOut.featureId = graph[currentSelections.front()].featureId; 
+  
+  projectMessageSignal(pMessageOut);
+}
+
+void Model::removeFeatureSlot()
+{
+  auto currentSelections = getAllSelected();
+  assert(currentSelections.size() == 1);
+  
+  ProjectSpace::Message pMessageOut;
+  pMessageOut.type = ProjectSpace::Message::Type::Request;
+  pMessageOut.action = ProjectSpace::Message::Action::RemoveFeature;
+  pMessageOut.featureId = graph[currentSelections.front()].featureId; 
+  
+  projectMessageSignal(pMessageOut);
+}
+
 
 // void Model::onRenameSlot()
 // {
