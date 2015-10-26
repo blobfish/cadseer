@@ -45,6 +45,7 @@
 #include "feature/union.h"
 #include "dialogs/boxdialog.h"
 #include "preferences/dialog.h"
+#include <message/dispatch.h>
 
 using boost::uuids::uuid;
 
@@ -64,6 +65,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QSplitter *splitter = new QSplitter(Qt::Horizontal, this);
     splitter->addWidget(viewWidget);
     splitter->addWidget(dagView);
+    //size setup temp.
+    QList<int> sizes;
+    sizes.append(1000);
+    sizes.append(300);
+    splitter->setSizes(sizes);
     
     QHBoxLayout *aLayout = new QHBoxLayout();
     aLayout->addWidget(splitter);
@@ -94,17 +100,17 @@ MainWindow::MainWindow(QWidget *parent) :
     assert(application);
     application->setProject(project);
     
-    project->connectFeatureAdded(boost::bind(&DAG::Model::featureAddedSlot, dagModel, _1));
-    project->connectFeatureRemoved(boost::bind(&DAG::Model::featureRemovedSlot, dagModel, _1));
-    project->connectProjectUpdated(boost::bind(&DAG::Model::projectUpdatedSlot, dagModel));
-    project->connectConnectionAdded(boost::bind(&DAG::Model::connectionAddedSlot, dagModel, _1, _2, _3));
-    project->connectConnectionRemoved(boost::bind(&DAG::Model::connectionRemovedSlot, dagModel, _1, _2, _3));
-    dagModel->connectProjectMessageSignal(boost::bind(&Project::messageInSlot, project, _1));
-    
-    dagModel->connectSelectionChanged(boost::bind
-      (&Selection::EventHandler::selectionMessageInSlot, viewWidget->getSelectionEventHandler(), _1));
-    viewWidget->getSelectionEventHandler()->connectSelectionChanged(boost::bind(
-      &DAG::Model::selectionMessageInSlot, dagModel, _1));
+    //new message system.
+    project->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
+    msg::dispatch().connectMessageOut(boost::bind(&Project::messageInSlot, project, _1));
+    dagModel->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
+    msg::dispatch().connectMessageOut(boost::bind(&DAG::Model::messageInSlot, dagModel, _1));
+    viewWidget->getSelectionEventHandler()->connectMessageOut
+      (boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
+    msg::dispatch().connectMessageOut(boost::bind(&Selection::EventHandler::messageInSlot,
+						  viewWidget->getSelectionEventHandler(), _1));
+    viewWidget->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
+    msg::dispatch().connectMessageOut(boost::bind(&ViewerWidget::messageInSlot, viewWidget, _1));
 
     setupCommands();
 }
@@ -124,7 +130,7 @@ void MainWindow::readBrepSlot()
     Application *application = dynamic_cast<Application *>(qApp);
     assert(application);
     Project *project = application->getProject();
-    project->readOCC(fileName.toStdString(), viewWidget->getRoot());
+    project->readOCC(fileName.toStdString());
     project->update();
     project->updateVisual();
     viewWidget->update();
@@ -293,7 +299,7 @@ void MainWindow::constructionBoxSlot()
       gp_Ax2 location;
       location.SetLocation(gp_Pnt(1.0, 1.0, 1.0));
       boxPtr->setSystem(location);
-      project->addFeature(boxPtr, viewWidget->getRoot());
+      project->addFeature(boxPtr);
     }
     
     box->setParameters
@@ -320,7 +326,7 @@ void MainWindow::constructionSphereSlot()
     location.SetLocation(gp_Pnt(6.0, 6.0, 5.0));
     sphere->setSystem(location);
     
-    project->addFeature(sphere, viewWidget->getRoot());
+    project->addFeature(sphere);
     project->update();
     project->updateVisual();
 
@@ -341,7 +347,7 @@ void MainWindow::constructionConeSlot()
     location.SetLocation(gp_Pnt(11.0, 6.0, 3.0));
     cone->setSystem(location);
     
-    project->addFeature(cone, viewWidget->getRoot());
+    project->addFeature(cone);
     project->update();
     project->updateVisual();
 
@@ -362,7 +368,7 @@ void MainWindow::constructionCylinderSlot()
   cylinder->setSystem(location);
   
   
-  project->addFeature(cylinder, viewWidget->getRoot());
+  project->addFeature(cylinder);
   project->update();
   project->updateVisual();
 
@@ -395,7 +401,7 @@ void MainWindow::constructionBlendSlot()
   Project *project = application->getProject();
   
   std::shared_ptr<Feature::Blend> blend(new Feature::Blend());
-  project->addFeature(blend, viewWidget->getRoot());
+  project->addFeature(blend);
   project->connect(targetFeatureId, blend->getId(), Feature::InputTypes::target);
   blend->setEdgeIds(edgeIds);
   
@@ -434,7 +440,7 @@ void MainWindow::constructionUnionSlot()
   
   //union keyword. whoops
   std::shared_ptr<Feature::Union> onion(new Feature::Union());
-  project->addFeature(onion, viewWidget->getRoot());
+  project->addFeature(onion);
   project->connect(targetFeatureId, onion->getId(), Feature::InputTypes::target);
   project->connect(toolFeatureId, onion->getId(), Feature::InputTypes::tool);
   
@@ -469,7 +475,7 @@ void MainWindow::removeSlot()
   Selection::Containers selections = viewWidget->getSelections();
   viewWidget->clearSelections();
   for (const auto &current : selections)
-    project->removeFeature(current.featureId, viewWidget->getRoot());
+    project->removeFeature(current.featureId);
   
   project->update();
   project->updateVisual();

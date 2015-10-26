@@ -44,6 +44,14 @@ public:
     Selection::EventHandler* getSelectionEventHandler(){return selectionHandler.get();}
     const Selection::Containers& getSelections() const {return selectionHandler->getSelections();}
     void clearSelections() const {selectionHandler->clearSelections();}
+    
+    //new messaging system
+    void messageInSlot(const msg::Message &);
+    typedef boost::signals2::signal<void (const msg::Message &)> MessageOutSignal;
+    boost::signals2::connection connectMessageOut(const MessageOutSignal::slot_type &subscriber)
+    {
+      return messageOutSignal.connect(subscriber);
+    }
 
 public Q_SLOTS:
     void setSelectionMask(const int &maskIn);
@@ -66,6 +74,11 @@ protected:
     int glWidgetWidth;
     int glWidgetHeight;
     osgQt::GraphicsWindowQt *windowQt;
+    MessageOutSignal messageOutSignal;
+    msg::MessageDispatcher dispatcher;
+    void setupDispatcher();
+    void featureAddedDispatched(const msg::Message &);
+    void featureRemovedDispatched(const msg::Message &);
 };
 
 class VisibleVisitor : public osg::NodeVisitor

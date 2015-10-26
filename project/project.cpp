@@ -36,16 +36,23 @@
 #include "../feature/inert.h"
 #include <project/message.h>
 #include "project.h"
+#include <message/message.h>
+#include <message/dispatch.h>
 
 using namespace ProjectGraph;
 using boost::uuids::uuid;
 
 Project::Project()
 {
+  setupDispatcher();
 }
 
 void Project::update()
 {
+  msg::Message preMessage;
+  preMessage.mask = msg::Response | msg::Pre | msg::Update;
+  messageOutSignal(preMessage);
+  
   writeGraphViz("/home/tanderson/temp/cadseer.dot");
   
   Path sorted;
@@ -88,7 +95,10 @@ void Project::update()
   }
   
   updateLeafStatus();
-  projectUpdatedSignal();
+  
+  msg::Message postMessage;
+  postMessage.mask = msg::Response | msg::Post | msg::Update;
+  messageOutSignal(postMessage);
 }
 
 void Project::updateVisual()
@@ -126,7 +136,7 @@ void Project::writeGraphViz(const std::string& fileName)
 }
 
 
-void Project::readOCC(const std::string &fileName, osg::Group *root)
+void Project::readOCC(const std::string &fileName)
 {
     TopoDS_Shape base;
     BRep_Builder junk;
@@ -151,7 +161,7 @@ void Project::readOCC(const std::string &fileName, osg::Group *root)
 //            continue;
         }
 
-        addOCCShape(current, root);
+        addOCCShape(current);
     }
 }
 
@@ -168,28 +178,34 @@ ProjectGraph::Vertex Project::findVertex(const uuid& idIn)
   return it->second;
 }
 
-void Project::addOCCShape(const TopoDS_Shape &shapeIn, osg::Group *root)
+void Project::addOCCShape(const TopoDS_Shape &shapeIn)
 {
   std::shared_ptr<Feature::Inert> inert(new Feature::Inert(shapeIn));
-  addFeature(inert, root);
+  addFeature(inert);
 }
 
-void Project::addFeature(std::shared_ptr<Feature::Base> feature, osg::Group *root)
+void Project::addFeature(std::shared_ptr<Feature::Base> feature)
 {
+  //no pre message.
+  
   Vertex newVertex = boost::add_vertex(projectGraph);
   projectGraph[newVertex].feature = feature;
   map.insert(std::make_pair(feature->getId(), newVertex));
-  featureAddedSignal(feature);
-  
-  root->addChild(feature->getMainSwitch());
+  msg::Message postMessage;
+  postMessage.mask = msg::Response | msg::Post | msg::AddFeature;
+  prj::Message pMessage;
+  pMessage.feature = feature;
+  postMessage.payload = pMessage;
+  messageOutSignal(postMessage);
   
   projectGraph[newVertex].connection = feature->connectState(boost::bind(&Project::stateChangedSlot, this, _1, _2));
 }
 
-void Project::removeFeature(const uuid& idIn, osg::Group *root)
+void Project::removeFeature(const uuid& idIn)
 {
   Vertex vertex = findVertex(idIn);
   std::shared_ptr<Feature::Base> feature = projectGraph[vertex].feature;
+  
   feature->setModelDirty(); //this will make all children dirty.
   projectGraph[vertex].connection.disconnect();
   
@@ -213,16 +229,40 @@ void Project::removeFeature(const uuid& idIn, osg::Group *root)
   }
   
   for (const auto &current : parents)
-    connectionRemovedSignal(projectGraph[current.first].feature->getId(), idIn, projectGraph[current.second].inputType);
+  {
+    msg::Message preMessage;
+    preMessage.mask = msg::Response | msg::Pre | msg::RemoveConnection;
+    prj::Message pMessage;
+    pMessage.featureId = projectGraph[current.first].feature->getId();
+    pMessage.featureId2 = idIn;
+    pMessage.inputType = projectGraph[current.second].inputType;
+    preMessage.payload = pMessage;
+    messageOutSignal(preMessage);
+  }
   
   for (const auto &current : children)
-    connectionRemovedSignal(idIn, projectGraph[current.first].feature->getId(), projectGraph[current.second].inputType);
+  {
+    msg::Message preMessage;
+    preMessage.mask = msg::Response | msg::Pre | msg::RemoveConnection;
+    prj::Message pMessage;
+    pMessage.featureId = idIn;
+    pMessage.featureId2 = projectGraph[current.first].feature->getId();
+    pMessage.inputType = projectGraph[current.second].inputType;
+    preMessage.payload = pMessage;
+    messageOutSignal(preMessage);
+  }
   
-  root->removeChild(feature->getMainSwitch());
-  featureRemovedSignal(feature);
+  msg::Message preMessage;
+  preMessage.mask = msg::Response | msg::Pre | msg::RemoveFeature;
+  prj::Message pMessage;
+  pMessage.feature = feature;
+  preMessage.payload = pMessage;
+  messageOutSignal(preMessage);
   
   boost::clear_vertex(vertex, projectGraph);
   boost::remove_vertex(vertex, projectGraph);
+  
+  //no post message.
 }
 
 void Project::setFeatureActive(const uuid& idIn)
@@ -296,7 +336,14 @@ void Project::connect(const boost::uuids::uuid& parentIn, const boost::uuids::uu
   Edge edge = connectVertices(parent, child, type);
   projectGraph[edge].inputType = type;
   
-  connectionAddedSignal(parentIn, childIn, type);
+  msg::Message postMessage;
+  postMessage.mask = msg::Response | msg::Post | msg::AddConnection;
+  prj::Message pMessage;
+  pMessage.featureId = parentIn;
+  pMessage.featureId2 = childIn; 
+  pMessage.inputType = type;
+  postMessage.payload = pMessage;
+  messageOutSignal(postMessage);
 }
 
 void Project::stateChangedSlot(const uuid& featureIdIn, std::size_t stateIn)
@@ -320,33 +367,57 @@ void Project::stateChangedSlot(const uuid& featureIdIn, std::size_t stateIn)
   boost::breadth_first_search(projectGraph, vertex, boost::visitor(visitor));
 }
 
-void Project::messageInSlot(const ProjectSpace::Message& messageIn)
+void Project::messageInSlot(const msg::Message &messageIn)
 {
-  //block connection back to project.
+//   std::cout << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::MessageDispatcher::iterator it = dispatcher.find(messageIn.mask);
+  if (it == dispatcher.end())
+    return;
+  
+  //block the signals back into project. should this be done here
+  //or should this be done in dispatched function on a case by case basis?
+  //to be determined.
   std::vector<boost::signals2::shared_connection_block> blockVector;
   BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
   {
     boost::signals2::shared_connection_block currentBlock(projectGraph[currentVertex].connection);
     blockVector.push_back(currentBlock);
   }
-  if 
-  (
-    (messageIn.type == ProjectSpace::Message::Type::Request) &&
-    (messageIn.action == ProjectSpace::Message::Action::SetCurrentLeaf)
-  )
-  {
-    setFeatureActive(messageIn.featureId);
-  }
-  if 
-  (
-    (messageIn.type == ProjectSpace::Message::Type::Request) &&
-    (messageIn.action == ProjectSpace::Message::Action::RemoveFeature)
-  )
-  {
-    //hold off until message system is in place.
-    std::cout << "inside: " << __PRETTY_FUNCTION__ << "  for remove feature" << std::endl;
-//     removeFeature(messageIn.featureId);
-  }
+  
+  it->second(messageIn);
+}
+
+void Project::setupDispatcher()
+{
+  msg::Mask mask;
+  
+  mask = msg::Request | msg::SetCurrentLeaf;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Project::setCurrentLeafDispatched, this, _1)));
+  
+  mask = msg::Request | msg::RemoveFeature;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Project::removeFeatureDispatched, this, _1)));
+}
+
+void Project::setCurrentLeafDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  prj::Message message = boost::get<prj::Message>(messageIn.payload);
+  //send response signal out 'pre set current feature'.
+  setFeatureActive(message.featureId);
+  //send response signal out 'post set current feature'.
+}
+
+void Project::removeFeatureDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  prj::Message message = boost::get<prj::Message>(messageIn.payload);
+  removeFeature(message.featureId);
 }
 
 void Project::indexVerticesEdges()
@@ -372,9 +443,16 @@ void Project::indexVerticesEdges()
 Edge Project::connect(Vertex parentIn, Vertex childIn, Feature::InputTypes type)
 {
   Edge edge = connectVertices(parentIn, childIn, type);
-  projectGraph[edge].inputType = type;
   
-  connectionAddedSignal(projectGraph[parentIn].feature->getId(), projectGraph[childIn].feature->getId(), type);
+  msg::Message postMessage;
+  postMessage.mask = msg::Response | msg::Post | msg::AddConnection;
+  prj::Message pMessage;
+  pMessage.featureId = projectGraph[parentIn].feature->getId();
+  pMessage.featureId2 = projectGraph[childIn].feature->getId(); 
+  pMessage.inputType = type;
+  postMessage.payload = pMessage;
+  messageOutSignal(postMessage);
+  
   return edge;
 }
 

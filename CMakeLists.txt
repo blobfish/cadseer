@@ -54,6 +54,11 @@ SET(GESTURE_SOURCES
     ./gesture/gesturehandler.cpp
     ./gesture/gesturenode.cpp
     )
+    
+SET(MESSAGE_SOURCES
+    message/message.cpp
+    message/dispatch.cpp
+    )
 
 SET(COMMAND_SOURCES
     ./command/command.cpp
@@ -118,6 +123,7 @@ SET(CADSEER_SOURCES
     ${TESTING_SOURCES}
     ${GESTURE_SOURCES}
     ${COMMAND_SOURCES}
+    ${MESSAGE_SOURCES}
     ${FEATURE_SOURCES}
     ${SELECTION_SOURCES}
     ${DIALOG_SOURCES}

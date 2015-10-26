@@ -24,34 +24,15 @@
 
 #include <selection/definitions.h>
 
-namespace Selection
+namespace slc
 {
-
-struct Message
-{
-  enum class Type
+  struct Message
   {
-    None = 0,
-    Preselection,
-    Selection
+    Message();
+    Selection::Type type;
+    boost::uuids::uuid featureId;
+    boost::uuids::uuid shapeId;
   };
-  
-  enum class Action
-  {
-    None = 0,
-    Addition,
-    Subtraction,
-    RequestClear
-  };
-  
-  Message();
-  Message::Type type;
-  Action action;
-  Selection::Type objectType;
-  boost::uuids::uuid featureId;
-  boost::uuids::uuid shapeId;
-};
-
 }
 
 #endif // SELECTIONMESSAGE_H

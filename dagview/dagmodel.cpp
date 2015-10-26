@@ -37,6 +37,7 @@
 #include "../globalutilities.h"
 #include "dagcontrolleddfs.h"
 #include "dagmodel.h"
+#include <message/dispatch.h>
 
 using namespace DAG;
 
@@ -78,6 +79,8 @@ using namespace DAG;
 
 Model::Model(QObject *parentIn) : QGraphicsScene(parentIn)
 {
+  setupDispatcher();
+  
   //turned off BSP as it was giving inconsistent discovery of items
   //underneath cursor.
   this->setItemIndexMethod(QGraphicsScene::NoIndex);
@@ -184,38 +187,50 @@ void Model::indexVerticesEdges()
   }
 }
 
-void Model::featureAddedSlot(std::shared_ptr<Feature::Base> featureIn)
+void Model::featureAddedDispatched(const msg::Message &messageIn)
 {
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  prj::Message message = boost::get<prj::Message>(messageIn.payload);
+  
   Vertex virginVertex = boost::add_vertex(graph);
-  graph[virginVertex].feature = featureIn;
-  graph[virginVertex].featureId = featureIn->getId();
+  graph[virginVertex].feature = message.feature;
+  graph[virginVertex].featureId = message.feature->getId();
   
   //some of these are temp.
   graph[virginVertex].visibleIconRaw->setPixmap(visiblePixmapEnabled);
   graph[virginVertex].stateIconRaw->setPixmap(passPixmap);
-  graph[virginVertex].featureIconRaw->setPixmap(featureIn->getIcon().pixmap(iconSize, iconSize));
-  graph[virginVertex].textRaw->setPlainText(featureIn->getName());
+  graph[virginVertex].featureIconRaw->setPixmap(message.feature->getIcon().pixmap(iconSize, iconSize));
+  graph[virginVertex].textRaw->setPlainText(message.feature->getName());
   graph[virginVertex].textRaw->setFont(this->font());
   
   graphLink.insert(graph[virginVertex]);
   
   VertexIdRecord record;
-  record.featureId = featureIn->getId();
+  record.featureId = message.feature->getId();
   record.vertex = virginVertex;
   vertexIdContainer.insert(record);
   
-  graph[virginVertex].connection = featureIn->connectState(boost::bind(&Model::stateChangedSlot, this, _1, _2));
+  graph[virginVertex].connection = message.feature->connectState(boost::bind(&Model::stateChangedSlot, this, _1, _2));
   
   addVertexItemsToScene(virginVertex);
   
   this->invalidate(); //temp.
 }
 
-void Model::featureRemovedSlot(std::shared_ptr< Feature::Base > featureIn)
+void Model::featureRemovedDispatched(const msg::Message &messageIn)
 {
-  Vertex vertex = findRecord(vertexIdContainer, featureIn->getId()).vertex;
-  eraseRecord(graphLink, featureIn->getId());
-  eraseRecord(vertexIdContainer, featureIn->getId());
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  prj::Message message = boost::get<prj::Message>(messageIn.payload);
+  
+  Vertex vertex = findRecord(vertexIdContainer, message.feature->getId()).vertex;
+  eraseRecord(graphLink, message.feature->getId());
+  eraseRecord(vertexIdContainer, message.feature->getId());
   removeVertexItemsFromScene(vertex);
   graph[vertex].connection.disconnect();
   assert(boost::in_degree(vertex, graph) == 0);
@@ -224,16 +239,22 @@ void Model::featureRemovedSlot(std::shared_ptr< Feature::Base > featureIn)
 }
 
 
-void Model::connectionAddedSlot(const boost::uuids::uuid &parentIdIn, const boost::uuids::uuid &childIdIn, Feature::InputTypes typeIn)
+void Model::connectionAddedDispatched(const msg::Message &messageIn)
 {
-  Vertex parentVertex = findRecord(vertexIdContainer, parentIdIn).vertex;
-  Vertex childVertex = findRecord(vertexIdContainer, childIdIn).vertex;
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  prj::Message message = boost::get<prj::Message>(messageIn.payload);
+  
+  Vertex parentVertex = findRecord(vertexIdContainer, message.featureId).vertex;
+  Vertex childVertex = findRecord(vertexIdContainer, message.featureId2).vertex;
   
   bool results;
   Edge edge;
   std::tie(edge, results) = boost::add_edge(parentVertex, childVertex, graph);
   assert(results);
-  graph[edge].inputType = typeIn;
+  graph[edge].inputType = message.inputType;
   
   QPainterPath path;
   path.moveTo(0.0, 0.0);
@@ -243,21 +264,26 @@ void Model::connectionAddedSlot(const boost::uuids::uuid &parentIdIn, const boos
   addEdgeItemsToScene(edge);
 }
 
-void Model::connectionRemovedSlot(const uuid &parentIdIn, const uuid &childIdIn, Feature::InputTypes typeIn)
+void Model::connectionRemovedDispatched(const msg::Message &messageIn)
 {
-  Vertex parentVertex = findRecord(vertexIdContainer, parentIdIn).vertex;
-  Vertex childVertex = findRecord(vertexIdContainer, childIdIn).vertex;
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  prj::Message message = boost::get<prj::Message>(messageIn.payload);
+  
+  Vertex parentVertex = findRecord(vertexIdContainer, message.featureId).vertex;
+  Vertex childVertex = findRecord(vertexIdContainer, message.featureId2).vertex;
   
   bool results;
   Edge edge;
   std::tie(edge, results) = boost::edge(parentVertex, childVertex, graph);
   assert(results);
-  assert(graph[edge].inputType == typeIn);
+  assert(graph[edge].inputType == message.inputType);
   
   removeEdgeItemsFromScene(edge);
   boost::remove_edge(edge, graph);
 }
-
 
 void Model::stateChangedSlot(const boost::uuids::uuid &featureIdIn, std::size_t stateOffsetChanged)
 {
@@ -326,40 +352,117 @@ void Model::stateChangedSlot(const boost::uuids::uuid &featureIdIn, std::size_t 
 //     "      state value is: " << ((currentState) ? "true" : "false") <<  std::endl;
 }
 
-void Model::selectionMessageInSlot(const Selection::Message &messageIn)
+void Model::messageInSlot(const msg::Message &messageIn)
 {
-  const VertexProperty& record = findRecord(graphLink, messageIn.featureId);
+  msg::MessageDispatcher::iterator it = dispatcher.find(messageIn.mask);
+  if (it == dispatcher.end())
+    return;
   
-  if (messageIn.type == Selection::Message::Type::Preselection)
-  {
-    //clear the current highlight if it exists requardless of whether
-    //we are adding or subtracting highlight.
-    if (currentPrehighlight)
-    {
-      currentPrehighlight->preHighlightOff();
-      currentPrehighlight = nullptr;
-    }
-    if (messageIn.action == Selection::Message::Action::Addition)
-    {
-      currentPrehighlight = record.rectRaw;
-      currentPrehighlight->preHighlightOn();
-    }
-  }
-  else // = selection
-  {
-    Vertex vertex = findRecord(vertexIdContainer, messageIn.featureId).vertex;
-    if (messageIn.action == Selection::Message::Action::Addition)
-    {
-      graph[vertex].rectRaw->selectionOn();
-    }
-    else // = subtraction.
-    {
-      graph[vertex].rectRaw->selectionOff();
-    }
-  }
+  it->second(messageIn);
+}
+
+void Model::setupDispatcher()
+{
+  msg::Mask mask;
+  
+  mask = msg::Response | msg::Post | msg::AddFeature;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Model::featureAddedDispatched, this, _1)));
+  
+  mask = msg::Response | msg::Pre | msg::RemoveFeature;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Model::featureRemovedDispatched, this, _1)));
+  
+  mask = msg::Response | msg::Post | msg::AddConnection;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Model::connectionAddedDispatched, this, _1)));
+  
+  mask = msg::Response | msg::Pre | msg::RemoveConnection;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Model::connectionRemovedDispatched, this, _1)));
+  
+  mask = msg::Response | msg::Post | msg::Update;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Model::projectUpdatedDispatched, this, _1)));
+  
+  mask = msg::Response | msg::Post | msg::Preselection | msg::Addition;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Model::preselectionAdditionDispatched, this, _1)));
+  
+  mask = msg::Response | msg::Pre | msg::Preselection | msg::Subtraction;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Model::preselectionSubtractionDispatched, this, _1)));
+  
+  mask = msg::Response | msg::Post | msg::Selection | msg::Addition;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Model::selectionAdditionDispatched, this, _1)));
+  
+  mask = msg::Response | msg::Pre | msg::Selection | msg::Subtraction;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Model::selectionSubtractionDispatched, this, _1)));
+  
+}
+
+void Model::preselectionAdditionDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
+  if (sMessage.type != Selection::Type::Object)
+    return;
+  Vertex vertex = findRecord(vertexIdContainer, sMessage.featureId).vertex;
+  assert(!currentPrehighlight); //trying to set prehighlight when something is already set.
+  currentPrehighlight = graph[vertex].rectRaw;
+  currentPrehighlight->preHighlightOn();
   
   invalidate();
 }
+
+void Model::preselectionSubtractionDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
+  if (sMessage.type != Selection::Type::Object)
+    return;
+  Vertex vertex = findRecord(vertexIdContainer, sMessage.featureId).vertex;
+  assert(currentPrehighlight); //trying to clear prehighlight when already empty.
+  graph[vertex].rectRaw->preHighlightOff();
+  currentPrehighlight = nullptr;
+  
+  invalidate();
+}
+
+void Model::selectionAdditionDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
+  if (sMessage.type != Selection::Type::Object)
+    return;
+  Vertex vertex = findRecord(vertexIdContainer, sMessage.featureId).vertex;
+  graph[vertex].rectRaw->selectionOn();
+  
+  lastPickValid = true;
+  lastPick = graph[vertex].rectRaw->mapToScene(graph[vertex].rectRaw->rect().center());
+  
+  invalidate();
+}
+
+void Model::selectionSubtractionDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
+  if (sMessage.type != Selection::Type::Object)
+    return;
+  Vertex vertex = findRecord(vertexIdContainer, sMessage.featureId).vertex;
+  graph[vertex].rectRaw->selectionOff();
+  
+  lastPickValid = false;
+  
+  invalidate();
+}
+
 
 // void Model::selectionChanged(const SelectionChanges& msg)
 // {
@@ -478,8 +581,13 @@ void Model::selectionMessageInSlot(const Selection::Message &messageIn)
 //   updateStates();
 // }
 
-void Model::projectUpdatedSlot()
+void Model::projectUpdatedDispatched(const msg::Message &)
 {
+  #include <message/dispatch.h>
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
   indexVerticesEdges();
   outputGraphviz<Graph>(graph, "/home/tanderson/temp/dagview.dot");
   
@@ -818,26 +926,30 @@ void Model::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
   {
     if (!currentPrehighlight)
       return;
-    Selection::Message messageOut;
     const VertexProperty& record = findRecord(graphLink, currentPrehighlight);
-    messageOut.type = Selection::Message::Type::Preselection;
-    messageOut.action = Selection::Message::Action::Subtraction;
-    messageOut.objectType = Selection::Type::Object;
-    messageOut.featureId = record.featureId;
-    messageOut.shapeId = boost::uuids::nil_generator()();
-    selectionChangedSignal(messageOut);
+    
+    msg::Message message;
+    message.mask = msg::Request | msg::Preselection | msg::Subtraction;
+    slc::Message sMessage;
+    sMessage.type = Selection::Type::Object;
+    sMessage.featureId = record.featureId;
+    sMessage.shapeId = boost::uuids::nil_generator()();
+    message.payload = sMessage;
+    messageOutSignal(message);
   };
   
   auto setPrehighlight = [this](RectItem *rectIn)
   {
-    Selection::Message messageOut;
     const VertexProperty& record = findRecord(graphLink, rectIn);
-    messageOut.type = Selection::Message::Type::Preselection;
-    messageOut.action = Selection::Message::Action::Addition;
-    messageOut.objectType = Selection::Type::Object;
-    messageOut.featureId = record.featureId;
-    messageOut.shapeId = boost::uuids::nil_generator()();
-    selectionChangedSignal(messageOut);
+    
+    msg::Message message;
+    message.mask = msg::Request | msg::Preselection | msg::Addition;
+    slc::Message sMessage;
+    sMessage.type = Selection::Type::Object;
+    sMessage.featureId = record.featureId;
+    sMessage.shapeId = boost::uuids::nil_generator()();
+    message.payload = sMessage;
+    messageOutSignal(message);
   };
   
   RectItem *rect = getRectFromPosition(event->scenePos());
@@ -854,15 +966,17 @@ void Model::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
 void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
-  auto select = [this](const uuid &featureIdIn, Selection::Message::Action actionIn)
+  auto select = [this](const uuid &featureIdIn, std::size_t actionIn)
   {
-    Selection::Message messageOut;
-    messageOut.type = Selection::Message::Type::Selection;
-    messageOut.action = actionIn;
-    messageOut.objectType = Selection::Type::Object;
-    messageOut.featureId = featureIdIn;
-    messageOut.shapeId = boost::uuids::nil_generator()();
-    selectionChangedSignal(messageOut);
+    assert((actionIn == msg::Addition) || (actionIn == msg::Subtraction));
+    msg::Message message;
+    message.mask = msg::Request | msg::Selection | actionIn;
+    slc::Message sMessage;
+    sMessage.type = Selection::Type::Object;
+    sMessage.featureId = featureIdIn;
+    sMessage.shapeId = boost::uuids::nil_generator()();
+    message.payload = sMessage;
+    messageOutSignal(message);
   };
   
   auto getFeatureIdFromRect = [this](RectItem *rectIn)
@@ -882,16 +996,16 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
       RectItem *rect = dynamic_cast<RectItem *>(*currentItem);
       if (!rect || rect->isSelected())
 	continue;
-      select(getFeatureIdFromRect(rect), Selection::Message::Action::Addition);
+      select(getFeatureIdFromRect(rect), msg::Addition);
     }
   };
   
   auto toggleSelect = [this, select, getFeatureIdFromRect](RectItem *rectIn)
   {
     if (rectIn->isSelected())
-      select(getFeatureIdFromRect(rectIn), Selection::Message::Action::Subtraction);
+      select(getFeatureIdFromRect(rectIn), msg::Subtraction);
     else
-      select(getFeatureIdFromRect(rectIn), Selection::Message::Action::Addition);
+      select(getFeatureIdFromRect(rectIn), msg::Addition);
   };
 //   
 //   if (proxy)
@@ -926,17 +1040,16 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
       {
 	toggleSelect(rect);
       }
-      lastPickValid = true;		//move these to a response coming in.
-      lastPick = event->scenePos();
     }
   }
   
   if (event->button() == Qt::MiddleButton)
   {
-    lastPickValid = false;
-    Selection::Message messageOut;
-    messageOut.action = Selection::Message::Action::RequestClear;
-    selectionChangedSignal(messageOut);
+    msg::Message message;
+    message.mask = msg::Request | msg::Selection | msg::Clear;
+    slc::Message sMessage;
+    message.payload = sMessage;
+    messageOutSignal(message);
   }
   
   QGraphicsScene::mousePressEvent(event);
@@ -982,19 +1095,19 @@ void Model::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     
     if (!rect->isSelected() || getAllSelected().size() > 1)
     {
-      Selection::Message messageOut;
-      messageOut.action = Selection::Message::Action::RequestClear;
-      selectionChangedSignal(messageOut);
+      msg::Message clearMessage;
+      clearMessage.mask = msg::Request | msg::Selection | msg::Clear;
+      slc::Message clearSMessage;
+      clearMessage.payload = clearSMessage;
+      messageOutSignal(clearMessage);
       
-      messageOut.type = Selection::Message::Type::Selection;
-      messageOut.action = Selection::Message::Action::Addition;
-      messageOut.objectType = Selection::Type::Object;
-      messageOut.featureId = record.featureId;
-      messageOut.shapeId = boost::uuids::nil_generator()();
-      selectionChangedSignal(messageOut);
-      
-      lastPickValid = true;
-      lastPick = event->scenePos();
+      msg::Message message;
+      message.mask = msg::Request | msg::Selection | msg::Addition;
+      slc::Message sMessage;
+      sMessage.type = Selection::Type::Object;
+      sMessage.featureId = record.featureId;
+      message.payload = sMessage;
+      messageOutSignal(message);
     }
     
     QMenu contextMenu;
@@ -1046,12 +1159,13 @@ void Model::setCurrentLeafSlot()
   auto currentSelections = getAllSelected();
   assert(currentSelections.size() == 1);
   
-  ProjectSpace::Message pMessageOut;
-  pMessageOut.type = ProjectSpace::Message::Type::Request;
-  pMessageOut.action = ProjectSpace::Message::Action::SetCurrentLeaf;
-  pMessageOut.featureId = graph[currentSelections.front()].featureId; 
-  
-  projectMessageSignal(pMessageOut);
+  //temp for testing
+  prj::Message prjMessageOut;
+  prjMessageOut.featureId = graph[currentSelections.front()].featureId;
+  msg::Message messageOut;
+  messageOut.mask = msg::Request | msg::SetCurrentLeaf;
+  messageOut.payload = prjMessageOut;
+  messageOutSignal(messageOut);
 }
 
 void Model::removeFeatureSlot()
@@ -1059,12 +1173,18 @@ void Model::removeFeatureSlot()
   auto currentSelections = getAllSelected();
   assert(currentSelections.size() == 1);
   
-  ProjectSpace::Message pMessageOut;
-  pMessageOut.type = ProjectSpace::Message::Type::Request;
-  pMessageOut.action = ProjectSpace::Message::Action::RemoveFeature;
-  pMessageOut.featureId = graph[currentSelections.front()].featureId; 
+  msg::Message message;
+  message.mask = msg::Request | msg::Selection | msg::Clear;
+  slc::Message sMessage;
+  message.payload = sMessage;
+  messageOutSignal(message);
   
-  projectMessageSignal(pMessageOut);
+  prj::Message prjMessageOut;
+  prjMessageOut.featureId = graph[currentSelections.front()].featureId;
+  msg::Message messageOut;
+  messageOut.mask = msg::Request | msg::RemoveFeature;
+  messageOut.payload = prjMessageOut;
+  messageOutSignal(messageOut);
 }
 
 

@@ -17,13 +17,6 @@
  *
  */
 
-#include <boost/uuid/nil_generator.hpp>
+#include "message.h"
 
-#include <selection/message.h>
-
-slc::Message::Message()
-{
-  type = Selection::Type::None;
-  featureId = boost::uuids::nil_generator()();
-  shapeId = boost::uuids::nil_generator()();
-}
+using namespace msg;

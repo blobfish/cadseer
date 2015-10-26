@@ -37,10 +37,11 @@
 #include <boost/signals2.hpp>
 
 #include "dagmodelgraph.h"
-#endif
-
+#include <message/message.h>
 #include <selection/message.h>
 #include <project/message.h>
+#endif
+
 // #include "DAGFilter.h"
 
 class QGraphicsSceneHoverEvent;
@@ -67,27 +68,13 @@ namespace DAG
     Model(QObject *parentIn);
     virtual ~Model() override;
     
-    void featureAddedSlot(std::shared_ptr<Feature::Base>); //!<received from the project.
-    void featureRemovedSlot(std::shared_ptr<Feature::Base>); //!<received from the project.
-    void connectionAddedSlot(const boost::uuids::uuid&, const boost::uuids::uuid&, Feature::InputTypes);
-    void connectionRemovedSlot(const boost::uuids::uuid&, const boost::uuids::uuid&, Feature::InputTypes);
-    void projectUpdatedSlot(); //!<received from the project.
-    
-    //selection messages out of dagview.
-    typedef boost::signals2::signal<void (const Selection::Message &)> SelectionChangedSignal;
-    boost::signals2::connection connectSelectionChanged(const SelectionChangedSignal::slot_type &subscriber)
+    //new messaging system
+    void messageInSlot(const msg::Message &);
+    typedef boost::signals2::signal<void (const msg::Message &)> MessageOutSignal;
+    boost::signals2::connection connectMessageOut(const MessageOutSignal::slot_type &subscriber)
     {
-      return selectionChangedSignal.connect(subscriber);
+      return messageOutSignal.connect(subscriber);
     }
-    
-    typedef boost::signals2::signal<void (const ProjectSpace::Message &)> ProjectMessageSignal;
-    boost::signals2::connection connectProjectMessageSignal(const ProjectMessageSignal::slot_type &subscriber)
-    {
-      return projectMessageSignal.connect(subscriber);
-    }
-    
-    //selection message in to dagview
-    void selectionMessageInSlot(const Selection::Message &);
     
   protected:
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
@@ -109,8 +96,18 @@ namespace DAG
     Model(){}
     void indexVerticesEdges();
     void stateChangedSlot(const uuid& featureIdIn, std::size_t); //!< received from each feature.
-    SelectionChangedSignal selectionChangedSignal;
-    ProjectMessageSignal projectMessageSignal;
+    MessageOutSignal messageOutSignal; //new message system.
+    msg::MessageDispatcher dispatcher;
+    void setupDispatcher();
+    void featureAddedDispatched(const msg::Message &);
+    void featureRemovedDispatched(const msg::Message &);
+    void connectionAddedDispatched(const msg::Message &);
+    void connectionRemovedDispatched(const msg::Message &);
+    void projectUpdatedDispatched(const msg::Message &); //!< don't use message but need for function signature.
+    void preselectionAdditionDispatched(const msg::Message &);
+    void preselectionSubtractionDispatched(const msg::Message &);
+    void selectionAdditionDispatched(const msg::Message &);
+    void selectionSubtractionDispatched(const msg::Message &);
     
     Graph graph;
     GraphLinkContainer graphLink;

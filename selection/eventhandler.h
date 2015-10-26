@@ -28,11 +28,10 @@
 #include <osgUtil/LineSegmentIntersector>
 
 #include <selection/definitions.h>
+#include <message/message.h>
 
 namespace Selection
 {
-class Message;
-
 class Selected
 {
 public:
@@ -74,12 +73,13 @@ public:
     const Containers& getSelections() const {return selectionContainers;}
     void clearSelections();
     void setSelectionMask(const unsigned int &maskIn);
-    void selectionMessageInSlot(const Message &);
     
-    typedef boost::signals2::signal<void (const Message &)> SelectionChangedSignal;
-    boost::signals2::connection connectSelectionChanged(const SelectionChangedSignal::slot_type &subscriber)
+    //new messaging system
+    void messageInSlot(const msg::Message &);
+    typedef boost::signals2::signal<void (const msg::Message &)> MessageOutSignal;
+    boost::signals2::connection connectMessageOut(const MessageOutSignal::slot_type &subscriber)
     {
-      return selectionChangedSignal.connect(subscriber);
+      return messageOutSignal.connect(subscriber);
     }
 protected:
     virtual bool handle(const osgGA::GUIEventAdapter& eventAdapter,
@@ -102,7 +102,15 @@ protected:
 
     osgUtil::LineSegmentIntersector::Intersections currentIntersections;
     
-    SelectionChangedSignal selectionChangedSignal;
+    MessageOutSignal messageOutSignal;
+    msg::MessageDispatcher dispatcher;
+    void setupDispatcher();
+    void requestPreselectionAdditionDispatched(const msg::Message &);
+    void requestPreselectionSubtractionDispatched(const msg::Message &);
+    void requestSelectionAdditionDispatched(const msg::Message &);
+    void requestSelectionSubtractionDispatched(const msg::Message &);
+    void requestSelectionClearDispatched(const msg::Message &);
+    Selection::Container buildContainer(const msg::Message &);
 };
 
 class getGeometryFromIds : public osg::NodeVisitor

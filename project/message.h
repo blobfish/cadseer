@@ -18,9 +18,15 @@
  */
 
 #include <boost/uuid/uuid.hpp>
+#include <boost/shared_ptr.hpp>
+
+#include <feature/inputtypes.h>
 
 #ifndef MESSAGE_H
 #define MESSAGE_H
+
+namespace Feature{class Base;}
+
 
 namespace ProjectSpace
 {
@@ -44,6 +50,18 @@ namespace ProjectSpace
     Message::Type type;
     Action action;
     boost::uuids::uuid featureId;
+  };
+}
+
+namespace prj
+{
+  struct Message
+  {
+    Message();
+    boost::uuids::uuid featureId;
+    boost::uuids::uuid featureId2;
+    std::shared_ptr<Feature::Base> feature;
+    Feature::InputTypes inputType;
   };
 }
 

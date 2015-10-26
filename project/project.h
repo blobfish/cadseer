@@ -24,10 +24,10 @@
 
 #include <boost/signals2.hpp>
 
+#include <message/message.h>
 #include "projectgraph.h"
 
 class TopoDS_Shape;
-namespace osg{class Group;}
 
 typedef std::map<boost::uuids::uuid, ProjectGraph::Vertex> IdVertexMap;
 namespace ProjectSpace{class Message;}
@@ -36,51 +36,29 @@ class Project
 {
 public:
     Project();
-    void readOCC(const std::string &fileName, osg::Group *root);
-    void addOCCShape(const TopoDS_Shape &shapeIn, osg::Group *root);
+    void readOCC(const std::string &fileName);
+    void addOCCShape(const TopoDS_Shape &shapeIn);
     Feature::Base* findFeature(const boost::uuids::uuid &idIn);
     void update();
     void updateVisual();
     void writeGraphViz(const std::string &fileName);
     void setAllVisualDirty();
     
-    void addFeature(std::shared_ptr<Feature::Base> feature, osg::Group *root);
-    void removeFeature(const boost::uuids::uuid &idIn, osg::Group *root);
+    void addFeature(std::shared_ptr<Feature::Base> feature);
+    void removeFeature(const boost::uuids::uuid &idIn);
     void setFeatureActive(const boost::uuids::uuid &idIn);
     void connect(const boost::uuids::uuid &parentIn, const boost::uuids::uuid &childIn, Feature::InputTypes type);
     
-    typedef boost::signals2::signal<void (std::shared_ptr<Feature::Base> feature)> FeatureAddedSignal;
-    boost::signals2::connection connectFeatureAdded(const FeatureAddedSignal::slot_type &subscriber)
-    {
-      return featureAddedSignal.connect(subscriber);
-    }
-    
-    typedef boost::signals2::signal<void (std::shared_ptr<Feature::Base> feature)> FeatureRemovedSignal;
-    boost::signals2::connection connectFeatureRemoved(const FeatureRemovedSignal::slot_type &subscriber)
-    {
-      return featureRemovedSignal.connect(subscriber);
-    }
-    
-    typedef boost::signals2::signal<void ()> ProjectUpdatedSignal;
-    boost::signals2::connection connectProjectUpdated(const ProjectUpdatedSignal::slot_type &subscriber)
-    {
-      return projectUpdatedSignal.connect(subscriber);
-    }
-    
-    typedef boost::signals2::signal<void (const boost::uuids::uuid&, const boost::uuids::uuid&, Feature::InputTypes)> ConnectionAddedSignal;
-    boost::signals2::connection connectConnectionAdded(const ConnectionAddedSignal::slot_type &subscriber)
-    {
-      return connectionAddedSignal.connect(subscriber);
-    }
-    
-    typedef boost::signals2::signal<void (const boost::uuids::uuid&, const boost::uuids::uuid&, Feature::InputTypes)> ConnectionRemovedSignal;
-    boost::signals2::connection connectConnectionRemoved(const ConnectionRemovedSignal::slot_type &subscriber)
-    {
-      return connectionRemovedSignal.connect(subscriber);
-    }
-    
     void stateChangedSlot(const boost::uuids::uuid &featureIdIn, std::size_t stateIn); //!< received from each feature.
-    void messageInSlot(const ProjectSpace::Message &messageIn);
+//     void messageInSlot(const ProjectSpace::Message &messageIn);
+    
+    //new messaging system
+    void messageInSlot(const msg::Message &);
+    typedef boost::signals2::signal<void (const msg::Message &)> MessageOutSignal;
+    boost::signals2::connection connectMessageOut(const MessageOutSignal::slot_type &subscriber)
+    {
+      return messageOutSignal.connect(subscriber);
+    }
     
 private:
     //! index all the vertices of the graph. needed for algorthims when using listS.
@@ -97,11 +75,11 @@ private:
     IdVertexMap map;
     ProjectGraph::Graph projectGraph;
     
-    FeatureAddedSignal featureAddedSignal;
-    FeatureRemovedSignal featureRemovedSignal;
-    ProjectUpdatedSignal projectUpdatedSignal;
-    ConnectionAddedSignal connectionAddedSignal;
-    ConnectionRemovedSignal connectionRemovedSignal;
+    MessageOutSignal messageOutSignal; //new message system.
+    msg::MessageDispatcher dispatcher;
+    void setupDispatcher();
+    void setCurrentLeafDispatched(const msg::Message &);
+    void removeFeatureDispatched(const msg::Message &);
 };
 
 #endif // PROJECT_H

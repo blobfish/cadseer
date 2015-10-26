@@ -50,10 +50,14 @@
 #include "./command/commandmanager.h"
 #include "globalutilities.h"
 #include "coordinatesystem.h"
+#include <message/dispatch.h>
 #include "textcamera.h"
+#include <feature/base.h>
 
 ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel) : QWidget()
 {
+    setupDispatcher();
+    
     setThreadingModel(threadingModel);
     connect(&_timer, SIGNAL(timeout()), this, SLOT(update()));
 
@@ -94,6 +98,9 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     infoCamera->setViewport(0, 0, glWidgetWidth, glWidgetHeight);
     infoCamera->setProjectionResizePolicy(osg::Camera::ProjectionResizePolicy::FIXED);
     view->addSlave(infoCamera, false);
+    //wire up to message system.
+    infoCamera->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
+    msg::dispatch().connectMessageOut(boost::bind(&TextCamera::messageInSlot, infoCamera, _1));
 
     view->setSceneData(root);
     view->addEventHandler(new osgViewer::StatsHandler);
@@ -109,8 +116,6 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     spaceballManipulator = new osgGA::SpaceballManipulator(view->getCamera());
     view->setCameraManipulator(spaceballManipulator);
     
-    selectionHandler->connectSelectionChanged(boost::bind(&TextCamera::selectionChangedSlot, infoCamera, _1));
-
     addView(view);
 
     QHBoxLayout *layout = new QHBoxLayout();
@@ -356,6 +361,46 @@ void ViewerWidget::writeOSGSlot()
   if (fileName.isEmpty())
     return;
   osgDB::writeNodeFile(*root, fileName.toStdString());
+}
+
+void ViewerWidget::setupDispatcher()
+{
+  msg::Mask mask;
+  
+  mask = msg::Response | msg::Post | msg::AddFeature;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::featureAddedDispatched, this, _1)));
+  
+  mask = msg::Response | msg::Pre | msg::RemoveFeature;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::featureRemovedDispatched, this, _1)));
+}
+
+void ViewerWidget::messageInSlot(const msg::Message &messageIn)
+{
+  msg::MessageDispatcher::iterator it = dispatcher.find(messageIn.mask);
+  if (it == dispatcher.end())
+    return;
+  
+  it->second(messageIn);
+}
+
+void ViewerWidget::featureAddedDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  prj::Message message = boost::get<prj::Message>(messageIn.payload);
+  root->addChild(message.feature->getMainSwitch());
+}
+
+void ViewerWidget::featureRemovedDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  prj::Message message = boost::get<prj::Message>(messageIn.payload);
+  root->removeChild(message.feature->getMainSwitch());
 }
 
 VisibleVisitor::VisibleVisitor(bool visIn) : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), visibility(visIn)

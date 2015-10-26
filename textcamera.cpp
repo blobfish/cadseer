@@ -22,6 +22,7 @@
 #include <assert.h>
 
 #include <boost/uuid/uuid_io.hpp>
+#include <boost/signals2.hpp>
 
 #include <QApplication>
 
@@ -33,6 +34,7 @@
 
 #include <selection/definitions.h>
 #include <selection/message.h>
+#include <message/dispatch.h>
 #include "textcamera.h"
 
 ResizeEventHandler::ResizeEventHandler(const osg::observer_ptr< osg::Camera > slaveCameraIn) :
@@ -85,6 +87,7 @@ void ResizeEventHandler::positionSelection()
 
 TextCamera::TextCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
 {
+  setupDispatcher();
   setGraphicsContext(windowIn);
   setProjectionMatrix(osg::Matrix::ortho2D(0, windowIn->getTraits()->width, 0, windowIn->getTraits()->width));
   setReferenceFrame(osg::Transform::ABSOLUTE_RF);
@@ -125,39 +128,85 @@ TextCamera::TextCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
   infoSwitch->setAllChildrenOn();
 }
 
-void TextCamera::selectionChangedSlot(const Selection::Message &messageIn)
+void TextCamera::setupDispatcher()
 {
-  if (messageIn.type == Selection::Message::Type::Preselection)
-  {
-    preselectionText.clear();
-    std::ostringstream preselectStream;
-    preselectStream << "Pre-Selection:" << std::endl;
-    if (messageIn.action == Selection::Message::Action::Addition)
-    {
-      preselectStream << "object type: " << Selection::getNameOfType(messageIn.objectType) << std::endl <<
-        "Feature id: " << messageIn.featureId << std::endl <<
-        "Shape id: " << messageIn.shapeId << std::endl;
-    }
-    preselectionText = preselectStream.str();
-  }
-  if (messageIn.type == Selection::Message::Type::Selection)
-  {
-    auto key = std::make_pair(messageIn.featureId, messageIn.shapeId);
-    if (messageIn.action == Selection::Message::Action::Addition)
-    {
-      //snap points will have duplicates. what to do?
-//       assert(selectionMap.count(key) == 0);
-      selectionMap.insert(std::make_pair(key, messageIn));
-    }
-    if (messageIn.action == Selection::Message::Action::Subtraction)
-    {
-      //snap points will have duplicates. what to do?
-//       assert(selectionMap.count(key) == 1);
-      selectionMap.erase(key);
-    }
-  }
+  msg::Mask mask;
   
+  mask = msg::Response | msg::Post | msg::Preselection | msg::Addition;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&TextCamera::preselectionAdditionDispatched, this, _1)));
+  
+  mask = msg::Response | msg::Pre | msg::Preselection | msg::Subtraction;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&TextCamera::preselectionSubtractionDispatched, this, _1)));
+  
+  mask = msg::Response | msg::Post | msg::Selection | msg::Addition;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&TextCamera::selectionAdditionDispatched, this, _1)));
+  
+  mask = msg::Response | msg::Pre | msg::Selection | msg::Subtraction;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&TextCamera::selectionSubtractionDispatched, this, _1)));
+}
+
+void TextCamera::messageInSlot(const msg::Message &messageIn)
+{
+  msg::MessageDispatcher::iterator it = dispatcher.find(messageIn.mask);
+  if (it == dispatcher.end())
+    return;
+  
+  it->second(messageIn);
   updateSelectionLabel();
+}
+
+void TextCamera::preselectionAdditionDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
+  
+  preselectionText.clear();
+  std::ostringstream preselectStream;
+  preselectStream << "Pre-Selection:" << std::endl;
+  preselectStream << "object type: " << Selection::getNameOfType(sMessage.type) << std::endl <<
+    "Feature id: " << sMessage.featureId << std::endl <<
+    "Shape id: " << sMessage.shapeId << std::endl;
+  preselectionText = preselectStream.str();
+}
+
+void TextCamera::preselectionSubtractionDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  preselectionText.clear();
+}
+
+void TextCamera::selectionAdditionDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
+  
+  auto key = std::make_pair(sMessage.featureId, sMessage.shapeId);
+  //snap points will have duplicates. what to do?
+//       assert(selectionMap.count(key) == 0);
+  selectionMap.insert(std::make_pair(key, sMessage));
+}
+
+void TextCamera::selectionSubtractionDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
+  
+  auto key = std::make_pair(sMessage.featureId, sMessage.shapeId);
+  //snap points will have duplicates. what to do?
+//       assert(selectionMap.count(key) == 0);
+  selectionMap.erase(key);
 }
 
 void TextCamera::updateSelectionLabel()
@@ -168,7 +217,7 @@ void TextCamera::updateSelectionLabel()
   for (SelectionMap::const_iterator it = selectionMap.begin(); it != selectionMap.end(); ++it)
   {
     labelStream << std::endl <<
-      "object type: " << Selection::getNameOfType(it->second.objectType) << std::endl <<
+      "object type: " << Selection::getNameOfType(it->second.type) << std::endl <<
       "Feature id: " << it->second.featureId << std::endl <<
       "Shape id: " << it->second.shapeId << std::endl;
   }

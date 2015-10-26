@@ -21,9 +21,12 @@
 
 #include "message.h"
 
-using namespace ProjectSpace;
+ProjectSpace::Message::Message()
+{
+  featureId = boost::uuids::nil_generator()();
+}
 
-Message::Message()
+prj::Message::Message()
 {
   featureId = boost::uuids::nil_generator()();
 }

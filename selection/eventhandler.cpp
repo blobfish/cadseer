@@ -37,6 +37,7 @@
 #include <project/project.h>
 #include <modelviz/connector.h>
 #include <selection/message.h>
+#include <message/dispatch.h>
 
 using namespace osg;
 using namespace boost::uuids;
@@ -63,6 +64,7 @@ EventHandler::EventHandler() : osgGA::GUIEventHandler()
     preHighlightColor = Vec4(1.0, 1.0, 0.0, 1.0);
     selectionColor = Vec4(1.0, 1.0, 1.0, 1.0);
     nodeMask = ~(NodeMaskDef::backGroundCamera | NodeMaskDef::gestureCamera | NodeMaskDef::csys | NodeMaskDef::point);
+    setupDispatcher();
 }
 
 void EventHandler::setSelectionMask(const unsigned int &maskIn)
@@ -183,13 +185,14 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
 	  //prehighlight gets 'moved' into selections so can't call
 	  //clear prehighlight, but we still clear the prehighlight
 	  //selections we need to make observers aware of this 'hidden' change.
-	    Message preMessage;
-	    preMessage.type = Message::Type::Preselection;
-	    preMessage.action = Message::Action::Subtraction;
-	    preMessage.objectType = lastPrehighlight.selectionType;
-	    preMessage.featureId = lastPrehighlight.featureId;
-	    preMessage.shapeId = lastPrehighlight.shapeId;
-	    selectionChangedSignal(preMessage);
+	    msg::Message clearMessage;
+	    clearMessage.mask = msg::Response | msg::Pre | msg::Preselection | msg::Subtraction;
+	    slc::Message clearSMessage;
+	    clearSMessage.type = lastPrehighlight.selectionType;
+	    clearSMessage.featureId = lastPrehighlight.featureId;
+	    clearSMessage.shapeId = lastPrehighlight.shapeId;
+	    clearMessage.payload = clearSMessage;
+	    messageOutSignal(clearMessage);
 	  
             std::vector<Selected>::iterator it;
             for (it = lastPrehighlight.selections.begin(); it != lastPrehighlight.selections.end(); ++it)
@@ -199,13 +202,16 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
                 setGeometryColor(currentSelected.geometry.get(), selectionColor);
             }
             selectionContainers.push_back(lastPrehighlight);
-            Message message;
-            message.type = Message::Type::Selection;
-            message.action = Message::Action::Addition;
-            message.objectType = lastPrehighlight.selectionType;
-            message.featureId = lastPrehighlight.featureId;
-            message.shapeId = lastPrehighlight.shapeId;
-            selectionChangedSignal(message);
+	    
+	    msg::Message addMessage;
+	    addMessage.mask = msg::Response | msg::Post | msg::Selection | msg::Addition;
+	    slc::Message addSMessage;
+	    addSMessage.type = lastPrehighlight.selectionType;
+	    addSMessage.featureId = lastPrehighlight.featureId;
+	    addSMessage.shapeId = lastPrehighlight.shapeId;
+	    addMessage.payload = addSMessage;
+	    messageOutSignal(addMessage);
+	    
             lastPrehighlight = Container();
         }
         //not clearing the selection anymore on a empty pick.
@@ -508,6 +514,15 @@ void EventHandler::clearSelections()
     Containers::reverse_iterator it;
     for (it = selectionContainers.rbegin(); it != selectionContainers.rend(); ++it)
     {
+	msg::Message removeMessage;
+	removeMessage.mask = msg::Response | msg::Pre | msg::Selection | msg::Subtraction;
+	slc::Message removeSMessage;
+	removeSMessage.type = it->selectionType;
+	removeSMessage.featureId = it->featureId;
+	removeSMessage.shapeId = it->shapeId;
+	removeMessage.payload = removeSMessage;
+	messageOutSignal(removeMessage);
+      
         std::vector<Selected>::iterator selectedIt;
         for (selectedIt = it->selections.begin(); selectedIt != it->selections.end(); ++selectedIt)
         {
@@ -524,13 +539,6 @@ void EventHandler::clearSelections()
 	    aSwitch->removeChild(geode);
 	  }
         }
-        Message message;
-        message.type = Message::Type::Selection;
-        message.action = Message::Action::Subtraction;
-        message.objectType = it->selectionType;
-        message.featureId = it->featureId;
-        message.shapeId = it->shapeId;
-        selectionChangedSignal(message);
     }
     selectionContainers.clear();
 }
@@ -553,13 +561,14 @@ void EventHandler::setPrehighlight(Selection::Container &selected)
     for (it = selected.selections.begin(); it != selected.selections.end(); ++it)
         setGeometryColor(it->geometry.get(), preHighlightColor);
     
-    Message message;
-    message.type = Message::Type::Preselection;
-    message.action = Message::Action::Addition;
-    message.objectType = lastPrehighlight.selectionType;
-    message.featureId = lastPrehighlight.featureId;
-    message.shapeId = lastPrehighlight.shapeId;
-    selectionChangedSignal(message);
+    msg::Message addMessage;
+    addMessage.mask = msg::Response | msg::Post | msg::Preselection | msg::Addition;
+    slc::Message addSMessage;
+    addSMessage.type = lastPrehighlight.selectionType;
+    addSMessage.featureId = lastPrehighlight.featureId;
+    addSMessage.shapeId = lastPrehighlight.shapeId;
+    addMessage.payload = addSMessage;
+    messageOutSignal(addMessage);
 }
 
 void EventHandler::clearPrehighlight()
@@ -567,13 +576,15 @@ void EventHandler::clearPrehighlight()
     if (lastPrehighlight.selections.size() < 1)
         return;
     
-    Message message;
-    message.type = Message::Type::Preselection;
-    message.action = Message::Action::Subtraction;
-    message.objectType = lastPrehighlight.selectionType;
-    message.featureId = lastPrehighlight.featureId;
-    message.shapeId = lastPrehighlight.shapeId;
-    selectionChangedSignal(message);
+    msg::Message removeMessage;
+    removeMessage.mask = msg::Response | msg::Pre | msg::Preselection | msg::Subtraction;
+    slc::Message removeSMessage;
+    removeSMessage.type = lastPrehighlight.selectionType;
+    removeSMessage.featureId = lastPrehighlight.featureId;
+    removeSMessage.shapeId = lastPrehighlight.shapeId;
+    removeMessage.payload = removeSMessage;
+    messageOutSignal(removeMessage);
+    
     
     std::vector<Selected>::const_iterator it;
     for (it = lastPrehighlight.selections.begin(); it != lastPrehighlight.selections.end(); ++it)
@@ -595,91 +606,154 @@ void EventHandler::clearPrehighlight()
     lastPrehighlight = Container();
 }
 
-void EventHandler::selectionMessageInSlot(const Message &messageIn)
+Container EventHandler::buildContainer(const msg::Message &messageIn)
 {
-  //this function doesn't consider the selection mask.
+  slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
+  assert(!sMessage.featureId.is_nil());
   
-  auto buildContainer = [](const Message &messageIn)
+  Selection::Container container;
+  const Feature::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(sMessage.featureId);
+  assert(feature);
+  const ModelViz::Connector &connector = feature->getConnector();
+  //only object supported at this time.
+  if (sMessage.type == Selection::Type::Object)
   {
-    Selection::Container container;
-    const Feature::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(messageIn.featureId);
-    assert(feature);
-    const ModelViz::Connector &connector = feature->getConnector();
-    if (messageIn.objectType == Selection::Type::Object)
+    uuid object = connector.useGetRoot();
+    assert(!object.is_nil());
+    std::vector<uuid> faces = connector.useGetChildrenOfType(object, TopAbs_FACE);
+    std::vector<osg::Geometry *> faceGeometry;
+    getGeometryFromIds visit(faces, faceGeometry);
+    feature->getMainSwitch()->accept(visit); //starting higher than I need. FYI.
+    std::vector<osg::Geometry *>::const_iterator geomIt;
+    for (geomIt = faceGeometry.begin(); geomIt != faceGeometry.end(); ++geomIt)
     {
-      uuid object = connector.useGetRoot();
-      assert(!object.is_nil());
-      std::vector<uuid> faces = connector.useGetChildrenOfType(object, TopAbs_FACE);
-      std::vector<osg::Geometry *> faceGeometry;
-      getGeometryFromIds visit(faces, faceGeometry);
-      feature->getMainSwitch()->accept(visit); //starting higher than I need. FYI.
-      std::vector<osg::Geometry *>::const_iterator geomIt;
-      for (geomIt = faceGeometry.begin(); geomIt != faceGeometry.end(); ++geomIt)
-      {
-	  Selected newSelection;
-	  newSelection.initialize(*geomIt);
-	  container.selections.push_back(newSelection);
-      }
-      container.selectionType = Type::Object;
-      container.featureId = messageIn.featureId;
-      container.shapeId = nil_generator()();
+	Selected newSelection;
+	newSelection.initialize(*geomIt);
+	container.selections.push_back(newSelection);
     }
-    return container;
-  };
+    container.selectionType = Type::Object;
+    container.featureId = sMessage.featureId;
+    container.shapeId = nil_generator()();
+  }
+  return container;
+}
+
+void EventHandler::setupDispatcher()
+{
+  msg::Mask mask;
   
-  //clear prehighlight for all conditions with an external message.
+  mask = msg::Request | msg::Preselection | msg::Addition;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&EventHandler::requestPreselectionAdditionDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Preselection | msg::Subtraction;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&EventHandler::requestPreselectionSubtractionDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Selection | msg::Addition;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&EventHandler::requestSelectionAdditionDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Selection | msg::Subtraction;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&EventHandler::requestSelectionSubtractionDispatched, this, _1)));
+
+  mask = msg::Request | msg::Selection | msg::Clear;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&EventHandler::requestSelectionClearDispatched, this, _1)));
+}
+
+void EventHandler::messageInSlot(const msg::Message &messageIn)
+{
+  msg::MessageDispatcher::iterator it = dispatcher.find(messageIn.mask);
+  if (it == dispatcher.end())
+    return;
+  
+  it->second(messageIn);
+}
+
+void EventHandler::requestPreselectionAdditionDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  Selection::Container container = buildContainer(messageIn);
+  if (alreadySelected(container))
+    return;
+  if (!container.selections.empty())
+    setPrehighlight(container);
+}
+
+void EventHandler::requestPreselectionSubtractionDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  Selection::Container container = buildContainer(messageIn);
+  if (alreadySelected(container))
+    return;
+  clearPrehighlight();
+}
+
+void EventHandler::requestSelectionAdditionDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  //there is a good chance that what we are selecting has already been preselected.
+  //because buildContainer pulls the current color from objects it will
+  //pull the prehighlight color from the object if we don't clear the prehighlight.
   clearPrehighlight();
   
-  if (messageIn.action == Message::Action::RequestClear)
+  Selection::Container container = buildContainer(messageIn);
+  if (!alreadySelected(container))
   {
-    clearSelections();
-    return;
+    std::vector<Selected>::iterator it;
+    for (it = container.selections.begin(); it != container.selections.end(); ++it)
+    {
+	Selected currentSelected = *it;
+	assert(currentSelected.geometry.valid());
+	setGeometryColor(currentSelected.geometry.get(), selectionColor);
+    }
+    selectionContainers.push_back(container);
+    msg::Message messageOut = messageIn;
+    messageOut.mask &= ~msg::Request;
+    messageOut.mask |= msg::Response | msg::Post;
+    messageOutSignal(messageOut);
+  }
+}
+
+void EventHandler::requestSelectionSubtractionDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  Selection::Container container = buildContainer(messageIn);
+  Containers::iterator containIt = std::find(selectionContainers.begin(), selectionContainers.end(), container);
+  assert(containIt != selectionContainers.end());
+  
+  msg::Message messageOut = messageIn;
+  messageOut.mask &= ~msg::Request;
+  messageOut.mask |= msg::Response | msg::Pre;
+  messageOutSignal(messageOut);
+  
+  std::vector<Selected>::iterator it;
+  for (it = containIt->selections.begin(); it != containIt->selections.end(); ++it)
+  {
+    assert(it->geometry.valid());
+    setGeometryColor(it->geometry.get(), it->color);
   }
   
-  assert(!messageIn.featureId.is_nil());
+  selectionContainers.erase(containIt);
+}
+
+void EventHandler::requestSelectionClearDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
   
-  if (messageIn.type == Message::Type::Preselection)
-  {
-    if (messageIn.action == Message::Action::Addition)
-    {
-      Selection::Container container = buildContainer(messageIn);
-      if (!container.selections.empty())
-	setPrehighlight(container);
-    }
-  }
-  else // selection
-  {
-    Selection::Container container = buildContainer(messageIn);
-    if (messageIn.action == Message::Action::Addition)
-    {
-      if (!alreadySelected(container))
-      {
-	std::vector<Selected>::iterator it;
-	for (it = container.selections.begin(); it != container.selections.end(); ++it)
-	{
-	    Selected currentSelected = *it;
-	    assert(currentSelected.geometry.valid());
-	    setGeometryColor(currentSelected.geometry.get(), selectionColor);
-	}
-	selectionContainers.push_back(container);
-      }
-    }
-    else if (messageIn.action == Message::Action::Subtraction)
-    {
-      Containers::iterator containIt = std::find(selectionContainers.begin(), selectionContainers.end(), container);
-      assert(containIt != selectionContainers.end());
-      
-      std::vector<Selected>::iterator it;
-      for (it = containIt->selections.begin(); it != containIt->selections.end(); ++it)
-      {
-	assert(it->geometry.valid());
-	setGeometryColor(it->geometry.get(), it->color);
-      }
-      
-      selectionContainers.erase(containIt);
-    }
-    selectionChangedSignal(messageIn);
-  }
+  clearPrehighlight();
+  clearSelections();
 }
 
 void EventHandler::setGeometryColor(osg::Geometry *geometryIn, const osg::Vec4 &colorIn)

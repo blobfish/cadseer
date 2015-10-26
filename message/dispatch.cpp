@@ -17,13 +17,24 @@
  *
  */
 
-#include <boost/uuid/nil_generator.hpp>
+#include <iostream>
 
-#include <selection/message.h>
+#include "dispatch.h"
 
-slc::Message::Message()
+using namespace msg;
+
+void Dispatch::messageInSlot(const Message &message)
 {
-  type = Selection::Type::None;
-  featureId = boost::uuids::nil_generator()();
-  shapeId = boost::uuids::nil_generator()();
+  messageOutSignal(message);
+}
+
+void Dispatch::dumpString(const std::string &stringIn)
+{
+//   std::cout << stringIn;
+}
+
+Dispatch& msg::dispatch()
+{
+  static Dispatch localDispatcher;
+  return localDispatcher;
 }
