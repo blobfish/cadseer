@@ -31,6 +31,8 @@ enum Constants
     StandardViewFront,
     StandardViewRight,
     ViewFit,
+    ViewFill,
+    ViewLine,
     ConstructionBox,
     ConstructionSphere,
     ConstructionCone,

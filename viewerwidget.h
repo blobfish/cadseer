@@ -60,6 +60,8 @@ public Q_SLOTS:
     void viewRightSlot();
     void viewFitSlot();
     void writeOSGSlot();
+    void viewFillSlot();
+    void viewLineSlot();
 
 protected:
     void createMainCamera(osg::Camera *camera);

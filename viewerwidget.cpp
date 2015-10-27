@@ -65,9 +65,8 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     root->setName("viewer root");
     
     osg::ref_ptr<osg::PolygonMode> pm = new osg::PolygonMode;
-    pm->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL);
-//     pm->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
     root->getOrCreateStateSet()->setAttribute(pm.get());
+    viewFillSlot();
     
     osg::ShadeModel *shadeModel = new osg::ShadeModel(osg::ShadeModel::SMOOTH);
     root->getOrCreateStateSet()->setAttribute(shadeModel);
@@ -329,6 +328,16 @@ void ViewerWidget::setupCommands()
     connect(fitAction, SIGNAL(triggered()), this, SLOT(viewFitSlot()));
     cmd::Command fitCommand(cmd::ViewFit, "View Fit", fitAction);
     cmd::CommandManager::getManager().addCommand(fitCommand);
+    
+    QAction *fillAction = new QAction(qApp);
+    connect(fillAction, SIGNAL(triggered()), this, SLOT(viewFillSlot()));
+    cmd::Command fillCommand(cmd::ViewFill, "View Fill", fillAction);
+    cmd::CommandManager::getManager().addCommand(fillCommand);
+    
+    QAction *lineAction = new QAction(qApp);
+    connect(lineAction, SIGNAL(triggered()), this, SLOT(viewLineSlot()));
+    cmd::Command lineCommand(cmd::ViewLine, "View Line", lineAction);
+    cmd::CommandManager::getManager().addCommand(lineCommand);
 }
 
 void ViewerWidget::viewTopSlot()
@@ -352,6 +361,22 @@ void ViewerWidget::viewRightSlot()
 void ViewerWidget::viewFitSlot()
 {
     spaceballManipulator->viewFit();
+}
+
+void ViewerWidget::viewFillSlot()
+{
+  osg::PolygonMode *pMode = dynamic_cast<osg::PolygonMode*>
+    (root->getOrCreateStateSet()->getAttribute(osg::StateAttribute::POLYGONMODE));
+  assert(pMode);
+  pMode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL);
+}
+
+void ViewerWidget::viewLineSlot()
+{
+  osg::PolygonMode *pMode = dynamic_cast<osg::PolygonMode*>
+    (root->getOrCreateStateSet()->getAttribute(osg::StateAttribute::POLYGONMODE));
+  assert(pMode);
+  pMode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
 }
 
 void ViewerWidget::writeOSGSlot()

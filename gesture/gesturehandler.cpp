@@ -265,6 +265,16 @@ void GestureHandler::constructMenu()
     viewFit->setMatrix(dummy);
     viewFit->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::ViewFit));
     viewBase->insertChild(viewBase->getNumChildren() - 2, viewFit);
+    
+    osg::MatrixTransform *viewFill = gsn::buildCommandNode(":/resources/images/viewFill.svg");
+    viewFill->setMatrix(dummy);
+    viewFill->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::ViewFill));
+    viewBase->insertChild(viewBase->getNumChildren() - 2, viewFill);
+    
+    osg::MatrixTransform *viewLine = gsn::buildCommandNode(":/resources/images/viewLine.svg");
+    viewLine->setMatrix(dummy);
+    viewLine->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::ViewLine));
+    viewBase->insertChild(viewBase->getNumChildren() - 2, viewLine);
 
     //construction base
     osg::MatrixTransform *constructionBase;
