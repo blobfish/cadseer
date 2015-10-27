@@ -30,7 +30,7 @@
 //http://www.utilities-online.info/xsdvalidation/#.Vf2u9ZOVvts
 
 //generate parsing files.
-//xsdcxx cxx-tree --std c++11 --generate-serialization --generate-doxygen --type-naming ucc --hxx-suffix .h --cxx-suffix .cpp --namespace-map =Preferences  preferencesXML.xsd
+//xsdcxx cxx-tree --std c++11 --generate-serialization --generate-doxygen --type-naming ucc --hxx-suffix .h --cxx-suffix .cpp --namespace-map =prf  preferencesXML.xsd
 
 //ok this is screwy. the parser, by default, validates the xml so it
 //needs the xsd at runtime. We have the xsd and a default xml in
@@ -38,7 +38,7 @@
 //directory if they don't already exist.
 
 
-using namespace Preferences;
+using namespace prf;
 
 Manager::Manager()
 {

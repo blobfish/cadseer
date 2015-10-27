@@ -39,7 +39,7 @@
 #include "dagmodel.h"
 #include <message/dispatch.h>
 
-using namespace DAG;
+using namespace dag;
 
 // LineEdit::LineEdit(QWidget* parentIn): QLineEdit(parentIn)
 // {
@@ -291,16 +291,16 @@ void Model::stateChangedSlot(const boost::uuids::uuid &featureIdIn, std::size_t 
 
   assert(!graph[vertex].feature.expired());
   
-  Feature::State featureState = graph[vertex].feature.lock()->getState();
+  ftr::State featureState = graph[vertex].feature.lock()->getState();
   bool currentChangedState = featureState.test(stateOffsetChanged);
   
-  if (stateOffsetChanged == Feature::StateOffset::ModelDirty)
+  if (stateOffsetChanged == ftr::StateOffset::ModelDirty)
   {
     if (currentChangedState)
       graph[vertex].stateIconRaw->setPixmap(pendingPixmap);
   }
   
-  if (stateOffsetChanged == Feature::StateOffset::Hidden3D)
+  if (stateOffsetChanged == ftr::StateOffset::Hidden3D)
   {
     if (currentChangedState)
       graph[vertex].visibleIconRaw->setPixmap(visiblePixmapDisabled);
@@ -308,7 +308,7 @@ void Model::stateChangedSlot(const boost::uuids::uuid &featureIdIn, std::size_t 
       graph[vertex].visibleIconRaw->setPixmap(visiblePixmapEnabled);
   }
   
-  if (stateOffsetChanged == Feature::StateOffset::Failure)
+  if (stateOffsetChanged == ftr::StateOffset::Failure)
   {
     if (currentChangedState)
       graph[vertex].stateIconRaw->setPixmap(failPixmap);
@@ -316,7 +316,7 @@ void Model::stateChangedSlot(const boost::uuids::uuid &featureIdIn, std::size_t 
       graph[vertex].stateIconRaw->setPixmap(passPixmap);
   }
   
-  if (stateOffsetChanged == Feature::StateOffset::Inactive)
+  if (stateOffsetChanged == ftr::StateOffset::Inactive)
   {
     if (currentChangedState)
     {
@@ -324,16 +324,16 @@ void Model::stateChangedSlot(const boost::uuids::uuid &featureIdIn, std::size_t 
     }
     else
     {
-      if (featureState.test(Feature::StateOffset::ModelDirty))
+      if (featureState.test(ftr::StateOffset::ModelDirty))
 	graph[vertex].stateIconRaw->setPixmap(pendingPixmap);
-      else if (featureState.test(Feature::StateOffset::Failure))
+      else if (featureState.test(ftr::StateOffset::Failure))
 	graph[vertex].stateIconRaw->setPixmap(failPixmap);
       else
 	graph[vertex].stateIconRaw->setPixmap(passPixmap);
     }
   }
   
-  if (stateOffsetChanged == Feature::StateOffset::NonLeaf)
+  if (stateOffsetChanged == ftr::StateOffset::NonLeaf)
   {
     if (currentChangedState)
     {
@@ -348,7 +348,7 @@ void Model::stateChangedSlot(const boost::uuids::uuid &featureIdIn, std::size_t 
   }
 //   std::cout <<
 //     "state changed. Feature id is: " << featureIdIn <<
-//     "      state offset is: " << Feature::StateOffset::toString(stateIn) <<
+//     "      state offset is: " << ftr::StateOffset::toString(stateIn) <<
 //     "      state value is: " << ((currentState) ? "true" : "false") <<  std::endl;
 }
 
@@ -401,7 +401,7 @@ void Model::preselectionAdditionDispatched(const msg::Message &messageIn)
   msg::dispatch().dumpString(debug.str());
   
   slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
-  if (sMessage.type != Selection::Type::Object)
+  if (sMessage.type != slc::Type::Object)
     return;
   Vertex vertex = findRecord(vertexIdContainer, sMessage.featureId).vertex;
   assert(!currentPrehighlight); //trying to set prehighlight when something is already set.
@@ -418,7 +418,7 @@ void Model::preselectionSubtractionDispatched(const msg::Message &messageIn)
   msg::dispatch().dumpString(debug.str());
   
   slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
-  if (sMessage.type != Selection::Type::Object)
+  if (sMessage.type != slc::Type::Object)
     return;
   Vertex vertex = findRecord(vertexIdContainer, sMessage.featureId).vertex;
   assert(currentPrehighlight); //trying to clear prehighlight when already empty.
@@ -435,7 +435,7 @@ void Model::selectionAdditionDispatched(const msg::Message &messageIn)
   msg::dispatch().dumpString(debug.str());
   
   slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
-  if (sMessage.type != Selection::Type::Object)
+  if (sMessage.type != slc::Type::Object)
     return;
   Vertex vertex = findRecord(vertexIdContainer, sMessage.featureId).vertex;
   graph[vertex].rectRaw->selectionOn();
@@ -453,7 +453,7 @@ void Model::selectionSubtractionDispatched(const msg::Message &messageIn)
   msg::dispatch().dumpString(debug.str());
   
   slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
-  if (sMessage.type != Selection::Type::Object)
+  if (sMessage.type != slc::Type::Object)
     return;
   Vertex vertex = findRecord(vertexIdContainer, sMessage.featureId).vertex;
   graph[vertex].rectRaw->selectionOff();
@@ -639,7 +639,7 @@ void Model::projectUpdatedDispatched(const msg::Message &)
     //this isn't complete. now when finding alter parent the spreadMask
     //is ignored. This probably won't work. revist after some more features
     //like linked copy and union.
-    if (graph[currentVertex].feature.lock()->getDescriptor() == Feature::Descriptor::Alter)
+    if (graph[currentVertex].feature.lock()->getDescriptor() == ftr::Descriptor::Alter)
     {
       //build spreadMask. spreadMask reflects occupied columns between
       //child and farthest parent. 'Farthest' is relative to topo sort.
@@ -654,7 +654,7 @@ void Model::projectUpdatedDispatched(const msg::Message &)
         GraphReversed::edge_descriptor currentEdge;
         std::tie(currentEdge, results) = boost::edge(currentVertex, *parentIt, rGraph);
         assert(results);
-        if (rGraph[currentEdge].inputType == Feature::InputTypes::target)
+        if (rGraph[currentEdge].inputType == ftr::InputTypes::target)
           currentColumn = columnNumberFromMask(rGraph[*parentIt].columnMask);
         
         auto parentSortedIndex = rGraph[*parentIt].sortedIndex;
@@ -705,14 +705,14 @@ void Model::projectUpdatedDispatched(const msg::Message &)
     {
       bool results;
       Edge edge;
-      Feature::InputTypes type;
+      ftr::InputTypes type;
       std::tie(edge, results) = boost::edge(currentVertex, *it, graph);
       if (results)
         type = graph[edge].inputType;
       if
       (
-        (graph[*it].feature.lock()->getDescriptor() == Feature::Descriptor::Alter) &&
-        (type == Feature::InputTypes::target)
+        (graph[*it].feature.lock()->getDescriptor() == ftr::Descriptor::Alter) &&
+        (type == ftr::InputTypes::target)
       )
         futureChildMask |= freshMask;
       else
@@ -931,7 +931,7 @@ void Model::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     msg::Message message;
     message.mask = msg::Request | msg::Preselection | msg::Subtraction;
     slc::Message sMessage;
-    sMessage.type = Selection::Type::Object;
+    sMessage.type = slc::Type::Object;
     sMessage.featureId = record.featureId;
     sMessage.shapeId = boost::uuids::nil_generator()();
     message.payload = sMessage;
@@ -945,7 +945,7 @@ void Model::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     msg::Message message;
     message.mask = msg::Request | msg::Preselection | msg::Addition;
     slc::Message sMessage;
-    sMessage.type = Selection::Type::Object;
+    sMessage.type = slc::Type::Object;
     sMessage.featureId = record.featureId;
     sMessage.shapeId = boost::uuids::nil_generator()();
     message.payload = sMessage;
@@ -972,7 +972,7 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
     msg::Message message;
     message.mask = msg::Request | msg::Selection | actionIn;
     slc::Message sMessage;
-    sMessage.type = Selection::Type::Object;
+    sMessage.type = slc::Type::Object;
     sMessage.featureId = featureIdIn;
     sMessage.shapeId = boost::uuids::nil_generator()();
     message.payload = sMessage;
@@ -1017,8 +1017,8 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
     if (theItems.isEmpty())
       return;
 
-    int currentType = theItems.front()->data(QtData::key).toInt();
-    if (currentType == QtData::visibleIcon)
+    int currentType = theItems.front()->data(qtd::key).toInt();
+    if (currentType == qtd::visibleIcon)
     {
       QGraphicsPixmapItem *currentPixmap = dynamic_cast<QGraphicsPixmapItem *>(theItems.front());
       assert(currentPixmap);
@@ -1104,7 +1104,7 @@ void Model::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
       msg::Message message;
       message.mask = msg::Request | msg::Selection | msg::Addition;
       slc::Message sMessage;
-      sMessage.type = Selection::Type::Object;
+      sMessage.type = slc::Type::Object;
       sMessage.featureId = record.featureId;
       message.payload = sMessage;
       messageOutSignal(message);

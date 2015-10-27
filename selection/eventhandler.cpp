@@ -41,9 +41,9 @@
 
 using namespace osg;
 using namespace boost::uuids;
-using namespace Selection;
+using namespace slc;
 
-std::ostream& Selection::operator<<(std::ostream& os, const Container& container)
+std::ostream& slc::operator<<(std::ostream& os, const Container& container)
 {
   os << 
     "type is: " << getNameOfType(container.selectionType) << 
@@ -52,7 +52,7 @@ std::ostream& Selection::operator<<(std::ostream& os, const Container& container
   return os;
 }
 
-std::ostream& Selection::operator<<(std::ostream& os, const Containers& containers)
+std::ostream& slc::operator<<(std::ostream& os, const Containers& containers)
 {
   for (const auto &current : containers)
     os << current;
@@ -126,10 +126,10 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
            currentIntersections = picker->getIntersections();
            osgUtil::LineSegmentIntersector::Intersections::const_iterator itIt;
 
-           Selection::Container newContainer;
+           slc::Container newContainer;
            for (itIt = currentIntersections.begin(); itIt != currentIntersections.end(); ++itIt)
            {
-               Selection::Container tempContainer;
+               slc::Container tempContainer;
                if (!buildPreSelection(tempContainer, itIt))
                    continue;
 
@@ -148,8 +148,8 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
            //the same function call. so we make sure the current prehighlight is empty.
            if
 	   (
-	     (lastPrehighlight.selectionType == Selection::Type::Wire) ||
-	     (lastPrehighlight.selectionType == Selection::Type::Edge)
+	     (lastPrehighlight.selectionType == slc::Type::Wire) ||
+	     (lastPrehighlight.selectionType == slc::Type::Edge)
 	   )
            {
                clearPrehighlight();
@@ -240,7 +240,7 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
     return false;
 }
 
-bool EventHandler::buildPreSelection(Selection::Container &container,
+bool EventHandler::buildPreSelection(slc::Container &container,
                                               const osgUtil::LineSegmentIntersector::Intersections::const_iterator &intersection)
 {
     auto walkUpToMask = [intersection](unsigned int maskIn) -> osg::Node*
@@ -256,9 +256,9 @@ bool EventHandler::buildPreSelection(Selection::Container &container,
     
     auto processWire = [this, &container, &intersection](const uuid &featureId) -> bool
     {
-      const Feature::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(featureId);
+      const ftr::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(featureId);
       assert(feature);
-      const ModelViz::Connector &connector = feature->getConnector();
+      const mdv::Connector &connector = feature->getConnector();
       
       osgUtil::LineSegmentIntersector::Intersections::const_iterator it = intersection;
 
@@ -342,9 +342,9 @@ bool EventHandler::buildPreSelection(Selection::Container &container,
         }
         else if (canSelectShells(selectionMask))
         {
-            const Feature::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(featureId);
+            const ftr::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(featureId);
             assert(feature);
-            const ModelViz::Connector &connector = feature->getConnector();
+            const mdv::Connector &connector = feature->getConnector();
             std::vector<uuid> shells = connector.useGetParentsOfType(selectedId, TopAbs_SHELL);
             //should be only 1 shell
             if (shells.size() == 1)
@@ -366,9 +366,9 @@ bool EventHandler::buildPreSelection(Selection::Container &container,
         }
         else if (canSelectSolids(selectionMask))
         {
-            const Feature::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(featureId);
+            const ftr::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(featureId);
             assert(feature);
-            const ModelViz::Connector &connector = feature->getConnector();
+            const mdv::Connector &connector = feature->getConnector();
             std::vector<uuid> solids = connector.useGetParentsOfType(selectedId, TopAbs_SOLID);
             //should be only 1 solid
             if (solids.size() == 1)
@@ -390,9 +390,9 @@ bool EventHandler::buildPreSelection(Selection::Container &container,
         }
         else if (canSelectObjects(selectionMask))
         {
-          const Feature::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(featureId);
+          const ftr::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(featureId);
           assert(feature);
-          const ModelViz::Connector &connector = feature->getConnector();
+          const mdv::Connector &connector = feature->getConnector();
           uuid object = connector.useGetRoot();
           if (!object.is_nil())
           {
@@ -416,13 +416,13 @@ bool EventHandler::buildPreSelection(Selection::Container &container,
     case NodeMaskDef::edge:
 	if (canSelectPoints(selectionMask))
 	{
-	  const Feature::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(featureId);
+	  const ftr::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(featureId);
           assert(feature);
-          const ModelViz::Connector &connector = feature->getConnector();
+          const mdv::Connector &connector = feature->getConnector();
 	  osg::Vec3d iPoint = intersection->getWorldIntersectPoint();
 	  osg::Vec3d snapPoint;
 	  double distance = std::numeric_limits<double>::max();
-	  Selection::Type sType = Selection::Type::None;
+	  slc::Type sType = slc::Type::None;
 	  
 	  auto updateSnaps = [&](const std::vector<osg::Vec3d> &vecIn) -> bool
 	  {
@@ -444,35 +444,35 @@ bool EventHandler::buildPreSelection(Selection::Container &container,
 	  {
 	    std::vector<osg::Vec3d> endPoints = connector.useGetEndPoints(selectedId);
 	    if (updateSnaps(endPoints))
-	      sType = Selection::Type::EndPoint;
+	      sType = slc::Type::EndPoint;
 	  }
 	  
 	  if (canSelectMidPoints(selectionMask))
 	  {
 	    std::vector<osg::Vec3d> midPoints = connector.useGetMidPoint(selectedId);
 	    if (updateSnaps(midPoints))
-	      sType = Selection::Type::MidPoint;
+	      sType = slc::Type::MidPoint;
 	  }
 	  
 	  if (canSelectCenterPoints(selectionMask))
 	  {
 	    std::vector<osg::Vec3d> centerPoints = connector.useGetCenterPoint(selectedId);
 	    if (updateSnaps(centerPoints))
-	      sType = Selection::Type::CenterPoint;
+	      sType = slc::Type::CenterPoint;
 	  }
 	  
 	  if (canSelectQuadrantPoints(selectionMask))
 	  {
 	    std::vector<osg::Vec3d> quadrantPoints = connector.useGetQuadrantPoints(selectedId);
 	    if (updateSnaps(quadrantPoints))
-	      sType = Selection::Type::QuadrantPoint;
+	      sType = slc::Type::QuadrantPoint;
 	  }
 	  
 	  if (canSelectNearestPoints(selectionMask))
 	  {
 	    std::vector<osg::Vec3d> nearestPoints = connector.useGetNearestPoint(selectedId, intersection->getWorldIntersectPoint());
 	    if (updateSnaps(nearestPoints))
-	      sType = Selection::Type::NearestPoint;
+	      sType = slc::Type::NearestPoint;
 	  }
 	  container.selectionType = sType;
 	  container.shapeId = selectedId;
@@ -543,7 +543,7 @@ void EventHandler::clearSelections()
     selectionContainers.clear();
 }
 
-bool EventHandler::alreadySelected(const Selection::Container &testContainer)
+bool EventHandler::alreadySelected(const slc::Container &testContainer)
 {
     Containers::const_iterator it;
     for (it = selectionContainers.begin(); it != selectionContainers.end(); ++it)
@@ -554,7 +554,7 @@ bool EventHandler::alreadySelected(const Selection::Container &testContainer)
     return false;
 }
 
-void EventHandler::setPrehighlight(Selection::Container &selected)
+void EventHandler::setPrehighlight(slc::Container &selected)
 {
     lastPrehighlight = selected;
     std::vector<Selected>::const_iterator it;
@@ -611,12 +611,12 @@ Container EventHandler::buildContainer(const msg::Message &messageIn)
   slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
   assert(!sMessage.featureId.is_nil());
   
-  Selection::Container container;
-  const Feature::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(sMessage.featureId);
+  slc::Container container;
+  const ftr::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(sMessage.featureId);
   assert(feature);
-  const ModelViz::Connector &connector = feature->getConnector();
+  const mdv::Connector &connector = feature->getConnector();
   //only object supported at this time.
-  if (sMessage.type == Selection::Type::Object)
+  if (sMessage.type == slc::Type::Object)
   {
     uuid object = connector.useGetRoot();
     assert(!object.is_nil());
@@ -673,7 +673,7 @@ void EventHandler::requestPreselectionAdditionDispatched(const msg::Message &mes
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
   msg::dispatch().dumpString(debug.str());
   
-  Selection::Container container = buildContainer(messageIn);
+  slc::Container container = buildContainer(messageIn);
   if (alreadySelected(container))
     return;
   if (!container.selections.empty())
@@ -686,7 +686,7 @@ void EventHandler::requestPreselectionSubtractionDispatched(const msg::Message &
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
   msg::dispatch().dumpString(debug.str());
   
-  Selection::Container container = buildContainer(messageIn);
+  slc::Container container = buildContainer(messageIn);
   if (alreadySelected(container))
     return;
   clearPrehighlight();
@@ -703,7 +703,7 @@ void EventHandler::requestSelectionAdditionDispatched(const msg::Message &messag
   //pull the prehighlight color from the object if we don't clear the prehighlight.
   clearPrehighlight();
   
-  Selection::Container container = buildContainer(messageIn);
+  slc::Container container = buildContainer(messageIn);
   if (!alreadySelected(container))
   {
     std::vector<Selected>::iterator it;
@@ -727,7 +727,7 @@ void EventHandler::requestSelectionSubtractionDispatched(const msg::Message &mes
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
   msg::dispatch().dumpString(debug.str());
   
-  Selection::Container container = buildContainer(messageIn);
+  slc::Container container = buildContainer(messageIn);
   Containers::iterator containIt = std::find(selectionContainers.begin(), selectionContainers.end(), container);
   assert(containIt != selectionContainers.end());
   

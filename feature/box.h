@@ -24,7 +24,7 @@
 #include "csysbase.h"
 
 
-namespace Feature
+namespace ftr
 {
 class BoxBuilder;
 
@@ -42,7 +42,7 @@ public:
   void getParameters (double &lengthOut, double &widthOut, double &heightOut) const;
   virtual void update(const UpdateMap&) override;
   virtual Type getType() const override {return Type::Box;}
-  virtual const std::string& getTypeString() const override {return Feature::getTypeString(Type::Box);}
+  virtual const std::string& getTypeString() const override {return toString(Type::Box);}
   virtual const QIcon& getIcon() const override {return icon;}
   virtual Descriptor getDescriptor() const override {return Descriptor::Create;}
   

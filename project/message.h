@@ -17,41 +17,15 @@
  *
  */
 
+#ifndef MESSAGE_H
+#define MESSAGE_H
+
 #include <boost/uuid/uuid.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include <feature/inputtypes.h>
 
-#ifndef MESSAGE_H
-#define MESSAGE_H
-
-namespace Feature{class Base;}
-
-
-namespace ProjectSpace
-{
-  struct Message
-  {
-    enum class Type
-    {
-      None = 0,
-      Request,
-      Response
-    };
-    
-    enum class Action
-    {
-      None = 0,
-      SetCurrentLeaf,
-      RemoveFeature
-    };
-    
-    Message();
-    Message::Type type;
-    Action action;
-    boost::uuids::uuid featureId;
-  };
-}
+namespace ftr{class Base;}
 
 namespace prj
 {
@@ -60,8 +34,8 @@ namespace prj
     Message();
     boost::uuids::uuid featureId;
     boost::uuids::uuid featureId2;
-    std::shared_ptr<Feature::Base> feature;
-    Feature::InputTypes inputType;
+    std::shared_ptr<ftr::Base> feature;
+    ftr::InputTypes inputType;
   };
 }
 

@@ -22,7 +22,7 @@
 
 #include <string>
 
-namespace CommandConstants
+namespace cmd
 {
 static std::string attributeTitle = "CommandAttributeTitle";
 enum Constants

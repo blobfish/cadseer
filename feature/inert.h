@@ -22,7 +22,7 @@
 
 #include "csysbase.h"
 
-namespace Feature
+namespace ftr
 {
   /*! @brief static feature.
    * 
@@ -35,7 +35,7 @@ namespace Feature
     Inert(const TopoDS_Shape &shapeIn);
     virtual void update(const UpdateMap&) override {}
     virtual Type getType() const override {return Type::Inert;}
-    virtual const std::string& getTypeString() const override {return Feature::getTypeString(Type::Inert);}
+    virtual const std::string& getTypeString() const override {return toString(Type::Inert);}
     virtual const QIcon& getIcon() const override {return icon;}
     virtual Descriptor getDescriptor() const override {return Descriptor::Create;}
     

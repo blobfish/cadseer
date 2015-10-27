@@ -19,7 +19,7 @@
 
 #include "dagmodelgraph.h"
 
-using namespace DAG;
+using namespace dag;
 
 VertexProperty::VertexProperty() :
   feature(),
@@ -51,12 +51,12 @@ VertexProperty::VertexProperty() :
   textRaw->setZValue(0.0);
   
   //assign data to recognize later.
-  rectRaw->setData(QtData::key, QtData::rectangle);
-  pointRaw->setData(QtData::key, QtData::point);
-  visibleIconRaw->setData(QtData::key, QtData::visibleIcon);
-  stateIconRaw->setData(QtData::key, QtData::stateIcon);
-  featureIconRaw->setData(QtData::key, QtData::featureIcon);
-  textRaw->setData(QtData::key, QtData::text);
+  rectRaw->setData(qtd::key, qtd::rectangle);
+  pointRaw->setData(qtd::key, qtd::point);
+  visibleIconRaw->setData(qtd::key, qtd::visibleIcon);
+  stateIconRaw->setData(qtd::key, qtd::stateIcon);
+  featureIconRaw->setData(qtd::key, qtd::featureIcon);
+  textRaw->setData(qtd::key, qtd::text);
 }
 
 EdgeProperty::EdgeProperty() : connector(new QGraphicsPathItem())
@@ -64,10 +64,10 @@ EdgeProperty::EdgeProperty() : connector(new QGraphicsPathItem())
   connector->setZValue(0.0);
   
   //maybe senseless as right now. we are not searching for connectors.
-  connector->setData(QtData::key, QtData::connector);
+  connector->setData(qtd::key, qtd::connector);
 }
 
-const VertexProperty& DAG::findRecordByVisible(const GraphLinkContainer &containerIn, QGraphicsPixmapItem *itemIn)
+const VertexProperty& dag::findRecordByVisible(const GraphLinkContainer &containerIn, QGraphicsPixmapItem *itemIn)
 {
   typedef GraphLinkContainer::index<VertexProperty::ByVisibleIcon>::type List;
   const List &list = containerIn.get<VertexProperty::ByVisibleIcon>();
@@ -76,7 +76,7 @@ const VertexProperty& DAG::findRecordByVisible(const GraphLinkContainer &contain
   return *it;
 }
 
-const VertexProperty& DAG::findRecord(const GraphLinkContainer &containerIn, const uuid &idIn)
+const VertexProperty& dag::findRecord(const GraphLinkContainer &containerIn, const uuid &idIn)
 {
   typedef GraphLinkContainer::index<VertexProperty::ByFeatureId>::type List;
   const List &list = containerIn.get<VertexProperty::ByFeatureId>();
@@ -85,7 +85,7 @@ const VertexProperty& DAG::findRecord(const GraphLinkContainer &containerIn, con
   return *it;
 }
 
-void DAG::eraseRecord(GraphLinkContainer& containerIn, const uuid& idIn)
+void dag::eraseRecord(GraphLinkContainer& containerIn, const uuid& idIn)
 {
   typedef GraphLinkContainer::index<VertexProperty::ByFeatureId>::type List;
   List &list = containerIn.get<VertexProperty::ByFeatureId>();
@@ -122,7 +122,7 @@ void DAG::eraseRecord(GraphLinkContainer& containerIn, const uuid& idIn)
 //   return *it;
 // }
 // 
-const VertexProperty& DAG::findRecord(const GraphLinkContainer &containerIn, RectItem* rectIn)
+const VertexProperty& dag::findRecord(const GraphLinkContainer &containerIn, RectItem* rectIn)
 {
   typedef GraphLinkContainer::index<VertexProperty::ByRect>::type List;
   const List &list = containerIn.get<VertexProperty::ByRect>();

@@ -22,7 +22,7 @@
 
 #include "csysbase.h"
 
-namespace Feature
+namespace ftr
 {
   class CylinderBuilder;
   
@@ -39,7 +39,7 @@ namespace Feature
     
     virtual void update(const UpdateMap&) override;
     virtual Type getType() const override {return Type::Cylinder;}
-    virtual const std::string& getTypeString() const override {return Feature::getTypeString(Type::Cylinder);}
+    virtual const std::string& getTypeString() const override {return toString(Type::Cylinder);}
     virtual const QIcon& getIcon() const override {return icon;}
     virtual Descriptor getDescriptor() const override {return Descriptor::Create;}
   

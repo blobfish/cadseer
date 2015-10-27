@@ -24,7 +24,7 @@
 
 class BRepFilletAPI_MakeFillet;
 
-namespace Feature
+namespace ftr
 {
 class Blend : public Base
 {
@@ -37,7 +37,7 @@ class Blend : public Base
     
     virtual void update(const UpdateMap&) override;
     virtual Type getType() const override {return Type::Blend;}
-    virtual const std::string& getTypeString() const override {return Feature::getTypeString(Type::Blend);}
+    virtual const std::string& getTypeString() const override {return toString(Type::Blend);}
     virtual const QIcon& getIcon() const override {return icon;}
     virtual Descriptor getDescriptor() const override {return Descriptor::Alter;}
   
@@ -54,7 +54,7 @@ class Blend : public Base
     DerivedContainer derivedContainer;
     
 private:
-    void shapeMatch(const Feature::Base* targetFeatureIn);
+    void shapeMatch(const Base* targetFeatureIn);
     void modifiedMatch(BRepFilletAPI_MakeFillet&, const Base *);
     void generatedMatch(BRepFilletAPI_MakeFillet&, const Base *);
     void uniqueTypeMatch(const Base *);

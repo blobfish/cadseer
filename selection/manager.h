@@ -27,7 +27,7 @@
 
 class QAction;
 
-namespace Selection
+namespace slc
 {
 class Manager : public QObject
 {

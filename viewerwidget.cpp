@@ -77,7 +77,7 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     
     Plotter::getReference().setBase(root);
     
-    root->addChild(CoordinateSystem::buildCoordinateSystemNode());
+    root->addChild(csys::buildCoordinateSystemNode());
 
     osgViewer::View* view = new osgViewer::View;
     createMainCamera(view->getCamera());
@@ -104,7 +104,7 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
 
     view->setSceneData(root);
     view->addEventHandler(new osgViewer::StatsHandler);
-    selectionHandler = new Selection::EventHandler();
+    selectionHandler = new slc::EventHandler();
     view->addEventHandler(selectionHandler);
     //why does the following line create an additional thread. why?
     //not sure why it does, but it happens down inside librsvg and doesn't
@@ -312,23 +312,23 @@ void ViewerWidget::setupCommands()
 {
     QAction *topAction = new QAction(qApp);
     connect(topAction, SIGNAL(triggered()), this, SLOT(viewTopSlot()));
-    Command topCommand(CommandConstants::StandardViewTop, "View Top", topAction);
-    CommandManager::getManager().addCommand(topCommand);
+    cmd::Command topCommand(cmd::StandardViewTop, "View Top", topAction);
+    cmd::CommandManager::getManager().addCommand(topCommand);
 
     QAction *frontAction = new QAction(qApp);
     connect(frontAction, SIGNAL(triggered()), this, SLOT(viewFrontSlot()));
-    Command frontCommand(CommandConstants::StandardViewFront, "View Front", frontAction);
-    CommandManager::getManager().addCommand(frontCommand);
+    cmd::Command frontCommand(cmd::StandardViewFront, "View Front", frontAction);
+    cmd::CommandManager::getManager().addCommand(frontCommand);
 
     QAction *rightAction = new QAction(qApp);
     connect(rightAction, SIGNAL(triggered()), this, SLOT(viewRightSlot()));
-    Command rightCommand(CommandConstants::StandardViewRight, "View Right", rightAction);
-    CommandManager::getManager().addCommand(rightCommand);
+    cmd::Command rightCommand(cmd::StandardViewRight, "View Right", rightAction);
+    cmd::CommandManager::getManager().addCommand(rightCommand);
 
     QAction *fitAction = new QAction(qApp);
     connect(fitAction, SIGNAL(triggered()), this, SLOT(viewFitSlot()));
-    Command fitCommand(CommandConstants::ViewFit, "View Fit", fitAction);
-    CommandManager::getManager().addCommand(fitCommand);
+    cmd::Command fitCommand(cmd::ViewFit, "View Fit", fitAction);
+    cmd::CommandManager::getManager().addCommand(fitCommand);
 }
 
 void ViewerWidget::viewTopSlot()

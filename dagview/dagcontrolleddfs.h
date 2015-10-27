@@ -27,7 +27,7 @@
 #ifndef CONTROLLEDDAGDFS_H
 #define CONTROLLEDDAGDFS_H
 
-namespace DAG
+namespace dag
 {
   //! get all the roots of the templated graph.
   template <class GraphT>

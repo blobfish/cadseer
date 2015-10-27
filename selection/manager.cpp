@@ -23,73 +23,73 @@
 #include <selection/definitions.h>
 #include <selection/manager.h>
 
-using namespace Selection;
+using namespace slc;
 
 Manager::Manager(QObject *parent) :
-    QObject(parent), selectionMask(Selection::None)
+    QObject(parent), selectionMask(slc::None)
 {
 }
 
 void Manager::triggeredObjects(bool objectStateIn)
 {
     if (objectStateIn)
-        selectionMask |= Selection::ObjectsSelectable;
+        selectionMask |= slc::ObjectsSelectable;
     else
-        selectionMask &= ~Selection::ObjectsSelectable;
+        selectionMask &= ~slc::ObjectsSelectable;
     sendState();
 }
 
 void Manager::triggeredFeatures(bool featureStateIn)
 {
     if (featureStateIn)
-        selectionMask |= Selection::FeaturesSelectable;
+        selectionMask |= slc::FeaturesSelectable;
     else
-        selectionMask &= ~Selection::FeaturesSelectable;
+        selectionMask &= ~slc::FeaturesSelectable;
     sendState();
 }
 
 void Manager::triggeredSolids(bool solidStateIn)
 {
     if (solidStateIn)
-        selectionMask |= Selection::SolidsSelectable;
+        selectionMask |= slc::SolidsSelectable;
     else
-        selectionMask &= ~Selection::SolidsSelectable;
+        selectionMask &= ~slc::SolidsSelectable;
     sendState();
 }
 
 void Manager::triggeredShells(bool shellStateIn)
 {
     if (shellStateIn)
-        selectionMask |= Selection::ShellsSelectable;
+        selectionMask |= slc::ShellsSelectable;
     else
-        selectionMask &= ~Selection::ShellsSelectable;
+        selectionMask &= ~slc::ShellsSelectable;
     sendState();
 }
 
 void Manager::triggeredFaces(bool faceStateIn)
 {
     if (faceStateIn)
-        selectionMask |= Selection::FacesSelectable;
+        selectionMask |= slc::FacesSelectable;
     else
-        selectionMask &= ~Selection::FacesSelectable;
+        selectionMask &= ~slc::FacesSelectable;
     sendState();
 }
 
 void Manager::triggeredWires(bool wireStateIn)
 {
     if (wireStateIn)
-        selectionMask |= Selection::WiresSelectable;
+        selectionMask |= slc::WiresSelectable;
     else
-        selectionMask &= ~Selection::WiresSelectable;
+        selectionMask &= ~slc::WiresSelectable;
     sendState();
 }
 
 void Manager::triggeredEdges(bool edgeStateIn)
 {
     if (edgeStateIn)
-        selectionMask |= Selection::EdgesSelectable;
+        selectionMask |= slc::EdgesSelectable;
     else
-        selectionMask &= ~Selection::EdgesSelectable;
+        selectionMask &= ~slc::EdgesSelectable;
     sendState();
 }
 
@@ -97,21 +97,21 @@ void Manager::triggeredVertices(bool vertexStateIn)
 {
     if (vertexStateIn)
     {
-        selectionMask |= Selection::PointsSelectable;
-	selectionMask |= Selection::EndPointsEnabled;
-	selectionMask |= Selection::MidPointsEnabled;
-	selectionMask |= Selection::CenterPointsEnabled;
-	selectionMask |= Selection::QuadrantPointsEnabled;
-	selectionMask |= Selection::NearestPointsEnabled;
+        selectionMask |= slc::PointsSelectable;
+	selectionMask |= slc::EndPointsEnabled;
+	selectionMask |= slc::MidPointsEnabled;
+	selectionMask |= slc::CenterPointsEnabled;
+	selectionMask |= slc::QuadrantPointsEnabled;
+	selectionMask |= slc::NearestPointsEnabled;
     }
     else
     {
-        selectionMask &= ~Selection::PointsSelectable;
-	selectionMask &= ~Selection::EndPointsEnabled;
-	selectionMask &= ~Selection::MidPointsEnabled;
-	selectionMask &= ~Selection::CenterPointsEnabled;
-	selectionMask &= ~Selection::QuadrantPointsEnabled;
-	selectionMask &= ~Selection::NearestPointsEnabled;
+        selectionMask &= ~slc::PointsSelectable;
+	selectionMask &= ~slc::EndPointsEnabled;
+	selectionMask &= ~slc::MidPointsEnabled;
+	selectionMask &= ~slc::CenterPointsEnabled;
+	selectionMask &= ~slc::QuadrantPointsEnabled;
+	selectionMask &= ~slc::NearestPointsEnabled;
     }
     updateToolbar();
     sendState();
@@ -120,27 +120,27 @@ void Manager::triggeredVertices(bool vertexStateIn)
 void Manager::triggeredEndPoints(bool endPointStateIn)
 {
   if (endPointStateIn)
-    selectionMask |= Selection::EndPointsSelectable;
+    selectionMask |= slc::EndPointsSelectable;
   else
-    selectionMask &= ~Selection::EndPointsSelectable;
+    selectionMask &= ~slc::EndPointsSelectable;
   sendState();
 }
 
 void Manager::triggeredMidPoints(bool midPointStateIn)
 {
   if (midPointStateIn)
-    selectionMask |= Selection::MidPointsSelectable;
+    selectionMask |= slc::MidPointsSelectable;
   else
-    selectionMask &= ~Selection::MidPointsSelectable;
+    selectionMask &= ~slc::MidPointsSelectable;
   sendState();
 }
 
 void Manager::triggeredCenterPoints(bool centerPointStateIn)
 {
   if (centerPointStateIn)
-    selectionMask |= Selection::CenterPointsSelectable;
+    selectionMask |= slc::CenterPointsSelectable;
   else
-    selectionMask &= ~Selection::CenterPointsSelectable;
+    selectionMask &= ~slc::CenterPointsSelectable;
   sendState();
 
 }
@@ -148,9 +148,9 @@ void Manager::triggeredCenterPoints(bool centerPointStateIn)
 void Manager::triggeredQuadrantPoints(bool quadrantPointStateIn)
 {
   if (quadrantPointStateIn)
-    selectionMask |= Selection::QuadrantPointsSelectable;
+    selectionMask |= slc::QuadrantPointsSelectable;
   else
-    selectionMask &= ~Selection::QuadrantPointsSelectable;
+    selectionMask &= ~slc::QuadrantPointsSelectable;
   sendState();
 
 }
@@ -158,18 +158,18 @@ void Manager::triggeredQuadrantPoints(bool quadrantPointStateIn)
 void Manager::triggeredNearestPoints(bool nearestPointStateIn)
 {
   if (nearestPointStateIn)
-    selectionMask |= Selection::NearestPointsSelectable;
+    selectionMask |= slc::NearestPointsSelectable;
   else
-    selectionMask &= ~Selection::NearestPointsSelectable;
+    selectionMask &= ~slc::NearestPointsSelectable;
   sendState();
 }
 
 void Manager::triggeredScreenPoints(bool screenPointStateIn)
 {
   if (screenPointStateIn)
-    selectionMask |= Selection::ScreenPointsSelectable;
+    selectionMask |= slc::ScreenPointsSelectable;
   else
-    selectionMask &= ~Selection::ScreenPointsSelectable;
+    selectionMask &= ~slc::ScreenPointsSelectable;
   sendState();
 }
 
@@ -225,32 +225,32 @@ void Manager::setState(const unsigned int &stateIn)
 
 void Manager::updateToolbar()
 {
-    actionSelectObjects->setEnabled(Selection::ObjectsEnabled & selectionMask);
-    actionSelectObjects->setChecked(Selection::ObjectsSelectable & selectionMask);
-    actionSelectFeatures->setEnabled(Selection::FeaturesEnabled & selectionMask);
-    actionSelectFeatures->setChecked(Selection::FeaturesSelectable & selectionMask);
-    actionSelectSolids->setEnabled(Selection::SolidsEnabled & selectionMask);
-    actionSelectSolids->setChecked(Selection::SolidsSelectable & selectionMask);
-    actionSelectShells->setEnabled(Selection::ShellsEnabled & selectionMask);
-    actionSelectShells->setChecked(Selection::ShellsSelectable & selectionMask);
-    actionSelectFaces->setEnabled(Selection::FacesEnabled & selectionMask);
-    actionSelectFaces->setChecked(Selection::FacesSelectable & selectionMask);
-    actionSelectWires->setEnabled(Selection::WiresEnabled & selectionMask);
-    actionSelectWires->setChecked(Selection::WiresSelectable & selectionMask);
-    actionSelectEdges->setEnabled(Selection::EdgesEnabled & selectionMask);
-    actionSelectEdges->setChecked(Selection::EdgesSelectable & selectionMask);
-    actionSelectVertices->setEnabled(Selection::PointsEnabled & selectionMask);
-    actionSelectVertices->setChecked(Selection::PointsSelectable & selectionMask);
-    actionSelectEndPoints->setEnabled(Selection::EndPointsEnabled & selectionMask);
-    actionSelectEndPoints->setChecked(Selection::EndPointsSelectable & selectionMask);
-    actionSelectMidPoints->setEnabled(Selection::MidPointsEnabled & selectionMask);
-    actionSelectMidPoints->setChecked(Selection::MidPointsSelectable & selectionMask);
-    actionSelectCenterPoints->setEnabled(Selection::CenterPointsEnabled & selectionMask);
-    actionSelectCenterPoints->setChecked(Selection::CenterPointsSelectable & selectionMask);
-    actionSelectQuadrantPoints->setEnabled(Selection::QuadrantPointsEnabled & selectionMask);
-    actionSelectQuadrantPoints->setChecked(Selection::QuadrantPointsSelectable & selectionMask);
-    actionSelectNearestPoints->setEnabled(Selection::NearestPointsEnabled & selectionMask);
-    actionSelectNearestPoints->setChecked(Selection::NearestPointsSelectable & selectionMask);
-    actionSelectScreenPoints->setEnabled(Selection::ScreenPointsEnabled & selectionMask);
-    actionSelectScreenPoints->setChecked(Selection::ScreenPointsSelectable & selectionMask);
+    actionSelectObjects->setEnabled(slc::ObjectsEnabled & selectionMask);
+    actionSelectObjects->setChecked(slc::ObjectsSelectable & selectionMask);
+    actionSelectFeatures->setEnabled(slc::FeaturesEnabled & selectionMask);
+    actionSelectFeatures->setChecked(slc::FeaturesSelectable & selectionMask);
+    actionSelectSolids->setEnabled(slc::SolidsEnabled & selectionMask);
+    actionSelectSolids->setChecked(slc::SolidsSelectable & selectionMask);
+    actionSelectShells->setEnabled(slc::ShellsEnabled & selectionMask);
+    actionSelectShells->setChecked(slc::ShellsSelectable & selectionMask);
+    actionSelectFaces->setEnabled(slc::FacesEnabled & selectionMask);
+    actionSelectFaces->setChecked(slc::FacesSelectable & selectionMask);
+    actionSelectWires->setEnabled(slc::WiresEnabled & selectionMask);
+    actionSelectWires->setChecked(slc::WiresSelectable & selectionMask);
+    actionSelectEdges->setEnabled(slc::EdgesEnabled & selectionMask);
+    actionSelectEdges->setChecked(slc::EdgesSelectable & selectionMask);
+    actionSelectVertices->setEnabled(slc::PointsEnabled & selectionMask);
+    actionSelectVertices->setChecked(slc::PointsSelectable & selectionMask);
+    actionSelectEndPoints->setEnabled(slc::EndPointsEnabled & selectionMask);
+    actionSelectEndPoints->setChecked(slc::EndPointsSelectable & selectionMask);
+    actionSelectMidPoints->setEnabled(slc::MidPointsEnabled & selectionMask);
+    actionSelectMidPoints->setChecked(slc::MidPointsSelectable & selectionMask);
+    actionSelectCenterPoints->setEnabled(slc::CenterPointsEnabled & selectionMask);
+    actionSelectCenterPoints->setChecked(slc::CenterPointsSelectable & selectionMask);
+    actionSelectQuadrantPoints->setEnabled(slc::QuadrantPointsEnabled & selectionMask);
+    actionSelectQuadrantPoints->setChecked(slc::QuadrantPointsSelectable & selectionMask);
+    actionSelectNearestPoints->setEnabled(slc::NearestPointsEnabled & selectionMask);
+    actionSelectNearestPoints->setChecked(slc::NearestPointsSelectable & selectionMask);
+    actionSelectScreenPoints->setEnabled(slc::ScreenPointsEnabled & selectionMask);
+    actionSelectScreenPoints->setChecked(slc::ScreenPointsSelectable & selectionMask);
 }

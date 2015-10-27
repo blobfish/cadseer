@@ -34,13 +34,13 @@
 
 #include "../feature/maps.h"
 
-namespace ModelViz
+namespace mdv
 {
 
 class Build
 {
 public:
-    Build(const TopoDS_Shape &, const Feature::ResultContainer &);
+    Build(const TopoDS_Shape &, const ftr::ResultContainer &);
     osg::ref_ptr<osg::Switch> getViz();
     bool go(const Standard_Real &deflection, const Standard_Real &angle);
 private:
@@ -54,7 +54,7 @@ private:
     void edgeConstruct(const TopoDS_Edge &edgeIn);
     void faceConstruct(const TopoDS_Face &faceIn);
     const TopoDS_Shape &originalShape;
-    const Feature::ResultContainer &resultContainer;
+    const ftr::ResultContainer &resultContainer;
     TopoDS_Shape copiedShape;
     TopTools_MapOfShape processed;
     Bnd_Box bound;

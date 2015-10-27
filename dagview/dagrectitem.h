@@ -23,7 +23,7 @@
 #include <QGraphicsRectItem>
 #include <QBrush>
 
-namespace DAG
+namespace dag
 {
   /*all right I give up! the parenting combined with the zvalues is fubar!
     * you can't control any kind of layering between children of separate parents

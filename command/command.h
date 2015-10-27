@@ -25,19 +25,22 @@
 
 #include "commandconstants.h"
 
+namespace cmd
+{
 class Command
 {
 public:
-    Command(CommandConstants::Constants idIn, QString nameIn, QAction *actionIn);
-    CommandConstants::Constants getId() const;
+    Command(cmd::Constants idIn, QString nameIn, QAction *actionIn);
+    cmd::Constants getId() const;
     QString getName() const;
     QAction* getAction() const;
     void trigger() const;
 
 protected:
-    CommandConstants::Constants id;
+    cmd::Constants id;
     QString name;
     QAction *action;
 };
+}
 
 #endif // COMMAND_H

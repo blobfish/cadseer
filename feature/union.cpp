@@ -28,7 +28,7 @@
 
 #include "union.h"
 
-using namespace Feature;
+using namespace ftr;
 
 QIcon Union::icon;
 

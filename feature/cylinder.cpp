@@ -24,7 +24,7 @@
 #include "cylinderbuilder.h"
 #include "cylinder.h"
 
-using namespace Feature;
+using namespace ftr;
 using boost::uuids::uuid;
 
 enum class FeatureTag

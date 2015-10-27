@@ -28,7 +28,7 @@
  * objects seems to have cured the problem.
  */
 
-namespace Feature
+namespace ftr
 {
   /*! @brief helper class for box feature.
   * 

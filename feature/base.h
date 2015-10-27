@@ -40,7 +40,7 @@
 #include "../modelviz/connector.h"
 #include "states.h"
 
-namespace Feature
+namespace ftr
 {
   class Base;
   typedef std::map<InputTypes, const Base*> UpdateMap;
@@ -50,30 +50,30 @@ class Base
 public:
   Base();
   virtual ~Base();
-  bool isModelDirty() const {return state.test(StateOffset::ModelDirty);}
-  bool isModelClean() const {return !(state.test(StateOffset::ModelDirty));}
+  bool isModelDirty() const {return state.test(ftr::StateOffset::ModelDirty);}
+  bool isModelClean() const {return !(state.test(ftr::StateOffset::ModelDirty));}
   void setModelDirty();
-  bool isVisualDirty() const {return state.test(StateOffset::VisualDirty);}
-  bool isVisualClean() const {return !(state.test(StateOffset::VisualDirty));}
+  bool isVisualDirty() const {return state.test(ftr::StateOffset::VisualDirty);}
+  bool isVisualClean() const {return !(state.test(ftr::StateOffset::VisualDirty));}
   void setVisualDirty();
   void show3D();
   void hide3D();
   void toggle3D();
-  bool isVisible3D() const {return !(state.test(StateOffset::Hidden3D));}
-  bool isHidden3D() const {return state.test(StateOffset::Hidden3D);}
-  bool isSuccess() const {return !(state.test(StateOffset::Failure));}
-  bool isFailure() const {return state.test(StateOffset::Failure);}
+  bool isVisible3D() const {return !(state.test(ftr::StateOffset::Hidden3D));}
+  bool isHidden3D() const {return state.test(ftr::StateOffset::Hidden3D);}
+  bool isSuccess() const {return !(state.test(ftr::StateOffset::Failure));}
+  bool isFailure() const {return state.test(ftr::StateOffset::Failure);}
   void setActive();
   void setInActive();
-  bool isActive() const {return !(state.test(StateOffset::Inactive));}
-  bool isInactive() const {return state.test(StateOffset::Inactive);}
+  bool isActive() const {return !(state.test(ftr::StateOffset::Inactive));}
+  bool isInactive() const {return state.test(ftr::StateOffset::Inactive);}
   void setLeaf();
   void setNonLeaf();
-  bool isLeaf() const {return !(state.test(StateOffset::NonLeaf));}
-  bool isNonLeaf() const {return (state.test(StateOffset::NonLeaf));}
+  bool isLeaf() const {return !(state.test(ftr::StateOffset::NonLeaf));}
+  bool isNonLeaf() const {return (state.test(ftr::StateOffset::NonLeaf));}
   void setName(const QString &nameIn){name = nameIn;}
   QString getName() const {return name;}
-  State getState() const {return state;}
+  ftr::State getState() const {return state;}
   virtual void update(const UpdateMap&) = 0;
   virtual void updateVisual(); //called after update.
   virtual Type getType() const = 0;
@@ -86,7 +86,7 @@ public:
   const TopoDS_Shape& getShape() const {return shape;}
   static TopoDS_Compound compoundWrap(const TopoDS_Shape &shapeIn);
   osg::Switch* getMainSwitch() const {return mainSwitch.get();}
-  const ModelViz::Connector& getConnector() const {return connector;}
+  const mdv::Connector& getConnector() const {return connector;}
   
   static std::size_t nextConstructionIndex;
   
@@ -108,7 +108,7 @@ protected:
   mutable StateChangedSignal stateChangedSignal;
   
   boost::uuids::uuid id;
-  State state;
+  ftr::State state;
   std::size_t constructionIndex; //!< for consistently ordered iteration. @see DAGView
   
   TopoDS_Shape shape;
@@ -118,7 +118,7 @@ protected:
   FeatureContainer featureContainer;
   
   osg::ref_ptr<osg::Switch> mainSwitch;
-  ModelViz::Connector connector;
+  mdv::Connector connector;
 };
 }
 

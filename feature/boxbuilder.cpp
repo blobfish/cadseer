@@ -29,7 +29,7 @@
 
 #include "boxbuilder.h"
 
-using namespace Feature;
+using namespace ftr;
 
 /*
    * note every call to BRepPrimAPI_MakeBox::Solid() returns

@@ -23,7 +23,7 @@
 #include <vector>
 #include <string>
 
-namespace Selection
+namespace slc
 {
   static const std::size_t None = 0;
   static const std::size_t ObjectsEnabled = 1;

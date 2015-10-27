@@ -24,7 +24,7 @@
 #include <vector>
 #include <string>
 
-namespace Feature
+namespace ftr
 {
   enum class InputTypes
   {

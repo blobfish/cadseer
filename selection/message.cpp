@@ -23,7 +23,7 @@
 
 slc::Message::Message()
 {
-  type = Selection::Type::None;
+  type = slc::Type::None;
   featureId = boost::uuids::nil_generator()();
   shapeId = boost::uuids::nil_generator()();
 }

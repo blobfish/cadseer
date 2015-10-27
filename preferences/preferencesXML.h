@@ -616,7 +616,7 @@ namespace xml_schema
 
 // Forward declarations.
 //
-namespace Preferences
+namespace prf
 {
   class DecPositive;
   class Mesh;
@@ -643,7 +643,7 @@ namespace Preferences
  * @brief C++ namespace for the %
  * schema namespace.
  */
-namespace Preferences
+namespace prf
 {
   /**
    * @brief Class corresponding to the %DecPositive schema type.
@@ -758,7 +758,7 @@ namespace Preferences
     /**
      * @brief Element type.
      */
-    typedef ::Preferences::DecPositive LinearDeflectionType;
+    typedef ::prf::DecPositive LinearDeflectionType;
 
     /**
      * @brief Element traits type.
@@ -824,7 +824,7 @@ namespace Preferences
     /**
      * @brief Element type.
      */
-    typedef ::Preferences::DecPositive AngularDeflectionType;
+    typedef ::prf::DecPositive AngularDeflectionType;
 
     /**
      * @brief Element traits type.
@@ -986,7 +986,7 @@ namespace Preferences
     /**
      * @brief Element type.
      */
-    typedef ::Preferences::Mesh MeshType;
+    typedef ::prf::Mesh MeshType;
 
     /**
      * @brief Element traits type.
@@ -1148,7 +1148,7 @@ namespace Preferences
     /**
      * @brief Element type.
      */
-    typedef ::Preferences::Visual VisualType;
+    typedef ::prf::Visual VisualType;
 
     /**
      * @brief Element traits type.
@@ -1298,7 +1298,7 @@ namespace Preferences
 #include <xercesc/dom/DOMDocument.hpp>
 #include <xercesc/dom/DOMErrorHandler.hpp>
 
-namespace Preferences
+namespace prf
 {
   /**
    * @name Parsing functions for the %root document root.
@@ -1315,7 +1315,7 @@ namespace Preferences
    *
    * This function uses exceptions to report parsing errors.
    */
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (const ::std::string& uri,
         ::xml_schema::Flags f = 0,
         const ::xml_schema::Properties& p = ::xml_schema::Properties ());
@@ -1331,7 +1331,7 @@ namespace Preferences
    *
    * This function reports parsing errors by calling the error handler.
    */
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (const ::std::string& uri,
         ::xml_schema::ErrorHandler& eh,
         ::xml_schema::Flags f = 0,
@@ -1349,7 +1349,7 @@ namespace Preferences
    *
    * This function reports parsing errors by calling the error handler.
    */
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (const ::std::string& uri,
         ::xercesc::DOMErrorHandler& eh,
         ::xml_schema::Flags f = 0,
@@ -1365,7 +1365,7 @@ namespace Preferences
    *
    * This function uses exceptions to report parsing errors.
    */
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (::std::istream& is,
         ::xml_schema::Flags f = 0,
         const ::xml_schema::Properties& p = ::xml_schema::Properties ());
@@ -1381,7 +1381,7 @@ namespace Preferences
    *
    * This function reports parsing errors by calling the error handler.
    */
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (::std::istream& is,
         ::xml_schema::ErrorHandler& eh,
         ::xml_schema::Flags f = 0,
@@ -1399,7 +1399,7 @@ namespace Preferences
    *
    * This function reports parsing errors by calling the error handler.
    */
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (::std::istream& is,
         ::xercesc::DOMErrorHandler& eh,
         ::xml_schema::Flags f = 0,
@@ -1419,7 +1419,7 @@ namespace Preferences
    *
    * This function uses exceptions to report parsing errors.
    */
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (::std::istream& is,
         const ::std::string& id,
         ::xml_schema::Flags f = 0,
@@ -1441,7 +1441,7 @@ namespace Preferences
    *
    * This function reports parsing errors by calling the error handler.
    */
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (::std::istream& is,
         const ::std::string& id,
         ::xml_schema::ErrorHandler& eh,
@@ -1464,7 +1464,7 @@ namespace Preferences
    *
    * This function reports parsing errors by calling the error handler.
    */
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (::std::istream& is,
         const ::std::string& id,
         ::xercesc::DOMErrorHandler& eh,
@@ -1481,7 +1481,7 @@ namespace Preferences
    *
    * This function uses exceptions to report parsing errors.
    */
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (::xercesc::InputSource& is,
         ::xml_schema::Flags f = 0,
         const ::xml_schema::Properties& p = ::xml_schema::Properties ());
@@ -1497,7 +1497,7 @@ namespace Preferences
    *
    * This function reports parsing errors by calling the error handler.
    */
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (::xercesc::InputSource& is,
         ::xml_schema::ErrorHandler& eh,
         ::xml_schema::Flags f = 0,
@@ -1515,7 +1515,7 @@ namespace Preferences
    *
    * This function reports parsing errors by calling the error handler.
    */
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (::xercesc::InputSource& is,
         ::xercesc::DOMErrorHandler& eh,
         ::xml_schema::Flags f = 0,
@@ -1529,7 +1529,7 @@ namespace Preferences
    * @param p Parsing properties. 
    * @return A pointer to the root of the object model.
    */
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (const ::xercesc::DOMDocument& d,
         ::xml_schema::Flags f = 0,
         const ::xml_schema::Properties& p = ::xml_schema::Properties ());
@@ -1546,7 +1546,7 @@ namespace Preferences
    * own_dom parsing flags to assign ownership of the DOM document
    * to the object model.
    */
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (::xml_schema::dom::unique_ptr< ::xercesc::DOMDocument > d,
         ::xml_schema::Flags f = 0,
         const ::xml_schema::Properties& p = ::xml_schema::Properties ());
@@ -1562,7 +1562,7 @@ namespace Preferences
 
 #include <xsd/cxx/xml/dom/auto-ptr.hxx>
 
-namespace Preferences
+namespace prf
 {
   void
   operator<< (::xercesc::DOMElement&, const DecPositive&);
@@ -1601,7 +1601,7 @@ namespace Preferences
    */
   void
   root (::std::ostream& os,
-        const ::Preferences::Root& x, 
+        const ::prf::Root& x, 
         const ::xml_schema::NamespaceInfomap& m = ::xml_schema::NamespaceInfomap (),
         const ::std::string& e = "UTF-8",
         ::xml_schema::Flags f = 0);
@@ -1621,7 +1621,7 @@ namespace Preferences
    */
   void
   root (::std::ostream& os,
-        const ::Preferences::Root& x, 
+        const ::prf::Root& x, 
         ::xml_schema::ErrorHandler& eh,
         const ::xml_schema::NamespaceInfomap& m = ::xml_schema::NamespaceInfomap (),
         const ::std::string& e = "UTF-8",
@@ -1643,7 +1643,7 @@ namespace Preferences
    */
   void
   root (::std::ostream& os,
-        const ::Preferences::Root& x, 
+        const ::prf::Root& x, 
         ::xercesc::DOMErrorHandler& eh,
         const ::xml_schema::NamespaceInfomap& m = ::xml_schema::NamespaceInfomap (),
         const ::std::string& e = "UTF-8",
@@ -1662,7 +1662,7 @@ namespace Preferences
    */
   void
   root (::xercesc::XMLFormatTarget& ft,
-        const ::Preferences::Root& x, 
+        const ::prf::Root& x, 
         const ::xml_schema::NamespaceInfomap& m = ::xml_schema::NamespaceInfomap (),
         const ::std::string& e = "UTF-8",
         ::xml_schema::Flags f = 0);
@@ -1683,7 +1683,7 @@ namespace Preferences
    */
   void
   root (::xercesc::XMLFormatTarget& ft,
-        const ::Preferences::Root& x, 
+        const ::prf::Root& x, 
         ::xml_schema::ErrorHandler& eh,
         const ::xml_schema::NamespaceInfomap& m = ::xml_schema::NamespaceInfomap (),
         const ::std::string& e = "UTF-8",
@@ -1705,7 +1705,7 @@ namespace Preferences
    */
   void
   root (::xercesc::XMLFormatTarget& ft,
-        const ::Preferences::Root& x, 
+        const ::prf::Root& x, 
         ::xercesc::DOMErrorHandler& eh,
         const ::xml_schema::NamespaceInfomap& m = ::xml_schema::NamespaceInfomap (),
         const ::std::string& e = "UTF-8",
@@ -1724,7 +1724,7 @@ namespace Preferences
    */
   void
   root (::xercesc::DOMDocument& d,
-        const ::Preferences::Root& x,
+        const ::prf::Root& x,
         ::xml_schema::Flags f = 0);
 
   /**
@@ -1736,7 +1736,7 @@ namespace Preferences
    * @return A pointer to the new Xerces-C++ DOM document.
    */
   ::xml_schema::dom::unique_ptr< ::xercesc::DOMDocument >
-  root (const ::Preferences::Root& x, 
+  root (const ::prf::Root& x, 
         const ::xml_schema::NamespaceInfomap& m = ::xml_schema::NamespaceInfomap (),
         ::xml_schema::Flags f = 0);
 

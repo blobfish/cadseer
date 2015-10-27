@@ -24,10 +24,9 @@
 #include <osg/Node>
 
 class ViewerWidget;
-namespace Selection{class Manager;}
-class Project;
+namespace slc{class Manager;}
 
-namespace DAG{class View; class Model;}
+namespace dag{class View; class Model;}
 
 namespace Ui {
 class MainWindow;
@@ -61,9 +60,9 @@ private:
     void setupCommands();
     Ui::MainWindow *ui;
     ViewerWidget* viewWidget;
-    DAG::Model *dagModel;
-    DAG::View *dagView;
-    Selection::Manager *selectionManager;
+    dag::Model *dagModel;
+    dag::View *dagView;
+    slc::Manager *selectionManager;
 };
 
 #endif // MAINWINDOW_H

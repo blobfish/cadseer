@@ -19,15 +19,15 @@
 
 #include "spaceballqevent.h"
 
-using namespace Spaceball;
+using namespace spb;
 
-int Spaceball::MotionEvent::Type = -1;
-int Spaceball::ButtonEvent::Type = -1;
+int spb::MotionEvent::Type = -1;
+int spb::ButtonEvent::Type = -1;
 
-void Spaceball::registerEvents()
+void spb::registerEvents()
 {
-    Spaceball::MotionEvent::Type = QEvent::registerEventType();
-    Spaceball::ButtonEvent::Type = QEvent::registerEventType();
+    spb::MotionEvent::Type = QEvent::registerEventType();
+    spb::ButtonEvent::Type = QEvent::registerEventType();
 }
 
 EventBase::EventBase(QEvent::Type event) : QInputEvent(static_cast<QEvent::Type>(event)), handled(false)

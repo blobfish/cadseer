@@ -77,14 +77,14 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
             if (currentNode->getNodeMask() & NodeMaskDef::gestureCommand)
             {
                 int temp;
-                if (!currentNode->getUserValue(CommandConstants::attributeTitle, temp))
+                if (!currentNode->getUserValue(cmd::attributeTitle, temp))
                 {
                     std::cout << "couldn't get commandid" << std::endl;
                     return false;
                 }
-                CommandConstants::Constants commandId = static_cast<CommandConstants::Constants>(temp);
+                cmd::Constants commandId = static_cast<cmd::Constants>(temp);
 
-                CommandManager::getManager().trigger(commandId);
+                cmd::CommandManager::getManager().trigger(commandId);
             }
         }
     }
@@ -230,135 +230,135 @@ void GestureHandler::contractSubNodes()
 
 void GestureHandler::constructMenu()
 {
-    startNode = GestureNode::buildMenuNode(":/resources/images/start.svg");
+    startNode = gsn::buildMenuNode(":/resources/images/start.svg");
     gestureSwitch->addChild(startNode);
 
     osg::Matrixd dummy;
 
     //view base
     osg::MatrixTransform *viewBase;
-    viewBase = GestureNode::buildMenuNode(":/resources/images/viewBase.svg");
+    viewBase = gsn::buildMenuNode(":/resources/images/viewBase.svg");
     viewBase->setMatrix(dummy);
     startNode->insertChild(startNode->getNumChildren() - 2, viewBase);
 
     osg::MatrixTransform *viewStandard;
-    viewStandard = GestureNode::buildMenuNode(":/resources/images/viewStandard.svg");
+    viewStandard = gsn::buildMenuNode(":/resources/images/viewStandard.svg");
     viewStandard->setMatrix(dummy);
     viewBase->insertChild(viewBase->getNumChildren() - 2, viewStandard);
 
-    osg::MatrixTransform *viewTop = GestureNode::buildCommandNode(":/resources/images/viewTop.svg");
+    osg::MatrixTransform *viewTop = gsn::buildCommandNode(":/resources/images/viewTop.svg");
     viewTop->setMatrix(dummy);
-    viewTop->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::StandardViewTop));
+    viewTop->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::StandardViewTop));
     viewStandard->insertChild(viewStandard->getNumChildren() - 2, viewTop);
 
-    osg::MatrixTransform *viewFront = GestureNode::buildCommandNode(":/resources/images/viewFront.svg");
+    osg::MatrixTransform *viewFront = gsn::buildCommandNode(":/resources/images/viewFront.svg");
     viewFront->setMatrix(dummy);
-    viewFront->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::StandardViewFront));
+    viewFront->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::StandardViewFront));
     viewStandard->insertChild(viewStandard->getNumChildren() - 2, viewFront);
 
-    osg::MatrixTransform *viewRight = GestureNode::buildCommandNode(":/resources/images/viewRight.svg");
+    osg::MatrixTransform *viewRight = gsn::buildCommandNode(":/resources/images/viewRight.svg");
     viewRight->setMatrix(dummy);
-    viewRight->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::StandardViewRight));
+    viewRight->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::StandardViewRight));
     viewStandard->insertChild(viewStandard->getNumChildren() - 2, viewRight);
 
-    osg::MatrixTransform *viewFit = GestureNode::buildCommandNode(":/resources/images/viewFit.svg");
+    osg::MatrixTransform *viewFit = gsn::buildCommandNode(":/resources/images/viewFit.svg");
     viewFit->setMatrix(dummy);
-    viewFit->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::ViewFit));
+    viewFit->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::ViewFit));
     viewBase->insertChild(viewBase->getNumChildren() - 2, viewFit);
 
     //construction base
     osg::MatrixTransform *constructionBase;
-    constructionBase = GestureNode::buildMenuNode(":/resources/images/constructionBase.svg");
+    constructionBase = gsn::buildMenuNode(":/resources/images/constructionBase.svg");
     constructionBase->setMatrix(dummy);
     startNode->insertChild(startNode->getNumChildren() - 2, constructionBase);
 
     osg::MatrixTransform *constructionPrimitives;
-    constructionPrimitives = GestureNode::buildMenuNode(":/resources/images/constructionPrimitives.svg");
+    constructionPrimitives = gsn::buildMenuNode(":/resources/images/constructionPrimitives.svg");
     constructionPrimitives->setMatrix(dummy);
     constructionBase->insertChild(constructionBase->getNumChildren() - 2, constructionPrimitives);
 
-    osg::MatrixTransform *constructionBox = GestureNode::buildCommandNode(":/resources/images/constructionBox.svg");
+    osg::MatrixTransform *constructionBox = gsn::buildCommandNode(":/resources/images/constructionBox.svg");
     constructionBox->setMatrix(dummy);
-    constructionBox->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::ConstructionBox));
+    constructionBox->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::ConstructionBox));
     constructionPrimitives->insertChild(constructionPrimitives->getNumChildren() - 2, constructionBox);
 
-    osg::MatrixTransform *constructionSphere = GestureNode::buildCommandNode(":/resources/images/constructionSphere.svg");
+    osg::MatrixTransform *constructionSphere = gsn::buildCommandNode(":/resources/images/constructionSphere.svg");
     constructionSphere->setMatrix(dummy);
-    constructionSphere->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::ConstructionSphere));
+    constructionSphere->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::ConstructionSphere));
     constructionPrimitives->insertChild(constructionPrimitives->getNumChildren() - 2, constructionSphere);
 
-    osg::MatrixTransform *constructionCone = GestureNode::buildCommandNode(":/resources/images/constructionCone.svg");
+    osg::MatrixTransform *constructionCone = gsn::buildCommandNode(":/resources/images/constructionCone.svg");
     constructionCone->setMatrix(dummy);
-    constructionCone->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::ConstructionCone));
+    constructionCone->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::ConstructionCone));
     constructionPrimitives->insertChild(constructionPrimitives->getNumChildren() - 2, constructionCone);
 
-    osg::MatrixTransform *constructionCylinder = GestureNode::buildCommandNode(":/resources/images/constructionCylinder.svg");
+    osg::MatrixTransform *constructionCylinder = gsn::buildCommandNode(":/resources/images/constructionCylinder.svg");
     constructionCylinder->setMatrix(dummy);
-    constructionCylinder->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::ConstructionCylinder));
+    constructionCylinder->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::ConstructionCylinder));
     constructionPrimitives->insertChild(constructionPrimitives->getNumChildren() - 2, constructionCylinder);
     
     //construction finishing base
     osg::MatrixTransform *constructionFinishing;
-    constructionFinishing = GestureNode::buildMenuNode(":/resources/images/constructionFinishing.svg");
+    constructionFinishing = gsn::buildMenuNode(":/resources/images/constructionFinishing.svg");
     constructionFinishing->setMatrix(dummy);
     constructionBase->insertChild(constructionBase->getNumChildren() - 2, constructionFinishing);
     
-    osg::MatrixTransform *constructionBlend = GestureNode::buildCommandNode(":/resources/images/constructionBlend.svg");
+    osg::MatrixTransform *constructionBlend = gsn::buildCommandNode(":/resources/images/constructionBlend.svg");
     constructionBlend->setMatrix(dummy);
-    constructionBlend->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::ConstructionBlend));
+    constructionBlend->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::ConstructionBlend));
     constructionFinishing->insertChild(constructionFinishing->getNumChildren() - 2, constructionBlend);
     
     //booleans
     osg::MatrixTransform *constructionBoolean;
-    constructionBoolean = GestureNode::buildMenuNode(":/resources/images/constructionBoolean.svg");
+    constructionBoolean = gsn::buildMenuNode(":/resources/images/constructionBoolean.svg");
     constructionBoolean->setMatrix(dummy);
     constructionBase->insertChild(constructionBase->getNumChildren() - 2, constructionBoolean);
     
-    osg::MatrixTransform *constructionUnion = GestureNode::buildCommandNode(":/resources/images/constructionUnion.svg");
+    osg::MatrixTransform *constructionUnion = gsn::buildCommandNode(":/resources/images/constructionUnion.svg");
     constructionUnion->setMatrix(dummy);
-    constructionUnion->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::ConstructionUnion));
+    constructionUnion->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::ConstructionUnion));
     constructionBoolean->insertChild(constructionBoolean->getNumChildren() - 2, constructionUnion);
     
-    osg::MatrixTransform *remove = GestureNode::buildCommandNode(":/resources/images/remove.svg");
+    osg::MatrixTransform *remove = gsn::buildCommandNode(":/resources/images/remove.svg");
     remove->setMatrix(dummy);
-    remove->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::Remove));
+    remove->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::Remove));
     startNode->insertChild(constructionBoolean->getNumChildren() - 2, remove);
     
     //file base
     osg::MatrixTransform *fileBase;
-    fileBase = GestureNode::buildMenuNode(":/resources/images/fileBase.svg");
+    fileBase = gsn::buildMenuNode(":/resources/images/fileBase.svg");
     fileBase->setMatrix(dummy);
     startNode->insertChild(startNode->getNumChildren() - 2, fileBase);
     
     osg::MatrixTransform *fileImport;
-    fileImport = GestureNode::buildMenuNode(":/resources/images/fileImport.svg");
+    fileImport = gsn::buildMenuNode(":/resources/images/fileImport.svg");
     fileImport->setMatrix(dummy);
     fileBase->insertChild(fileBase->getNumChildren() - 2, fileImport);
     
-    osg::MatrixTransform *fileImportOCC = GestureNode::buildCommandNode(":/resources/images/fileOCC.svg");
+    osg::MatrixTransform *fileImportOCC = gsn::buildCommandNode(":/resources/images/fileOCC.svg");
     fileImportOCC->setMatrix(dummy);
-    fileImportOCC->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::FileImportOCC));
+    fileImportOCC->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::FileImportOCC));
     fileImport->insertChild(fileImport->getNumChildren() - 2, fileImportOCC);
     
     osg::MatrixTransform *fileExport;
-    fileExport = GestureNode::buildMenuNode(":/resources/images/fileExport.svg");
+    fileExport = gsn::buildMenuNode(":/resources/images/fileExport.svg");
     fileExport->setMatrix(dummy);
     fileBase->insertChild(fileBase->getNumChildren() - 2, fileExport);
     
-    osg::MatrixTransform *fileExportOSG = GestureNode::buildCommandNode(":/resources/images/fileOSG.svg");
+    osg::MatrixTransform *fileExportOSG = gsn::buildCommandNode(":/resources/images/fileOSG.svg");
     fileExportOSG->setMatrix(dummy);
-    fileExportOSG->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::FileExportOSG));
+    fileExportOSG->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::FileExportOSG));
     fileExport->insertChild(fileExport->getNumChildren() - 2, fileExportOSG);
     
-    osg::MatrixTransform *fileExportOCC = GestureNode::buildCommandNode(":/resources/images/fileOCC.svg");
+    osg::MatrixTransform *fileExportOCC = gsn::buildCommandNode(":/resources/images/fileOCC.svg");
     fileExportOCC->setMatrix(dummy);
-    fileExportOCC->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::FileExportOCC));
+    fileExportOCC->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::FileExportOCC));
     fileExport->insertChild(fileExport->getNumChildren() - 2, fileExportOCC);
     
     //probably won't stay under file node. good enough for now.
-    osg::MatrixTransform *preferences = GestureNode::buildCommandNode(":/resources/images/preferences.svg");
+    osg::MatrixTransform *preferences = gsn::buildCommandNode(":/resources/images/preferences.svg");
     preferences->setMatrix(dummy);
-    preferences->setUserValue(CommandConstants::attributeTitle, static_cast<int>(CommandConstants::Preferences));
+    preferences->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::Preferences));
     fileBase->insertChild(fileBase->getNumChildren() - 2, preferences);
 }
 

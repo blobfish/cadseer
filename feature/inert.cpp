@@ -24,7 +24,7 @@
 
 #include "inert.h"
 
-using namespace Feature;
+using namespace ftr;
 using namespace boost::uuids;
 
 QIcon Inert::icon;

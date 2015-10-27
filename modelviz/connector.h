@@ -28,14 +28,14 @@
 #include "../feature/maps.h"
 #include "connectorgraph.h"
 
-namespace ModelViz
+namespace mdv
 {
 
 class Connector
 {
 public:
     Connector() {}
-    void buildStartNode(const TopoDS_Shape &shapeIn, const Feature::ResultContainer &resultContainerIn);
+    void buildStartNode(const TopoDS_Shape &shapeIn, const ftr::ResultContainer &resultContainerIn);
     void buildEndNode();
     std::vector<boost::uuids::uuid> useGetParentsOfType(const boost::uuids::uuid &, const TopAbs_ShapeEnum &shapeType) const;
     std::vector<boost::uuids::uuid> useGetChildrenOfType(const boost::uuids::uuid &, const TopAbs_ShapeEnum &shapeType) const;
@@ -50,18 +50,18 @@ public:
     std::vector<osg::Vec3d> useGetQuadrantPoints(const boost::uuids::uuid &) const;
     std::vector<osg::Vec3d> useGetNearestPoint(const boost::uuids::uuid &, const osg::Vec3d&) const;
 private:
-    void buildAddShape(const TopoDS_Shape &shapeIn, const Feature::ResultContainer &resultContainerIn);
-    void connectVertices(ConnectorGraph::Vertex from, ConnectorGraph::Vertex to);
-    ConnectorGraph::Graph graph;
-    ConnectorGraph::IdVertexMap vertexMap;
-    std::stack<ConnectorGraph::Vertex> vertexStack;
+    void buildAddShape(const TopoDS_Shape &shapeIn, const ftr::ResultContainer &resultContainerIn);
+    void connectVertices(cng::Vertex from, cng::Vertex to);
+    cng::Graph graph;
+    cng::IdVertexMap vertexMap;
+    std::stack<cng::Vertex> vertexStack;
 };
 
 class BuildConnector
 {
 public:
-    BuildConnector(const TopoDS_Shape &, const Feature::ResultContainer &resultContainerIn);
-    void buildRecursiveConnector(const TopoDS_Shape &, const Feature::ResultContainer &resultContainerIn);
+    BuildConnector(const TopoDS_Shape &, const ftr::ResultContainer &resultContainerIn);
+    void buildRecursiveConnector(const TopoDS_Shape &, const ftr::ResultContainer &resultContainerIn);
     Connector getConnector(){return connector;}
 
 private:

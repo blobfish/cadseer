@@ -47,7 +47,7 @@
 class QGraphicsSceneHoverEvent;
 class QGraphicsProxyWidget;
 
-namespace DAG
+namespace dag
 {
 //   class LineEdit : public QLineEdit
 //   {

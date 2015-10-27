@@ -26,7 +26,7 @@
 #include "dialog.h"
 #include "ui_dialog.h"
 
-using namespace Preferences;
+using namespace prf;
 
 Dialog::Dialog(Manager *managerIn) : QDialog(), ui(new Ui::dialog), manager(managerIn)
 {

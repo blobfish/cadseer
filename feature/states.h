@@ -25,7 +25,7 @@
 #include <string>
 #include <assert.h>
 
-namespace Feature
+namespace ftr
 {
   typedef std::bitset<sizeof(int) * 8> State;
   

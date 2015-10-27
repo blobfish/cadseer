@@ -34,7 +34,7 @@
 
 #include "conebuilder.h"
 
-using namespace Feature;
+using namespace ftr;
 
 ConeBuilder::ConeBuilder(const double& radius1, const double& radius2, const double& height, gp_Ax2 axis2)
 {

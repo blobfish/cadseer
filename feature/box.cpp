@@ -27,7 +27,7 @@
 #include "boxbuilder.h"
 #include "box.h"
 
-using namespace Feature;
+using namespace ftr;
 using boost::uuids::uuid;
 
 //this is probably overkill for primitives such as box as it

@@ -40,7 +40,7 @@
 
 #include "preferencesXML.h"
 
-namespace Preferences
+namespace prf
 {
   // DecPositive
   // 
@@ -168,7 +168,7 @@ namespace Preferences
 
 #include <xsd/cxx/xml/dom/parsing-source.hxx>
 
-namespace Preferences
+namespace prf
 {
   // DecPositive
   //
@@ -545,9 +545,9 @@ namespace Preferences
 #include <xsd/cxx/xml/sax/std-input-source.hxx>
 #include <xsd/cxx/tree/error-handler.hxx>
 
-namespace Preferences
+namespace prf
 {
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (const ::std::string& u,
         ::xml_schema::Flags f,
         const ::xml_schema::Properties& p)
@@ -564,12 +564,12 @@ namespace Preferences
 
     h.throw_if_failed< ::xsd::cxx::tree::parsing< char > > ();
 
-    return ::std::unique_ptr< ::Preferences::Root > (
-      ::Preferences::root (
+    return ::std::unique_ptr< ::prf::Root > (
+      ::prf::root (
         std::move (d), f | ::xml_schema::Flags::own_dom, p));
   }
 
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (const ::std::string& u,
         ::xml_schema::ErrorHandler& h,
         ::xml_schema::Flags f,
@@ -586,12 +586,12 @@ namespace Preferences
     if (!d.get ())
       throw ::xsd::cxx::tree::parsing< char > ();
 
-    return ::std::unique_ptr< ::Preferences::Root > (
-      ::Preferences::root (
+    return ::std::unique_ptr< ::prf::Root > (
+      ::prf::root (
         std::move (d), f | ::xml_schema::Flags::own_dom, p));
   }
 
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (const ::std::string& u,
         ::xercesc::DOMErrorHandler& h,
         ::xml_schema::Flags f,
@@ -604,12 +604,12 @@ namespace Preferences
     if (!d.get ())
       throw ::xsd::cxx::tree::parsing< char > ();
 
-    return ::std::unique_ptr< ::Preferences::Root > (
-      ::Preferences::root (
+    return ::std::unique_ptr< ::prf::Root > (
+      ::prf::root (
         std::move (d), f | ::xml_schema::Flags::own_dom, p));
   }
 
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (::std::istream& is,
         ::xml_schema::Flags f,
         const ::xml_schema::Properties& p)
@@ -619,10 +619,10 @@ namespace Preferences
       (f & ::xml_schema::Flags::keep_dom) == 0);
 
     ::xsd::cxx::xml::sax::std_input_source isrc (is);
-    return ::Preferences::root (isrc, f, p);
+    return ::prf::root (isrc, f, p);
   }
 
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (::std::istream& is,
         ::xml_schema::ErrorHandler& h,
         ::xml_schema::Flags f,
@@ -633,20 +633,20 @@ namespace Preferences
       (f & ::xml_schema::Flags::keep_dom) == 0);
 
     ::xsd::cxx::xml::sax::std_input_source isrc (is);
-    return ::Preferences::root (isrc, h, f, p);
+    return ::prf::root (isrc, h, f, p);
   }
 
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (::std::istream& is,
         ::xercesc::DOMErrorHandler& h,
         ::xml_schema::Flags f,
         const ::xml_schema::Properties& p)
   {
     ::xsd::cxx::xml::sax::std_input_source isrc (is);
-    return ::Preferences::root (isrc, h, f, p);
+    return ::prf::root (isrc, h, f, p);
   }
 
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (::std::istream& is,
         const ::std::string& sid,
         ::xml_schema::Flags f,
@@ -657,10 +657,10 @@ namespace Preferences
       (f & ::xml_schema::Flags::keep_dom) == 0);
 
     ::xsd::cxx::xml::sax::std_input_source isrc (is, sid);
-    return ::Preferences::root (isrc, f, p);
+    return ::prf::root (isrc, f, p);
   }
 
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (::std::istream& is,
         const ::std::string& sid,
         ::xml_schema::ErrorHandler& h,
@@ -672,10 +672,10 @@ namespace Preferences
       (f & ::xml_schema::Flags::keep_dom) == 0);
 
     ::xsd::cxx::xml::sax::std_input_source isrc (is, sid);
-    return ::Preferences::root (isrc, h, f, p);
+    return ::prf::root (isrc, h, f, p);
   }
 
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (::std::istream& is,
         const ::std::string& sid,
         ::xercesc::DOMErrorHandler& h,
@@ -683,10 +683,10 @@ namespace Preferences
         const ::xml_schema::Properties& p)
   {
     ::xsd::cxx::xml::sax::std_input_source isrc (is, sid);
-    return ::Preferences::root (isrc, h, f, p);
+    return ::prf::root (isrc, h, f, p);
   }
 
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (::xercesc::InputSource& i,
         ::xml_schema::Flags f,
         const ::xml_schema::Properties& p)
@@ -699,12 +699,12 @@ namespace Preferences
 
     h.throw_if_failed< ::xsd::cxx::tree::parsing< char > > ();
 
-    return ::std::unique_ptr< ::Preferences::Root > (
-      ::Preferences::root (
+    return ::std::unique_ptr< ::prf::Root > (
+      ::prf::root (
         std::move (d), f | ::xml_schema::Flags::own_dom, p));
   }
 
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (::xercesc::InputSource& i,
         ::xml_schema::ErrorHandler& h,
         ::xml_schema::Flags f,
@@ -717,12 +717,12 @@ namespace Preferences
     if (!d.get ())
       throw ::xsd::cxx::tree::parsing< char > ();
 
-    return ::std::unique_ptr< ::Preferences::Root > (
-      ::Preferences::root (
+    return ::std::unique_ptr< ::prf::Root > (
+      ::prf::root (
         std::move (d), f | ::xml_schema::Flags::own_dom, p));
   }
 
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (::xercesc::InputSource& i,
         ::xercesc::DOMErrorHandler& h,
         ::xml_schema::Flags f,
@@ -735,12 +735,12 @@ namespace Preferences
     if (!d.get ())
       throw ::xsd::cxx::tree::parsing< char > ();
 
-    return ::std::unique_ptr< ::Preferences::Root > (
-      ::Preferences::root (
+    return ::std::unique_ptr< ::prf::Root > (
+      ::prf::root (
         std::move (d), f | ::xml_schema::Flags::own_dom, p));
   }
 
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (const ::xercesc::DOMDocument& doc,
         ::xml_schema::Flags f,
         const ::xml_schema::Properties& p)
@@ -750,8 +750,8 @@ namespace Preferences
       ::xml_schema::dom::unique_ptr< ::xercesc::DOMDocument > d (
         static_cast< ::xercesc::DOMDocument* > (doc.cloneNode (true)));
 
-      return ::std::unique_ptr< ::Preferences::Root > (
-        ::Preferences::root (
+      return ::std::unique_ptr< ::prf::Root > (
+        ::prf::root (
           std::move (d), f | ::xml_schema::Flags::own_dom, p));
     }
 
@@ -762,8 +762,8 @@ namespace Preferences
     if (n.name () == "root" &&
         n.namespace_ () == "")
     {
-      ::std::unique_ptr< ::Preferences::Root > r (
-        ::xsd::cxx::tree::traits< ::Preferences::Root, char >::create (
+      ::std::unique_ptr< ::prf::Root > r (
+        ::xsd::cxx::tree::traits< ::prf::Root, char >::create (
           e, f, 0));
       return r;
     }
@@ -775,7 +775,7 @@ namespace Preferences
       "");
   }
 
-  ::std::unique_ptr< ::Preferences::Root >
+  ::std::unique_ptr< ::prf::Root >
   root (::xml_schema::dom::unique_ptr< ::xercesc::DOMDocument > d,
         ::xml_schema::Flags f,
         const ::xml_schema::Properties&)
@@ -800,8 +800,8 @@ namespace Preferences
     if (n.name () == "root" &&
         n.namespace_ () == "")
     {
-      ::std::unique_ptr< ::Preferences::Root > r (
-        ::xsd::cxx::tree::traits< ::Preferences::Root, char >::create (
+      ::std::unique_ptr< ::prf::Root > r (
+        ::xsd::cxx::tree::traits< ::prf::Root, char >::create (
           e, f, 0));
       return r;
     }
@@ -818,7 +818,7 @@ namespace Preferences
 #include <xsd/cxx/tree/error-handler.hxx>
 #include <xsd/cxx/xml/dom/serialization-source.hxx>
 
-namespace Preferences
+namespace prf
 {
   void
   operator<< (::xercesc::DOMElement& e, const DecPositive& i)
@@ -903,7 +903,7 @@ namespace Preferences
 
   void
   root (::std::ostream& o,
-        const ::Preferences::Root& s,
+        const ::prf::Root& s,
         const ::xml_schema::NamespaceInfomap& m,
         const ::std::string& e,
         ::xml_schema::Flags f)
@@ -912,7 +912,7 @@ namespace Preferences
       (f & ::xml_schema::Flags::dont_initialize) == 0);
 
     ::xml_schema::dom::unique_ptr< ::xercesc::DOMDocument > d (
-      ::Preferences::root (s, m, f));
+      ::prf::root (s, m, f));
 
     ::xsd::cxx::tree::error_handler< char > h;
 
@@ -925,7 +925,7 @@ namespace Preferences
 
   void
   root (::std::ostream& o,
-        const ::Preferences::Root& s,
+        const ::prf::Root& s,
         ::xml_schema::ErrorHandler& h,
         const ::xml_schema::NamespaceInfomap& m,
         const ::std::string& e,
@@ -935,7 +935,7 @@ namespace Preferences
       (f & ::xml_schema::Flags::dont_initialize) == 0);
 
     ::xml_schema::dom::unique_ptr< ::xercesc::DOMDocument > d (
-      ::Preferences::root (s, m, f));
+      ::prf::root (s, m, f));
     ::xsd::cxx::xml::dom::ostream_format_target t (o);
     if (!::xsd::cxx::xml::dom::serialize (t, *d, e, h, f))
     {
@@ -945,14 +945,14 @@ namespace Preferences
 
   void
   root (::std::ostream& o,
-        const ::Preferences::Root& s,
+        const ::prf::Root& s,
         ::xercesc::DOMErrorHandler& h,
         const ::xml_schema::NamespaceInfomap& m,
         const ::std::string& e,
         ::xml_schema::Flags f)
   {
     ::xml_schema::dom::unique_ptr< ::xercesc::DOMDocument > d (
-      ::Preferences::root (s, m, f));
+      ::prf::root (s, m, f));
     ::xsd::cxx::xml::dom::ostream_format_target t (o);
     if (!::xsd::cxx::xml::dom::serialize (t, *d, e, h, f))
     {
@@ -962,13 +962,13 @@ namespace Preferences
 
   void
   root (::xercesc::XMLFormatTarget& t,
-        const ::Preferences::Root& s,
+        const ::prf::Root& s,
         const ::xml_schema::NamespaceInfomap& m,
         const ::std::string& e,
         ::xml_schema::Flags f)
   {
     ::xml_schema::dom::unique_ptr< ::xercesc::DOMDocument > d (
-      ::Preferences::root (s, m, f));
+      ::prf::root (s, m, f));
 
     ::xsd::cxx::tree::error_handler< char > h;
 
@@ -980,14 +980,14 @@ namespace Preferences
 
   void
   root (::xercesc::XMLFormatTarget& t,
-        const ::Preferences::Root& s,
+        const ::prf::Root& s,
         ::xml_schema::ErrorHandler& h,
         const ::xml_schema::NamespaceInfomap& m,
         const ::std::string& e,
         ::xml_schema::Flags f)
   {
     ::xml_schema::dom::unique_ptr< ::xercesc::DOMDocument > d (
-      ::Preferences::root (s, m, f));
+      ::prf::root (s, m, f));
     if (!::xsd::cxx::xml::dom::serialize (t, *d, e, h, f))
     {
       throw ::xsd::cxx::tree::serialization< char > ();
@@ -996,14 +996,14 @@ namespace Preferences
 
   void
   root (::xercesc::XMLFormatTarget& t,
-        const ::Preferences::Root& s,
+        const ::prf::Root& s,
         ::xercesc::DOMErrorHandler& h,
         const ::xml_schema::NamespaceInfomap& m,
         const ::std::string& e,
         ::xml_schema::Flags f)
   {
     ::xml_schema::dom::unique_ptr< ::xercesc::DOMDocument > d (
-      ::Preferences::root (s, m, f));
+      ::prf::root (s, m, f));
     if (!::xsd::cxx::xml::dom::serialize (t, *d, e, h, f))
     {
       throw ::xsd::cxx::tree::serialization< char > ();
@@ -1012,7 +1012,7 @@ namespace Preferences
 
   void
   root (::xercesc::DOMDocument& d,
-        const ::Preferences::Root& s,
+        const ::prf::Root& s,
         ::xml_schema::Flags)
   {
     ::xercesc::DOMElement& e (*d.getDocumentElement ());
@@ -1035,7 +1035,7 @@ namespace Preferences
   }
 
   ::xml_schema::dom::unique_ptr< ::xercesc::DOMDocument >
-  root (const ::Preferences::Root& s,
+  root (const ::prf::Root& s,
         const ::xml_schema::NamespaceInfomap& m,
         ::xml_schema::Flags f)
   {
@@ -1045,7 +1045,7 @@ namespace Preferences
         "",
         m, f));
 
-    ::Preferences::root (*d, s, f);
+    ::prf::root (*d, s, f);
     return d;
   }
 }

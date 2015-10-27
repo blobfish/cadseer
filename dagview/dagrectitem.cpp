@@ -23,7 +23,7 @@
 
 #include "dagrectitem.h"
 
-using namespace DAG;
+using namespace dag;
 
 RectItem::RectItem(QGraphicsItem* parent) : QGraphicsRectItem(parent)
 {

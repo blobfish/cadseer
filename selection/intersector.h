@@ -22,7 +22,7 @@
 
 #include <osgUtil/LineSegmentIntersector>
 
-namespace Selection
+namespace slc
 {
 class Intersector : public osgUtil::LineSegmentIntersector
 {

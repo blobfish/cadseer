@@ -22,7 +22,7 @@
 #include "conebuilder.h"
 #include "cone.h"
 
-using namespace Feature;
+using namespace ftr;
 using boost::uuids::uuid;
 
 enum class FeatureTag

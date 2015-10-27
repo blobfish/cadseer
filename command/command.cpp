@@ -19,12 +19,14 @@
 
 #include "command.h"
 
-Command::Command(CommandConstants::Constants idIn, QString nameIn, QAction *actionIn) : id(idIn), name(nameIn), action(actionIn)
+using namespace cmd;
+
+Command::Command(cmd::Constants idIn, QString nameIn, QAction *actionIn) : id(idIn), name(nameIn), action(actionIn)
 {
 }
 
 
-CommandConstants::Constants Command::getId() const
+cmd::Constants Command::getId() const
 {
     return id;
 }

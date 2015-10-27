@@ -26,7 +26,7 @@ class MatrixTransform;
 class Geode;
 }
 
-namespace GestureNode
+namespace gsn
 {
 osg::MatrixTransform* buildMenuNode(const char *resourceName);
 osg::MatrixTransform* buildCommandNode(const char *resourceName);

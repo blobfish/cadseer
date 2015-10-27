@@ -20,7 +20,7 @@
 // #include "dagmodel.h"
 #include "dagview.h"
 
-using namespace DAG;
+using namespace dag;
 
 View::View(QWidget* parentIn): QGraphicsView(parentIn)
 {

@@ -38,9 +38,9 @@
 
 using boost::uuids::uuid;
 
-namespace DAG
+namespace dag
 {
-  namespace QtData
+  namespace qtd
   {
     const static int key =              0;
     const static int rectangle =        1;
@@ -64,7 +64,7 @@ namespace DAG
   struct VertexProperty
   {
     VertexProperty();
-    std::weak_ptr<Feature::Base> feature;
+    std::weak_ptr<ftr::Base> feature;
     uuid featureId;  //? possibly for multi_index.
     ColumnMask columnMask; //!< column number containing the point.
     std::size_t row;
@@ -112,7 +112,7 @@ namespace DAG
   {
     EdgeProperty();
     std::shared_ptr <QGraphicsPathItem> connector; //!< line representing link between nodes.
-    Feature::InputTypes inputType;
+    ftr::InputTypes inputType;
   };
   /*! @brief needed to create an internal index for graph edges. needed for setS. Not needed upon implementation*/
   typedef boost::property<boost::edge_index_t, std::size_t, EdgeProperty> edge_prop;
@@ -137,7 +137,7 @@ namespace DAG
     {
       out << 
 	"[label=\"" <<
-        Feature::getInputTypeString(graphEW[edgeW].inputType) <<
+        getInputTypeString(graphEW[edgeW].inputType) <<
         "\"]";
     }
   private:

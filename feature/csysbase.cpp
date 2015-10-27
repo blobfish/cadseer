@@ -26,7 +26,7 @@
 #include "../nodemaskdefs.h"
 #include "csysbase.h"
 
-using namespace Feature;
+using namespace ftr;
 
 CSysBase::CSysBase() : Base(), system()
 {

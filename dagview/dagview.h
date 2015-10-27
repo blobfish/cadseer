@@ -26,7 +26,7 @@
 
 // #include "dagmodel.h"
 
-namespace DAG
+namespace dag
 {
   //! @brief view for DAG viewer
   class View : public QGraphicsView

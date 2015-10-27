@@ -22,7 +22,7 @@
 #ifndef COORDINATESYSTEM_H
 #define COORDINATESYSTEM_H
 
-namespace CoordinateSystem
+namespace csys
 {
   osg::Node* buildCoordinateSystemNode();
   osg::Node* buildArrow(const double &size, const osg::Vec4 &color);

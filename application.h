@@ -25,10 +25,10 @@
 
 #include <memory>
 
-namespace Preferences{class Manager;}
+namespace prf{class Manager;}
 
 class MainWindow;
-class Project;
+namespace prj{class Project;}
 
 class Application : public QApplication
 {
@@ -38,18 +38,18 @@ public:
     ~Application();
     bool x11EventFilter(XEvent *event);
     void initializeSpaceball(MainWindow *mainWindowIn);
-    void setProject(Project *projectIn){project = projectIn;}
-    Project *getProject(){return project;}
-    Preferences::Manager* getPreferencesManager(){return preferenceManager.get();}
+    void setProject(prj::Project *projectIn){project = projectIn;}
+    prj::Project *getProject(){return project;}
+    prf::Manager* getPreferencesManager(){return preferenceManager.get();}
     QDir getApplicationDirectory();
 
 public Q_SLOTS:
     void quittingSlot();
 private:
     MainWindow *mainWindow = nullptr;
-    Project *project = nullptr;
+    prj::Project *project = nullptr;
     bool spaceballPresent;
-    std::unique_ptr<Preferences::Manager> preferenceManager;
+    std::unique_ptr<prf::Manager> preferenceManager;
 };
 
 #endif // APPLICATION_H

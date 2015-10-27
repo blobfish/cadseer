@@ -26,7 +26,7 @@
 
 class Root;
 
-namespace Preferences
+namespace prf
 {
   class Manager
   {

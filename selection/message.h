@@ -29,7 +29,7 @@ namespace slc
   struct Message
   {
     Message();
-    Selection::Type type;
+    slc::Type type;
     boost::uuids::uuid featureId;
     boost::uuids::uuid shapeId;
   };

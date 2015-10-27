@@ -23,7 +23,7 @@
 #include <TopoDS_Shape.hxx>
 #include <gp_Ax2.hxx>
 
-namespace Feature
+namespace ftr
 {
   class ConeBuilder
   {

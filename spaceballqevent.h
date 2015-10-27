@@ -21,7 +21,7 @@
 #define SPACEBALLQEVENT_H
 
 #include <QInputEvent>
-namespace Spaceball
+namespace spb
 {
     enum ButtonStateType {BUTTON_NONE = 0, BUTTON_PRESSED, BUTTON_RELEASED};
 

@@ -36,21 +36,21 @@
 #include "gesturenode.h"
 #include "../nodemaskdefs.h"
 
-osg::MatrixTransform *GestureNode::buildMenuNode(const char *resourceName)
+osg::MatrixTransform *gsn::buildMenuNode(const char *resourceName)
 {
     osg::ref_ptr<osg::MatrixTransform> mainNode = buildCommonNode(resourceName);
     mainNode->setNodeMask(NodeMaskDef::gestureMenu);
     return mainNode.release();
 }
 
-osg::MatrixTransform* GestureNode::buildCommandNode(const char *resourceName)
+osg::MatrixTransform* gsn::buildCommandNode(const char *resourceName)
 {
     osg::ref_ptr<osg::MatrixTransform> mainNode = buildCommonNode(resourceName);
     mainNode->setNodeMask(NodeMaskDef::gestureCommand);
     return mainNode.release();
 }
 
-osg::MatrixTransform* GestureNode::buildCommonNode(const char *resourceName)
+osg::MatrixTransform* gsn::buildCommonNode(const char *resourceName)
 {
     osg::ref_ptr<osg::MatrixTransform> mainNode = new osg::MatrixTransform();
 
@@ -65,7 +65,7 @@ osg::MatrixTransform* GestureNode::buildCommonNode(const char *resourceName)
     return mainNode.release();
 }
 
-osg::Geode* GestureNode::buildIconGeode(const char *resourceName)
+osg::Geode* gsn::buildIconGeode(const char *resourceName)
 {
   //alright this sucks. getting svg icons onto geode is a pain.
   //I tried something I found on the web, but looks like ass.
@@ -176,7 +176,7 @@ osg::Geode* GestureNode::buildIconGeode(const char *resourceName)
 */
 }
 
-osg::Geode* GestureNode::buildLineGeode()
+osg::Geode* gsn::buildLineGeode()
 {
     osg::ref_ptr<osg::Geometry> geometryLine = new osg::Geometry();
     osg::ref_ptr<osg::Vec3Array> points = new osg::Vec3Array();

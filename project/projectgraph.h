@@ -31,13 +31,13 @@
 #include "../feature/inputtypes.h"
 #include "../feature/base.h"
 
-namespace ProjectGraph
+namespace prg
 {
   struct VertexProperty
   {
     //boost graph will call destructor when expanding vector
     //so we need to keep from deleting when this happens.
-    std::shared_ptr<Feature::Base> feature;
+    std::shared_ptr<ftr::Base> feature;
     boost::signals2::connection connection;
   };
   /*! @brief needed to create an internal index for vertex. needed for listS.*/
@@ -45,7 +45,7 @@ namespace ProjectGraph
 
   struct EdgeProperty
   {
-    Feature::InputTypes inputType;
+    ftr::InputTypes inputType;
   };
   /*! @brief needed to create an internal index for graph edges. needed for setS. Not needed upon implementation*/
   typedef boost::property<boost::edge_index_t, std::size_t, EdgeProperty> edge_prop;
@@ -69,7 +69,7 @@ namespace ProjectGraph
       void operator()(std::ostream& out, const EdgeW& edgeW) const
       {
         out << "[label=\"";
-        out << Feature::getInputTypeString(graphEW[edgeW].inputType);
+        out << getInputTypeString(graphEW[edgeW].inputType);
         out << "\"]";
       }
     private:

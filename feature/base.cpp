@@ -31,7 +31,7 @@
 #include "../globalutilities.h"
 #include "base.h"
 
-using namespace Feature;
+using namespace ftr;
 
 std::size_t Base::nextConstructionIndex = 0;
 
@@ -48,12 +48,12 @@ Base::Base()
   mainSwitch->setNodeMask(NodeMaskDef::object);
   mainSwitch->setUserValue(GU::idAttributeTitle, GU::idToString(id));
   
-  state.set(StateOffset::ModelDirty, true);
-  state.set(StateOffset::VisualDirty, true);
-  state.set(StateOffset::Hidden3D, false);
-  state.set(StateOffset::Failure, false);
-  state.set(StateOffset::Inactive, false);
-  state.set(StateOffset::NonLeaf, false);
+  state.set(ftr::StateOffset::ModelDirty, true);
+  state.set(ftr::StateOffset::VisualDirty, true);
+  state.set(ftr::StateOffset::Hidden3D, false);
+  state.set(ftr::StateOffset::Failure, false);
+  state.set(ftr::StateOffset::Inactive, false);
+  state.set(ftr::StateOffset::NonLeaf, false);
 }
 
 Base::~Base()
@@ -67,8 +67,8 @@ void Base::setModelDirty()
   //ensure model and visual are in sync.
   if (isModelClean())
   {
-    state.set(StateOffset::ModelDirty, true);
-    stateChangedSignal(id, StateOffset::ModelDirty);
+    state.set(ftr::StateOffset::ModelDirty, true);
+    stateChangedSignal(id, ftr::StateOffset::ModelDirty);
   }
   setVisualDirty();
 }
@@ -77,24 +77,24 @@ void Base::setModelClean()
 {
   if (isModelClean())
     return;
-  state.set(StateOffset::ModelDirty, false);
-  stateChangedSignal(id, StateOffset::ModelDirty);
+  state.set(ftr::StateOffset::ModelDirty, false);
+  stateChangedSignal(id, ftr::StateOffset::ModelDirty);
 }
 
 void Base::setVisualClean()
 {
   if (isVisualClean())
     return;
-  state.set(StateOffset::VisualDirty, false);
-  stateChangedSignal(id, StateOffset::VisualDirty);
+  state.set(ftr::StateOffset::VisualDirty, false);
+  stateChangedSignal(id, ftr::StateOffset::VisualDirty);
 }
 
 void Base::setVisualDirty()
 {
   if(isVisualDirty())
     return;
-  state.set(StateOffset::VisualDirty, true);
-  stateChangedSignal(id, StateOffset::VisualDirty);
+  state.set(ftr::StateOffset::VisualDirty, true);
+  stateChangedSignal(id, ftr::StateOffset::VisualDirty);
 }
 
 
@@ -115,7 +115,7 @@ void Base::updateVisual()
   if (shape.IsNull())
     return;
 
-  ModelViz::BuildConnector connectBuilder(shape, resultContainer);
+  mdv::BuildConnector connectBuilder(shape, resultContainer);
   connector = connectBuilder.getConnector();
   connector.outputGraphviz();
   
@@ -125,7 +125,7 @@ void Base::updateVisual()
   double linear = app->getPreferencesManager()->rootPtr->visual().mesh().linearDeflection();
   double angular = app->getPreferencesManager()->rootPtr->visual().mesh().angularDeflection();
 
-  ModelViz::Build builder(shape, resultContainer);
+  mdv::Build builder(shape, resultContainer);
   if (builder.go(linear, angular))
   {
       mainSwitch->addChild(builder.getViz().get());
@@ -142,8 +142,8 @@ void Base::show3D()
   if (isVisualDirty())
     updateVisual();
   mainSwitch->setAllChildrenOn();
-  state.set(StateOffset::Hidden3D, false);
-  stateChangedSignal(id, StateOffset::Hidden3D);
+  state.set(ftr::StateOffset::Hidden3D, false);
+  stateChangedSignal(id, ftr::StateOffset::Hidden3D);
 }
 
 void Base::hide3D()
@@ -152,8 +152,8 @@ void Base::hide3D()
   if (isHidden3D())
     return; //already off.
   mainSwitch->setAllChildrenOff();
-  state.set(StateOffset::Hidden3D, true);
-  stateChangedSignal(id, StateOffset::Hidden3D);
+  state.set(ftr::StateOffset::Hidden3D, true);
+  stateChangedSignal(id, ftr::StateOffset::Hidden3D);
 }
 
 void Base::toggle3D()
@@ -163,53 +163,53 @@ void Base::toggle3D()
     hide3D();
   else
     show3D();
-  stateChangedSignal(id, StateOffset::Hidden3D);
+  stateChangedSignal(id, ftr::StateOffset::Hidden3D);
 }
 
 void Base::setSuccess()
 {
   if (isSuccess())
     return; //already success
-  state.set(StateOffset::Failure, false);
-  stateChangedSignal(id, StateOffset::Failure);
+  state.set(ftr::StateOffset::Failure, false);
+  stateChangedSignal(id, ftr::StateOffset::Failure);
 }
 
 void Base::setFailure()
 {
   if (isFailure())
     return; //already failure
-  state.set(StateOffset::Failure, true);
-  stateChangedSignal(id, StateOffset::Failure);
+  state.set(ftr::StateOffset::Failure, true);
+  stateChangedSignal(id, ftr::StateOffset::Failure);
 }
 
 void Base::setActive()
 {
   if (isActive())
     return; //already active.
-  state.set(StateOffset::Inactive, false);
-  stateChangedSignal(id, StateOffset::Inactive);
+  state.set(ftr::StateOffset::Inactive, false);
+  stateChangedSignal(id, ftr::StateOffset::Inactive);
 }
 
 void Base::setInActive()
 {
   if (isInactive())
     return; //already inactive.
-  state.set(StateOffset::Inactive, true);
-  stateChangedSignal(id, StateOffset::Inactive);
+  state.set(ftr::StateOffset::Inactive, true);
+  stateChangedSignal(id, ftr::StateOffset::Inactive);
 }
 
 void Base::setLeaf()
 {
   if (isLeaf())
     return; //already a leaf.
-  state.set(StateOffset::NonLeaf, false);
-  stateChangedSignal(id, StateOffset::NonLeaf);
+  state.set(ftr::StateOffset::NonLeaf, false);
+  stateChangedSignal(id, ftr::StateOffset::NonLeaf);
 }
 
 void Base::setNonLeaf()
 {
   if (isNonLeaf())
     return; //already nonLeaf.
-  state.set(StateOffset::NonLeaf, true);
-  stateChangedSignal(id, StateOffset::NonLeaf);
+  state.set(ftr::StateOffset::NonLeaf, true);
+  stateChangedSignal(id, ftr::StateOffset::NonLeaf);
 }

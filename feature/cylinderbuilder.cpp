@@ -24,7 +24,7 @@
 
 #include "cylinderbuilder.h"
 
-using namespace Feature;
+using namespace ftr;
 
 CylinderBuilder::CylinderBuilder(const double& radiusIn, const double& heightIn, gp_Ax2 axis2)
 {

@@ -19,12 +19,7 @@
 
 #include <boost/uuid/nil_generator.hpp>
 
-#include "message.h"
-
-ProjectSpace::Message::Message()
-{
-  featureId = boost::uuids::nil_generator()();
-}
+#include <project/message.h>
 
 prj::Message::Message()
 {

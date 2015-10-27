@@ -166,7 +166,7 @@ void TextCamera::preselectionAdditionDispatched(const msg::Message &messageIn)
   preselectionText.clear();
   std::ostringstream preselectStream;
   preselectStream << "Pre-Selection:" << std::endl;
-  preselectStream << "object type: " << Selection::getNameOfType(sMessage.type) << std::endl <<
+  preselectStream << "object type: " << slc::getNameOfType(sMessage.type) << std::endl <<
     "Feature id: " << sMessage.featureId << std::endl <<
     "Shape id: " << sMessage.shapeId << std::endl;
   preselectionText = preselectStream.str();
@@ -217,7 +217,7 @@ void TextCamera::updateSelectionLabel()
   for (SelectionMap::const_iterator it = selectionMap.begin(); it != selectionMap.end(); ++it)
   {
     labelStream << std::endl <<
-      "object type: " << Selection::getNameOfType(it->second.type) << std::endl <<
+      "object type: " << slc::getNameOfType(it->second.type) << std::endl <<
       "Feature id: " << it->second.featureId << std::endl <<
       "Shape id: " << it->second.shapeId << std::endl;
   }

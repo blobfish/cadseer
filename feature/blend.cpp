@@ -35,7 +35,7 @@
 #include "../globalutilities.h"
 #include "blend.h"
 
-using namespace Feature;
+using namespace ftr;
 using boost::uuids::uuid;
 
 QIcon Blend::icon;
@@ -139,9 +139,9 @@ void Blend::shapeMatch(const Base *targetFeatureIn)
     
     //if the shape can be found in parent get it's id otherwise the id will be nil.
     ResultRecord record;
-    if (Feature::hasResult(targetResultContainer, currentShape))
+    if (hasResult(targetResultContainer, currentShape))
     {
-      record.id = Feature::findResultByShape(targetResultContainer, currentShape).id;
+      record.id = findResultByShape(targetResultContainer, currentShape).id;
     }
     record.shape = currentShape;
     resultContainer.insert(record);
@@ -175,9 +175,9 @@ void Blend::modifiedMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *ta
       for(;it.More(); it.Next())
       {
         const TopoDS_Shape &listShape = it.Value();
-        uuid targetId = Feature::findResultByShape(targetResultContainer, currentShape).id;
-        assert(Feature::hasResult(resultContainer, listShape));
-        Feature::updateId(resultContainer, targetId, listShape);
+        uuid targetId = findResultByShape(targetResultContainer, currentShape).id;
+        assert(hasResult(resultContainer, listShape));
+        updateId(resultContainer, targetId, listShape);
       }
     }
   }
@@ -207,10 +207,10 @@ void Blend::generatedMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *t
     assert(blendedFace.ShapeType() == TopAbs_FACE);
     
     //targetEdgeId should also be in member edgeIds
-    uuid targetEdgeId = Feature::findResultByShape(targetFeatureIn->getResultContainer(), currentShape).id;
+    uuid targetEdgeId = findResultByShape(targetFeatureIn->getResultContainer(), currentShape).id;
     uuid blendedFaceId = boost::uuids::nil_generator()();
     //first time edge has been blended
-    if (!Feature::hasInId(shapeMap, targetEdgeId))
+    if (!hasInId(shapeMap, targetEdgeId))
     {
       //build new record.
       EvolutionRecord record;
@@ -221,14 +221,14 @@ void Blend::generatedMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *t
       blendedFaceId = record.outId;
     }
     else
-      blendedFaceId = Feature::findRecordByIn(shapeMap, targetEdgeId).outId;
+      blendedFaceId = findRecordByIn(shapeMap, targetEdgeId).outId;
     
     //now we have the id for the face, just update the result map.
-    Feature::updateId(resultContainer, blendedFaceId, blendedFace);
+    updateId(resultContainer, blendedFaceId, blendedFace);
     
     //now look for outerwire for newly generated face.
     uuid blendedFaceWireId = boost::uuids::nil_generator()();
-    if (!Feature::hasInId(shapeMap, blendedFaceId))
+    if (!hasInId(shapeMap, blendedFaceId))
     {
       //this means that the face id is in both columns.
       EvolutionRecord record;
@@ -239,11 +239,11 @@ void Blend::generatedMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *t
       blendedFaceWireId = record.outId;
     }
     else
-      blendedFaceWireId = Feature::findRecordByIn(shapeMap, blendedFaceId).outId;
+      blendedFaceWireId = findRecordByIn(shapeMap, blendedFaceId).outId;
     
     //now get the wire and update the result to id.
     const TopoDS_Shape &blendedFaceWire = BRepTools::OuterWire(TopoDS::Face(blendedFace));
-    Feature::updateId(resultContainer, blendedFaceWireId, blendedFaceWire);
+    updateId(resultContainer, blendedFaceWireId, blendedFaceWire);
   }
 }
 
@@ -300,7 +300,7 @@ void Blend::uniqueTypeMatch(const Base *targetFeatureIn)
       continue;
     
     //here we have an acceptable match.
-    Feature::updateId(resultContainer, targetRecord.id, blendRecord.shape);
+    updateId(resultContainer, targetRecord.id, blendRecord.shape);
   }
 }
 
@@ -317,21 +317,21 @@ void Blend::outerWireMatch(const Base *targetFeatureIn)
   {
     const TopoDS_Shape &targetFace = shapeMap(index);
     TopoDS_Shape targetOuterWire = BRepTools::OuterWire(TopoDS::Face(targetFace));
-    uuid targetOuterWireId = Feature::findResultByShape(targetFeatureIn->getResultContainer(), targetOuterWire).id;
-    uuid targetFaceId = Feature::findResultByShape(targetFeatureIn->getResultContainer(), targetFace).id;
+    uuid targetOuterWireId = findResultByShape(targetFeatureIn->getResultContainer(), targetOuterWire).id;
+    uuid targetFaceId = findResultByShape(targetFeatureIn->getResultContainer(), targetFace).id;
     
-    if (Feature::hasResult(resultContainer, targetOuterWireId))
+    if (hasResult(resultContainer, targetOuterWireId))
       continue;
-    if (!Feature::hasResult(resultContainer, targetFaceId))
+    if (!hasResult(resultContainer, targetFaceId))
     {
       std::cout << "can't find faceId" << std::endl;
       continue;
     }
     
-    const TopoDS_Shape &outFace = Feature::findResultById(resultContainer, targetFaceId).shape;
+    const TopoDS_Shape &outFace = findResultById(resultContainer, targetFaceId).shape;
     assert(!outFace.IsNull());
     TopoDS_Shape outOuterWire = BRepTools::OuterWire(TopoDS::Face(outFace));
-    Feature::updateId(resultContainer, targetOuterWireId, outOuterWire);
+    updateId(resultContainer, targetOuterWireId, outOuterWire);
   }
 }
 
@@ -353,8 +353,8 @@ void Blend::innerWireMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *t
   const ResultContainer &targetResultContainer = targetFeatureIn->getResultContainer();
   for (const auto &currentId : edgeIds)
   {
-    assert(Feature::hasResult(targetResultContainer, currentId));
-    const TopoDS_Shape &currentEdge = Feature::findResultById(targetResultContainer, currentId).shape;
+    assert(hasResult(targetResultContainer, currentId));
+    const TopoDS_Shape &currentEdge = findResultById(targetResultContainer, currentId).shape;
     
     TopTools_ListOfShape generated = blendMakerIn.Generated(currentEdge);
     assert(generated.Extent() == 1);
@@ -378,15 +378,15 @@ void Blend::innerWireMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *t
       assert(faceList.Extent() == 1);
       const TopoDS_Shape &currentFace = faceList.First();
 //       faceWirePair.push_back(std::make_pair(currentFace, currentWire));
-      uuid targetFaceId = Feature::findResultByShape(targetResultContainer, currentFace).id;
-      uuid targetWireId = Feature::findResultByShape(targetResultContainer, currentWire).id;
+      uuid targetFaceId = findResultByShape(targetResultContainer, currentFace).id;
+      uuid targetWireId = findResultByShape(targetResultContainer, currentWire).id;
       //skip if the wire id has already by added to this' result container. Possibly by outerWireMatch.
-      if (Feature::hasResult(resultContainer, targetWireId))
+      if (hasResult(resultContainer, targetWireId))
         continue;
       
       //now find the face of this' feature that matches the targetFace.
-      assert(Feature::hasResult(resultContainer, targetFaceId));
-      const TopoDS_Shape &resultFace = Feature::findResultById(resultContainer, targetFaceId).shape;
+      assert(hasResult(resultContainer, targetFaceId));
+      const TopoDS_Shape &resultFace = findResultById(resultContainer, targetFaceId).shape;
       
       //now find the common edge that belongs to the resultFace and the blended face.
       TopExp_Explorer exp;
@@ -406,7 +406,7 @@ void Blend::innerWireMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *t
             if (edgeIt.Current().IsEqual(partnerEdge))
             {
               //we have the fucking wire.
-              Feature::updateId(resultContainer, targetWireId, goalWire);
+              updateId(resultContainer, targetWireId, goalWire);
               goto getOut; //glorified break.
             }
           }
@@ -461,7 +461,7 @@ void Blend::derivedMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *tar
     TopTools_ListIteratorOfListOfShape it;
     for (it.Initialize(faceList); it.More(); it.Next())
     {
-      uuid faceId = Feature::findResultByShape(resultContainer, it.Value()).id;
+      uuid faceId = findResultByShape(resultContainer, it.Value()).id;
       idSet.insert(faceId);
     }
     
@@ -480,7 +480,7 @@ void Blend::derivedMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *tar
     else
       edgeId = derivedContainer.at(idSet);
     
-    Feature::updateId(resultContainer, edgeId, edgeShapes(edgeIndex));
+    updateId(resultContainer, edgeId, edgeShapes(edgeIndex));
   }
   
   TopTools_IndexedDataMapOfShapeListOfShape vToE; //edges to face
@@ -493,7 +493,7 @@ void Blend::derivedMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *tar
     TopTools_ListIteratorOfListOfShape it;
     for (it.Initialize(edgeList); it.More(); it.Next())
     {
-      uuid edgeId = Feature::findResultByShape(resultContainer, it.Value()).id;
+      uuid edgeId = findResultByShape(resultContainer, it.Value()).id;
       idSet.insert(edgeId);
     }
     
@@ -512,7 +512,7 @@ void Blend::derivedMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *tar
     else
       vertexId = derivedContainer.at(idSet);
     
-    Feature::updateId(resultContainer, vertexId, vertexShapes(vertexIndex));
+    updateId(resultContainer, vertexId, vertexShapes(vertexIndex));
   }
 }
 
@@ -546,7 +546,7 @@ void Blend::dumpInfo(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *targetF
     const TopoDS_Shape &currentShape = outShapeMap(index);
     std::cout << "ShapteType is: " << std::setw(10) << GU::getShapeTypeString(currentShape) <<
     "      is in targetResults: " <<
-      ((Feature::hasResult(targetFeatureIn->getResultContainer(), currentShape)) ? "true" : "false") << std::endl;
+      ((hasResult(targetFeatureIn->getResultContainer(), currentShape)) ? "true" : "false") << std::endl;
   }
 }
 

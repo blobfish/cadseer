@@ -24,7 +24,7 @@
 
 #include "base.h"
 
-namespace Feature
+namespace ftr
 {
   /*! Base class for features dependent on a coordinate system*/
   class CSysBase : public Base
@@ -32,7 +32,7 @@ namespace Feature
   public:
     CSysBase();
     virtual Type getType() const override {return Type::CSys;}
-    virtual const std::string& getTypeString() const override {return Feature::getTypeString(Type::CSys);}
+    virtual const std::string& getTypeString() const override {return toString(Type::CSys);}
     virtual const QIcon& getIcon() const override {static QIcon junk; return junk;}
     virtual Descriptor getDescriptor() const override {return Descriptor::None;}
     

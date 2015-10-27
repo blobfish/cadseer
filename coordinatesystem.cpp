@@ -32,7 +32,7 @@
 #include "coordinatesystem.h"
 
 
-osg::Node* CoordinateSystem::buildCoordinateSystemNode()
+osg::Node* csys::buildCoordinateSystemNode()
 {
   osg::ref_ptr<osg::AutoTransform> base = new osg::AutoTransform();
   base->setAutoScaleToScreen(true);
@@ -77,7 +77,7 @@ osg::Node* CoordinateSystem::buildCoordinateSystemNode()
   return base.release();
 }
 
-osg::Node* CoordinateSystem::buildArrow(const double &size, const osg::Vec4 &color)
+osg::Node* csys::buildArrow(const double &size, const osg::Vec4 &color)
 {
   osg::ref_ptr<osg::Group> arrowGroup = new osg::Group();
   
@@ -108,7 +108,7 @@ osg::Node* CoordinateSystem::buildArrow(const double &size, const osg::Vec4 &col
   return arrowGroup.release();
 }
 
-osg::Node* CoordinateSystem::buildPlane(const double &size, const osg::Vec4 &color)
+osg::Node* csys::buildPlane(const double &size, const osg::Vec4 &color)
 {
   double halfSize = size/2.0;
   osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array();

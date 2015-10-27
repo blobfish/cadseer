@@ -55,9 +55,9 @@
 
 
 using namespace boost::uuids;
-using namespace ModelViz;
+using namespace mdv;
 
-Build::Build(const TopoDS_Shape &shapeIn, const Feature::ResultContainer &resultContainerIn) :
+Build::Build(const TopoDS_Shape &shapeIn, const ftr::ResultContainer &resultContainerIn) :
   originalShape(shapeIn), resultContainer(resultContainerIn), success(false), initialized(false)
 {
     try
@@ -269,7 +269,7 @@ void Build::edgeConstruct(const TopoDS_Edge &edgeIn)
     }
 
     osg::ref_ptr<osg::Geode> geode = createGeodeEdge();
-    uuid id = Feature::findResultByShape(resultContainer, edgeIn).id;
+    uuid id = findResultByShape(resultContainer, edgeIn).id;
     geode->setUserValue(GU::idAttributeTitle, GU::idToString(id));
     osg::ref_ptr<osg::Geometry> geometry = createGeometryEdge();
     geode->addDrawable(geometry);
@@ -313,7 +313,7 @@ void Build::faceConstruct(const TopoDS_Face &faceIn)
     }
 
     osg::ref_ptr<osg::Geode> geode = createGeodeFace();
-    uuid id = Feature::findResultByShape(resultContainer, faceIn).id;
+    uuid id = findResultByShape(resultContainer, faceIn).id;
     geode->setUserValue(GU::idAttributeTitle, GU::idToString(id));
     osg::ref_ptr<osg::Geometry> geometry = createGeometryFace();
     geode->addDrawable(geometry);

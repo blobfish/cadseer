@@ -38,7 +38,7 @@ Application::Application(int &argc, char **argv) :
     mainWindow = 0;
     spaceballPresent = false;
     //some day pass the preferences file from user home directory to the manager constructor.
-    std::unique_ptr<Preferences::Manager> temp(new Preferences::Manager());
+    std::unique_ptr<prf::Manager> temp(new prf::Manager());
     preferenceManager = std::move(temp);
     
     if (!preferenceManager->isOk())
@@ -77,7 +77,7 @@ bool Application::x11EventFilter(XEvent *event)
 
     if (navEvent.type == SPNAV_EVENT_MOTION)
     {
-        Spaceball::MotionEvent *qEvent = new Spaceball::MotionEvent();
+        spb::MotionEvent *qEvent = new spb::MotionEvent();
         qEvent->setTranslations(navEvent.motion.x, navEvent.motion.y, navEvent.motion.z);
         qEvent->setRotations(navEvent.motion.rx, navEvent.motion.ry, navEvent.motion.rz);
 
@@ -100,7 +100,7 @@ void Application::initializeSpaceball(MainWindow *mainWindowIn)
     if (!mainWindow)
         return;
 
-    Spaceball::registerEvents();
+    spb::registerEvents();
 
     if (spnav_x11_open(QX11Info::display(), mainWindow->winId()) == -1)
     {

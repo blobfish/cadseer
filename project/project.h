@@ -29,28 +29,28 @@
 
 class TopoDS_Shape;
 
-typedef std::map<boost::uuids::uuid, ProjectGraph::Vertex> IdVertexMap;
-namespace ProjectSpace{class Message;}
+typedef std::map<boost::uuids::uuid, prg::Vertex> IdVertexMap;
 
+namespace prj
+{
 class Project
 {
 public:
     Project();
     void readOCC(const std::string &fileName);
     void addOCCShape(const TopoDS_Shape &shapeIn);
-    Feature::Base* findFeature(const boost::uuids::uuid &idIn);
+    ftr::Base* findFeature(const boost::uuids::uuid &idIn);
     void update();
     void updateVisual();
     void writeGraphViz(const std::string &fileName);
     void setAllVisualDirty();
     
-    void addFeature(std::shared_ptr<Feature::Base> feature);
+    void addFeature(std::shared_ptr<ftr::Base> feature);
     void removeFeature(const boost::uuids::uuid &idIn);
     void setFeatureActive(const boost::uuids::uuid &idIn);
-    void connect(const boost::uuids::uuid &parentIn, const boost::uuids::uuid &childIn, Feature::InputTypes type);
+    void connect(const boost::uuids::uuid &parentIn, const boost::uuids::uuid &childIn, ftr::InputTypes type);
     
     void stateChangedSlot(const boost::uuids::uuid &featureIdIn, std::size_t stateIn); //!< received from each feature.
-//     void messageInSlot(const ProjectSpace::Message &messageIn);
     
     //new messaging system
     void messageInSlot(const msg::Message &);
@@ -63,17 +63,17 @@ public:
 private:
     //! index all the vertices of the graph. needed for algorthims when using listS.
     void indexVerticesEdges();
-    ProjectGraph::Edge connect(ProjectGraph::Vertex parentIn, ProjectGraph::Vertex childIn, Feature::InputTypes type);
-    ProjectGraph::Edge connectVertices(ProjectGraph::Vertex parent, ProjectGraph::Vertex child, Feature::InputTypes type);
-    ProjectGraph::Vertex findVertex(const boost::uuids::uuid &idIn);
-    typedef std::pair<ProjectGraph::Vertex, ProjectGraph::Edge> VertexEdgePair;
+    prg::Edge connect(prg::Vertex parentIn, prg::Vertex childIn, ftr::InputTypes type);
+    prg::Edge connectVertices(prg::Vertex parent, prg::Vertex child, ftr::InputTypes type);
+    prg::Vertex findVertex(const boost::uuids::uuid &idIn);
+    typedef std::pair<prg::Vertex, prg::Edge> VertexEdgePair;
     typedef std::vector<VertexEdgePair> VertexEdgePairs;
-    VertexEdgePairs getParents(ProjectGraph::Vertex);
-    VertexEdgePairs getChildren(ProjectGraph::Vertex);
+    VertexEdgePairs getParents(prg::Vertex);
+    VertexEdgePairs getChildren(prg::Vertex);
     void updateLeafStatus();
     
     IdVertexMap map;
-    ProjectGraph::Graph projectGraph;
+    prg::Graph projectGraph;
     
     MessageOutSignal messageOutSignal; //new message system.
     msg::MessageDispatcher dispatcher;
@@ -81,5 +81,6 @@ private:
     void setCurrentLeafDispatched(const msg::Message &);
     void removeFeatureDispatched(const msg::Message &);
 };
+}
 
 #endif // PROJECT_H

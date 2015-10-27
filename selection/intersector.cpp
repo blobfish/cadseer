@@ -30,7 +30,7 @@
 
 using namespace osg;
 using namespace Eigen;
-using namespace Selection;
+using namespace slc;
 
 Intersector::Intersector(CoordinateFrame frame, double x, double y) :
     LineSegmentIntersector(frame, x, y), pickRadius(1.0)

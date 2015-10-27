@@ -22,6 +22,8 @@
 
 #include "commandmanager.h"
 
+using namespace cmd;
+
 CommandManager& CommandManager::getManager()
 {
     static CommandManager manager;
@@ -33,7 +35,7 @@ void CommandManager::addCommand(const Command &commandIn)
     commandMap.insert(std::make_pair(commandIn.getId(), commandIn));
 }
 
-void CommandManager::trigger(const CommandConstants::Constants constant)
+void CommandManager::trigger(const cmd::Constants constant)
 {
     CommandMap::const_iterator it = commandMap.find(constant);
     assert(it != commandMap.end());

@@ -24,7 +24,7 @@
 
 class BRepPrimAPI_MakeSphere;
 
-namespace Feature
+namespace ftr
 {
   class Sphere : public CSysBase
   {
@@ -34,7 +34,7 @@ namespace Feature
     double getRadius() const {return radius;}
     virtual void update(const UpdateMap&) override;
     virtual Type getType() const override {return Type::Sphere;}
-    virtual const std::string& getTypeString() const override {return Feature::getTypeString(Type::Sphere);}
+    virtual const std::string& getTypeString() const override {return toString(Type::Sphere);}
     virtual const QIcon& getIcon() const override {return icon;}
     virtual Descriptor getDescriptor() const override {return Descriptor::Create;}
     

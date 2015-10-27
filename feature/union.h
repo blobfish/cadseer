@@ -22,7 +22,7 @@
 
 #include "base.h"
 
-namespace Feature
+namespace ftr
 {
   class Union : public Base
   {
@@ -30,7 +30,7 @@ namespace Feature
     Union();
     virtual void update(const UpdateMap&) override;
     virtual Type getType() const override {return Type::Union;}
-    virtual const std::string& getTypeString() const override {return Feature::getTypeString(Type::Union);}
+    virtual const std::string& getTypeString() const override {return toString(Type::Union);}
     virtual const QIcon& getIcon() const override {return icon;}
     virtual Descriptor getDescriptor() const override {return Descriptor::Alter;}
     

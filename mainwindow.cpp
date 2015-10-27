@@ -58,8 +58,8 @@ MainWindow::MainWindow(QWidget *parent) :
     viewWidget = new ViewerWidget(osgViewer::ViewerBase::SingleThreaded);
     viewWidget->setGeometry( 100, 100, 800, 600 );
     
-    dagModel = new DAG::Model(this);
-    dagView = new DAG::View(this);
+    dagModel = new dag::Model(this);
+    dagView = new dag::View(this);
     dagView->setScene(dagModel);
     
     QSplitter *splitter = new QSplitter(Qt::Horizontal, this);
@@ -75,39 +75,39 @@ MainWindow::MainWindow(QWidget *parent) :
     aLayout->addWidget(splitter);
     ui->centralwidget->setLayout(aLayout);
 
-    selectionManager = new Selection::Manager(this);
+    selectionManager = new slc::Manager(this);
     setupSelectionToolbar();
     connect(selectionManager, SIGNAL(setSelectionMask(int)), viewWidget, SLOT(setSelectionMask(int)));
     selectionManager->setState
     (
-      Selection::All &
-      ~Selection::ObjectsSelectable &
-      ~Selection::FeaturesSelectable &
-      ~Selection::SolidsSelectable &
-      ~Selection::ShellsSelectable &
-      ~Selection::FacesSelectable &
-      ~Selection::WiresSelectable &
-      ~Selection::EdgesSelectable &
-      ~Selection::MidPointsSelectable &
-      ~Selection::CenterPointsSelectable &
-      ~Selection::QuadrantPointsSelectable &
-      ~Selection::NearestPointsSelectable &
-      ~Selection::ScreenPointsSelectable
+      slc::All &
+      ~slc::ObjectsSelectable &
+      ~slc::FeaturesSelectable &
+      ~slc::SolidsSelectable &
+      ~slc::ShellsSelectable &
+      ~slc::FacesSelectable &
+      ~slc::WiresSelectable &
+      ~slc::EdgesSelectable &
+      ~slc::MidPointsSelectable &
+      ~slc::CenterPointsSelectable &
+      ~slc::QuadrantPointsSelectable &
+      ~slc::NearestPointsSelectable &
+      ~slc::ScreenPointsSelectable
     );
 
-    Project *project = new Project();
+    prj::Project *project = new prj::Project();
     Application *application = dynamic_cast<Application *>(qApp);
     assert(application);
     application->setProject(project);
     
     //new message system.
     project->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
-    msg::dispatch().connectMessageOut(boost::bind(&Project::messageInSlot, project, _1));
+    msg::dispatch().connectMessageOut(boost::bind(&prj::Project::messageInSlot, project, _1));
     dagModel->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
-    msg::dispatch().connectMessageOut(boost::bind(&DAG::Model::messageInSlot, dagModel, _1));
+    msg::dispatch().connectMessageOut(boost::bind(&dag::Model::messageInSlot, dagModel, _1));
     viewWidget->getSelectionEventHandler()->connectMessageOut
       (boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
-    msg::dispatch().connectMessageOut(boost::bind(&Selection::EventHandler::messageInSlot,
+    msg::dispatch().connectMessageOut(boost::bind(&slc::EventHandler::messageInSlot,
 						  viewWidget->getSelectionEventHandler(), _1));
     viewWidget->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
     msg::dispatch().connectMessageOut(boost::bind(&ViewerWidget::messageInSlot, viewWidget, _1));
@@ -129,7 +129,7 @@ void MainWindow::readBrepSlot()
 
     Application *application = dynamic_cast<Application *>(qApp);
     assert(application);
-    Project *project = application->getProject();
+    prj::Project *project = application->getProject();
     project->readOCC(fileName.toStdString());
     project->update();
     project->updateVisual();
@@ -144,10 +144,10 @@ void MainWindow::writeBrepSlot()
     if (fileName.isEmpty())
         return;
     
-  const Selection::Containers &selections = viewWidget->getSelections();
+  const slc::Containers &selections = viewWidget->getSelections();
   if (selections.empty())
     return;
-  if(selections.at(0).selectionType != Selection::Type::Object)
+  if(selections.at(0).selectionType != slc::Type::Object)
   {
     viewWidget->clearSelections();
     return;
@@ -155,7 +155,7 @@ void MainWindow::writeBrepSlot()
   
   Application *application = dynamic_cast<Application *>(qApp);
   assert(application);
-  Project *project = application->getProject();
+  prj::Project *project = application->getProject();
   
   BRepTools::Write(project->findFeature(selections.at(0).featureId)->getShape(), fileName.toStdString().c_str());
   
@@ -200,77 +200,77 @@ void MainWindow::setupCommands()
 {
     QAction *constructionBoxAction = new QAction(qApp);
     connect(constructionBoxAction, SIGNAL(triggered()), this, SLOT(constructionBoxSlot()));
-    Command constructionBoxCommand(CommandConstants::ConstructionBox, "Construct Box", constructionBoxAction);
-    CommandManager::getManager().addCommand(constructionBoxCommand);
+    cmd::Command constructionBoxCommand(cmd::ConstructionBox, "Construct Box", constructionBoxAction);
+    cmd::CommandManager::getManager().addCommand(constructionBoxCommand);
 
     QAction *constructionSphereAction = new QAction(qApp);
     connect(constructionSphereAction, SIGNAL(triggered()), this, SLOT(constructionSphereSlot()));
-    Command constructionSphereCommand(CommandConstants::ConstructionSphere, "Construct Sphere", constructionSphereAction);
-    CommandManager::getManager().addCommand(constructionSphereCommand);
+    cmd::Command constructionSphereCommand(cmd::ConstructionSphere, "Construct Sphere", constructionSphereAction);
+    cmd::CommandManager::getManager().addCommand(constructionSphereCommand);
 
     QAction *constructionConeAction = new QAction(qApp);
     connect(constructionConeAction, SIGNAL(triggered()), this, SLOT(constructionConeSlot()));
-    Command constructionConeCommand(CommandConstants::ConstructionCone, "Construct Cone", constructionConeAction);
-    CommandManager::getManager().addCommand(constructionConeCommand);
+    cmd::Command constructionConeCommand(cmd::ConstructionCone, "Construct Cone", constructionConeAction);
+    cmd::CommandManager::getManager().addCommand(constructionConeCommand);
     
     QAction *constructionCylinderAction = new QAction(qApp);
     connect(constructionCylinderAction, SIGNAL(triggered(bool)), this, SLOT(constructionCylinderSlot()));
-    Command constructionCylinderCommand(CommandConstants::ConstructionCylinder, "Construct Cylinder", constructionCylinderAction);
-    CommandManager::getManager().addCommand(constructionCylinderCommand);
+    cmd::Command constructionCylinderCommand(cmd::ConstructionCylinder, "Construct Cylinder", constructionCylinderAction);
+    cmd::CommandManager::getManager().addCommand(constructionCylinderCommand);
     
     QAction *constructionBlendAction = new QAction(qApp);
     connect(constructionBlendAction, SIGNAL(triggered(bool)), this, SLOT(constructionBlendSlot()));
-    Command constructionBlendCommand(CommandConstants::ConstructionBlend, "Construct Blend", constructionBlendAction);
-    CommandManager::getManager().addCommand(constructionBlendCommand);
+    cmd::Command constructionBlendCommand(cmd::ConstructionBlend, "Construct Blend", constructionBlendAction);
+    cmd::CommandManager::getManager().addCommand(constructionBlendCommand);
     
     QAction *constructionUnionAction = new QAction(qApp);
     connect(constructionUnionAction, SIGNAL(triggered(bool)), this, SLOT(constructionUnionSlot()));
-    Command constructionUnionCommand(CommandConstants::ConstructionUnion, "Construct Union", constructionUnionAction);
-    CommandManager::getManager().addCommand(constructionUnionCommand);
+    cmd::Command constructionUnionCommand(cmd::ConstructionUnion, "Construct Union", constructionUnionAction);
+    cmd::CommandManager::getManager().addCommand(constructionUnionCommand);
     
     QAction *fileImportOCCAction = new QAction(qApp);
     connect(fileImportOCCAction, SIGNAL(triggered(bool)), this, SLOT(readBrepSlot()));
-    Command fileImportOCCCommand(CommandConstants::FileImportOCC, "Import BRep", fileImportOCCAction);
-    CommandManager::getManager().addCommand(fileImportOCCCommand);
+    cmd::Command fileImportOCCCommand(cmd::FileImportOCC, "Import BRep", fileImportOCCAction);
+    cmd::CommandManager::getManager().addCommand(fileImportOCCCommand);
     
     QAction *fileExportOSGAction = new QAction(qApp);
     connect(fileExportOSGAction, SIGNAL(triggered(bool)), viewWidget, SLOT(writeOSGSlot()));
-    Command fileExportOSGCommand(CommandConstants::FileExportOSG, "Export OSG", fileExportOSGAction);
-    CommandManager::getManager().addCommand(fileExportOSGCommand);
+    cmd::Command fileExportOSGCommand(cmd::FileExportOSG, "Export OSG", fileExportOSGAction);
+    cmd::CommandManager::getManager().addCommand(fileExportOSGCommand);
     
     QAction *fileExportOCCAction = new QAction(qApp);
     connect(fileExportOCCAction, SIGNAL(triggered(bool)), this, SLOT(writeBrepSlot()));
-    Command fileExportOCCCommand(CommandConstants::FileExportOCC, "Export BRep", fileExportOCCAction);
-    CommandManager::getManager().addCommand(fileExportOCCCommand);
+    cmd::Command fileExportOCCCommand(cmd::FileExportOCC, "Export BRep", fileExportOCCAction);
+    cmd::CommandManager::getManager().addCommand(fileExportOCCCommand);
     
     QAction *preferencesAction = new QAction(qApp);
     connect(preferencesAction, SIGNAL(triggered(bool)), this, SLOT(preferencesSlot()));
-    Command preferencesCommand(CommandConstants::Preferences, "Preferences", preferencesAction);
-    CommandManager::getManager().addCommand(preferencesCommand);
+    cmd::Command preferencesCommand(cmd::Preferences, "Preferences", preferencesAction);
+    cmd::CommandManager::getManager().addCommand(preferencesCommand);
     
     QAction *removeAction = new QAction(qApp);
     connect(removeAction, SIGNAL(triggered(bool)), this, SLOT(removeSlot()));
-    Command removeCommand(CommandConstants::Remove, "Remove", removeAction);
-    CommandManager::getManager().addCommand(removeCommand);
+    cmd::Command removeCommand(cmd::Remove, "Remove", removeAction);
+    cmd::CommandManager::getManager().addCommand(removeCommand);
 }
 
 void MainWindow::constructionBoxSlot()
 {
     Application *application = dynamic_cast<Application *>(qApp);
     assert(application);
-    Project *project = application->getProject();
+    prj::Project *project = application->getProject();
     
-    Feature::Box *box = nullptr;
-    const Selection::Containers &selections = viewWidget->getSelections();
+    ftr::Box *box = nullptr;
+    const slc::Containers &selections = viewWidget->getSelections();
     //find first box.
     for (const auto &currentSelection : selections)
     {
-      Feature::Base *feature = project->findFeature(currentSelection.featureId);
+      ftr::Base *feature = project->findFeature(currentSelection.featureId);
       assert(feature);
-      if (feature->getType() != Feature::Type::Box)
+      if (feature->getType() != ftr::Type::Box)
         continue;
       
-      box = dynamic_cast<Feature::Box*>(feature);
+      box = dynamic_cast<ftr::Box*>(feature);
       assert(box);
       break;
     }
@@ -294,7 +294,7 @@ void MainWindow::constructionBoxSlot()
       if (!dialog.exec())
         return;
       
-      std::shared_ptr<Feature::Box> boxPtr(new Feature::Box());
+      std::shared_ptr<ftr::Box> boxPtr(new ftr::Box());
       box = boxPtr.get();
       gp_Ax2 location;
       location.SetLocation(gp_Pnt(1.0, 1.0, 1.0));
@@ -318,9 +318,9 @@ void MainWindow::constructionSphereSlot()
 {
     Application *application = dynamic_cast<Application *>(qApp);
     assert(application);
-    Project *project = application->getProject();
+    prj::Project *project = application->getProject();
     
-    std::shared_ptr<Feature::Sphere> sphere(new Feature::Sphere());
+    std::shared_ptr<ftr::Sphere> sphere(new ftr::Sphere());
     sphere->setRadius(2.0);
     gp_Ax2 location;
     location.SetLocation(gp_Pnt(6.0, 6.0, 5.0));
@@ -337,9 +337,9 @@ void MainWindow::constructionConeSlot()
 {
     Application *application = dynamic_cast<Application *>(qApp);
     assert(application);
-    Project *project = application->getProject();
+    prj::Project *project = application->getProject();
     
-    std::shared_ptr<Feature::Cone> cone(new Feature::Cone());
+    std::shared_ptr<ftr::Cone> cone(new ftr::Cone());
     cone->setRadius1(2.0);
     cone->setRadius2(0.5);
     cone->setHeight(8.0);
@@ -358,9 +358,9 @@ void MainWindow::constructionCylinderSlot()
 {
   Application *application = dynamic_cast<Application *>(qApp);
   assert(application);
-  Project *project = application->getProject();
+  prj::Project *project = application->getProject();
   
-  std::shared_ptr<Feature::Cylinder> cylinder(new Feature::Cylinder());
+  std::shared_ptr<ftr::Cylinder> cylinder(new ftr::Cylinder());
   cylinder->setRadius(2.0);
   cylinder->setHeight(8.0);
   gp_Ax2 location;
@@ -377,7 +377,7 @@ void MainWindow::constructionCylinderSlot()
 
 void MainWindow::constructionBlendSlot()
 {
-  const Selection::Containers &selections = viewWidget->getSelections();
+  const slc::Containers &selections = viewWidget->getSelections();
   if (selections.empty())
     return;
   
@@ -389,7 +389,7 @@ void MainWindow::constructionBlendSlot()
     if
     (
       currentSelection.featureId != targetFeatureId ||
-      currentSelection.selectionType != Selection::Type::Edge //just edges for now.
+      currentSelection.selectionType != slc::Type::Edge //just edges for now.
     )
       continue;
     
@@ -398,14 +398,14 @@ void MainWindow::constructionBlendSlot()
   
   Application *application = dynamic_cast<Application *>(qApp);
   assert(application);
-  Project *project = application->getProject();
+  prj::Project *project = application->getProject();
   
-  std::shared_ptr<Feature::Blend> blend(new Feature::Blend());
+  std::shared_ptr<ftr::Blend> blend(new ftr::Blend());
   project->addFeature(blend);
-  project->connect(targetFeatureId, blend->getId(), Feature::InputTypes::target);
+  project->connect(targetFeatureId, blend->getId(), ftr::InputTypes::target);
   blend->setEdgeIds(edgeIds);
   
-  Feature::Base *targetFeature = project->findFeature(targetFeatureId);
+  ftr::Base *targetFeature = project->findFeature(targetFeatureId);
   targetFeature->hide3D();
   viewWidget->clearSelections();
   
@@ -415,15 +415,15 @@ void MainWindow::constructionBlendSlot()
 
 void MainWindow::constructionUnionSlot()
 {
-  const Selection::Containers &selections = viewWidget->getSelections();
+  const slc::Containers &selections = viewWidget->getSelections();
   if (selections.size() < 2)
     return;
   
   //for now only accept objects.
   if
   (
-    selections.at(0).selectionType != Selection::Type::Object ||
-    selections.at(1).selectionType != Selection::Type::Object
+    selections.at(0).selectionType != slc::Type::Object ||
+    selections.at(1).selectionType != slc::Type::Object
   )
     return;
     
@@ -432,17 +432,17 @@ void MainWindow::constructionUnionSlot()
   
   Application *application = dynamic_cast<Application *>(qApp);
   assert(application);
-  Project *project = application->getProject();
+  prj::Project *project = application->getProject();
   
   project->findFeature(targetFeatureId)->hide3D();
   project->findFeature(toolFeatureId)->hide3D();
   viewWidget->clearSelections();
   
   //union keyword. whoops
-  std::shared_ptr<Feature::Union> onion(new Feature::Union());
+  std::shared_ptr<ftr::Union> onion(new ftr::Union());
   project->addFeature(onion);
-  project->connect(targetFeatureId, onion->getId(), Feature::InputTypes::target);
-  project->connect(toolFeatureId, onion->getId(), Feature::InputTypes::tool);
+  project->connect(targetFeatureId, onion->getId(), ftr::InputTypes::target);
+  project->connect(toolFeatureId, onion->getId(), ftr::InputTypes::tool);
   
   project->update();
   project->updateVisual();
@@ -452,7 +452,7 @@ void MainWindow::constructionUnionSlot()
 
 void MainWindow::preferencesSlot()
 {
-  std::unique_ptr<Preferences::Dialog> dialog(new Preferences::Dialog(dynamic_cast<Application *>(qApp)->getPreferencesManager()));
+  std::unique_ptr<prf::Dialog> dialog(new prf::Dialog(dynamic_cast<Application *>(qApp)->getPreferencesManager()));
   dialog->setModal(true);
   if (!dialog->exec())
     return;
@@ -460,7 +460,7 @@ void MainWindow::preferencesSlot()
   {
     Application *application = dynamic_cast<Application *>(qApp);
     assert(application);
-    Project *project = application->getProject();
+    prj::Project *project = application->getProject();
     project->setAllVisualDirty();
     project->updateVisual();
   }
@@ -470,9 +470,9 @@ void MainWindow::removeSlot()
 {
   Application *application = dynamic_cast<Application *>(qApp);
   assert(application);
-  Project *project = application->getProject();
+  prj::Project *project = application->getProject();
   
-  Selection::Containers selections = viewWidget->getSelections();
+  slc::Containers selections = viewWidget->getSelections();
   viewWidget->clearSelections();
   for (const auto &current : selections)
     project->removeFeature(current.featureId);

@@ -31,7 +31,7 @@ GLEventWidget::GLEventWidget(const QGLFormat& format, QWidget* parent, const QGL
 
 bool GLEventWidget::event(QEvent* event)
 {
-    if (event->type() == Spaceball::MotionEvent::Type)
+    if (event->type() == spb::MotionEvent::Type)
     {
 //        std::cout << "inside event widget" << std::endl;
         osg::ref_ptr<osgGA::GUIEventAdapter> osgEvent = _gw->getEventQueue()->createEvent();
@@ -46,9 +46,9 @@ bool GLEventWidget::event(QEvent* event)
 osg::ref_ptr<SpaceballOSGEvent> GLEventWidget::convertEvent(QEvent* qEvent)
 {
     osg::ref_ptr<SpaceballOSGEvent> osgEvent = new SpaceballOSGEvent();
-    if (qEvent->type() == Spaceball::MotionEvent::Type)
+    if (qEvent->type() == spb::MotionEvent::Type)
     {
-        Spaceball::MotionEvent *spaceQEvent = dynamic_cast<Spaceball::MotionEvent *>(qEvent);
+        spb::MotionEvent *spaceQEvent = dynamic_cast<spb::MotionEvent *>(qEvent);
         osgEvent->theType = SpaceballOSGEvent::Motion;
         osgEvent->translationX = spaceQEvent->translationX();
         osgEvent->translationY = spaceQEvent->translationY();

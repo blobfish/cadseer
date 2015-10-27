@@ -30,7 +30,7 @@
 #include <selection/definitions.h>
 #include <message/message.h>
 
-namespace Selection
+namespace slc
 {
 class Selected
 {
@@ -110,7 +110,7 @@ protected:
     void requestSelectionAdditionDispatched(const msg::Message &);
     void requestSelectionSubtractionDispatched(const msg::Message &);
     void requestSelectionClearDispatched(const msg::Message &);
-    Selection::Container buildContainer(const msg::Message &);
+    slc::Container buildContainer(const msg::Message &);
 };
 
 class getGeometryFromIds : public osg::NodeVisitor

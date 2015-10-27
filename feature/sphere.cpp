@@ -23,7 +23,7 @@
 
 #include "sphere.h"
 
-using namespace Feature;
+using namespace ftr;
 using namespace boost::uuids;
 
 enum class FeatureTag

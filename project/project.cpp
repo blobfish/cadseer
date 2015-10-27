@@ -39,7 +39,8 @@
 #include <message/message.h>
 #include <message/dispatch.h>
 
-using namespace ProjectGraph;
+using namespace prj;
+using namespace prg;
 using boost::uuids::uuid;
 
 Project::Project()
@@ -83,7 +84,7 @@ void Project::update()
     if (projectGraph[currentVertex].feature->isModelClean())
       continue;
     
-    Feature::UpdateMap updateMap;
+    ftr::UpdateMap updateMap;
     InEdgeIterator inEdgeIt, inEdgeItDone;
     boost::tie(inEdgeIt, inEdgeItDone) = boost::in_edges(currentVertex, projectGraph);
     for(;inEdgeIt != inEdgeItDone; ++inEdgeIt)
@@ -165,12 +166,12 @@ void Project::readOCC(const std::string &fileName)
     }
 }
 
-Feature::Base* Project::findFeature(const uuid &idIn)
+ftr::Base* Project::findFeature(const uuid &idIn)
 {
   return projectGraph[findVertex(idIn)].feature.get();
 }
 
-ProjectGraph::Vertex Project::findVertex(const uuid& idIn)
+prg::Vertex Project::findVertex(const uuid& idIn)
 {
   IdVertexMap::const_iterator it;
   it = map.find(idIn);
@@ -180,11 +181,11 @@ ProjectGraph::Vertex Project::findVertex(const uuid& idIn)
 
 void Project::addOCCShape(const TopoDS_Shape &shapeIn)
 {
-  std::shared_ptr<Feature::Inert> inert(new Feature::Inert(shapeIn));
+  std::shared_ptr<ftr::Inert> inert(new ftr::Inert(shapeIn));
   addFeature(inert);
 }
 
-void Project::addFeature(std::shared_ptr<Feature::Base> feature)
+void Project::addFeature(std::shared_ptr<ftr::Base> feature)
 {
   //no pre message.
   
@@ -204,7 +205,7 @@ void Project::addFeature(std::shared_ptr<Feature::Base> feature)
 void Project::removeFeature(const uuid& idIn)
 {
   Vertex vertex = findVertex(idIn);
-  std::shared_ptr<Feature::Base> feature = projectGraph[vertex].feature;
+  std::shared_ptr<ftr::Base> feature = projectGraph[vertex].feature;
   
   feature->setModelDirty(); //this will make all children dirty.
   projectGraph[vertex].connection.disconnect();
@@ -217,7 +218,7 @@ void Project::removeFeature(const uuid& idIn)
     Vertex targetParent = boost::graph_traits<Graph>::null_vertex();
     for (const auto &current : parents)
     {
-      if (projectGraph[current.second].inputType == Feature::InputTypes::target)
+      if (projectGraph[current.second].inputType == ftr::InputTypes::target)
       {
 	targetParent = current.first;
 	break;
@@ -279,7 +280,7 @@ void Project::setFeatureActive(const uuid& idIn)
     blockVector.push_back(currentBlock);
   }
   
-  ProjectGraph::Vertex vertex = findVertex(idIn);
+  prg::Vertex vertex = findVertex(idIn);
   
   GraphReversed rGraph = boost::make_reverse_graph(projectGraph);
   
@@ -329,7 +330,7 @@ void Project::updateLeafStatus()
   }
 }
 
-void Project::connect(const boost::uuids::uuid& parentIn, const boost::uuids::uuid& childIn, Feature::InputTypes type)
+void Project::connect(const boost::uuids::uuid& parentIn, const boost::uuids::uuid& childIn, ftr::InputTypes type)
 {
   Vertex parent = map.at(parentIn);
   Vertex child = map.at(childIn);
@@ -348,7 +349,7 @@ void Project::connect(const boost::uuids::uuid& parentIn, const boost::uuids::uu
 
 void Project::stateChangedSlot(const uuid& featureIdIn, std::size_t stateIn)
 {
-  if (stateIn != Feature::StateOffset::ModelDirty)
+  if (stateIn != ftr::StateOffset::ModelDirty)
     return;
   indexVerticesEdges();
   
@@ -362,7 +363,7 @@ void Project::stateChangedSlot(const uuid& featureIdIn, std::size_t stateIn)
     blockVector.push_back(currentBlock);
   }
   
-  ProjectGraph::Vertex vertex = findVertex(featureIdIn);
+  prg::Vertex vertex = findVertex(featureIdIn);
   SetDirtyVisitor visitor;
   boost::breadth_first_search(projectGraph, vertex, boost::visitor(visitor));
 }
@@ -440,7 +441,7 @@ void Project::indexVerticesEdges()
   }
 }
 
-Edge Project::connect(Vertex parentIn, Vertex childIn, Feature::InputTypes type)
+Edge Project::connect(Vertex parentIn, Vertex childIn, ftr::InputTypes type)
 {
   Edge edge = connectVertices(parentIn, childIn, type);
   
@@ -456,7 +457,7 @@ Edge Project::connect(Vertex parentIn, Vertex childIn, Feature::InputTypes type)
   return edge;
 }
 
-Edge Project::connectVertices(Vertex parent, Vertex child, Feature::InputTypes type)
+Edge Project::connectVertices(Vertex parent, Vertex child, ftr::InputTypes type)
 {
   bool results;
   Edge newEdge;
@@ -474,7 +475,7 @@ void Project::setAllVisualDirty()
   }
 }
 
-Project::VertexEdgePairs Project::getParents(ProjectGraph::Vertex vertexIn)
+Project::VertexEdgePairs Project::getParents(prg::Vertex vertexIn)
 {
   VertexEdgePairs out;
   InEdgeIterator inEdgeIt, inEdgeItDone;
@@ -489,7 +490,7 @@ Project::VertexEdgePairs Project::getParents(ProjectGraph::Vertex vertexIn)
   return out;
 }
 
-Project::VertexEdgePairs Project::getChildren(ProjectGraph::Vertex vertexIn)
+Project::VertexEdgePairs Project::getChildren(prg::Vertex vertexIn)
 {
   VertexEdgePairs out;
   OutEdgeIterator outEdgeIt, outEdgeItDone;

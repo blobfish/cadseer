@@ -30,7 +30,7 @@
 #include <TopAbs_ShapeEnum.hxx>
 #include <TopoDS_Shape.hxx>
 
-namespace ConnectorGraph
+namespace cng
 {
 struct VertexProperty
 {

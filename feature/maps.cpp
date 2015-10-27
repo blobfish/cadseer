@@ -24,7 +24,7 @@
 #include "../globalutilities.h"
 #include "maps.h"
 
-using namespace Feature;
+using namespace ftr; //needed for parameters.
 
 static const std::vector<std::string> shapeStrings
 ({
@@ -39,13 +39,13 @@ static const std::vector<std::string> shapeStrings
      "Shape",
  });
 
-ostream& Feature::operator<<(ostream& os, const EvolutionRecord& record)
+ostream& ftr::operator<<(ostream& os, const EvolutionRecord& record)
 {
   os << boost::uuids::to_string(record.inId) << "      " << boost::uuids::to_string(record.outId) << std::endl;
   return os;
 }
 
-ostream& Feature::operator<<(ostream& os, const EvolutionContainer& container)
+ostream& ftr::operator<<(ostream& os, const EvolutionContainer& container)
 {
   typedef EvolutionContainer::index<EvolutionRecord::ByInId>::type List;
   const List &list = container.get<EvolutionRecord::ByInId>();
@@ -54,7 +54,7 @@ ostream& Feature::operator<<(ostream& os, const EvolutionContainer& container)
   return os;
 }
 
-bool Feature::hasInId(const EvolutionContainer& containerIn, const boost::uuids::uuid& inIdIn)
+bool ftr::hasInId(const EvolutionContainer& containerIn, const boost::uuids::uuid& inIdIn)
 {
   typedef EvolutionContainer::index<EvolutionRecord::ByInId>::type List;
   const List &list = containerIn.get<EvolutionRecord::ByInId>();
@@ -62,7 +62,7 @@ bool Feature::hasInId(const EvolutionContainer& containerIn, const boost::uuids:
   return (it != list.end());
 }
 
-const EvolutionRecord& Feature::findRecordByIn(const EvolutionContainer& containerIn, const boost::uuids::uuid& inIdIn)
+const EvolutionRecord& ftr::findRecordByIn(const EvolutionContainer& containerIn, const boost::uuids::uuid& inIdIn)
 {
   typedef EvolutionContainer::index<EvolutionRecord::ByInId>::type List;
   const List &list = containerIn.get<EvolutionRecord::ByInId>();
@@ -70,7 +70,7 @@ const EvolutionRecord& Feature::findRecordByIn(const EvolutionContainer& contain
   return *it;
 }
 
-std::ostream& Feature::operator<<(std::ostream& os, const ResultRecord& record)
+std::ostream& ftr::operator<<(std::ostream& os, const ResultRecord& record)
 {
   os << boost::uuids::to_string(record.id) << "      " << 
     GU::getShapeHash(record.shape) << "      " <<
@@ -78,7 +78,7 @@ std::ostream& Feature::operator<<(std::ostream& os, const ResultRecord& record)
   return os;
 }
 
-std::ostream& Feature::operator<<(std::ostream& os, const ResultContainer& container)
+std::ostream& ftr::operator<<(std::ostream& os, const ResultContainer& container)
 {
   typedef ResultContainer::index<ResultRecord::ById>::type List;
   const List &list = container.get<ResultRecord::ById>();
@@ -87,7 +87,7 @@ std::ostream& Feature::operator<<(std::ostream& os, const ResultContainer& conta
   return os;
 }
 
-const ResultRecord& Feature::findResultByShape(const ResultContainer& containerIn, const TopoDS_Shape& shapeIn)
+const ResultRecord& ftr::findResultByShape(const ResultContainer& containerIn, const TopoDS_Shape& shapeIn)
 {
   typedef ResultContainer::index<ResultRecord::ByShape>::type List;
   const List &list = containerIn.get<ResultRecord::ByShape>();
@@ -96,7 +96,7 @@ const ResultRecord& Feature::findResultByShape(const ResultContainer& containerI
   return *it;
 }
 
-bool Feature::hasResult(const ResultContainer& containerIn, const TopoDS_Shape& shapeIn)
+bool ftr::hasResult(const ResultContainer& containerIn, const TopoDS_Shape& shapeIn)
 {
   typedef ResultContainer::index<ResultRecord::ByShape>::type List;
   const List &list = containerIn.get<ResultRecord::ByShape>();
@@ -104,7 +104,7 @@ bool Feature::hasResult(const ResultContainer& containerIn, const TopoDS_Shape& 
   return (it != list.end());
 }
 
-bool Feature::hasResult(const ResultContainer& containerIn, const boost::uuids::uuid& idIn)
+bool ftr::hasResult(const ResultContainer& containerIn, const boost::uuids::uuid& idIn)
 {
   typedef ResultContainer::index<ResultRecord::ById>::type List;
   const List &list = containerIn.get<ResultRecord::ById>();
@@ -112,7 +112,7 @@ bool Feature::hasResult(const ResultContainer& containerIn, const boost::uuids::
   return (it != list.end());
 }
 
-const ResultRecord& Feature::findResultById(const ResultContainer& containerIn, const boost::uuids::uuid& idIn)
+const ResultRecord& ftr::findResultById(const ResultContainer& containerIn, const boost::uuids::uuid& idIn)
 {
   typedef ResultContainer::index<ResultRecord::ById>::type List;
   const List &list = containerIn.get<ResultRecord::ById>();
@@ -121,7 +121,7 @@ const ResultRecord& Feature::findResultById(const ResultContainer& containerIn, 
   return *it;
 }
 
-void Feature::updateShapeById(ResultContainer& containerIn, const boost::uuids::uuid& idIn, const TopoDS_Shape& shapeIn)
+void ftr::updateShapeById(ResultContainer& containerIn, const boost::uuids::uuid& idIn, const TopoDS_Shape& shapeIn)
 {
   typedef ResultContainer::index<ResultRecord::ById>::type List;
   List &list = containerIn.get<ResultRecord::ById>();
@@ -132,7 +132,7 @@ void Feature::updateShapeById(ResultContainer& containerIn, const boost::uuids::
   list.replace(it, record);
 }
 
-void Feature::updateId(ResultContainer& containerIn, const boost::uuids::uuid& idIn, const TopoDS_Shape& shapeIn)
+void ftr::updateId(ResultContainer& containerIn, const boost::uuids::uuid& idIn, const TopoDS_Shape& shapeIn)
 {
   typedef ResultContainer::index<ResultRecord::ByShape>::type List;
   List &list = containerIn.get<ResultRecord::ByShape>();
@@ -143,7 +143,7 @@ void Feature::updateId(ResultContainer& containerIn, const boost::uuids::uuid& i
   list.replace(it, record);
 }
 
-std::tuple<int, int, int> Feature::stats(ResultContainer& containerIn, const TopoDS_Shape &shapeIn)
+std::tuple<int, int, int> ftr::stats(ResultContainer& containerIn, const TopoDS_Shape &shapeIn)
 {
   int equalCount = 0;
   int sameCount = 0;
@@ -164,13 +164,13 @@ std::tuple<int, int, int> Feature::stats(ResultContainer& containerIn, const Top
   return std::make_tuple(equalCount, sameCount, partnerCount);
 }
 
-ostream& Feature::operator<<(ostream& os, const FeatureRecord& record)
+ostream& ftr::operator<<(ostream& os, const FeatureRecord& record)
 {
   os << boost::uuids::to_string(record.id) << "      " << record.tag << std::endl;
   return os;
 }
 
-ostream& Feature::operator<<(ostream& os, const Feature::FeatureContainer& container)
+ostream& ftr::operator<<(ostream& os, const FeatureContainer& container)
 {
   typedef FeatureContainer::index<FeatureRecord::ById>::type List;
   const List &list = container.get<FeatureRecord::ById>();
@@ -179,7 +179,7 @@ ostream& Feature::operator<<(ostream& os, const Feature::FeatureContainer& conta
   return os;
 }
 
-const FeatureRecord& Feature::findFeatureByTag(const FeatureContainer &containerIn, const std::string &featureTagIn)
+const FeatureRecord& ftr::findFeatureByTag(const FeatureContainer &containerIn, const std::string &featureTagIn)
 {
   typedef FeatureContainer::index<FeatureRecord::ByTag>::type List;
   const List &list = containerIn.get<FeatureRecord::ByTag>();

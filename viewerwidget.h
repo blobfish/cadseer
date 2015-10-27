@@ -41,8 +41,8 @@ public:
     virtual void paintEvent(QPaintEvent* event);
     void update();
     osg::Group* getRoot(){return root;}
-    Selection::EventHandler* getSelectionEventHandler(){return selectionHandler.get();}
-    const Selection::Containers& getSelections() const {return selectionHandler->getSelections();}
+    slc::EventHandler* getSelectionEventHandler(){return selectionHandler.get();}
+    const slc::Containers& getSelections() const {return selectionHandler->getSelections();}
     void clearSelections() const {selectionHandler->clearSelections();}
     
     //new messaging system
@@ -69,7 +69,7 @@ protected:
     QTimer _timer;
     osg::ref_ptr<osg::Group> root;
     osg::ref_ptr<osg::Switch> infoSwitch;
-    osg::ref_ptr<Selection::EventHandler> selectionHandler;
+    osg::ref_ptr<slc::EventHandler> selectionHandler;
     osg::ref_ptr<osgGA::SpaceballManipulator> spaceballManipulator;
     int glWidgetWidth;
     int glWidgetHeight;

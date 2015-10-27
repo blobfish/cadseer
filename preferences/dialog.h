@@ -24,7 +24,7 @@
 
 namespace Ui{ class dialog; }
 
-namespace Preferences
+namespace prf
 {
   class Manager;
   

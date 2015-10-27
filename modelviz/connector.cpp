@@ -34,14 +34,14 @@
 #include "../globalutilities.h"
 #include "connector.h"
 
-using namespace ModelViz;
-using namespace ConnectorGraph;
+using namespace mdv;
+using namespace cng;
 using namespace boost::uuids;
 
-void Connector::buildStartNode(const TopoDS_Shape &shapeIn, const Feature::ResultContainer &resultContainerIn)
+void Connector::buildStartNode(const TopoDS_Shape &shapeIn, const ftr::ResultContainer &resultContainerIn)
 {
-    uuid shapeId = Feature::findResultByShape(resultContainerIn, shapeIn).id;
-    ConnectorGraph::IdVertexMap::iterator it = vertexMap.find(shapeId);
+    uuid shapeId = findResultByShape(resultContainerIn, shapeIn).id;
+    cng::IdVertexMap::iterator it = vertexMap.find(shapeId);
     Vertex previous;
     bool firstNode = vertexStack.empty();
     if (!firstNode)
@@ -58,10 +58,10 @@ void Connector::buildStartNode(const TopoDS_Shape &shapeIn, const Feature::Resul
         connectVertices(previous, vertexStack.top());
 }
 
-void Connector::buildAddShape(const TopoDS_Shape &shapeIn, const Feature::ResultContainer &resultContainerIn)
+void Connector::buildAddShape(const TopoDS_Shape &shapeIn, const ftr::ResultContainer &resultContainerIn)
 {
     assert(!vertexStack.empty());
-    graph[vertexStack.top()].id = Feature::findResultByShape(resultContainerIn, shapeIn).id;
+    graph[vertexStack.top()].id = findResultByShape(resultContainerIn, shapeIn).id;
     graph[vertexStack.top()].shapeType = shapeIn.ShapeType();
     graph[vertexStack.top()].shape = shapeIn;
     vertexMap.insert(std::make_pair(graph[vertexStack.top()].id, vertexStack.top()));
@@ -72,7 +72,7 @@ void Connector::buildEndNode()
     vertexStack.pop();
 }
 
-void Connector::connectVertices(ConnectorGraph::Vertex from, ConnectorGraph::Vertex to)
+void Connector::connectVertices(cng::Vertex from, cng::Vertex to)
 {
     bool edgeResult;
     Edge edge;
@@ -83,18 +83,18 @@ void Connector::connectVertices(ConnectorGraph::Vertex from, ConnectorGraph::Ver
 std::vector<boost::uuids::uuid> Connector::useGetParentsOfType
   (const boost::uuids::uuid &idIn, const TopAbs_ShapeEnum &shapeTypeIn) const
 {
-    ConnectorGraph::Graph temp = graph;
-    ConnectorGraph::GraphReversed reversed = boost::make_reverse_graph(temp);
+    cng::Graph temp = graph;
+    cng::GraphReversed reversed = boost::make_reverse_graph(temp);
 
-    ConnectorGraph::IdVertexMap::const_iterator it;
+    cng::IdVertexMap::const_iterator it;
     it = vertexMap.find(idIn);
     assert(it != vertexMap.end());
 
-    std::vector<ConnectorGraph::Vertex> vertices;
+    std::vector<cng::Vertex> vertices;
     TypeCollectionVisitor vis(shapeTypeIn, vertices);
     boost::breadth_first_search(reversed, it->second, boost::visitor(vis));
 
-    std::vector<ConnectorGraph::Vertex>::const_iterator vit;
+    std::vector<cng::Vertex>::const_iterator vit;
     std::vector<uuid> idsOut;
     for (vit = vertices.begin(); vit != vertices.end(); ++vit)
         idsOut.push_back(reversed[*vit].id);
@@ -104,15 +104,15 @@ std::vector<boost::uuids::uuid> Connector::useGetParentsOfType
 std::vector<boost::uuids::uuid> Connector::useGetChildrenOfType
   (const boost::uuids::uuid &idIn, const TopAbs_ShapeEnum &shapeType) const
 {
-    ConnectorGraph::IdVertexMap::const_iterator it;
+    cng::IdVertexMap::const_iterator it;
     it = vertexMap.find(idIn);
     assert(it != vertexMap.end());
 
-    std::vector<ConnectorGraph::Vertex> vertices;
+    std::vector<cng::Vertex> vertices;
     TypeCollectionVisitor vis(shapeType, vertices);
     boost::breadth_first_search(graph, it->second, boost::visitor(vis));
 
-    std::vector<ConnectorGraph::Vertex>::const_iterator vit;
+    std::vector<cng::Vertex>::const_iterator vit;
     std::vector<uuid> idsOut;
     for (vit = vertices.begin(); vit != vertices.end(); ++vit)
         idsOut.push_back(graph[*vit].id);
@@ -122,20 +122,20 @@ std::vector<boost::uuids::uuid> Connector::useGetChildrenOfType
 boost::uuids::uuid Connector::useGetWire
   (const boost::uuids::uuid &edgeIdIn, const boost::uuids::uuid &faceIdIn) const
 {
-    ConnectorGraph::IdVertexMap::const_iterator it;
+    cng::IdVertexMap::const_iterator it;
     it = vertexMap.find(edgeIdIn);
     assert(it != vertexMap.end());
-    ConnectorGraph::Vertex edgeVertex = it->second;
+    cng::Vertex edgeVertex = it->second;
 
     it = vertexMap.find(faceIdIn);
     assert(it != vertexMap.end());
-    ConnectorGraph::Vertex faceVertex = it->second;
+    cng::Vertex faceVertex = it->second;
 
-    ConnectorGraph::Vertex wireVertex;
-    ConnectorGraph::VertexAdjacencyIterator wireIt, wireItEnd;
+    cng::Vertex wireVertex;
+    cng::VertexAdjacencyIterator wireIt, wireItEnd;
     for (boost::tie(wireIt, wireItEnd) = boost::adjacent_vertices(faceVertex, graph); wireIt != wireItEnd; ++wireIt)
     {
-        ConnectorGraph::VertexAdjacencyIterator edgeIt, edgeItEnd;
+        cng::VertexAdjacencyIterator edgeIt, edgeItEnd;
         for (boost::tie(edgeIt, edgeItEnd) = boost::adjacent_vertices((*wireIt), graph); edgeIt != edgeItEnd; ++edgeIt)
         {
             if (edgeVertex == (*edgeIt))
@@ -150,8 +150,8 @@ boost::uuids::uuid Connector::useGetWire
 
 uuid Connector::useGetRoot() const
 {
-  std::vector<ConnectorGraph::Vertex> roots;
-  BGL_FORALL_VERTICES(currentVertex, graph, ConnectorGraph::Graph)
+  std::vector<cng::Vertex> roots;
+  BGL_FORALL_VERTICES(currentVertex, graph, cng::Graph)
   {
     if (boost::in_degree(currentVertex, graph) == 0)
       roots.push_back(currentVertex);
@@ -184,7 +184,7 @@ bool Connector::useIsEdgeOfFace(const uuid& edgeIn, const uuid& faceIn) const
 //do I really  need this?
 TopoDS_Shape Connector::getShape(const boost::uuids::uuid &idIn) const
 {
-    ConnectorGraph::IdVertexMap::const_iterator it;
+    cng::IdVertexMap::const_iterator it;
     it = vertexMap.find(idIn);
     assert(it != vertexMap.end());
     return graph[it->second].shape;
@@ -195,7 +195,7 @@ void Connector::outputGraphviz()
     std::ofstream file("/home/tanderson/temp/connector.dot");
 
     //forward graph
-    boost::write_graphviz(file, graph, Node_writer<ConnectorGraph::Graph>(graph), boost::default_writer());
+    boost::write_graphviz(file, graph, Node_writer<cng::Graph>(graph), boost::default_writer());
 
     //reversed graph
 //    ConnectorGraph::GraphReversed reversed = boost::make_reverse_graph(graph);
@@ -324,19 +324,19 @@ std::vector< osg::Vec3d > Connector::useGetNearestPoint(const uuid &shapeIn, con
 //through maps. However, here we are using topods_iterator which finds both
 //edges of a seam. so when we look for the shape in the
 //result map we fail as one of the 2 seam edges isn't in the map.
-BuildConnector::BuildConnector(const TopoDS_Shape &shapeIn, const Feature::ResultContainer &resultContainerIn) : connector()
+BuildConnector::BuildConnector(const TopoDS_Shape &shapeIn, const ftr::ResultContainer &resultContainerIn) : connector()
 {
     connector.buildStartNode(shapeIn, resultContainerIn);
     buildRecursiveConnector(shapeIn, resultContainerIn);
     connector.buildEndNode();
 }
 
-void BuildConnector::buildRecursiveConnector(const TopoDS_Shape &shapeIn, const Feature::ResultContainer &resultContainerIn)
+void BuildConnector::buildRecursiveConnector(const TopoDS_Shape &shapeIn, const ftr::ResultContainer &resultContainerIn)
 {
     for (TopoDS_Iterator it(shapeIn); it.More(); it.Next())
     {
         const TopoDS_Shape &currentShape = it.Value();
-        if (!(Feature::hasResult(resultContainerIn, currentShape)))
+        if (!(hasResult(resultContainerIn, currentShape)))
           continue; //yuck. see note above. probably seam edge.
 
         connector.buildStartNode(currentShape, resultContainerIn);

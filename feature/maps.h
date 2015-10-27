@@ -38,7 +38,7 @@
 
 #include "../globalutilities.h"
 
-namespace Feature
+namespace ftr
 {
   namespace BMI = boost::multi_index;
   

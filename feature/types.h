@@ -24,7 +24,7 @@
 #include <map>
 #include <string>
 
-namespace Feature
+namespace ftr
 {
   //! feature types. make sure and update function below.
   enum class Type
@@ -40,7 +40,7 @@ namespace Feature
     Union //!< feature box class.
   };
   
-  inline const static std::string& getTypeString(Type typeIn)
+  inline const static std::string& toString(Type typeIn)
   {
     typedef std::map<Type, const std::string> LocalMap;
     const static LocalMap strings = 
