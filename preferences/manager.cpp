@@ -20,11 +20,11 @@
 #include <iostream>
 #include <fstream>
 
-#include "../application.h"
+#include <application.h>
 #include <QDir>
 
-#include "preferencesXML.h"
-#include "manager.h"
+#include <preferences/preferencesXML.h>
+#include <preferences/manager.h>
 
 //xml, xsd validation website.
 //http://www.utilities-online.info/xsdvalidation/#.Vf2u9ZOVvts
@@ -44,7 +44,7 @@ Manager::Manager()
 {
   ok = false;
   
-  appDirectory = static_cast<Application*>(qApp)->getApplicationDirectory();
+  appDirectory = static_cast<app::Application*>(qApp)->getApplicationDirectory();
   fileNameXML = "preferences.xml";
   filePathXML = appDirectory.absolutePath() + QDir::separator() + fileNameXML;
   filePathXSD = appDirectory.absolutePath() + QDir::separator() + "preferences.xsd";

@@ -27,7 +27,7 @@
 #include <QDialogButtonBox>
 #include <QLocale>
 
-#include "boxdialog.h"
+#include <dialogs/boxdialog.h>
 
 BoxDialog::BoxDialog(QWidget* parent): QDialog(parent)
 {

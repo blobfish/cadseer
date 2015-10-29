@@ -17,7 +17,7 @@
  *
  */
 
-#include "spaceballqevent.h"
+#include <viewer/spaceballqevent.h>
 
 using namespace spb;
 

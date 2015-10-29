@@ -20,6 +20,8 @@
 #include <iostream>
 #include <assert.h>
 
+#include <boost/uuid/string_generator.hpp>
+
 #include <osg/Geometry>
 #include <osg/View>
 #include <osgViewer/View>
@@ -47,8 +49,8 @@ std::ostream& slc::operator<<(std::ostream& os, const Container& container)
 {
   os << 
     "type is: " << getNameOfType(container.selectionType) << 
-    "      featureid is: " << GU::idToString(container.featureId) <<
-    "      id is: " << GU::idToString(container.shapeId) << std::endl;
+    "      featureid is: " << boost::uuids::to_string(container.featureId) <<
+    "      id is: " << boost::uuids::to_string(container.shapeId) << std::endl;
   return os;
 }
 
@@ -256,7 +258,7 @@ bool EventHandler::buildPreSelection(slc::Container &container,
     
     auto processWire = [this, &container, &intersection](const uuid &featureId) -> bool
     {
-      const ftr::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(featureId);
+      const ftr::Base *feature = dynamic_cast<app::Application *>(qApp)->getProject()->findFeature(featureId);
       assert(feature);
       const mdv::Connector &connector = feature->getConnector();
       
@@ -342,7 +344,7 @@ bool EventHandler::buildPreSelection(slc::Container &container,
         }
         else if (canSelectShells(selectionMask))
         {
-            const ftr::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(featureId);
+            const ftr::Base *feature = dynamic_cast<app::Application *>(qApp)->getProject()->findFeature(featureId);
             assert(feature);
             const mdv::Connector &connector = feature->getConnector();
             std::vector<uuid> shells = connector.useGetParentsOfType(selectedId, TopAbs_SHELL);
@@ -366,7 +368,7 @@ bool EventHandler::buildPreSelection(slc::Container &container,
         }
         else if (canSelectSolids(selectionMask))
         {
-            const ftr::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(featureId);
+            const ftr::Base *feature = dynamic_cast<app::Application *>(qApp)->getProject()->findFeature(featureId);
             assert(feature);
             const mdv::Connector &connector = feature->getConnector();
             std::vector<uuid> solids = connector.useGetParentsOfType(selectedId, TopAbs_SOLID);
@@ -390,7 +392,7 @@ bool EventHandler::buildPreSelection(slc::Container &container,
         }
         else if (canSelectObjects(selectionMask))
         {
-          const ftr::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(featureId);
+          const ftr::Base *feature = dynamic_cast<app::Application *>(qApp)->getProject()->findFeature(featureId);
           assert(feature);
           const mdv::Connector &connector = feature->getConnector();
           uuid object = connector.useGetRoot();
@@ -416,7 +418,7 @@ bool EventHandler::buildPreSelection(slc::Container &container,
     case NodeMaskDef::edge:
 	if (canSelectPoints(selectionMask))
 	{
-	  const ftr::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(featureId);
+	  const ftr::Base *feature = dynamic_cast<app::Application *>(qApp)->getProject()->findFeature(featureId);
           assert(feature);
           const mdv::Connector &connector = feature->getConnector();
 	  osg::Vec3d iPoint = intersection->getWorldIntersectPoint();
@@ -612,7 +614,7 @@ Container EventHandler::buildContainer(const msg::Message &messageIn)
   assert(!sMessage.featureId.is_nil());
   
   slc::Container container;
-  const ftr::Base *feature = dynamic_cast<Application *>(qApp)->getProject()->findFeature(sMessage.featureId);
+  const ftr::Base *feature = dynamic_cast<app::Application *>(qApp)->getProject()->findFeature(sMessage.featureId);
   assert(feature);
   const mdv::Connector &connector = feature->getConnector();
   //only object supported at this time.
@@ -817,7 +819,7 @@ void getGeometryFromIds::apply(osg::Geode &aGeode)
     std::string selectedIdString;
     if (!aGeode.getUserValue(GU::idAttributeTitle, selectedIdString))
         assert(0);
-    uuid selectedId = GU::stringToId(selectedIdString);
+    uuid selectedId = string_generator()(selectedIdString);
     //consider switching connector and this visitor to a std::set instead of a vector for speed here.
     if (std::find(ids.begin(), ids.end(), selectedId) == ids.end())
     {

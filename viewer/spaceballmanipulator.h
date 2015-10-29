@@ -22,7 +22,7 @@
 
 #include <osgGA/CameraManipulator>
 
-class SpaceballOSGEvent;
+namespace spb{class SpaceballOSGEvent;}
 
 namespace osgGA
 {
@@ -57,8 +57,8 @@ protected:
     //use cam/view properties to derive transformations, but at some point the
     //spaceball numbers have to be meshed in. sensitivity mutations should be done to the
     //events before arriving here to be processed.
-    void goOrtho(const SpaceballOSGEvent *event);
-    void goPerspective(const SpaceballOSGEvent *event);
+    void goOrtho(const spb::SpaceballOSGEvent *event);
+    void goPerspective(const spb::SpaceballOSGEvent *event);
     void getProjectionData();
     void getViewData();
     void scaleView(double scaleFactor);//used for ortho zoom.

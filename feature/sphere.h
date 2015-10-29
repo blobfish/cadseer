@@ -20,7 +20,7 @@
 #ifndef SPHERE_H
 #define SPHERE_H
 
-#include "csysbase.h"
+#include <feature/csysbase.h>
 
 class BRepPrimAPI_MakeSphere;
 

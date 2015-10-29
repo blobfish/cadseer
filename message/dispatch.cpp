@@ -19,7 +19,7 @@
 
 #include <iostream>
 
-#include "dispatch.h"
+#include <message/dispatch.h>
 
 using namespace msg;
 

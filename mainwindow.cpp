@@ -25,26 +25,27 @@
 #include <QHBoxLayout>
 #include <QFileDialog>
 #include <QSplitter>
+#include <QDir>
 
 #include <BRepTools.hxx>
 
-#include "mainwindow.h"
-#include "dagview/dagmodel.h"
-#include "dagview/dagview.h"
-#include "application.h"
-#include "ui_mainwindow.h"
-#include "viewerwidget.h"
+#include <mainwindow.h>
+#include <dagview/dagmodel.h>
+#include <dagview/dagview.h>
+#include <application.h>
+#include <ui_mainwindow.h>
+#include <viewer/viewerwidget.h>
 #include <selection/manager.h>
-#include "project/project.h"
-#include "command/commandmanager.h"
-#include "feature/box.h"
-#include "feature/sphere.h"
-#include "feature/cone.h"
-#include "feature/cylinder.h"
-#include "feature/blend.h"
-#include "feature/union.h"
-#include "dialogs/boxdialog.h"
-#include "preferences/dialog.h"
+#include <project/project.h>
+#include <command/manager.h>
+#include <feature/box.h>
+#include <feature/sphere.h>
+#include <feature/cone.h>
+#include <feature/cylinder.h>
+#include <feature/blend.h>
+#include <feature/union.h>
+#include <dialogs/boxdialog.h>
+#include <preferences/dialog.h>
 #include <message/dispatch.h>
 
 using boost::uuids::uuid;
@@ -96,7 +97,7 @@ MainWindow::MainWindow(QWidget *parent) :
     );
 
     prj::Project *project = new prj::Project();
-    Application *application = dynamic_cast<Application *>(qApp);
+    app::Application *application = dynamic_cast<app::Application *>(qApp);
     assert(application);
     application->setProject(project);
     
@@ -123,11 +124,11 @@ MainWindow::~MainWindow()
 void MainWindow::readBrepSlot()
 {
     QString fileName = QFileDialog::getOpenFileName(ui->centralwidget, tr("Open File"),
-                                                    "/home/tanderson/Programming/cadseer/test/files", tr("brep (*.brep *.brp)"));
+                                                    QDir::homePath(), tr("brep (*.brep *.brp)"));
     if (fileName.isEmpty())
         return;
 
-    Application *application = dynamic_cast<Application *>(qApp);
+    app::Application *application = dynamic_cast<app::Application *>(qApp);
     assert(application);
     prj::Project *project = application->getProject();
     project->readOCC(fileName.toStdString());
@@ -139,7 +140,7 @@ void MainWindow::readBrepSlot()
 void MainWindow::writeBrepSlot()
 {
   QString fileName = QFileDialog::getSaveFileName(ui->centralwidget, tr("Save File"),
-                           "/home/tanderson/temp", tr("brep (*.brep *.brp)"));
+                           QDir::homePath(), tr("brep (*.brep *.brp)"));
 
     if (fileName.isEmpty())
         return;
@@ -153,7 +154,7 @@ void MainWindow::writeBrepSlot()
     return;
   }
   
-  Application *application = dynamic_cast<Application *>(qApp);
+  app::Application *application = dynamic_cast<app::Application *>(qApp);
   assert(application);
   prj::Project *project = application->getProject();
   
@@ -201,62 +202,62 @@ void MainWindow::setupCommands()
     QAction *constructionBoxAction = new QAction(qApp);
     connect(constructionBoxAction, SIGNAL(triggered()), this, SLOT(constructionBoxSlot()));
     cmd::Command constructionBoxCommand(cmd::ConstructionBox, "Construct Box", constructionBoxAction);
-    cmd::CommandManager::getManager().addCommand(constructionBoxCommand);
+    cmd::Manager::getManager().addCommand(constructionBoxCommand);
 
     QAction *constructionSphereAction = new QAction(qApp);
     connect(constructionSphereAction, SIGNAL(triggered()), this, SLOT(constructionSphereSlot()));
     cmd::Command constructionSphereCommand(cmd::ConstructionSphere, "Construct Sphere", constructionSphereAction);
-    cmd::CommandManager::getManager().addCommand(constructionSphereCommand);
+    cmd::Manager::getManager().addCommand(constructionSphereCommand);
 
     QAction *constructionConeAction = new QAction(qApp);
     connect(constructionConeAction, SIGNAL(triggered()), this, SLOT(constructionConeSlot()));
     cmd::Command constructionConeCommand(cmd::ConstructionCone, "Construct Cone", constructionConeAction);
-    cmd::CommandManager::getManager().addCommand(constructionConeCommand);
+    cmd::Manager::getManager().addCommand(constructionConeCommand);
     
     QAction *constructionCylinderAction = new QAction(qApp);
     connect(constructionCylinderAction, SIGNAL(triggered(bool)), this, SLOT(constructionCylinderSlot()));
     cmd::Command constructionCylinderCommand(cmd::ConstructionCylinder, "Construct Cylinder", constructionCylinderAction);
-    cmd::CommandManager::getManager().addCommand(constructionCylinderCommand);
+    cmd::Manager::getManager().addCommand(constructionCylinderCommand);
     
     QAction *constructionBlendAction = new QAction(qApp);
     connect(constructionBlendAction, SIGNAL(triggered(bool)), this, SLOT(constructionBlendSlot()));
     cmd::Command constructionBlendCommand(cmd::ConstructionBlend, "Construct Blend", constructionBlendAction);
-    cmd::CommandManager::getManager().addCommand(constructionBlendCommand);
+    cmd::Manager::getManager().addCommand(constructionBlendCommand);
     
     QAction *constructionUnionAction = new QAction(qApp);
     connect(constructionUnionAction, SIGNAL(triggered(bool)), this, SLOT(constructionUnionSlot()));
     cmd::Command constructionUnionCommand(cmd::ConstructionUnion, "Construct Union", constructionUnionAction);
-    cmd::CommandManager::getManager().addCommand(constructionUnionCommand);
+    cmd::Manager::getManager().addCommand(constructionUnionCommand);
     
     QAction *fileImportOCCAction = new QAction(qApp);
     connect(fileImportOCCAction, SIGNAL(triggered(bool)), this, SLOT(readBrepSlot()));
     cmd::Command fileImportOCCCommand(cmd::FileImportOCC, "Import BRep", fileImportOCCAction);
-    cmd::CommandManager::getManager().addCommand(fileImportOCCCommand);
+    cmd::Manager::getManager().addCommand(fileImportOCCCommand);
     
     QAction *fileExportOSGAction = new QAction(qApp);
     connect(fileExportOSGAction, SIGNAL(triggered(bool)), viewWidget, SLOT(writeOSGSlot()));
     cmd::Command fileExportOSGCommand(cmd::FileExportOSG, "Export OSG", fileExportOSGAction);
-    cmd::CommandManager::getManager().addCommand(fileExportOSGCommand);
+    cmd::Manager::getManager().addCommand(fileExportOSGCommand);
     
     QAction *fileExportOCCAction = new QAction(qApp);
     connect(fileExportOCCAction, SIGNAL(triggered(bool)), this, SLOT(writeBrepSlot()));
     cmd::Command fileExportOCCCommand(cmd::FileExportOCC, "Export BRep", fileExportOCCAction);
-    cmd::CommandManager::getManager().addCommand(fileExportOCCCommand);
+    cmd::Manager::getManager().addCommand(fileExportOCCCommand);
     
     QAction *preferencesAction = new QAction(qApp);
     connect(preferencesAction, SIGNAL(triggered(bool)), this, SLOT(preferencesSlot()));
     cmd::Command preferencesCommand(cmd::Preferences, "Preferences", preferencesAction);
-    cmd::CommandManager::getManager().addCommand(preferencesCommand);
+    cmd::Manager::getManager().addCommand(preferencesCommand);
     
     QAction *removeAction = new QAction(qApp);
     connect(removeAction, SIGNAL(triggered(bool)), this, SLOT(removeSlot()));
     cmd::Command removeCommand(cmd::Remove, "Remove", removeAction);
-    cmd::CommandManager::getManager().addCommand(removeCommand);
+    cmd::Manager::getManager().addCommand(removeCommand);
 }
 
 void MainWindow::constructionBoxSlot()
 {
-    Application *application = dynamic_cast<Application *>(qApp);
+    app::Application *application = dynamic_cast<app::Application *>(qApp);
     assert(application);
     prj::Project *project = application->getProject();
     
@@ -316,7 +317,7 @@ void MainWindow::constructionBoxSlot()
 
 void MainWindow::constructionSphereSlot()
 {
-    Application *application = dynamic_cast<Application *>(qApp);
+    app::Application *application = dynamic_cast<app::Application *>(qApp);
     assert(application);
     prj::Project *project = application->getProject();
     
@@ -335,7 +336,7 @@ void MainWindow::constructionSphereSlot()
 
 void MainWindow::constructionConeSlot()
 {
-    Application *application = dynamic_cast<Application *>(qApp);
+    app::Application *application = dynamic_cast<app::Application *>(qApp);
     assert(application);
     prj::Project *project = application->getProject();
     
@@ -356,7 +357,7 @@ void MainWindow::constructionConeSlot()
 
 void MainWindow::constructionCylinderSlot()
 {
-  Application *application = dynamic_cast<Application *>(qApp);
+  app::Application *application = dynamic_cast<app::Application *>(qApp);
   assert(application);
   prj::Project *project = application->getProject();
   
@@ -396,7 +397,7 @@ void MainWindow::constructionBlendSlot()
     edgeIds.push_back(currentSelection.shapeId);
   }
   
-  Application *application = dynamic_cast<Application *>(qApp);
+  app::Application *application = dynamic_cast<app::Application *>(qApp);
   assert(application);
   prj::Project *project = application->getProject();
   
@@ -430,7 +431,7 @@ void MainWindow::constructionUnionSlot()
   uuid targetFeatureId = selections.at(0).featureId;
   uuid toolFeatureId = selections.at(1).featureId; //only 1 tool right now.
   
-  Application *application = dynamic_cast<Application *>(qApp);
+  app::Application *application = dynamic_cast<app::Application *>(qApp);
   assert(application);
   prj::Project *project = application->getProject();
   
@@ -452,13 +453,13 @@ void MainWindow::constructionUnionSlot()
 
 void MainWindow::preferencesSlot()
 {
-  std::unique_ptr<prf::Dialog> dialog(new prf::Dialog(dynamic_cast<Application *>(qApp)->getPreferencesManager()));
+  std::unique_ptr<prf::Dialog> dialog(new prf::Dialog(dynamic_cast<app::Application *>(qApp)->getPreferencesManager()));
   dialog->setModal(true);
   if (!dialog->exec())
     return;
   if (dialog->isVisualDirty())
   {
-    Application *application = dynamic_cast<Application *>(qApp);
+    app::Application *application = dynamic_cast<app::Application *>(qApp);
     assert(application);
     prj::Project *project = application->getProject();
     project->setAllVisualDirty();
@@ -468,7 +469,7 @@ void MainWindow::preferencesSlot()
 
 void MainWindow::removeSlot()
 {
-  Application *application = dynamic_cast<Application *>(qApp);
+  app::Application *application = dynamic_cast<app::Application *>(qApp);
   assert(application);
   prj::Project *project = application->getProject();
   

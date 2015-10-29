@@ -34,9 +34,10 @@
 #include <QMenu>
 #include <QTimer>
 
-#include "../globalutilities.h"
-#include "dagcontrolleddfs.h"
-#include "dagmodel.h"
+#include <application.h>
+#include <globalutilities.h>
+#include <dagview/dagcontrolleddfs.h>
+#include <dagview/dagmodel.h>
 #include <message/dispatch.h>
 
 using namespace dag;
@@ -589,8 +590,11 @@ void Model::projectUpdatedDispatched(const msg::Message &)
   msg::dispatch().dumpString(debug.str());
   
   indexVerticesEdges();
-  outputGraphviz<Graph>(graph, "/home/tanderson/temp/dagview.dot");
-  
+  //something here to check preferences about writing this out.
+  QString fileName = static_cast<app::Application *>(qApp)->getApplicationDirectory().path();
+  fileName += QDir::separator();
+  fileName += "dagView.dot";
+  outputGraphviz<Graph>(graph, fileName.toStdString());
   
 //   auto dumpMask = [] (const ColumnMask& columnMaskIn)
 //   {

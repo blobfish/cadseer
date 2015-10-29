@@ -21,8 +21,7 @@
 #ifndef BOX_H
 #define BOX_H
 
-#include "csysbase.h"
-
+#include <feature/csysbase.h>
 
 namespace ftr
 {

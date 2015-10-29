@@ -23,8 +23,8 @@
 
 #include <osg/MatrixTransform>
 
-#include "../nodemaskdefs.h"
-#include "csysbase.h"
+#include <nodemaskdefs.h>
+#include <feature/csysbase.h>
 
 using namespace ftr;
 

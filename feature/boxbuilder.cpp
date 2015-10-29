@@ -27,7 +27,7 @@
 #include <TopExp.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 
-#include "boxbuilder.h"
+#include <feature/boxbuilder.h>
 
 using namespace ftr;
 

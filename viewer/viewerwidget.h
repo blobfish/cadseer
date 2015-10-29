@@ -25,7 +25,7 @@
 #include <osgViewer/CompositeViewer>
 #ifndef Q_MOC_RUN
 #include <selection/eventhandler.h>
-#include "spaceballmanipulator.h"
+#include <viewer/spaceballmanipulator.h>
 #endif
 
 namespace osgQt

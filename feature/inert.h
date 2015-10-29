@@ -20,7 +20,7 @@
 #ifndef INERT_H
 #define INERT_H
 
-#include "csysbase.h"
+#include <feature/csysbase.h>
 
 namespace ftr
 {

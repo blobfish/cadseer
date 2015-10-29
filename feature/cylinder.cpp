@@ -21,8 +21,8 @@
 
 #include <boost/uuid/random_generator.hpp>
 
-#include "cylinderbuilder.h"
-#include "cylinder.h"
+#include <feature/cylinderbuilder.h>
+#include <feature/cylinder.h>
 
 using namespace ftr;
 using boost::uuids::uuid;

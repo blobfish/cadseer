@@ -32,8 +32,8 @@
 #include <BOPTools_AlgoTools.hxx>
 #include <BRepTools.hxx>
 
-#include "../globalutilities.h"
-#include "blend.h"
+#include <globalutilities.h>
+#include <feature/blend.h>
 
 using namespace ftr;
 using boost::uuids::uuid;

@@ -36,7 +36,7 @@
 
 #include <TopoDS_Shape.hxx>
 
-#include "../globalutilities.h"
+#include <globalutilities.h>
 
 namespace ftr
 {

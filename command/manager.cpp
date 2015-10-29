@@ -17,24 +17,27 @@
  *
  */
 
-#ifndef GLEVENTWIDGET_H
-#define GLEVENTWIDGET_H
+#include <assert.h>
+#include <iostream>
 
-#include <osgQt/GraphicsWindowQt>
+#include <command/manager.h>
 
-class SpaceballOSGEvent;
+using namespace cmd;
 
-class GLEventWidget : public osgQt::GLWidget
+Manager& Manager::getManager()
 {
-    typedef osgQt::GLWidget inherited;
-public:
-    GLEventWidget(const QGLFormat& format, QWidget* parent = NULL, const QGLWidget* shareWidget = NULL,
-                  Qt::WindowFlags f = 0, bool forwardKeyEvents = false);
-protected:
-    virtual bool event(QEvent* event);
+    static Manager manager;
+    return manager;
+}
 
-private:
-    osg::ref_ptr<SpaceballOSGEvent> convertEvent(QEvent* qEvent);
-};
+void Manager::addCommand(const Command &commandIn)
+{
+    commandMap.insert(std::make_pair(commandIn.getId(), commandIn));
+}
 
-#endif // GLEVENTWIDGET_H
+void Manager::trigger(const cmd::Constants constant)
+{
+    CommandMap::const_iterator it = commandMap.find(constant);
+    assert(it != commandMap.end());
+    it->second.trigger();
+}

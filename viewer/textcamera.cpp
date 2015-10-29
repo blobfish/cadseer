@@ -35,7 +35,7 @@
 #include <selection/definitions.h>
 #include <selection/message.h>
 #include <message/dispatch.h>
-#include "textcamera.h"
+#include <viewer/textcamera.h>
 
 ResizeEventHandler::ResizeEventHandler(const osg::observer_ptr< osg::Camera > slaveCameraIn) :
                                        osgGA::GUIEventHandler(), slaveCamera(slaveCameraIn)

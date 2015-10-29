@@ -31,8 +31,9 @@
 #include <BRepBuilderAPI_MakeVertex.hxx>
 #include <BRepExtrema_DistShapeShape.hxx>
 
-#include "../globalutilities.h"
-#include "connector.h"
+#include <application.h>
+#include <globalutilities.h>
+#include <modelviz/connector.h>
 
 using namespace mdv;
 using namespace cng;
@@ -192,14 +193,13 @@ TopoDS_Shape Connector::getShape(const boost::uuids::uuid &idIn) const
 
 void Connector::outputGraphviz()
 {
-    std::ofstream file("/home/tanderson/temp/connector.dot");
+  //something here to check preferences about writing this out.
+  QString fileName = static_cast<app::Application *>(qApp)->getApplicationDirectory().path();
+  fileName += QDir::separator();
+  fileName += "connector.dot";
+  std::ofstream file(fileName.toStdString().c_str());
 
-    //forward graph
-    boost::write_graphviz(file, graph, Node_writer<cng::Graph>(graph), boost::default_writer());
-
-    //reversed graph
-//    ConnectorGraph::GraphReversed reversed = boost::make_reverse_graph(graph);
-//    boost::write_graphviz(file, reversed, Node_writer<ConnectorGraph::GraphReversed>(reversed), boost::default_writer());
+  boost::write_graphviz(file, graph, Node_writer<cng::Graph>(graph), boost::default_writer());
 }
 
 std::vector<osg::Vec3d> Connector::useGetEndPoints(const boost::uuids::uuid &edgeIdIn) const

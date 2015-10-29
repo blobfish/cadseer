@@ -17,27 +17,30 @@
  *
  */
 
-#include <assert.h>
-#include <iostream>
+#ifndef SPACEBALLOSGEVENT_H
+#define SPACEBALLOSGEVENT_H
 
-#include "commandmanager.h"
+#include <osg/Referenced>
 
-using namespace cmd;
-
-CommandManager& CommandManager::getManager()
+namespace spb
 {
-    static CommandManager manager;
-    return manager;
-}
-
-void CommandManager::addCommand(const Command &commandIn)
+class SpaceballOSGEvent : public osg::Referenced
 {
-    commandMap.insert(std::make_pair(commandIn.getId(), commandIn));
-}
+public:
+    enum Type {TNone, Motion, Button};
+    enum ButtonState{BNone, Pressed, Released};
+    SpaceballOSGEvent();
+    virtual ~SpaceballOSGEvent(){}
 
-void CommandManager::trigger(const cmd::Constants constant)
-{
-    CommandMap::const_iterator it = commandMap.find(constant);
-    assert(it != commandMap.end());
-    it->second.trigger();
+    Type theType;
+    ButtonState theButtonState;
+    int buttonNumber;
+    int translationX;
+    int translationY;
+    int translationZ;
+    int rotationX;
+    int rotationY;
+    int rotationZ;
+};
 }
+#endif // SPACEBALLOSGEVENT_H

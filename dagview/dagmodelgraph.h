@@ -32,9 +32,9 @@
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/ordered_index.hpp>
 
-#include "../feature/base.h"
-#include "../feature/inputtypes.h"
-#include "dagrectitem.h"
+#include <feature/base.h>
+#include <feature/inputtypes.h>
+#include <dagview/dagrectitem.h>
 
 using boost::uuids::uuid;
 

@@ -19,8 +19,8 @@
 
 #include <boost/uuid/random_generator.hpp>
 
-#include "conebuilder.h"
-#include "cone.h"
+#include <feature/conebuilder.h>
+#include <feature/cone.h>
 
 using namespace ftr;
 using boost::uuids::uuid;

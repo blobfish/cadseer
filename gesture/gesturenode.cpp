@@ -33,8 +33,8 @@
 #include <osgDB/ReadFile>
 #include <osg/BlendFunc>
 
-#include "gesturenode.h"
-#include "../nodemaskdefs.h"
+#include <gesture/gesturenode.h>
+#include <nodemaskdefs.h>
 
 osg::MatrixTransform *gsn::buildMenuNode(const char *resourceName)
 {

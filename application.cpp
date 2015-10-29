@@ -18,25 +18,32 @@
  */
 
 #include <iostream>
+#include <memory>
 
 #include <QX11Info>
 #include <QTimer>
 #include <QMessageBox>
 
-#include "application.h"
-#include "mainwindow.h"
-#include "spaceballqevent.h"
-#include "project/project.h"
-#include "preferences/preferencesXML.h"
-#include "preferences/manager.h"
+#include <application.h>
+#include <mainwindow.h>
+#include <viewer/spaceballqevent.h>
+#include <project/project.h>
+#include <preferences/preferencesXML.h>
+#include <preferences/manager.h>
 
 #include <spnav.h>
+
+using namespace app;
 
 Application::Application(int &argc, char **argv) :
     QApplication(argc, argv)
 {
-    mainWindow = 0;
     spaceballPresent = false;
+    
+    //didn't have any luck using std::make_shared. weird behavior.
+    std::unique_ptr<MainWindow> tempWindow(new MainWindow());
+    mainWindow = std::move(tempWindow);
+    
     //some day pass the preferences file from user home directory to the manager constructor.
     std::unique_ptr<prf::Manager> temp(new prf::Manager());
     preferenceManager = std::move(temp);
@@ -94,9 +101,8 @@ bool Application::x11EventFilter(XEvent *event)
     return false;
 }
 
-void Application::initializeSpaceball(MainWindow *mainWindowIn)
+void Application::initializeSpaceball()
 {
-    mainWindow = mainWindowIn;
     if (!mainWindow)
         return;
 

@@ -20,7 +20,7 @@
 #ifndef CONE_H
 #define CONE_H
 
-#include "csysbase.h"
+#include <feature/csysbase.h>
 
 namespace ftr
 {

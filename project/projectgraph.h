@@ -28,8 +28,8 @@
 #include <boost/graph/breadth_first_search.hpp>
 #include <boost/graph/graphviz.hpp>
 
-#include "../feature/inputtypes.h"
-#include "../feature/base.h"
+#include <feature/inputtypes.h>
+#include <feature/base.h>
 
 namespace prg
 {

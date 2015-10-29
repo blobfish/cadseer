@@ -24,8 +24,6 @@
 
 #include <QtGui/QGraphicsView>
 
-// #include "dagmodel.h"
-
 namespace dag
 {
   //! @brief view for DAG viewer

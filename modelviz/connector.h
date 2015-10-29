@@ -25,8 +25,8 @@
 
 #include <osg/Vec3d>
 
-#include "../feature/maps.h"
-#include "connectorgraph.h"
+#include <feature/maps.h>
+#include <modelviz/connectorgraph.h>
 
 namespace mdv
 {

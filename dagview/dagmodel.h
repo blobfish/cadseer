@@ -36,7 +36,7 @@
 #include <boost/multi_index/composite_key.hpp>
 #include <boost/signals2.hpp>
 
-#include "dagmodelgraph.h"
+#include <dagview/dagmodelgraph.h>
 #include <message/message.h>
 #include <selection/message.h>
 #include <project/message.h>

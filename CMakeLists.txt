@@ -62,7 +62,7 @@ SET(MESSAGE_SOURCES
 
 SET(COMMAND_SOURCES
     ./command/command.cpp
-    ./command/commandmanager.cpp
+    ./command/manager.cpp
     )
     
 SET(FEATURE_SOURCES
@@ -105,20 +105,20 @@ SET(PROJECT_SOURCES
 
 SET(CADSEER_SOURCES
     ./main.cpp
-    ./viewerwidget.cpp
+    viewer/viewerwidget.cpp
     ./mainwindow.cpp
     ./dagview/dagview.cpp
     ./dagview/dagmodel.cpp
     ./dagview/dagmodelgraph.cpp
     ./dagview/dagrectitem.cpp
-    ./spaceballmanipulator.cpp
-    ./spaceballqevent.cpp
-    ./gleventwidget.cpp
-    ./spaceballosgevent.cpp
+    viewer/spaceballmanipulator.cpp
+    viewer/spaceballqevent.cpp
+    viewer/gleventwidget.cpp
+    viewer/spaceballosgevent.cpp
     ./application.cpp
     ./globalutilities.cpp
     ./coordinatesystem.cpp
-    ./textcamera.cpp
+    viewer/textcamera.cpp
     ${MODELVIZ_SOURCES}
     ${TESTING_SOURCES}
     ${GESTURE_SOURCES}
@@ -132,7 +132,7 @@ SET(CADSEER_SOURCES
     )
 
 SET(CADSEER_MOC_HDRS
-    ./viewerwidget.h
+    viewer/viewerwidget.h
     ./mainwindow.h
     ./dagview/dagview.h
     ./dagview/dagmodel.h

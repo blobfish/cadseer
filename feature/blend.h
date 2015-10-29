@@ -20,7 +20,7 @@
 #ifndef BLEND_H
 #define BLEND_H
 
-#include "base.h"
+#include <feature/base.h>
 
 class BRepFilletAPI_MakeFillet;
 

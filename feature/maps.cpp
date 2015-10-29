@@ -21,8 +21,8 @@
 
 #include <boost/uuid/random_generator.hpp>
 
-#include "../globalutilities.h"
-#include "maps.h"
+#include <globalutilities.h>
+#include <feature/maps.h>
 
 using namespace ftr; //needed for parameters.
 

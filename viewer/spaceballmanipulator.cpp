@@ -21,9 +21,9 @@
 
 #include <osg/ComputeBoundsVisitor>
 
-#include "nodemaskdefs.h"
-#include "spaceballosgevent.h"
-#include "spaceballmanipulator.h"
+#include <nodemaskdefs.h>
+#include <viewer/spaceballosgevent.h>
+#include <viewer/spaceballmanipulator.h>
 
 using namespace osgGA;
 
@@ -154,7 +154,7 @@ bool SpaceballManipulator::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIAc
 {
     if (ea.getEventType() == osgGA::GUIEventAdapter::USER)
     {
-        const SpaceballOSGEvent *event = static_cast<const SpaceballOSGEvent *>(ea.getUserData());
+        const spb::SpaceballOSGEvent *event = static_cast<const spb::SpaceballOSGEvent *>(ea.getUserData());
         if (!event || !cam || !node.get())
         {
             std::cout << "error in spaceball event" << std::endl;
@@ -207,7 +207,7 @@ void SpaceballManipulator::getViewData()
     viewData.x.normalize();
 }
 
-void SpaceballManipulator::goOrtho(const SpaceballOSGEvent *event)
+void SpaceballManipulator::goOrtho(const spb::SpaceballOSGEvent *event)
 {
     osg::Vec3d newEye, newCenter, newUp;
     newEye = spaceEye;
@@ -290,7 +290,7 @@ osg::Vec3d SpaceballManipulator::projectToBound(const osg::Vec3d &eye, osg::Vec3
     return out;
 }
 
-void SpaceballManipulator::goPerspective(const SpaceballOSGEvent *event)
+void SpaceballManipulator::goPerspective(const spb::SpaceballOSGEvent *event)
 {
     osg::Vec3d newEye, newCenter, newUp;
     newEye = spaceEye;

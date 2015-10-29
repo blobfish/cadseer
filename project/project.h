@@ -25,7 +25,7 @@
 #include <boost/signals2.hpp>
 
 #include <message/message.h>
-#include "projectgraph.h"
+#include <project/projectgraph.h>
 
 class TopoDS_Shape;
 

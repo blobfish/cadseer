@@ -21,7 +21,7 @@
 #include <osg/Geode>
 #include <osg/Point>
 
-#include "plotter.h"
+#include <testing/plotter.h>
 
 void Plotter::setBase(osg::ref_ptr<osg::Group> baseIn)
 {

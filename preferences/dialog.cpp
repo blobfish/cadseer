@@ -20,11 +20,10 @@
 
 #include <QDoubleValidator>
 
-#include "preferencesXML.h"
-#include "manager.h"
-
-#include "dialog.h"
-#include "ui_dialog.h"
+#include <preferences/preferencesXML.h>
+#include <preferences/manager.h>
+#include <preferences/dialog.h>
+#include <ui_dialog.h> //in build directory
 
 using namespace prf;
 

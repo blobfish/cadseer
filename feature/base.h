@@ -34,11 +34,11 @@
 
 #include <osg/Switch>
 
-#include "maps.h"
-#include "types.h"
-#include "inputtypes.h"
-#include "../modelviz/connector.h"
-#include "states.h"
+#include <feature/maps.h>
+#include <feature/types.h>
+#include <feature/inputtypes.h>
+#include <modelviz/connector.h>
+#include <feature/states.h>
 
 namespace ftr
 {

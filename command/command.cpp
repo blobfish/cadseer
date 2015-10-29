@@ -17,7 +17,7 @@
  *
  */
 
-#include "command.h"
+#include <command/command.h>
 
 using namespace cmd;
 

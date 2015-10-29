@@ -26,7 +26,7 @@
 #include <TopExp.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 
-#include "union.h"
+#include <feature/union.h>
 
 using namespace ftr;
 

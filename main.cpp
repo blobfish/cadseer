@@ -17,9 +17,9 @@
  *
  */
 
-#include "application.h"
-#include "viewerwidget.h"
-#include "mainwindow.h"
+#include <application.h>
+#include <viewer/viewerwidget.h>
+#include <mainwindow.h>
 
 
 int main( int argc, char** argv )
@@ -32,12 +32,11 @@ int main( int argc, char** argv )
 //    while (arguments.read("--DrawThreadPerContext")) threadingModel = osgViewer::ViewerBase::DrawThreadPerContext;
 //    while (arguments.read("--CullThreadPerCameraDrawThreadPerContext")) threadingModel = osgViewer::ViewerBase::CullThreadPerCameraDrawThreadPerContext;
 
-    Application app(argc, argv);
+    app::Application app(argc, argv);
     QObject::connect(&app, SIGNAL(aboutToQuit()), &app, SLOT(quittingSlot()));
 
-    MainWindow mainWindow;
-    app.initializeSpaceball(&mainWindow);
+    app.initializeSpaceball();
 
-    mainWindow.showMaximized();
+    app.getMainWindow()->showMaximized();
     return app.exec();
 }

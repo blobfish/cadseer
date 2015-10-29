@@ -23,7 +23,7 @@
 #include <QString>
 #include <QAction>
 
-#include "commandconstants.h"
+#include <command/constants.h>
 
 namespace cmd
 {

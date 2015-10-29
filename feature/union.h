@@ -20,7 +20,7 @@
 #ifndef UNION_H
 #define UNION_H
 
-#include "base.h"
+#include <feature/base.h>
 
 namespace ftr
 {
@@ -38,8 +38,5 @@ namespace ftr
     static QIcon icon;
   };
 }
-
-
-
 
 #endif // UNION_H

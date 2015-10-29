@@ -22,7 +22,7 @@
 #include <TopExp.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 
-#include "inert.h"
+#include <feature/inert.h>
 
 using namespace ftr;
 using namespace boost::uuids;

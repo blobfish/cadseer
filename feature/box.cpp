@@ -23,9 +23,9 @@
 
 #include <boost/uuid/random_generator.hpp>
 
-#include "../globalutilities.h"
-#include "boxbuilder.h"
-#include "box.h"
+#include <globalutilities.h>
+#include <feature/boxbuilder.h>
+#include <feature/box.h>
 
 using namespace ftr;
 using boost::uuids::uuid;

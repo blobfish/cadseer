@@ -28,8 +28,8 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/BlendFunc>
 
-#include "nodemaskdefs.h"
-#include "coordinatesystem.h"
+#include <nodemaskdefs.h>
+#include <coordinatesystem.h>
 
 
 osg::Node* csys::buildCoordinateSystemNode()

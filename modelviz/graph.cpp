@@ -49,9 +49,9 @@
 #include <osg/Depth>
 #include <osg/ValueObject>
 
-#include "graph.h"
-#include "../nodemaskdefs.h"
-#include "../globalutilities.h"
+#include <modelviz/graph.h>
+#include <nodemaskdefs.h>
+#include <globalutilities.h>
 
 
 using namespace boost::uuids;
@@ -270,7 +270,7 @@ void Build::edgeConstruct(const TopoDS_Edge &edgeIn)
 
     osg::ref_ptr<osg::Geode> geode = createGeodeEdge();
     uuid id = findResultByShape(resultContainer, edgeIn).id;
-    geode->setUserValue(GU::idAttributeTitle, GU::idToString(id));
+    geode->setUserValue(GU::idAttributeTitle, boost::uuids::to_string(id));
     osg::ref_ptr<osg::Geometry> geometry = createGeometryEdge();
     geode->addDrawable(geometry);
     groupEdges->addChild(geode);
@@ -314,7 +314,7 @@ void Build::faceConstruct(const TopoDS_Face &faceIn)
 
     osg::ref_ptr<osg::Geode> geode = createGeodeFace();
     uuid id = findResultByShape(resultContainer, faceIn).id;
-    geode->setUserValue(GU::idAttributeTitle, GU::idToString(id));
+    geode->setUserValue(GU::idAttributeTitle, boost::uuids::to_string(id));
     osg::ref_ptr<osg::Geometry> geometry = createGeometryFace();
     geode->addDrawable(geometry);
     groupFaces->addChild(geode);

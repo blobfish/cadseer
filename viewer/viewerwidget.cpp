@@ -41,17 +41,17 @@
 #include <osg/BlendFunc>
 #include <osg/ValueObject>
 
-#include "viewerwidget.h"
-#include "gleventwidget.h"
-#include "nodemaskdefs.h"
+#include <viewer/viewerwidget.h>
+#include <viewer/gleventwidget.h>
+#include <nodemaskdefs.h>
 #include <selection/definitions.h>
-#include "./testing/plotter.h"
-#include "./gesture/gesturehandler.h"
-#include "./command/commandmanager.h"
-#include "globalutilities.h"
-#include "coordinatesystem.h"
+#include <testing/plotter.h>
+#include <gesture/gesturehandler.h>
+#include <command/manager.h>
+#include <globalutilities.h>
+#include <coordinatesystem.h>
 #include <message/dispatch.h>
-#include "textcamera.h"
+#include <viewer/textcamera.h>
 #include <feature/base.h>
 
 ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel) : QWidget()
@@ -312,32 +312,32 @@ void ViewerWidget::setupCommands()
     QAction *topAction = new QAction(qApp);
     connect(topAction, SIGNAL(triggered()), this, SLOT(viewTopSlot()));
     cmd::Command topCommand(cmd::StandardViewTop, "View Top", topAction);
-    cmd::CommandManager::getManager().addCommand(topCommand);
+    cmd::Manager::getManager().addCommand(topCommand);
 
     QAction *frontAction = new QAction(qApp);
     connect(frontAction, SIGNAL(triggered()), this, SLOT(viewFrontSlot()));
     cmd::Command frontCommand(cmd::StandardViewFront, "View Front", frontAction);
-    cmd::CommandManager::getManager().addCommand(frontCommand);
+    cmd::Manager::getManager().addCommand(frontCommand);
 
     QAction *rightAction = new QAction(qApp);
     connect(rightAction, SIGNAL(triggered()), this, SLOT(viewRightSlot()));
     cmd::Command rightCommand(cmd::StandardViewRight, "View Right", rightAction);
-    cmd::CommandManager::getManager().addCommand(rightCommand);
+    cmd::Manager::getManager().addCommand(rightCommand);
 
     QAction *fitAction = new QAction(qApp);
     connect(fitAction, SIGNAL(triggered()), this, SLOT(viewFitSlot()));
     cmd::Command fitCommand(cmd::ViewFit, "View Fit", fitAction);
-    cmd::CommandManager::getManager().addCommand(fitCommand);
+    cmd::Manager::getManager().addCommand(fitCommand);
     
     QAction *fillAction = new QAction(qApp);
     connect(fillAction, SIGNAL(triggered()), this, SLOT(viewFillSlot()));
     cmd::Command fillCommand(cmd::ViewFill, "View Fill", fillAction);
-    cmd::CommandManager::getManager().addCommand(fillCommand);
+    cmd::Manager::getManager().addCommand(fillCommand);
     
     QAction *lineAction = new QAction(qApp);
     connect(lineAction, SIGNAL(triggered()), this, SLOT(viewLineSlot()));
     cmd::Command lineCommand(cmd::ViewLine, "View Line", lineAction);
-    cmd::CommandManager::getManager().addCommand(lineCommand);
+    cmd::Manager::getManager().addCommand(lineCommand);
 }
 
 void ViewerWidget::viewTopSlot()

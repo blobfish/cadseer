@@ -17,17 +17,28 @@
  *
  */
 
-#include "spaceballosgevent.h"
+#ifndef COMMANDMANAGER_H
+#define COMMANDMANAGER_H
 
-SpaceballOSGEvent::SpaceballOSGEvent() : osg::Referenced()
+#include <command/command.h>
+
+namespace cmd
 {
-    theType = TNone;
-    theButtonState = BNone;
-    buttonNumber = -1;
-    translationX = 0;
-    translationY = 0;
-    translationZ = 0;
-    rotationX = 0;
-    rotationY = 0;
-    rotationZ = 0;
+class Manager
+{
+public:
+    static Manager& getManager();
+    void addCommand(const Command &commandIn);
+    void trigger(const cmd::Constants constant);
+
+private:
+    Manager(){}
+    Manager(const Manager &other);
+    void operator=(const Manager &other);
+
+    typedef std::map<cmd::Constants, Command> CommandMap;
+    CommandMap commandMap;
+};
 }
+
+#endif // COMMANDMANAGER_H

@@ -19,9 +19,9 @@
 
 #include <iostream>
 
-#include "gleventwidget.h"
-#include "spaceballqevent.h"
-#include "spaceballosgevent.h"
+#include <viewer/gleventwidget.h>
+#include <viewer/spaceballqevent.h>
+#include <viewer/spaceballosgevent.h>
 
 GLEventWidget::GLEventWidget(const QGLFormat& format, QWidget* parent, const QGLWidget* shareWidget,
                              Qt::WindowFlags f, bool forwardKeyEvents) :
@@ -43,13 +43,13 @@ bool GLEventWidget::event(QEvent* event)
     return inherited::event(event);
 }
 
-osg::ref_ptr<SpaceballOSGEvent> GLEventWidget::convertEvent(QEvent* qEvent)
+osg::ref_ptr<spb::SpaceballOSGEvent> GLEventWidget::convertEvent(QEvent* qEvent)
 {
-    osg::ref_ptr<SpaceballOSGEvent> osgEvent = new SpaceballOSGEvent();
+    osg::ref_ptr<spb::SpaceballOSGEvent> osgEvent = new spb::SpaceballOSGEvent();
     if (qEvent->type() == spb::MotionEvent::Type)
     {
         spb::MotionEvent *spaceQEvent = dynamic_cast<spb::MotionEvent *>(qEvent);
-        osgEvent->theType = SpaceballOSGEvent::Motion;
+        osgEvent->theType = spb::SpaceballOSGEvent::Motion;
         osgEvent->translationX = spaceQEvent->translationX();
         osgEvent->translationY = spaceQEvent->translationY();
         osgEvent->translationZ = spaceQEvent->translationZ();

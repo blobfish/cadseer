@@ -19,17 +19,17 @@
 
 #include <boost/uuid/random_generator.hpp>
 
-#include "../application.h"
-#include "../preferences/preferencesXML.h"
-#include "../preferences/manager.h"
-
 #include <BRep_Builder.hxx>
 #include <TopoDS_Compound.hxx>
 
-#include "../nodemaskdefs.h"
-#include "../modelviz/graph.h"
-#include "../globalutilities.h"
-#include "base.h"
+#include <application.h>
+#include <preferences/preferencesXML.h>
+#include <preferences/manager.h>
+#include <nodemaskdefs.h>
+#include <modelviz/graph.h>
+#include <globalutilities.h>
+#include <feature/base.h>
+
 
 using namespace ftr;
 
@@ -46,7 +46,7 @@ Base::Base()
   mainSwitch = new osg::Switch();
   mainSwitch->setName("feature");
   mainSwitch->setNodeMask(NodeMaskDef::object);
-  mainSwitch->setUserValue(GU::idAttributeTitle, GU::idToString(id));
+  mainSwitch->setUserValue(GU::idAttributeTitle, boost::uuids::to_string(id));
   
   state.set(ftr::StateOffset::ModelDirty, true);
   state.set(ftr::StateOffset::VisualDirty, true);
@@ -120,7 +120,7 @@ void Base::updateVisual()
   connector.outputGraphviz();
   
   //get deflection values.
-  Application *app = dynamic_cast<Application*>(qApp);
+  app::Application *app = dynamic_cast<app::Application*>(qApp);
   assert(app);
   double linear = app->getPreferencesManager()->rootPtr->visual().mesh().linearDeflection();
   double angular = app->getPreferencesManager()->rootPtr->visual().mesh().angularDeflection();

@@ -32,7 +32,7 @@
 #include <osg/Switch>
 #include <osg/Geometry>
 
-#include "../feature/maps.h"
+#include <feature/maps.h>
 
 namespace mdv
 {

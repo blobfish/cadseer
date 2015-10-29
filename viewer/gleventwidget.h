@@ -17,28 +17,24 @@
  *
  */
 
-#ifndef SPACEBALLOSGEVENT_H
-#define SPACEBALLOSGEVENT_H
+#ifndef GLEVENTWIDGET_H
+#define GLEVENTWIDGET_H
 
-#include <osg/Referenced>
+#include <osgQt/GraphicsWindowQt>
 
-class SpaceballOSGEvent : public osg::Referenced
+namespace spb{class SpaceballOSGEvent;}
+
+class GLEventWidget : public osgQt::GLWidget
 {
+    typedef osgQt::GLWidget inherited;
 public:
-    enum Type {TNone, Motion, Button};
-    enum ButtonState{BNone, Pressed, Released};
-    SpaceballOSGEvent();
-    virtual ~SpaceballOSGEvent(){}
+    GLEventWidget(const QGLFormat& format, QWidget* parent = NULL, const QGLWidget* shareWidget = NULL,
+                  Qt::WindowFlags f = 0, bool forwardKeyEvents = false);
+protected:
+    virtual bool event(QEvent* event);
 
-    Type theType;
-    ButtonState theButtonState;
-    int buttonNumber;
-    int translationX;
-    int translationY;
-    int translationZ;
-    int rotationX;
-    int rotationY;
-    int rotationZ;
+private:
+    osg::ref_ptr<spb::SpaceballOSGEvent> convertEvent(QEvent* qEvent);
 };
 
-#endif // SPACEBALLOSGEVENT_H
+#endif // GLEVENTWIDGET_H

@@ -22,7 +22,7 @@
 
 #include <gp_Ax2.hxx>
 
-#include "base.h"
+#include <feature/base.h>
 
 namespace ftr
 {

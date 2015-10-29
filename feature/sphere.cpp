@@ -21,7 +21,7 @@
 
 #include <BRepPrimAPI_MakeSphere.hxx>
 
-#include "sphere.h"
+#include <feature/sphere.h>
 
 using namespace ftr;
 using namespace boost::uuids;

@@ -29,10 +29,10 @@
 #include <osgUtil/LineSegmentIntersector>
 #include <osg/ValueObject>
 
-#include "gesturenode.h"
-#include "gesturehandler.h"
-#include "../nodemaskdefs.h"
-#include "../command/commandmanager.h"
+#include <gesture/gesturenode.h>
+#include <gesture/gesturehandler.h>
+#include <nodemaskdefs.h>
+#include <command/manager.h>
 
 GestureHandler::GestureHandler(osg::Camera *cameraIn) : osgGA::GUIEventHandler(), rightButtonDown(false),
     currentNodeLeft(false), iconRadius(32.0), includedAngle(90.0)
@@ -84,7 +84,7 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
                 }
                 cmd::Constants commandId = static_cast<cmd::Constants>(temp);
 
-                cmd::CommandManager::getManager().trigger(commandId);
+                cmd::Manager::getManager().trigger(commandId);
             }
         }
     }

@@ -29,13 +29,14 @@
 
 #include <osg/ValueObject>
 
-#include "../globalutilities.h"
-#include "../modelviz/graph.h"
-#include "../modelviz/connector.h"
-#include "../feature/base.h"
-#include "../feature/inert.h"
+#include <application.h>
+#include <globalutilities.h>
+#include <modelviz/graph.h>
+#include <modelviz/connector.h>
+#include <feature/base.h>
+#include <feature/inert.h>
 #include <project/message.h>
-#include "project.h"
+#include <project/project.h>
 #include <message/message.h>
 #include <message/dispatch.h>
 
@@ -54,7 +55,11 @@ void Project::update()
   preMessage.mask = msg::Response | msg::Pre | msg::Update;
   messageOutSignal(preMessage);
   
-  writeGraphViz("/home/tanderson/temp/cadseer.dot");
+  //something here to check preferences about writing this out.
+  QString fileName = static_cast<app::Application *>(qApp)->getApplicationDirectory().path();
+  fileName += QDir::separator();
+  fileName += "project.dot";
+  writeGraphViz(fileName.toStdString().c_str());
   
   Path sorted;
   try
