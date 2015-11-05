@@ -345,10 +345,13 @@ void ViewerWidget::viewLineDispatched(const msg::Message&)
 
 void ViewerWidget::exportOSGDispatched(const msg::Message&)
 {
-  QString start = QDir::homePath() + "/OpenSceneGraph.osg";
-  QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), start, tr("Scene (*.osg)"));
+  QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), QDir::homePath(), tr("Scene (*.osg)"));
   if (fileName.isEmpty())
     return;
+  
+  if (!fileName.endsWith(QObject::tr(".osg")))
+    fileName += QObject::tr(".osg");
+  
   osgDB::writeNodeFile(*root, fileName.toStdString());
 }
 
