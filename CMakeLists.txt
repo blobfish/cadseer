@@ -42,17 +42,17 @@ SET(ADDITIONAL_INCLUDE_PATHS
 INCLUDE_DIRECTORIES(${ADDITIONAL_INCLUDE_PATHS})
 
 SET(MODELVIZ_SOURCES
-  ./modelviz/graph.cpp
-  ./modelviz/connector.cpp
-  )
+    modelviz/graph.cpp
+    modelviz/connector.cpp
+    )
 
 SET(TESTING_SOURCES
-    ./testing/plotter.cpp
+    testing/plotter.cpp
     )
 
 SET(GESTURE_SOURCES
-    ./gesture/gesturehandler.cpp
-    ./gesture/gesturenode.cpp
+    gesture/gesturehandler.cpp
+    gesture/gesturenode.cpp
     )
     
 SET(MESSAGE_SOURCES
@@ -61,42 +61,42 @@ SET(MESSAGE_SOURCES
     )
     
 SET(FEATURE_SOURCES
-    ./feature/base.cpp
-    ./feature/csysbase.cpp
-    ./feature/box.cpp
-    ./feature/boxbuilder.cpp
-    ./feature/sphere.cpp
-    ./feature/inert.cpp
-    ./feature/cone.cpp
-    ./feature/conebuilder.cpp
-    ./feature/cylinder.cpp
-    ./feature/blend.cpp
-    ./feature/maps.cpp
-    ./feature/cylinderbuilder.cpp
-    ./feature/union.cpp
+    feature/base.cpp
+    feature/csysbase.cpp
+    feature/box.cpp
+    feature/boxbuilder.cpp
+    feature/sphere.cpp
+    feature/inert.cpp
+    feature/cone.cpp
+    feature/conebuilder.cpp
+    feature/cylinder.cpp
+    feature/blend.cpp
+    feature/maps.cpp
+    feature/cylinderbuilder.cpp
+    feature/union.cpp
     )
     
 SET(SELECTION_SOURCES
-    ./selection/eventhandler.cpp
-    ./selection/intersector.cpp
-    ./selection/manager.cpp
-    ./selection/message.cpp
+    selection/eventhandler.cpp
+    selection/intersector.cpp
+    selection/manager.cpp
+    selection/message.cpp
     selection/container.cpp
     )
 
 SET(DIALOG_SOURCES
-    ./dialogs/boxdialog.cpp
+    dialogs/boxdialog.cpp
     )
     
 SET(PREFERENCE_SOURCES
-    ./preferences/preferencesXML.cpp
-    ./preferences/manager.cpp
-    ./preferences/dialog.cpp
+    preferences/preferencesXML.cpp
+    preferences/manager.cpp
+    preferences/dialog.cpp
     )
     
 SET(PROJECT_SOURCES
-    ./project/project.cpp
-    ./project/message.cpp
+    project/project.cpp
+    project/message.cpp
     )
     
 SET(APPLICATION_SOURCES
@@ -107,18 +107,18 @@ SET(APPLICATION_SOURCES
     )
 
 SET(CADSEER_SOURCES
-    ./main.cpp
+    main.cpp
     viewer/viewerwidget.cpp
-    ./dagview/dagview.cpp
-    ./dagview/dagmodel.cpp
-    ./dagview/dagmodelgraph.cpp
-    ./dagview/dagrectitem.cpp
+    dagview/dagview.cpp
+    dagview/dagmodel.cpp
+    dagview/dagmodelgraph.cpp
+    dagview/dagrectitem.cpp
     viewer/spaceballmanipulator.cpp
     viewer/spaceballqevent.cpp
     viewer/gleventwidget.cpp
     viewer/spaceballosgevent.cpp
-    ./globalutilities.cpp
-    ./coordinatesystem.cpp
+    globalutilities.cpp
+    coordinatesystem.cpp
     viewer/textcamera.cpp
     ${MODELVIZ_SOURCES}
     ${TESTING_SOURCES}
@@ -135,12 +135,12 @@ SET(CADSEER_SOURCES
 SET(CADSEER_MOC_HDRS
     viewer/viewerwidget.h
     application/mainwindow.h
-    ./dagview/dagview.h
-    ./dagview/dagmodel.h
+    dagview/dagview.h
+    dagview/dagmodel.h
     application/application.h
     selection/manager.h
-    ./dialogs/boxdialog.h
-    ./preferences/dialog.h
+    dialogs/boxdialog.h
+    preferences/dialog.h
     )
 
 SET(CADSEER_LIBRARIES
@@ -155,11 +155,11 @@ SET(CADSEER_LIBRARIES
 
 SET(CADSEER_UIS
     application/mainwindow.ui
-    ./preferences/dialog.ui
+    preferences/dialog.ui
     )
 
 SET(CADSEER_RESOURCES
-    ./resources.qrc
+    resources.qrc
     )
 
 QT4_ADD_RESOURCES(CADSEER_RESOURCES_RCC ${CADSEER_RESOURCES})
