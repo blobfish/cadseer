@@ -17,10 +17,10 @@
  *
  */
 
-#include <application.h>
+#include <application/application.h>
+#include <application/mainwindow.h>
 #include <viewer/viewerwidget.h>
-#include <mainwindow.h>
-
+#include <message/dispatch.h>
 
 int main( int argc, char** argv )
 {
@@ -38,5 +38,24 @@ int main( int argc, char** argv )
     app.initializeSpaceball();
 
     app.getMainWindow()->showMaximized();
+    
+    //build an empty project.
+    msg::Message messageOut;
+    
+    messageOut.mask = msg::Request | msg::NewProject;
+    msg::dispatch().messageInSlot(messageOut);
+    
+    messageOut.mask = msg::Request | msg::Construct | msg::Box;
+    msg::dispatch().messageInSlot(messageOut);
+    
+    messageOut.mask = msg::Request | msg::Construct | msg::Cylinder;
+    msg::dispatch().messageInSlot(messageOut);
+    
+    messageOut.mask = msg::Request | msg::Construct | msg::Cone;
+    msg::dispatch().messageInSlot(messageOut);
+    
+    messageOut.mask = msg::Request | msg::Construct | msg::Sphere;
+    msg::dispatch().messageInSlot(messageOut);
+    
     return app.exec();
 }

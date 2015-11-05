@@ -71,7 +71,7 @@ void Sphere::setRadius(const double& radiusIn)
   radius = radiusIn;
 }
 
-void Sphere::update(const UpdateMap& mapIn)
+void Sphere::updateModel(const UpdateMap& mapIn)
 {
   //clear shape so if we fail the feature will be empty.
   shape = TopoDS_Shape();

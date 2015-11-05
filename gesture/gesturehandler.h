@@ -20,12 +20,24 @@
 #ifndef GESTUREHANDLER_H
 #define GESTUREHANDLER_H
 
+#include <boost/signals2.hpp>
+
 #include <osgGA/GUIEventHandler>
+
+#include <message/message.h>
 
 class GestureHandler : public osgGA::GUIEventHandler
 {
 public:
     GestureHandler(osg::Camera *cameraIn);
+    
+    void messageInSlot(const msg::Message &);
+    typedef boost::signals2::signal<void (const msg::Message &)> MessageOutSignal;
+    boost::signals2::connection connectMessageOut(const MessageOutSignal::slot_type &subscriber)
+    {
+      return messageOutSignal.connect(subscriber);
+    }
+    
 protected:
     virtual bool handle(const osgGA::GUIEventAdapter& eventAdapter,
                         osgGA::GUIActionAdapter& actionAdapter, osg::Object *object,
@@ -50,6 +62,10 @@ protected:
     double includedAngle; //in degrees
     double mininumSprayRadius;
     double nodeSpread;
+    
+    MessageOutSignal messageOutSignal;
+    msg::MessageDispatcher dispatcher;
+    void setupDispatcher();
 };
 
 class GestureAllSwitchesOffVisitor : public osg::NodeVisitor

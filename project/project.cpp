@@ -29,7 +29,7 @@
 
 #include <osg/ValueObject>
 
-#include <application.h>
+#include <application/application.h>
 #include <globalutilities.h>
 #include <modelviz/graph.h>
 #include <modelviz/connector.h>
@@ -49,10 +49,10 @@ Project::Project()
   setupDispatcher();
 }
 
-void Project::update()
+void Project::updateModel()
 {
   msg::Message preMessage;
-  preMessage.mask = msg::Response | msg::Pre | msg::Update;
+  preMessage.mask = msg::Response | msg::Pre | msg::UpdateModel;
   messageOutSignal(preMessage);
   
   //something here to check preferences about writing this out.
@@ -97,18 +97,22 @@ void Project::update()
       Vertex source = boost::source(*inEdgeIt, projectGraph);
       updateMap.insert(std::make_pair(projectGraph[*inEdgeIt].inputType, projectGraph[source].feature.get()));
     }
-    projectGraph[currentVertex].feature->update(updateMap);
+    projectGraph[currentVertex].feature->updateModel(updateMap);
   }
   
   updateLeafStatus();
   
   msg::Message postMessage;
-  postMessage.mask = msg::Response | msg::Post | msg::Update;
+  postMessage.mask = msg::Response | msg::Post | msg::UpdateModel;
   messageOutSignal(postMessage);
 }
 
 void Project::updateVisual()
 {
+  msg::Message preMessage;
+  preMessage.mask = msg::Response | msg::Pre | msg::UpdateVisual;
+  messageOutSignal(preMessage);
+  
   Path sorted;
   try
   {
@@ -133,6 +137,10 @@ void Project::updateVisual()
     )
       feature->updateVisual();
   }
+  
+  msg::Message postMessage;
+  postMessage.mask = msg::Response | msg::Post | msg::UpdateVisual;
+  messageOutSignal(postMessage);
 }
 
 void Project::writeGraphViz(const std::string& fileName)
@@ -402,6 +410,12 @@ void Project::setupDispatcher()
   
   mask = msg::Request | msg::RemoveFeature;
   dispatcher.insert(std::make_pair(mask, boost::bind(&Project::removeFeatureDispatched, this, _1)));
+  
+  mask = msg::Request | msg::UpdateModel;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Project::updateModelDispatched, this, _1)));
+  
+  mask = msg::Request | msg::UpdateVisual;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Project::updateVisualDispatched, this, _1)));
 }
 
 void Project::setCurrentLeafDispatched(const msg::Message &messageIn)
@@ -425,6 +439,25 @@ void Project::removeFeatureDispatched(const msg::Message &messageIn)
   prj::Message message = boost::get<prj::Message>(messageIn.payload);
   removeFeature(message.featureId);
 }
+
+void Project::updateModelDispatched(const msg::Message&)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  updateModel();
+}
+
+void Project::updateVisualDispatched(const msg::Message&)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  updateVisual();
+}
+
 
 void Project::indexVerticesEdges()
 {

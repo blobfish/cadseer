@@ -55,19 +55,11 @@ public:
 
 public Q_SLOTS:
     void setSelectionMask(const int &maskIn);
-    void viewTopSlot();
-    void viewFrontSlot();
-    void viewRightSlot();
-    void viewFitSlot();
-    void writeOSGSlot();
-    void viewFillSlot();
-    void viewLineSlot();
 
 protected:
     void createMainCamera(osg::Camera *camera);
     osg::Camera* createBackgroundCamera();
     osg::Camera* createGestureCamera();
-    void setupCommands();
     QTimer _timer;
     osg::ref_ptr<osg::Group> root;
     osg::ref_ptr<osg::Switch> infoSwitch;
@@ -81,6 +73,14 @@ protected:
     void setupDispatcher();
     void featureAddedDispatched(const msg::Message &);
     void featureRemovedDispatched(const msg::Message &);
+    void visualUpdatedDispatched(const msg::Message &);
+    void viewTopDispatched(const msg::Message &);
+    void viewFrontDispatched(const msg::Message &);
+    void viewRightDispatched(const msg::Message &);
+    void viewFitDispatched(const msg::Message &);
+    void viewFillDispatched(const msg::Message &);
+    void viewLineDispatched(const msg::Message &);
+    void exportOSGDispatched(const msg::Message &);
 };
 
 class VisibleVisitor : public osg::NodeVisitor

@@ -35,7 +35,7 @@
 #include <selection/definitions.h>
 #include <selection/intersector.h>
 #include <globalutilities.h>
-#include <application.h>
+#include <application/application.h>
 #include <project/project.h>
 #include <modelviz/connector.h>
 #include <selection/message.h>
@@ -44,22 +44,6 @@
 using namespace osg;
 using namespace boost::uuids;
 using namespace slc;
-
-std::ostream& slc::operator<<(std::ostream& os, const Container& container)
-{
-  os << 
-    "type is: " << getNameOfType(container.selectionType) << 
-    "      featureid is: " << boost::uuids::to_string(container.featureId) <<
-    "      id is: " << boost::uuids::to_string(container.shapeId) << std::endl;
-  return os;
-}
-
-std::ostream& slc::operator<<(std::ostream& os, const Containers& containers)
-{
-  for (const auto &current : containers)
-    os << current;
-  return os;
-}
 
 EventHandler::EventHandler() : osgGA::GUIEventHandler()
 {
@@ -211,6 +195,7 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
 	    addSMessage.type = lastPrehighlight.selectionType;
 	    addSMessage.featureId = lastPrehighlight.featureId;
 	    addSMessage.shapeId = lastPrehighlight.shapeId;
+	    addSMessage.pointLocation = lastPrehighlight.pointLocation;
 	    addMessage.payload = addSMessage;
 	    messageOutSignal(addMessage);
 	    
@@ -569,6 +554,7 @@ void EventHandler::setPrehighlight(slc::Container &selected)
     addSMessage.type = lastPrehighlight.selectionType;
     addSMessage.featureId = lastPrehighlight.featureId;
     addSMessage.shapeId = lastPrehighlight.shapeId;
+    addSMessage.pointLocation = lastPrehighlight.pointLocation;
     addMessage.payload = addSMessage;
     messageOutSignal(addMessage);
 }

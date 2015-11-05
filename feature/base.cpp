@@ -22,7 +22,7 @@
 #include <BRep_Builder.hxx>
 #include <TopoDS_Compound.hxx>
 
-#include <application.h>
+#include <application/application.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <nodemaskdefs.h>

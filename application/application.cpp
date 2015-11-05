@@ -24,14 +24,17 @@
 #include <QTimer>
 #include <QMessageBox>
 
-#include <application.h>
-#include <mainwindow.h>
+#include <application/application.h>
+#include <application/mainwindow.h>
 #include <viewer/spaceballqevent.h>
 #include <project/project.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
+#include <message/dispatch.h>
+#include <application/factory.h>
 
 #include <spnav.h>
+
 
 using namespace app;
 
@@ -39,10 +42,14 @@ Application::Application(int &argc, char **argv) :
     QApplication(argc, argv)
 {
     spaceballPresent = false;
+    setupDispatcher();
     
     //didn't have any luck using std::make_shared. weird behavior.
     std::unique_ptr<MainWindow> tempWindow(new MainWindow());
     mainWindow = std::move(tempWindow);
+    
+    std::unique_ptr<Factory> tempFactory(new Factory());
+    factory = std::move(tempFactory);
     
     //some day pass the preferences file from user home directory to the manager constructor.
     std::unique_ptr<prf::Manager> temp(new prf::Manager());
@@ -54,13 +61,12 @@ Application::Application(int &argc, char **argv) :
       QTimer::singleShot(0, this, SLOT(quit()));
       return;
     }
+    
+//     factory->setViewer(mainWindow->getViewer());
 }
 
 Application::~Application()
 {
-  if (project)
-    delete project;
-  project = nullptr;
 }
 
 void Application::quittingSlot()
@@ -130,3 +136,50 @@ QDir Application::getApplicationDirectory()
   return appDir;
 }
 
+void Application::createNewProject()
+{
+  if (project)
+    std::cout << "need to close project" << std::endl; //serves as a warning and todo and reminder etc..
+  
+  msg::Message preMessage;
+  preMessage.mask = msg::Response | msg::Pre | msg::NewProject;
+  messageOutSignal(preMessage);
+  
+  std::unique_ptr<prj::Project> tempProject(new prj::Project());
+  project = std::move(tempProject);
+  
+  project->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
+    msg::dispatch().connectMessageOut(boost::bind(&prj::Project::messageInSlot, project.get(), _1));
+  
+  msg::Message postMessage;
+  postMessage.mask = msg::Response | msg::Post | msg::NewProject;
+  messageOutSignal(postMessage);
+}
+
+void Application::setupDispatcher()
+{
+  this->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
+    msg::dispatch().connectMessageOut(boost::bind(&Application::messageInSlot, this, _1));
+  
+  msg::Mask mask;
+  mask = msg::Request | msg::NewProject;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Application::newProjectRequestDispatched, this, _1)));
+}
+
+void Application::messageInSlot(const msg::Message &messageIn)
+{
+  msg::MessageDispatcher::iterator it = dispatcher.find(messageIn.mask);
+  if (it == dispatcher.end())
+    return;
+  
+  it->second(messageIn);
+}
+
+void Application::newProjectRequestDispatched(const msg::Message&)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  createNewProject();
+}

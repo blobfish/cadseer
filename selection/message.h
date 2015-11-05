@@ -22,6 +22,8 @@
 
 #include <boost/uuid/uuid.hpp>
 
+#include <osg/Vec3d>
+
 #include <selection/definitions.h>
 
 namespace slc
@@ -32,6 +34,7 @@ namespace slc
     slc::Type type;
     boost::uuids::uuid featureId;
     boost::uuids::uuid shapeId;
+    osg::Vec3d pointLocation;
   };
 }
 

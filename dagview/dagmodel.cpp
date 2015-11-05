@@ -34,7 +34,7 @@
 #include <QMenu>
 #include <QTimer>
 
-#include <application.h>
+#include <application/application.h>
 #include <globalutilities.h>
 #include <dagview/dagcontrolleddfs.h>
 #include <dagview/dagmodel.h>
@@ -378,7 +378,7 @@ void Model::setupDispatcher()
   mask = msg::Response | msg::Pre | msg::RemoveConnection;
   dispatcher.insert(std::make_pair(mask, boost::bind(&Model::connectionRemovedDispatched, this, _1)));
   
-  mask = msg::Response | msg::Post | msg::Update;
+  mask = msg::Response | msg::Post | msg::UpdateModel;
   dispatcher.insert(std::make_pair(mask, boost::bind(&Model::projectUpdatedDispatched, this, _1)));
   
   mask = msg::Response | msg::Post | msg::Preselection | msg::Addition;
@@ -970,7 +970,7 @@ void Model::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
 void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
-  auto select = [this](const uuid &featureIdIn, std::size_t actionIn)
+  auto select = [this](const uuid &featureIdIn, msg::Mask actionIn)
   {
     assert((actionIn == msg::Addition) || (actionIn == msg::Subtraction));
     msg::Message message;

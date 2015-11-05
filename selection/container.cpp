@@ -17,34 +17,24 @@
  *
  */
 
-#ifndef COMMANDCONSTANTS_H
-#define COMMANDCONSTANTS_H
+#include <boost/uuid/uuid_io.hpp>
 
-#include <string>
+#include <selection/container.h>
 
-namespace cmd
+using namespace slc;
+
+std::ostream& slc::operator<<(std::ostream& os, const Container& container)
 {
-static std::string attributeTitle = "CommandAttributeTitle";
-enum Constants
-{
-    StandardViewTop,
-    StandardViewFront,
-    StandardViewRight,
-    ViewFit,
-    ViewFill,
-    ViewLine,
-    ConstructionBox,
-    ConstructionSphere,
-    ConstructionCone,
-    ConstructionCylinder,
-    ConstructionBlend,
-    ConstructionUnion,
-    FileImportOCC,
-    FileExportOSG,
-    FileExportOCC,
-    Preferences,
-    Remove
-};
+  os << 
+    "type is: " << getNameOfType(container.selectionType) << 
+    "      featureid is: " << boost::uuids::to_string(container.featureId) <<
+    "      id is: " << boost::uuids::to_string(container.shapeId) << std::endl;
+  return os;
 }
 
-#endif // COMMANDCONSTANTS_H
+std::ostream& slc::operator<<(std::ostream& os, const Containers& containers)
+{
+  for (const auto &current : containers)
+    os << current;
+  return os;
+}

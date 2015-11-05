@@ -40,7 +40,7 @@ public:
     void readOCC(const std::string &fileName);
     void addOCCShape(const TopoDS_Shape &shapeIn);
     ftr::Base* findFeature(const boost::uuids::uuid &idIn);
-    void update();
+    void updateModel();
     void updateVisual();
     void writeGraphViz(const std::string &fileName);
     void setAllVisualDirty();
@@ -80,6 +80,8 @@ private:
     void setupDispatcher();
     void setCurrentLeafDispatched(const msg::Message &);
     void removeFeatureDispatched(const msg::Message &);
+    void updateModelDispatched(const msg::Message &);
+    void updateVisualDispatched(const msg::Message &);
 };
 }
 

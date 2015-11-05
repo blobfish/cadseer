@@ -31,7 +31,7 @@
 #include <BRepBuilderAPI_MakeVertex.hxx>
 #include <BRepExtrema_DistShapeShape.hxx>
 
-#include <application.h>
+#include <application/application.h>
 #include <globalutilities.h>
 #include <modelviz/connector.h>
 

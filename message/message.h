@@ -22,49 +22,67 @@
 
 #include <bitset>
 #include <functional>
-#include <map>
+#include <unordered_map>
 
 #include <boost/variant.hpp>
 
 #include <project/message.h>
 #include <selection/message.h>
+#include <application/message.h>
 
 namespace msg
 {
   //! Mask is for a key in a function dispatch message handler. We might need a validation routine.
   // no pre and post on requests only on response.
-  typedef std::bitset<32> Mask; //pay attention to size we convert to ullong for comparison operator.
-  static const std::size_t Request =		1 << 1;		//!< message classification
-  static const std::size_t Response =		1 << 2;		//!< message classification
-  static const std::size_t Pre =		1 << 3;		//!< message response timing. think "about to". Data still valid
-  static const std::size_t Post =		1 << 4;		//!< message response timing. think "done". Data invalid.
-  static const std::size_t Preselection =	1 << 5;		//!< selection classification
-  static const std::size_t Selection =		1 << 6;		//!< selection classification
-  static const std::size_t Addition =		1 << 7;		//!< selection action
-  static const std::size_t Subtraction =	1 << 8;		//!< selection action
-  static const std::size_t Clear =		1 << 9;		//!< selection action
-  static const std::size_t SetCurrentLeaf =	1 << 10;	//!< project action
-  static const std::size_t RemoveFeature =	1 << 11;	//!< project action
-  static const std::size_t AddFeature	 =	1 << 12;	//!< project action
-  static const std::size_t Update	 =	1 << 13;	//!< project action
-  static const std::size_t AddConnection =	1 << 14;	//!< project action
-  static const std::size_t RemoveConnection =	1 << 15;	//!< project action
+  typedef std::bitset<128> Mask;
+  static const Mask Request(Mask().		set(0));//!< message classification
+  static const Mask Response(Mask().		set(1));//!< message classification
+  static const Mask Pre(Mask().			set(2));//!< message response timing. think "about to". Data still valid
+  static const Mask Post(Mask().		set(3));//!< message response timing. think "done". Data invalid.
+  static const Mask Preselection(Mask().	set(4));//!< selection classification
+  static const Mask Selection(Mask().		set(5));//!< selection classification
+  static const Mask Addition(Mask().		set(6));//!< selection action
+  static const Mask Subtraction(Mask().		set(7));//!< selection action
+  static const Mask Clear(Mask().		set(8));//!< selection action
+  static const Mask SetCurrentLeaf(Mask().	set(9));//!< project action
+  static const Mask RemoveFeature(Mask().	set(10));//!< project action & command
+  static const Mask AddFeature(Mask().		set(11));//!< project action
+  static const Mask UpdateModel(Mask().		set(12));//!< project action
+  static const Mask UpdateVisual(Mask().	set(13));//!< project action
+  static const Mask AddConnection(Mask().	set(14));//!< project action
+  static const Mask RemoveConnection(Mask().	set(15));//!< project action
+  static const Mask NewProject(Mask().		set(16));//!< application action
+  static const Mask Construct(Mask().		set(17));//!< factory action.
+  static const Mask ViewTop(Mask().		set(18));//!< command
+  static const Mask ViewFront(Mask().		set(19));//!< command
+  static const Mask ViewRight(Mask().		set(20));//!< command
+  static const Mask ViewFit(Mask().		set(21));//!< command
+  static const Mask ViewFill(Mask().		set(22));//!< command
+  static const Mask ViewLine(Mask().		set(23));//!< command
+  static const Mask Box(Mask().			set(24));//!< command
+  static const Mask Sphere(Mask().		set(25));//!< command
+  static const Mask Cone(Mask().		set(26));//!< command
+  static const Mask Cylinder(Mask().		set(27));//!< command
+  static const Mask Blend(Mask().		set(28));//!< command
+  static const Mask Union(Mask().		set(29));//!< command
+  static const Mask ImportOCC(Mask().		set(30));//!< command
+  static const Mask ExportOCC(Mask().		set(31));//!< command
+  static const Mask ExportOSG(Mask().		set(32));//!< command
+  static const Mask Preferences(Mask().		set(33));//!< command
+  static const Mask Remove(Mask().		set(34));//!< command
   
-  typedef boost::variant<prj::Message, slc::Message> Payload;
+  typedef boost::variant<prj::Message, slc::Message, app::Message> Payload;
   
   struct Message
   {
+    Message(){}
+    Message(const Mask &maskIn) : mask(maskIn){}
     Mask mask = 0;
     Payload payload;
   };
   
   typedef std::function< void (const Message&) > MessageHandler;
-  
-  struct MaskCompare
-  {
-    bool operator() (const Mask& lhs, const Mask& rhs){return lhs.to_ullong() < rhs.to_ullong();}
-  };
-  typedef std::map<Mask, MessageHandler, MaskCompare> MessageDispatcher;
+  typedef std::unordered_map<Mask, MessageHandler> MessageDispatcher;
 }
 
 

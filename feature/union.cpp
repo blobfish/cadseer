@@ -40,7 +40,7 @@ Union::Union() : Base()
   name = QObject::tr("Union");
 }
 
-void Union::update(const UpdateMap &mapIn)
+void Union::updateModel(const UpdateMap &mapIn)
 {
   shape = TopoDS_Shape();
   setFailure(); //assume failure until success.

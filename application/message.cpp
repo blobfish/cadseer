@@ -17,31 +17,11 @@
  *
  */
 
-#include <command/command.h>
+#include "message.h"
 
-using namespace cmd;
+using namespace app;
 
-Command::Command(cmd::Constants idIn, QString nameIn, QAction *actionIn) : id(idIn), name(nameIn), action(actionIn)
+Message::Message()
 {
-}
-
-
-cmd::Constants Command::getId() const
-{
-    return id;
-}
-
-QString Command::getName() const
-{
-    return name;
-}
-
-QAction* Command::getAction() const
-{
-    return action;
-}
-
-void Command::trigger() const
-{
-    action->trigger();
+  type = ftr::Type::Base;
 }

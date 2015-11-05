@@ -106,7 +106,7 @@ void Cylinder::getParameters(double& radiusOut, double& heightOut) const
   heightOut = height;
 }
 
-void Cylinder::update(const UpdateMap& mapIn)
+void Cylinder::updateModel(const UpdateMap& mapIn)
 {
   //clear shape so if we fail the feature will be empty.
   shape = TopoDS_Shape();

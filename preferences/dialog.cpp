@@ -27,7 +27,7 @@
 
 using namespace prf;
 
-Dialog::Dialog(Manager *managerIn) : QDialog(), ui(new Ui::dialog), manager(managerIn)
+Dialog::Dialog(Manager *managerIn, QWidget *parent) : QDialog(parent), ui(new Ui::dialog), manager(managerIn)
 {
   ui->setupUi(this);
   initialize();

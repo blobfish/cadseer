@@ -117,7 +117,7 @@ void Cone::getParameters(double& radius1Out, double& radius2Out, double& heightO
   heightOut = height;
 }
 
-void Cone::update(const UpdateMap& mapIn)
+void Cone::updateModel(const UpdateMap& mapIn)
 {
   //clear shape so if we fail the feature will be empty.
   shape = TopoDS_Shape();

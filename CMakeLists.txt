@@ -59,11 +59,6 @@ SET(MESSAGE_SOURCES
     message/message.cpp
     message/dispatch.cpp
     )
-
-SET(COMMAND_SOURCES
-    ./command/command.cpp
-    ./command/manager.cpp
-    )
     
 SET(FEATURE_SOURCES
     ./feature/base.cpp
@@ -86,6 +81,7 @@ SET(SELECTION_SOURCES
     ./selection/intersector.cpp
     ./selection/manager.cpp
     ./selection/message.cpp
+    selection/container.cpp
     )
 
 SET(DIALOG_SOURCES
@@ -102,11 +98,17 @@ SET(PROJECT_SOURCES
     ./project/project.cpp
     ./project/message.cpp
     )
+    
+SET(APPLICATION_SOURCES
+    application/mainwindow.cpp
+    application/application.cpp
+    application/factory.cpp
+    application/message.cpp
+    )
 
 SET(CADSEER_SOURCES
     ./main.cpp
     viewer/viewerwidget.cpp
-    ./mainwindow.cpp
     ./dagview/dagview.cpp
     ./dagview/dagmodel.cpp
     ./dagview/dagmodelgraph.cpp
@@ -115,28 +117,27 @@ SET(CADSEER_SOURCES
     viewer/spaceballqevent.cpp
     viewer/gleventwidget.cpp
     viewer/spaceballosgevent.cpp
-    ./application.cpp
     ./globalutilities.cpp
     ./coordinatesystem.cpp
     viewer/textcamera.cpp
     ${MODELVIZ_SOURCES}
     ${TESTING_SOURCES}
     ${GESTURE_SOURCES}
-    ${COMMAND_SOURCES}
     ${MESSAGE_SOURCES}
     ${FEATURE_SOURCES}
     ${SELECTION_SOURCES}
     ${DIALOG_SOURCES}
     ${PREFERENCE_SOURCES}
     ${PROJECT_SOURCES}
+    ${APPLICATION_SOURCES}
     )
 
 SET(CADSEER_MOC_HDRS
     viewer/viewerwidget.h
-    ./mainwindow.h
+    application/mainwindow.h
     ./dagview/dagview.h
     ./dagview/dagmodel.h
-    ./application.h
+    application/application.h
     selection/manager.h
     ./dialogs/boxdialog.h
     ./preferences/dialog.h
@@ -153,7 +154,7 @@ SET(CADSEER_LIBRARIES
     )
 
 SET(CADSEER_UIS
-    ./mainwindow.ui
+    application/mainwindow.ui
     ./preferences/dialog.ui
     )
 

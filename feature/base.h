@@ -74,7 +74,7 @@ public:
   void setName(const QString &nameIn){name = nameIn;}
   QString getName() const {return name;}
   ftr::State getState() const {return state;}
-  virtual void update(const UpdateMap&) = 0;
+  virtual void updateModel(const UpdateMap&) = 0;
   virtual void updateVisual(); //called after update.
   virtual Type getType() const = 0;
   virtual const std::string& getTypeString() const = 0;

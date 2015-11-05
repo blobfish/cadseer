@@ -20,52 +20,16 @@
 #ifndef SELECTIONEVENTHANDLER_H
 #define SELECTIONEVENTHANDLER_H
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/nil_generator.hpp>
 #include <boost/signals2.hpp>
 
 #include <osgGA/GUIEventHandler>
 #include <osgUtil/LineSegmentIntersector>
 
-#include <selection/definitions.h>
+#include <selection/container.h>
 #include <message/message.h>
 
 namespace slc
 {
-class Selected
-{
-public:
-    Selected(){}
-    void initialize(osg::Geometry *geometryIn);
-    osg::observer_ptr<osg::Geometry> geometry;
-    osg::Vec4 color;
-};
-
-class Container
-{
-public:
-    Container(){}
-    Type selectionType = Type::None;
-    std::vector<Selected> selections;
-    boost::uuids::uuid featureId = boost::uuids::nil_generator()();
-    boost::uuids::uuid shapeId = boost::uuids::nil_generator()();
-    osg::Vec3d pointLocation;
-};
-inline bool operator==(const Container& lhs, const Container& rhs)
-{
-  return
-  (
-    (lhs.selectionType == rhs.selectionType) &&
-    (lhs.featureId == rhs.featureId) &&
-    (lhs.shapeId == rhs.shapeId) &&
-    (lhs.pointLocation == rhs.pointLocation)
-  );
-}
-std::ostream& operator<<(std::ostream& os, const Container& container);
-
-typedef std::vector<Container> Containers;
-std::ostream& operator<<(std::ostream& os, const Containers& containers);
-
 class EventHandler : public osgGA::GUIEventHandler
 {
 public:

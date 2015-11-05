@@ -32,7 +32,9 @@
 #include <gesture/gesturenode.h>
 #include <gesture/gesturehandler.h>
 #include <nodemaskdefs.h>
-#include <command/manager.h>
+#include <message/dispatch.h>
+
+static const std::string attributeTitle = "CommandAttributeTitle";
 
 GestureHandler::GestureHandler(osg::Camera *cameraIn) : osgGA::GUIEventHandler(), rightButtonDown(false),
     currentNodeLeft(false), iconRadius(32.0), includedAngle(90.0)
@@ -47,8 +49,11 @@ GestureHandler::GestureHandler(osg::Camera *cameraIn) : osgGA::GUIEventHandler()
     mininumSprayRadius = iconRadius * 7.0;
     nodeSpread = iconRadius * 3.0;
     constructMenu();
+    
+    setupDispatcher();
+    this->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
+    msg::dispatch().connectMessageOut(boost::bind(&GestureHandler::messageInSlot, this, _1));
 }
-
 
 bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
                             osgGA::GUIActionAdapter& actionAdapter, osg::Object *object,
@@ -76,15 +81,16 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
             gestureSwitch->setAllChildrenOff();
             if (currentNode->getNodeMask() & NodeMaskDef::gestureCommand)
             {
-                int temp;
-                if (!currentNode->getUserValue(cmd::attributeTitle, temp))
-                {
-                    std::cout << "couldn't get commandid" << std::endl;
-                    return false;
-                }
-                cmd::Constants commandId = static_cast<cmd::Constants>(temp);
-
-                cmd::Manager::getManager().trigger(commandId);
+	      std::string msgMaskString;
+	      if (currentNode->getUserValue(attributeTitle, msgMaskString))
+	      {
+		msg::Mask msgMask(msgMaskString);
+		msg::Message messageOut;
+		messageOut.mask = msgMask;
+		messageOutSignal(messageOut);
+	      }
+	      else
+		assert(0); //gesture node doesn't have msgMask attribute;
             }
         }
     }
@@ -248,32 +254,32 @@ void GestureHandler::constructMenu()
 
     osg::MatrixTransform *viewTop = gsn::buildCommandNode(":/resources/images/viewTop.svg");
     viewTop->setMatrix(dummy);
-    viewTop->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::StandardViewTop));
+    viewTop->setUserValue(attributeTitle, (msg::Request | msg::ViewTop).to_string());
     viewStandard->insertChild(viewStandard->getNumChildren() - 2, viewTop);
 
     osg::MatrixTransform *viewFront = gsn::buildCommandNode(":/resources/images/viewFront.svg");
     viewFront->setMatrix(dummy);
-    viewFront->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::StandardViewFront));
+    viewFront->setUserValue(attributeTitle, (msg::Request | msg::ViewFront).to_string());
     viewStandard->insertChild(viewStandard->getNumChildren() - 2, viewFront);
 
     osg::MatrixTransform *viewRight = gsn::buildCommandNode(":/resources/images/viewRight.svg");
     viewRight->setMatrix(dummy);
-    viewRight->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::StandardViewRight));
+    viewRight->setUserValue(attributeTitle, (msg::Request | msg::ViewRight).to_string());
     viewStandard->insertChild(viewStandard->getNumChildren() - 2, viewRight);
 
     osg::MatrixTransform *viewFit = gsn::buildCommandNode(":/resources/images/viewFit.svg");
     viewFit->setMatrix(dummy);
-    viewFit->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::ViewFit));
+    viewFit->setUserValue(attributeTitle, (msg::Request | msg::ViewFit).to_string());
     viewBase->insertChild(viewBase->getNumChildren() - 2, viewFit);
     
     osg::MatrixTransform *viewFill = gsn::buildCommandNode(":/resources/images/viewFill.svg");
     viewFill->setMatrix(dummy);
-    viewFill->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::ViewFill));
+    viewFill->setUserValue(attributeTitle, (msg::Request | msg::ViewFill).to_string());
     viewBase->insertChild(viewBase->getNumChildren() - 2, viewFill);
     
     osg::MatrixTransform *viewLine = gsn::buildCommandNode(":/resources/images/viewLine.svg");
     viewLine->setMatrix(dummy);
-    viewLine->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::ViewLine));
+    viewLine->setUserValue(attributeTitle, (msg::Request | msg::ViewLine).to_string());
     viewBase->insertChild(viewBase->getNumChildren() - 2, viewLine);
 
     //construction base
@@ -289,22 +295,22 @@ void GestureHandler::constructMenu()
 
     osg::MatrixTransform *constructionBox = gsn::buildCommandNode(":/resources/images/constructionBox.svg");
     constructionBox->setMatrix(dummy);
-    constructionBox->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::ConstructionBox));
+    constructionBox->setUserValue(attributeTitle, (msg::Request | msg::Construct | msg::Box).to_string());
     constructionPrimitives->insertChild(constructionPrimitives->getNumChildren() - 2, constructionBox);
 
     osg::MatrixTransform *constructionSphere = gsn::buildCommandNode(":/resources/images/constructionSphere.svg");
     constructionSphere->setMatrix(dummy);
-    constructionSphere->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::ConstructionSphere));
+    constructionSphere->setUserValue(attributeTitle, (msg::Request | msg::Construct | msg::Sphere).to_string());
     constructionPrimitives->insertChild(constructionPrimitives->getNumChildren() - 2, constructionSphere);
 
     osg::MatrixTransform *constructionCone = gsn::buildCommandNode(":/resources/images/constructionCone.svg");
     constructionCone->setMatrix(dummy);
-    constructionCone->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::ConstructionCone));
+    constructionCone->setUserValue(attributeTitle, (msg::Request | msg::Construct | msg::Cone).to_string());
     constructionPrimitives->insertChild(constructionPrimitives->getNumChildren() - 2, constructionCone);
 
     osg::MatrixTransform *constructionCylinder = gsn::buildCommandNode(":/resources/images/constructionCylinder.svg");
     constructionCylinder->setMatrix(dummy);
-    constructionCylinder->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::ConstructionCylinder));
+    constructionCylinder->setUserValue(attributeTitle, (msg::Request | msg::Construct | msg::Cylinder).to_string());
     constructionPrimitives->insertChild(constructionPrimitives->getNumChildren() - 2, constructionCylinder);
     
     //construction finishing base
@@ -315,7 +321,7 @@ void GestureHandler::constructMenu()
     
     osg::MatrixTransform *constructionBlend = gsn::buildCommandNode(":/resources/images/constructionBlend.svg");
     constructionBlend->setMatrix(dummy);
-    constructionBlend->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::ConstructionBlend));
+    constructionBlend->setUserValue(attributeTitle, (msg::Request | msg::Construct | msg::Blend).to_string());
     constructionFinishing->insertChild(constructionFinishing->getNumChildren() - 2, constructionBlend);
     
     //booleans
@@ -326,12 +332,12 @@ void GestureHandler::constructMenu()
     
     osg::MatrixTransform *constructionUnion = gsn::buildCommandNode(":/resources/images/constructionUnion.svg");
     constructionUnion->setMatrix(dummy);
-    constructionUnion->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::ConstructionUnion));
+    constructionUnion->setUserValue(attributeTitle, (msg::Request | msg::Construct | msg::Union).to_string());
     constructionBoolean->insertChild(constructionBoolean->getNumChildren() - 2, constructionUnion);
     
     osg::MatrixTransform *remove = gsn::buildCommandNode(":/resources/images/remove.svg");
     remove->setMatrix(dummy);
-    remove->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::Remove));
+    remove->setUserValue(attributeTitle, (msg::Request | msg::Remove).to_string());
     startNode->insertChild(constructionBoolean->getNumChildren() - 2, remove);
     
     //file base
@@ -347,7 +353,7 @@ void GestureHandler::constructMenu()
     
     osg::MatrixTransform *fileImportOCC = gsn::buildCommandNode(":/resources/images/fileOCC.svg");
     fileImportOCC->setMatrix(dummy);
-    fileImportOCC->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::FileImportOCC));
+    fileImportOCC->setUserValue(attributeTitle, (msg::Request | msg::ImportOCC).to_string());
     fileImport->insertChild(fileImport->getNumChildren() - 2, fileImportOCC);
     
     osg::MatrixTransform *fileExport;
@@ -357,18 +363,18 @@ void GestureHandler::constructMenu()
     
     osg::MatrixTransform *fileExportOSG = gsn::buildCommandNode(":/resources/images/fileOSG.svg");
     fileExportOSG->setMatrix(dummy);
-    fileExportOSG->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::FileExportOSG));
+    fileExportOSG->setUserValue(attributeTitle, (msg::Request | msg::ExportOSG).to_string());
     fileExport->insertChild(fileExport->getNumChildren() - 2, fileExportOSG);
     
     osg::MatrixTransform *fileExportOCC = gsn::buildCommandNode(":/resources/images/fileOCC.svg");
     fileExportOCC->setMatrix(dummy);
-    fileExportOCC->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::FileExportOCC));
+    fileExportOCC->setUserValue(attributeTitle, (msg::Request | msg::ExportOCC).to_string());
     fileExport->insertChild(fileExport->getNumChildren() - 2, fileExportOCC);
     
     //probably won't stay under file node. good enough for now.
     osg::MatrixTransform *preferences = gsn::buildCommandNode(":/resources/images/preferences.svg");
     preferences->setMatrix(dummy);
-    preferences->setUserValue(cmd::attributeTitle, static_cast<int>(cmd::Preferences));
+    preferences->setUserValue(attributeTitle, (msg::Request | msg::Preferences).to_string());
     fileBase->insertChild(fileBase->getNumChildren() - 2, preferences);
 }
 
@@ -440,6 +446,27 @@ void GestureHandler::startDrag(const osgGA::GUIEventAdapter& eventAdapter)
     startNode->setMatrix(scaleMatrix * locationMatrix);
 
     aggregateMatrix = startNode->getMatrix();
+}
+
+void GestureHandler::messageInSlot(const msg::Message &messageIn)
+{
+  //not using yet
+  
+//   msg::MessageDispatcher::iterator it = dispatcher.find(messageIn.mask);
+//   if (it == dispatcher.end())
+//     return;
+//   
+//   it->second(messageIn);
+}
+
+void GestureHandler::setupDispatcher()
+{
+  //not using yet
+  
+//   msg::Mask mask;
+//   
+//   mask = msg::Response | msg::Post | msg::NewProject;
+//   dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newProjectDispatched, this, _1)));
 }
 
 

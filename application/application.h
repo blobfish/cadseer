@@ -20,17 +20,25 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
+#include <memory>
+
 #include <QApplication>
 #include <QDir>
 
-#include <memory>
+#ifndef Q_MOC_RUN
+#include <boost/signals2.hpp>
+#include <message/message.h>
+#endif
 
-class MainWindow;
+
+
 namespace prf{class Manager;}
 namespace prj{class Project;}
 
 namespace app
 {
+class MainWindow;
+class Factory;
 class Application : public QApplication
 {
     Q_OBJECT
@@ -39,19 +47,34 @@ public:
     ~Application();
     bool x11EventFilter(XEvent *event);
     void initializeSpaceball();
-    void setProject(prj::Project *projectIn){project = projectIn;}
-    prj::Project* getProject(){return project;}
+    prj::Project* getProject(){return project.get();}
     prf::Manager* getPreferencesManager(){return preferenceManager.get();}
     MainWindow* getMainWindow(){return mainWindow.get();}
     QDir getApplicationDirectory();
+    
+    //new messaging system
+    void messageInSlot(const msg::Message &);
+    typedef boost::signals2::signal<void (const msg::Message &)> MessageOutSignal;
+    boost::signals2::connection connectMessageOut(const MessageOutSignal::slot_type &subscriber)
+    {
+      return messageOutSignal.connect(subscriber);
+    }
 
 public Q_SLOTS:
     void quittingSlot();
 private:
     std::unique_ptr<MainWindow> mainWindow;
-    prj::Project *project = nullptr;
-    bool spaceballPresent;
+    std::unique_ptr<prj::Project> project;
+    std::unique_ptr<Factory> factory;
     std::unique_ptr<prf::Manager> preferenceManager;
+    bool spaceballPresent;
+    
+    void createNewProject();
+    
+    MessageOutSignal messageOutSignal;
+    msg::MessageDispatcher dispatcher;
+    void setupDispatcher();
+    void newProjectRequestDispatched(const msg::Message &);
 };
 }
 

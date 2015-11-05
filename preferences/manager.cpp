@@ -20,7 +20,7 @@
 #include <iostream>
 #include <fstream>
 
-#include <application.h>
+#include <application/application.h>
 #include <QDir>
 
 #include <preferences/preferencesXML.h>

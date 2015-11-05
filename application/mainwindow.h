@@ -17,30 +17,43 @@
  *
  */
 
-#ifndef COMMAND_H
-#define COMMAND_H
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
 
-#include <QString>
-#include <QAction>
+#include <QMainWindow>
+#include <osg/Node>
 
-#include <command/constants.h>
+class ViewerWidget;
+namespace slc{class Manager;}
 
-namespace cmd
+namespace dag{class View; class Model;}
+
+namespace Ui {
+class MainWindow;
+}
+
+class TopoDS_Face;
+class TopoDS_Shape;
+
+namespace app
 {
-class Command
+class MainWindow : public QMainWindow
 {
+    Q_OBJECT
+    
 public:
-    Command(cmd::Constants idIn, QString nameIn, QAction *actionIn);
-    cmd::Constants getId() const;
-    QString getName() const;
-    QAction* getAction() const;
-    void trigger() const;
+    explicit MainWindow(QWidget *parent = 0);
+    ~MainWindow();
+    ViewerWidget* getViewer(){return viewWidget;}
 
-protected:
-    cmd::Constants id;
-    QString name;
-    QAction *action;
+private:
+    void setupSelectionToolbar();
+    Ui::MainWindow *ui;
+    ViewerWidget* viewWidget;
+    dag::Model *dagModel;
+    dag::View *dagView;
+    slc::Manager *selectionManager;
 };
 }
 
-#endif // COMMAND_H
+#endif // MAINWINDOW_H

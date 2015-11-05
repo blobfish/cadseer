@@ -17,27 +17,19 @@
  *
  */
 
-#include <assert.h>
-#include <iostream>
 
-#include <command/manager.h>
+#ifndef APP_MESSAGE_H
+#define APP_MESSAGE_H
 
-using namespace cmd;
+#include <feature/types.h>
 
-Manager& Manager::getManager()
+namespace app
 {
-    static Manager manager;
-    return manager;
+  struct Message
+  {
+    Message();
+    ftr::Type type; //!< for factory dispatch.
+  };
 }
 
-void Manager::addCommand(const Command &commandIn)
-{
-    commandMap.insert(std::make_pair(commandIn.getId(), commandIn));
-}
-
-void Manager::trigger(const cmd::Constants constant)
-{
-    CommandMap::const_iterator it = commandMap.find(constant);
-    assert(it != commandMap.end());
-    it->second.trigger();
-}
+#endif // APP_MESSAGE_H

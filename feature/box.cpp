@@ -167,7 +167,7 @@ void Box::getParameters(double &lengthOut, double &widthOut, double &heightOut) 
   heightOut = height;
 }
 
-void Box::update(const UpdateMap& mapIn)
+void Box::updateModel(const UpdateMap& mapIn)
 {
   //clear shape so if we fail the feature will be empty.
   shape = TopoDS_Shape();

@@ -63,7 +63,7 @@ void Blend::setEdgeIds(const std::vector<boost::uuids::uuid>& edgeIdsIn)
   setModelDirty();
 }
 
-void Blend::update(const UpdateMap& mapIn)
+void Blend::updateModel(const UpdateMap& mapIn)
 {
   //clear shape so if we fail the feature will be empty. what about maps?
   shape = TopoDS_Shape();

@@ -47,7 +47,6 @@
 #include <selection/definitions.h>
 #include <testing/plotter.h>
 #include <gesture/gesturehandler.h>
-#include <command/manager.h>
 #include <globalutilities.h>
 #include <coordinatesystem.h>
 #include <message/dispatch.h>
@@ -66,7 +65,7 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     
     osg::ref_ptr<osg::PolygonMode> pm = new osg::PolygonMode;
     root->getOrCreateStateSet()->setAttribute(pm.get());
-    viewFillSlot();
+    viewFillDispatched(msg::Message());
     
     osg::ShadeModel *shadeModel = new osg::ShadeModel(osg::ShadeModel::SMOOTH);
     root->getOrCreateStateSet()->setAttribute(shadeModel);
@@ -120,8 +119,6 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     QHBoxLayout *layout = new QHBoxLayout();
     layout->addWidget(windowQt->getGLWidget());
     setLayout(layout);
-
-    setupCommands();
 
     _timer.start( 10 );
 }
@@ -307,63 +304,30 @@ void ViewerWidget::setSelectionMask(const int &maskIn)
     selectionHandler->setSelectionMask(maskIn);
 }
 
-void ViewerWidget::setupCommands()
-{
-    QAction *topAction = new QAction(qApp);
-    connect(topAction, SIGNAL(triggered()), this, SLOT(viewTopSlot()));
-    cmd::Command topCommand(cmd::StandardViewTop, "View Top", topAction);
-    cmd::Manager::getManager().addCommand(topCommand);
-
-    QAction *frontAction = new QAction(qApp);
-    connect(frontAction, SIGNAL(triggered()), this, SLOT(viewFrontSlot()));
-    cmd::Command frontCommand(cmd::StandardViewFront, "View Front", frontAction);
-    cmd::Manager::getManager().addCommand(frontCommand);
-
-    QAction *rightAction = new QAction(qApp);
-    connect(rightAction, SIGNAL(triggered()), this, SLOT(viewRightSlot()));
-    cmd::Command rightCommand(cmd::StandardViewRight, "View Right", rightAction);
-    cmd::Manager::getManager().addCommand(rightCommand);
-
-    QAction *fitAction = new QAction(qApp);
-    connect(fitAction, SIGNAL(triggered()), this, SLOT(viewFitSlot()));
-    cmd::Command fitCommand(cmd::ViewFit, "View Fit", fitAction);
-    cmd::Manager::getManager().addCommand(fitCommand);
-    
-    QAction *fillAction = new QAction(qApp);
-    connect(fillAction, SIGNAL(triggered()), this, SLOT(viewFillSlot()));
-    cmd::Command fillCommand(cmd::ViewFill, "View Fill", fillAction);
-    cmd::Manager::getManager().addCommand(fillCommand);
-    
-    QAction *lineAction = new QAction(qApp);
-    connect(lineAction, SIGNAL(triggered()), this, SLOT(viewLineSlot()));
-    cmd::Command lineCommand(cmd::ViewLine, "View Line", lineAction);
-    cmd::Manager::getManager().addCommand(lineCommand);
-}
-
-void ViewerWidget::viewTopSlot()
+void ViewerWidget::viewTopDispatched(const msg::Message&)
 {
     spaceballManipulator->setView(osg::Vec3d(0.0, 0.0, -1.0), osg::Vec3d(0.0, 1.0, 0.0));
     spaceballManipulator->viewFit();
 }
 
-void ViewerWidget::viewFrontSlot()
+void ViewerWidget::viewFrontDispatched(const msg::Message&)
 {
     spaceballManipulator->setView(osg::Vec3d(0.0, 1.0, 0.0), osg::Vec3d(0.0, 0.0, 1.0));
     spaceballManipulator->viewFit();
 }
 
-void ViewerWidget::viewRightSlot()
+void ViewerWidget::viewRightDispatched(const msg::Message&)
 {
     spaceballManipulator->setView(osg::Vec3d(-1.0, 0.0, 0.0), osg::Vec3d(0.0, 0.0, 1.0));
     spaceballManipulator->viewFit();
 }
 
-void ViewerWidget::viewFitSlot()
+void ViewerWidget::viewFitDispatched(const msg::Message&)
 {
     spaceballManipulator->viewFit();
 }
 
-void ViewerWidget::viewFillSlot()
+void ViewerWidget::viewFillDispatched(const msg::Message&)
 {
   osg::PolygonMode *pMode = dynamic_cast<osg::PolygonMode*>
     (root->getOrCreateStateSet()->getAttribute(osg::StateAttribute::POLYGONMODE));
@@ -371,7 +335,7 @@ void ViewerWidget::viewFillSlot()
   pMode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL);
 }
 
-void ViewerWidget::viewLineSlot()
+void ViewerWidget::viewLineDispatched(const msg::Message&)
 {
   osg::PolygonMode *pMode = dynamic_cast<osg::PolygonMode*>
     (root->getOrCreateStateSet()->getAttribute(osg::StateAttribute::POLYGONMODE));
@@ -379,7 +343,7 @@ void ViewerWidget::viewLineSlot()
   pMode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
 }
 
-void ViewerWidget::writeOSGSlot()
+void ViewerWidget::exportOSGDispatched(const msg::Message&)
 {
   QString start = QDir::homePath() + "/OpenSceneGraph.osg";
   QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), start, tr("Scene (*.osg)"));
@@ -397,6 +361,30 @@ void ViewerWidget::setupDispatcher()
   
   mask = msg::Response | msg::Pre | msg::RemoveFeature;
   dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::featureRemovedDispatched, this, _1)));
+  
+  mask = msg::Response | msg::Post | msg::UpdateVisual;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::visualUpdatedDispatched, this, _1)));
+  
+  mask = msg::Request | msg::ViewTop;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewTopDispatched, this, _1)));
+  
+  mask = msg::Request | msg::ViewFront;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewFrontDispatched, this, _1)));
+  
+  mask = msg::Request | msg::ViewRight;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewRightDispatched, this, _1)));
+  
+  mask = msg::Request | msg::ViewFit;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewFitDispatched, this, _1)));
+  
+  mask = msg::Request | msg::ViewFill;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewFillDispatched, this, _1)));
+  
+  mask = msg::Request | msg::ViewLine;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewLineDispatched, this, _1)));
+  
+  mask = msg::Request | msg::ExportOSG;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::exportOSGDispatched, this, _1)));
 }
 
 void ViewerWidget::messageInSlot(const msg::Message &messageIn)
@@ -426,6 +414,11 @@ void ViewerWidget::featureRemovedDispatched(const msg::Message &messageIn)
   
   prj::Message message = boost::get<prj::Message>(messageIn.payload);
   root->removeChild(message.feature->getMainSwitch());
+}
+
+void ViewerWidget::visualUpdatedDispatched(const msg::Message &messageIn)
+{
+  this->update();
 }
 
 VisibleVisitor::VisibleVisitor(bool visIn) : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), visibility(visIn)

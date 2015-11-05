@@ -32,7 +32,7 @@ namespace prf
   {
       Q_OBJECT
   public:
-    Dialog(Manager *);
+    Dialog(Manager *, QWidget* = 0);
     ~Dialog();
     bool isVisualDirty(){return visualDirty;}
   public Q_SLOTS:
