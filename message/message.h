@@ -66,11 +66,12 @@ namespace msg
   static const Mask Blend(Mask().		set(28));//!< command
   static const Mask Union(Mask().		set(29));//!< command
   static const Mask Subtract(Mask().		set(30));//!< command
-  static const Mask ImportOCC(Mask().		set(31));//!< command
-  static const Mask ExportOCC(Mask().		set(32));//!< command
-  static const Mask ExportOSG(Mask().		set(33));//!< command
-  static const Mask Preferences(Mask().		set(34));//!< command
-  static const Mask Remove(Mask().		set(35));//!< command
+  static const Mask Intersect(Mask().		set(31));//!< command
+  static const Mask ImportOCC(Mask().		set(32));//!< command
+  static const Mask ExportOCC(Mask().		set(33));//!< command
+  static const Mask ExportOSG(Mask().		set(34));//!< command
+  static const Mask Preferences(Mask().		set(35));//!< command
+  static const Mask Remove(Mask().		set(36));//!< command
   
   typedef boost::variant<prj::Message, slc::Message, app::Message> Payload;
   

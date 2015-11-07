@@ -40,6 +40,7 @@
 #include <feature/cone.h>
 #include <feature/union.h>
 #include <feature/subtract.h>
+#include <feature/intersect.h>
 #include <feature/blend.h>
 
 using namespace app;
@@ -93,6 +94,9 @@ void Factory::setupDispatcher()
   
   mask = msg::Request | msg::Construct | msg::Subtract;
   dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newSubtractDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Construct | msg::Intersect;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newIntersectDispatched, this, _1)));
   
   mask = msg::Request | msg::Construct | msg::Blend;
   dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newBlendDispatched, this, _1)));
@@ -274,7 +278,6 @@ void Factory::newUnionDispatched(const msg::Message&)
   triggerUpdate();
 }
 
-
 void Factory::newSubtractDispatched(const msg::Message&)
 {
   std::ostringstream debug;
@@ -305,6 +308,44 @@ void Factory::newSubtractDispatched(const msg::Message&)
   project->addFeature(subtract);
   project->connect(targetFeatureId, subtract->getId(), ftr::InputTypes::target);
   project->connect(toolFeatureId, subtract->getId(), ftr::InputTypes::tool);
+  
+  msg::Message clearSelectionMessage;
+  clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
+  messageOutSignal(clearSelectionMessage);
+  
+  triggerUpdate();
+}
+
+void Factory::newIntersectDispatched(const msg::Message&)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  if (containers.size() < 2)
+    return;
+  
+  //for now only accept objects.
+  if
+  (
+    containers.at(0).selectionType != slc::Type::Object ||
+    containers.at(1).selectionType != slc::Type::Object
+  )
+    return;
+    
+  assert(project);
+    
+  uuid targetFeatureId = containers.at(0).featureId;
+  uuid toolFeatureId = containers.at(1).featureId; //only 1 tool right now.
+  
+  project->findFeature(targetFeatureId)->hide3D();
+  project->findFeature(toolFeatureId)->hide3D();
+  
+  //union keyword. whoops
+  std::shared_ptr<ftr::Intersect> intersect(new ftr::Intersect());
+  project->addFeature(intersect);
+  project->connect(targetFeatureId, intersect->getId(), ftr::InputTypes::target);
+  project->connect(toolFeatureId, intersect->getId(), ftr::InputTypes::tool);
   
   msg::Message clearSelectionMessage;
   clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;

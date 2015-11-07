@@ -38,7 +38,8 @@ namespace ftr
     Blend, //!< feature blend class.
     Inert, //!< feature inert class.
     Union, //!< feature union class.
-    Subtract //!< feature subtract class.
+    Subtract, //!< feature subtract class.
+    Intersect //!< feature intersect class.
   };
   
   inline const static std::string& toString(Type typeIn)
@@ -55,7 +56,8 @@ namespace ftr
       {Type::Blend, "Blend"},
       {Type::Inert, "Inert"},
       {Type::Union, "Union"},
-      {Type::Union, "Subtract"}
+      {Type::Union, "Subtract"},
+      {Type::Union, "Intersect"}
     };
     
     assert(strings.count(typeIn) > 0);
