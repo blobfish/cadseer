@@ -74,6 +74,7 @@ SET(FEATURE_SOURCES
     feature/maps.cpp
     feature/cylinderbuilder.cpp
     feature/union.cpp
+    feature/subtract.cpp
     )
     
 SET(SELECTION_SOURCES

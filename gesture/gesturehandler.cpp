@@ -335,6 +335,11 @@ void GestureHandler::constructMenu()
     constructionUnion->setUserValue(attributeTitle, (msg::Request | msg::Construct | msg::Union).to_string());
     constructionBoolean->insertChild(constructionBoolean->getNumChildren() - 2, constructionUnion);
     
+    osg::MatrixTransform *constructionSubtraction = gsn::buildCommandNode(":/resources/images/constructionSubtraction.svg");
+    constructionSubtraction->setMatrix(dummy);
+    constructionSubtraction->setUserValue(attributeTitle, (msg::Request | msg::Construct | msg::Subtract).to_string());
+    constructionBoolean->insertChild(constructionBoolean->getNumChildren() - 2, constructionSubtraction);
+    
     osg::MatrixTransform *remove = gsn::buildCommandNode(":/resources/images/remove.svg");
     remove->setMatrix(dummy);
     remove->setUserValue(attributeTitle, (msg::Request | msg::Remove).to_string());

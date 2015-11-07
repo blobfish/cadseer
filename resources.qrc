@@ -36,6 +36,7 @@
     <file>resources/images/constructionInert.svg</file>
     <file>resources/images/constructionBoolean.svg</file>
     <file>resources/images/constructionUnion.svg</file>
+    <file>resources/images/constructionSubtract.svg</file>
     <file>resources/images/remove.svg</file>
     <file>resources/images/fileBase.svg</file>
     <file>resources/images/fileImport.svg</file>

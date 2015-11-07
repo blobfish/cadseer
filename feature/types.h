@@ -33,11 +33,12 @@ namespace ftr
     CSys, //!< feature base class.
     Box, //!< feature box class.
     Sphere, //!< feature sphere class.
-    Cone, //!< feature sphere class.
-    Cylinder, //!< feature sphere class.
+    Cone, //!< feature cone class.
+    Cylinder, //!< feature cylinder class.
     Blend, //!< feature blend class.
-    Inert, //!< feature box class.
-    Union //!< feature box class.
+    Inert, //!< feature inert class.
+    Union, //!< feature union class.
+    Subtract //!< feature subtract class.
   };
   
   inline const static std::string& toString(Type typeIn)
@@ -53,7 +54,8 @@ namespace ftr
       {Type::Cylinder, "Cylinder"},
       {Type::Blend, "Blend"},
       {Type::Inert, "Inert"},
-      {Type::Union, "Union"}
+      {Type::Union, "Union"},
+      {Type::Union, "Subtract"}
     };
     
     assert(strings.count(typeIn) > 0);

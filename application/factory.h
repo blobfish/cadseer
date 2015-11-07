@@ -63,6 +63,7 @@ namespace app
     void newSphereDispatched(const msg::Message&);
     void newConeDispatched(const msg::Message&);
     void newUnionDispatched(const msg::Message&);
+    void newSubtractDispatched(const msg::Message&);
     void newBlendDispatched(const msg::Message&);
     void importOCCDispatched(const msg::Message&);
     void exportOCCDispatched(const msg::Message&);
