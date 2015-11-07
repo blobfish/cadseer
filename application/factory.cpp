@@ -203,9 +203,9 @@ void Factory::newSphereDispatched(const msg::Message&)
   assert(project);
   
   std::shared_ptr<ftr::Sphere> sphere(new ftr::Sphere());
-  sphere->setRadius(2.0);
+  sphere->setRadius(4.0);
   gp_Ax2 location;
-  location.SetLocation(gp_Pnt(6.0, 6.0, 5.0));
+  location.SetLocation(gp_Pnt(11.0, 6.0, -1.5));
   sphere->setSystem(location);
   project->addFeature(sphere);
   
@@ -225,7 +225,7 @@ void Factory::newConeDispatched(const msg::Message&)
   cone->setRadius2(0.5);
   cone->setHeight(8.0);
   gp_Ax2 location;
-  location.SetLocation(gp_Pnt(11.0, 6.0, 3.0));
+  location.SetLocation(gp_Pnt(6.0, 6.0, 2.5));
   cone->setSystem(location);
   project->addFeature(cone);
   
