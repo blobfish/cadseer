@@ -35,7 +35,7 @@ QIcon Union::icon;
 Union::Union() : Base()
 {
   if (icon.isNull())
-    icon = QIcon(":/resources/images/constructionBlend.svg");
+    icon = QIcon(":/resources/images/constructionUnion.svg");
   
   name = QObject::tr("Union");
 }

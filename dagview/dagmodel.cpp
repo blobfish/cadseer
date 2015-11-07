@@ -584,7 +584,6 @@ void Model::selectionSubtractionDispatched(const msg::Message &messageIn)
 
 void Model::projectUpdatedDispatched(const msg::Message &)
 {
-  #include <message/dispatch.h>
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
   msg::dispatch().dumpString(debug.str());
@@ -608,8 +607,7 @@ void Model::projectUpdatedDispatched(const msg::Message &)
   auto columnNumberFromMask = [] (const ColumnMask& columnMaskIn)
   {
     //if we probe for a column before it is set, Error!
-    if (columnMaskIn.count() != 1)
-      assert(0); //toposort problem?
+    assert(columnMaskIn.any()); //toposort problem?
     //we can't use to_ulong or to_ullong. They are to small.
     //this might be slow?
     std::string buffer = columnMaskIn.to_string();
@@ -617,17 +615,22 @@ void Model::projectUpdatedDispatched(const msg::Message &)
     return (columnMaskIn.size() - position - 1);
   };
   
-  
-  //this obsoletes the passed in sortedIds.
   TopoSortVisitor<Graph> visitor(graph);
   ControlledDFS<Graph, TopoSortVisitor<Graph> > dfs(visitor);
   Path sorted = visitor.getResults();
   
-  std::size_t currentRow = 0;
-  std::size_t currentColumn = 0;
+  //reversed graph for calculating parent mask.
+  GraphReversed rGraph = boost::make_reverse_graph(graph);
+  GraphReversed::adjacency_iterator parentIt, parentItEnd;
+  
   std::size_t maxColumn = 0;
   float maxTextLength = 0;
-  ColumnMask futureChildMask; //keeps track of columns that are awaiting children.
+  std::size_t currentRow = 0;
+  
+  
+  
+  
+  
   for (auto currentIt = sorted.begin(); currentIt != sorted.end(); ++currentIt)
   {
     Vertex currentVertex = *currentIt;
@@ -636,64 +639,43 @@ void Model::projectUpdatedDispatched(const msg::Message &)
     if (!graph[currentVertex].dagVisible)
       continue;
     
-    //find appropriate column.
-    currentColumn = 0; //always default to first column
-    ColumnMask spreadMask;
-    
-    //this isn't complete. now when finding alter parent the spreadMask
-    //is ignored. This probably won't work. revist after some more features
-    //like linked copy and union.
-    if (graph[currentVertex].feature.lock()->getDescriptor() == ftr::Descriptor::Alter)
+    std::size_t currentColumn = 0; //always default to first column
+    ColumnMask spreadMask; //mask between child and all parents.
+    ColumnMask targetMask; //mask of 'target' parent.
+    std::tie(parentIt, parentItEnd) = boost::adjacent_vertices(currentVertex, rGraph);
+    for (; parentIt != parentItEnd; ++parentIt)
     {
-      //build spreadMask. spreadMask reflects occupied columns between
-      //child and farthest parent. 'Farthest' is relative to topo sort.
-      std::size_t maxSpread = 0;
+      bool results;
+      GraphReversed::edge_descriptor currentEdge;
+      std::tie(currentEdge, results) = boost::edge(currentVertex, *parentIt, rGraph);
+      assert(results);
+      if (rGraph[currentEdge].inputType == ftr::InputTypes::target)
+	targetMask |= rGraph[*parentIt].columnMask; //should only be 1 target parent.
       
-      GraphReversed rGraph = boost::make_reverse_graph(graph);
-      GraphReversed::adjacency_iterator parentIt, parentItEnd;
-      std::tie(parentIt, parentItEnd) = boost::adjacent_vertices(currentVertex, rGraph);
-      for (; parentIt != parentItEnd; ++parentIt)
+      auto parentSortedIndex = rGraph[*parentIt].sortedIndex;
+      auto tempParentIt = sorted.begin() + parentSortedIndex;
+      tempParentIt++;
+      while (tempParentIt != currentIt)
       {
-        bool results;
-        GraphReversed::edge_descriptor currentEdge;
-        std::tie(currentEdge, results) = boost::edge(currentVertex, *parentIt, rGraph);
-        assert(results);
-        if (rGraph[currentEdge].inputType == ftr::InputTypes::target)
-          currentColumn = columnNumberFromMask(rGraph[*parentIt].columnMask);
-        
-        auto parentSortedIndex = rGraph[*parentIt].sortedIndex;
-        auto currentSortedIndex = rGraph[*currentIt].sortedIndex;
-        //spread is the distance between the current parent and the current entry
-        //in the topo sorted vector. 1 means adjacency, 2 means 1 feature between etc..
-        auto spread = currentSortedIndex - parentSortedIndex;
-        
-        if ((spread < 2) || (spread < maxSpread))
-          continue;
-        
-        maxSpread = spread;
-        spreadMask.reset();
-        auto tempParentIt = sorted.begin() + parentSortedIndex;
-        tempParentIt++;
-        while (tempParentIt != currentIt)
-        {
-          Vertex parentVertex = *tempParentIt;
-          spreadMask |= rGraph[parentVertex].columnMask;
-          tempParentIt++;
-//           dumpMask(spreadMask);
-        }
+	Vertex parentVertex = *tempParentIt;
+	spreadMask |= rGraph[parentVertex].columnMask;
+	tempParentIt++;
       }
     }
-    else
+    assert(targetMask.count() < 2); //just a little sanity check.
+    
+    if ((targetMask & (~spreadMask)).any())
+      currentColumn = columnNumberFromMask(targetMask);
+    else //target parent didn't work.
     {
-      //use masks to determin column and set.
-      ColumnMask testMask = spreadMask | futureChildMask;
-      for (std::size_t index = 0; index < testMask.size(); ++index)
+      //find first usable column
+      for (std::size_t nextColumn = 0; nextColumn < ColumnMask().size(); nextColumn++)
       {
-        if (! testMask.test(index))
-        {
-          currentColumn = index;
-          break;
-        }
+	if (!spreadMask.test(nextColumn))
+	{
+	  currentColumn = nextColumn;
+	  break;
+	}
       }
     }
     
@@ -701,35 +683,10 @@ void Model::projectUpdatedDispatched(const msg::Message &)
     ColumnMask freshMask;
     freshMask.set(currentColumn);
     
-    //now loop through children and decide if we need
-    //to reserve this column for future children.
-    VertexAdjacencyIterator it, itEnd;
-    std::tie(it, itEnd) = boost::adjacent_vertices(currentVertex, graph);
-    for (; it != itEnd; ++it)
-    {
-      bool results;
-      Edge edge;
-      ftr::InputTypes type;
-      std::tie(edge, results) = boost::edge(currentVertex, *it, graph);
-      if (results)
-        type = graph[edge].inputType;
-      if
-      (
-        (graph[*it].feature.lock()->getDescriptor() == ftr::Descriptor::Alter) &&
-        (type == ftr::InputTypes::target)
-      )
-        futureChildMask |= freshMask;
-      else
-        futureChildMask &= ~freshMask;
-    }
+
     
     
-    //update futureChildMask to reserve column for future.
-    //quit half way through implementing the following.
-//     GraphicsEdgeByParentIterator startChild, endChild;
-//     std::tie(startChild, endChild) = findParents(graphicsEdgeMap, currentRecord.featureId);
-//     if (startChild != endChild)
-//       futureChildMask |= freshMask;
+
     
     graph[currentVertex].columnMask = freshMask;
     graph[currentVertex].row = currentRow;
@@ -1174,23 +1131,9 @@ void Model::setCurrentLeafSlot()
 
 void Model::removeFeatureSlot()
 {
-  auto currentSelections = getAllSelected();
-  assert(currentSelections.size() == 1);
-  
-  msg::Message message;
-  message.mask = msg::Request | msg::Selection | msg::Clear;
-  slc::Message sMessage;
-  message.payload = sMessage;
+  msg::Message message(msg::Request | msg::Remove);
   messageOutSignal(message);
-  
-  prj::Message prjMessageOut;
-  prjMessageOut.featureId = graph[currentSelections.front()].featureId;
-  msg::Message messageOut;
-  messageOut.mask = msg::Request | msg::RemoveFeature;
-  messageOut.payload = prjMessageOut;
-  messageOutSignal(messageOut);
 }
-
 
 // void Model::onRenameSlot()
 // {

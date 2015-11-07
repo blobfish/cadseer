@@ -68,9 +68,9 @@ namespace prg
       template <class EdgeW>
       void operator()(std::ostream& out, const EdgeW& edgeW) const
       {
-        out << "[label=\"";
-        out << getInputTypeString(graphEW[edgeW].inputType);
-        out << "\"]";
+        out << "[label=\"" <<
+	  ftr::getInputTypeString(graphEW[edgeW].inputType) <<
+	  "\"]";
       }
     private:
       const GraphEW &graphEW;
@@ -86,7 +86,8 @@ namespace prg
         out << 
 	  "[label=\"" <<
 	  graphVW[vertexW].feature->getName().toAscii().data() << "\\n" <<
-	  graphVW[vertexW].feature->getId() <<
+	  graphVW[vertexW].feature->getId() << "\\n" <<
+	  "Descriptor: " << ftr::getDescriptorString(graphVW[vertexW].feature->getDescriptor()) << 
 	  "\"]";
       }
     private:
