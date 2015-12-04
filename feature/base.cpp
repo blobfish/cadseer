@@ -48,9 +48,18 @@ Base::Base()
   mainSwitch->setNodeMask(NodeMaskDef::object);
   mainSwitch->setUserValue(GU::idAttributeTitle, boost::uuids::to_string(id));
   
+  mainTransform = new osg::MatrixTransform();
+  mainTransform->setMatrix(osg::Matrixd::identity());
+  mainSwitch->addChild(mainTransform);
+  
+  overlaySwitch = new osg::Switch();
+  overlaySwitch->setName("overlay");
+  overlaySwitch->setUserValue(GU::idAttributeTitle, boost::uuids::to_string(id));
+  
   state.set(ftr::StateOffset::ModelDirty, true);
   state.set(ftr::StateOffset::VisualDirty, true);
   state.set(ftr::StateOffset::Hidden3D, false);
+  state.set(ftr::StateOffset::HiddenOverlay, false);
   state.set(ftr::StateOffset::Failure, false);
   state.set(ftr::StateOffset::Inactive, false);
   state.set(ftr::StateOffset::NonLeaf, false);
@@ -109,8 +118,8 @@ TopoDS_Compound Base::compoundWrap(const TopoDS_Shape& shapeIn)
 
 void Base::updateVisual()
 {
-  //clear all the children from the main switch.
-  mainSwitch->removeChildren(0, mainSwitch->getNumChildren());
+  //clear all the children from the main transform.
+  mainTransform->removeChildren(0, mainTransform->getNumChildren());
   
   if (shape.IsNull())
     return;
@@ -128,7 +137,7 @@ void Base::updateVisual()
   mdv::Build builder(shape, resultContainer);
   if (builder.go(linear, angular))
   {
-      mainSwitch->addChild(builder.getViz().get());
+    mainTransform->addChild(builder.getViz().get());
   }
   
   setVisualClean();
@@ -139,9 +148,11 @@ void Base::show3D()
   assert(mainSwitch->getNumChildren());
   if (isVisible3D())
     return; //already on.
-  if (isVisualDirty())
+  if (isVisualDirty() && isModelClean() && isSuccess())
     updateVisual();
   mainSwitch->setAllChildrenOn();
+  if (isVisibleOverlay())
+    overlaySwitch->setAllChildrenOn();
   state.set(ftr::StateOffset::Hidden3D, false);
   stateChangedSignal(id, ftr::StateOffset::Hidden3D);
 }
@@ -152,6 +163,8 @@ void Base::hide3D()
   if (isHidden3D())
     return; //already off.
   mainSwitch->setAllChildrenOff();
+  if (isVisibleOverlay())
+    overlaySwitch->setAllChildrenOff();
   state.set(ftr::StateOffset::Hidden3D, true);
   stateChangedSignal(id, ftr::StateOffset::Hidden3D);
 }
@@ -164,6 +177,32 @@ void Base::toggle3D()
   else
     show3D();
   stateChangedSignal(id, ftr::StateOffset::Hidden3D);
+}
+
+void Base::showOverlay()
+{
+  if (isVisibleOverlay())
+    return; //already on.
+  overlaySwitch->setAllChildrenOn();
+  state.set(ftr::StateOffset::HiddenOverlay, false);
+  stateChangedSignal(id, ftr::StateOffset::Hidden3D);
+}
+
+void Base::hideOverlay()
+{
+  if (isHiddenOverlay())
+    return; //already off.
+  overlaySwitch->setAllChildrenOff();
+  state.set(ftr::StateOffset::HiddenOverlay, true);
+  stateChangedSignal(id, ftr::StateOffset::HiddenOverlay);
+}
+
+void Base::toggleOverlay()
+{
+  if (isVisibleOverlay())
+    hideOverlay();
+  else
+    showOverlay();
 }
 
 void Base::setSuccess()

@@ -17,7 +17,7 @@ find_package(OCE REQUIRED COMPONENTS TKernel TKBRep TKMesh TKFeat TKFillet)
 SET(OCE_LIBRARIES "TKernel;TKBRep;TKMesh;TKFeat;TKFillet")
 
 FIND_PACKAGE(OpenSceneGraph REQUIRED)
-SET(OPENSCENEGRAPH_LIBRARIES "OpenThreads;osg;osgDB;osgUtil;osgViewer;osgQt;osgGA;osgText")
+SET(OPENSCENEGRAPH_LIBRARIES "OpenThreads;osg;osgDB;osgUtil;osgViewer;osgQt;osgGA;osgText;osgManipulator")
 
 find_package(Spnav)
 IF(SPNAV_FOUND)
@@ -107,6 +107,19 @@ SET(APPLICATION_SOURCES
     application/factory.cpp
     application/message.cpp
     )
+    
+SET(OSG_SOURCES
+    osg/circlebuilder.cpp
+    osg/circleprojector.cpp
+    osg/conebuilder.cpp
+    osg/csysdragger.cpp
+    osg/cylinderbuilder.cpp
+    osg/geometrylibrary.cpp
+    osg/iconbuilder.cpp
+    osg/rotatecirculardragger.cpp
+    osg/spherebuilder.cpp
+    osg/torusbuilder.cpp
+    )
 
 SET(CADSEER_SOURCES
     main.cpp
@@ -122,6 +135,7 @@ SET(CADSEER_SOURCES
     globalutilities.cpp
     coordinatesystem.cpp
     viewer/textcamera.cpp
+    viewer/overlaycamera.cpp
     ${MODELVIZ_SOURCES}
     ${TESTING_SOURCES}
     ${GESTURE_SOURCES}
@@ -132,6 +146,7 @@ SET(CADSEER_SOURCES
     ${PREFERENCE_SOURCES}
     ${PROJECT_SOURCES}
     ${APPLICATION_SOURCES}
+    ${OSG_SOURCES}
     )
 
 SET(CADSEER_MOC_HDRS

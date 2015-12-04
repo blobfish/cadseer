@@ -90,9 +90,6 @@ void Subtract::updateModel(const UpdateMap &mapIn)
       evolutionContainer.insert(evolutionRecord);
     }
     
-    
-    
-    setModelClean();
     setSuccess();
   }
   catch (Standard_Failure)
@@ -104,4 +101,5 @@ void Subtract::updateModel(const UpdateMap &mapIn)
   {
     std::cout << std::endl << "Error in union update. " << e.what() << std::endl;
   }
+  setModelClean();
 }

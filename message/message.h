@@ -47,31 +47,33 @@ namespace msg
   static const Mask SetCurrentLeaf(Mask().	set(9));//!< project action
   static const Mask RemoveFeature(Mask().	set(10));//!< project action & command
   static const Mask AddFeature(Mask().		set(11));//!< project action
-  static const Mask UpdateModel(Mask().		set(12));//!< project action
-  static const Mask UpdateVisual(Mask().	set(13));//!< project action
-  static const Mask AddConnection(Mask().	set(14));//!< project action
-  static const Mask RemoveConnection(Mask().	set(15));//!< project action
-  static const Mask NewProject(Mask().		set(16));//!< application action
-  static const Mask Construct(Mask().		set(17));//!< factory action.
-  static const Mask ViewTop(Mask().		set(18));//!< command
-  static const Mask ViewFront(Mask().		set(19));//!< command
-  static const Mask ViewRight(Mask().		set(20));//!< command
-  static const Mask ViewFit(Mask().		set(21));//!< command
-  static const Mask ViewFill(Mask().		set(22));//!< command
-  static const Mask ViewLine(Mask().		set(23));//!< command
-  static const Mask Box(Mask().			set(24));//!< command
-  static const Mask Sphere(Mask().		set(25));//!< command
-  static const Mask Cone(Mask().		set(26));//!< command
-  static const Mask Cylinder(Mask().		set(27));//!< command
-  static const Mask Blend(Mask().		set(28));//!< command
-  static const Mask Union(Mask().		set(29));//!< command
-  static const Mask Subtract(Mask().		set(30));//!< command
-  static const Mask Intersect(Mask().		set(31));//!< command
-  static const Mask ImportOCC(Mask().		set(32));//!< command
-  static const Mask ExportOCC(Mask().		set(33));//!< command
-  static const Mask ExportOSG(Mask().		set(34));//!< command
-  static const Mask Preferences(Mask().		set(35));//!< command
-  static const Mask Remove(Mask().		set(36));//!< command
+  static const Mask Update(Mask().		set(12));//!< project action. request only for all: model, visual etc..
+  static const Mask ForceUpdate(Mask().		set(13));//!< project action. request only. marks dirty to force updates
+  static const Mask UpdateModel(Mask().		set(14));//!< project action
+  static const Mask UpdateVisual(Mask().	set(15));//!< project action
+  static const Mask AddConnection(Mask().	set(16));//!< project action
+  static const Mask RemoveConnection(Mask().	set(17));//!< project action
+  static const Mask NewProject(Mask().		set(18));//!< application action
+  static const Mask Construct(Mask().		set(19));//!< factory action.
+  static const Mask ViewTop(Mask().		set(20));//!< command
+  static const Mask ViewFront(Mask().		set(21));//!< command
+  static const Mask ViewRight(Mask().		set(22));//!< command
+  static const Mask ViewFit(Mask().		set(23));//!< command
+  static const Mask ViewFill(Mask().		set(24));//!< command
+  static const Mask ViewLine(Mask().		set(25));//!< command
+  static const Mask Box(Mask().			set(26));//!< command
+  static const Mask Sphere(Mask().		set(27));//!< command
+  static const Mask Cone(Mask().		set(28));//!< command
+  static const Mask Cylinder(Mask().		set(29));//!< command
+  static const Mask Blend(Mask().		set(30));//!< command
+  static const Mask Union(Mask().		set(31));//!< command
+  static const Mask Subtract(Mask().		set(32));//!< command
+  static const Mask Intersect(Mask().		set(33));//!< command
+  static const Mask ImportOCC(Mask().		set(34));//!< command
+  static const Mask ExportOCC(Mask().		set(35));//!< command
+  static const Mask ExportOSG(Mask().		set(36));//!< command
+  static const Mask Preferences(Mask().		set(37));//!< command
+  static const Mask Remove(Mask().		set(38));//!< command
   
   typedef boost::variant<prj::Message, slc::Message, app::Message> Payload;
   

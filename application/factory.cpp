@@ -117,9 +117,7 @@ void Factory::setupDispatcher()
 void Factory::triggerUpdate()
 {
   msg::Message updateMessage;
-  updateMessage.mask = msg::Request | msg::UpdateModel;
-  msg::dispatch().messageInSlot(updateMessage);
-  updateMessage.mask = msg::Request | msg::UpdateVisual;
+  updateMessage.mask = msg::Request | msg::Update;
   msg::dispatch().messageInSlot(updateMessage);
 }
 

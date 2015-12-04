@@ -84,7 +84,6 @@ void Sphere::updateModel(const UpdateMap& mapIn)
     assert(sphereMaker.IsDone());
     shape = compoundWrap(sphereMaker.Shape());
     updateResult(sphereMaker);
-    setModelClean();
     setSuccess();
   }
   catch (Standard_Failure)
@@ -92,6 +91,7 @@ void Sphere::updateModel(const UpdateMap& mapIn)
     Handle_Standard_Failure e = Standard_Failure::Caught();
     std::cout << std::endl << "Error in sphere update. " << e->GetMessageString() << std::endl;
   }
+  setModelClean();
 }
 
 void Sphere::initializeMaps()

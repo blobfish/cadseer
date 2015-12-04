@@ -179,7 +179,6 @@ void Box::updateModel(const UpdateMap& mapIn)
     TopoDS_Compound wrapper = compoundWrap(boxMaker.getSolid());
     shape = wrapper;
     updateResult(boxMaker);
-    setModelClean();
     setSuccess();
   }
   catch (Standard_Failure)
@@ -187,6 +186,7 @@ void Box::updateModel(const UpdateMap& mapIn)
     Handle_Standard_Failure e = Standard_Failure::Caught();
     std::cout << std::endl << "Error in box update. " << e->GetMessageString() << std::endl;
   }
+  setModelClean();
 }
 
 //the quantity of cone shapes can change so generating maps from first update can lead to missing

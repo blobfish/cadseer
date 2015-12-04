@@ -33,6 +33,7 @@
 #include <Precision.hxx> //used in derived classes.
 
 #include <osg/Switch>
+#include <osg/MatrixTransform>
 
 #include <feature/maps.h>
 #include <feature/types.h>
@@ -61,6 +62,11 @@ public:
   void toggle3D();
   bool isVisible3D() const {return !(state.test(ftr::StateOffset::Hidden3D));}
   bool isHidden3D() const {return state.test(ftr::StateOffset::Hidden3D);}
+  void showOverlay();
+  void hideOverlay();
+  void toggleOverlay();
+  bool isVisibleOverlay() const {return !(state.test(ftr::StateOffset::HiddenOverlay));}
+  bool isHiddenOverlay() const {return state.test(ftr::StateOffset::HiddenOverlay);}
   bool isSuccess() const {return !(state.test(ftr::StateOffset::Failure));}
   bool isFailure() const {return state.test(ftr::StateOffset::Failure);}
   void setActive();
@@ -86,6 +92,7 @@ public:
   const TopoDS_Shape& getShape() const {return shape;}
   static TopoDS_Compound compoundWrap(const TopoDS_Shape &shapeIn);
   osg::Switch* getMainSwitch() const {return mainSwitch.get();}
+  osg::Switch* getOverlaySwitch() const {return overlaySwitch.get();}
   const mdv::Connector& getConnector() const {return connector;}
   
   static std::size_t nextConstructionIndex;
@@ -118,6 +125,8 @@ protected:
   FeatureContainer featureContainer;
   
   osg::ref_ptr<osg::Switch> mainSwitch;
+  osg::ref_ptr<osg::MatrixTransform> mainTransform;
+  osg::ref_ptr<osg::Switch> overlaySwitch;
   mdv::Connector connector;
 };
 }

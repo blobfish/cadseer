@@ -64,6 +64,7 @@ void Project::updateModel()
   Path sorted;
   try
   {
+    indexVerticesEdges();
     boost::topological_sort(projectGraph, std::back_inserter(sorted));
   }
   catch(const boost::not_a_dag &)
@@ -86,7 +87,11 @@ void Project::updateModel()
   for (auto it = sorted.rbegin(); it != sorted.rend(); ++it)
   {
     Vertex currentVertex = *it;
-    if (projectGraph[currentVertex].feature->isModelClean())
+    if
+    (
+      (projectGraph[currentVertex].feature->isModelClean()) ||
+      (projectGraph[currentVertex].feature->isInactive())
+    )
       continue;
     
     ftr::UpdateMap updateMap;
@@ -109,6 +114,12 @@ void Project::updateModel()
 
 void Project::updateVisual()
 {
+  //if we have selection and then destroy the geometry when the
+  //the visual updates, things get out of sync. so clear the selection.
+  msg::Message clearSelectionMessage;
+  clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
+  messageOutSignal(clearSelectionMessage);
+  
   msg::Message preMessage;
   preMessage.mask = msg::Response | msg::Pre | msg::UpdateVisual;
   messageOutSignal(preMessage);
@@ -130,6 +141,7 @@ void Project::updateVisual()
     auto feature = projectGraph[*it].feature;
     if
     (
+      feature->isModelClean() &&
       feature->isVisible3D() &&
       feature->isActive() &&
       feature->isSuccess() &&
@@ -283,6 +295,13 @@ void Project::setFeatureActive(const uuid& idIn)
 {
   indexVerticesEdges();
   
+  //sometimes the visual of a feature is dirty and doesn't get updated 
+  //until we try to show it. However it might be selected meaning that
+  //we will destroy the old geometry that is highlighted. So clear the seleciton.
+  msg::Message clearSelectionMessage;
+  clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
+  messageOutSignal(clearSelectionMessage);
+  
   //the visitor will be setting features to an inactive state which
   //triggers the signal and we would end up back into this->stateChangedSlot.
   //so we block all the connections to avoid this.
@@ -411,6 +430,12 @@ void Project::setupDispatcher()
   mask = msg::Request | msg::RemoveFeature;
   dispatcher.insert(std::make_pair(mask, boost::bind(&Project::removeFeatureDispatched, this, _1)));
   
+  mask = msg::Request | msg::Update;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Project::updateDispatched, this, _1)));
+  
+  mask = msg::Request | msg::ForceUpdate;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Project::forceUpdateDispatched, this, _1)));
+  
   mask = msg::Request | msg::UpdateModel;
   dispatcher.insert(std::make_pair(mask, boost::bind(&Project::updateModelDispatched, this, _1)));
   
@@ -438,6 +463,31 @@ void Project::removeFeatureDispatched(const msg::Message &messageIn)
   
   prj::Message message = boost::get<prj::Message>(messageIn.payload);
   removeFeature(message.featureId);
+}
+
+void Project::updateDispatched(const msg::Message&)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  updateModel();
+  updateVisual();
+}
+
+void Project::forceUpdateDispatched(const msg::Message&)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
+  {
+    projectGraph[currentVertex].feature->setModelDirty();
+  }
+  
+  updateModel();
+  updateVisual();
 }
 
 void Project::updateModelDispatched(const msg::Message&)

@@ -111,7 +111,6 @@ void Blend::updateModel(const UpdateMap& mapIn)
     
     //at this point the only thing left should be new edges and vertices created by
     //the blend feature. We will use derivedContainer to map these to known faces.
-    setModelClean();
     setSuccess();
   }
   catch (Standard_Failure)
@@ -119,6 +118,7 @@ void Blend::updateModel(const UpdateMap& mapIn)
     Handle_Standard_Failure e = Standard_Failure::Caught();
     std::cout << std::endl << "Error in cylinder update. " << e->GetMessageString() << std::endl;
   }
+  setModelClean();
 }
 
 /* assigns ids by simply matching on shapes between

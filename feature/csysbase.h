@@ -22,10 +22,13 @@
 
 #include <gp_Ax2.hxx>
 
+#include <osg/csysdragger.h>
 #include <feature/base.h>
 
 namespace ftr
 {
+  class DCallBack;
+  
   /*! Base class for features dependent on a coordinate system*/
   class CSysBase : public Base
   {
@@ -35,12 +38,29 @@ namespace ftr
     virtual const std::string& getTypeString() const override {return toString(Type::CSys);}
     virtual const QIcon& getIcon() const override {static QIcon junk; return junk;}
     virtual Descriptor getDescriptor() const override {return Descriptor::None;}
-    
+    virtual void updateVisual() override;
     void setSystem(const gp_Ax2 &systemIn);
+    void setSystem(const osg::Matrixd &systemIn);
     const gp_Ax2& getSystem() const {return system;}
     
   protected:
     gp_Ax2 system;
+    osg::ref_ptr<CSysDragger> dragger;
+    osg::ref_ptr<DCallBack> callBack;
+  };
+  
+    /*! @brief class to mark the feature dirty when the dragger is used.
+   * 
+   * not really in love with this, but don't see a better way.
+   */
+  class DCallBack : public osgManipulator::DraggerTransformCallback
+  {
+  public:
+    DCallBack(osg::MatrixTransform *t, CSysBase *csysBaseIn) : 
+      osgManipulator::DraggerTransformCallback(t), csysBase(csysBaseIn){}
+    virtual bool receive(const osgManipulator::MotionCommand &) override;
+  private:
+    CSysBase *csysBase = nullptr;
   };
 }
 

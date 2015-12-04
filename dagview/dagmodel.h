@@ -85,6 +85,7 @@ namespace dag
   private Q_SLOTS:
     void setCurrentLeafSlot();
     void removeFeatureSlot();
+    void toggleOverlaySlot();
 //     void updateSlot();
 //     void onRenameSlot();
 //     void renameAcceptedSlot();

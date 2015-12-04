@@ -128,7 +128,6 @@ void Cone::updateModel(const UpdateMap& mapIn)
     ConeBuilder coneBuilder(radius1, radius2, height, system);
     shape = compoundWrap(coneBuilder.getSolid());
     updateResult(coneBuilder);
-    setModelClean();
     setSuccess();
   }
   catch (Standard_Failure)
@@ -136,6 +135,7 @@ void Cone::updateModel(const UpdateMap& mapIn)
     Handle_Standard_Failure e = Standard_Failure::Caught();
     std::cout << std::endl << "Error in cone update. " << e->GetMessageString() << std::endl;
   }
+  setModelClean();
 }
 
 void Cone::updateResult(const ConeBuilder& coneBuilderIn)

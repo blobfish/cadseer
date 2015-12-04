@@ -80,6 +80,8 @@ private:
     void setupDispatcher();
     void setCurrentLeafDispatched(const msg::Message &);
     void removeFeatureDispatched(const msg::Message &);
+    void updateDispatched(const msg::Message &);
+    void forceUpdateDispatched(const msg::Message &);
     void updateModelDispatched(const msg::Message &);
     void updateVisualDispatched(const msg::Message &);
 };

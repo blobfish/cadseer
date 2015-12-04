@@ -34,9 +34,10 @@ namespace ftr
     static const std::size_t ModelDirty = 0;
     static const std::size_t VisualDirty = 1;
     static const std::size_t Hidden3D = 2;
-    static const std::size_t Failure = 3;
-    static const std::size_t Inactive = 4;
-    static const std::size_t NonLeaf = 5; //keeping consistently negative.
+    static const std::size_t HiddenOverlay = 3;
+    static const std::size_t Failure = 4;
+    static const std::size_t Inactive = 5;
+    static const std::size_t NonLeaf = 6; //keeping consistently negative.
     
     inline std::string toString(std::size_t offsetIn)
     {
@@ -44,7 +45,8 @@ namespace ftr
       {
         "Model Dirty",
         "Visual Dirty",
-        "Visibility3D",
+        "Hidden 3D",
+        "Hidden Overlay",
         "Failure",
         "Inactive",
         "NonLeaf"

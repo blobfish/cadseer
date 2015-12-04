@@ -345,10 +345,26 @@ void GestureHandler::constructMenu()
     constructionIntersect->setUserValue(attributeTitle, (msg::Request | msg::Construct | msg::Intersect).to_string());
     constructionBoolean->insertChild(constructionBoolean->getNumChildren() - 2, constructionIntersect);
     
-    osg::MatrixTransform *remove = gsn::buildCommandNode(":/resources/images/remove.svg");
+    //edit base
+    osg::MatrixTransform *editBase;
+    editBase = gsn::buildMenuNode(":/resources/images/editBase.svg");
+    editBase->setMatrix(dummy);
+    startNode->insertChild(startNode->getNumChildren() - 2, editBase);
+    
+    osg::MatrixTransform *remove = gsn::buildCommandNode(":/resources/images/editRemove.svg");
     remove->setMatrix(dummy);
     remove->setUserValue(attributeTitle, (msg::Request | msg::Remove).to_string());
-    startNode->insertChild(startNode->getNumChildren() - 2, remove);
+    editBase->insertChild(editBase->getNumChildren() - 2, remove);
+    
+    osg::MatrixTransform *editUpdate = gsn::buildCommandNode(":/resources/images/editUpdate.svg");
+    editUpdate->setMatrix(dummy);
+    editUpdate->setUserValue(attributeTitle, (msg::Request | msg::Update).to_string());
+    editBase->insertChild(editBase->getNumChildren() - 2, editUpdate);
+    
+    osg::MatrixTransform *editForceUpdate = gsn::buildCommandNode(":/resources/images/editForceUpdate.svg");
+    editForceUpdate->setMatrix(dummy);
+    editForceUpdate->setUserValue(attributeTitle, (msg::Request | msg::ForceUpdate).to_string());
+    editBase->insertChild(editBase->getNumChildren() - 2, editForceUpdate);
     
     //file base
     osg::MatrixTransform *fileBase;

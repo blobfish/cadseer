@@ -48,9 +48,10 @@
 #include <testing/plotter.h>
 #include <gesture/gesturehandler.h>
 #include <globalutilities.h>
-#include <coordinatesystem.h>
+#include <osg/csysdragger.h>
 #include <message/dispatch.h>
 #include <viewer/textcamera.h>
+#include <viewer/overlaycamera.h>
 #include <feature/base.h>
 
 ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel) : QWidget()
@@ -75,8 +76,6 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     
     Plotter::getReference().setBase(root);
     
-    root->addChild(csys::buildCoordinateSystemNode());
-
     osgViewer::View* view = new osgViewer::View;
     createMainCamera(view->getCamera());
 
@@ -99,6 +98,20 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     //wire up to message system.
     infoCamera->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
     msg::dispatch().connectMessageOut(boost::bind(&TextCamera::messageInSlot, infoCamera, _1));
+    
+    OverlayCamera *oCamera = new OverlayCamera(windowQt);
+    view->addSlave(oCamera, false);
+    oCamera->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
+    msg::dispatch().connectMessageOut(boost::bind(&OverlayCamera::messageInSlot, oCamera, _1));
+    
+    CSysDragger *origin = new CSysDragger();
+    origin->setScreenScale(100.0f);
+    origin->setRotationIncrement(15.0);
+    origin->setTranslationIncrement(0.25);
+    origin->setHandleEvents(false);
+    origin->setupDefaultGeometry();
+    origin->setUnlink();
+    oCamera->addChild(origin);
 
     view->setSceneData(root);
     view->addEventHandler(new osgViewer::StatsHandler);
@@ -179,6 +192,7 @@ void ViewerWidget::createMainCamera(osg::Camera *camera)
     windowQt = new osgQt::GraphicsWindowQt(glWidget);
 
     camera->setGraphicsContext(windowQt);
+    camera->setName("main");
 
     QPixmap cursorImage(":/resources/images/cursor.png");
     QCursor cursor(cursorImage.scaled(32, 32));//hot point defaults to center.

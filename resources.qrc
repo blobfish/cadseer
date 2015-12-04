@@ -38,7 +38,10 @@
     <file>resources/images/constructionUnion.svg</file>
     <file>resources/images/constructionSubtract.svg</file>
     <file>resources/images/constructionIntersect.svg</file>
-    <file>resources/images/remove.svg</file>
+    <file>resources/images/editBase.svg</file>
+    <file>resources/images/editRemove.svg</file>
+    <file>resources/images/editUpdate.svg</file>
+    <file>resources/images/editForceUpdate.svg</file>
     <file>resources/images/fileBase.svg</file>
     <file>resources/images/fileImport.svg</file>
     <file>resources/images/fileExport.svg</file>
@@ -50,9 +53,12 @@
     <file>resources/images/dagViewVisible.svg</file>
     <file>resources/images/dagViewInactive.svg</file>
     <file>resources/images/dagViewLeaf.svg</file>
-    <file>resources/images/cadSeer.svg</file>
     <file>resources/images/dagViewRemove.svg</file>
+    <file>resources/images/dagViewOverlay.svg</file>
+    <file>resources/images/cadSeer.svg</file>
     <file>resources/images/preferences.svg</file>
+    <file>resources/images/linkIcon.svg</file>
+    <file>resources/images/unlinkIcon.svg</file>
     <file>preferences/preferences.xml</file>
     <file>preferences/preferencesXML.xsd</file>
   </qresource>

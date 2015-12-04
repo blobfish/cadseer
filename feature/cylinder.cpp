@@ -117,7 +117,6 @@ void Cylinder::updateModel(const UpdateMap& mapIn)
     CylinderBuilder cylinderMaker(radius, height, system);
     shape = compoundWrap(cylinderMaker.getSolid());
     updateResult(cylinderMaker);
-    setModelClean();
     setSuccess();
   }
   catch (Standard_Failure)
@@ -125,6 +124,7 @@ void Cylinder::updateModel(const UpdateMap& mapIn)
     Handle_Standard_Failure e = Standard_Failure::Caught();
     std::cout << std::endl << "Error in cylinder update. " << e->GetMessageString() << std::endl;
   }
+  setModelClean();
 }
 
 //the quantity of cone shapes can change so generating maps from first update can lead to missing

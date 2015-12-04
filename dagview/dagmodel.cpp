@@ -20,6 +20,7 @@
 #include <iostream>
 
 #include <QString>
+#include <QTextStream>
 #include <QGraphicsTextItem>
 #include <QGraphicsEllipseItem>
 #include <QGraphicsPixmapItem>
@@ -289,17 +290,40 @@ void Model::connectionRemovedDispatched(const msg::Message &messageIn)
 void Model::stateChangedSlot(const boost::uuids::uuid &featureIdIn, std::size_t stateOffsetChanged)
 {
   Vertex vertex = findRecord(vertexIdContainer, featureIdIn).vertex;
-
   assert(!graph[vertex].feature.expired());
+  std::shared_ptr<ftr::Base> feature = graph[vertex].feature.lock();
   
-  ftr::State featureState = graph[vertex].feature.lock()->getState();
-  bool currentChangedState = featureState.test(stateOffsetChanged);
-  
-  if (stateOffsetChanged == ftr::StateOffset::ModelDirty)
+  auto updateStateIcon = [&]()
   {
-    if (currentChangedState)
+    //from highest to lowest priority.
+    if (feature->isInactive())
+    {
+      graph[vertex].stateIconRaw->setPixmap(inactivePixmap);
+      return;
+    }
+    
+    if (feature->isModelDirty())
+    {
       graph[vertex].stateIconRaw->setPixmap(pendingPixmap);
-  }
+      return;
+    }
+    
+    if (feature->isFailure())
+      graph[vertex].stateIconRaw->setPixmap(failPixmap);
+    else
+      graph[vertex].stateIconRaw->setPixmap(passPixmap);
+  };
+  
+  if
+  (
+    (stateOffsetChanged == ftr::StateOffset::ModelDirty) ||
+    (stateOffsetChanged == ftr::StateOffset::Failure) ||
+    (stateOffsetChanged == ftr::StateOffset::Inactive)
+  )
+    updateStateIcon();
+  
+  ftr::State featureState = feature->getState();
+  bool currentChangedState = featureState.test(stateOffsetChanged);
   
   if (stateOffsetChanged == ftr::StateOffset::Hidden3D)
   {
@@ -307,31 +331,6 @@ void Model::stateChangedSlot(const boost::uuids::uuid &featureIdIn, std::size_t 
       graph[vertex].visibleIconRaw->setPixmap(visiblePixmapDisabled);
     else
       graph[vertex].visibleIconRaw->setPixmap(visiblePixmapEnabled);
-  }
-  
-  if (stateOffsetChanged == ftr::StateOffset::Failure)
-  {
-    if (currentChangedState)
-      graph[vertex].stateIconRaw->setPixmap(failPixmap);
-    else
-      graph[vertex].stateIconRaw->setPixmap(passPixmap);
-  }
-  
-  if (stateOffsetChanged == ftr::StateOffset::Inactive)
-  {
-    if (currentChangedState)
-    {
-      graph[vertex].stateIconRaw->setPixmap(inactivePixmap);
-    }
-    else
-    {
-      if (featureState.test(ftr::StateOffset::ModelDirty))
-	graph[vertex].stateIconRaw->setPixmap(pendingPixmap);
-      else if (featureState.test(ftr::StateOffset::Failure))
-	graph[vertex].stateIconRaw->setPixmap(failPixmap);
-      else
-	graph[vertex].stateIconRaw->setPixmap(passPixmap);
-    }
   }
   
   if (stateOffsetChanged == ftr::StateOffset::NonLeaf)
@@ -351,6 +350,40 @@ void Model::stateChangedSlot(const boost::uuids::uuid &featureIdIn, std::size_t 
 //     "state changed. Feature id is: " << featureIdIn <<
 //     "      state offset is: " << ftr::StateOffset::toString(stateIn) <<
 //     "      state value is: " << ((currentState) ? "true" : "false") <<  std::endl;
+
+  //set tool tip to current state.
+  
+  QString ts = tr("True");
+  QString fs = tr("False");
+  QString toolTip;
+  QTextStream stream(&toolTip);
+  stream <<
+    "<table border=\"1\" cellpadding=\"6\">" << 
+      "<tr>" <<
+	"<td>" << tr("Model Dirty") << "</td><td>" << ((featureState.test(ftr::StateOffset::ModelDirty)) ? ts : fs) << "</td>" <<
+      "</tr><tr>" <<
+	"<td>" << tr("Visual Dirty") << "</td><td>" << ((featureState.test(ftr::StateOffset::VisualDirty)) ? ts : fs) << "</td>" <<
+      "</tr>" <<
+      "</tr><tr>" <<
+	"<td>" << tr("Hidden 3D") << "</td><td>" << ((featureState.test(ftr::StateOffset::Hidden3D)) ? ts : fs) << "</td>" <<
+      "</tr>" <<
+      "</tr><tr>" <<
+	"<td>" << tr("Hidden Overlay") << "</td><td>" << ((featureState.test(ftr::StateOffset::HiddenOverlay)) ? ts : fs) << "</td>" <<
+      "</tr>" <<
+      "</tr>" <<
+      "</tr><tr>" <<
+	"<td>" << tr("Failure") << "</td><td>" << ((featureState.test(ftr::StateOffset::Failure)) ? ts : fs) << "</td>" <<
+      "</tr>" <<
+      "</tr>" <<
+      "</tr><tr>" <<
+	"<td>" << tr("Inactive") << "</td><td>" << ((featureState.test(ftr::StateOffset::Inactive)) ? ts : fs) << "</td>" <<
+      "</tr>" <<
+      "</tr>" <<
+      "</tr><tr>" <<
+	"<td>" << tr("Non-Leaf") << "</td><td>" << ((featureState.test(ftr::StateOffset::NonLeaf)) ? ts : fs) << "</td>" <<
+      "</tr>" <<
+    "</table>";
+  graph[vertex].stateIconRaw->setToolTip(toolTip);
 }
 
 void Model::messageInSlot(const msg::Message &messageIn)
@@ -1053,15 +1086,8 @@ void Model::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
   if (rect)
   {
     const VertexProperty &record = findRecord(graphLink, rect);
-    
-    if (!rect->isSelected() || getAllSelected().size() > 1)
+    if (!rect->isSelected())
     {
-      msg::Message clearMessage;
-      clearMessage.mask = msg::Request | msg::Selection | msg::Clear;
-      slc::Message clearSMessage;
-      clearMessage.payload = clearSMessage;
-      messageOutSignal(clearMessage);
-      
       msg::Message message;
       message.mask = msg::Request | msg::Selection | msg::Addition;
       slc::Message sMessage;
@@ -1072,12 +1098,22 @@ void Model::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     }
     
     QMenu contextMenu;
-    static QIcon leafIcon(":/resources/images/dagViewLeaf.svg");
-    QAction* setCurrentLeafAction = contextMenu.addAction(leafIcon, tr("Set Current Leaf"));
-    connect(setCurrentLeafAction, SIGNAL(triggered()), this, SLOT(setCurrentLeafSlot()));
+    
+    if (getAllSelected().size() == 1)
+    {
+      static QIcon leafIcon(":/resources/images/dagViewLeaf.svg");
+      QAction* setCurrentLeafAction = contextMenu.addAction(leafIcon, tr("Set Current Leaf"));
+      connect(setCurrentLeafAction, SIGNAL(triggered()), this, SLOT(setCurrentLeafSlot()));
+    }
+    
     static QIcon removeIcon(":/resources/images/dagViewRemove.svg");
     QAction* removeFeatureAction = contextMenu.addAction(removeIcon, tr("Remove Feature"));
     connect(removeFeatureAction, SIGNAL(triggered()), this, SLOT(removeFeatureSlot()));
+    
+    static QIcon overlayIcon(":/resources/images/dagViewOverlay.svg");
+    QAction* toggleOverlayAction = contextMenu.addAction(overlayIcon, tr("Toggle Overlay"));
+    connect(toggleOverlayAction, SIGNAL(triggered()), this, SLOT(toggleOverlaySlot()));
+    
     contextMenu.exec(event->screenPos());
 //     
 //     //don't like that I am doing this again here after getRectFromPosition call.
@@ -1133,6 +1169,18 @@ void Model::removeFeatureSlot()
 {
   msg::Message message(msg::Request | msg::Remove);
   messageOutSignal(message);
+}
+
+void Model::toggleOverlaySlot()
+{
+  auto currentSelections = getAllSelected();
+  
+  msg::Message message;
+  message.mask = msg::Request | msg::Selection | msg::Clear;
+  messageOutSignal(message);
+  
+  for (auto v : currentSelections)
+    graph[v].feature.lock()->toggleOverlay();
 }
 
 // void Model::onRenameSlot()
