@@ -67,10 +67,12 @@ private:
   void preselectionSubtractionDispatched(const msg::Message &);
   void selectionAdditionDispatched(const msg::Message &);
   void selectionSubtractionDispatched(const msg::Message &);
+  void statusTextDispatched(const msg::Message &);
     
   osg::ref_ptr<osg::Switch> infoSwitch;
   //indexes for children
   static const unsigned int SelectionIndex = 0;
+  static const unsigned int StatusIndex = 1;
   
   osg::ref_ptr<osgText::Text> selectionLabel;
   void updateSelectionLabel();
@@ -79,6 +81,8 @@ private:
   typedef std::pair<boost::uuids::uuid, boost::uuids::uuid> SelectionMapKey;
   typedef std::map<SelectionMapKey, slc::Message> SelectionMap;
   SelectionMap selectionMap;
+  
+  osg::ref_ptr<osgText::Text> statusLabel;
 };
 
 #endif // TEXTCAMERA_H

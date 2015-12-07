@@ -25,6 +25,7 @@
 #include <osgViewer/CompositeViewer>
 #ifndef Q_MOC_RUN
 #include <selection/eventhandler.h>
+#include <selection/overlayhandler.h>
 #include <viewer/spaceballmanipulator.h>
 #endif
 
@@ -64,6 +65,7 @@ protected:
     osg::ref_ptr<osg::Group> root;
     osg::ref_ptr<osg::Switch> infoSwitch;
     osg::ref_ptr<slc::EventHandler> selectionHandler;
+    osg::ref_ptr<slc::OverlayHandler> overlayHandler;
     osg::ref_ptr<osgGA::SpaceballManipulator> spaceballManipulator;
     int glWidgetWidth;
     int glWidgetHeight;

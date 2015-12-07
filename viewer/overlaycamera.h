@@ -20,6 +20,8 @@
 #ifndef OVERLAYCAMERA_H
 #define OVERLAYCAMERA_H
 
+#include <boost/signals2.hpp>
+
 #include <osg/Camera>
 #include <osg/Switch>
 #include <osg/observer_ptr>

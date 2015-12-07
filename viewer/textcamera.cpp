@@ -65,24 +65,29 @@ void ResizeEventHandler::positionSelection()
 {
   //look for selection geode.
   osg::Switch *infoSwitch = slaveCamera->getChild(0)->asSwitch();
-  osg::Geode *selectionGeode = nullptr;
+  osgText::Text *selectionLabel = nullptr;
+  osgText::Text *statusLabel = nullptr;
   for (unsigned int index = 0; index < infoSwitch->getNumChildren(); ++index)
   {
-    if (infoSwitch->getChild(index)->getName() != "selection")
-      continue;
-    selectionGeode = infoSwitch->getChild(index)->asGeode();
-    break;
+    if (infoSwitch->getChild(index)->getName() == "selection")
+      selectionLabel = dynamic_cast<osgText::Text*>(infoSwitch->getChild(index));
+    if (infoSwitch->getChild(index)->getName() == "status")
+      statusLabel = dynamic_cast<osgText::Text*>(infoSwitch->getChild(index));
   }
   
-  assert(selectionGeode);
-  osgText::Text *label = dynamic_cast<osgText::Text*>(selectionGeode->getChild(0));
-  assert(label);
+  assert(selectionLabel);
+  assert(statusLabel);
   
   osg::Vec3 pos;
-  osg::BoundingBox::value_type padding = label->getCharacterHeight() / 2.0;
+  osg::BoundingBox::value_type padding = selectionLabel->getCharacterHeight() / 2.0;
   pos.x() = slaveCamera->getViewport()->width() - padding;
   pos.y() = slaveCamera->getViewport()->height() - padding;
-  label->setPosition(pos);
+  selectionLabel->setPosition(pos);
+  
+  padding = statusLabel->getCharacterHeight() / 2.0; //redundent
+  pos.x() = padding;
+  pos.y() = slaveCamera->getViewport()->height() - padding; //redundent
+  statusLabel->setPosition(pos);
 }
 
 TextCamera::TextCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
@@ -91,7 +96,7 @@ TextCamera::TextCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
   setGraphicsContext(windowIn);
   setProjectionMatrix(osg::Matrix::ortho2D(0, windowIn->getTraits()->width, 0, windowIn->getTraits()->width));
   setReferenceFrame(osg::Transform::ABSOLUTE_RF);
-  setRenderOrder(osg::Camera::POST_RENDER);
+  setRenderOrder(osg::Camera::POST_RENDER, 2);
   setAllowEventFocus(false);
   setViewMatrix(osg::Matrix::identity());
   setClearMask(0);
@@ -105,14 +110,11 @@ TextCamera::TextCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
   addChild(infoSwitch);
   
   //set up on screen text.
-  osg::Vec3 pos(0.0, 0.0f, 0.0f);
+  osg::Vec3 pos(0.0, 0.0f, 0.0f); //position gets updated in resize handler.
   osg::Vec4 color(0.0f,0.0f,0.0f,1.0f);
-  osg::Geode* geode = new osg::Geode();
-  geode->setName("selection");
-  infoSwitch->addChild(geode, true);
   
   selectionLabel = new osgText::Text();
-  geode->addDrawable( selectionLabel.get() );
+  selectionLabel->setName("selection");
   osg::ref_ptr<osgQt::QFontImplementation> fontImplement(new osgQt::QFontImplementation(qApp->font()));
   osg::ref_ptr<osgText::Font> textFont(new osgText::Font(fontImplement.get()));
   selectionLabel->setFont(textFont);
@@ -124,6 +126,19 @@ TextCamera::TextCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
   selectionLabel->setPosition(pos);
   selectionLabel->setAlignment(osgText::TextBase::RIGHT_TOP);
   selectionLabel->setText("testing text\n and yet even multiline");
+  infoSwitch->addChild(selectionLabel.get());
+  
+  statusLabel = new osgText::Text();
+  statusLabel->setName("status");
+  statusLabel->setFont(textFont);
+  statusLabel->setColor(color);
+  statusLabel->setBackdropType(osgText::Text::OUTLINE);
+  statusLabel->setBackdropColor(osg::Vec4(1.0, 1.0, 1.0, 1.0));
+  statusLabel->setCharacterSize(qApp->font().pointSizeF()); //this is 9.0 here.
+  statusLabel->setPosition(pos);
+  statusLabel->setAlignment(osgText::TextBase::LEFT_TOP);
+  statusLabel->setText("Status");
+  infoSwitch->addChild(statusLabel.get());
   
   infoSwitch->setAllChildrenOn();
 }
@@ -143,6 +158,9 @@ void TextCamera::setupDispatcher()
   
   mask = msg::Response | msg::Pre | msg::Selection | msg::Subtraction;
   dispatcher.insert(std::make_pair(mask, boost::bind(&TextCamera::selectionSubtractionDispatched, this, _1)));
+  
+  mask = msg::Request | msg::StatusText;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&TextCamera::statusTextDispatched, this, _1)));
 }
 
 void TextCamera::messageInSlot(const msg::Message &messageIn)
@@ -207,6 +225,16 @@ void TextCamera::selectionSubtractionDispatched(const msg::Message &messageIn)
   //snap points will have duplicates. what to do?
 //       assert(selectionMap.count(key) == 0);
   selectionMap.erase(key);
+}
+
+void TextCamera::statusTextDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  vwr::Message sMessage = boost::get<vwr::Message>(messageIn.payload);
+  statusLabel->setText(sMessage.text);
 }
 
 void TextCamera::updateSelectionLabel()

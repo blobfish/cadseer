@@ -22,7 +22,6 @@
 #include <BRep_Builder.hxx>
 #include <TopoDS_Compound.hxx>
 
-#include <application/application.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <nodemaskdefs.h>
@@ -129,10 +128,8 @@ void Base::updateVisual()
   connector.outputGraphviz();
   
   //get deflection values.
-  app::Application *app = dynamic_cast<app::Application*>(qApp);
-  assert(app);
-  double linear = app->getPreferencesManager()->rootPtr->visual().mesh().linearDeflection();
-  double angular = app->getPreferencesManager()->rootPtr->visual().mesh().angularDeflection();
+  double linear = prf::manager().rootPtr->visual().mesh().linearDeflection();
+  double angular = prf::manager().rootPtr->visual().mesh().angularDeflection();
 
   mdv::Build builder(shape, resultContainer);
   if (builder.go(linear, angular))
@@ -151,8 +148,8 @@ void Base::show3D()
   if (isVisualDirty() && isModelClean() && isSuccess())
     updateVisual();
   mainSwitch->setAllChildrenOn();
-  if (isVisibleOverlay())
-    overlaySwitch->setAllChildrenOn();
+//   if (isVisibleOverlay())
+//     overlaySwitch->setAllChildrenOn();
   state.set(ftr::StateOffset::Hidden3D, false);
   stateChangedSignal(id, ftr::StateOffset::Hidden3D);
 }
@@ -163,8 +160,8 @@ void Base::hide3D()
   if (isHidden3D())
     return; //already off.
   mainSwitch->setAllChildrenOff();
-  if (isVisibleOverlay())
-    overlaySwitch->setAllChildrenOff();
+//   if (isVisibleOverlay())
+//     overlaySwitch->setAllChildrenOff();
   state.set(ftr::StateOffset::Hidden3D, true);
   stateChangedSignal(id, ftr::StateOffset::Hidden3D);
 }

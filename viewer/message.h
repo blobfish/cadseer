@@ -17,32 +17,17 @@
  *
  */
 
-#ifndef INERT_H
-#define INERT_H
+#ifndef VWR_MESSAGE_H
+#define VWR_MESSAGE_H
 
-#include <feature/csysbase.h>
+#include <string>
 
-namespace ftr
+namespace vwr
 {
-  /*! @brief static feature.
-   * 
-   * feature that has no real parameters or update.
-   * for example, used for import geometry.
-   */
-  class Inert : public CSysBase
+  struct Message
   {
-  public:
-    Inert(const TopoDS_Shape &shapeIn);
-    virtual void updateModel(const UpdateMap&) override;
-    virtual Type getType() const override {return Type::Inert;}
-    virtual const std::string& getTypeString() const override {return toString(Type::Inert);}
-    virtual const QIcon& getIcon() const override {return icon;}
-    virtual Descriptor getDescriptor() const override {return Descriptor::Create;}
-    
-  private:
-    Inert(){};
-    static QIcon icon;
+    std::string text = "Default Message";
   };
 }
 
-#endif // INERT_H
+#endif // VWR_MESSAGE_H

@@ -40,6 +40,12 @@
 
 using namespace prf;
 
+prf::Manager& prf::manager()
+{
+  static Manager localManager;
+  return localManager;
+}
+
 Manager::Manager()
 {
   ok = false;

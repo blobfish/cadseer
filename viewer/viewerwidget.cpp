@@ -111,12 +111,18 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     origin->setHandleEvents(false);
     origin->setupDefaultGeometry();
     origin->setUnlink();
+    origin->hide(CSysDragger::SwitchIndexes::XRotate);
+    origin->hide(CSysDragger::SwitchIndexes::YRotate);
+    origin->hide(CSysDragger::SwitchIndexes::ZRotate);
+    origin->hide(CSysDragger::SwitchIndexes::LinkIcon);
     oCamera->addChild(origin);
 
     view->setSceneData(root);
     view->addEventHandler(new osgViewer::StatsHandler);
+    overlayHandler = new slc::OverlayHandler(oCamera);
+    view->addEventHandler(overlayHandler.get());
     selectionHandler = new slc::EventHandler();
-    view->addEventHandler(selectionHandler);
+    view->addEventHandler(selectionHandler.get());
     //why does the following line create an additional thread. why?
     //not sure why it does, but it happens down inside librsvg and doesn't
     //come into play for application. I have proven out that our qactions
@@ -147,10 +153,6 @@ void dumpLookAt(const osg::Vec3d &eye, const osg::Vec3d &center, const osg::Vec3
 
 void ViewerWidget::update()
 {
-    osgViewer::View* view = this->getView(0);
-    osgGA::CameraManipulator *camManip = view->getCameraManipulator();
-    camManip->home(1.0);
-
     osgUtil::Optimizer opt;
     opt.optimize(root);
 
@@ -247,7 +249,7 @@ osg::Camera* ViewerWidget::createBackgroundCamera()
     bgCamera->setClearMask(0);
     bgCamera->setAllowEventFocus(false);
     bgCamera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
-    bgCamera->setRenderOrder(osg::Camera::POST_RENDER);
+    bgCamera->setRenderOrder(osg::Camera::POST_RENDER, 0);
     bgCamera->setProjectionMatrix(osg::Matrix::ortho2D(0.0, 1.0, 0.0, 1.0));
     bgCamera->addChild(geode.get());
     bgCamera->setNodeMask(NodeMaskDef::backGroundCamera);
@@ -261,47 +263,32 @@ osg::Camera* ViewerWidget::createBackgroundCamera()
 
 osg::Camera* ViewerWidget::createGestureCamera()
 {
-//     double localWidgetWidth = static_cast<double>(glWidgetWidth);
-//     double localWidgetHeight = static_cast<double>(glWidgetHeight);
-
-//     double projectionHeight = 1000.0; //height is constant
     double quadSize = 10000;
 
-
     osg::ref_ptr<osg::Geometry> quad = osg::createTexturedQuadGeometry
-//            (osg::Vec3(), osg::Vec3(localWidgetWidth, 0.0, 0.0), osg::Vec3(0.0, localWidgetHeight, 0.0));
-    (osg::Vec3(), osg::Vec3(quadSize, 0.0, 0.0), osg::Vec3(0.0, quadSize, 0.0));
-//    quad->getOrCreateStateSet()->setTextureAttributeAndModes(0, texture.get());
+      (osg::Vec3(), osg::Vec3(quadSize, 0.0, 0.0), osg::Vec3(0.0, quadSize, 0.0));
     osg::Vec4Array *colorArray = new osg::Vec4Array();
-    colorArray->push_back(osg::Vec4(0.0, 0.0, 0.0, 0.8));
+    colorArray->push_back(osg::Vec4(0.0, 0.0, 0.0, 0.6));
     quad->setColorArray(colorArray);
-    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
-    geode->addDrawable(quad.get());
-    geode->setNodeMask(NodeMaskDef::gestureCamera);
+    quad->setColorBinding(osg::Geometry::BIND_OVERALL);
+    quad->setNodeMask(NodeMaskDef::gestureCamera);
+    quad->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);
+    quad->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
 
     osg::Camera *fadeCamera = new osg::Camera();
     fadeCamera->setCullingActive(false);
     fadeCamera->setClearMask(GL_DEPTH_BUFFER_BIT);
     fadeCamera->setAllowEventFocus(false);
     fadeCamera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
-    fadeCamera->setRenderOrder(osg::Camera::POST_RENDER, 1);
-//    fadeCamera->setProjectionMatrix(osg::Matrix::ortho2D(0.0, localWidgetWidth, 0.0, localWidgetHeight));
+    fadeCamera->setRenderOrder(osg::Camera::POST_RENDER, 3);
     fadeCamera->setProjectionMatrix(osg::Matrix::ortho2D(0.0, 1000.0, 0.0, 1000.0));
-//    fadeCamera->setProjectionMatrix(osg::Matrix::ortho2D(0.0, 100.0, 0.0, 100.0));
     fadeCamera->setViewMatrix(osg::Matrix::identity());
     fadeCamera->setGraphicsContext(windowQt);
     fadeCamera->setNodeMask(NodeMaskDef::gestureCamera);
-
-    osg::StateSet* ss = fadeCamera->getOrCreateStateSet();
-    ss->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-    ss->setAttributeAndModes(new osg::Depth(osg::Depth::LEQUAL, 0.0, 0.0));
-    osg::ref_ptr<osg::BlendFunc> blend = new osg::BlendFunc();
-    blend->setFunction(GL_SRC_COLOR, GL_ONE_MINUS_DST_ALPHA);
-    ss->setAttributeAndModes(blend);
-    ss->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+    fadeCamera->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 
     osg::Switch *aSwitch = new osg::Switch();
-    aSwitch->addChild(geode.get());
+    aSwitch->addChild(quad.get());
     aSwitch->setAllChildrenOff();
     fadeCamera->addChild(aSwitch);
 
@@ -338,7 +325,8 @@ void ViewerWidget::viewRightDispatched(const msg::Message&)
 
 void ViewerWidget::viewFitDispatched(const msg::Message&)
 {
-    spaceballManipulator->viewFit();
+  spaceballManipulator->home(1.0);
+  spaceballManipulator->viewFit();
 }
 
 void ViewerWidget::viewFillDispatched(const msg::Message&)

@@ -48,7 +48,6 @@ public:
     bool x11EventFilter(XEvent *event);
     void initializeSpaceball();
     prj::Project* getProject(){return project.get();}
-    prf::Manager* getPreferencesManager(){return preferenceManager.get();}
     MainWindow* getMainWindow(){return mainWindow.get();}
     QDir getApplicationDirectory();
     
@@ -66,7 +65,6 @@ private:
     std::unique_ptr<MainWindow> mainWindow;
     std::unique_ptr<prj::Project> project;
     std::unique_ptr<Factory> factory;
-    std::unique_ptr<prf::Manager> preferenceManager;
     bool spaceballPresent;
     
     void createNewProject();

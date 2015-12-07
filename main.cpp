@@ -57,5 +57,8 @@ int main( int argc, char** argv )
     messageOut.mask = msg::Request | msg::Construct | msg::Sphere;
     msg::dispatch().messageInSlot(messageOut);
     
+    messageOut.mask = msg::Request | msg::ViewFit;
+    msg::dispatch().messageInSlot(messageOut);
+    
     return app.exec();
 }

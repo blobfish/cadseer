@@ -52,10 +52,8 @@ Application::Application(int &argc, char **argv) :
     factory = std::move(tempFactory);
     
     //some day pass the preferences file from user home directory to the manager constructor.
-    std::unique_ptr<prf::Manager> temp(new prf::Manager());
-    preferenceManager = std::move(temp);
-    
-    if (!preferenceManager->isOk())
+    prf::Manager &manager = prf::manager(); //this should cause preferences file to be read.
+    if (!manager.isOk())
     {
       QMessageBox::critical(0, tr("CadSeer"), tr("Preferences failed to load"));
       QTimer::singleShot(0, this, SLOT(quit()));

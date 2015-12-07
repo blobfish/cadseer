@@ -123,6 +123,8 @@ void Cone::updateModel(const UpdateMap& mapIn)
   shape = TopoDS_Shape();
   setFailure();
   
+  CSysBase::updateModel(mapIn);
+  
   try
   {
     ConeBuilder coneBuilder(radius1, radius2, height, system);

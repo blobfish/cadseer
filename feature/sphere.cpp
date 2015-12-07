@@ -77,6 +77,8 @@ void Sphere::updateModel(const UpdateMap& mapIn)
   shape = TopoDS_Shape();
   setFailure();
   
+  CSysBase::updateModel(mapIn);
+  
   try
   {
     BRepPrimAPI_MakeSphere sphereMaker(system, radius);

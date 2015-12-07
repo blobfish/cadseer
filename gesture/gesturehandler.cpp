@@ -28,6 +28,7 @@
 #include <osg/MatrixTransform>
 #include <osgUtil/LineSegmentIntersector>
 #include <osg/ValueObject>
+#include <osg/Depth>
 
 #include <gesture/gesturenode.h>
 #include <gesture/gesturehandler.h>
@@ -237,7 +238,9 @@ void GestureHandler::contractSubNodes()
 void GestureHandler::constructMenu()
 {
     startNode = gsn::buildMenuNode(":/resources/images/start.svg");
-    gestureSwitch->addChild(startNode);
+    startNode->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+    startNode->getOrCreateStateSet()->setAttributeAndModes(new osg::Depth(osg::Depth::LEQUAL, 0.0, 0.0));
+    gestureSwitch->insertChild(0, startNode);
 
     osg::Matrixd dummy;
 

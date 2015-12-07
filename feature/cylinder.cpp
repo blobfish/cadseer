@@ -112,6 +112,8 @@ void Cylinder::updateModel(const UpdateMap& mapIn)
   shape = TopoDS_Shape();
   setFailure();
   
+  CSysBase::updateModel(mapIn);
+  
   try
   {
     CylinderBuilder cylinderMaker(radius, height, system);

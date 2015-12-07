@@ -20,9 +20,18 @@
   </xs:sequence>
 </xs:complexType>
 
+<xs:complexType name="Dragger">
+  <xs:sequence minOccurs="1" maxOccurs="1">
+    <xs:element name="triggerUpdateOnFinish" type="xs:boolean" default="false"/>
+    <xs:element name="linearIncrement" type="DecPositive" default="1.0"/>
+    <xs:element name="angularIncrement" type="DecPositive" default="15.0"/>
+  </xs:sequence>
+</xs:complexType>
+
 <xs:complexType name="Root">
   <xs:sequence minOccurs="1" maxOccurs="1">
     <xs:element name="visual" type="Visual"/>
+    <xs:element name="dragger" type="Dragger"/>
   </xs:sequence>
 </xs:complexType>
 

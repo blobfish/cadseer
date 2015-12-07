@@ -17,14 +17,23 @@
  *
  */
 
+#include <sstream>
+#include <iomanip>
+#include <cmath>
+#include <limits>
+
 #include <gp_Trsf.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Ax2.hxx>
 
 #include <osg/MatrixTransform>
+#include <osgManipulator/Command>
 
 #include <nodemaskdefs.h>
 #include <feature/csysbase.h>
+#include <message/dispatch.h>
+#include <preferences/preferencesXML.h>
+#include <preferences/manager.h>
 
 using namespace ftr;
 
@@ -82,17 +91,85 @@ static gp_Ax2 toOcc(const osg::Matrixd &m)
   return out;
 }
 
+DCallBack::DCallBack(osg::MatrixTransform *t, CSysBase *csysBaseIn) : 
+      osgManipulator::DraggerTransformCallback(t), csysBase(csysBaseIn)
+{
+  connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
+  //we don't intake messages from the dispatcher.
+}
+
 bool DCallBack::receive(const osgManipulator::MotionCommand &commandIn)
 {
   bool out = osgManipulator::DraggerCallback::receive(commandIn);
+  
+  static double lastTranslation;
+  static int lastRotation;
+  
+  const osgManipulator::TranslateInLineCommand *tCommand = 
+    dynamic_cast<const osgManipulator::TranslateInLineCommand *>(&commandIn);
+  const osgManipulator::Rotate3DCommand *rCommand = 
+    dynamic_cast<const osgManipulator::Rotate3DCommand *>(&commandIn);
+  
+  std::ostringstream stream;
+  if (commandIn.getStage() == osgManipulator::MotionCommand::START)
+  {
+    if (tCommand)
+      originStart = tCommand->getTranslation() * tCommand->getLocalToWorld();
+    lastTranslation = 0.0;
+    lastRotation = 0.0;
+    
+    CSysDragger &dragger = csysBase->getDragger();
+    dragger.setTranslationIncrement(prf::manager().rootPtr->dragger().linearIncrement());
+    dragger.setRotationIncrement(prf::manager().rootPtr->dragger().angularIncrement());
+  }
+    
+  if (commandIn.getStage() == osgManipulator::MotionCommand::MOVE)
+  {
+    if (tCommand)
+    {
+      osg::Vec3d tVec = tCommand->getTranslation() * tCommand->getLocalToWorld();
+      double diff = (tVec-originStart).length();
+      if (std::fabs(diff - lastTranslation) < std::numeric_limits<double>::epsilon())
+	return out;
+      lastTranslation = diff;
+      stream << QObject::tr("Translation Increment: ").toUtf8().data() << std::setprecision(3) << std::fixed <<
+	prf::manager().rootPtr->dragger().linearIncrement() << std::endl <<
+        QObject::tr("Translation: ").toUtf8().data() << std::setprecision(3) << std::fixed << diff;
+    }
+    if (rCommand)
+    {
+      double w = rCommand->getRotation().asVec4().w();
+      int angle = static_cast<int>(std::round(osg::RadiansToDegrees(2.0 * std::acos(w))));
+      if (angle == lastRotation)
+	return out;
+      lastRotation = angle;
+      stream << QObject::tr("Rotation Increment: ").toUtf8().data() << 
+	static_cast<int>(prf::manager().rootPtr->dragger().angularIncrement()) <<
+	std::endl << QObject::tr("Rotation: ").toUtf8().data() << angle;
+    }
+  }
   
   //assuming at this point the transform matrix has been updated.
   //so copy it back to gp_Ax2 and mark the feature dirty.
   if (commandIn.getStage() == osgManipulator::MotionCommand::FINISH)
   {
     assert(csysBase);
-    csysBase->setSystem(getTransform()->getMatrix());
+    csysBase->setModelDirty();
+    
+    if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
+    {
+      msg::Message uMessage;
+      uMessage.mask = msg::Request | msg::Update;
+      messageOutSignal(uMessage);
+    }
   }
+  
+  msg::Message messageOut;
+  messageOut.mask = msg::Request | msg::StatusText;
+  vwr::Message vMessageOut;
+  vMessageOut.text = stream.str();
+  messageOut.payload = vMessageOut;
+  messageOutSignal(messageOut);
   
   return out;
 }
@@ -101,10 +178,10 @@ CSysBase::CSysBase() : Base(), system()
 {
   dragger = new CSysDragger();
   overlaySwitch->addChild(dragger);
-  dragger->setScreenScale(50.0f);
-  dragger->setRotationIncrement(15.0);
-  dragger->setTranslationIncrement(0.25);
-  dragger->setHandleEvents(true);
+  dragger->setScreenScale(75.0f);
+  dragger->setRotationIncrement(prf::manager().rootPtr->dragger().angularIncrement());
+  dragger->setTranslationIncrement(prf::manager().rootPtr->dragger().linearIncrement());
+  dragger->setHandleEvents(false);
   dragger->setupDefaultGeometry();
   dragger->linkToMatrix(mainTransform.get());
   
@@ -115,28 +192,25 @@ CSysBase::CSysBase() : Base(), system()
 void CSysBase::setSystem(const gp_Ax2& systemIn)
 {
   system = systemIn;
-  
-  bool wasDraggerLinked = dragger->isLinked();
-  dragger->setUnlink();
-  dragger->setMatrix(toOsg(systemIn));
-  if (wasDraggerLinked)
-    dragger->setLink();
-  
   setModelDirty();
 }
 
 void CSysBase::setSystem(const osg::Matrixd& systemIn)
 {
-  system = toOcc(systemIn);
-  setModelDirty();
+  setSystem(toOcc(systemIn));
 }
 
-void CSysBase::updateVisual()
+void CSysBase::updateDragger()
 {
-  ftr::Base::updateVisual();
-  
-  //after dragging we need to reset the transform.
-  if (isVisualClean())
-    mainTransform->setMatrix(osg::Matrixd::identity());
+  bool wasDraggerLinked = dragger->isLinked();
+  dragger->setUnlink();
+  dragger->setMatrix(toOsg(system));
+  if (wasDraggerLinked)
+    dragger->setLink();
 }
 
+void CSysBase::updateModel(const UpdateMap &mapIn)
+{
+  setSystem(toOsg(system) * mainTransform->getMatrix());
+  mainTransform->setMatrix(osg::Matrixd::identity());
+}

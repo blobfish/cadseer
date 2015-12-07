@@ -173,6 +173,8 @@ void Box::updateModel(const UpdateMap& mapIn)
   shape = TopoDS_Shape();
   setFailure();
   
+  CSysBase::updateModel(mapIn);
+  
   try
   {
     BoxBuilder boxMaker(length, width, height, system);

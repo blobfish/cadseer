@@ -138,6 +138,94 @@ namespace prf
   }
 
 
+  // Dragger
+  // 
+
+  const Dragger::TriggerUpdateOnFinishType& Dragger::
+  triggerUpdateOnFinish () const
+  {
+    return this->triggerUpdateOnFinish_.get ();
+  }
+
+  Dragger::TriggerUpdateOnFinishType& Dragger::
+  triggerUpdateOnFinish ()
+  {
+    return this->triggerUpdateOnFinish_.get ();
+  }
+
+  void Dragger::
+  triggerUpdateOnFinish (const TriggerUpdateOnFinishType& x)
+  {
+    this->triggerUpdateOnFinish_.set (x);
+  }
+
+  Dragger::TriggerUpdateOnFinishType Dragger::
+  triggerUpdateOnFinish_default_value ()
+  {
+    return TriggerUpdateOnFinishType (false);
+  }
+
+  const Dragger::LinearIncrementType& Dragger::
+  linearIncrement () const
+  {
+    return this->linearIncrement_.get ();
+  }
+
+  Dragger::LinearIncrementType& Dragger::
+  linearIncrement ()
+  {
+    return this->linearIncrement_.get ();
+  }
+
+  void Dragger::
+  linearIncrement (const LinearIncrementType& x)
+  {
+    this->linearIncrement_.set (x);
+  }
+
+  void Dragger::
+  linearIncrement (::std::unique_ptr< LinearIncrementType > x)
+  {
+    this->linearIncrement_.set (std::move (x));
+  }
+
+  Dragger::LinearIncrementType Dragger::
+  linearIncrement_default_value ()
+  {
+    return LinearIncrementType (1.0);
+  }
+
+  const Dragger::AngularIncrementType& Dragger::
+  angularIncrement () const
+  {
+    return this->angularIncrement_.get ();
+  }
+
+  Dragger::AngularIncrementType& Dragger::
+  angularIncrement ()
+  {
+    return this->angularIncrement_.get ();
+  }
+
+  void Dragger::
+  angularIncrement (const AngularIncrementType& x)
+  {
+    this->angularIncrement_.set (x);
+  }
+
+  void Dragger::
+  angularIncrement (::std::unique_ptr< AngularIncrementType > x)
+  {
+    this->angularIncrement_.set (std::move (x));
+  }
+
+  Dragger::AngularIncrementType Dragger::
+  angularIncrement_default_value ()
+  {
+    return AngularIncrementType (15.0);
+  }
+
+
   // Root
   // 
 
@@ -163,6 +251,30 @@ namespace prf
   visual (::std::unique_ptr< VisualType > x)
   {
     this->visual_.set (std::move (x));
+  }
+
+  const Root::DraggerType& Root::
+  dragger () const
+  {
+    return this->dragger_.get ();
+  }
+
+  Root::DraggerType& Root::
+  dragger ()
+  {
+    return this->dragger_.get ();
+  }
+
+  void Root::
+  dragger (const DraggerType& x)
+  {
+    this->dragger_.set (x);
+  }
+
+  void Root::
+  dragger (::std::unique_ptr< DraggerType > x)
+  {
+    this->dragger_.set (std::move (x));
   }
 }
 
@@ -441,20 +553,165 @@ namespace prf
   {
   }
 
+  // Dragger
+  //
+
+  Dragger::
+  Dragger (const TriggerUpdateOnFinishType& triggerUpdateOnFinish,
+           const LinearIncrementType& linearIncrement,
+           const AngularIncrementType& angularIncrement)
+  : ::xml_schema::Type (),
+    triggerUpdateOnFinish_ (triggerUpdateOnFinish, this),
+    linearIncrement_ (linearIncrement, this),
+    angularIncrement_ (angularIncrement, this)
+  {
+  }
+
+  Dragger::
+  Dragger (const Dragger& x,
+           ::xml_schema::Flags f,
+           ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    triggerUpdateOnFinish_ (x.triggerUpdateOnFinish_, f, this),
+    linearIncrement_ (x.linearIncrement_, f, this),
+    angularIncrement_ (x.angularIncrement_, f, this)
+  {
+  }
+
+  Dragger::
+  Dragger (const ::xercesc::DOMElement& e,
+           ::xml_schema::Flags f,
+           ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    triggerUpdateOnFinish_ (this),
+    linearIncrement_ (this),
+    angularIncrement_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void Dragger::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // triggerUpdateOnFinish
+      //
+      if (n.name () == "triggerUpdateOnFinish" && n.namespace_ ().empty ())
+      {
+        if (!triggerUpdateOnFinish_.present ())
+        {
+          this->triggerUpdateOnFinish_.set (TriggerUpdateOnFinishTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      // linearIncrement
+      //
+      if (n.name () == "linearIncrement" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< LinearIncrementType > r (
+          LinearIncrementTraits::create (i, f, this));
+
+        if (!linearIncrement_.present ())
+        {
+          this->linearIncrement_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      // angularIncrement
+      //
+      if (n.name () == "angularIncrement" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< AngularIncrementType > r (
+          AngularIncrementTraits::create (i, f, this));
+
+        if (!angularIncrement_.present ())
+        {
+          this->angularIncrement_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!triggerUpdateOnFinish_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "triggerUpdateOnFinish",
+        "");
+    }
+
+    if (!linearIncrement_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "linearIncrement",
+        "");
+    }
+
+    if (!angularIncrement_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "angularIncrement",
+        "");
+    }
+  }
+
+  Dragger* Dragger::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class Dragger (*this, f, c);
+  }
+
+  Dragger& Dragger::
+  operator= (const Dragger& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->triggerUpdateOnFinish_ = x.triggerUpdateOnFinish_;
+      this->linearIncrement_ = x.linearIncrement_;
+      this->angularIncrement_ = x.angularIncrement_;
+    }
+
+    return *this;
+  }
+
+  Dragger::
+  ~Dragger ()
+  {
+  }
+
   // Root
   //
 
   Root::
-  Root (const VisualType& visual)
+  Root (const VisualType& visual,
+        const DraggerType& dragger)
   : ::xml_schema::Type (),
-    visual_ (visual, this)
+    visual_ (visual, this),
+    dragger_ (dragger, this)
   {
   }
 
   Root::
-  Root (::std::unique_ptr< VisualType > visual)
+  Root (::std::unique_ptr< VisualType > visual,
+        ::std::unique_ptr< DraggerType > dragger)
   : ::xml_schema::Type (),
-    visual_ (std::move (visual), this)
+    visual_ (std::move (visual), this),
+    dragger_ (std::move (dragger), this)
   {
   }
 
@@ -463,7 +720,8 @@ namespace prf
         ::xml_schema::Flags f,
         ::xml_schema::Container* c)
   : ::xml_schema::Type (x, f, c),
-    visual_ (x.visual_, f, this)
+    visual_ (x.visual_, f, this),
+    dragger_ (x.dragger_, f, this)
   {
   }
 
@@ -472,7 +730,8 @@ namespace prf
         ::xml_schema::Flags f,
         ::xml_schema::Container* c)
   : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
-    visual_ (this)
+    visual_ (this),
+    dragger_ (this)
   {
     if ((f & ::xml_schema::Flags::base) == 0)
     {
@@ -505,6 +764,20 @@ namespace prf
         }
       }
 
+      // dragger
+      //
+      if (n.name () == "dragger" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< DraggerType > r (
+          DraggerTraits::create (i, f, this));
+
+        if (!dragger_.present ())
+        {
+          this->dragger_.set (::std::move (r));
+          continue;
+        }
+      }
+
       break;
     }
 
@@ -512,6 +785,13 @@ namespace prf
     {
       throw ::xsd::cxx::tree::expected_element< char > (
         "visual",
+        "");
+    }
+
+    if (!dragger_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "dragger",
         "");
     }
   }
@@ -530,6 +810,7 @@ namespace prf
     {
       static_cast< ::xml_schema::Type& > (*this) = x;
       this->visual_ = x.visual_;
+      this->dragger_ = x.dragger_;
     }
 
     return *this;
@@ -885,6 +1166,45 @@ namespace prf
   }
 
   void
+  operator<< (::xercesc::DOMElement& e, const Dragger& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // triggerUpdateOnFinish
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "triggerUpdateOnFinish",
+          e));
+
+      s << i.triggerUpdateOnFinish ();
+    }
+
+    // linearIncrement
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "linearIncrement",
+          e));
+
+      s << i.linearIncrement ();
+    }
+
+    // angularIncrement
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "angularIncrement",
+          e));
+
+      s << i.angularIncrement ();
+    }
+  }
+
+  void
   operator<< (::xercesc::DOMElement& e, const Root& i)
   {
     e << static_cast< const ::xml_schema::Type& > (i);
@@ -898,6 +1218,17 @@ namespace prf
           e));
 
       s << i.visual ();
+    }
+
+    // dragger
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "dragger",
+          e));
+
+      s << i.dragger ();
     }
   }
 

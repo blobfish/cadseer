@@ -29,6 +29,7 @@
 #include <project/message.h>
 #include <selection/message.h>
 #include <application/message.h>
+#include <viewer/message.h>
 
 namespace msg
 {
@@ -74,8 +75,9 @@ namespace msg
   static const Mask ExportOSG(Mask().		set(36));//!< command
   static const Mask Preferences(Mask().		set(37));//!< command
   static const Mask Remove(Mask().		set(38));//!< command
+  static const Mask StatusText(Mask().		set(39));//!< display text for info cam
   
-  typedef boost::variant<prj::Message, slc::Message, app::Message> Payload;
+  typedef boost::variant<prj::Message, slc::Message, app::Message, vwr::Message> Payload;
   
   struct Message
   {

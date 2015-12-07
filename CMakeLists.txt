@@ -84,6 +84,7 @@ SET(SELECTION_SOURCES
     selection/manager.cpp
     selection/message.cpp
     selection/container.cpp
+    selection/overlayhandler.cpp
     )
 
 SET(DIALOG_SOURCES

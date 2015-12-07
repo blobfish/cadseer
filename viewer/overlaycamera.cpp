@@ -25,15 +25,18 @@
 
 #include <osgViewer/GraphicsWindow>
 
+#include <nodemaskdefs.h>
 #include <feature/base.h>
 #include <message/dispatch.h>
 #include <viewer/overlaycamera.h>
 
 OverlayCamera::OverlayCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
 {
+  setNodeMask(NodeMaskDef::overlayCamera);
   setupDispatcher();
   setGraphicsContext(windowIn);
   setClearMask(GL_DEPTH_BUFFER_BIT);
+  setRenderOrder(osg::Camera::POST_RENDER, 1);
   
   osg::Camera *mainCamera = nullptr;
   const osg::GraphicsContext::Cameras &cameras = windowIn->getCameras();

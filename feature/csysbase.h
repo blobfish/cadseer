@@ -24,12 +24,17 @@
 
 #include <osg/csysdragger.h>
 #include <feature/base.h>
+#include <message/message.h>
 
 namespace ftr
 {
   class DCallBack;
   
-  /*! Base class for features dependent on a coordinate system*/
+  /*! Base class for features dependent on a coordinate system
+   *
+   * Child classes must call this classes updateModel and updateVisual
+   * in overrides.
+   */
   class CSysBase : public Base
   {
   public:
@@ -38,11 +43,13 @@ namespace ftr
     virtual const std::string& getTypeString() const override {return toString(Type::CSys);}
     virtual const QIcon& getIcon() const override {static QIcon junk; return junk;}
     virtual Descriptor getDescriptor() const override {return Descriptor::None;}
-    virtual void updateVisual() override;
+    virtual void updateModel(const UpdateMap&) override;
     void setSystem(const gp_Ax2 &systemIn);
     void setSystem(const osg::Matrixd &systemIn);
+    void updateDragger(); //!< dragger to match feature system.
     const gp_Ax2& getSystem() const {return system;}
-    
+    CSysDragger& getDragger() {return *dragger;}
+
   protected:
     gp_Ax2 system;
     osg::ref_ptr<CSysDragger> dragger;
@@ -56,11 +63,20 @@ namespace ftr
   class DCallBack : public osgManipulator::DraggerTransformCallback
   {
   public:
-    DCallBack(osg::MatrixTransform *t, CSysBase *csysBaseIn) : 
-      osgManipulator::DraggerTransformCallback(t), csysBase(csysBaseIn){}
+    DCallBack(osg::MatrixTransform *t, CSysBase *csysBaseIn);
     virtual bool receive(const osgManipulator::MotionCommand &) override;
+    
+        
+    typedef boost::signals2::signal<void (const msg::Message &)> MessageOutSignal;
+    boost::signals2::connection connectMessageOut(const MessageOutSignal::slot_type &subscriber)
+    {
+      return messageOutSignal.connect(subscriber);
+    }
+    
   private:
     CSysBase *csysBase = nullptr;
+    osg::Vec3d originStart;
+    MessageOutSignal messageOutSignal;
   };
 }
 

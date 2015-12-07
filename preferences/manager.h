@@ -45,6 +45,7 @@ namespace prf
     QString filePathXSD;
     bool ok;
   };
+  Manager& manager();
 }
 
 #endif // MANAGER_H

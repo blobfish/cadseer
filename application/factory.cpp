@@ -33,6 +33,7 @@
 #include <application/mainwindow.h>
 #include <preferences/dialog.h>
 #include <application/factory.h>
+#include <preferences/manager.h>
 #include <feature/types.h>
 #include <feature/box.h>
 #include <feature/cylinder.h>
@@ -175,6 +176,7 @@ void Factory::newBoxDispatched(const msg::Message &)
   gp_Ax2 location;
   location.SetLocation(gp_Pnt(1.0, 1.0, 1.0));
   boxPtr->setSystem(location);
+  boxPtr->updateDragger();
   boxPtr->setParameters(20.0, 10.0, 2.0);
   project->addFeature(boxPtr);
   
@@ -195,6 +197,7 @@ void Factory::newCylinderDispatched(const msg::Message &)
   gp_Ax2 location;
   location.SetLocation(gp_Pnt(16.0, 6.0, 2.5));
   cylinder->setSystem(location);
+  cylinder->updateDragger();
   project->addFeature(cylinder);
   
   triggerUpdate();
@@ -213,6 +216,7 @@ void Factory::newSphereDispatched(const msg::Message&)
   gp_Ax2 location;
   location.SetLocation(gp_Pnt(11.0, 6.0, -1.5));
   sphere->setSystem(location);
+  sphere->updateDragger();
   project->addFeature(sphere);
   
   triggerUpdate();
@@ -233,6 +237,7 @@ void Factory::newConeDispatched(const msg::Message&)
   gp_Ax2 location;
   location.SetLocation(gp_Pnt(6.0, 6.0, 2.5));
   cone->setSystem(location);
+  cone->updateDragger();
   project->addFeature(cone);
   
   triggerUpdate();
@@ -457,7 +462,7 @@ void Factory::preferencesDispatched(const msg::Message&)
   
   app::Application *application = dynamic_cast<app::Application *>(qApp);
   assert(application);
-  std::unique_ptr<prf::Dialog> dialog(new prf::Dialog(application->getPreferencesManager(), application->getMainWindow()));
+  std::unique_ptr<prf::Dialog> dialog(new prf::Dialog(&prf::manager(), application->getMainWindow()));
   dialog->setModal(true);
   if (!dialog->exec())
     return;

@@ -21,6 +21,9 @@
 
 #include <TopExp.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
+#include <gp_Ax3.hxx>
+#include <gp_Trsf.hxx>
+#include <TopLoc_Location.hxx>
 
 #include <feature/inert.h>
 
@@ -40,23 +43,43 @@ Inert::Inert(const TopoDS_Shape &shapeIn) : CSysBase()
     shape = shapeIn;
   else
     shape = compoundWrap(shapeIn);
+}
+
+void Inert::updateModel(const UpdateMap &mapIn)
+{
   
-  TopTools_IndexedMapOfShape shapeMap;
-  TopExp::MapShapes(shape, shapeMap);
+  CSysBase::updateModel(mapIn);
   
-  for (int index = 1; index <= shapeMap.Extent(); ++index)
+  gp_Ax3 tempAx3(system);
+  gp_Trsf tempTrsf; tempTrsf.SetTransformation(tempAx3); tempTrsf.Invert();
+  TopLoc_Location freshLocation(tempTrsf);
+  
+  if (shape.Location() != freshLocation)
   {
-    uuid tempId = basic_random_generator<boost::mt19937>()();
+    shape.Location(freshLocation);
     
-    ResultRecord record;
-    record.id = tempId;
-    record.shape = shapeMap(index);
-    resultContainer.insert(record);
-    
-    EvolutionRecord evolutionRecord;
-    evolutionRecord.outId = tempId;
-    evolutionContainer.insert(evolutionRecord);
+    //here we are just generating new ids every update.
+    //this is temp as we are going to have reconcile the ids
+    //from before to after.
+    TopTools_IndexedMapOfShape shapeMap;
+    TopExp::MapShapes(shape, shapeMap);
+    for (int index = 1; index <= shapeMap.Extent(); ++index)
+    {
+      uuid tempId = basic_random_generator<boost::mt19937>()();
+      
+      ResultRecord record;
+      record.id = tempId;
+      record.shape = shapeMap(index);
+      resultContainer.insert(record);
+      
+      EvolutionRecord evolutionRecord;
+      evolutionRecord.outId = tempId;
+      evolutionContainer.insert(evolutionRecord);
+    }
+    //not using feature container;
   }
   
-  //not using feature container;
+  setSuccess();
+  setModelClean();
 }
+

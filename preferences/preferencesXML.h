@@ -621,6 +621,7 @@ namespace prf
   class DecPositive;
   class Mesh;
   class Visual;
+  class Dragger;
   class Root;
 }
 
@@ -1130,6 +1131,291 @@ namespace prf
   };
 
   /**
+   * @brief Class corresponding to the %Dragger schema type.
+   *
+   * @nosubgrouping
+   */
+  class Dragger: public ::xml_schema::Type
+  {
+    public:
+    /**
+     * @name triggerUpdateOnFinish
+     *
+     * @brief Accessor and modifier functions for the %triggerUpdateOnFinish
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::xml_schema::Boolean TriggerUpdateOnFinishType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< TriggerUpdateOnFinishType, char > TriggerUpdateOnFinishTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const TriggerUpdateOnFinishType&
+    triggerUpdateOnFinish () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    TriggerUpdateOnFinishType&
+    triggerUpdateOnFinish ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    triggerUpdateOnFinish (const TriggerUpdateOnFinishType& x);
+
+    /**
+     * @brief Return the default value for the element.
+     *
+     * @return The element's default value.
+     */
+    static TriggerUpdateOnFinishType
+    triggerUpdateOnFinish_default_value ();
+
+    //@}
+
+    /**
+     * @name linearIncrement
+     *
+     * @brief Accessor and modifier functions for the %linearIncrement
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::DecPositive LinearIncrementType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< LinearIncrementType, char > LinearIncrementTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const LinearIncrementType&
+    linearIncrement () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    LinearIncrementType&
+    linearIncrement ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    linearIncrement (const LinearIncrementType& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly
+     * instead of making a copy.
+     */
+    void
+    linearIncrement (::std::unique_ptr< LinearIncrementType > p);
+
+    /**
+     * @brief Return the default value for the element.
+     *
+     * @return The element's default value.
+     */
+    static LinearIncrementType
+    linearIncrement_default_value ();
+
+    //@}
+
+    /**
+     * @name angularIncrement
+     *
+     * @brief Accessor and modifier functions for the %angularIncrement
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::DecPositive AngularIncrementType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< AngularIncrementType, char > AngularIncrementTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const AngularIncrementType&
+    angularIncrement () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    AngularIncrementType&
+    angularIncrement ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    angularIncrement (const AngularIncrementType& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly
+     * instead of making a copy.
+     */
+    void
+    angularIncrement (::std::unique_ptr< AngularIncrementType > p);
+
+    /**
+     * @brief Return the default value for the element.
+     *
+     * @return The element's default value.
+     */
+    static AngularIncrementType
+    angularIncrement_default_value ();
+
+    //@}
+
+    /**
+     * @name Constructors
+     */
+    //@{
+
+    /**
+     * @brief Create an instance from the ultimate base and
+     * initializers for required elements and attributes.
+     */
+    Dragger (const TriggerUpdateOnFinishType&,
+             const LinearIncrementType&,
+             const AngularIncrementType&);
+
+    /**
+     * @brief Create an instance from a DOM element.
+     *
+     * @param e A DOM element to extract the data from.
+     * @param f Flags to create the new instance with.
+     * @param c A pointer to the object that will contain the new
+     * instance.
+     */
+    Dragger (const ::xercesc::DOMElement& e,
+             ::xml_schema::Flags f = 0,
+             ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy constructor.
+     *
+     * @param x An instance to make a copy of.
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    Dragger (const Dragger& x,
+             ::xml_schema::Flags f = 0,
+             ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy the instance polymorphically.
+     *
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     * @return A pointer to the dynamically allocated copy.
+     *
+     * This function ensures that the dynamic type of the instance is
+     * used for copying and should be used for polymorphic object
+     * models instead of the copy constructor.
+     */
+    virtual Dragger*
+    _clone (::xml_schema::Flags f = 0,
+            ::xml_schema::Container* c = 0) const;
+
+    /**
+     * @brief Copy assignment operator.
+     *
+     * @param x An instance to make a copy of.
+     * @return A reference to itself.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    Dragger&
+    operator= (const Dragger& x);
+
+    //@}
+
+    /**
+     * @brief Destructor.
+     */
+    virtual 
+    ~Dragger ();
+
+    // Implementation.
+    //
+
+    //@cond
+
+    protected:
+    void
+    parse (::xsd::cxx::xml::dom::parser< char >&,
+           ::xml_schema::Flags);
+
+    protected:
+    ::xsd::cxx::tree::one< TriggerUpdateOnFinishType > triggerUpdateOnFinish_;
+    ::xsd::cxx::tree::one< LinearIncrementType > linearIncrement_;
+    ::xsd::cxx::tree::one< AngularIncrementType > angularIncrement_;
+
+    //@endcond
+  };
+
+  /**
    * @brief Class corresponding to the %Root schema type.
    *
    * @nosubgrouping
@@ -1196,6 +1482,64 @@ namespace prf
     //@}
 
     /**
+     * @name dragger
+     *
+     * @brief Accessor and modifier functions for the %dragger
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::Dragger DraggerType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< DraggerType, char > DraggerTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const DraggerType&
+    dragger () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    DraggerType&
+    dragger ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    dragger (const DraggerType& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly
+     * instead of making a copy.
+     */
+    void
+    dragger (::std::unique_ptr< DraggerType > p);
+
+    //@}
+
+    /**
      * @name Constructors
      */
     //@{
@@ -1204,7 +1548,8 @@ namespace prf
      * @brief Create an instance from the ultimate base and
      * initializers for required elements and attributes.
      */
-    Root (const VisualType&);
+    Root (const VisualType&,
+          const DraggerType&);
 
     /**
      * @brief Create an instance from the ultimate base and
@@ -1214,7 +1559,8 @@ namespace prf
      * This constructor will try to use the passed values directly
      * instead of making copies.
      */
-    Root (::std::unique_ptr< VisualType >);
+    Root (::std::unique_ptr< VisualType >,
+          ::std::unique_ptr< DraggerType >);
 
     /**
      * @brief Create an instance from a DOM element.
@@ -1287,6 +1633,7 @@ namespace prf
 
     protected:
     ::xsd::cxx::tree::one< VisualType > visual_;
+    ::xsd::cxx::tree::one< DraggerType > dragger_;
 
     //@endcond
   };
@@ -1579,6 +1926,9 @@ namespace prf
 
   void
   operator<< (::xercesc::DOMElement&, const Visual&);
+
+  void
+  operator<< (::xercesc::DOMElement&, const Dragger&);
 
   void
   operator<< (::xercesc::DOMElement&, const Root&);

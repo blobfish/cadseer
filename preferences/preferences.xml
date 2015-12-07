@@ -6,4 +6,9 @@
       <angularDeflection>0.5</angularDeflection>
     </mesh>
   </visual>
+  <dragger>
+    <triggerUpdateOnFinish>false</triggerUpdateOnFinish>
+    <linearIncrement>1.0</linearIncrement>
+    <angularIncrement>15.0</angularIncrement>
+  </dragger>
 </root>

@@ -92,6 +92,12 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
                     osgGA::GUIActionAdapter& actionAdapter, osg::Object *object,
                                    osg::NodeVisitor * nodeVistor)
 {
+    if(eventAdapter.getHandled())
+    {
+      clearPrehighlight();
+      return true; //overlay has taken event;
+    }
+  
     currentIntersections.clear();
     if (eventAdapter.getEventType() == osgGA::GUIEventAdapter::MOVE)
     {
