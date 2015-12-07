@@ -209,7 +209,7 @@ void CSysBase::updateDragger()
     dragger->setLink();
 }
 
-void CSysBase::updateModel(const UpdateMap &mapIn)
+void CSysBase::updateModel(const UpdateMap &)
 {
   setSystem(toOsg(system) * mainTransform->getMatrix());
   mainTransform->setMatrix(osg::Matrixd::identity());

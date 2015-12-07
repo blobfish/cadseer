@@ -218,7 +218,7 @@ void ViewerWidget::createMainCamera(osg::Camera *camera)
     glWidgetHeight = glWidget->height();
 }
 
-void ViewerWidget::paintEvent( QPaintEvent* event )
+void ViewerWidget::paintEvent(QPaintEvent*)
 {
     frame();
 }
@@ -421,7 +421,7 @@ void ViewerWidget::featureRemovedDispatched(const msg::Message &messageIn)
   root->removeChild(message.feature->getMainSwitch());
 }
 
-void ViewerWidget::visualUpdatedDispatched(const msg::Message &messageIn)
+void ViewerWidget::visualUpdatedDispatched(const msg::Message &)
 {
   this->update();
 }

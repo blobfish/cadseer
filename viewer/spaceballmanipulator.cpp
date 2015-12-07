@@ -32,23 +32,35 @@ SpaceballManipulator::SpaceballManipulator(osg::Camera *camIn) : inherited(), bo
 {
 }
 
-SpaceballManipulator::SpaceballManipulator(const SpaceballManipulator& manipIn,
-                                           const osg::CopyOp& copyOp) : inherited(),
-                                           cam(manipIn.cam)
+//don't know why I even have this copy constructor?
+SpaceballManipulator::SpaceballManipulator
+(
+  const SpaceballManipulator& manipIn,
+  const osg::CopyOp& copyOp
+) : 
+  osg::Object(manipIn, copyOp),
+  osg::Callback(manipIn, copyOp),
+  inherited(manipIn, copyOp),
+  cam(manipIn.cam)
 {
+  boundingSphere = manipIn.boundingSphere;
+  cam = manipIn.cam;
+  spaceEye = manipIn.spaceEye;
+  spaceCenter = manipIn.spaceCenter;
+  spaceUp = manipIn.spaceUp;
 }
 
-void SpaceballManipulator::init(const GUIEventAdapter &ea, GUIActionAdapter &us)
+void SpaceballManipulator::init(const GUIEventAdapter &, GUIActionAdapter &us)
 {
     us.requestContinuousUpdate(false);
 }
 
-void SpaceballManipulator::setByMatrix(const osg::Matrixd& matrix)
+void SpaceballManipulator::setByMatrix(const osg::Matrixd&)
 {
 //    matrix.getLookAt(spaceEye, spaceCenter, spaceUp);
 }
 
-void SpaceballManipulator::setByInverseMatrix(const osg::Matrixd& matrix)
+void SpaceballManipulator::setByInverseMatrix(const osg::Matrixd&)
 {
 //    setByMatrix(osg::Matrixd::inverse(matrix));
 }
@@ -81,7 +93,7 @@ void SpaceballManipulator::setNode(osg::Node *nodeIn)
     node = nodeIn;
 }
 
-void SpaceballManipulator::computeHomePosition(const osg::Camera *camera, bool useBoundingBox)
+void SpaceballManipulator::computeHomePosition(const osg::Camera *, bool useBoundingBox)
 {
     if (useBoundingBox)
     {
@@ -131,7 +143,7 @@ void SpaceballManipulator::scaleView(double scaleFactor)
                                     projectionData.top, projectionData.near, projectionData.far);
 }
 
-void SpaceballManipulator::home(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us)
+void SpaceballManipulator::home(const osgGA::GUIEventAdapter&, osgGA::GUIActionAdapter& us)
 {
     if (getAutoComputeHomePosition())
         computeHomePosition(cam, true);

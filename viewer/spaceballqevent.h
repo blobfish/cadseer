@@ -30,15 +30,15 @@ namespace spb
     class EventBase : public QInputEvent
     {
     public:
-        bool isHandled(){return handled;}
-        void setHandled(bool sig){handled = sig;}
+        bool isHandled(){return myHandled;}
+        void setHandled(bool sig){myHandled = sig;}
 
     protected:
         EventBase(QEvent::Type event);
         //Qt will not propagate custom events. so we create our own state variable. use it
         //in the qapplication notify and dispatch up the window hierarchy until handled or we
         //reach the default.
-        bool handled;
+        bool myHandled = false;
     };
 
     class MotionEvent : public EventBase
@@ -67,7 +67,6 @@ namespace spb
         int xRot;
         int yRot;
         int zRot;
-        bool handled;
     };
 
     class ButtonEvent : public EventBase

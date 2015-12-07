@@ -57,8 +57,8 @@ GestureHandler::GestureHandler(osg::Camera *cameraIn) : osgGA::GUIEventHandler()
 }
 
 bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
-                            osgGA::GUIActionAdapter& actionAdapter, osg::Object *object,
-                            osg::NodeVisitor *nodeVistor)
+                            osgGA::GUIActionAdapter&, osg::Object *,
+                            osg::NodeVisitor *)
 {
     if (!gestureSwitch.valid())
         return false;
@@ -477,7 +477,7 @@ void GestureHandler::startDrag(const osgGA::GUIEventAdapter& eventAdapter)
     aggregateMatrix = startNode->getMatrix();
 }
 
-void GestureHandler::messageInSlot(const msg::Message &messageIn)
+void GestureHandler::messageInSlot(const msg::Message &)
 {
   //not using yet
   

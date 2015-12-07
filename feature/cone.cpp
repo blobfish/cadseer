@@ -145,8 +145,8 @@ void Cone::updateResult(const ConeBuilder& coneBuilderIn)
   //helper lamda
   auto updateShapeByTag = [this](const TopoDS_Shape &shapeIn, FeatureTag featureTagIn)
   {
-    uuid id = findFeatureByTag(featureContainer, featureTagMap.at(featureTagIn)).id;
-    updateShapeById(resultContainer, id, shapeIn);
+    uuid localId = findFeatureByTag(featureContainer, featureTagMap.at(featureTagIn)).id;
+    updateShapeById(resultContainer, localId, shapeIn);
   };
   
   updateShapeByTag(shape, FeatureTag::Root);

@@ -43,8 +43,8 @@ ResizeEventHandler::ResizeEventHandler(const osg::observer_ptr< osg::Camera > sl
 
 }
 
-bool ResizeEventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter, osgGA::GUIActionAdapter& actionAdapter,
-                                osg::Object* object, osg::NodeVisitor* nodeVistor)
+bool ResizeEventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter, osgGA::GUIActionAdapter&,
+                                osg::Object*, osg::NodeVisitor*)
 {
   if (eventAdapter.getEventType() != osgGA::GUIEventAdapter::RESIZE)
     return false;
@@ -190,7 +190,7 @@ void TextCamera::preselectionAdditionDispatched(const msg::Message &messageIn)
   preselectionText = preselectStream.str();
 }
 
-void TextCamera::preselectionSubtractionDispatched(const msg::Message &messageIn)
+void TextCamera::preselectionSubtractionDispatched(const msg::Message &)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;

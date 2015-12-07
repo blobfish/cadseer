@@ -24,4 +24,6 @@
 prj::Message::Message()
 {
   featureId = boost::uuids::nil_generator()();
+  featureId2 = boost::uuids::nil_generator()();
+  inputType = ftr::InputTypes::none;
 }

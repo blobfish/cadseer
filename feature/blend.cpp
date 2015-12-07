@@ -311,11 +311,11 @@ void Blend::uniqueTypeMatch(const Base *targetFeatureIn)
 void Blend::outerWireMatch(const Base *targetFeatureIn)
 {
   const TopoDS_Shape &targetShape = targetFeatureIn->getShape();
-  TopTools_IndexedMapOfShape shapeMap;
-  TopExp::MapShapes(targetShape, TopAbs_FACE, shapeMap);
-  for (int index = 1; index <= shapeMap.Extent(); ++index)
+  TopTools_IndexedMapOfShape localShapeMap;
+  TopExp::MapShapes(targetShape, TopAbs_FACE, localShapeMap);
+  for (int index = 1; index <= localShapeMap.Extent(); ++index)
   {
-    const TopoDS_Shape &targetFace = shapeMap(index);
+    const TopoDS_Shape &targetFace = localShapeMap(index);
     TopoDS_Shape targetOuterWire = BRepTools::OuterWire(TopoDS::Face(targetFace));
     uuid targetOuterWireId = findResultByShape(targetFeatureIn->getResultContainer(), targetOuterWire).id;
     uuid targetFaceId = findResultByShape(targetFeatureIn->getResultContainer(), targetFace).id;
@@ -523,11 +523,11 @@ void Blend::dumpInfo(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *targetF
     "fillet dump:" << std::endl;
   
   const TopoDS_Shape &targetShape = targetFeatureIn->getShape();
-  TopTools_IndexedMapOfShape shapeMap;
-  TopExp::MapShapes(targetShape, shapeMap);
-  for (int index = 1; index <= shapeMap.Extent(); ++index)
+  TopTools_IndexedMapOfShape localShapeMap;
+  TopExp::MapShapes(targetShape, localShapeMap);
+  for (int index = 1; index <= localShapeMap.Extent(); ++index)
   {
-    const TopoDS_Shape &currentShape = shapeMap(index);
+    const TopoDS_Shape &currentShape = localShapeMap(index);
     std::cout << "ShapeType is: " << std::setw(10) << GU::getShapeTypeString(currentShape) << 
       "      Generated Count is: " << blendMakerIn.Generated(currentShape).Extent() <<
       "      Modified Count is: " << blendMakerIn.Modified(currentShape).Extent() <<

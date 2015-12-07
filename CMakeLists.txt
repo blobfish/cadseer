@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 project(cadseer)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall" )
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -Wshadow" )
 
 add_definitions(-DQT_NO_KEYWORDS) #macros clashing
 find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
@@ -30,7 +30,7 @@ find_package(Eigen3 REQUIRED)
 find_package(XercesC REQUIRED)
 find_package(XSDCXX REQUIRED)
 
-SET(ADDITIONAL_INCLUDE_PATHS
+SET(LIBRARY_INCLUDE_PATHS
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR} #needed to find moc files.
     ${OPENSCENEGRAPH_INCLUDE_DIRS}
@@ -39,7 +39,13 @@ SET(ADDITIONAL_INCLUDE_PATHS
     ${XSDCXX_INCLUDE_DIR}
     ${XERCESC_INCLUDE_DIR}
     )
-INCLUDE_DIRECTORIES(${ADDITIONAL_INCLUDE_PATHS})
+INCLUDE_DIRECTORIES(SYSTEM ${LIBRARY_INCLUDE_PATHS}) #system suppresses warnings for those libraries.
+
+SET(LOCAL_INCLUDE_PATHS
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR} #needed to find moc files.
+    )
+INCLUDE_DIRECTORIES(${LIBRARY_INCLUDE_PATHS})
 
 SET(MODELVIZ_SOURCES
     modelviz/graph.cpp

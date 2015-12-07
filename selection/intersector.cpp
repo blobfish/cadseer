@@ -33,13 +33,13 @@ using namespace Eigen;
 using namespace slc;
 
 Intersector::Intersector(CoordinateFrame frame, double x, double y) :
-    LineSegmentIntersector(frame, x, y), pickRadius(1.0)
+    LineSegmentIntersector(frame, x, y)
 {
 
 }
 
 Intersector::Intersector(const osg::Vec3& startIn, const osg::Vec3& endIn) :
-    LineSegmentIntersector(startIn, endIn), pickRadius(1.0)
+    LineSegmentIntersector(startIn, endIn)
 {
 
 }

@@ -155,7 +155,7 @@ void Build::setUpGraph()
     groupOut->addChild(groupFaces);
     
     //edge state
-    osg::Depth *depth = new osg::Depth();
+    osg::Depth *depth;
     depth = new osg::Depth();
     depth->setRange(0.001, 1.001);
     groupEdges->getOrCreateStateSet()->setAttribute(depth);

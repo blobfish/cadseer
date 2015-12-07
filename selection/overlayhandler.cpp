@@ -35,8 +35,8 @@ bool OverlayHandler::handle
 (
   const osgGA::GUIEventAdapter& eventAdapter,
   osgGA::GUIActionAdapter& actionAdapter,
-  osg::Object* object,
-  osg::NodeVisitor* nodeVistor
+  osg::Object* /*object*/,
+  osg::NodeVisitor* /*nodeVistor*/
 )
 {
   auto doIntersection = [&]() -> osgUtil::LineSegmentIntersector::Intersections

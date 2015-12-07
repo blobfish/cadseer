@@ -30,7 +30,7 @@ void spb::registerEvents()
     spb::ButtonEvent::Type = QEvent::registerEventType();
 }
 
-EventBase::EventBase(QEvent::Type event) : QInputEvent(static_cast<QEvent::Type>(event)), handled(false)
+EventBase::EventBase(QEvent::Type event) : QInputEvent(static_cast<QEvent::Type>(event))
 {
 
 }
@@ -48,7 +48,7 @@ MotionEvent::MotionEvent(const MotionEvent& in) : EventBase(static_cast<QEvent::
     xRot    = in.xRot;
     yRot    = in.yRot;
     zRot    = in.zRot;
-    handled = in.handled;
+    myHandled = in.myHandled;
 }
 
 void MotionEvent::translations(int &xTransOut, int &yTransOut, int &zTransOut)
@@ -89,7 +89,7 @@ ButtonEvent::ButtonEvent(const ButtonEvent& in) : EventBase(static_cast<QEvent::
 {
     buttonState = in.buttonState;
     button = in.button;
-    handled = in.handled;
+    myHandled = in.myHandled;
 }
 
 ButtonStateType ButtonEvent::buttonStatus()

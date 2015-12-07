@@ -32,7 +32,7 @@ RectItem::RectItem(QGraphicsItem* parent) : QGraphicsRectItem(parent)
   editing = false;
 }
 
-void RectItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
+void RectItem::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
   painter->save();
   

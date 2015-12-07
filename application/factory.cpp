@@ -122,7 +122,7 @@ void Factory::triggerUpdate()
   msg::dispatch().messageInSlot(updateMessage);
 }
 
-void Factory::newProjectDispatched(const msg::Message &messageIn)
+void Factory::newProjectDispatched(const msg::Message& /*messageIn*/)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;

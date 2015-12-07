@@ -41,10 +41,10 @@ protected:
     bool getLocalStartEnd();
     void goPoints(const osg::ref_ptr<osg::PrimitiveSet> primitive, const Intersection &hitBase);
     void goEdges(const osg::ref_ptr<osg::PrimitiveSet> primitive, const Intersection &hitBase);
-    double scale;
-    double pickRadius;
-    osg::Geometry *currentGeometry;
-    osg::Vec3Array *currentVertices;
+    double scale = 1.0;
+    double pickRadius = 1.0;
+    osg::Geometry *currentGeometry = nullptr;
+    osg::Vec3Array *currentVertices = nullptr;
     osg::Vec3d localStart;
     osg::Vec3d localEnd;
 };

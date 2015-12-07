@@ -62,7 +62,7 @@ class BuildConnector
 public:
     BuildConnector(const TopoDS_Shape &, const ftr::ResultContainer &resultContainerIn);
     void buildRecursiveConnector(const TopoDS_Shape &, const ftr::ResultContainer &resultContainerIn);
-    Connector getConnector(){return connector;}
+    const Connector& getConnector(){return connector;}
 
 private:
     Connector connector;

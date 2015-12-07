@@ -73,9 +73,6 @@ class GestureAllSwitchesOffVisitor : public osg::NodeVisitor
 public:
     GestureAllSwitchesOffVisitor();
     virtual void apply(osg::Switch &aSwitch);
-protected:
-    bool visibility;
-    int hash;
 };
 
 #endif // GESTUREHANDLER_H

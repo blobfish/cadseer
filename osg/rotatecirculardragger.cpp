@@ -191,10 +191,10 @@ osg::Geometry* RotateCircularDragger::buildTorus() const
   tBuilder.setMinorIsoLines(minorIsoLines);
   tBuilder.setAngularSpanDegrees(angularSpan);
   
-  osg::Geometry *torus = tBuilder;
-  setDrawableToAlwaysCull(*torus);
+  osg::Geometry *localTorus = tBuilder;
+  setDrawableToAlwaysCull(*localTorus);
   
-  return torus;
+  return localTorus;
 }
 
 osg::Vec3d RotateCircularDragger::calculateArcMidPoint() const

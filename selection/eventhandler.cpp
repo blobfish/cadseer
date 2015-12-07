@@ -89,8 +89,8 @@ void EventHandler::setSelectionMask(const unsigned int &maskIn)
 }
 
 bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
-                    osgGA::GUIActionAdapter& actionAdapter, osg::Object *object,
-                                   osg::NodeVisitor * nodeVistor)
+                    osgGA::GUIActionAdapter& actionAdapter, osg::Object*,
+                                   osg::NodeVisitor*)
 {
     if(eventAdapter.getHandled())
     {
@@ -260,7 +260,7 @@ bool EventHandler::buildPreSelection(slc::Container &container,
       osgUtil::LineSegmentIntersector::Intersections::const_iterator edgeIt = currentIntersections.end();
       for(; it != currentIntersections.end(); ++it)
       {
-          assert((*it).nodePath.size() - 2 >= 0);
+          assert((static_cast<int>((*it).nodePath.size()) - 2) >= 0);
           int currentNodeMask = (*it).nodePath[(*it).nodePath.size() - 2]->getNodeMask();
           if (currentNodeMask == NodeMaskDef::face && faceId.is_nil())
               faceId = GU::getId((*it).nodePath.back());
@@ -740,7 +740,7 @@ void EventHandler::requestSelectionSubtractionDispatched(const msg::Message &mes
   selectionContainers.erase(containIt);
 }
 
-void EventHandler::requestSelectionClearDispatched(const msg::Message &messageIn)
+void EventHandler::requestSelectionClearDispatched(const msg::Message &)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;

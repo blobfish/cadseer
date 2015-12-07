@@ -759,8 +759,8 @@ void Model::projectUpdatedDispatched(const msg::Message &)
     float currentX = pointSpacing * currentColumn + pointSize / 2.0;
     float currentY = rowHeight * currentRow + rowHeight / 2.0;
     
-    GraphReversed rGraph = boost::make_reverse_graph(graph);
-    GraphReversed::adjacency_iterator parentIt, parentItEnd;
+//     GraphReversed rGraph = boost::make_reverse_graph(graph);
+//     GraphReversed::adjacency_iterator parentIt, parentItEnd;
     std::tie(parentIt, parentItEnd) = boost::adjacent_vertices(currentVertex, rGraph);
     for (; parentIt != parentItEnd; ++parentIt)
     {

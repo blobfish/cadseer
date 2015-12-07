@@ -197,7 +197,7 @@ namespace dag
      * called from dfs to give the visitor a chance for an ordered
      * iteration over child vertices.
      */
-    void sortVertices(VerticesT &childVerticesInOut)
+    void sortVertices(VerticesT &)
     {
       //nothing for now.
     }
