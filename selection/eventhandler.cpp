@@ -38,6 +38,7 @@
 #include <application/application.h>
 #include <project/project.h>
 #include <modelviz/connector.h>
+#include <modelviz/shapegeometry.h>
 #include <selection/message.h>
 #include <message/dispatch.h>
 
@@ -45,8 +46,10 @@ using namespace osg;
 using namespace boost::uuids;
 using namespace slc;
 
-EventHandler::EventHandler() : osgGA::GUIEventHandler()
+EventHandler::EventHandler(osg::Group *viewerRootIn) : osgGA::GUIEventHandler()
 {
+    viewerRoot = viewerRootIn;
+    
     preHighlightColor = Vec4(1.0, 1.0, 0.0, 1.0);
     selectionColor = Vec4(1.0, 1.0, 1.0, 1.0);
     nodeMask = ~(NodeMaskDef::backGroundCamera | NodeMaskDef::gestureCamera | NodeMaskDef::csys | NodeMaskDef::point);
@@ -113,9 +116,10 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
         osgUtil::IntersectionVisitor iv(picker.get());
         iv.setTraversalMask(nodeMask);
         view->getCamera()->accept(iv);
+	
         if (picker->containsIntersections())
         {
-           currentIntersections = picker->getIntersections();
+           currentIntersections = picker->getMyIntersections();
            osgUtil::LineSegmentIntersector::Intersections::const_iterator itIt;
 
            slc::Container newContainer;
@@ -149,20 +153,28 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
            }
            
            clearPrehighlight();
+	   
+	   if
+	   (
+	     (newContainer.selectionIds.empty()) &&
+	     (!slc::isPointType(newContainer.selectionType))
+	   )
+	      return false;
            
+	   //this is here so we make sure we get through all selection
+	   //conditions before we construct point geometry.
            if (isPointType(newContainer.selectionType))
 	   {
-	     ref_ptr<Geode> pointGeode(buildTempPoint(newContainer.pointLocation));
-	     Selected freshSelection;
-	     freshSelection.initialize(pointGeode->getDrawable(0)->asGeometry());
-	     newContainer.selections.push_back(freshSelection);
-	     osg::Switch *tempSwitch = itIt->nodePath[itIt->nodePath.size() - 2]->asSwitch();
-	     tempSwitch->addChild(pointGeode);
+	     ref_ptr<Geometry> pointGeometry(buildTempPoint(newContainer.pointLocation));
+	     newContainer.pointGeometry = pointGeometry.get();
+	     
+	     ParentMaskVisitor visitor(NodeMaskDef::object);
+	     itIt->nodePath.back()->accept(visitor);
+	     assert(visitor.out);
+	     osg::Switch *tempSwitch = visitor.out->asSwitch();
+	     tempSwitch->addChild(pointGeometry.get());
 	   }
 	   
-           if (newContainer.selections.empty())
-               return false;
-           
 	   setPrehighlight(newContainer);
         }
         else
@@ -172,7 +184,11 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
     if (eventAdapter.getButton() == osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON &&
             eventAdapter.getEventType() == osgGA::GUIEventAdapter::RELEASE)
     {
-        if (lastPrehighlight.selections.size() > 0)
+        if
+	(
+	  (!lastPrehighlight.selectionIds.empty()) ||
+	  (slc::isPointType(lastPrehighlight.selectionType))
+	)
         {
 	  //prehighlight gets 'moved' into selections so can't call
 	  //clear prehighlight, but we still clear the prehighlight
@@ -185,14 +201,20 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
 	    clearSMessage.shapeId = lastPrehighlight.shapeId;
 	    clearMessage.payload = clearSMessage;
 	    messageOutSignal(clearMessage);
-	  
-            std::vector<Selected>::iterator it;
-            for (it = lastPrehighlight.selections.begin(); it != lastPrehighlight.selections.end(); ++it)
-            {
-                Selected currentSelected = *it;
-                assert(currentSelected.geometry.valid());
-                setGeometryColor(currentSelected.geometry.get(), selectionColor);
-            }
+	    
+	    if (slc::isPointType(lastPrehighlight.selectionType))
+	    {
+	      assert(lastPrehighlight.pointGeometry.valid());
+	      osg::Vec4Array *colors = dynamic_cast<osg::Vec4Array*>(lastPrehighlight.pointGeometry->getColorArray());
+	      assert(colors);
+	      (*colors)[0] = osg::Vec4(1.0, 1.0, 1.0, 1.0);
+	      colors->dirty();
+	      lastPrehighlight.pointGeometry->dirtyDisplayList();
+	    }
+	    else
+	      selectionOperation(lastPrehighlight.featureId, lastPrehighlight.selectionIds,
+				HighlightVisitor::Operation::Highlight);
+	    
             selectionContainers.push_back(lastPrehighlight);
 	    
 	    msg::Message addMessage;
@@ -260,13 +282,15 @@ bool EventHandler::buildPreSelection(slc::Container &container,
       osgUtil::LineSegmentIntersector::Intersections::const_iterator edgeIt = currentIntersections.end();
       for(; it != currentIntersections.end(); ++it)
       {
-          assert((static_cast<int>((*it).nodePath.size()) - 2) >= 0);
-          int currentNodeMask = (*it).nodePath[(*it).nodePath.size() - 2]->getNodeMask();
+          mdv::ShapeGeometry *sGeometry = dynamic_cast<mdv::ShapeGeometry *>(it->nodePath.back());
+	  if (!sGeometry)
+	    continue;
+          int currentNodeMask = it->nodePath.back()->getNodeMask();
           if (currentNodeMask == NodeMaskDef::face && faceId.is_nil())
-              faceId = GU::getId((*it).nodePath.back());
+              faceId = sGeometry->getId(it->primitiveIndex);
           if (currentNodeMask == NodeMaskDef::edge)
           {
-              edgeId = GU::getId((*it).nodePath.back());
+              edgeId = sGeometry->getId(it->primitiveIndex);
               edgeIt = it;
           }
           if (faceId.is_nil() || edgeId.is_nil())
@@ -274,6 +298,7 @@ bool EventHandler::buildPreSelection(slc::Container &container,
           if (connector.useIsEdgeOfFace(edgeId, faceId))
             break;
       }
+      
       if (it == currentIntersections.end())
         return false;
 
@@ -282,30 +307,20 @@ bool EventHandler::buildPreSelection(slc::Container &container,
         return false;
       assert(edgeIt != currentIntersections.end());
 
-      std::vector<uuid> edges = connector.useGetChildrenOfType(wireId, TopAbs_EDGE);
-      std::vector<osg::Geometry *> edgeGeometry;
-      getGeometryFromIds visit(edges, edgeGeometry);
-      edgeIt->nodePath[edgeIt->nodePath.size() - 2]->accept(visit);
-      
-      std::vector<osg::Geometry *>::const_iterator geomIt;
-      for (geomIt = edgeGeometry.begin(); geomIt != edgeGeometry.end(); ++geomIt)
-      {
-          Selected newSelection;
-          newSelection.initialize(*geomIt);
-          container.selections.push_back(newSelection);
-      }
+      container.selectionIds = connector.useGetChildrenOfType(wireId, TopAbs_EDGE);
       container.selectionType = Type::Wire;
       container.shapeId = wireId;
       
       return true;
     };
     
-    osg::Geometry *geometry = dynamic_cast<Geometry *>((*intersection).drawable.get());
-    if (!geometry)
+    mdv::ShapeGeometry *shapeGeometry = dynamic_cast<mdv::ShapeGeometry *>((*intersection).drawable.get());
+    if (!shapeGeometry)
         return false;
 
-    int localNodeMask = (*intersection).nodePath[(*intersection).nodePath.size() - 2]->getNodeMask();
-    uuid selectedId = GU::getId((*intersection).nodePath.back());
+    int localNodeMask = (*intersection).nodePath.back()->getNodeMask();
+    
+    uuid selectedId = shapeGeometry->getId(intersection->primitiveIndex);
     osg::Node *featureRoot = walkUpToMask(NodeMaskDef::object);
     assert(featureRoot);
     uuid featureId = GU::getId(featureRoot);
@@ -327,11 +342,9 @@ bool EventHandler::buildPreSelection(slc::Container &container,
         }
         if (canSelectFaces(selectionMask) && !wireSignal)
         {
-          Selected newSelection;
-          newSelection.initialize(geometry);
-          container.selections.push_back(newSelection);
           container.selectionType = Type::Face;
           container.shapeId = selectedId;
+	  container.selectionIds.push_back(selectedId);
         }
         else if (canSelectShells(selectionMask))
         {
@@ -342,17 +355,7 @@ bool EventHandler::buildPreSelection(slc::Container &container,
             //should be only 1 shell
             if (shells.size() == 1)
             {
-                std::vector<uuid> faces = connector.useGetChildrenOfType(shells.at(0), TopAbs_FACE);
-                std::vector<osg::Geometry *> faceGeometry;
-                getGeometryFromIds visit(faces, faceGeometry);
-                (*intersection).nodePath[(*intersection).nodePath.size() - 2]->accept(visit);
-                std::vector<osg::Geometry *>::const_iterator geomIt;
-                for (geomIt = faceGeometry.begin(); geomIt != faceGeometry.end(); ++geomIt)
-                {
-                    Selected newSelection;
-                    newSelection.initialize(*geomIt);
-                    container.selections.push_back(newSelection);
-                }
+                container.selectionIds = connector.useGetChildrenOfType(shells.at(0), TopAbs_FACE);
                 container.selectionType = Type::Shell;
                 container.shapeId = shells.at(0);
             }
@@ -366,17 +369,7 @@ bool EventHandler::buildPreSelection(slc::Container &container,
             //should be only 1 solid
             if (solids.size() == 1)
             {
-                std::vector<uuid> faces = connector.useGetChildrenOfType(solids.at(0), TopAbs_FACE);
-                std::vector<osg::Geometry *> faceGeometry;
-                getGeometryFromIds visit(faces, faceGeometry);
-                (*intersection).nodePath[(*intersection).nodePath.size() - 2]->accept(visit);
-                std::vector<osg::Geometry *>::const_iterator geomIt;
-                for (geomIt = faceGeometry.begin(); geomIt != faceGeometry.end(); ++geomIt)
-                {
-                    Selected newSelection;
-                    newSelection.initialize(*geomIt);
-                    container.selections.push_back(newSelection);
-                }
+                container.selectionIds = connector.useGetChildrenOfType(solids.at(0), TopAbs_FACE);
                 container.selectionType = Type::Solid;
                 container.shapeId = solids.at(0);
             }
@@ -389,17 +382,7 @@ bool EventHandler::buildPreSelection(slc::Container &container,
           uuid object = connector.useGetRoot();
           if (!object.is_nil())
           {
-            std::vector<uuid> faces = connector.useGetChildrenOfType(object, TopAbs_FACE);
-            std::vector<osg::Geometry *> faceGeometry;
-            getGeometryFromIds visit(faces, faceGeometry);
-            (*intersection).nodePath[(*intersection).nodePath.size() - 2]->accept(visit);
-            std::vector<osg::Geometry *>::const_iterator geomIt;
-            for (geomIt = faceGeometry.begin(); geomIt != faceGeometry.end(); ++geomIt)
-            {
-                Selected newSelection;
-                newSelection.initialize(*geomIt);
-                container.selections.push_back(newSelection);
-            }
+            container.selectionIds = connector.useGetChildrenOfType(object, TopAbs_FACE);
             container.selectionType = Type::Object;
             container.shapeId = nil_generator()();
           }
@@ -473,11 +456,9 @@ bool EventHandler::buildPreSelection(slc::Container &container,
 	}
         else if (canSelectEdges(selectionMask))
         {
-            Selected newSelection;
-            newSelection.initialize(geometry);
             container.selectionType = Type::Edge;
             container.shapeId = selectedId;
-            container.selections.push_back(newSelection);
+	    container.selectionIds.push_back(selectedId);
         }
         else if (canSelectWires(selectionMask))
           processWire(featureId);
@@ -516,22 +497,14 @@ void EventHandler::clearSelections()
 	removeMessage.payload = removeSMessage;
 	messageOutSignal(removeMessage);
       
-        std::vector<Selected>::iterator selectedIt;
-        for (selectedIt = it->selections.begin(); selectedIt != it->selections.end(); ++selectedIt)
-        {
-          if (!selectedIt->geometry.valid())
-            continue;
-          //should I lock the geometry observer point?
-          setGeometryColor(selectedIt->geometry.get(), selectedIt->color);
-	  
-	  //snap points are temporary objects. so remove the geometry.
-	  if (isPointType(it->selectionType))
-	  {
-	    osg::Geode *geode = selectedIt->geometry.get()->getParent(0)->asGeode();
-	    osg::Switch *aSwitch = geode->getParent(0)->asSwitch();
-	    aSwitch->removeChild(geode);
-	  }
-        }
+	if (slc::isPointType(it->selectionType))
+	{
+	  assert(it->pointGeometry.valid());
+	  osg::Group *parent = it->pointGeometry->getParent(0)->asGroup();
+	  parent->removeChild(it->pointGeometry);
+	}
+        else
+	  selectionOperation(it->featureId, it->selectionIds, HighlightVisitor::Operation::Restore);
     }
     selectionContainers.clear();
 }
@@ -550,9 +523,16 @@ bool EventHandler::alreadySelected(const slc::Container &testContainer)
 void EventHandler::setPrehighlight(slc::Container &selected)
 {
     lastPrehighlight = selected;
-    std::vector<Selected>::const_iterator it;
-    for (it = selected.selections.begin(); it != selected.selections.end(); ++it)
-        setGeometryColor(it->geometry.get(), preHighlightColor);
+    if (slc::isPointType(selected.selectionType))
+    {
+      assert(selected.pointGeometry.valid());
+      osg::Vec4Array *colors = dynamic_cast<osg::Vec4Array*>(selected.pointGeometry->getColorArray());
+      assert(colors);
+      colors->at(0) = osg::Vec4(1.0, 1.0, 0.0, 1.0);
+      colors->dirty();
+    }
+    else
+      selectionOperation(selected.featureId, selected.selectionIds, HighlightVisitor::Operation::PreHighlight);
     
     msg::Message addMessage;
     addMessage.mask = msg::Response | msg::Post | msg::Preselection | msg::Addition;
@@ -567,8 +547,8 @@ void EventHandler::setPrehighlight(slc::Container &selected)
 
 void EventHandler::clearPrehighlight()
 {
-    if (lastPrehighlight.selections.size() < 1)
-        return;
+    if (lastPrehighlight.selectionType == Type::None)
+      return;
     
     msg::Message removeMessage;
     removeMessage.mask = msg::Response | msg::Pre | msg::Preselection | msg::Subtraction;
@@ -579,57 +559,23 @@ void EventHandler::clearPrehighlight()
     removeMessage.payload = removeSMessage;
     messageOutSignal(removeMessage);
     
-    
-    std::vector<Selected>::const_iterator it;
-    for (it = lastPrehighlight.selections.begin(); it != lastPrehighlight.selections.end(); ++it)
+    if (slc::isPointType(lastPrehighlight.selectionType))
     {
-      if (!it->geometry.valid())
-        continue;
-      //should I lock the geometry observer point?
-      setGeometryColor(it->geometry.get(), it->color);
-      
-      //snap points are temporary objects. so remove the geometry.
-      if (isPointType(lastPrehighlight.selectionType))
-      {
-	osg::Geode *geode = it->geometry.get()->getParent(0)->asGeode();
-	osg::Switch *aSwitch = geode->getParent(0)->asSwitch();
-	aSwitch->removeChild(geode);
-      }
+      assert(lastPrehighlight.pointGeometry.valid());
+      osg::Group *parent = lastPrehighlight.pointGeometry->getParent(0)->asGroup();
+      parent->removeChild(lastPrehighlight.pointGeometry);
+    }
+    else
+    {
+      selectionOperation(lastPrehighlight.featureId, lastPrehighlight.selectionIds, HighlightVisitor::Operation::Restore);
+      //certain situations, like selecting wires, where prehighlight can over write something already selected. Then
+      //when the prehighlight gets cleared and the color restored the selection is lost. for now lets just re select
+      //everything and do something different if we have performance problems.
+      for (const auto &current : selectionContainers)
+	selectionOperation(current.featureId, current.selectionIds, HighlightVisitor::Operation::Highlight);
     }
     
     lastPrehighlight = Container();
-}
-
-Container EventHandler::buildContainer(const msg::Message &messageIn)
-{
-  slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
-  assert(!sMessage.featureId.is_nil());
-  
-  slc::Container container;
-  const ftr::Base *feature = dynamic_cast<app::Application *>(qApp)->getProject()->findFeature(sMessage.featureId);
-  assert(feature);
-  const mdv::Connector &connector = feature->getConnector();
-  //only object supported at this time.
-  if (sMessage.type == slc::Type::Object)
-  {
-    uuid object = connector.useGetRoot();
-    assert(!object.is_nil());
-    std::vector<uuid> faces = connector.useGetChildrenOfType(object, TopAbs_FACE);
-    std::vector<osg::Geometry *> faceGeometry;
-    getGeometryFromIds visit(faces, faceGeometry);
-    feature->getMainSwitch()->accept(visit); //starting higher than I need. FYI.
-    std::vector<osg::Geometry *>::const_iterator geomIt;
-    for (geomIt = faceGeometry.begin(); geomIt != faceGeometry.end(); ++geomIt)
-    {
-	Selected newSelection;
-	newSelection.initialize(*geomIt);
-	container.selections.push_back(newSelection);
-    }
-    container.selectionType = Type::Object;
-    container.featureId = sMessage.featureId;
-    container.shapeId = nil_generator()();
-  }
-  return container;
 }
 
 void EventHandler::setupDispatcher()
@@ -661,17 +607,49 @@ void EventHandler::messageInSlot(const msg::Message &messageIn)
   it->second(messageIn);
 }
 
+void EventHandler::selectionOperation
+(
+  const uuid &featureIdIn,
+  const std::vector<uuid> &idsIn,
+  HighlightVisitor::Operation operationIn
+)
+{
+  MainSwitchVisitor sVisitor(featureIdIn);
+  viewerRoot->accept(sVisitor);
+  if (!sVisitor.out)
+    return;
+  HighlightVisitor hVisitor(idsIn, operationIn);
+  sVisitor.out->accept(hVisitor);
+}
+
 void EventHandler::requestPreselectionAdditionDispatched(const msg::Message &messageIn)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
   msg::dispatch().dumpString(debug.str());
   
-  slc::Container container = buildContainer(messageIn);
-  if (alreadySelected(container))
+  slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
+  assert(!sMessage.featureId.is_nil());
+  const ftr::Base *feature = dynamic_cast<app::Application *>(qApp)->getProject()->findFeature(sMessage.featureId);
+  assert(feature);
+  const mdv::Connector &connector = feature->getConnector();
+  
+  slc::Container container;
+  container.selectionType = sMessage.type;
+  container.featureId = sMessage.featureId;
+  container.shapeId = sMessage.shapeId;
+  if
+  (
+    (container == lastPrehighlight) ||
+    (alreadySelected(container))
+  )
     return;
-  if (!container.selections.empty())
+  
+  if (sMessage.type == slc::Type::Object)
+  {
+    container.selectionIds = connector.useGetChildrenOfType(connector.useGetRoot(), TopAbs_FACE);
     setPrehighlight(container);
+  }
 }
 
 void EventHandler::requestPreselectionSubtractionDispatched(const msg::Message &messageIn)
@@ -680,10 +658,23 @@ void EventHandler::requestPreselectionSubtractionDispatched(const msg::Message &
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
   msg::dispatch().dumpString(debug.str());
   
-  slc::Container container = buildContainer(messageIn);
-  if (alreadySelected(container))
-    return;
-  clearPrehighlight();
+  slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
+  assert(!sMessage.featureId.is_nil());
+  const ftr::Base *feature = dynamic_cast<app::Application *>(qApp)->getProject()->findFeature(sMessage.featureId);
+  assert(feature);
+  const mdv::Connector &connector = feature->getConnector();
+  
+  slc::Container container;
+  container.selectionType = sMessage.type;
+  container.featureId = sMessage.featureId;
+  container.shapeId = sMessage.shapeId;
+  assert(container == lastPrehighlight);
+  
+  if (sMessage.type == slc::Type::Object)
+  {
+    container.selectionIds = connector.useGetChildrenOfType(connector.useGetRoot(), TopAbs_FACE);
+    clearPrehighlight();
+  }
 }
 
 void EventHandler::requestSelectionAdditionDispatched(const msg::Message &messageIn)
@@ -692,21 +683,26 @@ void EventHandler::requestSelectionAdditionDispatched(const msg::Message &messag
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
   msg::dispatch().dumpString(debug.str());
   
-  //there is a good chance that what we are selecting has already been preselected.
-  //because buildContainer pulls the current color from objects it will
-  //pull the prehighlight color from the object if we don't clear the prehighlight.
   clearPrehighlight();
+
+  slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
+  assert(!sMessage.featureId.is_nil());
+  const ftr::Base *feature = dynamic_cast<app::Application *>(qApp)->getProject()->findFeature(sMessage.featureId);
+  assert(feature);
+  const mdv::Connector &connector = feature->getConnector();
   
-  slc::Container container = buildContainer(messageIn);
-  if (!alreadySelected(container))
+  slc::Container container;
+  container.selectionType = sMessage.type;
+  container.featureId = sMessage.featureId;
+  container.shapeId = sMessage.shapeId;
+  if (alreadySelected(container))
+    return;
+  
+  if (sMessage.type == slc::Type::Object)
   {
-    std::vector<Selected>::iterator it;
-    for (it = container.selections.begin(); it != container.selections.end(); ++it)
-    {
-	Selected currentSelected = *it;
-	assert(currentSelected.geometry.valid());
-	setGeometryColor(currentSelected.geometry.get(), selectionColor);
-    }
+    container.selectionIds = connector.useGetChildrenOfType(connector.useGetRoot(), TopAbs_FACE);
+    selectionOperation(sMessage.featureId, container.selectionIds, HighlightVisitor::Operation::Highlight);
+    
     selectionContainers.push_back(container);
     msg::Message messageOut = messageIn;
     messageOut.mask &= ~msg::Request;
@@ -721,23 +717,32 @@ void EventHandler::requestSelectionSubtractionDispatched(const msg::Message &mes
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
   msg::dispatch().dumpString(debug.str());
   
-  slc::Container container = buildContainer(messageIn);
+  slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
+  assert(!sMessage.featureId.is_nil());
+  const ftr::Base *feature = dynamic_cast<app::Application *>(qApp)->getProject()->findFeature(sMessage.featureId);
+  assert(feature);
+  const mdv::Connector &connector = feature->getConnector();
+  
+  slc::Container container;
+  container.selectionType = sMessage.type;
+  container.featureId = sMessage.featureId;
+  container.shapeId = sMessage.shapeId;
   Containers::iterator containIt = std::find(selectionContainers.begin(), selectionContainers.end(), container);
   assert(containIt != selectionContainers.end());
+  if (containIt == selectionContainers.end())
+    return;
   
-  msg::Message messageOut = messageIn;
-  messageOut.mask &= ~msg::Request;
-  messageOut.mask |= msg::Response | msg::Pre;
-  messageOutSignal(messageOut);
-  
-  std::vector<Selected>::iterator it;
-  for (it = containIt->selections.begin(); it != containIt->selections.end(); ++it)
+  if (sMessage.type == slc::Type::Object)
   {
-    assert(it->geometry.valid());
-    setGeometryColor(it->geometry.get(), it->color);
+    msg::Message messageOut = messageIn;
+    messageOut.mask &= ~msg::Request;
+    messageOut.mask |= msg::Response | msg::Pre;
+    messageOutSignal(messageOut);
+    
+    std::vector<uuid> faces = connector.useGetChildrenOfType(connector.useGetRoot(), TopAbs_FACE);
+    selectionOperation(sMessage.featureId, faces, HighlightVisitor::Operation::Restore);
+    selectionContainers.erase(containIt);
   }
-  
-  selectionContainers.erase(containIt);
 }
 
 void EventHandler::requestSelectionClearDispatched(const msg::Message &)
@@ -750,24 +755,12 @@ void EventHandler::requestSelectionClearDispatched(const msg::Message &)
   clearSelections();
 }
 
-void EventHandler::setGeometryColor(osg::Geometry *geometryIn, const osg::Vec4 &colorIn)
+Geometry* EventHandler::buildTempPoint(const Vec3d& pointIn)
 {
-    Vec4Array *colors = dynamic_cast<Vec4Array*>(geometryIn->getColorArray());
-    assert(colors);
-    assert(colors->size() > 0);
-
-    (*colors)[0] = colorIn;
-    colors->dirty();
-    geometryIn->dirtyDisplayList();
-}
-
-Geode* EventHandler::buildTempPoint(const Vec3d& pointIn)
-{
-  osg::Geode *geode = new osg::Geode();
-  geode->setCullingActive(false);
-  geode->setNodeMask(NodeMaskDef::point);
-  
   osg::Geometry *geometry = new osg::Geometry();
+  geometry->setNodeMask(NodeMaskDef::point);
+  geometry->setCullingActive(false);
+  geometry->setDataVariance(osg::Object::DYNAMIC);
   osg::Vec3Array *vertices = new osg::Vec3Array();
   vertices->push_back(pointIn);
   geometry->setVertexArray(vertices);
@@ -776,49 +769,80 @@ Geode* EventHandler::buildTempPoint(const Vec3d& pointIn)
   geometry->setColorArray(colors);
   geometry->setColorBinding(osg::Geometry::BIND_OVERALL);
   geometry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::POINTS, 0, 1));
-  geode->addDrawable(geometry);
   
-  osg::Point *point = new osg::Point();
-  point->setSize(10.0);
-  geode->getOrCreateStateSet()->setAttribute(point);
+  geometry->getOrCreateStateSet()->setAttribute(new osg::Point(10.0));
+  geometry->getOrCreateStateSet()->setAttribute(new osg::Depth(osg::Depth::LESS, 0.0, 1.0));
+  geometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
   
-  osg::Depth *depth = new osg::Depth();
-  depth->setRange(0.0, 1.0);
-  geode->getOrCreateStateSet()->setAttribute(depth);
-  
-  geode->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-  
-  return geode;
+  return geometry;
 }
 
-void Selected::initialize(osg::Geometry *geometryIn)
-{
-    this->geometry = geometryIn;
-    Vec4Array *colors = dynamic_cast<Vec4Array*>(geometryIn->getColorArray());
-    assert(colors);
-    assert(colors->size() > 0);
-    this->color = (*colors)[0];
-}
-
-getGeometryFromIds::getGeometryFromIds(const std::vector<boost::uuids::uuid> &idsIn, std::vector<osg::Geometry *> &geometryIn) :
-    osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), ids(idsIn), geometry(geometryIn)
+MainSwitchVisitor::MainSwitchVisitor(const uuid& idIn):
+  NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), id(idIn)
 {
 
 }
 
-void getGeometryFromIds::apply(osg::Geode &aGeode)
+void MainSwitchVisitor::apply(Switch& switchIn)
 {
-    std::string selectedIdString;
-    if (!aGeode.getUserValue(GU::idAttributeTitle, selectedIdString))
-        assert(0);
-    uuid selectedId = string_generator()(selectedIdString);
-    //consider switching connector and this visitor to a std::set instead of a vector for speed here.
-    if (std::find(ids.begin(), ids.end(), selectedId) == ids.end())
+  std::string userValue;
+  if (switchIn.getUserValue(GU::idAttributeTitle, userValue))
+  {
+    boost::uuids::uuid switchId = boost::uuids::string_generator()(userValue);
+    if (switchId == id)
     {
-        traverse(aGeode);
-        return;
+      out = &switchIn;
+      return; //no need to continue search.
     }
-    osg::Geometry *geom = dynamic_cast<osg::Geometry *>(aGeode.getDrawable(0));
-    assert(geom);
-    geometry.push_back(geom);
+  }
+
+  traverse(switchIn);
+}
+
+ParentMaskVisitor::ParentMaskVisitor(std::size_t maskIn):
+  NodeVisitor(osg::NodeVisitor::TRAVERSE_PARENTS), mask(maskIn)
+{
+
+}
+
+void ParentMaskVisitor::apply(Node& nodeIn)
+{
+  if(nodeIn.getNodeMask() == mask)
+  {
+    out = &nodeIn;
+    return; //no need to continue search.
+  }
+  traverse(nodeIn);
+}
+
+HighlightVisitor::HighlightVisitor(const std::vector< uuid >& idsIn, HighlightVisitor::Operation operationIn):
+  NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), ids(idsIn), operation(operationIn)
+{
+  //possible run time speed up and compile time slowdown:
+  //setup a std::funciton dispatcher here and eliminate if/then/else tree in apply.
+}
+
+void HighlightVisitor::apply(Geometry& geometryIn)
+{
+  mdv::ShapeGeometry *sGeometry = dynamic_cast<mdv::ShapeGeometry*>(&geometryIn);
+  if (!sGeometry)
+    return;
+  assert (operation != Operation::None);
+  if (operation == Operation::PreHighlight)
+  {
+    for (const auto &id : ids)
+      sGeometry->setToPreHighlight(id);
+  }
+  else if(operation == Operation::Highlight)
+  {
+    for (const auto &id : ids)
+      sGeometry->setToHighlight(id);
+  }
+  else //has to equal restore.
+  {
+    for (const auto &id : ids)
+      sGeometry->setToColor(id);
+  }
+  
+  //don't need to call traverse because geometry should be 'end of line'
 }

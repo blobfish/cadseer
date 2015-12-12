@@ -74,7 +74,7 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     root->getOrCreateStateSet()->setMode(GL_MULTISAMPLE_ARB, osg::StateAttribute::ON);
     root->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::ON);
     
-    Plotter::getReference().setBase(root);
+//     Plotter::getReference().setBase(root);
     
     osgViewer::View* view = new osgViewer::View;
     createMainCamera(view->getCamera());
@@ -121,7 +121,7 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     view->addEventHandler(new osgViewer::StatsHandler);
     overlayHandler = new slc::OverlayHandler(oCamera);
     view->addEventHandler(overlayHandler.get());
-    selectionHandler = new slc::EventHandler();
+    selectionHandler = new slc::EventHandler(root);
     view->addEventHandler(selectionHandler.get());
     //why does the following line create an additional thread. why?
     //not sure why it does, but it happens down inside librsvg and doesn't

@@ -28,12 +28,58 @@
 #include <selection/container.h>
 #include <message/message.h>
 
+namespace osg{class Switch;}
+namespace mdv{class ShapeGeometry;}
+
 namespace slc
 {
+  
+class MainSwitchVisitor : public osg::NodeVisitor
+{
+public:
+  MainSwitchVisitor(const boost::uuids::uuid &idIn);
+  virtual void apply(osg::Switch &switchIn) override;
+  osg::Switch *out = nullptr;
+  
+protected:
+  const boost::uuids::uuid &id;
+};
+
+class ParentMaskVisitor : public osg::NodeVisitor
+{
+public:
+  ParentMaskVisitor(std::size_t maskIn);
+  virtual void apply(osg::Node &nodeIn) override;
+  osg::Node *out = nullptr;
+  
+protected:
+  std::size_t mask;
+};
+
+class HighlightVisitor : public osg::NodeVisitor
+{
+public:
+  enum class Operation
+  {
+    None = 0,		//!< not set. Error
+    PreHighlight,	//!< color ids with prehighight color stored in shapegeometry
+    Highlight,		//!< color ids with highlight color stored in shapegeometry
+    Restore		//!< restore the color stored in the shapegeometry
+  };
+  HighlightVisitor(const std::vector<boost::uuids::uuid> &idsIn, Operation operationIn);
+  virtual void apply(osg::Geometry &geometryIn) override;
+protected:
+  const std::vector<boost::uuids::uuid> &ids;
+  Operation operation;
+  void setPreHighlight(mdv::ShapeGeometry *sGeometryIn);
+  void setHighlight(mdv::ShapeGeometry *sGeometryIn);
+  void setRestore(mdv::ShapeGeometry *sGeometryIn);
+};  
+  
 class EventHandler : public osgGA::GUIEventHandler
 {
 public:
-    EventHandler();
+    EventHandler(osg::Group* viewerRootIn);
     const Containers& getSelections() const {return selectionContainers;}
     void clearSelections();
     void setSelectionMask(const unsigned int &maskIn);
@@ -52,19 +98,21 @@ protected:
     void setPrehighlight(Container &selected);
     void clearPrehighlight();
     bool alreadySelected(const Container &testContainer);
-    void setGeometryColor(osg::Geometry *geometryIn, const osg::Vec4 &colorIn);
     bool buildPreSelection(Container &container,
                            const osgUtil::LineSegmentIntersector::Intersections::const_iterator &intersection);
+    void selectionOperation(const boost::uuids::uuid&, const std::vector<boost::uuids::uuid>&, HighlightVisitor::Operation);
     Container lastPrehighlight;
     osg::Vec4 preHighlightColor;
     osg::Vec4 selectionColor;
     Containers selectionContainers;
-    osg::Geode* buildTempPoint(const osg::Vec3d &pointIn);
+    osg::Geometry* buildTempPoint(const osg::Vec3d &pointIn);
 
     unsigned int nodeMask;
     unsigned int selectionMask;
 
     osgUtil::LineSegmentIntersector::Intersections currentIntersections;
+    
+    osg::ref_ptr<osg::Group> viewerRoot;
     
     MessageOutSignal messageOutSignal;
     msg::MessageDispatcher dispatcher;
@@ -74,17 +122,6 @@ protected:
     void requestSelectionAdditionDispatched(const msg::Message &);
     void requestSelectionSubtractionDispatched(const msg::Message &);
     void requestSelectionClearDispatched(const msg::Message &);
-    slc::Container buildContainer(const msg::Message &);
-};
-
-class getGeometryFromIds : public osg::NodeVisitor
-{
-public:
-    getGeometryFromIds(const std::vector<boost::uuids::uuid> &idsIn, std::vector<osg::Geometry *> &geometryIn);
-    virtual void apply(osg::Geode &aGeode);
-protected:
-    const std::vector<boost::uuids::uuid> &ids;
-    std::vector<osg::Geometry *> &geometry;
 };
 }
 

@@ -34,6 +34,7 @@
 
 #include <osg/Switch>
 #include <osg/MatrixTransform>
+#include <osg/LOD>
 
 #include <feature/maps.h>
 #include <feature/types.h>
@@ -127,6 +128,7 @@ protected:
   osg::ref_ptr<osg::Switch> mainSwitch;
   osg::ref_ptr<osg::MatrixTransform> mainTransform;
   osg::ref_ptr<osg::Switch> overlaySwitch;
+  osg::ref_ptr<osg::LOD> lod;
   mdv::Connector connector;
 };
 }

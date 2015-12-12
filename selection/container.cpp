@@ -19,9 +19,17 @@
 
 #include <boost/uuid/uuid_io.hpp>
 
+#include <osg/Geometry>
+
 #include <selection/container.h>
 
 using namespace slc;
+
+Container::~Container()
+{
+
+}
+
 
 std::ostream& slc::operator<<(std::ostream& os, const Container& container)
 {

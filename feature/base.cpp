@@ -22,10 +22,12 @@
 #include <BRep_Builder.hxx>
 #include <TopoDS_Compound.hxx>
 
+#include <osg/KdTree>
+
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <nodemaskdefs.h>
-#include <modelviz/graph.h>
+#include <modelviz/shapegeometry.h>
 #include <globalutilities.h>
 #include <feature/base.h>
 
@@ -50,6 +52,12 @@ Base::Base()
   mainTransform = new osg::MatrixTransform();
   mainTransform->setMatrix(osg::Matrixd::identity());
   mainSwitch->addChild(mainTransform);
+  
+  lod = new osg::LOD();
+  lod->setName("lod");
+  lod->setNodeMask(NodeMaskDef::lod);
+  lod->setRangeMode(osg::LOD::PIXEL_SIZE_ON_SCREEN);
+  mainTransform->addChild(lod.get());
   
   overlaySwitch = new osg::Switch();
   overlaySwitch->setName("overlay");
@@ -118,7 +126,7 @@ TopoDS_Compound Base::compoundWrap(const TopoDS_Shape& shapeIn)
 void Base::updateVisual()
 {
   //clear all the children from the main transform.
-  mainTransform->removeChildren(0, mainTransform->getNumChildren());
+  lod->removeChildren(0, mainTransform->getNumChildren());
   
   if (shape.IsNull())
     return;
@@ -131,11 +139,19 @@ void Base::updateVisual()
   double linear = prf::manager().rootPtr->visual().mesh().linearDeflection();
   double angular = prf::manager().rootPtr->visual().mesh().angularDeflection();
 
-  mdv::Build builder(shape, resultContainer);
-  if (builder.go(linear, angular))
-  {
-    mainTransform->addChild(builder.getViz().get());
-  }
+  ftr::ResultContainerWrapper wrapper;
+  wrapper.container = resultContainer;
+  mdv::ShapeGeometryBuilder sBuilder(shape, wrapper);
+  sBuilder.go(linear, angular);
+  assert(sBuilder.success);
+  
+  lod->setRadius(sBuilder.out->getBound().radius());
+  lod->addChild(sBuilder.out.get(), 0.0, 1000000.0);
+//   lod->addChild(geode,0.0f,100.0f);
+//   lod->addChild(cessna,100.0f,10000.0f);
+  
+  osg::ref_ptr<osg::KdTreeBuilder> kdTreeBuilder = new osg::KdTreeBuilder();
+  lod->accept(*kdTreeBuilder);
   
   setVisualClean();
 }

@@ -31,8 +31,6 @@
 
 #include <application/application.h>
 #include <globalutilities.h>
-#include <modelviz/graph.h>
-#include <modelviz/connector.h>
 #include <feature/base.h>
 #include <feature/inert.h>
 #include <project/message.h>

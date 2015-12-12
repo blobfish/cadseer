@@ -20,12 +20,15 @@
 #include <iostream>
 #include <assert.h>
 
+#include <boost/uuid/uuid.hpp>
+
 #include <osg/Geometry>
 #include <osg/PrimitiveSet>
 
 #include <eigen3/Eigen/Eigen>
 
 #include <selection/intersector.h>
+#include <modelviz/shapegeometry.h>
 #include <testing/plotter.h>
 
 using namespace osg;
@@ -43,7 +46,6 @@ Intersector::Intersector(const osg::Vec3& startIn, const osg::Vec3& endIn) :
 {
 
 }
-
 
 osgUtil::Intersector* Intersector::clone(osgUtil::IntersectionVisitor &iv)
 {
@@ -85,6 +87,28 @@ osgUtil::Intersector* Intersector::clone(osgUtil::IntersectionVisitor &iv)
     return cloned.release();
 }
 
+/* this threw me for a loop! the framework clones the intersector
+ * as it visits the graph. So for any additional member variables,
+ * their values would be lost as each node intersection would be 
+ * working on different copy of the intersector. The following
+ * works around this problem by using the _parent member that 
+ * gets assigned in the clone. Each call to this will recursively
+ * walk up the clone stack and assign to the original object.
+ */
+void Intersector::insertMyIntersection(const osgUtil::LineSegmentIntersector::Intersection& in)
+{
+  if (_parent)
+  {
+    Intersector *myParent = dynamic_cast<Intersector*>(_parent);
+    assert(myParent);
+    myParent->insertMyIntersection(in);
+  }
+  else
+  {
+    myIntersections.insert(in);
+  }
+}
+
 void Intersector::intersect(osgUtil::IntersectionVisitor &iv, osg::Drawable *drawable)
 {
     currentGeometry = drawable->asGeometry();
@@ -101,24 +125,48 @@ void Intersector::intersect(osgUtil::IntersectionVisitor &iv, osg::Drawable *dra
     if (iv.getDoDummyTraversal())//not sure what this does.
         return;
 
-
-    //doing primitive sets are overkill now because we have only object(vertex, line, edge) per geom node.
-    //I am leaving in case we go back to a merged geom node.
-    Geometry::PrimitiveSetList set = currentGeometry->getPrimitiveSetList();
-    Geometry::PrimitiveSetList::const_iterator setIt;
-    Intersection hitBase;
-    hitBase.nodePath = iv.getNodePath();
-    hitBase.drawable = drawable;
-    hitBase.matrix = iv.getModelMatrix();
-    for (setIt = set.begin(); setIt != set.end(); ++setIt)
+    const Geometry::PrimitiveSetList &setList = currentGeometry->getPrimitiveSetList();
+    GLenum mode = setList.front()->getMode(); //all sets of a drawable are of the same mode.
+    
+    mdv::ShapeGeometry *sGeometry = dynamic_cast<mdv::ShapeGeometry*>(currentGeometry);
+    
+    if (mode == GL_TRIANGLES)
     {
-        hitBase.primitiveIndex = setIt - set.begin();
-        if ((*setIt)->getMode() == GL_POINTS)
-            goPoints(*setIt, hitBase);
-        if ((*setIt)->getMode() == GL_LINE_STRIP)
-            goEdges(*setIt, hitBase);
-        if ((*setIt)->getMode() == GL_TRIANGLES)
-            LineSegmentIntersector::intersect(iv, drawable);
+      LineSegmentIntersector::intersect(iv, drawable);
+      
+      //result intersections has a member called primitiveindex.
+      //this is an index for the triangle(I believe) NOT the PrimitiveSET.
+      if (sGeometry)
+      {
+	for (const auto &current : getIntersections())
+	{
+	  //apparently LineSegmentIntersector::intersect doesn't limit itself
+	  //to the passed in drawable?
+	  if (current.nodePath.back() != sGeometry)
+	    continue;
+	  assert(!current.indexList.empty());
+	  std::size_t pSetIndex = sGeometry->getPSetFromVertex(current.indexList.front());
+	  Intersection temp = current;
+	  temp.primitiveIndex = pSetIndex;
+	  insertMyIntersection(temp);
+	}
+      }
+    }
+    else
+    {
+      Geometry::PrimitiveSetList::const_iterator setIt;
+      Intersection hitBase;
+      hitBase.nodePath = iv.getNodePath();
+      hitBase.drawable = drawable;
+      hitBase.matrix = iv.getModelMatrix();
+      for (setIt = setList.begin(); setIt != setList.end(); ++setIt)
+      {
+          hitBase.primitiveIndex = std::distance(setList.cbegin(), setIt);
+  //         if ((*setIt)->getMode() == GL_POINTS)
+  //             goPoints(*setIt, hitBase);
+          if ((*setIt)->getMode() == GL_LINE_STRIP)
+              goEdges(*setIt, hitBase);
+      }
     }
 }
 
@@ -151,17 +199,15 @@ void Intersector::goPoints(const osg::ref_ptr<osg::PrimitiveSet> primitive, cons
 
 void Intersector::goEdges(const osg::ref_ptr<osg::PrimitiveSet> primitive, const Intersection &hitBase)
 {
-    ref_ptr<DrawArrays> drawArray = dynamic_pointer_cast<DrawArrays>(primitive);
-    assert(drawArray);
-
-    int first = drawArray->getFirst();
-    int count = drawArray->getCount();
-    for (int index = first; index < first + count - 1; ++index)
+    ref_ptr<DrawElementsUInt> drawElements = dynamic_pointer_cast<DrawElementsUInt>(primitive);
+    assert(drawElements);
+    
+    for (std::size_t index = 0; index < drawElements->getNumIndices() - 1; ++index)
     {
-        Vec3d lineStart = currentVertices->at(index);
-        Vec3d lineEnd =  currentVertices->at(index + 1);
+        Vec3d lineStart = currentVertices->at((*drawElements)[index]);
+        Vec3d lineEnd =  currentVertices->at((*drawElements)[index + 1]);
         Vec3d segmentVector = lineEnd - lineStart;
-
+	
         Vec3d intersectionVector = localEnd - localStart;
         Vec3d tempIntersectVector = intersectionVector + (localEnd - lineStart);
 
@@ -200,7 +246,7 @@ void Intersector::goEdges(const osg::ref_ptr<osg::PrimitiveSet> primitive, const
             Intersection hit = hitBase;
             hit.ratio = (segmentPoint - _start).length() / ((_end - _start).length() * 1.01);
             hit.localIntersectionPoint = segmentPoint;
-            insertIntersection(hit);
+            insertMyIntersection(hit);
             break;//only one intersection for primitive.
         }
     }

@@ -24,6 +24,13 @@
 
 namespace slc
 {
+/* Intersection primitive index is for the triangles and not the primitive sets.
+ * shape geometry has each face in it owns primitive set so I need
+ * change the primitive index from triangle index to primitive set index
+ * I couldn't modify the results returned from getIntersections, so
+ * I will create my own intersections variable.
+ */ 
+ 
 class Intersector : public osgUtil::LineSegmentIntersector
 {
 public:
@@ -31,10 +38,13 @@ public:
     Intersector(const osg::Vec3& startIn, const osg::Vec3& endIn);
 
     virtual osgUtil::Intersector* clone(osgUtil::IntersectionVisitor &iv) override;
-    virtual void intersect(osgUtil::IntersectionVisitor &iv, osg::Drawable *drawable);
+    virtual void intersect(osgUtil::IntersectionVisitor &iv, osg::Drawable *drawable) override;
+    virtual bool containsIntersections() override{return !myIntersections.empty();}
 
     void setPickRadius(const double &radiusIn){pickRadius = radiusIn;}
     double getPickRadius(){return pickRadius;}
+    void insertMyIntersection(const osgUtil::LineSegmentIntersector::Intersection &in);
+    const Intersections& getMyIntersections(){return myIntersections;}
 
 protected:
     void setScale(osgUtil::IntersectionVisitor &iv);
@@ -47,6 +57,7 @@ protected:
     osg::Vec3Array *currentVertices = nullptr;
     osg::Vec3d localStart;
     osg::Vec3d localEnd;
+    Intersections myIntersections;
 };
 }
 

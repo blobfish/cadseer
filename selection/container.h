@@ -24,6 +24,7 @@
 #include <boost/uuid/nil_generator.hpp>
 
 #include <osg/observer_ptr>
+#include <osg/ref_ptr>
 #include <osg/Vec4>
 #include <osg/Vec3d>
 
@@ -33,23 +34,18 @@ namespace osg {class Geometry;}
 
 namespace slc
 {
-  class Selected
-  {
-  public:
-      void initialize(osg::Geometry *geometryIn);
-      osg::observer_ptr<osg::Geometry> geometry;
-      osg::Vec4 color;
-  };
-
   class Container
   {
   public:
+      ~Container();
       Type selectionType = Type::None;
-      std::vector<Selected> selections;
       boost::uuids::uuid featureId = boost::uuids::nil_generator()();
       boost::uuids::uuid shapeId = boost::uuids::nil_generator()();
+      std::vector<boost::uuids::uuid> selectionIds; //!< objects to color. i.e. faces for a solid
+      osg::ref_ptr<osg::Geometry> pointGeometry;
       osg::Vec3d pointLocation;
   };
+  
   inline bool operator==(const Container& lhs, const Container& rhs)
   {
     return
@@ -58,7 +54,13 @@ namespace slc
       (lhs.featureId == rhs.featureId) &&
       (lhs.shapeId == rhs.shapeId) &&
       (lhs.pointLocation == rhs.pointLocation)
+      //we don't consider the selection ids in comparison.
+      //we don't consider the pointGeometry in comparison?
     );
+  }
+  inline bool operator!=(const Container& lhs, const Container& rhs)
+  {
+    return !(lhs == rhs);
   }
   std::ostream& operator<<(std::ostream& os, const Container& container);
 

@@ -48,8 +48,8 @@ SET(LOCAL_INCLUDE_PATHS
 INCLUDE_DIRECTORIES(${LIBRARY_INCLUDE_PATHS})
 
 SET(MODELVIZ_SOURCES
-    modelviz/graph.cpp
     modelviz/connector.cpp
+    modelviz/shapegeometry.cpp
     )
 
 SET(TESTING_SOURCES

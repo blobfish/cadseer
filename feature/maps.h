@@ -136,6 +136,11 @@ namespace ftr
       >
     >
   > ResultContainer;
+  //! So I can forward declare.
+  struct ResultContainerWrapper
+  {
+    ResultContainer container;
+  };
 
   std::ostream& operator<<(std::ostream& os, const ResultContainer& container);
   bool hasResult(const ResultContainer &containerIn, const TopoDS_Shape &shapeIn);
