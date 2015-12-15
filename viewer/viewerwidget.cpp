@@ -48,7 +48,7 @@
 #include <testing/plotter.h>
 #include <gesture/gesturehandler.h>
 #include <globalutilities.h>
-#include <osg/csysdragger.h>
+#include <library/csysdragger.h>
 #include <message/dispatch.h>
 #include <viewer/textcamera.h>
 #include <viewer/overlaycamera.h>

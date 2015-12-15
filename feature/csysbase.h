@@ -22,7 +22,7 @@
 
 #include <gp_Ax2.hxx>
 
-#include <osg/csysdragger.h>
+#include <library/csysdragger.h>
 #include <feature/base.h>
 #include <message/message.h>
 

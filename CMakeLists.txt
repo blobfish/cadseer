@@ -117,17 +117,17 @@ SET(APPLICATION_SOURCES
     application/message.cpp
     )
     
-SET(OSG_SOURCES
-    osg/circlebuilder.cpp
-    osg/circleprojector.cpp
-    osg/conebuilder.cpp
-    osg/csysdragger.cpp
-    osg/cylinderbuilder.cpp
-    osg/geometrylibrary.cpp
-    osg/iconbuilder.cpp
-    osg/rotatecirculardragger.cpp
-    osg/spherebuilder.cpp
-    osg/torusbuilder.cpp
+SET(LIBRARY_SOURCES
+    library/circlebuilder.cpp
+    library/circleprojector.cpp
+    library/conebuilder.cpp
+    library/csysdragger.cpp
+    library/cylinderbuilder.cpp
+    library/geometrylibrary.cpp
+    library/iconbuilder.cpp
+    library/rotatecirculardragger.cpp
+    library/spherebuilder.cpp
+    library/torusbuilder.cpp
     )
 
 SET(CADSEER_SOURCES
@@ -155,7 +155,7 @@ SET(CADSEER_SOURCES
     ${PREFERENCE_SOURCES}
     ${PROJECT_SOURCES}
     ${APPLICATION_SOURCES}
-    ${OSG_SOURCES}
+    ${LIBRARY_SOURCES}
     )
 
 SET(CADSEER_MOC_HDRS

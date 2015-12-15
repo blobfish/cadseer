@@ -21,7 +21,7 @@
 #include <osgViewer/View>
 
 #include <viewer/overlaycamera.h>
-#include <osg/csysdragger.h>
+#include <library/csysdragger.h>
 #include "overlayhandler.h"
 
 using namespace slc;
