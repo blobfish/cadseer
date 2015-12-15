@@ -65,7 +65,7 @@ void Inert::updateModel(const UpdateMap &mapIn)
     TopExp::MapShapes(shape, shapeMap);
     for (int index = 1; index <= shapeMap.Extent(); ++index)
     {
-      uuid tempId = basic_random_generator<boost::mt19937>()();
+      uuid tempId = idGenerator();
       
       ResultRecord record;
       record.id = tempId;

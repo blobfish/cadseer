@@ -102,7 +102,7 @@ void Sphere::initializeMaps()
   std::vector<uuid> tempIds; //save ids for later.
   for (unsigned int index = 0; index < 8; ++index)
   {
-    uuid tempId = boost::uuids::basic_random_generator<boost::mt19937>()();
+    uuid tempId = idGenerator();
     tempIds.push_back(tempId);
     
     ResultRecord resultRecord;

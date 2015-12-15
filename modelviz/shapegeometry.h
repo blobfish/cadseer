@@ -30,6 +30,7 @@
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
 
+namespace boost{namespace uuids{class uuid;}}
 class TopoDS_Face; class TopoDS_Edge;
 namespace osg{class Switch; class Depth; class LineWidth;}
 namespace ftr{class ResultContainerWrapper;}

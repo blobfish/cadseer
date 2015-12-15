@@ -24,6 +24,7 @@
 #include <map>
 
 #include <boost/signals2.hpp>
+#include <boost/uuid/random_generator.hpp>
 
 #include <QIcon>
 #include <QString>
@@ -116,6 +117,7 @@ protected:
   mutable StateChangedSignal stateChangedSignal;
   
   boost::uuids::uuid id;
+  boost::uuids::basic_random_generator<boost::mt19937> idGenerator;
   ftr::State state;
   std::size_t constructionIndex; //!< for consistently ordered iteration. @see DAGView
   

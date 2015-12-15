@@ -150,7 +150,7 @@ void Blend::shapeMatch(const Base *targetFeatureIn)
 //     evolutionRecord.outId = tempId;
 //     evolutionContainer.insert(evolutionRecord);
     
-//     uuid tempId = boost::uuids::basic_random_generator<boost::mt19937>()();
+//     uuid tempId = idGenerator();
     
   }
 //   std::cout << std::endl << "resultContainer after shapeMatch" << std::endl << resultContainer << std::endl;
@@ -215,7 +215,7 @@ void Blend::generatedMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *t
       //build new record.
       EvolutionRecord record;
       record.inId = targetEdgeId;
-      record.outId = boost::uuids::basic_random_generator<boost::mt19937>()();
+      record.outId = idGenerator();
       shapeMap.insert(record);
       
       blendedFaceId = record.outId;
@@ -233,7 +233,7 @@ void Blend::generatedMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *t
       //this means that the face id is in both columns.
       EvolutionRecord record;
       record.inId = blendedFaceId;
-      record.outId = boost::uuids::basic_random_generator<boost::mt19937>()();
+      record.outId = idGenerator();
       shapeMap.insert(record);
       
       blendedFaceWireId = record.outId;
@@ -471,7 +471,7 @@ void Blend::derivedMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *tar
       DerivedContainer::value_type newEntry
       (
         idSet,
-        boost::uuids::basic_random_generator<boost::mt19937>()()
+        idGenerator()
       );
       derivedContainer.insert(newEntry);
       
@@ -503,7 +503,7 @@ void Blend::derivedMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *tar
       DerivedContainer::value_type newEntry
       (
         idSet,
-        boost::uuids::basic_random_generator<boost::mt19937>()()
+        idGenerator()
       );
       derivedContainer.insert(newEntry);
       

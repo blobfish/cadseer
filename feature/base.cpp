@@ -17,8 +17,6 @@
  *
  */
 
-#include <boost/uuid/random_generator.hpp>
-
 #include <BRep_Builder.hxx>
 #include <TopoDS_Compound.hxx>
 
@@ -38,7 +36,7 @@ std::size_t Base::nextConstructionIndex = 0;
 
 Base::Base()
 {
-  id = boost::uuids::basic_random_generator<boost::mt19937>()();
+  id = idGenerator();
   constructionIndex = nextConstructionIndex;
   nextConstructionIndex++;
   

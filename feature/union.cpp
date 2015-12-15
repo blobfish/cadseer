@@ -81,7 +81,7 @@ void Union::updateModel(const UpdateMap &mapIn)
     
     for (int index = 1; index <= shapeMap.Extent(); ++index)
     {
-      boost::uuids::uuid tempId = boost::uuids::basic_random_generator<boost::mt19937>()();
+      boost::uuids::uuid tempId = idGenerator();
       
       ResultRecord record;
       record.id = tempId;
