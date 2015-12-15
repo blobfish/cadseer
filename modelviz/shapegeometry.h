@@ -23,6 +23,7 @@
 #include <memory>
 
 #include <osg/Geometry>
+#include <osg/BoundingSphere>
 
 #include <TopoDS_Shape.hxx>
 #include <Bnd_Box.hxx>
@@ -56,6 +57,7 @@ namespace mdv
     void setPSetVertexWrapper(std::shared_ptr<PSetVertexWrapper> &);
     boost::uuids::uuid getId(std::size_t primitiveIndexIn) const;
     std::size_t getPSetFromVertex(std::size_t) const;
+    const osg::BoundingSphere& getBSphereFromPSet(std::size_t primitiveIndexIn) const;
     
     void setColor(const osg::Vec4 &colorIn);
     osg::Vec4 getColor() const {return color;}

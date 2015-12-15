@@ -17,36 +17,29 @@
  *
  */
 
-#ifndef SELECTIONMESSAGE_H
-#define SELECTIONMESSAGE_H
+#ifndef INTERPRETER_H
+#define INTERPRETER_H
 
-#include <boost/uuid/uuid.hpp>
+#include <osgUtil/LineSegmentIntersector>
 
-#include <osg/Vec3d>
-
-#include <selection/definitions.h>
+#include <selection/container.h>
 
 namespace slc
 {
-  struct Message
+  /*! @brief Interpretation from intersector to event handler.
+   *
+   * Converts osgUtil::LineSegment::Intersections(array) to a
+   * slc::Containers(array).
+   */ 
+  class Interpreter
   {
-    Message();
-    slc::Type type;
-    boost::uuids::uuid featureId;
-    boost::uuids::uuid shapeId;
-    osg::Vec3d pointLocation;
+  public:
+    Interpreter(const osgUtil::LineSegmentIntersector::Intersections &intersectionsIn, std::size_t selectionMaskIn);
+    Containers containersOut;
+  private:
+    void go();
+    const osgUtil::LineSegmentIntersector::Intersections &intersections;
+    std::size_t selectionMask;
   };
-  
-  inline bool operator==(const Message& lhs, const Message& rhs)
-  {
-    return
-    (
-      (lhs.type == rhs.type) &&
-      (lhs.featureId == rhs.featureId) &&
-      (lhs.shapeId == rhs.shapeId)
-      //we ignore point location.
-    );
-  }
 }
-
-#endif // SELECTIONMESSAGE_H
+#endif // INTERPRETER_H

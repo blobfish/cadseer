@@ -63,9 +63,14 @@ namespace slc
     return !(lhs == rhs);
   }
   std::ostream& operator<<(std::ostream& os, const Container& container);
-
+  
+  //allright. fuck it. I want a unique container that keeps insertion order.
+  //set and unordered_set both can change order. Don't use vector
+  //methods i.e. push_back etc..
   typedef std::vector<Container> Containers;
   std::ostream& operator<<(std::ostream& os, const Containers& containers);
+  bool has(Containers &containersIn, const Container &containerIn);
+  void add(Containers &containersIn, const Container &containerIn);
 }
 
 #endif // SLC_CONTAINER_H

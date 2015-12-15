@@ -46,3 +46,13 @@ std::ostream& slc::operator<<(std::ostream& os, const Containers& containers)
     os << current;
   return os;
 }
+
+bool slc::has(Containers &containersIn, const Container &containerIn)
+{
+  return std::find(containersIn.begin(), containersIn.end(), containerIn) != containersIn.end();
+}
+void slc::add(Containers &containersIn, const Container &containerIn)
+{
+  if (!has(containersIn, containerIn))
+    containersIn.push_back(containerIn);
+}

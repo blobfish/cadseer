@@ -206,11 +206,8 @@ void TextCamera::selectionAdditionDispatched(const msg::Message &messageIn)
   msg::dispatch().dumpString(debug.str());
   
   slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
-  
-  auto key = std::make_pair(sMessage.featureId, sMessage.shapeId);
-  //snap points will have duplicates. what to do?
-//       assert(selectionMap.count(key) == 0);
-  selectionMap.insert(std::make_pair(key, sMessage));
+  assert(std::find(selections.begin(), selections.end(), sMessage) == selections.end());
+  selections.push_back(sMessage);
 }
 
 void TextCamera::selectionSubtractionDispatched(const msg::Message &messageIn)
@@ -220,11 +217,9 @@ void TextCamera::selectionSubtractionDispatched(const msg::Message &messageIn)
   msg::dispatch().dumpString(debug.str());
   
   slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
-  
-  auto key = std::make_pair(sMessage.featureId, sMessage.shapeId);
-  //snap points will have duplicates. what to do?
-//       assert(selectionMap.count(key) == 0);
-  selectionMap.erase(key);
+  auto it = std::find(selections.begin(), selections.end(), sMessage); 
+  assert(it != selections.end());
+  selections.erase(it);
 }
 
 void TextCamera::statusTextDispatched(const msg::Message &messageIn)
@@ -242,12 +237,12 @@ void TextCamera::updateSelectionLabel()
   std::ostringstream labelStream;
   labelStream << preselectionText << std::endl <<
     "Selection:";
-  for (SelectionMap::const_iterator it = selectionMap.begin(); it != selectionMap.end(); ++it)
+  for (auto it = selections.begin(); it != selections.end(); ++it)
   {
     labelStream << std::endl <<
-      "object type: " << slc::getNameOfType(it->second.type) << std::endl <<
-      "Feature id: " << it->second.featureId << std::endl <<
-      "Shape id: " << it->second.shapeId << std::endl;
+      "object type: " << slc::getNameOfType(it->type) << std::endl <<
+      "Feature id: " << it->featureId << std::endl <<
+      "Shape id: " << it->shapeId << std::endl;
   }
   
   selectionLabel->setText(labelStream.str());

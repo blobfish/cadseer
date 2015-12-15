@@ -51,6 +51,8 @@ protected:
     bool getLocalStartEnd();
     void goPoints(const osg::ref_ptr<osg::PrimitiveSet> primitive, const Intersection &hitBase);
     void goEdges(const osg::ref_ptr<osg::PrimitiveSet> primitive, const Intersection &hitBase);
+    osg::BoundingSphere buildBoundingSphere(const osg::Vec3d& start, const osg::Vec3d& end);
+    osg::BoundingSphere segmentSphere;
     double scale = 1.0;
     double pickRadius = 1.0;
     osg::Geometry *currentGeometry = nullptr;

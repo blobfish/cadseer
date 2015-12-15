@@ -132,6 +132,11 @@ std::size_t ShapeGeometry::getPSetFromVertex(std::size_t vertexIndexIn) const
   return pSetVertexWrapper->findPSetFromVertex(vertexIndexIn);
 }
 
+const osg::BoundingSphere& ShapeGeometry::getBSphereFromPSet(std::size_t primitiveIndexIn) const
+{
+  return idPSetWrapper->findBSphereFromPSet(primitiveIndexIn);
+}
+
 ShapeGeometryBuilder::ShapeGeometryBuilder(const TopoDS_Shape &shapeIn, const ftr::ResultContainerWrapper &resultIn) : 
   originalShape(shapeIn), copiedShape(shapeIn), resultWrapper(resultIn), bound(), edgeToFace(),
   processed(), idPSetWrapperFace(new IdPSetWrapper()), idPSetWrapperEdge(new IdPSetWrapper())
@@ -445,6 +450,7 @@ void ShapeGeometryBuilder::edgeConstruct(const TopoDS_Edge &edgeIn)
   osg::Vec4Array *colors = dynamic_cast<osg::Vec4Array *>(edgeGeometry->getColorArray());
   osg::ref_ptr<osg::DrawElementsUInt> indices = new osg::DrawElementsUInt
 	  (GL_LINE_STRIP, indexes.Length());
+  osg::BoundingSphere bSphere;
   
   for (int index(indexes.Lower()); index < indexes.Upper() + 1; ++index)
   {
@@ -454,6 +460,14 @@ void ShapeGeometryBuilder::edgeConstruct(const TopoDS_Edge &edgeIn)
     vertices->push_back(osg::Vec3(point.X(), point.Y(), point.Z()));
     colors->push_back(edgeGeometry->getColor());
     (*indices)[index - 1] = vertices->size() - 1;
+    
+    if (!bSphere.valid()) //for first one.
+    {
+      bSphere.center() = vertices->back();
+      bSphere.radius() = 0.0;
+    }
+    else
+      bSphere.expandBy(vertices->back());
   }
   edgeGeometry->addPrimitiveSet(indices.get());
   boost::uuids::uuid id = ftr::findResultByShape(resultWrapper.container, edgeIn).id;
@@ -463,6 +477,7 @@ void ShapeGeometryBuilder::edgeConstruct(const TopoDS_Edge &edgeIn)
     IdPSetRecord record;
     record.id = id;
     record.primitiveSetIndex = lastPrimitiveIndex;
+    record.bSphere = bSphere;
     idPSetWrapperEdge->idPSetContainer.insert(record);
   }
   else

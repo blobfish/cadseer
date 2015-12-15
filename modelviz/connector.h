@@ -37,10 +37,13 @@ public:
     Connector() {}
     void buildStartNode(const TopoDS_Shape &shapeIn, const ftr::ResultContainer &resultContainerIn);
     void buildEndNode();
+    void buildReverseGraph();
     std::vector<boost::uuids::uuid> useGetParentsOfType(const boost::uuids::uuid &, const TopAbs_ShapeEnum &shapeType) const;
     std::vector<boost::uuids::uuid> useGetChildrenOfType(const boost::uuids::uuid &, const TopAbs_ShapeEnum &shapeType) const;
     boost::uuids::uuid useGetWire(const boost::uuids::uuid &, const boost::uuids::uuid &) const;
     boost::uuids::uuid useGetRoot() const;
+    boost::uuids::uuid useGetClosestWire(const boost::uuids::uuid &faceIn, const osg::Vec3d &pointIn) const;
+    std::vector<boost::uuids::uuid> useGetFacelessWires(const boost::uuids::uuid &edgeIn) const;
     bool useIsEdgeOfFace(const boost::uuids::uuid &edgeIn, const boost::uuids::uuid &faceIn) const;
     TopoDS_Shape getShape(const boost::uuids::uuid &) const;
     void outputGraphviz();
@@ -53,6 +56,7 @@ private:
     void buildAddShape(const TopoDS_Shape &shapeIn, const ftr::ResultContainer &resultContainerIn);
     void connectVertices(cng::Vertex from, cng::Vertex to);
     cng::Graph graph;
+    cng::Graph rGraph;
     cng::IdVertexMap vertexMap;
     std::stack<cng::Vertex> vertexStack;
 };

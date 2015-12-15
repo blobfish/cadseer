@@ -73,6 +73,29 @@ void Connector::buildEndNode()
     vertexStack.pop();
 }
 
+//I didn't see any easy way to store a boost reverse graph
+//so make my own copy.
+void Connector::buildReverseGraph()
+{
+  rGraph = graph;
+  std::vector<std::pair<Vertex, Vertex> > oldEdges;
+  BGL_FORALL_EDGES(edge, rGraph, Graph)
+  {
+    oldEdges.push_back(std::make_pair(boost::source(edge, rGraph), boost::target(edge, rGraph)));
+  }
+  
+  BGL_FORALL_VERTICES(vertex, rGraph, Graph)
+  {
+    boost::clear_out_edges(vertex, rGraph);
+  }
+  
+  for (const auto &current : oldEdges)
+  {
+    boost::add_edge(current.second, current.first, rGraph);
+  }
+
+}
+
 void Connector::connectVertices(cng::Vertex from, cng::Vertex to)
 {
     bool edgeResult;
@@ -84,21 +107,18 @@ void Connector::connectVertices(cng::Vertex from, cng::Vertex to)
 std::vector<boost::uuids::uuid> Connector::useGetParentsOfType
   (const boost::uuids::uuid &idIn, const TopAbs_ShapeEnum &shapeTypeIn) const
 {
-    cng::Graph temp = graph;
-    cng::GraphReversed reversed = boost::make_reverse_graph(temp);
-
     cng::IdVertexMap::const_iterator it;
     it = vertexMap.find(idIn);
     assert(it != vertexMap.end());
 
     std::vector<cng::Vertex> vertices;
     TypeCollectionVisitor vis(shapeTypeIn, vertices);
-    boost::breadth_first_search(reversed, it->second, boost::visitor(vis));
+    boost::breadth_first_search(rGraph, it->second, boost::visitor(vis));
 
     std::vector<cng::Vertex>::const_iterator vit;
     std::vector<uuid> idsOut;
     for (vit = vertices.begin(); vit != vertices.end(); ++vit)
-        idsOut.push_back(reversed[*vit].id);
+        idsOut.push_back(rGraph[*vit].id);
     return idsOut;
 }
 
@@ -168,6 +188,52 @@ uuid Connector::useGetRoot() const
   return graph[roots.at(0)].id;
 }
 
+uuid Connector::useGetClosestWire(const uuid& faceIn, const osg::Vec3d& pointIn) const
+{
+  //possible speed up. if face has only one wire, don't run the distance check.
+  
+  TopoDS_Vertex point = BRepBuilderAPI_MakeVertex(gp_Pnt(pointIn.x(), pointIn.y(), pointIn.z()));
+  
+  Vertex faceVertex = (vertexMap.find(faceIn))->second;
+  assert(graph[faceVertex].shape.ShapeType() == TopAbs_FACE);
+  VertexAdjacencyIterator it, itEnd;
+  uuid wireOut = nil_generator()();
+  double distance = std::numeric_limits<double>::max();
+  for (boost::tie(it, itEnd) = boost::adjacent_vertices(faceVertex, graph); it != itEnd; ++it)
+  {
+    assert(graph[*it].shape.ShapeType() == TopAbs_WIRE);
+    double deflection = 0.1; //hopefully makes fast. factor of bounding box?
+    BRepExtrema_DistShapeShape distanceCalc(point, graph[*it].shape, deflection, Extrema_ExtFlag_MIN);
+    if
+    (
+      (!distanceCalc.IsDone()) ||
+      (distanceCalc.NbSolution() < 1)
+    )
+      continue;
+    if (distanceCalc.Value() < distance)
+    {
+      distance = distanceCalc.Value();
+      wireOut = graph[*it].id;
+    }
+  }
+  
+  return wireOut;
+}
+
+std::vector<boost::uuids::uuid> Connector::useGetFacelessWires(const uuid& edgeIn) const
+{
+  //get first faceless wire of edge.
+  std::vector<boost::uuids::uuid> out;
+  auto wires = useGetParentsOfType(edgeIn, TopAbs_WIRE);
+  for (const auto &wire : wires)
+  {
+    auto faces = useGetParentsOfType(wire, TopAbs_FACE);
+    if (faces.empty())
+      out.push_back(wire);
+  }
+  return out;
+}
+
 bool Connector::useIsEdgeOfFace(const uuid& edgeIn, const uuid& faceIn) const
 {
   //note edge and face might belong to totally different solids.
@@ -210,16 +276,16 @@ std::vector<osg::Vec3d> Connector::useGetEndPoints(const boost::uuids::uuid &edg
   BRepAdaptor_Curve curveAdaptor(TopoDS::Edge(shape));
   
   std::vector<osg::Vec3d> out;
-  GeomAbs_CurveType curveType = curveAdaptor.GetType();
-  //no end points for conics
-  if (curveType == GeomAbs_Circle || curveType == GeomAbs_Ellipse)
-    return out;
   
   gp_Pnt tempPoint;
   tempPoint = curveAdaptor.Value(curveAdaptor.FirstParameter());
   out.push_back(osg::Vec3d(tempPoint.X(), tempPoint.Y(), tempPoint.Z()));
   tempPoint = curveAdaptor.Value(curveAdaptor.LastParameter());
   out.push_back(osg::Vec3d(tempPoint.X(), tempPoint.Y(), tempPoint.Z()));
+  
+  //I don't believe curve adaptor respects orientation.
+  if(shape.Orientation() == TopAbs_REVERSED)
+    std::reverse(out.begin(), out.end());
   
   return out;
 }
@@ -329,6 +395,7 @@ BuildConnector::BuildConnector(const TopoDS_Shape &shapeIn, const ftr::ResultCon
     connector.buildStartNode(shapeIn, resultContainerIn);
     buildRecursiveConnector(shapeIn, resultContainerIn);
     connector.buildEndNode();
+    connector.buildReverseGraph();
 }
 
 void BuildConnector::buildRecursiveConnector(const TopoDS_Shape &shapeIn, const ftr::ResultContainer &resultContainerIn)

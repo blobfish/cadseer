@@ -23,7 +23,6 @@
 #include <map>
 
 #include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/reverse_graph.hpp>
 #include <boost/graph/breadth_first_search.hpp>
 #include <boost/uuid/uuid.hpp>
 
@@ -47,7 +46,6 @@ typedef boost::graph_traits<Graph>::edge_iterator EdgeIterator;
 typedef boost::graph_traits<Graph>::in_edge_iterator InEdgeIterator;
 typedef boost::graph_traits<Graph>::out_edge_iterator OutEdgeIterator;
 typedef boost::graph_traits<Graph>::adjacency_iterator VertexAdjacencyIterator;
-typedef boost::reverse_graph<Graph, Graph&> GraphReversed;
 
 typedef std::map<boost::uuids::uuid, Vertex> IdVertexMap;
 

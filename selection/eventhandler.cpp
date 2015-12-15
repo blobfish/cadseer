@@ -41,6 +41,7 @@
 #include <modelviz/shapegeometry.h>
 #include <selection/message.h>
 #include <message/dispatch.h>
+#include <selection/interpreter.h>
 
 using namespace osg;
 using namespace boost::uuids;
@@ -120,45 +121,24 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
         if (picker->containsIntersections())
         {
            currentIntersections = picker->getMyIntersections();
-           osgUtil::LineSegmentIntersector::Intersections::const_iterator itIt;
+	   Interpreter interpreter(currentIntersections, selectionMask);
 
            slc::Container newContainer;
-           for (itIt = currentIntersections.begin(); itIt != currentIntersections.end(); ++itIt)
-           {
-               slc::Container tempContainer;
-               if (!buildPreSelection(tempContainer, itIt))
-                   continue;
-
-               if (alreadySelected(tempContainer))
-		 continue;
-
-               if (lastPrehighlight == tempContainer)
-		 return false;
-
-               newContainer = tempContainer;
-	       
-               break;
-           }
-
-           //wires were screwing up edges when changing same edge belonging to 2 different wires in
-           //the same function call. so we make sure the current prehighlight is empty.
-           if
-	   (
-	     (lastPrehighlight.selectionType == slc::Type::Wire) ||
-	     (lastPrehighlight.selectionType == slc::Type::Edge)
-	   )
-           {
-               clearPrehighlight();
-               return false;
-           }
-           
+	   //loop to get first non selected geometry.
+	   for (const auto& container : interpreter.containersOut)
+	   {
+	     if(alreadySelected(container))
+	      continue;
+	     newContainer = container;
+	     break;
+	   }
+	   
+	   if (newContainer == lastPrehighlight)
+	     return false;
+	   
            clearPrehighlight();
 	   
-	   if
-	   (
-	     (newContainer.selectionIds.empty()) &&
-	     (!slc::isPointType(newContainer.selectionType))
-	   )
+	   if (newContainer.selectionType == slc::Type::None)
 	      return false;
            
 	   //this is here so we make sure we get through all selection
@@ -167,12 +147,7 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
 	   {
 	     ref_ptr<Geometry> pointGeometry(buildTempPoint(newContainer.pointLocation));
 	     newContainer.pointGeometry = pointGeometry.get();
-	     
-	     ParentMaskVisitor visitor(NodeMaskDef::object);
-	     itIt->nodePath.back()->accept(visitor);
-	     assert(visitor.out);
-	     osg::Switch *tempSwitch = visitor.out->asSwitch();
-	     tempSwitch->addChild(pointGeometry.get());
+	     viewerRoot->addChild(pointGeometry.get());
 	   }
 	   
 	   setPrehighlight(newContainer);
@@ -215,7 +190,7 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
 	      selectionOperation(lastPrehighlight.featureId, lastPrehighlight.selectionIds,
 				HighlightVisitor::Operation::Highlight);
 	    
-            selectionContainers.push_back(lastPrehighlight);
+            add(selectionContainers, lastPrehighlight);
 	    
 	    msg::Message addMessage;
 	    addMessage.mask = msg::Response | msg::Post | msg::Selection | msg::Addition;
@@ -253,232 +228,6 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
     }
 
     return false;
-}
-
-bool EventHandler::buildPreSelection(slc::Container &container,
-                                              const osgUtil::LineSegmentIntersector::Intersections::const_iterator &intersection)
-{
-    auto walkUpToMask = [intersection](unsigned int maskIn) -> osg::Node*
-    {
-      auto nodePath = (*intersection).nodePath; //vector
-      for (auto it = nodePath.rbegin(); it != nodePath.rend(); ++it)
-      {
-        if ((*it)->getNodeMask() == maskIn)
-          return *it;
-      }
-      return nullptr;
-    };
-    
-    auto processWire = [this, &container, &intersection](const uuid &featureId) -> bool
-    {
-      const ftr::Base *feature = dynamic_cast<app::Application *>(qApp)->getProject()->findFeature(featureId);
-      assert(feature);
-      const mdv::Connector &connector = feature->getConnector();
-      
-      osgUtil::LineSegmentIntersector::Intersections::const_iterator it = intersection;
-
-      uuid faceId = boost::uuids::nil_generator()();
-      uuid edgeId = boost::uuids::nil_generator()();
-      osgUtil::LineSegmentIntersector::Intersections::const_iterator edgeIt = currentIntersections.end();
-      for(; it != currentIntersections.end(); ++it)
-      {
-          mdv::ShapeGeometry *sGeometry = dynamic_cast<mdv::ShapeGeometry *>(it->nodePath.back());
-	  if (!sGeometry)
-	    continue;
-          int currentNodeMask = it->nodePath.back()->getNodeMask();
-          if (currentNodeMask == NodeMaskDef::face && faceId.is_nil())
-              faceId = sGeometry->getId(it->primitiveIndex);
-          if (currentNodeMask == NodeMaskDef::edge)
-          {
-              edgeId = sGeometry->getId(it->primitiveIndex);
-              edgeIt = it;
-          }
-          if (faceId.is_nil() || edgeId.is_nil())
-            continue;
-          if (connector.useIsEdgeOfFace(edgeId, faceId))
-            break;
-      }
-      
-      if (it == currentIntersections.end())
-        return false;
-
-      uuid wireId = connector.useGetWire(edgeId, faceId);
-      if (wireId.is_nil())
-        return false;
-      assert(edgeIt != currentIntersections.end());
-
-      container.selectionIds = connector.useGetChildrenOfType(wireId, TopAbs_EDGE);
-      container.selectionType = Type::Wire;
-      container.shapeId = wireId;
-      
-      return true;
-    };
-    
-    mdv::ShapeGeometry *shapeGeometry = dynamic_cast<mdv::ShapeGeometry *>((*intersection).drawable.get());
-    if (!shapeGeometry)
-        return false;
-
-    int localNodeMask = (*intersection).nodePath.back()->getNodeMask();
-    
-    uuid selectedId = shapeGeometry->getId(intersection->primitiveIndex);
-    osg::Node *featureRoot = walkUpToMask(NodeMaskDef::object);
-    assert(featureRoot);
-    uuid featureId = GU::getId(featureRoot);
-
-//    std::cout << std::endl << "buildPreselection: " << std::endl << "   localNodeMask is: " << localNodeMask << std::endl <<
-//                 "   selectedId is: " << selectedId << std::endl <<
-//                 "   featureId is: " << featureId << std::endl;
-
-    container.featureId = featureId;
-    switch (localNodeMask)
-    {
-    case NodeMaskDef::face:
-    {
-        bool wireSignal = false;
-        if (canSelectWires(selectionMask))
-        {
-          if (processWire(featureId))
-            break;
-        }
-        if (canSelectFaces(selectionMask) && !wireSignal)
-        {
-          container.selectionType = Type::Face;
-          container.shapeId = selectedId;
-	  container.selectionIds.push_back(selectedId);
-        }
-        else if (canSelectShells(selectionMask))
-        {
-            const ftr::Base *feature = dynamic_cast<app::Application *>(qApp)->getProject()->findFeature(featureId);
-            assert(feature);
-            const mdv::Connector &connector = feature->getConnector();
-            std::vector<uuid> shells = connector.useGetParentsOfType(selectedId, TopAbs_SHELL);
-            //should be only 1 shell
-            if (shells.size() == 1)
-            {
-                container.selectionIds = connector.useGetChildrenOfType(shells.at(0), TopAbs_FACE);
-                container.selectionType = Type::Shell;
-                container.shapeId = shells.at(0);
-            }
-        }
-        else if (canSelectSolids(selectionMask))
-        {
-            const ftr::Base *feature = dynamic_cast<app::Application *>(qApp)->getProject()->findFeature(featureId);
-            assert(feature);
-            const mdv::Connector &connector = feature->getConnector();
-            std::vector<uuid> solids = connector.useGetParentsOfType(selectedId, TopAbs_SOLID);
-            //should be only 1 solid
-            if (solids.size() == 1)
-            {
-                container.selectionIds = connector.useGetChildrenOfType(solids.at(0), TopAbs_FACE);
-                container.selectionType = Type::Solid;
-                container.shapeId = solids.at(0);
-            }
-        }
-        else if (canSelectObjects(selectionMask))
-        {
-          const ftr::Base *feature = dynamic_cast<app::Application *>(qApp)->getProject()->findFeature(featureId);
-          assert(feature);
-          const mdv::Connector &connector = feature->getConnector();
-          uuid object = connector.useGetRoot();
-          if (!object.is_nil())
-          {
-            container.selectionIds = connector.useGetChildrenOfType(object, TopAbs_FACE);
-            container.selectionType = Type::Object;
-            container.shapeId = nil_generator()();
-          }
-        }
-        break;
-    }
-    case NodeMaskDef::edge:
-	if (canSelectPoints(selectionMask))
-	{
-	  const ftr::Base *feature = dynamic_cast<app::Application *>(qApp)->getProject()->findFeature(featureId);
-          assert(feature);
-          const mdv::Connector &connector = feature->getConnector();
-	  osg::Vec3d iPoint = intersection->getWorldIntersectPoint();
-	  osg::Vec3d snapPoint;
-	  double distance = std::numeric_limits<double>::max();
-	  slc::Type sType = slc::Type::None;
-	  
-	  auto updateSnaps = [&](const std::vector<osg::Vec3d> &vecIn) -> bool
-	  {
-	    bool out = false;
-	    for (const auto& point : vecIn)
-	    {
-	      double tempDistance = (iPoint - point).length2();
-	      if (tempDistance < distance)
-	      {
-		snapPoint = point;
-		distance = tempDistance;
-		out = true;
-	      }
-	    }
-	    return out;
-	  };
-	  
-	  if (canSelectEndPoints(selectionMask))
-	  {
-	    std::vector<osg::Vec3d> endPoints = connector.useGetEndPoints(selectedId);
-	    if (updateSnaps(endPoints))
-	      sType = slc::Type::EndPoint;
-	  }
-	  
-	  if (canSelectMidPoints(selectionMask))
-	  {
-	    std::vector<osg::Vec3d> midPoints = connector.useGetMidPoint(selectedId);
-	    if (updateSnaps(midPoints))
-	      sType = slc::Type::MidPoint;
-	  }
-	  
-	  if (canSelectCenterPoints(selectionMask))
-	  {
-	    std::vector<osg::Vec3d> centerPoints = connector.useGetCenterPoint(selectedId);
-	    if (updateSnaps(centerPoints))
-	      sType = slc::Type::CenterPoint;
-	  }
-	  
-	  if (canSelectQuadrantPoints(selectionMask))
-	  {
-	    std::vector<osg::Vec3d> quadrantPoints = connector.useGetQuadrantPoints(selectedId);
-	    if (updateSnaps(quadrantPoints))
-	      sType = slc::Type::QuadrantPoint;
-	  }
-	  
-	  if (canSelectNearestPoints(selectionMask))
-	  {
-	    std::vector<osg::Vec3d> nearestPoints = connector.useGetNearestPoint(selectedId, intersection->getWorldIntersectPoint());
-	    if (updateSnaps(nearestPoints))
-	      sType = slc::Type::NearestPoint;
-	  }
-	  container.selectionType = sType;
-	  container.shapeId = selectedId;
-	  container.pointLocation = snapPoint;
-	}
-        else if (canSelectEdges(selectionMask))
-        {
-            container.selectionType = Type::Edge;
-            container.shapeId = selectedId;
-	    container.selectionIds.push_back(selectedId);
-        }
-        else if (canSelectWires(selectionMask))
-          processWire(featureId);
-        break;
-	//obsolete. we no longer generate vertices.
-//     case NodeMaskDef::vertex:
-//     {
-//         Selected newSelection;
-//         newSelection.initialize(geometry);
-//         container.selectionType = Type::Vertex;
-//         container.shapeId = selectedId;
-//         container.selections.push_back(newSelection);
-//         break;
-//     }
-    default:
-        assert(0);
-        break;
-    }
-
-    return true;
 }
 
 void EventHandler::clearSelections()
@@ -703,7 +452,7 @@ void EventHandler::requestSelectionAdditionDispatched(const msg::Message &messag
     container.selectionIds = connector.useGetChildrenOfType(connector.useGetRoot(), TopAbs_FACE);
     selectionOperation(sMessage.featureId, container.selectionIds, HighlightVisitor::Operation::Highlight);
     
-    selectionContainers.push_back(container);
+    add(selectionContainers, container);
     msg::Message messageOut = messageIn;
     messageOut.mask &= ~msg::Request;
     messageOut.mask |= msg::Response | msg::Post;
@@ -775,74 +524,4 @@ Geometry* EventHandler::buildTempPoint(const Vec3d& pointIn)
   geometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
   
   return geometry;
-}
-
-MainSwitchVisitor::MainSwitchVisitor(const uuid& idIn):
-  NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), id(idIn)
-{
-
-}
-
-void MainSwitchVisitor::apply(Switch& switchIn)
-{
-  std::string userValue;
-  if (switchIn.getUserValue(GU::idAttributeTitle, userValue))
-  {
-    boost::uuids::uuid switchId = boost::uuids::string_generator()(userValue);
-    if (switchId == id)
-    {
-      out = &switchIn;
-      return; //no need to continue search.
-    }
-  }
-
-  traverse(switchIn);
-}
-
-ParentMaskVisitor::ParentMaskVisitor(std::size_t maskIn):
-  NodeVisitor(osg::NodeVisitor::TRAVERSE_PARENTS), mask(maskIn)
-{
-
-}
-
-void ParentMaskVisitor::apply(Node& nodeIn)
-{
-  if(nodeIn.getNodeMask() == mask)
-  {
-    out = &nodeIn;
-    return; //no need to continue search.
-  }
-  traverse(nodeIn);
-}
-
-HighlightVisitor::HighlightVisitor(const std::vector< uuid >& idsIn, HighlightVisitor::Operation operationIn):
-  NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), ids(idsIn), operation(operationIn)
-{
-  //possible run time speed up and compile time slowdown:
-  //setup a std::funciton dispatcher here and eliminate if/then/else tree in apply.
-}
-
-void HighlightVisitor::apply(Geometry& geometryIn)
-{
-  mdv::ShapeGeometry *sGeometry = dynamic_cast<mdv::ShapeGeometry*>(&geometryIn);
-  if (!sGeometry)
-    return;
-  assert (operation != Operation::None);
-  if (operation == Operation::PreHighlight)
-  {
-    for (const auto &id : ids)
-      sGeometry->setToPreHighlight(id);
-  }
-  else if(operation == Operation::Highlight)
-  {
-    for (const auto &id : ids)
-      sGeometry->setToHighlight(id);
-  }
-  else //has to equal restore.
-  {
-    for (const auto &id : ids)
-      sGeometry->setToColor(id);
-  }
-  
-  //don't need to call traverse because geometry should be 'end of line'
 }

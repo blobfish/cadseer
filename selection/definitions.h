@@ -66,6 +66,7 @@ namespace slc
       Face,
       Wire,
       Edge,
+      StartPoint,
       EndPoint,
       MidPoint,
       CenterPoint,
@@ -85,6 +86,7 @@ namespace slc
 						      "Face",
 						      "Wire",
 						      "Edge",
+						      "Start Point",
 						      "End Point",
 						      "Mid Point",
 						      "Center Point",
@@ -240,6 +242,7 @@ namespace slc
   {
     return
     (
+      (typeIn == Type::StartPoint) ||
       (typeIn == Type::EndPoint) ||
       (typeIn == Type::MidPoint) ||
       (typeIn == Type::CenterPoint) ||

@@ -91,6 +91,8 @@ SET(SELECTION_SOURCES
     selection/message.cpp
     selection/container.cpp
     selection/overlayhandler.cpp
+    selection/interpreter.cpp
+    selection/visitors.cpp
     )
 
 SET(DIALOG_SOURCES

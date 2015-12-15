@@ -29,6 +29,8 @@
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/composite_key.hpp>
 
+#include <osg/BoundingSphere>
+
 namespace mdv
 {
   namespace BMI = boost::multi_index;
@@ -38,6 +40,7 @@ namespace mdv
   {
     boost::uuids::uuid id = boost::uuids::nil_generator()();
     std::size_t primitiveSetIndex = 0; //!< primitiveset index.
+    osg::BoundingSphere bSphere; //!< only used for edges. faces use kdtree
     
     //@{
     //! used as tags.
@@ -114,6 +117,15 @@ namespace mdv
       List::const_iterator it = list.find(indexIn);
       assert(it != list.end());
       return it->id;
+    }
+    
+    const osg::BoundingSphere& findBSphereFromPSet(std::size_t indexIn) const
+    {
+      typedef IdPSetContainer::index<IdPSetRecord::ByPSet>::type List;
+      const List &list = idPSetContainer.get<IdPSetRecord::ByPSet>();
+      List::const_iterator it = list.find(indexIn);
+      assert(it != list.end());
+      return it->bSphere;
     }
   };
   

@@ -78,9 +78,7 @@ private:
   void updateSelectionLabel();
   std::string preselectionText;
   
-  typedef std::pair<boost::uuids::uuid, boost::uuids::uuid> SelectionMapKey;
-  typedef std::map<SelectionMapKey, slc::Message> SelectionMap;
-  SelectionMap selectionMap;
+  std::vector<slc::Message> selections;
   
   osg::ref_ptr<osgText::Text> statusLabel;
 };

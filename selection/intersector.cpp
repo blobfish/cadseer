@@ -159,13 +159,19 @@ void Intersector::intersect(osgUtil::IntersectionVisitor &iv, osg::Drawable *dra
       hitBase.nodePath = iv.getNodePath();
       hitBase.drawable = drawable;
       hitBase.matrix = iv.getModelMatrix();
+      
+      segmentSphere = buildBoundingSphere(localStart, localEnd);
       for (setIt = setList.begin(); setIt != setList.end(); ++setIt)
       {
           hitBase.primitiveIndex = std::distance(setList.cbegin(), setIt);
   //         if ((*setIt)->getMode() == GL_POINTS)
   //             goPoints(*setIt, hitBase);
           if ((*setIt)->getMode() == GL_LINE_STRIP)
-              goEdges(*setIt, hitBase);
+	  {
+	    if (!segmentSphere.intersects(sGeometry->getBSphereFromPSet(std::distance(setList.begin(), setIt))))
+	      continue;
+	    goEdges(*setIt, hitBase);
+	  }
       }
     }
 }
@@ -197,6 +203,17 @@ void Intersector::goPoints(const osg::ref_ptr<osg::PrimitiveSet> primitive, cons
     }
 }
 
+osg::BoundingSphere Intersector::buildBoundingSphere(const osg::Vec3d& start, const osg::Vec3d& end)
+{
+  osg::Vec3d diffVector = end - start;
+  double length = diffVector.length();
+  osg::Vec3 projection = diffVector;
+  projection.normalize();
+  projection *= length / 2.0;
+  osg::Vec3 center = start + projection;
+  return osg::BoundingSphere(center, length / 2.0);
+}
+
 void Intersector::goEdges(const osg::ref_ptr<osg::PrimitiveSet> primitive, const Intersection &hitBase)
 {
     ref_ptr<DrawElementsUInt> drawElements = dynamic_pointer_cast<DrawElementsUInt>(primitive);
@@ -210,6 +227,11 @@ void Intersector::goEdges(const osg::ref_ptr<osg::PrimitiveSet> primitive, const
 	
         Vec3d intersectionVector = localEnd - localStart;
         Vec3d tempIntersectVector = intersectionVector + (localEnd - lineStart);
+	
+	//try some bounding sphere stuff to speed up.
+	osg::BoundingSphere primitiveSphere = buildBoundingSphere(lineStart, lineEnd);
+	if (!segmentSphere.intersects(primitiveSphere))
+	  continue;
 
         Vec3d testPoint;
         double segmentDot = segmentVector * tempIntersectVector;
