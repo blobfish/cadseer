@@ -30,6 +30,7 @@
 
 using namespace osg;
 using namespace osgManipulator;
+using namespace lbr;
 
 AngleConstraint::AngleConstraint(osg::Node& refNodeIn, const osg::Vec3d& startIn, osg::Vec3d::value_type radiansIn) :
   Constraint(refNodeIn), start(startIn), increment(radiansIn)

@@ -24,6 +24,8 @@
 
 #include "iconbuilder.h"
 
+using namespace lbr;
+
 IconBuilder::IconBuilder(osg::Image *imageIn) : image(imageIn)
 {
 

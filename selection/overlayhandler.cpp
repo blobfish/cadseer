@@ -72,7 +72,7 @@ bool OverlayHandler::handle
 	if
 	(
 	  (!dynamic_cast<osgManipulator::Translate1DDragger *>(n)) &&
-	  (!dynamic_cast<RotateCircularDragger *>(n))
+	  (!dynamic_cast<lbr::RotateCircularDragger *>(n))
 	)
 	  continue;
 	
@@ -153,13 +153,13 @@ bool OverlayHandler::handle
       if (!path.empty())
       {
 	std::string nodeName;
-	CSysDragger *csysDragger = nullptr;
+	lbr::CSysDragger *csysDragger = nullptr;
 	for (auto it = path.rbegin(); it != path.rend(); ++it)
 	{
 	  if (nodeName.empty())
 	    nodeName = (*it)->getName();
 	  if (!csysDragger)
-	    csysDragger = dynamic_cast<CSysDragger*>(*it);
+	    csysDragger = dynamic_cast<lbr::CSysDragger*>(*it);
 	}
 	
 	if (!nodeName.empty() && csysDragger)

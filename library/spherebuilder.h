@@ -24,6 +24,9 @@
 
 namespace osg{class Geometry;}
 
+namespace lbr
+{
+
 /*! @brief class for constructing a sphere with OpenSceneGraph
  * 
  * Mesh density can be controlled by ::setIsoLines or ::setDeviation.
@@ -69,5 +72,5 @@ protected:
   std::size_t isoLines = 16; //!< default value of 16
   double radius = 1.0; //!< default value of 1.0
 };
-
+}
 #endif // SPHEREBUILDER_H

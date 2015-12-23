@@ -67,6 +67,7 @@ SET(MESSAGE_SOURCES
     )
     
 SET(FEATURE_SOURCES
+    feature/parameter.cpp
     feature/base.cpp
     feature/csysbase.cpp
     feature/box.cpp
@@ -128,6 +129,9 @@ SET(LIBRARY_SOURCES
     library/rotatecirculardragger.cpp
     library/spherebuilder.cpp
     library/torusbuilder.cpp
+    library/lineardragger.cpp
+    library/lineardimension.cpp
+    library/ipgroup.cpp
     )
 
 SET(CADSEER_SOURCES

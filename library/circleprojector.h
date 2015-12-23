@@ -22,6 +22,9 @@
 
 #include <osgManipulator/Projector>
 
+namespace lbr
+{
+
 class CircleProjector : public osgManipulator::Projector
 {
   public:
@@ -35,5 +38,6 @@ class CircleProjector : public osgManipulator::Projector
 protected:
   double radius;
 };
+}
 
 #endif //CIRCLEPROJECTOR_H

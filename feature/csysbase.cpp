@@ -118,7 +118,7 @@ bool DCallBack::receive(const osgManipulator::MotionCommand &commandIn)
     lastTranslation = 0.0;
     lastRotation = 0.0;
     
-    CSysDragger &dragger = csysBase->getDragger();
+    lbr::CSysDragger &dragger = csysBase->getDragger();
     dragger.setTranslationIncrement(prf::manager().rootPtr->dragger().linearIncrement());
     dragger.setRotationIncrement(prf::manager().rootPtr->dragger().angularIncrement());
   }
@@ -176,7 +176,7 @@ bool DCallBack::receive(const osgManipulator::MotionCommand &commandIn)
 
 CSysBase::CSysBase() : Base(), system()
 {
-  dragger = new CSysDragger();
+  dragger = new lbr::CSysDragger();
   overlaySwitch->addChild(dragger);
   dragger->setScreenScale(75.0f);
   dragger->setRotationIncrement(prf::manager().rootPtr->dragger().angularIncrement());

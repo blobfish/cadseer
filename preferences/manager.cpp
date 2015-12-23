@@ -142,7 +142,7 @@ bool Manager::readConfig()
   {
     xml_schema::Properties props;
     props.no_namespace_schema_location (filePathXSD.toStdString());
-    props.schema_location ("http://www.w3.org/XML/1998/namespace", "xml.xsd");
+//     props.schema_location ("http://www.w3.org/XML/1998/namespace", "xml.xsd");
     
     auto tempPtr(root(filePathXML.toStdString(), 0, props));
     rootPtr = std::move(tempPtr);

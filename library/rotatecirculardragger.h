@@ -26,6 +26,9 @@
 #include <osgManipulator/Constraint>
 #include "circleprojector.h"
 
+namespace lbr
+{
+
 /** @brief Constraint for angle rotation.
 */
 class AngleConstraint : public osgManipulator::Constraint
@@ -100,5 +103,6 @@ class RotateCircularDragger : public osgManipulator::Dragger
     
     void update();
 };
+}
 
 #endif //OSGMANIPULATOR_ROTATECIRCULARDRAGGER

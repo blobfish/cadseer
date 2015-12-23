@@ -26,6 +26,9 @@
 
 namespace osg{class Geometry;}
 
+namespace lbr
+{
+
 /*! @brief class for constructing a torus with OpenSceneGraph
  * 
  * Point density can be controlled by ::setMajorIsoLines and
@@ -76,5 +79,6 @@ protected:
   double calculateAngle(double, double) const; //!< calculate angle needed for deviation given radius.
   
 };
+}
 
 #endif // TORUSBUILDER_H

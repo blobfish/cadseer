@@ -40,6 +40,7 @@ namespace prf
   private:
     void initialize();
     void updateDeflections();
+    void updateDragger();
     Ui::dialog* ui;
     Manager *manager;
     bool visualDirty = false;

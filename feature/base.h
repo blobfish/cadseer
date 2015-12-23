@@ -40,8 +40,9 @@
 #include <feature/maps.h>
 #include <feature/types.h>
 #include <feature/inputtypes.h>
-#include <modelviz/connector.h>
 #include <feature/states.h>
+#include <feature/parameter.h>
+#include <modelviz/connector.h>
 
 namespace ftr
 {

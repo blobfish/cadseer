@@ -27,6 +27,8 @@
 
 #include "circlebuilder.h"
 
+using namespace lbr;
+
 void CircleBuilder::setRadius(double radiusIn)
 {
   radius = std::max(0.01, radiusIn);

@@ -226,6 +226,100 @@ namespace prf
   }
 
 
+  // InteractiveParameter
+  // 
+
+  const InteractiveParameter::CharacterSizeType& InteractiveParameter::
+  characterSize () const
+  {
+    return this->characterSize_.get ();
+  }
+
+  InteractiveParameter::CharacterSizeType& InteractiveParameter::
+  characterSize ()
+  {
+    return this->characterSize_.get ();
+  }
+
+  void InteractiveParameter::
+  characterSize (const CharacterSizeType& x)
+  {
+    this->characterSize_.set (x);
+  }
+
+  void InteractiveParameter::
+  characterSize (::std::unique_ptr< CharacterSizeType > x)
+  {
+    this->characterSize_.set (std::move (x));
+  }
+
+  InteractiveParameter::CharacterSizeType InteractiveParameter::
+  characterSize_default_value ()
+  {
+    return CharacterSizeType (1.0);
+  }
+
+  const InteractiveParameter::ArrowWidthType& InteractiveParameter::
+  arrowWidth () const
+  {
+    return this->arrowWidth_.get ();
+  }
+
+  InteractiveParameter::ArrowWidthType& InteractiveParameter::
+  arrowWidth ()
+  {
+    return this->arrowWidth_.get ();
+  }
+
+  void InteractiveParameter::
+  arrowWidth (const ArrowWidthType& x)
+  {
+    this->arrowWidth_.set (x);
+  }
+
+  void InteractiveParameter::
+  arrowWidth (::std::unique_ptr< ArrowWidthType > x)
+  {
+    this->arrowWidth_.set (std::move (x));
+  }
+
+  InteractiveParameter::ArrowWidthType InteractiveParameter::
+  arrowWidth_default_value ()
+  {
+    return ArrowWidthType (.5);
+  }
+
+  const InteractiveParameter::ArrowHeightType& InteractiveParameter::
+  arrowHeight () const
+  {
+    return this->arrowHeight_.get ();
+  }
+
+  InteractiveParameter::ArrowHeightType& InteractiveParameter::
+  arrowHeight ()
+  {
+    return this->arrowHeight_.get ();
+  }
+
+  void InteractiveParameter::
+  arrowHeight (const ArrowHeightType& x)
+  {
+    this->arrowHeight_.set (x);
+  }
+
+  void InteractiveParameter::
+  arrowHeight (::std::unique_ptr< ArrowHeightType > x)
+  {
+    this->arrowHeight_.set (std::move (x));
+  }
+
+  InteractiveParameter::ArrowHeightType InteractiveParameter::
+  arrowHeight_default_value ()
+  {
+    return ArrowHeightType (1.0);
+  }
+
+
   // Root
   // 
 
@@ -275,6 +369,30 @@ namespace prf
   dragger (::std::unique_ptr< DraggerType > x)
   {
     this->dragger_.set (std::move (x));
+  }
+
+  const Root::InteractiveParameterType& Root::
+  interactiveParameter () const
+  {
+    return this->interactiveParameter_.get ();
+  }
+
+  Root::InteractiveParameterType& Root::
+  interactiveParameter ()
+  {
+    return this->interactiveParameter_.get ();
+  }
+
+  void Root::
+  interactiveParameter (const InteractiveParameterType& x)
+  {
+    this->interactiveParameter_.set (x);
+  }
+
+  void Root::
+  interactiveParameter (::std::unique_ptr< InteractiveParameterType > x)
+  {
+    this->interactiveParameter_.set (std::move (x));
   }
 }
 
@@ -694,24 +812,172 @@ namespace prf
   {
   }
 
+  // InteractiveParameter
+  //
+
+  InteractiveParameter::
+  InteractiveParameter (const CharacterSizeType& characterSize,
+                        const ArrowWidthType& arrowWidth,
+                        const ArrowHeightType& arrowHeight)
+  : ::xml_schema::Type (),
+    characterSize_ (characterSize, this),
+    arrowWidth_ (arrowWidth, this),
+    arrowHeight_ (arrowHeight, this)
+  {
+  }
+
+  InteractiveParameter::
+  InteractiveParameter (const InteractiveParameter& x,
+                        ::xml_schema::Flags f,
+                        ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    characterSize_ (x.characterSize_, f, this),
+    arrowWidth_ (x.arrowWidth_, f, this),
+    arrowHeight_ (x.arrowHeight_, f, this)
+  {
+  }
+
+  InteractiveParameter::
+  InteractiveParameter (const ::xercesc::DOMElement& e,
+                        ::xml_schema::Flags f,
+                        ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    characterSize_ (this),
+    arrowWidth_ (this),
+    arrowHeight_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void InteractiveParameter::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // characterSize
+      //
+      if (n.name () == "characterSize" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< CharacterSizeType > r (
+          CharacterSizeTraits::create (i, f, this));
+
+        if (!characterSize_.present ())
+        {
+          this->characterSize_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      // arrowWidth
+      //
+      if (n.name () == "arrowWidth" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< ArrowWidthType > r (
+          ArrowWidthTraits::create (i, f, this));
+
+        if (!arrowWidth_.present ())
+        {
+          this->arrowWidth_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      // arrowHeight
+      //
+      if (n.name () == "arrowHeight" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< ArrowHeightType > r (
+          ArrowHeightTraits::create (i, f, this));
+
+        if (!arrowHeight_.present ())
+        {
+          this->arrowHeight_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!characterSize_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "characterSize",
+        "");
+    }
+
+    if (!arrowWidth_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "arrowWidth",
+        "");
+    }
+
+    if (!arrowHeight_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "arrowHeight",
+        "");
+    }
+  }
+
+  InteractiveParameter* InteractiveParameter::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class InteractiveParameter (*this, f, c);
+  }
+
+  InteractiveParameter& InteractiveParameter::
+  operator= (const InteractiveParameter& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->characterSize_ = x.characterSize_;
+      this->arrowWidth_ = x.arrowWidth_;
+      this->arrowHeight_ = x.arrowHeight_;
+    }
+
+    return *this;
+  }
+
+  InteractiveParameter::
+  ~InteractiveParameter ()
+  {
+  }
+
   // Root
   //
 
   Root::
   Root (const VisualType& visual,
-        const DraggerType& dragger)
+        const DraggerType& dragger,
+        const InteractiveParameterType& interactiveParameter)
   : ::xml_schema::Type (),
     visual_ (visual, this),
-    dragger_ (dragger, this)
+    dragger_ (dragger, this),
+    interactiveParameter_ (interactiveParameter, this)
   {
   }
 
   Root::
   Root (::std::unique_ptr< VisualType > visual,
-        ::std::unique_ptr< DraggerType > dragger)
+        ::std::unique_ptr< DraggerType > dragger,
+        ::std::unique_ptr< InteractiveParameterType > interactiveParameter)
   : ::xml_schema::Type (),
     visual_ (std::move (visual), this),
-    dragger_ (std::move (dragger), this)
+    dragger_ (std::move (dragger), this),
+    interactiveParameter_ (std::move (interactiveParameter), this)
   {
   }
 
@@ -721,7 +987,8 @@ namespace prf
         ::xml_schema::Container* c)
   : ::xml_schema::Type (x, f, c),
     visual_ (x.visual_, f, this),
-    dragger_ (x.dragger_, f, this)
+    dragger_ (x.dragger_, f, this),
+    interactiveParameter_ (x.interactiveParameter_, f, this)
   {
   }
 
@@ -731,7 +998,8 @@ namespace prf
         ::xml_schema::Container* c)
   : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
     visual_ (this),
-    dragger_ (this)
+    dragger_ (this),
+    interactiveParameter_ (this)
   {
     if ((f & ::xml_schema::Flags::base) == 0)
     {
@@ -778,6 +1046,20 @@ namespace prf
         }
       }
 
+      // interactiveParameter
+      //
+      if (n.name () == "interactiveParameter" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< InteractiveParameterType > r (
+          InteractiveParameterTraits::create (i, f, this));
+
+        if (!interactiveParameter_.present ())
+        {
+          this->interactiveParameter_.set (::std::move (r));
+          continue;
+        }
+      }
+
       break;
     }
 
@@ -792,6 +1074,13 @@ namespace prf
     {
       throw ::xsd::cxx::tree::expected_element< char > (
         "dragger",
+        "");
+    }
+
+    if (!interactiveParameter_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "interactiveParameter",
         "");
     }
   }
@@ -811,6 +1100,7 @@ namespace prf
       static_cast< ::xml_schema::Type& > (*this) = x;
       this->visual_ = x.visual_;
       this->dragger_ = x.dragger_;
+      this->interactiveParameter_ = x.interactiveParameter_;
     }
 
     return *this;
@@ -1205,6 +1495,45 @@ namespace prf
   }
 
   void
+  operator<< (::xercesc::DOMElement& e, const InteractiveParameter& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // characterSize
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "characterSize",
+          e));
+
+      s << i.characterSize ();
+    }
+
+    // arrowWidth
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "arrowWidth",
+          e));
+
+      s << i.arrowWidth ();
+    }
+
+    // arrowHeight
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "arrowHeight",
+          e));
+
+      s << i.arrowHeight ();
+    }
+  }
+
+  void
   operator<< (::xercesc::DOMElement& e, const Root& i)
   {
     e << static_cast< const ::xml_schema::Type& > (i);
@@ -1229,6 +1558,17 @@ namespace prf
           e));
 
       s << i.dragger ();
+    }
+
+    // interactiveParameter
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "interactiveParameter",
+          e));
+
+      s << i.interactiveParameter ();
     }
   }
 

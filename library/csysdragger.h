@@ -31,6 +31,9 @@
 
 namespace osgManipulator{class GridConstraint;}
 
+namespace lbr
+{
+
 /*! @brief Coordinate system dragger
  * 
  * Has depth test turned off and cull back face enabled.
@@ -103,5 +106,6 @@ protected:
   osg::ref_ptr<osgManipulator::GridConstraint> translateConstraint;
   osg::ref_ptr<AngleConstraint> rotateConstraint;
 };
+}
 
 #endif // CSYSDRAGGER_H

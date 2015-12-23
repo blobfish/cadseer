@@ -20,7 +20,11 @@
 #ifndef CYLINDER_H
 #define CYLINDER_H
 
+#include <osg/ref_ptr>
+
 #include <feature/csysbase.h>
+
+namespace lbr{class IPGroup;}
 
 namespace ftr
 {
@@ -30,6 +34,7 @@ namespace ftr
   {
   public:
     Cylinder();
+    virtual ~Cylinder() override;
     void setRadius(const double &radiusIn);
     void setHeight(const double &heightIn);
     void setParameters(const double &radiusIn, const double &heightIn);
@@ -44,10 +49,16 @@ namespace ftr
     virtual Descriptor getDescriptor() const override {return Descriptor::Create;}
   
   protected:
-    double radius;
-    double height;
+    Parameter radius;
+    Parameter height;
+    ParameterMap pMap;
+    
+    osg::ref_ptr<lbr::IPGroup> heightIP;
+    osg::ref_ptr<lbr::IPGroup> radiusIP;
     
     void initializeMaps();
+    void setupIPGroup();
+    void updateIPGroup();
     void updateResult(const CylinderBuilder &);
     
   private:

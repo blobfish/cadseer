@@ -48,11 +48,11 @@ namespace ftr
     void setSystem(const osg::Matrixd &systemIn);
     void updateDragger(); //!< dragger to match feature system.
     const gp_Ax2& getSystem() const {return system;}
-    CSysDragger& getDragger() {return *dragger;}
+    lbr::CSysDragger& getDragger() {return *dragger;}
 
   protected:
     gp_Ax2 system;
-    osg::ref_ptr<CSysDragger> dragger;
+    osg::ref_ptr<lbr::CSysDragger> dragger;
     osg::ref_ptr<DCallBack> callBack;
   };
   

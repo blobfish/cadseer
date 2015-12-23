@@ -25,6 +25,8 @@
 
 #include "spherebuilder.h"
 
+using namespace lbr;
+
 void SphereBuilder::setRadius(double radiusIn)
 {
   radius = std::max(0.01, radiusIn);

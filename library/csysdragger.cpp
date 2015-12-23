@@ -28,6 +28,7 @@
 
 using namespace osg;
 using namespace osgManipulator;
+using namespace lbr;
 
 CSysDragger::CSysDragger()
 {

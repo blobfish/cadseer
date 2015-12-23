@@ -104,17 +104,17 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     oCamera->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
     msg::dispatch().connectMessageOut(boost::bind(&OverlayCamera::messageInSlot, oCamera, _1));
     
-    CSysDragger *origin = new CSysDragger();
+    lbr::CSysDragger *origin = new lbr::CSysDragger();
     origin->setScreenScale(100.0f);
     origin->setRotationIncrement(15.0);
     origin->setTranslationIncrement(0.25);
     origin->setHandleEvents(false);
     origin->setupDefaultGeometry();
     origin->setUnlink();
-    origin->hide(CSysDragger::SwitchIndexes::XRotate);
-    origin->hide(CSysDragger::SwitchIndexes::YRotate);
-    origin->hide(CSysDragger::SwitchIndexes::ZRotate);
-    origin->hide(CSysDragger::SwitchIndexes::LinkIcon);
+    origin->hide(lbr::CSysDragger::SwitchIndexes::XRotate);
+    origin->hide(lbr::CSysDragger::SwitchIndexes::YRotate);
+    origin->hide(lbr::CSysDragger::SwitchIndexes::ZRotate);
+    origin->hide(lbr::CSysDragger::SwitchIndexes::LinkIcon);
     oCamera->addChild(origin);
 
     view->setSceneData(root);

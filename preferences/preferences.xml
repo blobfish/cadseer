@@ -11,4 +11,9 @@
     <linearIncrement>1.0</linearIncrement>
     <angularIncrement>15.0</angularIncrement>
   </dragger>
+  <interactiveParameter>
+    <characterSize>1.0</characterSize>
+    <arrowWidth>0.5</arrowWidth>
+    <arrowHeight>1.0</arrowHeight>
+  </interactiveParameter>
 </root>

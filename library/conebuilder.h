@@ -24,6 +24,9 @@
 
 #include <osg/Math> //for pi.
 
+namespace lbr
+{
+
 /*! @brief class for constructing a cone with OpenSceneGraph
  * 
  * Mesh density can be controlled by ::setIsoLines or ::setDeviation.
@@ -59,5 +62,6 @@ protected:
   double radius = 0.2;
   double height = 1.0;
 };
+}
 
 #endif // CONEBUILDER_H

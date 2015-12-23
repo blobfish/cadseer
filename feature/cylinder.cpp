@@ -19,8 +19,10 @@
 
 #include <assert.h>
 
-#include <boost/uuid/random_generator.hpp>
-
+#include <preferences/preferencesXML.h>
+#include <preferences/manager.h>
+#include <library/lineardimension.h>
+#include <library/ipgroup.h>
 #include <feature/cylinderbuilder.h>
 #include <feature/cylinder.h>
 
@@ -65,7 +67,50 @@ static const std::map<FeatureTag, std::string> featureTagMap =
 
 QIcon Cylinder::icon;
 
-Cylinder::Cylinder() : CSysBase(), radius(5.0), height(20.0)
+//TODO duplicate functions. copied from csysbase. address later
+static osg::Vec3d toOsg(const gp_Vec &occVecIn)
+{
+  osg::Vec3d out;
+  
+  out.x() = occVecIn.X();
+  out.y() = occVecIn.Y();
+  out.z() = occVecIn.Z();
+  
+  return out;
+}
+
+static osg::Vec3d toOsg(const gp_Pnt &occPointIn)
+{
+  osg::Vec3d out;
+  
+  out.x() = occPointIn.X();
+  out.y() = occPointIn.Y();
+  out.z() = occPointIn.Z();
+  
+  return out;
+}
+
+static osg::Matrixd toOsg(const gp_Ax2 &systemIn)
+{
+  
+  osg::Vec3d xVector = toOsg(gp_Vec(systemIn.XDirection()));
+  osg::Vec3d yVector = toOsg(gp_Vec(systemIn.YDirection()));
+  osg::Vec3d zVector = toOsg(gp_Vec(systemIn.Direction()));
+  osg::Vec3d origin = toOsg(systemIn.Location());
+  
+  //row major for openscenegraph.
+  osg::Matrixd out
+  (
+    xVector.x(), xVector.y(), xVector.z(), 0.0,
+    yVector.x(), yVector.y(), yVector.z(), 0.0,
+    zVector.x(), zVector.y(), zVector.z(), 0.0,
+    origin.x(), origin.y(), origin.z(), 1.0
+  );
+  
+  return out;
+}
+
+Cylinder::Cylinder() : CSysBase(), radius(ParameterNames::Radius, 5.0), height(ParameterNames::Height, 20.0)
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionCylinder.svg");
@@ -73,6 +118,58 @@ Cylinder::Cylinder() : CSysBase(), radius(5.0), height(20.0)
   name = QObject::tr("Cylinder");
   
   initializeMaps();
+  
+  pMap.insert(std::make_pair(ParameterNames::Radius, &radius));
+  pMap.insert(std::make_pair(ParameterNames::Height, &height));
+  
+  radius.connectValue(boost::bind(&Cylinder::setModelDirty, this));
+  height.connectValue(boost::bind(&Cylinder::setModelDirty, this));
+  
+  setupIPGroup();
+}
+
+Cylinder::~Cylinder()
+{
+
+}
+
+void Cylinder::setupIPGroup()
+{
+  heightIP = new lbr::IPGroup(&height);
+  heightIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(1.0, 0.0, 0.0)));
+  heightIP->setRotation(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(0.0, -1.0, 0.0));
+  heightIP->valueHasChanged();
+  overlaySwitch->addChild(heightIP.get());
+  dragger->linkToMatrix(heightIP.get());
+  
+  radiusIP = new lbr::IPGroup(&radius);
+  radiusIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 1.0, 0.0)));
+  radiusIP->setMatrixDragger(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(-1.0, 0.0, 0.0)));
+  radiusIP->setDimsFlipped(true);
+  radiusIP->setRotation(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(-1.0, 0.0, 0.0));
+  radiusIP->valueHasChanged();
+  overlaySwitch->addChild(radiusIP.get());
+  dragger->linkToMatrix(radiusIP.get());
+  
+  updateIPGroup();
+}
+
+void Cylinder::updateIPGroup()
+{
+  //height of radius dragger
+  osg::Matrixd freshMatrix;
+  freshMatrix.setRotate(osg::Quat(osg::PI_2, osg::Vec3d(-1.0, 0.0, 0.0)));
+  freshMatrix.setTrans(osg::Vec3d (0.0, 0.0, height / 2.0));
+  radiusIP->setMatrixDragger(freshMatrix);
+  
+  heightIP->setMatrix(toOsg(system));
+  radiusIP->setMatrix(toOsg(system));
+  
+  heightIP->mainDim->setSqueeze(radius);
+  heightIP->mainDim->setExtensionOffset(radius);
+  
+  radiusIP->mainDim->setSqueeze(height/2.0);
+  radiusIP->mainDim->setExtensionOffset(height/2.0);
 }
 
 void Cylinder::setRadius(const double& radiusIn)
@@ -80,7 +177,6 @@ void Cylinder::setRadius(const double& radiusIn)
   if (radius == radiusIn)
     return;
   assert(radiusIn > Precision::Confusion());
-  setModelDirty();
   radius = radiusIn;
 }
 
@@ -89,13 +185,11 @@ void Cylinder::setHeight(const double& heightIn)
   if (height == heightIn)
     return;
   assert(heightIn > Precision::Confusion());
-  setModelDirty();
   height = heightIn;
 }
 
 void Cylinder::setParameters(const double& radiusIn, const double& heightIn)
 {
-  //dirty and asserts in setters.
   setRadius(radiusIn);
   setHeight(heightIn);
 }
@@ -127,6 +221,8 @@ void Cylinder::updateModel(const UpdateMap& mapIn)
     std::cout << std::endl << "Error in cylinder update. " << e->GetMessageString() << std::endl;
   }
   setModelClean();
+  
+  updateIPGroup();
 }
 
 //the quantity of cone shapes can change so generating maps from first update can lead to missing

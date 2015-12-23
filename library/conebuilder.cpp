@@ -26,6 +26,8 @@
 #include "circlebuilder.h"
 #include "conebuilder.h"
 
+using namespace lbr;
+
 void ConeBuilder::setIsoLines(std::size_t isoLinesIn)
 {
   isoLines = std::max(static_cast<std::size_t>(3), isoLinesIn);

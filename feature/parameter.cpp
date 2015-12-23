@@ -17,26 +17,36 @@
  *
  */
 
-#include "circleprojector.h"
+#include "parameter.h"
 
-using namespace osg;
-using namespace osgManipulator;
-using namespace lbr;
+using namespace ftr;
 
-CircleProjector::CircleProjector() : radius(1.0)
+Parameter::Parameter()
 {
-  
+  name = "no name";
+  value = 1.0;
 }
 
-bool CircleProjector::project(const PointerInfo& pi, osg::Vec3d& projectedPoint) const
+Parameter::Parameter(const std::string& nameIn, double valueIn)
 {
-  ref_ptr<PlaneProjector> planeProjector = new PlaneProjector(Plane(Vec3d(0.0, 0.0, 1.0), Vec3d(0.0, 0.0, 0.0)));
-  planeProjector->setLocalToWorld(getLocalToWorld());
-  if (!planeProjector->project(pi, projectedPoint))
-    return false;
-  
-  projectedPoint.normalize();
-  projectedPoint *= radius;
+  name = nameIn;
+  value = valueIn;
+}
 
-  return true;
+Parameter& Parameter::operator=(double valueIn)
+{
+  setValue(valueIn);
+  return *this;
+}
+
+
+void Parameter::setValue(double valueIn)
+{
+  if (value == valueIn)
+    return;
+  if (!isConstant())
+    return;
+  
+  value = valueIn;
+  valueChangedSignal();
 }

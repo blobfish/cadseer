@@ -24,6 +24,9 @@
 
 #include <osg/Math> //for pi.
 
+namespace lbr
+{
+
 /*! @brief class for constructing a cylinder with OpenSceneGraph
  * 
  * Mesh density can be controlled by ::setIsoLines or ::setDeviation.
@@ -63,5 +66,6 @@ protected:
   double radius = 1.0; //!< default value of 1.0
   double height = 10.0; //!< default value of 10.0
 };
+}
 
 #endif // CYLINDERBUILDER_H

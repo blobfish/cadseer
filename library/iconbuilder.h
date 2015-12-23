@@ -23,6 +23,9 @@
 #include <osg/Vec3d>
 #include <osg/Image>
 
+namespace lbr
+{
+
 class IconBuilder
 {
 public:
@@ -38,5 +41,6 @@ protected:
   osg::Vec3d yVector = osg::Vec3d(0.0, 1.0, 0.0);
   
 };
+}
 
 #endif // ICONBUILDER_H

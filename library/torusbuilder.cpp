@@ -27,6 +27,8 @@
 
 #include "torusbuilder.h"
 
+using namespace lbr;
+
 static osg::Matrixd makeTransform(const osg::Vec3d &xVector, const osg::Vec3d &yVector, const osg::Vec3d &zVector)
 {
   //row major.

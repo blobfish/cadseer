@@ -622,6 +622,7 @@ namespace prf
   class Mesh;
   class Visual;
   class Dragger;
+  class InteractiveParameter;
   class Root;
 }
 
@@ -1416,6 +1417,302 @@ namespace prf
   };
 
   /**
+   * @brief Class corresponding to the %InteractiveParameter schema type.
+   *
+   * @nosubgrouping
+   */
+  class InteractiveParameter: public ::xml_schema::Type
+  {
+    public:
+    /**
+     * @name characterSize
+     *
+     * @brief Accessor and modifier functions for the %characterSize
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::DecPositive CharacterSizeType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< CharacterSizeType, char > CharacterSizeTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const CharacterSizeType&
+    characterSize () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    CharacterSizeType&
+    characterSize ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    characterSize (const CharacterSizeType& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly
+     * instead of making a copy.
+     */
+    void
+    characterSize (::std::unique_ptr< CharacterSizeType > p);
+
+    /**
+     * @brief Return the default value for the element.
+     *
+     * @return The element's default value.
+     */
+    static CharacterSizeType
+    characterSize_default_value ();
+
+    //@}
+
+    /**
+     * @name arrowWidth
+     *
+     * @brief Accessor and modifier functions for the %arrowWidth
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::DecPositive ArrowWidthType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< ArrowWidthType, char > ArrowWidthTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const ArrowWidthType&
+    arrowWidth () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    ArrowWidthType&
+    arrowWidth ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    arrowWidth (const ArrowWidthType& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly
+     * instead of making a copy.
+     */
+    void
+    arrowWidth (::std::unique_ptr< ArrowWidthType > p);
+
+    /**
+     * @brief Return the default value for the element.
+     *
+     * @return The element's default value.
+     */
+    static ArrowWidthType
+    arrowWidth_default_value ();
+
+    //@}
+
+    /**
+     * @name arrowHeight
+     *
+     * @brief Accessor and modifier functions for the %arrowHeight
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::DecPositive ArrowHeightType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< ArrowHeightType, char > ArrowHeightTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const ArrowHeightType&
+    arrowHeight () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    ArrowHeightType&
+    arrowHeight ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    arrowHeight (const ArrowHeightType& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly
+     * instead of making a copy.
+     */
+    void
+    arrowHeight (::std::unique_ptr< ArrowHeightType > p);
+
+    /**
+     * @brief Return the default value for the element.
+     *
+     * @return The element's default value.
+     */
+    static ArrowHeightType
+    arrowHeight_default_value ();
+
+    //@}
+
+    /**
+     * @name Constructors
+     */
+    //@{
+
+    /**
+     * @brief Create an instance from the ultimate base and
+     * initializers for required elements and attributes.
+     */
+    InteractiveParameter (const CharacterSizeType&,
+                          const ArrowWidthType&,
+                          const ArrowHeightType&);
+
+    /**
+     * @brief Create an instance from a DOM element.
+     *
+     * @param e A DOM element to extract the data from.
+     * @param f Flags to create the new instance with.
+     * @param c A pointer to the object that will contain the new
+     * instance.
+     */
+    InteractiveParameter (const ::xercesc::DOMElement& e,
+                          ::xml_schema::Flags f = 0,
+                          ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy constructor.
+     *
+     * @param x An instance to make a copy of.
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    InteractiveParameter (const InteractiveParameter& x,
+                          ::xml_schema::Flags f = 0,
+                          ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy the instance polymorphically.
+     *
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     * @return A pointer to the dynamically allocated copy.
+     *
+     * This function ensures that the dynamic type of the instance is
+     * used for copying and should be used for polymorphic object
+     * models instead of the copy constructor.
+     */
+    virtual InteractiveParameter*
+    _clone (::xml_schema::Flags f = 0,
+            ::xml_schema::Container* c = 0) const;
+
+    /**
+     * @brief Copy assignment operator.
+     *
+     * @param x An instance to make a copy of.
+     * @return A reference to itself.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    InteractiveParameter&
+    operator= (const InteractiveParameter& x);
+
+    //@}
+
+    /**
+     * @brief Destructor.
+     */
+    virtual 
+    ~InteractiveParameter ();
+
+    // Implementation.
+    //
+
+    //@cond
+
+    protected:
+    void
+    parse (::xsd::cxx::xml::dom::parser< char >&,
+           ::xml_schema::Flags);
+
+    protected:
+    ::xsd::cxx::tree::one< CharacterSizeType > characterSize_;
+    ::xsd::cxx::tree::one< ArrowWidthType > arrowWidth_;
+    ::xsd::cxx::tree::one< ArrowHeightType > arrowHeight_;
+
+    //@endcond
+  };
+
+  /**
    * @brief Class corresponding to the %Root schema type.
    *
    * @nosubgrouping
@@ -1540,6 +1837,64 @@ namespace prf
     //@}
 
     /**
+     * @name interactiveParameter
+     *
+     * @brief Accessor and modifier functions for the %interactiveParameter
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::InteractiveParameter InteractiveParameterType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< InteractiveParameterType, char > InteractiveParameterTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const InteractiveParameterType&
+    interactiveParameter () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    InteractiveParameterType&
+    interactiveParameter ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    interactiveParameter (const InteractiveParameterType& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly
+     * instead of making a copy.
+     */
+    void
+    interactiveParameter (::std::unique_ptr< InteractiveParameterType > p);
+
+    //@}
+
+    /**
      * @name Constructors
      */
     //@{
@@ -1549,7 +1904,8 @@ namespace prf
      * initializers for required elements and attributes.
      */
     Root (const VisualType&,
-          const DraggerType&);
+          const DraggerType&,
+          const InteractiveParameterType&);
 
     /**
      * @brief Create an instance from the ultimate base and
@@ -1560,7 +1916,8 @@ namespace prf
      * instead of making copies.
      */
     Root (::std::unique_ptr< VisualType >,
-          ::std::unique_ptr< DraggerType >);
+          ::std::unique_ptr< DraggerType >,
+          ::std::unique_ptr< InteractiveParameterType >);
 
     /**
      * @brief Create an instance from a DOM element.
@@ -1634,6 +1991,7 @@ namespace prf
     protected:
     ::xsd::cxx::tree::one< VisualType > visual_;
     ::xsd::cxx::tree::one< DraggerType > dragger_;
+    ::xsd::cxx::tree::one< InteractiveParameterType > interactiveParameter_;
 
     //@endcond
   };
@@ -1929,6 +2287,9 @@ namespace prf
 
   void
   operator<< (::xercesc::DOMElement&, const Dragger&);
+
+  void
+  operator<< (::xercesc::DOMElement&, const InteractiveParameter&);
 
   void
   operator<< (::xercesc::DOMElement&, const Root&);

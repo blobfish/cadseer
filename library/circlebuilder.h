@@ -26,6 +26,9 @@
 
 namespace osg{class Vec3d; class Geometry;}
 
+namespace lbr
+{
+
 /*! @brief class for constructing a circle of points with OpenSceneGraph
  * 
  * Point density can be controlled by ::setSegments or ::setDeviation.
@@ -79,5 +82,6 @@ protected:
   double angularSpan = 2.0 * osg::PI; //!< in radians, default 2PI, full circle.
   double radius = 1.0; //!< default value of 1.0
 };
+}
 
 #endif // CIRCLEBUILDER_H
