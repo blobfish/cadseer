@@ -18,10 +18,13 @@
 #ifndef OVERLAYHANDLER_H
 #define OVERLAYHANDLER_H
 
+#include <osg/ref_ptr>
 #include <osgGA/GUIEventHandler>
 #include <osgManipulator/Dragger> //needed for pointerInfo
 
 class OverlayCamera;
+
+namespace lbr {class IPGroup;}
 
 namespace slc
 {
@@ -36,6 +39,8 @@ namespace slc
     osg::ref_ptr<OverlayCamera> camera;
     osgManipulator::Dragger *dragger = nullptr;
     osgManipulator::PointerInfo pointer;
+    osg::ref_ptr<lbr::IPGroup> dimension;
+    
     osg::NodePath path;
     bool isDrag = false;
   };

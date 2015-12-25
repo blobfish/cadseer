@@ -48,11 +48,15 @@ namespace lbr
     IPGroup(const IPGroup &copy, const osg::CopyOp& copyOp=osg::CopyOp::SHALLOW_COPY);
     META_Node(osg, IPGroup);
     
+    ftr::Parameter* getParameter(){return parameter;}
     void setParameterValue(double valueIn);
     void setRotation(const osg::Vec3d&, const osg::Vec3d&);
     void valueHasChanged();
+    void constantHasChanged();
     osg::BoundingBox maxTextBoundingBox();
     bool processMotion(const osgManipulator::MotionCommand&);
+    void draggerShow();
+    void draggerHide();
     
     osg::ref_ptr<osg::AutoTransform> rotation;
     osg::ref_ptr<LinearDimension> mainDim;
@@ -76,6 +80,7 @@ namespace lbr
     osg::Vec3d originStart;
     osg::ref_ptr<osg::Switch> dimSwitch;
     osg::ref_ptr<LinearDragger> dragger;
+    osg::ref_ptr<osg::Switch> draggerSwitch;
     osg::ref_ptr<osg::MatrixTransform> draggerMatrix;
     osg::ref_ptr<IPCallback> ipCallback;
     MessageOutSignal messageOutSignal;

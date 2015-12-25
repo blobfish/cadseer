@@ -22,6 +22,12 @@
 
 #include <viewer/overlaycamera.h>
 #include <library/csysdragger.h>
+#include <library/ipgroup.h>
+#include <feature/parameter.h>
+#include <dialogs/parameterdialog.h>
+#include <selection/visitors.h>
+#include <nodemaskdefs.h>
+#include <globalutilities.h>
 #include "overlayhandler.h"
 
 using namespace slc;
@@ -110,6 +116,22 @@ bool OverlayHandler::handle
     }
   };
   
+  auto findDimension = [&](const osgUtil::LineSegmentIntersector::Intersections &intersections)
+  {
+    for (auto i : intersections)
+    {
+      for (auto n: i.nodePath)
+      {
+	dimension = dynamic_cast<lbr::IPGroup *>(n);
+	if(dimension)
+	{
+	  path = i.nodePath;
+	  return;
+	}
+      }
+    }
+  };
+  
   bool out= false;
   bool shouldRedraw = false;
   
@@ -117,14 +139,17 @@ bool OverlayHandler::handle
   if (eventAdapter.getEventType() == osgGA::GUIEventAdapter::MOVE)
   {
     assert(!dragger);
+    assert(!dimension);
     assert(path.empty());
     osgUtil::LineSegmentIntersector::Intersections intersections = doIntersection();
     findDragger(intersections);
     findIcon(intersections);
+    findDimension(intersections);
     out = !path.empty();
     
     pointer.reset();
     dragger = nullptr;
+    dimension.release();
     path.clear();
   }
   
@@ -205,6 +230,21 @@ bool OverlayHandler::handle
       out = true;
       pointer.reset();
       dragger = nullptr;
+    }
+    else
+    {
+      osgUtil::LineSegmentIntersector::Intersections intersections = doIntersection();
+      findDimension(intersections);
+      if (dimension)
+      {
+	ParentMaskVisitor visitor(NodeMaskDef::overlaySwitch);
+	dimension->accept(visitor);
+	assert(visitor.out);
+	
+	dlg::ParameterDialog *dialog = new dlg::ParameterDialog(dimension->getParameter(), GU::getId(visitor.out));
+	dialog->show();
+	dimension.release();
+      }
     }
     path.clear();
   }

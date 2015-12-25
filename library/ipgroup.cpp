@@ -73,15 +73,19 @@ parameter(parameterIn)
   draggerMatrix->setMatrix(osg::Matrixd::identity());
   rotation->addChild(draggerMatrix.get());
   
+  draggerSwitch = new osg::Switch();
+  draggerMatrix->addChild(draggerSwitch.get());
+  
   dragger = new LinearDragger();
   dragger->setScreenScale(75.0);
   dragger->setColor(osg::Vec4d(0.79, 0.13, 0.48, 1.0));
-  draggerMatrix->addChild(dragger.get());
+  draggerSwitch->addChild(dragger.get());
   
   ipCallback = new IPCallback(dragger.get(), this);
   dragger->addDraggerCallback(ipCallback.get());
   
   parameter->connectValue(boost::bind(&IPGroup::valueHasChanged, this));
+  parameter->connectConstant(boost::bind(&IPGroup::constantHasChanged, this));
   connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
 }
 
@@ -133,6 +137,15 @@ void IPGroup::valueHasChanged()
   setParameterValue(parameter->getValue());
 }
 
+void IPGroup::constantHasChanged()
+{
+  assert(parameter);
+  if (parameter->isConstant())
+    draggerShow();
+  else
+    draggerHide();
+}
+
 void IPGroup::setParameterValue(double valueIn)
 {
   if (value == valueIn)
@@ -142,6 +155,16 @@ void IPGroup::setParameterValue(double valueIn)
   overallDim->setSpread(value);
   
   dragger->setMatrix(osg::Matrixd::translate(0.0, 0.0, value));
+}
+
+void IPGroup::draggerShow()
+{
+  draggerSwitch->setAllChildrenOn();
+}
+
+void IPGroup::draggerHide()
+{
+  draggerSwitch->setAllChildrenOff();
 }
 
 bool IPGroup::processMotion(const osgManipulator::MotionCommand &commandIn)

@@ -59,6 +59,7 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     setupDispatcher();
     
     setThreadingModel(threadingModel);
+    setKeyEventSetsDone(0); //stops the viewer from freezing when the escape key is pressed.
     connect(&_timer, SIGNAL(timeout()), this, SLOT(update()));
 
     root = new osg::Group;

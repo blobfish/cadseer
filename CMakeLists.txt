@@ -98,6 +98,7 @@ SET(SELECTION_SOURCES
 
 SET(DIALOG_SOURCES
     dialogs/boxdialog.cpp
+    dialogs/parameterdialog.cpp
     )
     
 SET(PREFERENCE_SOURCES
@@ -171,6 +172,7 @@ SET(CADSEER_MOC_HDRS
     selection/manager.h
     dialogs/boxdialog.h
     preferences/dialog.h
+    dialogs/parameterdialog.h
     )
 
 SET(CADSEER_LIBRARIES

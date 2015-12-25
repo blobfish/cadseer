@@ -58,6 +58,7 @@ Base::Base()
   mainTransform->addChild(lod.get());
   
   overlaySwitch = new osg::Switch();
+  overlaySwitch->setNodeMask(NodeMaskDef::overlaySwitch);
   overlaySwitch->setName("overlay");
   overlaySwitch->setUserValue(GU::idAttributeTitle, boost::uuids::to_string(id));
   

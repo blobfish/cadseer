@@ -39,6 +39,13 @@ Parameter& Parameter::operator=(double valueIn)
   return *this;
 }
 
+void Parameter::setConstant(bool constantIn)
+{
+  if (constantIn == constant)
+    return;
+  constant = constantIn;
+  constantChangedSignal();
+}
 
 void Parameter::setValue(double valueIn)
 {

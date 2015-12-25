@@ -41,8 +41,8 @@ namespace ftr
     void setValue(double valueIn);
     std::string getName() const {return name;}
     void setName(const std::string &nameIn){name = nameIn;}
-    bool isDynamic() const {return true;} //!< signals whether we can drag or not. true for now.
-    bool isConstant() const {return true;} //!< true = not linked to forumla. Just true for now.
+    bool isConstant() const {return constant;} //!< true = not linked to forumla.
+    void setConstant(bool constantIn);
     operator double() const {return value;}
     Parameter& operator=(double valueIn);
     
@@ -51,12 +51,20 @@ namespace ftr
     {
       return valueChangedSignal.connect(subscriber);
     }
+    
+    typedef boost::signals2::signal<void ()> ConstantChangedSignal;
+    boost::signals2::connection connectConstant(const ConstantChangedSignal::slot_type &subscriber) const
+    {
+      return constantChangedSignal.connect(subscriber);
+    }
   private:
+    bool constant = true;
     std::string name;
     double value;
     
     //mutable allows us to connect to the signal through a const object.
     mutable ValueChangedSignal valueChangedSignal;
+    mutable ConstantChangedSignal constantChangedSignal;
   };
   inline bool operator==(const Parameter &lhs, const Parameter &rhs)
   {
@@ -64,8 +72,7 @@ namespace ftr
     (
       (lhs.getName() == rhs.getName()) &&
       (lhs.getValue() == rhs.getValue()) &&
-      (lhs.isConstant() == rhs.isConstant()) &&
-      (lhs.isDynamic() == rhs.isDynamic())
+      (lhs.isConstant() == rhs.isConstant())
     );
   }
   inline bool operator==(const Parameter &lhs, double valueIn)
