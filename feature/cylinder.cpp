@@ -95,7 +95,7 @@ void Cylinder::setupIPGroup()
 {
   heightIP = new lbr::IPGroup(&height);
   heightIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(1.0, 0.0, 0.0)));
-  heightIP->setRotation(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(0.0, -1.0, 0.0));
+  heightIP->setRotationAxis(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(0.0, -1.0, 0.0));
   heightIP->valueHasChanged();
   heightIP->constantHasChanged();
   overlaySwitch->addChild(heightIP.get());
@@ -105,7 +105,7 @@ void Cylinder::setupIPGroup()
   radiusIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 1.0, 0.0)));
   radiusIP->setMatrixDragger(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(-1.0, 0.0, 0.0)));
   radiusIP->setDimsFlipped(true);
-  radiusIP->setRotation(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(-1.0, 0.0, 0.0));
+  radiusIP->setRotationAxis(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(-1.0, 0.0, 0.0));
   radiusIP->valueHasChanged();
   radiusIP->constantHasChanged();
   overlaySwitch->addChild(radiusIP.get());

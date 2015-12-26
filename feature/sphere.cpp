@@ -21,6 +21,7 @@
 
 #include <BRepPrimAPI_MakeSphere.hxx>
 
+#include <library/ipgroup.h>
 #include <feature/sphere.h>
 
 using namespace ftr;
@@ -52,7 +53,7 @@ static const std::map<FeatureTag, std::string> featureTagMap =
 
 QIcon Sphere::icon;
 
-Sphere::Sphere() : CSysBase(), radius(5.0)
+Sphere::Sphere() : CSysBase(), radius(ParameterNames::Radius, 5.0)
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionSphere.svg");
@@ -60,6 +61,16 @@ Sphere::Sphere() : CSysBase(), radius(5.0)
   name = QObject::tr("Sphere");
   
   initializeMaps();
+  
+  pMap.insert(std::make_pair(ParameterNames::Radius, &radius));
+  radius.connectValue(boost::bind(&Sphere::setModelDirty, this));
+  
+  setupIPGroup();
+}
+
+Sphere::~Sphere()
+{
+
 }
 
 void Sphere::setRadius(const double& radiusIn)
@@ -69,6 +80,24 @@ void Sphere::setRadius(const double& radiusIn)
   assert(radiusIn > Precision::Confusion());
   setModelDirty();
   radius = radiusIn;
+}
+
+void Sphere::setupIPGroup()
+{
+  radiusIP = new lbr::IPGroup(&radius);
+  radiusIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 1.0, 0.0)));
+  radiusIP->setMatrixDragger(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(-1.0, 0.0, 0.0)));
+  radiusIP->setDimsFlipped(true);
+  radiusIP->setRotationAxis(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(-1.0, 0.0, 0.0));
+  radiusIP->valueHasChanged();
+  radiusIP->constantHasChanged();
+  overlaySwitch->addChild(radiusIP.get());
+  dragger->linkToMatrix(radiusIP.get());
+}
+
+void Sphere::updateIPGroup()
+{
+  radiusIP->setMatrix(gu::toOsg(system));
 }
 
 void Sphere::updateModel(const UpdateMap& mapIn)
@@ -94,6 +123,8 @@ void Sphere::updateModel(const UpdateMap& mapIn)
     std::cout << std::endl << "Error in sphere update. " << e->GetMessageString() << std::endl;
   }
   setModelClean();
+  
+  updateIPGroup();
 }
 
 void Sphere::initializeMaps()

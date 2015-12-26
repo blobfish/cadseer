@@ -94,7 +94,7 @@ IPGroup::IPGroup(const IPGroup& copy, const osg::CopyOp& copyOp) : osg::MatrixTr
   assert(0);
 }
 
-void IPGroup::setRotation(const osg::Vec3d &axisIn, const osg::Vec3d &normalIn)
+void IPGroup::setRotationAxis(const osg::Vec3d &axisIn, const osg::Vec3d &normalIn)
 {
   rotation->setAutoRotateMode(osg::AutoTransform::ROTATE_TO_AXIS);
   rotation->setAxis(axisIn);

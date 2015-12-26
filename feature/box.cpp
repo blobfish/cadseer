@@ -149,7 +149,7 @@ void Box::setupIPGroup()
   lengthIP = new lbr::IPGroup(&length);
   lengthIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 0.0, -1.0)));
   lengthIP->noAutoRotateDragger();
-  lengthIP->setRotation(osg::Vec3d(1.0, 0.0, 0.0), osg::Vec3d(0.0, 0.0, 1.0));
+  lengthIP->setRotationAxis(osg::Vec3d(1.0, 0.0, 0.0), osg::Vec3d(0.0, 0.0, 1.0));
   lengthIP->valueHasChanged();
   lengthIP->constantHasChanged();
   overlaySwitch->addChild(lengthIP.get());
@@ -158,7 +158,7 @@ void Box::setupIPGroup()
   widthIP = new lbr::IPGroup(&width);
 //   widthIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 0.0, -1.0)));
   widthIP->noAutoRotateDragger();
-  widthIP->setRotation(osg::Vec3d(0.0, 1.0, 0.0), osg::Vec3d(0.0, 0.0, -1.0));
+  widthIP->setRotationAxis(osg::Vec3d(0.0, 1.0, 0.0), osg::Vec3d(0.0, 0.0, -1.0));
   widthIP->valueHasChanged();
   widthIP->constantHasChanged();
   overlaySwitch->addChild(widthIP.get());
@@ -167,7 +167,7 @@ void Box::setupIPGroup()
   heightIP = new lbr::IPGroup(&height);
   heightIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(1.0, 0.0, 0.0)));
   heightIP->noAutoRotateDragger();
-  heightIP->setRotation(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(0.0, 1.0, 0.0));
+  heightIP->setRotationAxis(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(0.0, 1.0, 0.0));
   heightIP->valueHasChanged();
   heightIP->constantHasChanged();
   overlaySwitch->addChild(heightIP.get());

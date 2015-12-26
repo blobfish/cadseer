@@ -50,7 +50,7 @@ namespace lbr
     
     ftr::Parameter* getParameter(){return parameter;}
     void setParameterValue(double valueIn);
-    void setRotation(const osg::Vec3d&, const osg::Vec3d&);
+    void setRotationAxis(const osg::Vec3d&, const osg::Vec3d&);
     void valueHasChanged();
     void constantHasChanged();
     osg::BoundingBox maxTextBoundingBox();

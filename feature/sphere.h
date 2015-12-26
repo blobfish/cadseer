@@ -20,9 +20,12 @@
 #ifndef SPHERE_H
 #define SPHERE_H
 
+#include <osg/ref_ptr>
+
 #include <feature/csysbase.h>
 
 class BRepPrimAPI_MakeSphere;
+namespace lbr{class IPGroup;}
 
 namespace ftr
 {
@@ -30,6 +33,7 @@ namespace ftr
   {
   public:
     Sphere();
+    ~Sphere();
     void setRadius(const double &radiusIn);
     double getRadius() const {return radius;}
     virtual void updateModel(const UpdateMap&) override;
@@ -39,10 +43,14 @@ namespace ftr
     virtual Descriptor getDescriptor() const override {return Descriptor::Create;}
     
   protected:
-    double radius;
+    Parameter radius;
+    
+    osg::ref_ptr<lbr::IPGroup> radiusIP;
     
     void initializeMaps();
     void updateResult(BRepPrimAPI_MakeSphere&);
+    void setupIPGroup();
+    void updateIPGroup();
     
   private:
     static QIcon icon;
