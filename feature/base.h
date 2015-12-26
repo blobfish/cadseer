@@ -113,6 +113,7 @@ protected:
   void setSuccess(); //!< set only through virtual update.
   
   QString name;
+  ParameterMap pMap;
   
   //mutable allows us to connect to the signal through a const object. neat!
   mutable StateChangedSignal stateChangedSignal;

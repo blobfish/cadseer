@@ -42,7 +42,7 @@ static uuid getFeatureId(mdv::ShapeGeometry *geometryIn)
   geometryIn->accept(visitor);
   osg::Node *featureRoot = visitor.out;
   assert(featureRoot);
-  return GU::getId(featureRoot);
+  return gu::getId(featureRoot);
 }
 
 //helper function

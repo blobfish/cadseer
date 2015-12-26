@@ -45,7 +45,7 @@ Base::Base()
   mainSwitch = new osg::Switch();
   mainSwitch->setName("feature");
   mainSwitch->setNodeMask(NodeMaskDef::object);
-  mainSwitch->setUserValue(GU::idAttributeTitle, boost::uuids::to_string(id));
+  mainSwitch->setUserValue(gu::idAttributeTitle, boost::uuids::to_string(id));
   
   mainTransform = new osg::MatrixTransform();
   mainTransform->setMatrix(osg::Matrixd::identity());
@@ -60,7 +60,7 @@ Base::Base()
   overlaySwitch = new osg::Switch();
   overlaySwitch->setNodeMask(NodeMaskDef::overlaySwitch);
   overlaySwitch->setName("overlay");
-  overlaySwitch->setUserValue(GU::idAttributeTitle, boost::uuids::to_string(id));
+  overlaySwitch->setUserValue(gu::idAttributeTitle, boost::uuids::to_string(id));
   
   state.set(ftr::StateOffset::ModelDirty, true);
   state.set(ftr::StateOffset::VisualDirty, true);

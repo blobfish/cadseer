@@ -57,6 +57,7 @@ namespace lbr
     bool processMotion(const osgManipulator::MotionCommand&);
     void draggerShow();
     void draggerHide();
+    void noAutoRotateDragger();
     
     osg::ref_ptr<osg::AutoTransform> rotation;
     osg::ref_ptr<LinearDimension> mainDim;

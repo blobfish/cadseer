@@ -20,23 +20,34 @@
 #ifndef GLOBALUTILITIES_H
 #define GLOBALUTILITIES_H
 
+#include <string>
+
 #include <boost/uuid/uuid.hpp>
 
-#include <TopoDS_Shape.hxx>
+class TopoDS_Shape;
+class gp_Vec;
+class gp_Pnt;
+class gp_Ax2;
 
 namespace osg
 {
 class Geometry;
 class Node;
+class Vec3d;
+class Matrixd;
 }
 
-namespace GU
+namespace gu
 {
 int getShapeHash(const TopoDS_Shape &shape);
 boost::uuids::uuid getId(const osg::Geometry *geometry);
 boost::uuids::uuid getId(const osg::Node *node);
 static const std::string idAttributeTitle = "id";
 std::string getShapeTypeString(const TopoDS_Shape&);
+osg::Vec3d toOsg(const gp_Vec &occVecIn);
+osg::Vec3d toOsg(const gp_Pnt &occPointIn);
+osg::Matrixd toOsg(const gp_Ax2 &systemIn);
+gp_Ax2 toOcc(const osg::Matrixd &m);
 }
 
 #endif // GLOBALUTILITIES_H

@@ -21,16 +21,22 @@
 #ifndef BOX_H
 #define BOX_H
 
+#include <osg/ref_ptr>
+
 #include <feature/csysbase.h>
+
+namespace lbr{class IPGroup;}
 
 namespace ftr
 {
+  
 class BoxBuilder;
 
 class Box : public CSysBase
 {
 public:
   Box();
+  ~Box();
   void setLength(const double &lengthIn);
   void setWidth(const double &widthIn);
   void setHeight(const double &heightIn);
@@ -46,12 +52,18 @@ public:
   virtual Descriptor getDescriptor() const override {return Descriptor::Create;}
   
 protected:
-  double length;
-  double width;
-  double height;
+  Parameter length;
+  Parameter width;
+  Parameter height;
+  
+  osg::ref_ptr<lbr::IPGroup> lengthIP;
+  osg::ref_ptr<lbr::IPGroup> widthIP;
+  osg::ref_ptr<lbr::IPGroup> heightIP;
   
   void initializeMaps();
   void updateResult(const BoxBuilder&);
+  void setupIPGroup();
+  void updateIPGroup();
   
 private:
   static QIcon icon;

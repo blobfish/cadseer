@@ -51,7 +51,6 @@ namespace ftr
   protected:
     Parameter radius;
     Parameter height;
-    ParameterMap pMap;
     
     osg::ref_ptr<lbr::IPGroup> heightIP;
     osg::ref_ptr<lbr::IPGroup> radiusIP;

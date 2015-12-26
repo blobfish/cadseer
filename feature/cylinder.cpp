@@ -21,6 +21,7 @@
 
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
+#include <globalutilities.h>
 #include <library/lineardimension.h>
 #include <library/ipgroup.h>
 #include <feature/cylinderbuilder.h>
@@ -66,49 +67,6 @@ static const std::map<FeatureTag, std::string> featureTagMap =
 };
 
 QIcon Cylinder::icon;
-
-//TODO duplicate functions. copied from csysbase. address later
-static osg::Vec3d toOsg(const gp_Vec &occVecIn)
-{
-  osg::Vec3d out;
-  
-  out.x() = occVecIn.X();
-  out.y() = occVecIn.Y();
-  out.z() = occVecIn.Z();
-  
-  return out;
-}
-
-static osg::Vec3d toOsg(const gp_Pnt &occPointIn)
-{
-  osg::Vec3d out;
-  
-  out.x() = occPointIn.X();
-  out.y() = occPointIn.Y();
-  out.z() = occPointIn.Z();
-  
-  return out;
-}
-
-static osg::Matrixd toOsg(const gp_Ax2 &systemIn)
-{
-  
-  osg::Vec3d xVector = toOsg(gp_Vec(systemIn.XDirection()));
-  osg::Vec3d yVector = toOsg(gp_Vec(systemIn.YDirection()));
-  osg::Vec3d zVector = toOsg(gp_Vec(systemIn.Direction()));
-  osg::Vec3d origin = toOsg(systemIn.Location());
-  
-  //row major for openscenegraph.
-  osg::Matrixd out
-  (
-    xVector.x(), xVector.y(), xVector.z(), 0.0,
-    yVector.x(), yVector.y(), yVector.z(), 0.0,
-    zVector.x(), zVector.y(), zVector.z(), 0.0,
-    origin.x(), origin.y(), origin.z(), 1.0
-  );
-  
-  return out;
-}
 
 Cylinder::Cylinder() : CSysBase(), radius(ParameterNames::Radius, 5.0), height(ParameterNames::Height, 20.0)
 {
@@ -164,8 +122,8 @@ void Cylinder::updateIPGroup()
   freshMatrix.setTrans(osg::Vec3d (0.0, 0.0, height / 2.0));
   radiusIP->setMatrixDragger(freshMatrix);
   
-  heightIP->setMatrix(toOsg(system));
-  radiusIP->setMatrix(toOsg(system));
+  heightIP->setMatrix(gu::toOsg(system));
+  radiusIP->setMatrix(gu::toOsg(system));
   
   heightIP->mainDim->setSqueeze(radius);
   heightIP->mainDim->setExtensionOffset(radius);

@@ -91,7 +91,7 @@ parameter(parameterIn)
 
 IPGroup::IPGroup(const IPGroup& copy, const osg::CopyOp& copyOp) : osg::MatrixTransform(copy, copyOp)
 {
-  
+  assert(0);
 }
 
 void IPGroup::setRotation(const osg::Vec3d &axisIn, const osg::Vec3d &normalIn)
@@ -118,6 +118,12 @@ void IPGroup::setDimsFlipped(bool flippedIn)
   mainDim->setFlipped(flippedIn);
   differenceDim->setFlipped(flippedIn);
   overallDim->setFlipped(flippedIn);
+}
+
+void IPGroup::noAutoRotateDragger()
+{
+  rotation->removeChild(draggerMatrix.get());
+  this->addChild(draggerMatrix.get());
 }
 
 osg::BoundingBox IPGroup::maxTextBoundingBox()

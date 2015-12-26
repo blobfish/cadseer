@@ -519,7 +519,7 @@ void Blend::derivedMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *tar
 void Blend::dumpInfo(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *targetFeatureIn)
 {
   std::cout << std::endl << std::endl <<
-    "shape out type is: " << GU::getShapeTypeString(blendMakerIn.Shape()) << std::endl <<
+    "shape out type is: " << gu::getShapeTypeString(blendMakerIn.Shape()) << std::endl <<
     "fillet dump:" << std::endl;
   
   const TopoDS_Shape &targetShape = targetFeatureIn->getShape();
@@ -528,14 +528,14 @@ void Blend::dumpInfo(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *targetF
   for (int index = 1; index <= localShapeMap.Extent(); ++index)
   {
     const TopoDS_Shape &currentShape = localShapeMap(index);
-    std::cout << "ShapeType is: " << std::setw(10) << GU::getShapeTypeString(currentShape) << 
+    std::cout << "ShapeType is: " << std::setw(10) << gu::getShapeTypeString(currentShape) << 
       "      Generated Count is: " << blendMakerIn.Generated(currentShape).Extent() <<
       "      Modified Count is: " << blendMakerIn.Modified(currentShape).Extent() <<
       "      is deleted: " << ((blendMakerIn.IsDeleted(currentShape)) ? "true" : "false") << std::endl; 
       
       if (blendMakerIn.Generated(currentShape).Extent() > 0)
         std::cout << "   generated type is: " << 
-          GU::getShapeTypeString(blendMakerIn.Generated(currentShape).First()) << std::endl;
+          gu::getShapeTypeString(blendMakerIn.Generated(currentShape).First()) << std::endl;
   }
   
   std::cout << std::endl << std::endl << "output of blend: " << std::endl;
@@ -544,7 +544,7 @@ void Blend::dumpInfo(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *targetF
   for (int index = 1; index <= outShapeMap.Extent(); ++index)
   {
     const TopoDS_Shape &currentShape = outShapeMap(index);
-    std::cout << "ShapteType is: " << std::setw(10) << GU::getShapeTypeString(currentShape) <<
+    std::cout << "ShapteType is: " << std::setw(10) << gu::getShapeTypeString(currentShape) <<
     "      is in targetResults: " <<
       ((hasResult(targetFeatureIn->getResultContainer(), currentShape)) ? "true" : "false") << std::endl;
   }
@@ -560,7 +560,7 @@ void Blend::dumpResultStats()
   {
     if (record.id.is_nil())
     {
-      stream << std::setw(10) << GU::getShapeTypeString(record.shape) << "      is nil" << std::endl;
+      stream << std::setw(10) << gu::getShapeTypeString(record.shape) << "      is nil" << std::endl;
       ++counter;
     }
   }

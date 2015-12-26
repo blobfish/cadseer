@@ -241,7 +241,7 @@ bool OverlayHandler::handle
 	dimension->accept(visitor);
 	assert(visitor.out);
 	
-	dlg::ParameterDialog *dialog = new dlg::ParameterDialog(dimension->getParameter(), GU::getId(visitor.out));
+	dlg::ParameterDialog *dialog = new dlg::ParameterDialog(dimension->getParameter(), gu::getId(visitor.out));
 	dialog->show();
 	dimension.release();
       }

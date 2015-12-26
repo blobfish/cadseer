@@ -73,7 +73,7 @@ const EvolutionRecord& ftr::findRecordByIn(const EvolutionContainer& containerIn
 std::ostream& ftr::operator<<(std::ostream& os, const ResultRecord& record)
 {
   os << boost::uuids::to_string(record.id) << "      " << 
-    GU::getShapeHash(record.shape) << "      " <<
+    gu::getShapeHash(record.shape) << "      " <<
     shapeStrings.at(record.shape.ShapeType()) << std::endl;
   return os;
 }

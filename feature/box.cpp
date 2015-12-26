@@ -24,6 +24,7 @@
 #include <boost/uuid/random_generator.hpp>
 
 #include <globalutilities.h>
+#include <library/ipgroup.h>
 #include <feature/boxbuilder.h>
 #include <feature/box.h>
 
@@ -114,7 +115,11 @@ static const std::map<FeatureTag, std::string> featureTagMap =
 
 QIcon Box::icon;
 
-Box::Box() : CSysBase(), length(10.0), width(10.0), height(10.0)
+Box::Box() :
+  CSysBase(),
+  length(ParameterNames::Length, 10.0),
+  width(ParameterNames::Width, 10.0),
+  height(ParameterNames::Height, 10.0)
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionBox.svg");
@@ -122,6 +127,75 @@ Box::Box() : CSysBase(), length(10.0), width(10.0), height(10.0)
   name = QObject::tr("Box");
   
   initializeMaps();
+  
+  pMap.insert(std::make_pair(ParameterNames::Length, &length));
+  pMap.insert(std::make_pair(ParameterNames::Width, &width));
+  pMap.insert(std::make_pair(ParameterNames::Height, &height));
+  
+  length.connectValue(boost::bind(&Box::setModelDirty, this));
+  width.connectValue(boost::bind(&Box::setModelDirty, this));
+  height.connectValue(boost::bind(&Box::setModelDirty, this));
+  
+  setupIPGroup();
+}
+
+Box::~Box()
+{
+
+}
+
+void Box::setupIPGroup()
+{
+  lengthIP = new lbr::IPGroup(&length);
+  lengthIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 0.0, -1.0)));
+  lengthIP->noAutoRotateDragger();
+  lengthIP->setRotation(osg::Vec3d(1.0, 0.0, 0.0), osg::Vec3d(0.0, 0.0, 1.0));
+  lengthIP->valueHasChanged();
+  lengthIP->constantHasChanged();
+  overlaySwitch->addChild(lengthIP.get());
+  dragger->linkToMatrix(lengthIP.get());
+  
+  widthIP = new lbr::IPGroup(&width);
+//   widthIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 0.0, -1.0)));
+  widthIP->noAutoRotateDragger();
+  widthIP->setRotation(osg::Vec3d(0.0, 1.0, 0.0), osg::Vec3d(0.0, 0.0, -1.0));
+  widthIP->valueHasChanged();
+  widthIP->constantHasChanged();
+  overlaySwitch->addChild(widthIP.get());
+  dragger->linkToMatrix(widthIP.get());
+  
+  heightIP = new lbr::IPGroup(&height);
+  heightIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(1.0, 0.0, 0.0)));
+  heightIP->noAutoRotateDragger();
+  heightIP->setRotation(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(0.0, 1.0, 0.0));
+  heightIP->valueHasChanged();
+  heightIP->constantHasChanged();
+  overlaySwitch->addChild(heightIP.get());
+  dragger->linkToMatrix(heightIP.get());
+  
+  updateIPGroup();
+}
+
+void Box::updateIPGroup()
+{
+  lengthIP->setMatrix(gu::toOsg(system));
+  widthIP->setMatrix(gu::toOsg(system));
+  heightIP->setMatrix(gu::toOsg(system));
+  
+  osg::Matrix lMatrix;
+  lMatrix.setRotate(osg::Quat(osg::PI_2, osg::Vec3d(0.0, 1.0, 0.0)));
+  lMatrix.setTrans(osg::Vec3d(0.0, width / 2.0, height / 2.0));
+  lengthIP->setMatrixDragger(lMatrix);
+  
+  osg::Matrix wMatrix;
+  wMatrix.setRotate(osg::Quat(osg::PI_2, osg::Vec3d(-1.0, 0.0, 0.0)));
+  wMatrix.setTrans(osg::Vec3d(length / 2.0, 0.0, height / 2.0));
+  widthIP->setMatrixDragger(wMatrix);
+  
+  osg::Matrix hMatrix;
+  //no need to rotate
+  hMatrix.setTrans(osg::Vec3d(length / 2.0, width / 2.0, 0.0));
+  heightIP->setMatrixDragger(hMatrix);
 }
 
 void Box::setLength(const double &lengthIn)
@@ -189,6 +263,8 @@ void Box::updateModel(const UpdateMap& mapIn)
     std::cout << std::endl << "Error in box update. " << e->GetMessageString() << std::endl;
   }
   setModelClean();
+  
+  updateIPGroup();
 }
 
 //the quantity of cone shapes can change so generating maps from first update can lead to missing

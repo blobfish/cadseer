@@ -102,7 +102,7 @@ namespace ftr
   {
     std::size_t operator()(const TopoDS_Shape& shape)const
     {
-      int hashOut = GU::getShapeHash(shape);
+      int hashOut = gu::getShapeHash(shape);
       return static_cast<std::size_t>(hashOut);
     }
   };
