@@ -20,7 +20,11 @@
 #ifndef CONE_H
 #define CONE_H
 
+#include <osg/ref_ptr>
+
 #include <feature/csysbase.h>
+
+namespace lbr{class IPGroup;}
 
 namespace ftr
 {
@@ -30,6 +34,7 @@ namespace ftr
   {
   public:
     Cone();
+    virtual ~Cone() override;
     void setRadius1(const double &radius1In);
     void setRadius2(const double &radius2In);
     void setHeight(const double &heightIn);
@@ -45,12 +50,18 @@ namespace ftr
     virtual Descriptor getDescriptor() const override {return Descriptor::Create;}
     
   protected:
-    double radius1;
-    double radius2; //!< maybe zero.
-    double height;
+    Parameter radius1;
+    Parameter radius2; //!< maybe zero.
+    Parameter height;
+    
+    osg::ref_ptr<lbr::IPGroup> heightIP;
+    osg::ref_ptr<lbr::IPGroup> radius1IP;
+    osg::ref_ptr<lbr::IPGroup> radius2IP;
     
     void initializeMaps();
     void updateResult(const ConeBuilder &);
+    void setupIPGroup();
+    void updateIPGroup();
     
   private:
     static QIcon icon;

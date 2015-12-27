@@ -29,9 +29,11 @@ namespace ftr
   namespace ParameterNames
   {
     static const std::string Radius = "Radius"; //!< cylinder, sphere
-    static const std::string Height = "Height"; //!< cylinder, box
+    static const std::string Height = "Height"; //!< cylinder, box, cone
     static const std::string Length = "Length"; //!< box
     static const std::string Width = "Width"; //!< box
+    static const std::string Radius1 = "Radius1"; //!< cone
+    static const std::string Radius2 = "Radius2"; //!< cone
     
   }
   

@@ -17,8 +17,8 @@
  *
  */
 
-#include <boost/uuid/random_generator.hpp>
-
+#include <library/lineardimension.h>
+#include <library/ipgroup.h>
 #include <feature/conebuilder.h>
 #include <feature/cone.h>
 
@@ -65,7 +65,10 @@ QIcon Cone::icon;
 
 //only complete rotational cone. no partials. because top or bottom radius
 //maybe 0.0, faces and wires might be null and edges maybe degenerate.
-Cone::Cone() : CSysBase(), radius1(5.0), radius2(0.0), height(10.0)
+Cone::Cone() : CSysBase(),
+  radius1(ParameterNames::Radius1, 5.0),
+  radius2(ParameterNames::Radius2, 0.0),
+  height(ParameterNames::Height, 10.0)
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionCone.svg");
@@ -73,6 +76,72 @@ Cone::Cone() : CSysBase(), radius1(5.0), radius2(0.0), height(10.0)
   name = QObject::tr("Cone");
   
   initializeMaps();
+  
+  pMap.insert(std::make_pair(ParameterNames::Radius1, &radius1));
+  pMap.insert(std::make_pair(ParameterNames::Radius2, &radius2));
+  pMap.insert(std::make_pair(ParameterNames::Height, &height));
+  
+  radius1.connectValue(boost::bind(&Cone::setModelDirty, this));
+  radius2.connectValue(boost::bind(&Cone::setModelDirty, this));
+  height.connectValue(boost::bind(&Cone::setModelDirty, this));
+  
+  setupIPGroup();
+}
+
+Cone::~Cone()
+{
+
+}
+
+void Cone::setupIPGroup()
+{
+  heightIP = new lbr::IPGroup(&height);
+  heightIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(1.0, 0.0, 0.0)));
+  heightIP->setRotationAxis(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(0.0, -1.0, 0.0));
+  heightIP->valueHasChanged();
+  heightIP->constantHasChanged();
+  overlaySwitch->addChild(heightIP.get());
+  dragger->linkToMatrix(heightIP.get());
+  
+  radius1IP = new lbr::IPGroup(&radius1);
+  radius1IP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 1.0, 0.0)));
+  radius1IP->setMatrixDragger(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(-1.0, 0.0, 0.0)));
+  radius1IP->setDimsFlipped(true);
+  radius1IP->setRotationAxis(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(-1.0, 0.0, 0.0));
+  radius1IP->valueHasChanged();
+  radius1IP->constantHasChanged();
+  overlaySwitch->addChild(radius1IP.get());
+  dragger->linkToMatrix(radius1IP.get());
+  
+  radius2IP = new lbr::IPGroup(&radius2);
+  radius2IP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 1.0, 0.0)));
+  radius2IP->setMatrixDragger(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(-1.0, 0.0, 0.0)));
+  radius2IP->setDimsFlipped(true);
+  radius2IP->setRotationAxis(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(-1.0, 0.0, 0.0));
+  radius2IP->valueHasChanged();
+  radius2IP->constantHasChanged();
+  overlaySwitch->addChild(radius2IP.get());
+  dragger->linkToMatrix(radius2IP.get());
+  
+  updateIPGroup();
+}
+
+void Cone::updateIPGroup()
+{
+  //height of radius2 dragger
+  osg::Matrixd freshMatrix;
+  freshMatrix.setRotate(osg::Quat(osg::PI_2, osg::Vec3d(-1.0, 0.0, 0.0)));
+  freshMatrix.setTrans(osg::Vec3d (0.0, 0.0, height));
+  radius2IP->setMatrixDragger(freshMatrix);
+  radius2IP->mainDim->setSqueeze(height);
+  radius2IP->mainDim->setExtensionOffset(height);
+  
+  heightIP->setMatrix(gu::toOsg(system));
+  radius1IP->setMatrix(gu::toOsg(system));
+  radius2IP->setMatrix(gu::toOsg(system));
+  
+  heightIP->mainDim->setSqueeze(radius1);
+  heightIP->mainDim->setExtensionOffset(radius1);
 }
 
 void Cone::setRadius1(const double& radius1In)
@@ -138,6 +207,7 @@ void Cone::updateModel(const UpdateMap& mapIn)
     std::cout << std::endl << "Error in cone update. " << e->GetMessageString() << std::endl;
   }
   setModelClean();
+  updateIPGroup();
 }
 
 void Cone::updateResult(const ConeBuilder& coneBuilderIn)
