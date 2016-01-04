@@ -49,8 +49,8 @@ bool DCallBack::receive(const osgManipulator::MotionCommand &commandIn)
 {
   bool out = osgManipulator::DraggerCallback::receive(commandIn);
   
-  static double lastTranslation;
-  static int lastRotation;
+  static double lastTranslation = 0.0;
+  static int lastRotation = 0.0;
   
   const osgManipulator::TranslateInLineCommand *tCommand = 
     dynamic_cast<const osgManipulator::TranslateInLineCommand *>(&commandIn);
@@ -100,14 +100,17 @@ bool DCallBack::receive(const osgManipulator::MotionCommand &commandIn)
   //so copy it back to gp_Ax2 and mark the feature dirty.
   if (commandIn.getStage() == osgManipulator::MotionCommand::FINISH)
   {
-    assert(csysBase);
-    csysBase->setModelDirty();
-    
-    if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
+    if (lastTranslation != 0.0 || lastRotation != 0.0)
     {
-      msg::Message uMessage;
-      uMessage.mask = msg::Request | msg::Update;
-      messageOutSignal(uMessage);
+      assert(csysBase);
+      csysBase->setModelDirty();
+      
+      if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
+      {
+	msg::Message uMessage;
+	uMessage.mask = msg::Request | msg::Update;
+	messageOutSignal(uMessage);
+      }
     }
   }
   
@@ -131,6 +134,7 @@ CSysBase::CSysBase() : Base(), system()
   dragger->setHandleEvents(false);
   dragger->setupDefaultGeometry();
   dragger->linkToMatrix(mainTransform.get());
+  dragger->setUserValue(gu::idAttributeTitle, boost::uuids::to_string(id));
   
   callBack = new DCallBack(dragger.get(), this);
   dragger->addDraggerCallback(callBack.get());

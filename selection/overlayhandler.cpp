@@ -17,6 +17,7 @@
 
 #include <iostream>
 #include <assert.h>
+#include <memory>
 
 #include <osgViewer/View>
 
@@ -28,6 +29,8 @@
 #include <selection/visitors.h>
 #include <nodemaskdefs.h>
 #include <globalutilities.h>
+#include <command/manager.h>
+#include <command/csysedit.h>
 #include "overlayhandler.h"
 
 using namespace slc;
@@ -132,6 +135,27 @@ bool OverlayHandler::handle
     }
   };
   
+  auto findCSysOrigin = [&](const osgUtil::LineSegmentIntersector::Intersections &intersections)
+  {
+    for (auto i : intersections)
+    {
+      bool foundOrigin = false;
+      bool foundDragger = false;
+      for (auto n: i.nodePath)
+      {
+	if (dynamic_cast<lbr::CSysDragger *>(n))
+	  foundDragger = true;
+	if (n->getName() == "origin")
+	  foundOrigin = true;
+	if (foundDragger && foundOrigin)
+	{
+	  path = i.nodePath;
+	  return;
+	}
+      }
+    }
+  };
+  
   bool out= false;
   bool shouldRedraw = false;
   
@@ -145,6 +169,7 @@ bool OverlayHandler::handle
     findDragger(intersections);
     findIcon(intersections);
     findDimension(intersections);
+    findCSysOrigin(intersections);
     out = !path.empty();
     
     pointer.reset();
@@ -194,6 +219,7 @@ bool OverlayHandler::handle
 	  if (nodeName == "UnlinkIcon")
 	    csysDragger->setLink();
 	  shouldRedraw = true;
+	  path.clear(); //don't need to save path for icon.
 	}
       }
     }
@@ -220,13 +246,34 @@ bool OverlayHandler::handle
     if (dragger)
     {
       //this leaves the dragger highlighted in a non drag(select) scenario.
-      if (isDrag)
+
+      pointer.setMousePosition(eventAdapter.getX(), eventAdapter.getY());
+      dragger->handle(pointer, eventAdapter, actionAdapter);
+      dragger->setDraggerActive(false);
+      
+      if (!isDrag)
       {
-	pointer.setMousePosition(eventAdapter.getX(), eventAdapter.getY());
-	dragger->handle(pointer, eventAdapter, actionAdapter);
-	dragger->setDraggerActive(false);
-	isDrag = false;
+	osgManipulator::Translate1DDragger *tDragger = dynamic_cast<osgManipulator::Translate1DDragger*>(dragger);
+	if (tDragger)
+	{
+	  //look for csysdragger.
+	  ParentMaskVisitor visitor(NodeMaskDef::csys);
+	  dragger->accept(visitor);
+	  if (visitor.out)
+	  {
+	    lbr::CSysDragger *csysDragger = dynamic_cast<lbr::CSysDragger*>(visitor.out);
+	    assert(csysDragger); //might not assert, just test and continue if ok.
+	    
+	    std::shared_ptr<cmd::CSysEdit> csysEdit(new cmd::CSysEdit());
+	    csysEdit->csysDragger = csysDragger;
+	    csysEdit->translateDragger = tDragger;
+	    csysEdit->type = cmd::CSysEdit::Type::Vector;
+	    cmd::manager().addCommand(csysEdit);
+	  }
+	}
       }
+      
+      isDrag = false;
       out = true;
       pointer.reset();
       dragger = nullptr;
@@ -244,6 +291,24 @@ bool OverlayHandler::handle
 	dlg::ParameterDialog *dialog = new dlg::ParameterDialog(dimension->getParameter(), gu::getId(visitor.out));
 	dialog->show();
 	dimension.release();
+      }
+      else
+      {
+	findCSysOrigin(intersections);
+	if (!path.empty())
+	{
+	  assert(path.back()->getName() == "origin");
+	  ParentMaskVisitor visitor(NodeMaskDef::csys);
+	  path.back()->accept(visitor);
+	  assert(visitor.out);
+	  lbr::CSysDragger *lDragger = dynamic_cast<lbr::CSysDragger*>(visitor.out);
+	  assert(lDragger);
+	  
+	  std::shared_ptr<cmd::CSysEdit> csysEdit(new cmd::CSysEdit());
+	  csysEdit->csysDragger = lDragger;
+	  csysEdit->type = cmd::CSysEdit::Type::Origin;
+	  cmd::manager().addCommand(csysEdit);
+	}
       }
     }
     path.clear();

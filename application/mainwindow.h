@@ -45,6 +45,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     ViewerWidget* getViewer(){return viewWidget;}
+    slc::Manager* getSelectionManager(){return selectionManager;}
 
 private:
     void setupSelectionToolbar();

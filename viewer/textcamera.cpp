@@ -67,16 +67,21 @@ void ResizeEventHandler::positionSelection()
   osg::Switch *infoSwitch = slaveCamera->getChild(0)->asSwitch();
   osgText::Text *selectionLabel = nullptr;
   osgText::Text *statusLabel = nullptr;
+  osgText::Text *commandLabel = nullptr;
   for (unsigned int index = 0; index < infoSwitch->getNumChildren(); ++index)
   {
-    if (infoSwitch->getChild(index)->getName() == "selection")
-      selectionLabel = dynamic_cast<osgText::Text*>(infoSwitch->getChild(index));
-    if (infoSwitch->getChild(index)->getName() == "status")
-      statusLabel = dynamic_cast<osgText::Text*>(infoSwitch->getChild(index));
+    osg::Node *child = infoSwitch->getChild(index);
+    if (child->getName() == "selection")
+      selectionLabel = dynamic_cast<osgText::Text*>(child);
+    if (child->getName() == "status")
+      statusLabel = dynamic_cast<osgText::Text*>(child);
+    if (child->getName() == "command")
+      commandLabel = dynamic_cast<osgText::Text*>(child);
   }
   
   assert(selectionLabel);
   assert(statusLabel);
+  assert(commandLabel);
   
   osg::Vec3 pos;
   osg::BoundingBox::value_type padding = selectionLabel->getCharacterHeight() / 2.0;
@@ -88,6 +93,11 @@ void ResizeEventHandler::positionSelection()
   pos.x() = padding;
   pos.y() = slaveCamera->getViewport()->height() - padding; //redundent
   statusLabel->setPosition(pos);
+  
+  padding = statusLabel->getCharacterHeight() / 2.0; //redundent
+  pos.x() = padding;
+  pos.y() = padding;
+  commandLabel->setPosition(pos);
 }
 
 TextCamera::TextCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
@@ -140,6 +150,18 @@ TextCamera::TextCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
   statusLabel->setText("Status");
   infoSwitch->addChild(statusLabel.get());
   
+  commandLabel = new osgText::Text();
+  commandLabel->setName("command");
+  commandLabel->setFont(textFont);
+  commandLabel->setColor(color);
+  commandLabel->setBackdropType(osgText::Text::OUTLINE);
+  commandLabel->setBackdropColor(osg::Vec4(1.0, 1.0, 1.0, 1.0));
+  commandLabel->setCharacterSize(qApp->font().pointSizeF()); //this is 9.0 here.
+  commandLabel->setPosition(pos);
+  commandLabel->setAlignment(osgText::TextBase::LEFT_BOTTOM);
+  commandLabel->setText("Active command count: 0");
+  infoSwitch->addChild(commandLabel.get());
+  
   infoSwitch->setAllChildrenOn();
 }
 
@@ -161,6 +183,9 @@ void TextCamera::setupDispatcher()
   
   mask = msg::Request | msg::StatusText;
   dispatcher.insert(std::make_pair(mask, boost::bind(&TextCamera::statusTextDispatched, this, _1)));
+  
+  mask = msg::Request | msg::CommandText;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&TextCamera::commandTextDispatched, this, _1)));
 }
 
 void TextCamera::messageInSlot(const msg::Message &messageIn)
@@ -246,4 +271,14 @@ void TextCamera::updateSelectionLabel()
   }
   
   selectionLabel->setText(labelStream.str());
+}
+
+void TextCamera::commandTextDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  vwr::Message vMessage = boost::get<vwr::Message>(messageIn.payload);
+  commandLabel->setText(vMessage.text);
 }

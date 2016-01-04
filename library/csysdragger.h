@@ -65,6 +65,8 @@ public:
   void setUnlink();
   bool isLinked(){return matrixLinked;}
   
+  void updateMatrix(const osg::Matrixd &);
+  
   //indexes in dragger switch 
   enum class SwitchIndexes
   {
@@ -79,6 +81,9 @@ public:
   };
   void show(SwitchIndexes index);
   void hide(SwitchIndexes index);
+  
+  void highlightOrigin();
+  void unHighlightOrigin();
   
 protected:
   virtual ~CSysDragger();

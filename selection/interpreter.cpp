@@ -154,6 +154,7 @@ void Interpreter::go()
 	container.selectionType = Type::Edge;
 	container.shapeId = selectedId;
 	container.selectionIds.push_back(selectedId);
+	container.pointLocation = intersection.getWorldIntersectPoint();
 	add(containersOut, container);
       }
       if (canSelectWires(selectionMask))
@@ -169,6 +170,7 @@ void Interpreter::go()
 	  container.selectionType = Type::Wire;
 	  container.selectionIds = connector.useGetChildrenOfType(wireIds.front(), TopAbs_EDGE);
 	  container.shapeId = wireIds.front();
+	  container.pointLocation = intersection.getWorldIntersectPoint();
 	  add(containersOut, container);
 	}
       }
@@ -183,6 +185,7 @@ void Interpreter::go()
 	  container.selectionIds = connector.useGetChildrenOfType(wire, TopAbs_EDGE);
 	  container.selectionType = Type::Wire;
 	  container.shapeId = wire;
+	  container.pointLocation = intersection.getWorldIntersectPoint();
 	  add(containersOut, container);
 	}
       }
@@ -191,6 +194,7 @@ void Interpreter::go()
 	container.selectionType = Type::Face;
 	container.shapeId = selectedId;
 	container.selectionIds.push_back(selectedId);
+	container.pointLocation = intersection.getWorldIntersectPoint();
 	add(containersOut,container);
       }
       if (canSelectShells(selectionMask))
@@ -203,6 +207,7 @@ void Interpreter::go()
 	  if (!has(containersOut, container)) //don't run again
 	  {
 	    container.selectionIds = connector.useGetChildrenOfType(shells.at(0), TopAbs_FACE);
+	    container.pointLocation = intersection.getWorldIntersectPoint();
 	    add(containersOut, container);
 	  }
 	}
@@ -218,6 +223,7 @@ void Interpreter::go()
 	  if (!has(containersOut, container)) //don't run again
 	  {
 	    container.selectionIds = connector.useGetChildrenOfType(solids.at(0), TopAbs_FACE);
+	    container.pointLocation = intersection.getWorldIntersectPoint();
 	    add(containersOut, container);
 	  }
 	}
@@ -232,6 +238,7 @@ void Interpreter::go()
 	  if (!has(containersOut, container)) //don't run again
 	  {
 	    container.selectionIds = connector.useGetChildrenOfType(object, TopAbs_FACE);
+	    container.pointLocation = intersection.getWorldIntersectPoint();
 	    add(containersOut, container);
 	  }
 	}

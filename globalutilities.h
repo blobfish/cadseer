@@ -48,6 +48,10 @@ osg::Vec3d toOsg(const gp_Vec &occVecIn);
 osg::Vec3d toOsg(const gp_Pnt &occPointIn);
 osg::Matrixd toOsg(const gp_Ax2 &systemIn);
 gp_Ax2 toOcc(const osg::Matrixd &m);
+osg::Vec3d getXVector(const osg::Matrixd &m);
+osg::Vec3d getYVector(const osg::Matrixd &m);
+osg::Vec3d getZVector(const osg::Matrixd &m);
+osg::Vec3d gleanVector(const TopoDS_Shape &shapeIn, const osg::Vec3d &pickPoint);
 }
 
 #endif // GLOBALUTILITIES_H

@@ -119,6 +119,12 @@ SET(APPLICATION_SOURCES
     application/message.cpp
     )
     
+SET(COMMAND_SOURCES
+    command/manager.cpp
+    command/base.cpp
+    command/csysedit.cpp
+    )
+    
 SET(LIBRARY_SOURCES
     library/circlebuilder.cpp
     library/circleprojector.cpp
@@ -161,6 +167,7 @@ SET(CADSEER_SOURCES
     ${PROJECT_SOURCES}
     ${APPLICATION_SOURCES}
     ${LIBRARY_SOURCES}
+    ${COMMAND_SOURCES}
     )
 
 SET(CADSEER_MOC_HDRS

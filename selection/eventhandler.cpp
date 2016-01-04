@@ -101,6 +101,16 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
       clearPrehighlight();
       return true; //overlay has taken event;
     }
+    
+    //escape key should dispatch to cancel command.
+    if (eventAdapter.getEventType() == osgGA::GUIEventAdapter::KEYUP)
+    {
+      if (eventAdapter.getKey() == osgGA::GUIEventAdapter::KEY_Escape)
+      {
+	messageOutSignal(msg::Request | msg::Command | msg::Cancel);
+	return true;
+      }
+    }
   
     currentIntersections.clear();
     if (eventAdapter.getEventType() == osgGA::GUIEventAdapter::MOVE)
@@ -170,11 +180,7 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
 	  //selections we need to make observers aware of this 'hidden' change.
 	    msg::Message clearMessage;
 	    clearMessage.mask = msg::Response | msg::Pre | msg::Preselection | msg::Subtraction;
-	    slc::Message clearSMessage;
-	    clearSMessage.type = lastPrehighlight.selectionType;
-	    clearSMessage.featureId = lastPrehighlight.featureId;
-	    clearSMessage.shapeId = lastPrehighlight.shapeId;
-	    clearMessage.payload = clearSMessage;
+	    clearMessage.payload = containerToMessage(lastPrehighlight);
 	    messageOutSignal(clearMessage);
 	    
 	    if (slc::isPointType(lastPrehighlight.selectionType))
@@ -194,12 +200,7 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
 	    
 	    msg::Message addMessage;
 	    addMessage.mask = msg::Response | msg::Post | msg::Selection | msg::Addition;
-	    slc::Message addSMessage;
-	    addSMessage.type = lastPrehighlight.selectionType;
-	    addSMessage.featureId = lastPrehighlight.featureId;
-	    addSMessage.shapeId = lastPrehighlight.shapeId;
-	    addSMessage.pointLocation = lastPrehighlight.pointLocation;
-	    addMessage.payload = addSMessage;
+	    addMessage.payload = containerToMessage(lastPrehighlight);
 	    messageOutSignal(addMessage);
 	    
             lastPrehighlight = Container();
@@ -239,11 +240,7 @@ void EventHandler::clearSelections()
     {
 	msg::Message removeMessage;
 	removeMessage.mask = msg::Response | msg::Pre | msg::Selection | msg::Subtraction;
-	slc::Message removeSMessage;
-	removeSMessage.type = it->selectionType;
-	removeSMessage.featureId = it->featureId;
-	removeSMessage.shapeId = it->shapeId;
-	removeMessage.payload = removeSMessage;
+	removeMessage.payload = containerToMessage(*it);
 	messageOutSignal(removeMessage);
       
 	if (slc::isPointType(it->selectionType))
@@ -285,12 +282,7 @@ void EventHandler::setPrehighlight(slc::Container &selected)
     
     msg::Message addMessage;
     addMessage.mask = msg::Response | msg::Post | msg::Preselection | msg::Addition;
-    slc::Message addSMessage;
-    addSMessage.type = lastPrehighlight.selectionType;
-    addSMessage.featureId = lastPrehighlight.featureId;
-    addSMessage.shapeId = lastPrehighlight.shapeId;
-    addSMessage.pointLocation = lastPrehighlight.pointLocation;
-    addMessage.payload = addSMessage;
+    addMessage.payload = containerToMessage(lastPrehighlight);
     messageOutSignal(addMessage);
 }
 
@@ -301,11 +293,7 @@ void EventHandler::clearPrehighlight()
     
     msg::Message removeMessage;
     removeMessage.mask = msg::Response | msg::Pre | msg::Preselection | msg::Subtraction;
-    slc::Message removeSMessage;
-    removeSMessage.type = lastPrehighlight.selectionType;
-    removeSMessage.featureId = lastPrehighlight.featureId;
-    removeSMessage.shapeId = lastPrehighlight.shapeId;
-    removeMessage.payload = removeSMessage;
+    removeMessage.payload = containerToMessage(lastPrehighlight);
     messageOutSignal(removeMessage);
     
     if (slc::isPointType(lastPrehighlight.selectionType))
@@ -378,15 +366,7 @@ void EventHandler::requestPreselectionAdditionDispatched(const msg::Message &mes
   msg::dispatch().dumpString(debug.str());
   
   slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
-  assert(!sMessage.featureId.is_nil());
-  const ftr::Base *feature = dynamic_cast<app::Application *>(qApp)->getProject()->findFeature(sMessage.featureId);
-  assert(feature);
-  const mdv::Connector &connector = feature->getConnector();
-  
-  slc::Container container;
-  container.selectionType = sMessage.type;
-  container.featureId = sMessage.featureId;
-  container.shapeId = sMessage.shapeId;
+  slc::Container container = messageToContainer(sMessage);
   if
   (
     (container == lastPrehighlight) ||
@@ -394,11 +374,8 @@ void EventHandler::requestPreselectionAdditionDispatched(const msg::Message &mes
   )
     return;
   
-  if (sMessage.type == slc::Type::Object)
-  {
-    container.selectionIds = connector.useGetChildrenOfType(connector.useGetRoot(), TopAbs_FACE);
-    setPrehighlight(container);
-  }
+  //setPrehighlight handles points
+  setPrehighlight(container);
 }
 
 void EventHandler::requestPreselectionSubtractionDispatched(const msg::Message &messageIn)
@@ -408,22 +385,12 @@ void EventHandler::requestPreselectionSubtractionDispatched(const msg::Message &
   msg::dispatch().dumpString(debug.str());
   
   slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
-  assert(!sMessage.featureId.is_nil());
-  const ftr::Base *feature = dynamic_cast<app::Application *>(qApp)->getProject()->findFeature(sMessage.featureId);
-  assert(feature);
-  const mdv::Connector &connector = feature->getConnector();
   
-  slc::Container container;
-  container.selectionType = sMessage.type;
-  container.featureId = sMessage.featureId;
-  container.shapeId = sMessage.shapeId;
+  slc::Container container = messageToContainer(sMessage);
   assert(container == lastPrehighlight);
   
-  if (sMessage.type == slc::Type::Object)
-  {
-    container.selectionIds = connector.useGetChildrenOfType(connector.useGetRoot(), TopAbs_FACE);
-    clearPrehighlight();
-  }
+  //clearPrehighlight handles points
+  clearPrehighlight();
 }
 
 void EventHandler::requestSelectionAdditionDispatched(const msg::Message &messageIn)
@@ -435,29 +402,30 @@ void EventHandler::requestSelectionAdditionDispatched(const msg::Message &messag
   clearPrehighlight();
 
   slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
-  assert(!sMessage.featureId.is_nil());
-  const ftr::Base *feature = dynamic_cast<app::Application *>(qApp)->getProject()->findFeature(sMessage.featureId);
-  assert(feature);
-  const mdv::Connector &connector = feature->getConnector();
-  
-  slc::Container container;
-  container.selectionType = sMessage.type;
-  container.featureId = sMessage.featureId;
-  container.shapeId = sMessage.shapeId;
+  slc::Container container = messageToContainer(sMessage);
   if (alreadySelected(container))
     return;
   
-  if (sMessage.type == slc::Type::Object)
+  if (slc::isPointType(container.selectionType))
   {
-    container.selectionIds = connector.useGetChildrenOfType(connector.useGetRoot(), TopAbs_FACE);
-    selectionOperation(sMessage.featureId, container.selectionIds, HighlightVisitor::Operation::Highlight);
+    assert(container.pointGeometry.valid());
+    osg::Vec4Array *colors = dynamic_cast<osg::Vec4Array*>(container.pointGeometry->getColorArray());
+    assert(colors);
+    (*colors)[0] = osg::Vec4(1.0, 1.0, 1.0, 1.0);
+    colors->dirty();
+    container.pointGeometry->dirtyDisplayList();
     
-    add(selectionContainers, container);
-    msg::Message messageOut = messageIn;
-    messageOut.mask &= ~msg::Request;
-    messageOut.mask |= msg::Response | msg::Post;
-    messageOutSignal(messageOut);
+    viewerRoot->addChild(container.pointGeometry.get());
   }
+  else
+    selectionOperation(sMessage.featureId, container.selectionIds, HighlightVisitor::Operation::Highlight);
+  
+  add(selectionContainers, container);
+  
+  msg::Message messageOut = messageIn;
+  messageOut.mask &= ~msg::Request;
+  messageOut.mask |= msg::Response | msg::Post;
+  messageOutSignal(messageOut);
 }
 
 void EventHandler::requestSelectionSubtractionDispatched(const msg::Message &messageIn)
@@ -467,31 +435,27 @@ void EventHandler::requestSelectionSubtractionDispatched(const msg::Message &mes
   msg::dispatch().dumpString(debug.str());
   
   slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
-  assert(!sMessage.featureId.is_nil());
-  const ftr::Base *feature = dynamic_cast<app::Application *>(qApp)->getProject()->findFeature(sMessage.featureId);
-  assert(feature);
-  const mdv::Connector &connector = feature->getConnector();
+  slc::Container container = messageToContainer(sMessage);
   
-  slc::Container container;
-  container.selectionType = sMessage.type;
-  container.featureId = sMessage.featureId;
-  container.shapeId = sMessage.shapeId;
   Containers::iterator containIt = std::find(selectionContainers.begin(), selectionContainers.end(), container);
   assert(containIt != selectionContainers.end());
   if (containIt == selectionContainers.end())
     return;
   
-  if (sMessage.type == slc::Type::Object)
+  msg::Message messageOut = messageIn;
+  messageOut.mask &= ~msg::Request;
+  messageOut.mask |= msg::Response | msg::Pre;
+  messageOutSignal(messageOut);
+  
+  if (slc::isPointType(container.selectionType))
   {
-    msg::Message messageOut = messageIn;
-    messageOut.mask &= ~msg::Request;
-    messageOut.mask |= msg::Response | msg::Pre;
-    messageOutSignal(messageOut);
-    
-    std::vector<uuid> faces = connector.useGetChildrenOfType(connector.useGetRoot(), TopAbs_FACE);
-    selectionOperation(sMessage.featureId, faces, HighlightVisitor::Operation::Restore);
-    selectionContainers.erase(containIt);
+    assert(container.pointGeometry.valid());
+    osg::Group *parent = container.pointGeometry->getParent(0)->asGroup();
+    parent->removeChild(container.pointGeometry);
   }
+    selectionOperation(sMessage.featureId, container.selectionIds, HighlightVisitor::Operation::Restore);
+    
+  selectionContainers.erase(containIt);
 }
 
 void EventHandler::requestSelectionClearDispatched(const msg::Message &)
@@ -525,3 +489,63 @@ Geometry* EventHandler::buildTempPoint(const Vec3d& pointIn)
   
   return geometry;
 }
+
+Message EventHandler::containerToMessage(const Container &containerIn)
+{
+  slc::Message out;
+  out.type = containerIn.selectionType;
+  out.featureId = containerIn.featureId;
+  out.shapeId = containerIn.shapeId;
+  out.pointLocation = containerIn.pointLocation;
+  
+  return out;
+}
+
+Container EventHandler::messageToContainer(const Message &messageIn)
+{
+  //should incoming selection messages ignore selection mask?
+  //I am thinking yes right now. Selection masks are only really
+  //useful for cursor picking.
+  
+  assert(!messageIn.featureId.is_nil());
+  const ftr::Base *feature = dynamic_cast<app::Application *>(qApp)->getProject()->findFeature(messageIn.featureId);
+  assert(feature);
+  const mdv::Connector &connector = feature->getConnector();
+  
+  slc::Container container;
+  container.selectionType = messageIn.type;
+  container.featureId = messageIn.featureId;
+  container.shapeId = messageIn.shapeId;
+  container.pointLocation = messageIn.pointLocation;
+  
+  if
+  (
+    (messageIn.type == slc::Type::Object) ||
+    (messageIn.type == slc::Type::Solid) ||
+    (messageIn.type == slc::Type::Shell)
+  )
+  {
+    container.selectionIds = connector.useGetChildrenOfType(connector.useGetRoot(), TopAbs_FACE);
+  }
+  //skip feature for now.
+  else if
+  (
+    (messageIn.type == slc::Type::Face) ||
+    (messageIn.type == slc::Type::Edge)
+  )
+  {
+    container.selectionIds.push_back(container.shapeId);
+  }
+  else if (messageIn.type == slc::Type::Wire)
+  {
+    container.selectionIds = connector.useGetChildrenOfType(container.shapeId, TopAbs_EDGE);
+  }
+  else if (isPointType(messageIn.type))
+  {
+    container.pointGeometry = buildTempPoint(messageIn.pointLocation);
+  }
+
+  
+  return container;
+}
+

@@ -75,7 +75,11 @@ namespace msg
   static const Mask ExportOSG(Mask().		set(36));//!< command
   static const Mask Preferences(Mask().		set(37));//!< command
   static const Mask Remove(Mask().		set(38));//!< command
-  static const Mask StatusText(Mask().		set(39));//!< display text for info cam
+  static const Mask Cancel(Mask().		set(39));//!< active command
+  static const Mask Done(Mask().		set(40));//!< active command
+  static const Mask Command(Mask().		set(41));//!< active command
+  static const Mask StatusText(Mask().		set(42));//!< display text for info cam
+  static const Mask CommandText(Mask().		set(43));//!< display text for info cam
   
   typedef boost::variant<prj::Message, slc::Message, app::Message, vwr::Message> Payload;
   

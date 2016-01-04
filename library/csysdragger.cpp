@@ -49,26 +49,32 @@ CSysDragger::CSysDragger()
   matrixTransform->addChild(draggerSwitch);
   
   xTranslate = new Translate1DDragger(osg::Vec3(0.0,0.0,0.0), osg::Vec3(0.0,0.0,1.0));
+  xTranslate->setName("xTranslate");
   draggerSwitch->addChild(xTranslate.get());
   addDragger(xTranslate.get());
 
   yTranslate = new Translate1DDragger(osg::Vec3(0.0,0.0,0.0), osg::Vec3(0.0,0.0,1.0));
+  yTranslate->setName("yTranslate");
   draggerSwitch->addChild(yTranslate.get());
   addDragger(yTranslate.get());
 
   zTranslate = new Translate1DDragger(osg::Vec3(0.0,0.0,0.0), osg::Vec3(0.0,0.0,1.0));
+  zTranslate->setName("zTranslate");
   draggerSwitch->addChild(zTranslate.get());
   addDragger(zTranslate.get());
   
   xRotate = new RotateCircularDragger();
+  xRotate->setName("xRotate");
   draggerSwitch->addChild(xRotate.get());
   addDragger(xRotate.get());
   
   yRotate = new RotateCircularDragger();
+  yRotate->setName("yRotate");
   draggerSwitch->addChild(yRotate.get());
   addDragger(yRotate.get());
   
   zRotate = new RotateCircularDragger();
+  zRotate->setName("zRotate");
   draggerSwitch->addChild(zRotate.get());
   addDragger(zRotate.get());
   
@@ -103,6 +109,7 @@ void CSysDragger::setupDefaultGeometry()
   
   assert(lbr::Manager::getManager().isLinked(lbr::csys::SphereTag));
   originGeode->addDrawable(lbr::Manager::getManager().getGeometry(lbr::csys::SphereTag));
+  originGeode->setName("origin");
   setMaterialColor(osg::Vec4(0.7, 0.5, 0.8, 1.0), *originGeode);
   
   setupDefaultTranslation();
@@ -158,7 +165,6 @@ void CSysDragger::setupDefaultTranslation()
   assert(lbr::Manager::getManager().isLinked(lbr::csys::TranslationCylinderTag));
   assert(lbr::Manager::getManager().isLinked(lbr::csys::TranslationConeTag));
   osg::Geometry *translateLine = lbr::Manager::getManager().getGeometry(lbr::csys::TranslationLineTag);
-  osg::Geometry *translateCylinder = lbr::Manager::getManager().getGeometry(lbr::csys::TranslationCylinderTag);
   osg::Geometry *translateCone = lbr::Manager::getManager().getGeometry(lbr::csys::TranslationConeTag);
 
   xTranslate->addChild(translateLine);
@@ -168,10 +174,6 @@ void CSysDragger::setupDefaultTranslation()
   xTranslate->addChild(translateCone);
   yTranslate->addChild(translateCone);
   zTranslate->addChild(translateCone);
-
-  xTranslate->addChild(translateCylinder);
-  yTranslate->addChild(translateCylinder);
-  zTranslate->addChild(translateCylinder);
 
   //Rotate axes to correct position.
   osg::Quat xRotation;
@@ -240,6 +242,16 @@ void CSysDragger::hide(CSysDragger::SwitchIndexes index)
   draggerSwitch->setValue(static_cast<unsigned int>(index), false);
 }
 
+void CSysDragger::highlightOrigin()
+{
+  setMaterialColor(xTranslate->getPickColor(), *originGeode);
+}
+
+void CSysDragger::unHighlightOrigin()
+{
+  setMaterialColor(osg::Vec4(0.7, 0.5, 0.8, 1.0), *originGeode);
+}
+
 void CSysDragger::linkToMatrix(MatrixTransform *matrixIn)
 {
   if (matrixLinked)
@@ -262,7 +274,7 @@ void CSysDragger::setLink()
   iconSwitch->setValue(1, false);
   iconSwitch->setValue(0, true);
   matrixLinked = true;
-  for (auto transform : matrixLinks)
+  for (auto &transform : matrixLinks)
     addTransformUpdating(transform);
 }
 
@@ -271,7 +283,31 @@ void CSysDragger::setUnlink()
   iconSwitch->setValue(0, false);
   iconSwitch->setValue(1, true);
   matrixLinked = false;
-  for (auto transform : matrixLinks)
+  for (auto &transform : matrixLinks)
     removeTransformUpdating(transform);
+}
+
+void CSysDragger::updateMatrix(const Matrixd &mIn)
+{
+  //dragger matrix is always world.
+  
+  //get the difference between the new matrix and the old one.
+  osg::Matrixd diffMatrix = osg::Matrixd::inverse(_matrix) * mIn;
+  
+  if (matrixLinked)
+  {
+    for (auto &transform : matrixLinks)
+    {
+      // Get the LocalToWorld and WorldToLocal matrix for this node.
+      osg::NodePath nodePathToRoot;
+      computeNodePathToRoot(*transform, nodePathToRoot);
+      osg::Matrix localToWorld = osg::computeLocalToWorld(nodePathToRoot);
+      osg::Matrix worldToLocal = osg::Matrix::inverse(localToWorld);
+      
+      transform->setMatrix(worldToLocal * diffMatrix * localToWorld * transform->getMatrix());
+    }
+  }
+  
+  this->setMatrix(mIn);
 }
 

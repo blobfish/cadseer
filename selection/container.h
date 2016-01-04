@@ -34,6 +34,10 @@ namespace osg {class Geometry;}
 
 namespace slc
 {
+  /*! @brief storing selections.
+   * 
+   * pointLocation is accurate for points, but not for edges and faces. @see Interpreter.
+   */
   class Container
   {
   public:
@@ -48,15 +52,19 @@ namespace slc
   
   inline bool operator==(const Container& lhs, const Container& rhs)
   {
-    return
+    bool out =
     (
       (lhs.selectionType == rhs.selectionType) &&
       (lhs.featureId == rhs.featureId) &&
-      (lhs.shapeId == rhs.shapeId) &&
-      (lhs.pointLocation == rhs.pointLocation)
+      (lhs.shapeId == rhs.shapeId)
       //we don't consider the selection ids in comparison.
       //we don't consider the pointGeometry in comparison?
     );
+      
+    if (slc::isPointType(lhs.selectionType))
+      out = (out && (lhs.pointLocation == rhs.pointLocation));
+    
+    return out;
   }
   inline bool operator!=(const Container& lhs, const Container& rhs)
   {
@@ -71,6 +79,7 @@ namespace slc
   std::ostream& operator<<(std::ostream& os, const Containers& containers);
   bool has(Containers &containersIn, const Container &containerIn);
   void add(Containers &containersIn, const Container &containerIn);
+  void remove(Containers &containersIn, const Container &containerIn);
 }
 
 #endif // SLC_CONTAINER_H

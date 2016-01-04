@@ -96,6 +96,7 @@ public:
   static TopoDS_Compound compoundWrap(const TopoDS_Shape &shapeIn);
   osg::Switch* getMainSwitch() const {return mainSwitch.get();}
   osg::Switch* getOverlaySwitch() const {return overlaySwitch.get();}
+  osg::MatrixTransform* getMainTransform() const {return mainTransform.get();}
   const mdv::Connector& getConnector() const {return connector;}
   
   static std::size_t nextConstructionIndex;

@@ -25,7 +25,9 @@
 #include <boost/uuid/string_generator.hpp>
 
 #include <TopoDS_Shape.hxx>
+#include <TopoDS.hxx>
 #include <gp_Ax2.hxx>
+#include <BRepAdaptor_Curve.hxx>
 
 #include <osg/Geode>
 #include <osg/Geometry>
@@ -124,6 +126,72 @@ gp_Ax2 gu::toOcc(const osg::Matrixd &m)
     gp_Dir(m(2, 0), m(2, 1), m(2, 2)), //z vector
     gp_Dir(m(0, 0), m(0, 1), m(0, 2))  //x vector
   );
+  
+  return out;
+}
+
+osg::Vec3d gu::getXVector(const osg::Matrixd& m)
+{
+  osg::Vec3d out;
+  out.x() = m(0,0);
+  out.y() = m(0,1);
+  out.z() = m(0,2);
+  
+  return out;
+}
+
+osg::Vec3d gu::getYVector(const osg::Matrixd& m)
+{
+  osg::Vec3d out;
+  out.x() = m(1,0);
+  out.y() = m(1,1);
+  out.z() = m(1,2);
+  
+  return out;
+}
+
+osg::Vec3d gu::getZVector(const osg::Matrixd& m)
+{
+  osg::Vec3d out;
+  out.x() = m(2,0);
+  out.y() = m(2,1);
+  out.z() = m(2,2);
+  
+  return out;
+}
+
+osg::Vec3d gu::gleanVector(const TopoDS_Shape& shapeIn, const osg::Vec3d &pickPoint)
+{
+  osg::Vec3d out;
+  //nan signals couldn't find a vector.
+  out.x() = std::numeric_limits<double>::quiet_NaN();
+  out.y() = std::numeric_limits<double>::quiet_NaN();
+  out.z() = std::numeric_limits<double>::quiet_NaN();
+  
+  if (shapeIn.ShapeType() == TopAbs_EDGE)
+  {
+    BRepAdaptor_Curve cAdaptor(TopoDS::Edge(shapeIn));
+    if (cAdaptor.GetType() == GeomAbs_Line)
+    {
+      osg::Vec3d firstPoint = toOsg(cAdaptor.Value(cAdaptor.FirstParameter()));
+      osg::Vec3d lastPoint = toOsg(cAdaptor.Value(cAdaptor.LastParameter()));
+      double firstDistance = (pickPoint - firstPoint).length2();
+      double secondDistance = (pickPoint - lastPoint).length2();
+      if (firstDistance < secondDistance)
+      {
+	out = firstPoint - lastPoint;
+	out.normalize();
+      }
+      else
+      {
+	out = lastPoint - firstPoint;
+	out.normalize();
+      }
+    }
+  }
+  else if (shapeIn.ShapeType() == TopAbs_FACE)
+  {
+  }
   
   return out;
 }

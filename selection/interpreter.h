@@ -30,6 +30,11 @@ namespace slc
    *
    * Converts osgUtil::LineSegment::Intersections(array) to a
    * slc::Containers(array).
+   * 
+   * When dealing with endpoints, pointLocation member of slc::container should
+   * be accurate as we use mdv::connector to get the location from the occ model.
+   * This is not true for edges and faces. In those cases the user will be responsible
+   * for getting a 'true' location from the occ shape using the approximate 'pointLocation'
    */ 
   class Interpreter
   {

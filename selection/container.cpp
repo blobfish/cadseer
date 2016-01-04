@@ -56,3 +56,10 @@ void slc::add(Containers &containersIn, const Container &containerIn)
   if (!has(containersIn, containerIn))
     containersIn.push_back(containerIn);
 }
+
+void slc::remove(Containers& containersIn, const Container& containerIn)
+{
+  auto it = std::find(containersIn.begin(), containersIn.end(), containerIn);
+  if (it != containersIn.end())
+    containersIn.erase(it);
+}

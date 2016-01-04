@@ -20,6 +20,8 @@
 #ifndef SELECTIONMESSAGE_H
 #define SELECTIONMESSAGE_H
 
+#include <vector>
+
 #include <boost/uuid/uuid.hpp>
 
 #include <osg/Vec3d>
@@ -47,6 +49,16 @@ namespace slc
       //we ignore point location.
     );
   }
+  
+  inline bool operator!=(const Message& lhs, const Message& rhs)
+  {
+    return !(lhs == rhs);
+  }
+  
+  typedef std::vector<Message> Messages;
+  bool has(const Messages &messagesIn, const Message &messageIn);
+  void add(Messages &messagesIn, const Message &messageIn);
+  void remove(Messages &messagesIn, const Message &messageIn);
 }
 
 #endif // SELECTIONMESSAGE_H

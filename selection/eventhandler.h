@@ -78,6 +78,9 @@ protected:
     void requestSelectionAdditionDispatched(const msg::Message &);
     void requestSelectionSubtractionDispatched(const msg::Message &);
     void requestSelectionClearDispatched(const msg::Message &);
+    
+    slc::Container messageToContainer(const slc::Message &);
+    slc::Message containerToMessage(const slc::Container &);
 };
 }
 

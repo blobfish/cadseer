@@ -68,6 +68,7 @@ private:
   void selectionAdditionDispatched(const msg::Message &);
   void selectionSubtractionDispatched(const msg::Message &);
   void statusTextDispatched(const msg::Message &);
+  void commandTextDispatched(const msg::Message &);
     
   osg::ref_ptr<osg::Switch> infoSwitch;
   //indexes for children
@@ -81,6 +82,7 @@ private:
   std::vector<slc::Message> selections;
   
   osg::ref_ptr<osgText::Text> statusLabel;
+  osg::ref_ptr<osgText::Text> commandLabel;
 };
 
 #endif // TEXTCAMERA_H
