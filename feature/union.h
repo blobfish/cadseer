@@ -22,6 +22,10 @@
 
 #include <feature/base.h>
 
+class QDir;
+
+namespace prj{namespace srl{class FeatureUnion;}}
+
 namespace ftr
 {
   class Union : public Base
@@ -33,6 +37,8 @@ namespace ftr
     virtual const std::string& getTypeString() const override {return toString(Type::Union);}
     virtual const QIcon& getIcon() const override {return icon;}
     virtual Descriptor getDescriptor() const override {return Descriptor::Alter;}
+    virtual void serialWrite(const QDir&) override; //!< write xml file. not const, might reset a modified flag.
+    void serialRead(const prj::srl::FeatureUnion &sUnionIn); //!<initializes this from sBox. not virtual, type already known.
     
   private:
     static QIcon icon;

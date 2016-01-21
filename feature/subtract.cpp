@@ -23,6 +23,7 @@
 #include <TopExp.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 
+#include <project/serial/xsdcxxoutput/featuresubtract.h>
 #include "subtract.h"
 
 using namespace ftr;
@@ -103,3 +104,21 @@ void Subtract::updateModel(const UpdateMap &mapIn)
   }
   setModelClean();
 }
+
+void Subtract::serialWrite(const QDir &dIn)
+{
+  prj::srl::FeatureSubtract subtractOut
+  (
+    Base::serialOut()
+  );
+  
+  xml_schema::NamespaceInfomap infoMap;
+  std::ofstream stream(buildFilePathName(dIn).toUtf8().constData());
+  prj::srl::subtract(stream, subtractOut, infoMap);
+}
+
+void Subtract::serialRead(const prj::srl::FeatureSubtract& sSubtractIn)
+{
+  Base::serialIn(sSubtractIn.featureBase());
+}
+

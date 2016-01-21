@@ -24,6 +24,8 @@
 
 #include <boost/signals2.hpp>
 
+namespace prj{namespace srl{class Parameter;}}
+
 namespace ftr
 {
   namespace ParameterNames
@@ -62,6 +64,10 @@ namespace ftr
     {
       return constantChangedSignal.connect(subscriber);
     }
+    
+    prj::srl::Parameter serialOut() const;
+    void serialIn(const prj::srl::Parameter &sParameterIn);
+    
   private:
     bool constant = true;
     std::string name;

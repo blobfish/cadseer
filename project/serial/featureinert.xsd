@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="http://www.cadseer.com/prj/srl"
+  xmlns:srl="http://www.cadseer.com/prj/srl"
+>
+  
+<xs:include schemaLocation="featurecsysbase.xsd"/>
+
+<xs:complexType name="FeatureInert">
+  <xs:all>
+    <xs:element name="featureCSysBase" type="srl:FeatureCSysBase"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:element name="inert" type="srl:FeatureInert"/>
+  
+</xs:schema> 

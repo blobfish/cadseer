@@ -17,6 +17,8 @@
  *
  */
 
+#include <QDir>
+
 #include <boost/uuid/random_generator.hpp>
 
 #include <TopExp.hxx>
@@ -25,6 +27,7 @@
 #include <gp_Trsf.hxx>
 #include <TopLoc_Location.hxx>
 
+#include <project/serial/xsdcxxoutput/featureinert.h>
 #include <feature/inert.h>
 
 using namespace ftr;
@@ -61,6 +64,8 @@ void Inert::updateModel(const UpdateMap &mapIn)
     //here we are just generating new ids every update.
     //this is temp as we are going to have reconcile the ids
     //from before to after.
+    evolutionContainer.get<EvolutionRecord::ByInId>().clear();
+    resultContainer.get<ResultRecord::ById>().clear();
     TopTools_IndexedMapOfShape shapeMap;
     TopExp::MapShapes(shape, shapeMap);
     for (int index = 1; index <= shapeMap.Extent(); ++index)
@@ -83,3 +88,22 @@ void Inert::updateModel(const UpdateMap &mapIn)
   setModelClean();
 }
 
+void Inert::serialWrite(const QDir &dIn)
+{
+  prj::srl::FeatureInert inertOut
+  (
+    CSysBase::serialOut()
+  );
+  
+  xml_schema::NamespaceInfomap infoMap;
+  std::ofstream stream(buildFilePathName(dIn).toUtf8().constData());
+  prj::srl::inert(stream, inertOut, infoMap);
+}
+
+void Inert::serialRead(const prj::srl::FeatureInert& inert)
+{
+  CSysBase::serialIn(inert.featureCSysBase());
+  
+  setModelClean();
+  setVisualDirty();
+}

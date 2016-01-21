@@ -70,6 +70,8 @@ namespace app
     void exportOCCDispatched(const msg::Message&);
     void preferencesDispatched(const msg::Message&);
     void removeDispatched(const msg::Message&);
+    void openProjectDispatched(const msg::Message&);
+    void closeProjectDispatched(const msg::Message&);
   };
 }
 

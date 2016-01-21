@@ -22,6 +22,8 @@
 
 #include <feature/csysbase.h>
 
+namespace prj{namespace srl{class FeatureInert;}}
+
 namespace ftr
 {
   /*! @brief static feature.
@@ -38,6 +40,8 @@ namespace ftr
     virtual const std::string& getTypeString() const override {return toString(Type::Inert);}
     virtual const QIcon& getIcon() const override {return icon;}
     virtual Descriptor getDescriptor() const override {return Descriptor::Create;}
+    virtual void serialWrite(const QDir&) override;
+    void serialRead(const prj::srl::FeatureInert &sBox);
     
   private:
     Inert(){};

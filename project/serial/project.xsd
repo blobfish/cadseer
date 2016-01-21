@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="http://www.cadseer.com/prj/srl"
+  xmlns:srl="http://www.cadseer.com/prj/srl"
+>
+  
+<xs:complexType name="Feature">
+  <xs:all>
+    <xs:element name="id" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+    <xs:element name="type" type="xs:string" default="None"/>
+    <xs:element name="shapeOffset" type="xs:unsignedLong" default="18446744073709551615"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="Features">
+  <xs:sequence maxOccurs="unbounded">
+    <xs:element name="feature" type="srl:Feature"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="Connection">
+  <xs:all>
+    <xs:element name="sourceId" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+    <xs:element name="targetId" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+    <xs:element name="inputType" type="xs:string" default="None"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="Connections">
+  <xs:sequence maxOccurs="unbounded">
+    <xs:element name="connection" type="srl:Connection"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="AppVersion">
+  <xs:all>
+    <xs:element name="major" type="xs:int" default="0"/>
+    <xs:element name="minor" type="xs:int" default="0"/>
+    <xs:element name="maintenance" type="xs:int" default="0"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="Project">
+  <xs:all>
+    <xs:element name="appVersion" type="srl:AppVersion"/>
+    <xs:element name="fileVersion" type="xs:int" default="0"/>
+    <xs:element name="features" type="srl:Features"/>
+    <xs:element name="connections" type="srl:Connections"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:element name="project" type="srl:Project"/>
+  
+</xs:schema> 

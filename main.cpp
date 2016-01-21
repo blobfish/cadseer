@@ -17,8 +17,11 @@
  *
  */
 
+#include <QTimer>
+
 #include <application/application.h>
 #include <application/mainwindow.h>
+#include <project/project.h>
 #include <viewer/viewerwidget.h>
 #include <message/dispatch.h>
 
@@ -39,26 +42,35 @@ int main( int argc, char** argv )
 
     app.getMainWindow()->showMaximized();
     
-    //build an empty project.
     msg::Message messageOut;
     
-    messageOut.mask = msg::Request | msg::NewProject;
-    msg::dispatch().messageInSlot(messageOut);
+//     messageOut.mask = msg::Request | msg::NewProject;
+//     msg::dispatch().messageInSlot(messageOut);
+//     prj::Project *project = app.getProject();
+//     project->setSaveDirectory("/home/tanderson/Programming/cadseer/test/project");
     
-    messageOut.mask = msg::Request | msg::Construct | msg::Box;
-    msg::dispatch().messageInSlot(messageOut);
+    QTimer::singleShot(0, &app, SLOT(appStartSlot()));
     
-    messageOut.mask = msg::Request | msg::Construct | msg::Cylinder;
-    msg::dispatch().messageInSlot(messageOut);
+//     messageOut.mask = msg::Request | msg::OpenProject;
+//     msg::dispatch().messageInSlot(messageOut);
+//     
+//     messageOut.mask = msg::Request | msg::ForceUpdate;
+//     msg::dispatch().messageInSlot(messageOut);
     
-    messageOut.mask = msg::Request | msg::Construct | msg::Cone;
-    msg::dispatch().messageInSlot(messageOut);
+//     messageOut.mask = msg::Request | msg::Construct | msg::Box;
+//     msg::dispatch().messageInSlot(messageOut);
+//     
+//     messageOut.mask = msg::Request | msg::Construct | msg::Cylinder;
+//     msg::dispatch().messageInSlot(messageOut);
     
-    messageOut.mask = msg::Request | msg::Construct | msg::Sphere;
-    msg::dispatch().messageInSlot(messageOut);
+//     messageOut.mask = msg::Request | msg::Construct | msg::Cone;
+//     msg::dispatch().messageInSlot(messageOut);
+//     
+//     messageOut.mask = msg::Request | msg::Construct | msg::Sphere;
+//     msg::dispatch().messageInSlot(messageOut);
     
-    messageOut.mask = msg::Request | msg::ViewFit;
-    msg::dispatch().messageInSlot(messageOut);
+//     messageOut.mask = msg::Request | msg::ViewFit;
+//     msg::dispatch().messageInSlot(messageOut);
     
     return app.exec();
 }

@@ -36,6 +36,8 @@ namespace prj
     boost::uuids::uuid featureId2;
     std::shared_ptr<ftr::Base> feature;
     ftr::InputTypes inputType;
+    std::string directory;
+    std::string gitMessage;
   };
 }
 

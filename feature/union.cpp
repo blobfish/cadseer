@@ -20,12 +20,15 @@
 #include <assert.h>
 #include <stdexcept>
 
+#include <QDir>
+
 #include <boost/uuid/random_generator.hpp>
 
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <TopExp.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 
+#include <project/serial/xsdcxxoutput/featureunion.h>
 #include <feature/union.h>
 
 using namespace ftr;
@@ -105,4 +108,21 @@ void Union::updateModel(const UpdateMap &mapIn)
     std::cout << std::endl << "Error in union update. " << e.what() << std::endl;
   }
   setModelClean();
+}
+
+void Union::serialWrite(const QDir &dIn)
+{
+  prj::srl::FeatureUnion unionOut
+  (
+    Base::serialOut()
+  );
+  
+  xml_schema::NamespaceInfomap infoMap;
+  std::ofstream stream(buildFilePathName(dIn).toUtf8().constData());
+  prj::srl::fUnion(stream, unionOut, infoMap);
+}
+
+void Union::serialRead(const prj::srl::FeatureUnion& sUnionIn)
+{
+  Base::serialIn(sUnionIn.featureBase());
 }

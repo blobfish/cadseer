@@ -391,6 +391,9 @@ void ViewerWidget::setupDispatcher()
   
   mask = msg::Request | msg::ExportOSG;
   dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::exportOSGDispatched, this, _1)));
+  
+  mask = msg::Response | msg::Pre | msg::CloseProject;;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::closeProjectDispatched, this, _1)));
 }
 
 void ViewerWidget::messageInSlot(const msg::Message &messageIn)
@@ -425,6 +428,12 @@ void ViewerWidget::featureRemovedDispatched(const msg::Message &messageIn)
 void ViewerWidget::visualUpdatedDispatched(const msg::Message &)
 {
   this->update();
+}
+
+void ViewerWidget::closeProjectDispatched(const msg::Message&)
+{
+  //don't need to keep any children of the viewer.
+  root->removeChildren(0, root->getNumChildren());
 }
 
 VisibleVisitor::VisibleVisitor(bool visIn) : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), visibility(visIn)

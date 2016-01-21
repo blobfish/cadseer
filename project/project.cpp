@@ -22,6 +22,7 @@
 
 #include <boost/graph/topological_sort.hpp>
 #include <boost/graph/filtered_graph.hpp>
+#include <boost/uuid/string_generator.hpp>
 
 #include <BRep_Builder.hxx>
 #include <BRepTools.hxx>
@@ -34,9 +35,12 @@
 #include <feature/base.h>
 #include <feature/inert.h>
 #include <project/message.h>
-#include <project/project.h>
 #include <message/message.h>
 #include <message/dispatch.h>
+#include <project/gitmanager.h>
+#include <project/featureload.h>
+#include <project/serial/xsdcxxoutput/project.h>
+#include <project/project.h>
 
 using namespace prj;
 using namespace prg;
@@ -45,6 +49,17 @@ using boost::uuids::uuid;
 Project::Project()
 {
   setupDispatcher();
+  
+  connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
+  connection = msg::dispatch().connectMessageOut(boost::bind(&prj::Project::messageInSlot, this, _1));
+  
+  std::unique_ptr<GitManager> tempManager(new GitManager());
+  gitManager = std::move(tempManager);
+}
+
+Project::~Project()
+{
+  connection.disconnect();
 }
 
 void Project::updateModel()
@@ -101,7 +116,11 @@ void Project::updateModel()
       updateMap.insert(std::make_pair(projectGraph[*inEdgeIt].inputType, projectGraph[source].feature.get()));
     }
     projectGraph[currentVertex].feature->updateModel(updateMap);
+    projectGraph[currentVertex].feature->serialWrite(QDir(QString::fromStdString(saveDirectory)));
   }
+  
+  serialWrite();
+  gitManager->update();
   
   updateLeafStatus();
   
@@ -215,6 +234,12 @@ void Project::addFeature(std::shared_ptr<ftr::Base> feature)
   Vertex newVertex = boost::add_vertex(projectGraph);
   projectGraph[newVertex].feature = feature;
   map.insert(std::make_pair(feature->getId(), newVertex));
+  
+  //log action to git.
+  std::ostringstream gitMessage;
+  gitMessage << QObject::tr("Adding feature ").toStdString() << feature->getTypeString();
+  gitManager->appendGitMessage(gitMessage.str());
+  
   msg::Message postMessage;
   postMessage.mask = msg::Response | msg::Post | msg::AddFeature;
   prj::Message pMessage;
@@ -283,8 +308,20 @@ void Project::removeFeature(const uuid& idIn)
   preMessage.payload = pMessage;
   messageOutSignal(preMessage);
   
+  //remove file if exists.
+  QString fileName = QString::fromStdString(feature->getFileName());
+  QDir dir = QString::fromStdString(saveDirectory);
+  assert(dir.exists());
+  if (dir.exists(fileName))
+    dir.remove(fileName);
+  
   boost::clear_vertex(vertex, projectGraph);
   boost::remove_vertex(vertex, projectGraph);
+  
+  //log action to git.
+  std::ostringstream gitMessage;
+  gitMessage << QObject::tr("Removing feature ").toStdString() << feature->getTypeString();
+  gitManager->appendGitMessage(gitMessage.str());
   
   //no post message.
 }
@@ -439,6 +476,12 @@ void Project::setupDispatcher()
   
   mask = msg::Request | msg::UpdateVisual;
   dispatcher.insert(std::make_pair(mask, boost::bind(&Project::updateVisualDispatched, this, _1)));
+  
+  mask = msg::Request | msg::SaveProject;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Project::saveProjectRequestDispatched, this, _1)));
+  
+  mask = msg::Request | msg::GitMessage;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Project::gitMessageRequestDispatched, this, _1)));
 }
 
 void Project::setCurrentLeafDispatched(const msg::Message &messageIn)
@@ -506,6 +549,20 @@ void Project::updateVisualDispatched(const msg::Message&)
   updateVisual();
 }
 
+void Project::saveProjectRequestDispatched(const msg::Message&)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  save();
+}
+
+void Project::gitMessageRequestDispatched(const msg::Message &messageIn)
+{
+  Message pMessage = boost::get<prj::Message>(messageIn.payload);
+  gitManager->appendGitMessage(pMessage.gitMessage);
+}
 
 void Project::indexVerticesEdges()
 {
@@ -591,4 +648,134 @@ Project::VertexEdgePairs Project::getChildren(prg::Vertex vertexIn)
   return out;
 }
 
+void Project::setSaveDirectory(const std::string& directoryIn)
+{
+  saveDirectory = directoryIn;
+}
+
+void Project::serialWrite()
+{
+  using boost::uuids::to_string;
+  
+  //we accumulate all feature occt shapes into 1 master compound and write
+  //that to disk. We do this in an effort for occt to keep it's implicit
+  //sharing between saves and opens.
+  TopoDS_Compound compound;
+  std::size_t offset = 0;
+  BRep_Builder builder;
+  builder.MakeCompound(compound);
+  
+  prj::srl::Features features;
+  BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
+  {
+    ftr::Base *f = projectGraph[currentVertex].feature.get();
+    features.feature().push_back(prj::srl::Feature(to_string(f->getId()), f->getTypeString(), offset));
+    
+    //add to master compound
+    builder.Add(compound, f->getShape());
+    
+    offset++;
+  }
+  
+  //write out master compound
+  std::ostringstream masterName;
+  masterName << saveDirectory << QDir::separator().toLatin1() << "project.brep";
+  BRepTools::Write(compound, masterName.str().c_str());
+  
+  prj::srl::Connections connections;
+  BGL_FORALL_EDGES(currentEdge, projectGraph, Graph)
+  {
+    std::string inputTypeString = ftr::getInputTypeString(projectGraph[currentEdge].inputType);
+    ftr::Base *s = projectGraph[boost::source(currentEdge, projectGraph)].feature.get();
+    ftr::Base *t = projectGraph[boost::target(currentEdge, projectGraph)].feature.get();
+    connections.connection().push_back(prj::srl::Connection(to_string(s->getId()), to_string(t->getId()), inputTypeString));
+  }
+  
+  prj::srl::AppVersion version(0, 0, 0);
+  std::string projectPath = saveDirectory + QDir::separator().toLatin1() + "project.prjt";
+  srl::Project p(version, 0, features, connections);
+  xml_schema::NamespaceInfomap infoMap;
+  std::ofstream stream(projectPath.c_str());
+  srl::project(stream, p, infoMap);
+}
+
+void Project::save()
+{
+  msg::Message preMessage;
+  preMessage.mask = msg::Response | msg::Pre | msg::SaveProject;
+  messageOutSignal(preMessage);
+  
+  gitManager->save();
+  
+  msg::Message postMessage;
+  postMessage.mask = msg::Response | msg::Post | msg::SaveProject;
+  messageOutSignal(postMessage);
+}
+
+void Project::initializeNew()
+{
+  serialWrite();
+  gitManager->create(saveDirectory);
+}
+
+void Project::open()
+{
+  msg::Message preMessage;
+  preMessage.mask = msg::Response | msg::Pre | msg::OpenProject;
+  messageOutSignal(preMessage);
+  
+  std::string projectPath = saveDirectory + QDir::separator().toLatin1() + "project.prjt";
+  std::string shapePath = saveDirectory + QDir::separator().toLatin1() + "project.brep";
+  
+  gitManager->open(saveDirectory + QDir::separator().toLatin1() +".git");
+  
+  try
+  {
+    //read master shape.
+    TopoDS_Shape masterShape;
+    BRep_Builder junk;
+    std::fstream file(shapePath.c_str());
+    BRepTools::Read(masterShape, file, junk);
+    
+    auto project = srl::project(projectPath.c_str(), ::xml_schema::Flags::dont_validate);
+    FeatureLoad fLoader(saveDirectory + QDir::separator().toLatin1(), masterShape);
+    for (const auto &feature : project->features().feature())
+    {
+      std::shared_ptr<ftr::Base> featurePtr = fLoader.load(feature.id(), feature.type(), feature.shapeOffset());
+      if (featurePtr)
+	addFeature(featurePtr);
+    }
+    
+    for (const auto &fConnection : project->connections().connection())
+    {
+      uuid source = boost::uuids::string_generator()(fConnection.sourceId());
+      uuid target = boost::uuids::string_generator()(fConnection.targetId());
+      ftr::InputTypes inputType = ftr::getInputFromString(fConnection.inputType());
+      connect(source, target, inputType);
+    }
+    
+    updateModel();
+    updateVisual();
+  }
+  catch (const xsd::cxx::xml::invalid_utf16_string&)
+  {
+    std::cerr << "invalid UTF-16 text in DOM model" << std::endl;
+  }
+  catch (const xsd::cxx::xml::invalid_utf8_string&)
+  {
+    std::cerr << "invalid UTF-8 text in object model" << std::endl;
+  }
+  catch (const xml_schema::Exception& e)
+  {
+    std::cerr << e << std::endl;
+  }
+  
+  msg::Message postMessage;
+  postMessage.mask = msg::Response | msg::Post | msg::OpenProject;
+  messageOutSignal(postMessage);
+  
+  msg::Message viewFitMessage;
+  viewFitMessage.mask = msg::Request | msg::ViewFit;
+  messageOutSignal(viewFitMessage);
+}
 

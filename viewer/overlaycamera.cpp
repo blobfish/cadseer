@@ -61,6 +61,9 @@ void OverlayCamera::setupDispatcher()
   
   mask = msg::Response | msg::Pre | msg::RemoveFeature;
   dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::featureRemovedDispatched, this, _1)));
+  
+  mask = msg::Response | msg::Pre | msg::CloseProject;;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::closeProjectDispatched, this, _1)));
 }
 
 void OverlayCamera::messageInSlot(const msg::Message &messageIn)
@@ -92,3 +95,9 @@ void OverlayCamera::featureRemovedDispatched(const msg::Message &messageIn)
   removeChild(message.feature->getOverlaySwitch());
 }
 
+void OverlayCamera::closeProjectDispatched(const msg::Message&)
+{
+  //this code assumes that the first child is the absolute csys.
+  assert(getChild(0)->getNodeMask() == NodeMaskDef::csys);
+  removeChildren(1, getNumChildren() - 1);
+}

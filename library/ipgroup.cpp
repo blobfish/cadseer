@@ -249,6 +249,17 @@ bool IPGroup::processMotion(const osgManipulator::MotionCommand &commandIn)
     dimSwitch->setChildValue(overallDim.get(), false);
     parameter->setValue(overallDim->getSpread());
     
+    //add git message.
+    std::ostringstream gitStream;
+    gitStream << QObject::tr("Parameter ").toStdString() << parameter->getName() <<
+      QObject::tr(" changed to: ").toStdString() << parameter->getValue();
+    msg::Message gitMessage;
+    gitMessage.mask = msg::Request | msg::GitMessage;
+    prj::Message pMessage;
+    pMessage.gitMessage = gitStream.str();
+    gitMessage.payload = pMessage;
+    messageOutSignal(gitMessage);
+    
     if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
     {
       msg::Message uMessage;

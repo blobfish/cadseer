@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="http://www.cadseer.com/prj/srl"
+  xmlns:srl="http://www.cadseer.com/prj/srl"
+>
+  
+<xs:complexType name="Parameter">
+  <xs:all>
+    <xs:element name="name" type="xs:string" default="Name"/>
+    <xs:element name="constant" type="xs:boolean" default="true"/>
+    <xs:element name="value" type="xs:double" default="NaN"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="EvolutionRecord">
+  <xs:all>
+    <xs:element name="idIn" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+    <xs:element name="idOut" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="EvolutionContainer">
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+    <xs:element name="evolutionRecord" type="srl:EvolutionRecord"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="ResultRecord">
+  <xs:all>
+    <xs:element name="id" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+    <xs:element name="shapeOffset" type="xs:unsignedLong" default="18446744073709551615"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="ResultContainer">
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+    <xs:element name="resultRecord" type="srl:ResultRecord"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="FeatureRecord">
+  <xs:all>
+    <xs:element name="id" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+    <xs:element name="tag" type="xs:string" default=""/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="FeatureContainer">
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+    <xs:element name="featureRecord" type="srl:FeatureRecord"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="IdSet">
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+    <xs:element name="id" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="DerivedRecord">
+  <xs:all>
+    <xs:element name="idSet" type="srl:IdSet"/>
+    <xs:element name="id" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+  </xs:all>
+</xs:complexType>
+  
+<xs:complexType name="DerivedContainer">
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+    <xs:element name="derivedRecord" type="srl:DerivedRecord"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="FeatureBase">
+  <xs:all>
+    <xs:element name="name" type="xs:string" default="Empty"/>
+    <xs:element name="id" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+    <xs:element name="evolutionContainer" type="srl:EvolutionContainer"/>
+    <xs:element name="resultContainer" type="srl:ResultContainer"/>
+    <xs:element name="featureContainer" type="srl:FeatureContainer"/>
+  </xs:all>
+</xs:complexType>
+
+</xs:schema> 

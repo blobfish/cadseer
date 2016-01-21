@@ -426,6 +426,8 @@ void Model::setupDispatcher()
   mask = msg::Response | msg::Pre | msg::Selection | msg::Subtraction;
   dispatcher.insert(std::make_pair(mask, boost::bind(&Model::selectionSubtractionDispatched, this, _1)));
   
+  mask = msg::Response | msg::Pre | msg::CloseProject;;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Model::closeProjectDispatched, this, _1)));
 }
 
 void Model::preselectionAdditionDispatched(const msg::Message &messageIn)
@@ -493,6 +495,30 @@ void Model::selectionSubtractionDispatched(const msg::Message &messageIn)
   graph[vertex].rectRaw->selectionOff();
   
   lastPickValid = false;
+  
+  invalidate();
+}
+
+void Model::closeProjectDispatched(const msg::Message&)
+{
+  removeAllItems();
+  
+  //remove all edges.
+  //collect vertices to remove
+  std::vector<Vertex> vs;
+  BGL_FORALL_VERTICES(currentVertex, graph, Graph)
+  {
+    graph[currentVertex].connection.disconnect();
+    boost::clear_vertex(currentVertex, graph);
+    vs.push_back(currentVertex);
+  }
+
+  //remove all vertices
+  for (auto &vertex : vs)
+    boost::remove_vertex(vertex, graph);
+  
+  ::dag::clear(graphLink);
+  ::dag::clear(vertexIdContainer);
   
   invalidate();
 }

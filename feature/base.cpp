@@ -17,8 +17,15 @@
  *
  */
 
+#include <QDir>
+
+#include <boost/uuid/string_generator.hpp>
+
 #include <BRep_Builder.hxx>
 #include <TopoDS_Compound.hxx>
+#include <TopTools_IndexedMapOfShape.hxx>
+#include <TopExp.hxx>
+#include <Standard_StdAllocator.hxx>
 
 #include <osg/KdTree>
 
@@ -27,6 +34,7 @@
 #include <nodemaskdefs.h>
 #include <modelviz/shapegeometry.h>
 #include <globalutilities.h>
+#include <project/serial/xsdcxxoutput/featurebase.h>
 #include <feature/base.h>
 
 
@@ -263,4 +271,129 @@ void Base::setNonLeaf()
     return; //already nonLeaf.
   state.set(ftr::StateOffset::NonLeaf, true);
   stateChangedSignal(id, ftr::StateOffset::NonLeaf);
+}
+
+void Base::serialWrite(const QDir&)
+{
+  assert(0); //missing override in subclass?
+}
+
+prj::srl::FeatureBase Base::serialOut()
+{
+  //update the shape offset in result container. we use the
+  //shape offset to map id to shape when reading data from disk.
+  TopTools_IndexedMapOfShape shapeMap;
+  TopExp::MapShapes(shape, shapeMap);
+  for (std::size_t index = 1; index <= static_cast<std::size_t>(shapeMap.Extent()); ++index)
+  {
+    if (!hasResult(resultContainer, shapeMap(index)))
+      continue; //things like degenerated edges exist in shape but not in result.
+    ftr::updateOffset(resultContainer, shapeMap(index), index);
+  }
+  
+  prj::srl::EvolutionContainer eContainerOut;
+  typedef EvolutionContainer::index<EvolutionRecord::ByInId>::type EList;
+  const EList &eList = evolutionContainer.get<EvolutionRecord::ByInId>();
+  for (EList::const_iterator it = eList.begin(); it != eList.end(); ++it)
+  {
+    prj::srl::EvolutionRecord eRecord
+    (
+      boost::uuids::to_string(it->inId),
+      boost::uuids::to_string(it->outId)
+    );
+    eContainerOut.evolutionRecord().push_back(eRecord);
+  }
+  
+  prj::srl::ResultContainer rContainerOut;
+  typedef ResultContainer::index<ResultRecord::ById>::type RList;
+  const RList &rList = resultContainer.get<ResultRecord::ById>();
+  for (RList::const_iterator it = rList.begin(); it != rList.end(); ++it)
+  {
+    prj::srl::ResultRecord rRecord
+    (
+      boost::uuids::to_string(it->id),
+      it->shapeOffset
+    );
+    rContainerOut.resultRecord().push_back(rRecord);
+  }
+  
+  prj::srl::FeatureContainer fContainerOut;
+  typedef FeatureContainer::index<FeatureRecord::ById>::type FList;
+  const FList &fList = featureContainer.get<FeatureRecord::ById>();
+  for (FList::const_iterator it = fList.begin(); it != fList.end(); ++it)
+  {
+    prj::srl::FeatureRecord fRecord
+    (
+      boost::uuids::to_string(it->id),
+      it->tag
+    );
+    fContainerOut.featureRecord().push_back(fRecord);
+  }
+  
+  return prj::srl::FeatureBase
+  (
+    name.toStdString(),
+    boost::uuids::to_string(id),
+    eContainerOut,
+    rContainerOut,
+    fContainerOut
+  ); 
+}
+
+void Base::serialIn(const prj::srl::FeatureBase& sBaseIn)
+{
+  boost::uuids::string_generator sg;
+  
+  name = QString::fromStdString(sBaseIn.name());
+  id = sg(sBaseIn.id());
+  mainSwitch->setUserValue(gu::idAttributeTitle, boost::uuids::to_string(id));
+  
+  evolutionContainer.get<EvolutionRecord::ByInId>().clear();
+  for (const prj::srl::EvolutionRecord &sERecord : sBaseIn.evolutionContainer().evolutionRecord())
+  {
+    EvolutionRecord record;
+    record.inId = sg(sERecord.idIn());
+    record.outId = sg(sERecord.idOut());
+    evolutionContainer.insert(record);
+  }
+  
+  //fill in shape vector
+  std::vector<TopoDS_Shape, Standard_StdAllocator<TopoDS_Shape> > shapeVector;
+  TopTools_IndexedMapOfShape shapeMap;
+  TopExp::MapShapes(shape, shapeMap);
+  for (std::size_t index = 1; index <= static_cast<std::size_t>(shapeMap.Extent()); ++index)
+    shapeVector.push_back(shapeMap(index));
+  resultContainer.get<ResultRecord::ById>().clear();
+  for (const prj::srl::ResultRecord &sRRecord : sBaseIn.resultContainer().resultRecord())
+  {
+    ResultRecord record;
+    record.id = sg(sRRecord.id());
+    //shapeOffset not needed at runtime.
+    record.shapeOffset = sRRecord.shapeOffset();
+    record.shape = shapeVector.at(sRRecord.shapeOffset() - 1);
+    resultContainer.insert(record);
+  }
+  
+  featureContainer.get<FeatureRecord::ById>().clear();
+  for (const prj::srl::FeatureRecord &sFRecord : sBaseIn.featureContainer().featureRecord())
+  {
+    FeatureRecord record;
+    record.id = sg(sFRecord.id());
+    record.tag = sFRecord.tag();
+    featureContainer.insert(record);
+  }
+}
+
+std::string Base::getFileName() const
+{
+  return boost::uuids::to_string(id) + ".fetr";
+}
+
+QString Base::buildFilePathName(const QDir &dIn) const
+{
+  QString out = dIn.absolutePath();
+  out += QDir::separator() + 
+    QString::fromStdString(getFileName());
+    
+  return out;
 }

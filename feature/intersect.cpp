@@ -23,6 +23,7 @@
 #include <TopExp.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 
+#include <project/serial/xsdcxxoutput/featureintersect.h>
 #include "intersect.h"
 
 using namespace ftr;
@@ -95,11 +96,28 @@ void Intersect::updateModel(const UpdateMap &mapIn)
   catch (Standard_Failure)
   {
     Handle_Standard_Failure e = Standard_Failure::Caught();
-    std::cout << std::endl << "Error in union update. " << e->GetMessageString() << std::endl;
+    std::cout << std::endl << "Error in intersect update. " << e->GetMessageString() << std::endl;
   }
   catch (std::exception &e)
   {
-    std::cout << std::endl << "Error in union update. " << e.what() << std::endl;
+    std::cout << std::endl << "Error in intersect update. " << e.what() << std::endl;
   }
   setModelClean();
+}
+
+void Intersect::serialWrite(const QDir &dIn)
+{
+  prj::srl::FeatureIntersect intersectOut
+  (
+    Base::serialOut()
+  );
+  
+  xml_schema::NamespaceInfomap infoMap;
+  std::ofstream stream(buildFilePathName(dIn).toUtf8().constData());
+  prj::srl::intersect(stream, intersectOut, infoMap);
+}
+
+void Intersect::serialRead(const prj::srl::FeatureIntersect& sIntersectIn)
+{
+  Base::serialIn(sIntersectIn.featureBase());
 }

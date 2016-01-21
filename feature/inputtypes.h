@@ -23,6 +23,7 @@
 #include <assert.h>
 #include <vector>
 #include <string>
+#include <map>
 
 namespace ftr
 {
@@ -45,6 +46,20 @@ namespace ftr
     std::size_t casted = static_cast<std::size_t>(typeIn);
     assert(casted < strings.size());
     return strings.at(casted);
+  }
+  
+  inline const static InputTypes getInputFromString(const std::string &stringIn)
+  {
+    const static std::map<std::string, InputTypes> map
+    {
+      {"None", InputTypes::none},
+      {"Target", InputTypes::target},
+      {"Tool", InputTypes::tool}
+    };
+    
+    auto it = map.find(stringIn);
+    assert(it != map.end());
+    return it->second;
   }
   
   enum class Descriptor

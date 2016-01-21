@@ -74,7 +74,7 @@ std::ostream& ftr::operator<<(std::ostream& os, const ResultRecord& record)
 {
   os << boost::uuids::to_string(record.id) << "      " << 
     gu::getShapeHash(record.shape) << "      " <<
-    shapeStrings.at(record.shape.ShapeType()) << std::endl;
+    record.shapeOffset << std::endl;
   return os;
 }
 
@@ -140,6 +140,17 @@ void ftr::updateId(ResultContainer& containerIn, const boost::uuids::uuid& idIn,
   assert(it != list.end());
   ResultRecord record = *it;
   record.id = idIn;
+  list.replace(it, record);
+}
+
+void ftr::updateOffset(ResultContainer& containerIn, const TopoDS_Shape &shapeIn, std::size_t offsetIn)
+{
+  typedef ResultContainer::index<ResultRecord::ByShape>::type List;
+  List &list = containerIn.get<ResultRecord::ByShape>();
+  List::iterator it = list.find(shapeIn);
+  assert(it != list.end());
+  ResultRecord record = *it;
+  record.shapeOffset = offsetIn;
   list.replace(it, record);
 }
 

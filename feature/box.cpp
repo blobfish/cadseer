@@ -26,6 +26,7 @@
 #include <globalutilities.h>
 #include <library/ipgroup.h>
 #include <feature/boxbuilder.h>
+#include <project/serial/xsdcxxoutput/featurebox.h>
 #include <feature/box.h>
 
 using namespace ftr;
@@ -387,3 +388,25 @@ void Box::updateResult(const BoxBuilder& boxMakerIn)
 //   std::cout << std::endl << "update result:" << std::endl << resultContainer << std::endl;
 }
 
+void Box::serialWrite(const QDir &dIn)
+{
+  prj::srl::FeatureBox boxOut
+  (
+    CSysBase::serialOut(),
+    length.serialOut(),
+    width.serialOut(),
+    height.serialOut()
+  );
+  
+  xml_schema::NamespaceInfomap infoMap;
+  std::ofstream stream(buildFilePathName(dIn).toUtf8().constData());
+  prj::srl::box(stream, boxOut, infoMap);
+}
+
+void Box::serialRead(const prj::srl::FeatureBox& sBox)
+{
+  CSysBase::serialIn(sBox.featureCSysBase());
+  length.serialIn(sBox.length());
+  width.serialIn(sBox.width());
+  height.serialIn(sBox.height());
+}

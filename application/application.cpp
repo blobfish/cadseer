@@ -24,14 +24,18 @@
 #include <QTimer>
 #include <QMessageBox>
 
+#include <project/libgit2pp/libgit2/include/git2/global.h> //for git start and shutdown.
+
 #include <application/application.h>
 #include <application/mainwindow.h>
 #include <viewer/spaceballqevent.h>
+#include <project/gitmanager.h> //needed for unique_ptr destructor call.
 #include <project/project.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <message/dispatch.h>
 #include <application/factory.h>
+#include <project/projectdialog.h>
 
 #include <spnav.h>
 
@@ -60,11 +64,38 @@ Application::Application(int &argc, char **argv) :
       return;
     }
     
-//     factory->setViewer(mainWindow->getViewer());
+    git_libgit2_init();
 }
 
 Application::~Application()
 {
+  git_libgit2_shutdown();
+}
+
+void Application::appStartSlot()
+{
+  //a project might be loaded before we launch the message queue.
+  //if so then don't do the dialog.
+  if (!project)
+  {
+    prj::Dialog dialog(this->getMainWindow());
+    if (dialog.exec() == QDialog::Accepted)
+    {
+      prj::Dialog::Result r = dialog.getResult();
+      if (r == prj::Dialog::Result::Open || r == prj::Dialog::Result::Recent)
+      {
+	openProject(dialog.getDirectory().absolutePath().toStdString());
+      }
+      if (r == prj::Dialog::Result::New)
+      {
+	createNewProject(dialog.getDirectory().absolutePath().toStdString());
+      }
+    }
+    else
+    {
+      this->quit();
+    }
+  }
 }
 
 void Application::quittingSlot()
@@ -134,24 +165,72 @@ QDir Application::getApplicationDirectory()
   return appDir;
 }
 
-void Application::createNewProject()
+void Application::createNewProject(const std::string &directoryIn)
 {
-  if (project)
-    std::cout << "need to close project" << std::endl; //serves as a warning and todo and reminder etc..
-  
   msg::Message preMessage;
   preMessage.mask = msg::Response | msg::Pre | msg::NewProject;
   messageOutSignal(preMessage);
   
+  //directoryIn has been verified to exist before this call.
   std::unique_ptr<prj::Project> tempProject(new prj::Project());
   project = std::move(tempProject);
+  project->setSaveDirectory(directoryIn);
+  project->initializeNew();
   
-  project->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
-    msg::dispatch().connectMessageOut(boost::bind(&prj::Project::messageInSlot, project.get(), _1));
+  updateTitle();
   
   msg::Message postMessage;
   postMessage.mask = msg::Response | msg::Post | msg::NewProject;
   messageOutSignal(postMessage);
+}
+
+void Application::openProject(const std::string &directoryIn)
+{
+  msg::Message preMessage;
+  preMessage.mask = msg::Response | msg::Pre | msg::OpenProject;
+  messageOutSignal(preMessage);
+  
+  assert(!project);
+  //directoryIn has been verified to exist before this call.
+  std::unique_ptr<prj::Project> tempProject(new prj::Project());
+  project = std::move(tempProject);
+  project->setSaveDirectory(directoryIn);
+  project->open();
+  
+  updateTitle();
+  
+  msg::Message postMessage;
+  postMessage.mask = msg::Response | msg::Post | msg::OpenProject;
+  messageOutSignal(postMessage);
+}
+
+void Application::closeProject()
+{
+  //something here for modified project.
+  
+  msg::Message preMessage;
+  preMessage.mask = msg::Response | msg::Pre | msg::CloseProject;
+  messageOutSignal(preMessage);
+ 
+  if (project)
+  {
+    //test modified. qmessagebox to save. save if applicable.
+    project.reset();
+  }
+  
+  msg::Message postMessage;
+  postMessage.mask = msg::Response | msg::Post | msg::CloseProject;
+  messageOutSignal(postMessage);
+}
+
+void Application::updateTitle()
+{
+  if (!project)
+    return;
+  QDir directory(QString::fromStdString(project->getSaveDirectory()));
+  QString name = directory.dirName();
+  QString title = tr("CadSeer --") + name + "--";
+  mainWindow->setWindowTitle(title);
 }
 
 void Application::setupDispatcher()
@@ -162,6 +241,10 @@ void Application::setupDispatcher()
   msg::Mask mask;
   mask = msg::Request | msg::NewProject;
   dispatcher.insert(std::make_pair(mask, boost::bind(&Application::newProjectRequestDispatched, this, _1)));
+  mask = msg::Request | msg::OpenProject;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Application::openProjectRequestDispatched, this, _1)));
+  mask = msg::Request | msg::ProjectDialog;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Application::ProjectDialogRequestDispatched, this, _1)));
 }
 
 void Application::messageInSlot(const msg::Message &messageIn)
@@ -173,11 +256,60 @@ void Application::messageInSlot(const msg::Message &messageIn)
   it->second(messageIn);
 }
 
-void Application::newProjectRequestDispatched(const msg::Message&)
+void Application::ProjectDialogRequestDispatched(const msg::Message&)
+{
+  prj::Dialog dialog(this->getMainWindow());
+  if (dialog.exec() == QDialog::Accepted)
+  {
+    prj::Dialog::Result r = dialog.getResult();
+    if (r == prj::Dialog::Result::Open || r == prj::Dialog::Result::Recent)
+    {
+      closeProject();
+      openProject(dialog.getDirectory().absolutePath().toStdString());
+    }
+    if (r == prj::Dialog::Result::New)
+    {
+      closeProject();
+      createNewProject(dialog.getDirectory().absolutePath().toStdString());
+    }
+  }
+}
+
+void Application::newProjectRequestDispatched(const msg::Message &messageIn)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
   msg::dispatch().dumpString(debug.str());
   
-  createNewProject();
+  prj::Message pMessage = boost::get<prj::Message>(messageIn.payload);
+  
+  QDir dir(QString::fromStdString(pMessage.directory));
+  if (!dir.mkpath(QString::fromStdString(pMessage.directory)))
+  {
+    QMessageBox::critical(this->getMainWindow(), tr("Failed building directory"), QString::fromStdString(pMessage.directory));
+    return;
+  }
+  
+  if(project)
+    closeProject();
+  
+  createNewProject(pMessage.directory);
 }
+
+void Application::openProjectRequestDispatched(const msg::Message &messageIn)
+{
+  prj::Message pMessage = boost::get<prj::Message>(messageIn.payload);
+  
+  QDir dir(QString::fromStdString(pMessage.directory));
+  if (!dir.exists())
+  {
+    QMessageBox::critical(this->getMainWindow(), tr("Failed finding directory"), QString::fromStdString(pMessage.directory));
+    return;
+  }
+  
+  if(project)
+    closeProject();
+  
+  openProject(pMessage.directory);
+}
+

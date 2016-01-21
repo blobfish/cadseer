@@ -109,6 +109,7 @@ namespace dag
     void preselectionSubtractionDispatched(const msg::Message &);
     void selectionAdditionDispatched(const msg::Message &);
     void selectionSubtractionDispatched(const msg::Message &);
+    void closeProjectDispatched(const msg::Message&);
     
     Graph graph;
     GraphLinkContainer graphLink;

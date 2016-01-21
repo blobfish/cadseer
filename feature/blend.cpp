@@ -20,6 +20,7 @@
 #include <assert.h>
 
 #include <boost/uuid/random_generator.hpp>
+#include <boost/uuid/string_generator.hpp>
 
 #include <TopoDS.hxx>
 #include <TopoDS_Edge.hxx>
@@ -33,6 +34,7 @@
 #include <BRepTools.hxx>
 
 #include <globalutilities.h>
+#include <project/serial/xsdcxxoutput/featureblend.h>
 #include <feature/blend.h>
 
 using namespace ftr;
@@ -568,5 +570,81 @@ void Blend::dumpResultStats()
   {
     stream << counter << " nil shapes" << std::endl;
     std::cout << stream.str();
+  }
+}
+
+void Blend::serialWrite(const QDir &dIn)
+{
+  prj::srl::FeatureBlend::EdgeIdsType edgeIdsOut;
+  for (const auto &lId : edgeIds)
+    edgeIdsOut.id().push_back(boost::uuids::to_string(lId));
+  
+  prj::srl::FeatureBlend::ShapeMapType shapeMapOut;
+  typedef EvolutionContainer::index<EvolutionRecord::ByInId>::type EList;
+  const EList &eList = shapeMap.get<EvolutionRecord::ByInId>();
+  for (EList::const_iterator it = eList.begin(); it != eList.end(); ++it)
+  {
+    prj::srl::EvolutionRecord eRecord
+    (
+      boost::uuids::to_string(it->inId),
+      boost::uuids::to_string(it->outId)
+    );
+    shapeMapOut.evolutionRecord().push_back(eRecord);
+  }
+  
+  prj::srl::FeatureBlend::DerivedContainerType containerOut;
+  for (DerivedContainer::const_iterator it = derivedContainer.begin(); it != derivedContainer.end(); ++it)
+  {
+    prj::srl::IdSet setOut;
+    for (IdSet::const_iterator setIt = it->first.begin(); setIt != it->first.end(); ++setIt)
+      setOut.id().push_back(boost::uuids::to_string(*setIt));
+    
+    prj::srl::DerivedRecord recordOut(setOut, boost::uuids::to_string(it->second));
+    containerOut.derivedRecord().push_back(recordOut);
+  }
+  
+  prj::srl::FeatureBlend blendOut
+  (
+    Base::serialOut(),
+    radius,
+    edgeIdsOut,
+    shapeMapOut,
+    containerOut
+  );
+  
+  xml_schema::NamespaceInfomap infoMap;
+  std::ofstream stream(buildFilePathName(dIn).toUtf8().constData());
+  prj::srl::blend(stream, blendOut, infoMap);
+}
+
+void Blend::serialRead(const prj::srl::FeatureBlend& sBlendIn)
+{
+  boost::uuids::string_generator gen;
+  
+  Base::serialIn(sBlendIn.featureBase());
+  
+  radius = sBlendIn.radius();
+  
+  edgeIds.clear();
+  for (const auto &stringId : sBlendIn.edgeIds().id())
+    edgeIds.push_back(gen(stringId));
+  
+  shapeMap.get<EvolutionRecord::ByInId>().clear();
+  for (const prj::srl::EvolutionRecord &sERecord : sBlendIn.shapeMap().evolutionRecord())
+  {
+    EvolutionRecord record;
+    record.inId = gen(sERecord.idIn());
+    record.outId = gen(sERecord.idOut());
+    shapeMap.insert(record);
+  }
+  
+  derivedContainer.clear();
+  for (const auto &cRecord : sBlendIn.derivedContainer().derivedRecord())
+  {
+    IdSet setIn;
+    for (const auto &setEntry : cRecord.idSet().id())
+      setIn.insert(gen(setEntry));
+    auto containerEntry = std::make_pair(setIn, gen(cRecord.id()));
+    derivedContainer.insert(containerEntry);
   }
 }

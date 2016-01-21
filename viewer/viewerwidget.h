@@ -83,6 +83,7 @@ protected:
     void viewFillDispatched(const msg::Message &);
     void viewLineDispatched(const msg::Message &);
     void exportOSGDispatched(const msg::Message &);
+    void closeProjectDispatched(const msg::Message &);
 };
 
 class VisibleVisitor : public osg::NodeVisitor

@@ -26,6 +26,8 @@
 #include <feature/base.h>
 #include <message/message.h>
 
+namespace prj{namespace srl{class FeatureCSysBase;}}
+
 namespace ftr
 {
   class DCallBack;
@@ -51,6 +53,9 @@ namespace ftr
     lbr::CSysDragger& getDragger() {return *dragger;}
 
   protected:
+    prj::srl::FeatureCSysBase serialOut(); //!<convert this into serializable object.
+    void serialIn(const prj::srl::FeatureCSysBase &sCSysBaseIn); //intialize this from serial object.
+    
     gp_Ax2 system;
     osg::ref_ptr<lbr::CSysDragger> dragger;
     osg::ref_ptr<DCallBack> callBack;

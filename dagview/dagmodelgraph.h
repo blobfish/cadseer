@@ -256,12 +256,8 @@ namespace dag
   const VertexProperty& findRecordByVisible(const GraphLinkContainer &containerIn, QGraphicsPixmapItem *itemIn);
   const VertexProperty& findRecord(const GraphLinkContainer &containerIn, const uuid &idIn);
   void eraseRecord(GraphLinkContainer &containerIn, const uuid &idIn);
-//   const GraphLinkRecord& findRecord(const App::DocumentObject* dObjectIn, const GraphLinkContainer &containerIn);
-//   const GraphLinkRecord& findRecord(const Gui::ViewProviderDocumentObject* VPDObjectIn, const GraphLinkContainer &containerIn);
   const VertexProperty& findRecord(const GraphLinkContainer &containerIn, RectItem* rectIn);
-//   const GraphLinkRecord& findRecord(const std::string &stringIn, const GraphLinkContainer &containerIn);
-//   void eraseRecord(const Gui::ViewProviderDocumentObject* VPDObjectIn, GraphLinkContainer &containerIn);
-  
+  void clear(GraphLinkContainer &containerIn);
   
   struct VertexIdRecord
   {
@@ -318,6 +314,13 @@ namespace dag
     List::const_iterator it = list.find(featureIdIn);
     assert(it != list.end());
     list.erase(it);
+  }
+  
+  inline void clear(VertexIdContainer &containerIn)
+  {
+    typedef VertexIdContainer::index<VertexIdRecord::ByFeatureId>::type List;
+    List &list = containerIn.get<VertexIdRecord::ByFeatureId>();
+    list.clear();
   }
 }
 

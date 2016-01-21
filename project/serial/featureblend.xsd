@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="http://www.cadseer.com/prj/srl"
+  xmlns:srl="http://www.cadseer.com/prj/srl"
+>
+  
+<xs:include schemaLocation="featurebase.xsd"/>
+
+<xs:complexType name="EdgeIds">
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+    <xs:element name="id" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="FeatureBlend">
+  <xs:all>
+    <xs:element name="featureBase" type="srl:FeatureBase"/>
+    <xs:element name="radius" type="xs:double" default="NaN"/>
+    <xs:element name="edgeIds" type="srl:EdgeIds"/>
+    <xs:element name="shapeMap" type="srl:EvolutionContainer"/>
+    <xs:element name="derivedContainer" type="srl:DerivedContainer"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:element name="blend" type="srl:FeatureBlend"/>
+  
+</xs:schema> 

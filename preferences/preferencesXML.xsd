@@ -36,11 +36,27 @@
   </xs:sequence>
 </xs:complexType>
 
+<xs:complexType name="RecentProjects">
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+    <xs:element name="Entry" type="xs:string"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="Project">
+  <xs:all>
+    <xs:element name="basePath" type="xs:string"/>
+    <xs:element name="gitName" type="xs:string"/>
+    <xs:element name="gitEmail" type="xs:string"/>
+    <xs:element name="recentProjects" type="RecentProjects"/>
+  </xs:all>
+</xs:complexType>
+
 <xs:complexType name="Root">
   <xs:sequence minOccurs="1" maxOccurs="1">
     <xs:element name="visual" type="Visual"/>
     <xs:element name="dragger" type="Dragger"/>
     <xs:element name="interactiveParameter" type="InteractiveParameter"/>
+    <xs:element name="project" type="Project"/>
   </xs:sequence>
 </xs:complexType>
 

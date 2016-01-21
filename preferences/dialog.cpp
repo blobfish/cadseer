@@ -17,8 +17,11 @@
  *
  */
 #include <iostream>
+#include <stdexcept>
 
 #include <QDoubleValidator>
+#include <QMessageBox>
+#include <QFileDialog>
 
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
@@ -34,6 +37,7 @@ Dialog::Dialog(Manager *managerIn, QWidget *parent) : QDialog(parent), ui(new Ui
   
   connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
   connect(ui->buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+  connect(ui->basePathButton, SIGNAL(clicked()), this, SLOT(basePathBrowseSlot()));
 }
 
 Dialog::~Dialog()
@@ -63,15 +67,27 @@ void Dialog::initialize()
   ui->characterSizeEdit->setText(QString().setNum(manager->rootPtr->interactiveParameter().characterSize()));
   ui->arrowWidthEdit->setText(QString().setNum(manager->rootPtr->interactiveParameter().arrowWidth()));
   ui->arrowHeightEdit->setText(QString().setNum(manager->rootPtr->interactiveParameter().arrowHeight()));
+  
+  ui->basePathEdit->setText(QString::fromStdString(manager->rootPtr->project().basePath()));
+  ui->gitNameEdit->setText(QString::fromStdString(manager->rootPtr->project().gitName()));
+  ui->gitEmailEdit->setText(QString::fromStdString(manager->rootPtr->project().gitEmail()));
 }
 
 void Dialog::accept()
 {
-  updateDeflections();
-  updateDragger();
-  
-  manager->saveConfig();
-  QDialog::accept();
+  try
+  {
+    updateDeflections();
+    updateDragger();
+    updateProject();
+    
+    manager->saveConfig();
+    QDialog::accept();
+  }
+  catch(std::exception &error)
+  {
+    QMessageBox::warning(this, tr("Error"), QString::fromStdString(error.what()));
+  }
 }
 
 void Dialog::updateDeflections()
@@ -152,4 +168,36 @@ void Dialog::updateDragger()
     (tempArrowHeight != manager->rootPtr->interactiveParameter().arrowHeight())
   )
     manager->rootPtr->interactiveParameter().arrowHeight() = tempArrowHeight;
+}
+
+void Dialog::updateProject()
+{
+  QString pathString = ui->basePathEdit->text();
+  QDir baseDir(pathString);
+  if (!baseDir.mkpath(pathString))
+  {
+    QString defaultPath = QDir::homePath();
+    defaultPath += QString(QDir::separator()) + "CadseerProjects";
+    QDir defaultDir(defaultPath);
+    assert(defaultDir.mkpath(defaultPath));
+    ui->basePathEdit->setText(defaultDir.absolutePath());
+    
+    QString message(tr("Couldn't create base path. Default base path has been set"));
+    throw std::runtime_error(message.toStdString());
+  }
+  
+  manager->rootPtr->project().basePath() = ui->basePathEdit->text().toStdString();
+  manager->rootPtr->project().gitName() = ui->gitNameEdit->text().toStdString();
+  manager->rootPtr->project().gitEmail() = ui->gitEmailEdit->text().toStdString();
+}
+
+void Dialog::basePathBrowseSlot()
+{
+  QString browseStart = ui->basePathEdit->text();
+  QDir browseStartDir(browseStart);
+  if (!browseStartDir.exists() || browseStart.isEmpty())
+    browseStart = QDir::homePath();
+  QString freshDirectory = QFileDialog::getExistingDirectory(this, tr("Browse to projects base directory"), browseStart);
+  if (!freshDirectory.isEmpty())
+    ui->basePathEdit->setText(freshDirectory);
 }

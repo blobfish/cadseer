@@ -7,13 +7,19 @@
     </mesh>
   </visual>
   <dragger>
-    <triggerUpdateOnFinish>false</triggerUpdateOnFinish>
+    <triggerUpdateOnFinish>true</triggerUpdateOnFinish>
     <linearIncrement>1.0</linearIncrement>
     <angularIncrement>15.0</angularIncrement>
   </dragger>
   <interactiveParameter>
-    <characterSize>1.0</characterSize>
-    <arrowWidth>0.5</arrowWidth>
-    <arrowHeight>1.0</arrowHeight>
+    <characterSize>0.1875</characterSize>
+    <arrowWidth>0.125</arrowWidth>
+    <arrowHeight>0.25</arrowHeight>
   </interactiveParameter>
+  <project>
+    <basePath></basePath>
+    <gitName>Your Name</gitName>
+    <gitEmail>Your@Email</gitEmail>
+    <recentProjects></recentProjects>
+  </project>
 </root>

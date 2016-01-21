@@ -30,6 +30,8 @@ find_package(Eigen3 REQUIRED)
 find_package(XercesC REQUIRED)
 find_package(XSDCXX REQUIRED)
 
+add_subdirectory(project/libgit2pp)
+
 SET(LIBRARY_INCLUDE_PATHS
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR} #needed to find moc files.
@@ -110,6 +112,21 @@ SET(PREFERENCE_SOURCES
 SET(PROJECT_SOURCES
     project/project.cpp
     project/message.cpp
+    project/gitmanager.cpp
+    project/featureload.cpp
+    project/projectdialog.cpp
+    project/serial/xsdcxxoutput/project.cpp
+    project/serial/xsdcxxoutput/featurebase.cpp
+    project/serial/xsdcxxoutput/featurecsysbase.cpp
+    project/serial/xsdcxxoutput/featurebox.cpp
+    project/serial/xsdcxxoutput/featurecylinder.cpp
+    project/serial/xsdcxxoutput/featuresphere.cpp
+    project/serial/xsdcxxoutput/featurecone.cpp
+    project/serial/xsdcxxoutput/featureunion.cpp
+    project/serial/xsdcxxoutput/featureintersect.cpp
+    project/serial/xsdcxxoutput/featuresubtract.cpp
+    project/serial/xsdcxxoutput/featureinert.cpp
+    project/serial/xsdcxxoutput/featureblend.cpp
     )
     
 SET(APPLICATION_SOURCES
@@ -180,6 +197,7 @@ SET(CADSEER_MOC_HDRS
     dialogs/boxdialog.h
     preferences/dialog.h
     dialogs/parameterdialog.h
+    project/projectdialog.h
     )
 
 SET(CADSEER_LIBRARIES
@@ -190,11 +208,13 @@ SET(CADSEER_LIBRARIES
     ${XERCESC_LIBRARIES}
     ${SPNAV_LIBRARIES}
     ${ModelViz}
+    git2pp
     )
 
 SET(CADSEER_UIS
     application/mainwindow.ui
     preferences/dialog.ui
+    project/projectdialog.ui
     )
 
 SET(CADSEER_RESOURCES

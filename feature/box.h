@@ -26,6 +26,7 @@
 #include <feature/csysbase.h>
 
 namespace lbr{class IPGroup;}
+namespace prj{namespace srl{class FeatureBox;}}
 
 namespace ftr
 {
@@ -50,6 +51,8 @@ public:
   virtual const std::string& getTypeString() const override {return toString(Type::Box);}
   virtual const QIcon& getIcon() const override {return icon;}
   virtual Descriptor getDescriptor() const override {return Descriptor::Create;}
+  virtual void serialWrite(const QDir&) override; //!< write xml file. not const, might reset a modified flag.
+  void serialRead(const prj::srl::FeatureBox &sBox); //!<initializes this from sBox. not virtual, type already known.
   
 protected:
   Parameter length;
@@ -64,6 +67,7 @@ protected:
   void updateResult(const BoxBuilder&);
   void setupIPGroup();
   void updateIPGroup();
+  
   
 private:
   static QIcon icon;

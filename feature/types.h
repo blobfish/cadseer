@@ -56,13 +56,37 @@ namespace ftr
       {Type::Blend, "Blend"},
       {Type::Inert, "Inert"},
       {Type::Union, "Union"},
-      {Type::Union, "Subtract"},
-      {Type::Union, "Intersect"}
+      {Type::Subtract, "Subtract"},
+      {Type::Intersect, "Intersect"}
     };
     
     assert(strings.count(typeIn) > 0);
     return strings.at(typeIn);
   }
+  
+  //yuck duplicate. fix me
+  inline const static Type& typeFromString(const std::string &stringIn)
+  {
+    typedef std::map<const std::string, Type> LocalMap;
+    const static LocalMap types = 
+    {
+      {"Base", Type::Base},
+      {"CSys", Type::CSys},
+      {"Box", Type::Box},
+      {"Sphere", Type::Sphere},
+      {"Cone", Type::Cone},
+      {"Cylinder", Type::Cylinder},
+      {"Blend", Type::Blend},
+      {"Inert", Type::Inert},
+      {"Union", Type::Union},
+      {"Subtract", Type::Subtract},
+      {"Intersect", Type::Intersect}
+    };
+    
+    assert(types.count(stringIn) > 0);
+    return types.at(stringIn);
+  }
+  
 }
 
 

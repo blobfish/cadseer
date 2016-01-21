@@ -320,6 +320,128 @@ namespace prf
   }
 
 
+  // RecentProjects
+  // 
+
+  const RecentProjects::EntrySequence& RecentProjects::
+  Entry () const
+  {
+    return this->Entry_;
+  }
+
+  RecentProjects::EntrySequence& RecentProjects::
+  Entry ()
+  {
+    return this->Entry_;
+  }
+
+  void RecentProjects::
+  Entry (const EntrySequence& s)
+  {
+    this->Entry_ = s;
+  }
+
+
+  // Project
+  // 
+
+  const Project::BasePathType& Project::
+  basePath () const
+  {
+    return this->basePath_.get ();
+  }
+
+  Project::BasePathType& Project::
+  basePath ()
+  {
+    return this->basePath_.get ();
+  }
+
+  void Project::
+  basePath (const BasePathType& x)
+  {
+    this->basePath_.set (x);
+  }
+
+  void Project::
+  basePath (::std::unique_ptr< BasePathType > x)
+  {
+    this->basePath_.set (std::move (x));
+  }
+
+  const Project::GitNameType& Project::
+  gitName () const
+  {
+    return this->gitName_.get ();
+  }
+
+  Project::GitNameType& Project::
+  gitName ()
+  {
+    return this->gitName_.get ();
+  }
+
+  void Project::
+  gitName (const GitNameType& x)
+  {
+    this->gitName_.set (x);
+  }
+
+  void Project::
+  gitName (::std::unique_ptr< GitNameType > x)
+  {
+    this->gitName_.set (std::move (x));
+  }
+
+  const Project::GitEmailType& Project::
+  gitEmail () const
+  {
+    return this->gitEmail_.get ();
+  }
+
+  Project::GitEmailType& Project::
+  gitEmail ()
+  {
+    return this->gitEmail_.get ();
+  }
+
+  void Project::
+  gitEmail (const GitEmailType& x)
+  {
+    this->gitEmail_.set (x);
+  }
+
+  void Project::
+  gitEmail (::std::unique_ptr< GitEmailType > x)
+  {
+    this->gitEmail_.set (std::move (x));
+  }
+
+  const Project::RecentProjectsType& Project::
+  recentProjects () const
+  {
+    return this->recentProjects_.get ();
+  }
+
+  Project::RecentProjectsType& Project::
+  recentProjects ()
+  {
+    return this->recentProjects_.get ();
+  }
+
+  void Project::
+  recentProjects (const RecentProjectsType& x)
+  {
+    this->recentProjects_.set (x);
+  }
+
+  void Project::
+  recentProjects (::std::unique_ptr< RecentProjectsType > x)
+  {
+    this->recentProjects_.set (std::move (x));
+  }
+
+
   // Root
   // 
 
@@ -393,6 +515,30 @@ namespace prf
   interactiveParameter (::std::unique_ptr< InteractiveParameterType > x)
   {
     this->interactiveParameter_.set (std::move (x));
+  }
+
+  const Root::ProjectType& Root::
+  project () const
+  {
+    return this->project_.get ();
+  }
+
+  Root::ProjectType& Root::
+  project ()
+  {
+    return this->project_.get ();
+  }
+
+  void Root::
+  project (const ProjectType& x)
+  {
+    this->project_.set (x);
+  }
+
+  void Root::
+  project (::std::unique_ptr< ProjectType > x)
+  {
+    this->project_.set (std::move (x));
   }
 }
 
@@ -956,28 +1102,297 @@ namespace prf
   {
   }
 
+  // RecentProjects
+  //
+
+  RecentProjects::
+  RecentProjects ()
+  : ::xml_schema::Type (),
+    Entry_ (this)
+  {
+  }
+
+  RecentProjects::
+  RecentProjects (const RecentProjects& x,
+                  ::xml_schema::Flags f,
+                  ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    Entry_ (x.Entry_, f, this)
+  {
+  }
+
+  RecentProjects::
+  RecentProjects (const ::xercesc::DOMElement& e,
+                  ::xml_schema::Flags f,
+                  ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    Entry_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void RecentProjects::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // Entry
+      //
+      if (n.name () == "Entry" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< EntryType > r (
+          EntryTraits::create (i, f, this));
+
+        this->Entry_.push_back (::std::move (r));
+        continue;
+      }
+
+      break;
+    }
+  }
+
+  RecentProjects* RecentProjects::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class RecentProjects (*this, f, c);
+  }
+
+  RecentProjects& RecentProjects::
+  operator= (const RecentProjects& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->Entry_ = x.Entry_;
+    }
+
+    return *this;
+  }
+
+  RecentProjects::
+  ~RecentProjects ()
+  {
+  }
+
+  // Project
+  //
+
+  Project::
+  Project (const BasePathType& basePath,
+           const GitNameType& gitName,
+           const GitEmailType& gitEmail,
+           const RecentProjectsType& recentProjects)
+  : ::xml_schema::Type (),
+    basePath_ (basePath, this),
+    gitName_ (gitName, this),
+    gitEmail_ (gitEmail, this),
+    recentProjects_ (recentProjects, this)
+  {
+  }
+
+  Project::
+  Project (const BasePathType& basePath,
+           const GitNameType& gitName,
+           const GitEmailType& gitEmail,
+           ::std::unique_ptr< RecentProjectsType > recentProjects)
+  : ::xml_schema::Type (),
+    basePath_ (basePath, this),
+    gitName_ (gitName, this),
+    gitEmail_ (gitEmail, this),
+    recentProjects_ (std::move (recentProjects), this)
+  {
+  }
+
+  Project::
+  Project (const Project& x,
+           ::xml_schema::Flags f,
+           ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    basePath_ (x.basePath_, f, this),
+    gitName_ (x.gitName_, f, this),
+    gitEmail_ (x.gitEmail_, f, this),
+    recentProjects_ (x.recentProjects_, f, this)
+  {
+  }
+
+  Project::
+  Project (const ::xercesc::DOMElement& e,
+           ::xml_schema::Flags f,
+           ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    basePath_ (this),
+    gitName_ (this),
+    gitEmail_ (this),
+    recentProjects_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void Project::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // basePath
+      //
+      if (n.name () == "basePath" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< BasePathType > r (
+          BasePathTraits::create (i, f, this));
+
+        if (!basePath_.present ())
+        {
+          this->basePath_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      // gitName
+      //
+      if (n.name () == "gitName" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< GitNameType > r (
+          GitNameTraits::create (i, f, this));
+
+        if (!gitName_.present ())
+        {
+          this->gitName_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      // gitEmail
+      //
+      if (n.name () == "gitEmail" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< GitEmailType > r (
+          GitEmailTraits::create (i, f, this));
+
+        if (!gitEmail_.present ())
+        {
+          this->gitEmail_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      // recentProjects
+      //
+      if (n.name () == "recentProjects" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< RecentProjectsType > r (
+          RecentProjectsTraits::create (i, f, this));
+
+        if (!recentProjects_.present ())
+        {
+          this->recentProjects_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!basePath_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "basePath",
+        "");
+    }
+
+    if (!gitName_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "gitName",
+        "");
+    }
+
+    if (!gitEmail_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "gitEmail",
+        "");
+    }
+
+    if (!recentProjects_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "recentProjects",
+        "");
+    }
+  }
+
+  Project* Project::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class Project (*this, f, c);
+  }
+
+  Project& Project::
+  operator= (const Project& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->basePath_ = x.basePath_;
+      this->gitName_ = x.gitName_;
+      this->gitEmail_ = x.gitEmail_;
+      this->recentProjects_ = x.recentProjects_;
+    }
+
+    return *this;
+  }
+
+  Project::
+  ~Project ()
+  {
+  }
+
   // Root
   //
 
   Root::
   Root (const VisualType& visual,
         const DraggerType& dragger,
-        const InteractiveParameterType& interactiveParameter)
+        const InteractiveParameterType& interactiveParameter,
+        const ProjectType& project)
   : ::xml_schema::Type (),
     visual_ (visual, this),
     dragger_ (dragger, this),
-    interactiveParameter_ (interactiveParameter, this)
+    interactiveParameter_ (interactiveParameter, this),
+    project_ (project, this)
   {
   }
 
   Root::
   Root (::std::unique_ptr< VisualType > visual,
         ::std::unique_ptr< DraggerType > dragger,
-        ::std::unique_ptr< InteractiveParameterType > interactiveParameter)
+        ::std::unique_ptr< InteractiveParameterType > interactiveParameter,
+        ::std::unique_ptr< ProjectType > project)
   : ::xml_schema::Type (),
     visual_ (std::move (visual), this),
     dragger_ (std::move (dragger), this),
-    interactiveParameter_ (std::move (interactiveParameter), this)
+    interactiveParameter_ (std::move (interactiveParameter), this),
+    project_ (std::move (project), this)
   {
   }
 
@@ -988,7 +1403,8 @@ namespace prf
   : ::xml_schema::Type (x, f, c),
     visual_ (x.visual_, f, this),
     dragger_ (x.dragger_, f, this),
-    interactiveParameter_ (x.interactiveParameter_, f, this)
+    interactiveParameter_ (x.interactiveParameter_, f, this),
+    project_ (x.project_, f, this)
   {
   }
 
@@ -999,7 +1415,8 @@ namespace prf
   : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
     visual_ (this),
     dragger_ (this),
-    interactiveParameter_ (this)
+    interactiveParameter_ (this),
+    project_ (this)
   {
     if ((f & ::xml_schema::Flags::base) == 0)
     {
@@ -1060,6 +1477,20 @@ namespace prf
         }
       }
 
+      // project
+      //
+      if (n.name () == "project" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< ProjectType > r (
+          ProjectTraits::create (i, f, this));
+
+        if (!project_.present ())
+        {
+          this->project_.set (::std::move (r));
+          continue;
+        }
+      }
+
       break;
     }
 
@@ -1083,6 +1514,13 @@ namespace prf
         "interactiveParameter",
         "");
     }
+
+    if (!project_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "project",
+        "");
+    }
   }
 
   Root* Root::
@@ -1101,6 +1539,7 @@ namespace prf
       this->visual_ = x.visual_;
       this->dragger_ = x.dragger_;
       this->interactiveParameter_ = x.interactiveParameter_;
+      this->project_ = x.project_;
     }
 
     return *this;
@@ -1534,6 +1973,76 @@ namespace prf
   }
 
   void
+  operator<< (::xercesc::DOMElement& e, const RecentProjects& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // Entry
+    //
+    for (RecentProjects::EntryConstIterator
+         b (i.Entry ().begin ()), n (i.Entry ().end ());
+         b != n; ++b)
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "Entry",
+          e));
+
+      s << *b;
+    }
+  }
+
+  void
+  operator<< (::xercesc::DOMElement& e, const Project& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // basePath
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "basePath",
+          e));
+
+      s << i.basePath ();
+    }
+
+    // gitName
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "gitName",
+          e));
+
+      s << i.gitName ();
+    }
+
+    // gitEmail
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "gitEmail",
+          e));
+
+      s << i.gitEmail ();
+    }
+
+    // recentProjects
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "recentProjects",
+          e));
+
+      s << i.recentProjects ();
+    }
+  }
+
+  void
   operator<< (::xercesc::DOMElement& e, const Root& i)
   {
     e << static_cast< const ::xml_schema::Type& > (i);
@@ -1569,6 +2078,17 @@ namespace prf
           e));
 
       s << i.interactiveParameter ();
+    }
+
+    // project
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "project",
+          e));
+
+      s << i.project ();
     }
   }
 

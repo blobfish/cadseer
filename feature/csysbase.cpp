@@ -31,10 +31,11 @@
 
 #include <nodemaskdefs.h>
 #include <globalutilities.h>
-#include <feature/csysbase.h>
 #include <message/dispatch.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
+#include <project/serial/xsdcxxoutput/featurecsysbase.h>
+#include <feature/csysbase.h>
 
 using namespace ftr;
 
@@ -105,6 +106,17 @@ bool DCallBack::receive(const osgManipulator::MotionCommand &commandIn)
       assert(csysBase);
       csysBase->setModelDirty();
       
+      //add git message.
+      std::ostringstream gitStream;
+      gitStream << QObject::tr("Reposition feature: ").toStdString() << csysBase->getName().toStdString() <<
+	" id: " << boost::uuids::to_string(csysBase->getId());
+      msg::Message gitMessage;
+      gitMessage.mask = msg::Request | msg::GitMessage;
+      prj::Message pMessage;
+      pMessage.gitMessage = gitStream.str();
+      gitMessage.payload = pMessage;
+      messageOutSignal(gitMessage);
+      
       if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
       {
 	msg::Message uMessage;
@@ -164,4 +176,35 @@ void CSysBase::updateModel(const UpdateMap &)
 {
   setSystem(gu::toOsg(system) * mainTransform->getMatrix());
   mainTransform->setMatrix(osg::Matrixd::identity());
+}
+
+prj::srl::FeatureCSysBase CSysBase::serialOut()
+{
+  prj::srl::FeatureBase fBase = Base::serialOut();
+  
+  osg::Matrixd m = gu::toOsg(system);
+  prj::srl::CSys systemOut
+  (
+    m(0,0), m(0,1), m(0,2), m(0,3),
+    m(1,0), m(1,1), m(1,2), m(1,3),
+    m(2,0), m(2,1), m(2,2), m(2,3),
+    m(3,0), m(3,1), m(3,2), m(3,3)
+  );
+  
+  return prj::srl::FeatureCSysBase(fBase, systemOut);
+}
+
+void CSysBase::serialIn(const prj::srl::FeatureCSysBase& sCSysBaseIn)
+{
+  Base::serialIn(sCSysBaseIn.featureBase());
+  
+  const prj::srl::CSys &s = sCSysBaseIn.csys();
+  osg::Matrixd m;
+  m(0,0) = s.i0j0(); m(0,1) = s.i0j1(); m(0,2) = s.i0j2(); m(0,3) = s.i0j3();
+  m(1,0) = s.i1j0(); m(1,1) = s.i1j1(); m(1,2) = s.i1j2(); m(1,3) = s.i1j3();
+  m(2,0) = s.i2j0(); m(2,1) = s.i2j1(); m(2,2) = s.i2j2(); m(2,3) = s.i2j3();
+  m(3,0) = s.i3j0(); m(3,1) = s.i3j1(); m(3,2) = s.i3j2(); m(3,3) = s.i3j3();
+
+  this->setSystem(m);
+  updateDragger();
 }

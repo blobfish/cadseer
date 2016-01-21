@@ -17,6 +17,7 @@
  *
  */
 
+#include <project/serial/xsdcxxoutput/featurebase.h>
 #include "parameter.h"
 
 using namespace ftr;
@@ -56,4 +57,16 @@ void Parameter::setValue(double valueIn)
   
   value = valueIn;
   valueChangedSignal();
+}
+
+prj::srl::Parameter Parameter::serialOut() const
+{
+  return prj::srl::Parameter(name, constant, value); 
+}
+
+void Parameter::serialIn(const prj::srl::Parameter& sParameterIn)
+{
+  name = sParameterIn.name();
+  setConstant(sParameterIn.constant());
+  setValue(sParameterIn.value());
 }

@@ -24,6 +24,7 @@
 #include <globalutilities.h>
 #include <library/lineardimension.h>
 #include <library/ipgroup.h>
+#include <project/serial/xsdcxxoutput/featurecylinder.h>
 #include <feature/cylinderbuilder.h>
 #include <feature/cylinder.h>
 
@@ -262,4 +263,25 @@ void Cylinder::updateResult(const CylinderBuilder &cylinderBuilderIn)
   updateShapeByTag(cylinderBuilderIn.getVertexTop(), FeatureTag::VertexTop);
   
 //   std::cout << std::endl << "update result:" << std::endl << resultContainer << std::endl;
+}
+
+void Cylinder::serialWrite(const QDir &dIn)
+{
+  prj::srl::FeatureCylinder cylinderOut
+  (
+    CSysBase::serialOut(),
+    radius.serialOut(),
+    height.serialOut()
+  );
+  
+  xml_schema::NamespaceInfomap infoMap;
+  std::ofstream stream(buildFilePathName(dIn).toUtf8().constData());
+  prj::srl::cylinder(stream, cylinderOut, infoMap);
+}
+
+void Cylinder::serialRead(const prj::srl::FeatureCylinder& sCylinderIn)
+{
+  CSysBase::serialIn(sCylinderIn.featureCSysBase());
+  radius.serialIn(sCylinderIn.radius());
+  height.serialIn(sCylinderIn.height());
 }

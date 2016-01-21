@@ -44,6 +44,10 @@
 #include <feature/parameter.h>
 #include <modelviz/connector.h>
 
+class QDir;
+
+namespace prj{namespace srl{class FeatureBase;}}
+
 namespace ftr
 {
   class Base;
@@ -93,11 +97,16 @@ public:
   const ResultContainer& getResultContainer() const {return resultContainer;}
   boost::uuids::uuid getId() const {return id;}
   const TopoDS_Shape& getShape() const {return shape;}
+  void setShape(const TopoDS_Shape &in){shape = in;} //!< only used for serialize in!
   static TopoDS_Compound compoundWrap(const TopoDS_Shape &shapeIn);
   osg::Switch* getMainSwitch() const {return mainSwitch.get();}
   osg::Switch* getOverlaySwitch() const {return overlaySwitch.get();}
   osg::MatrixTransform* getMainTransform() const {return mainTransform.get();}
   const mdv::Connector& getConnector() const {return connector;}
+  
+  virtual void serialWrite(const QDir &); //!< override in leaf classes only.
+  std::string getFileName() const; //!< used by git.
+  QString buildFilePathName(const QDir&) const; //!<generate complete path to file
   
   static std::size_t nextConstructionIndex;
   
@@ -112,6 +121,9 @@ protected:
   void setVisualClean(); //!< clean can only set through virtual visual update.
   void setFailure(); //!< set only through virtual update.
   void setSuccess(); //!< set only through virtual update.
+  
+  prj::srl::FeatureBase serialOut(); //!<convert this into serializable object. no const, we update the result container with offset
+  void serialIn(const prj::srl::FeatureBase& sBaseIn);
   
   QString name;
   ParameterMap pMap;

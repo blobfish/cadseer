@@ -211,6 +211,7 @@ void GestureHandler::spraySubNodes(osg::Vec3 cursorLocation)
         assert(pointArray);
         (*pointArray)[1] = locations.at(index) * -1.0;
         geometry->dirtyDisplayList();
+	geometry->dirtyBound();
     }
 }
 
@@ -399,6 +400,16 @@ void GestureHandler::constructMenu()
     fileExportOCC->setMatrix(dummy);
     fileExportOCC->setUserValue(attributeTitle, (msg::Request | msg::ExportOCC).to_string());
     fileExport->insertChild(fileExport->getNumChildren() - 2, fileExportOCC);
+    
+    osg::MatrixTransform *fileOpen = gsn::buildCommandNode(":/resources/images/fileOpen.svg");
+    fileOpen->setMatrix(dummy);
+    fileOpen->setUserValue(attributeTitle, (msg::Request | msg::ProjectDialog).to_string());
+    fileBase->insertChild(fileBase->getNumChildren() - 2, fileOpen);
+    
+    osg::MatrixTransform *fileSave = gsn::buildCommandNode(":/resources/images/fileSave.svg");
+    fileSave->setMatrix(dummy);
+    fileSave->setUserValue(attributeTitle, (msg::Request | msg::SaveProject).to_string());
+    fileBase->insertChild(fileBase->getNumChildren() - 2, fileSave);
     
     //probably won't stay under file node. good enough for now.
     osg::MatrixTransform *preferences = gsn::buildCommandNode(":/resources/images/preferences.svg");

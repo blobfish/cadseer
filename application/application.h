@@ -61,18 +61,24 @@ public:
 
 public Q_SLOTS:
     void quittingSlot();
+    void appStartSlot();
 private:
     std::unique_ptr<MainWindow> mainWindow;
     std::unique_ptr<prj::Project> project;
     std::unique_ptr<Factory> factory;
     bool spaceballPresent;
     
-    void createNewProject();
+    void createNewProject(const std::string &);
+    void openProject(const std::string &);
+    void closeProject();
+    void updateTitle();
     
     MessageOutSignal messageOutSignal;
     msg::MessageDispatcher dispatcher;
     void setupDispatcher();
     void newProjectRequestDispatched(const msg::Message &);
+    void openProjectRequestDispatched(const msg::Message &);
+    void ProjectDialogRequestDispatched(const msg::Message &);
 };
 }
 

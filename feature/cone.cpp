@@ -19,6 +19,7 @@
 
 #include <library/lineardimension.h>
 #include <library/ipgroup.h>
+#include <project/serial/xsdcxxoutput/featurecone.h>
 #include <feature/conebuilder.h>
 #include <feature/cone.h>
 
@@ -288,4 +289,27 @@ void Cone::initializeMaps()
 //     "result Container: " << std::endl << resultContainer << std::endl << std::endl <<
 //     "feature Container:" << std::endl << featureContainer << std::endl << std::endl <<
 //     "evolution Container:" << std::endl << evolutionContainer << std::endl << std::endl;
+}
+
+void Cone::serialWrite(const QDir &dIn)
+{
+  prj::srl::FeatureCone coneOut
+  (
+    CSysBase::serialOut(),
+    radius1.serialOut(),
+    radius2.serialOut(),
+    height.serialOut()
+  );
+  
+  xml_schema::NamespaceInfomap infoMap;
+  std::ofstream stream(buildFilePathName(dIn).toUtf8().constData());
+  prj::srl::cone(stream, coneOut, infoMap);
+}
+
+void Cone::serialRead(const prj::srl::FeatureCone& sCone)
+{
+  CSysBase::serialIn(sCone.featureCSysBase());
+  radius1.serialIn(sCone.radius1());
+  radius2.serialIn(sCone.radius2());
+  height.serialIn(sCone.height());
 }

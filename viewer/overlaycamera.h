@@ -47,6 +47,7 @@ private:
   void setupDispatcher();
   void featureAddedDispatched(const msg::Message &);
   void featureRemovedDispatched(const msg::Message &);
+  void closeProjectDispatched(const msg::Message&);
 };
 
 #endif // OVERLAYCAMERA_H

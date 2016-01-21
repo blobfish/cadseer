@@ -33,10 +33,13 @@ typedef std::map<boost::uuids::uuid, prg::Vertex> IdVertexMap;
 
 namespace prj
 {
+  class GitManager;
+  
 class Project
 {
 public:
     Project();
+    ~Project();
     void readOCC(const std::string &fileName);
     void addOCCShape(const TopoDS_Shape &shapeIn);
     ftr::Base* findFeature(const boost::uuids::uuid &idIn);
@@ -49,6 +52,12 @@ public:
     void removeFeature(const boost::uuids::uuid &idIn);
     void setFeatureActive(const boost::uuids::uuid &idIn);
     void connect(const boost::uuids::uuid &parentIn, const boost::uuids::uuid &childIn, ftr::InputTypes type);
+    
+    void setSaveDirectory(const std::string &directoryIn);
+    std::string getSaveDirectory() const {return saveDirectory;}
+    void save();
+    void open(); //!< call setSaveDirectory prior.
+    void initializeNew(); //!< call setSaveDirectory prior.
     
     void stateChangedSlot(const boost::uuids::uuid &featureIdIn, std::size_t stateIn); //!< received from each feature.
     
@@ -74,9 +83,13 @@ private:
     
     IdVertexMap map;
     prg::Graph projectGraph;
+    std::string saveDirectory;
+    void serialWrite();
+    std::unique_ptr<GitManager> gitManager;
     
     MessageOutSignal messageOutSignal; //new message system.
     msg::MessageDispatcher dispatcher;
+    boost::signals2::connection connection;
     void setupDispatcher();
     void setCurrentLeafDispatched(const msg::Message &);
     void removeFeatureDispatched(const msg::Message &);
@@ -84,6 +97,8 @@ private:
     void forceUpdateDispatched(const msg::Message &);
     void updateModelDispatched(const msg::Message &);
     void updateVisualDispatched(const msg::Message &);
+    void saveProjectRequestDispatched(const msg::Message &);
+    void gitMessageRequestDispatched(const msg::Message &);
 };
 }
 

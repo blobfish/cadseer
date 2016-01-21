@@ -37,10 +37,12 @@ namespace prf
     bool isVisualDirty(){return visualDirty;}
   public Q_SLOTS:
     virtual void accept() override;
+    void basePathBrowseSlot();
   private:
     void initialize();
     void updateDeflections();
     void updateDragger();
+    void updateProject();
     Ui::dialog* ui;
     Manager *manager;
     bool visualDirty = false;

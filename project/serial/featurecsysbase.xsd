@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="http://www.cadseer.com/prj/srl"
+  xmlns:srl="http://www.cadseer.com/prj/srl"
+>
+  
+<xs:include schemaLocation="featurebase.xsd"/>
+
+<xs:complexType name="CSys">
+  <xs:all>
+    <xs:element name="i0j0" type="xs:double" default="1.0"/>
+    <xs:element name="i0j1" type="xs:double" default="0.0"/>
+    <xs:element name="i0j2" type="xs:double" default="0.0"/>
+    <xs:element name="i0j3" type="xs:double" default="0.0"/>
+    <xs:element name="i1j0" type="xs:double" default="0.0"/>
+    <xs:element name="i1j1" type="xs:double" default="1.0"/>
+    <xs:element name="i1j2" type="xs:double" default="0.0"/>
+    <xs:element name="i1j3" type="xs:double" default="0.0"/>
+    <xs:element name="i2j0" type="xs:double" default="0.0"/>
+    <xs:element name="i2j1" type="xs:double" default="0.0"/>
+    <xs:element name="i2j2" type="xs:double" default="1.0"/>
+    <xs:element name="i2j3" type="xs:double" default="0.0"/>
+    <xs:element name="i3j0" type="xs:double" default="0.0"/>
+    <xs:element name="i3j1" type="xs:double" default="0.0"/>
+    <xs:element name="i3j2" type="xs:double" default="0.0"/>
+    <xs:element name="i3j3" type="xs:double" default="1.0"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="FeatureCSysBase">
+  <xs:all>
+    <xs:element name="featureBase" type="srl:FeatureBase"/>
+    <xs:element name="csys" type="srl:CSys"/>
+  </xs:all>
+</xs:complexType>
+  
+</xs:schema> 

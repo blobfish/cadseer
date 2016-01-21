@@ -72,6 +72,12 @@ void Factory::setupDispatcher()
   mask = msg::Response | msg::Post | msg::NewProject;
   dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newProjectDispatched, this, _1)));
   
+  mask = msg::Response | msg::Post | msg::OpenProject;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::openProjectDispatched, this, _1)));
+  
+  mask = msg::Response | msg::Pre | msg::CloseProject;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::closeProjectDispatched, this, _1)));
+  
   mask = msg::Response | msg::Post | msg::Selection | msg::Addition;
   dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::selectionAdditionDispatched, this, _1)));
   
@@ -131,6 +137,26 @@ void Factory::newProjectDispatched(const msg::Message& /*messageIn*/)
   app::Application *application = dynamic_cast<app::Application *>(qApp);
   assert(application);
   project = application->getProject();
+}
+
+void Factory::openProjectDispatched(const msg::Message&)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  app::Application *application = dynamic_cast<app::Application *>(qApp);
+  assert(application);
+  project = application->getProject();
+}
+
+void Factory::closeProjectDispatched(const msg::Message&)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  project = nullptr;
 }
 
 void Factory::selectionAdditionDispatched(const msg::Message &messageIn)

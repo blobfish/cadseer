@@ -22,6 +22,7 @@
 #include <BRepPrimAPI_MakeSphere.hxx>
 
 #include <library/ipgroup.h>
+#include <project/serial/xsdcxxoutput/featuresphere.h>
 #include <feature/sphere.h>
 
 using namespace ftr;
@@ -193,4 +194,23 @@ void Sphere::updateResult(BRepPrimAPI_MakeSphere &sphereMaker)
   
 //   std::cout << std::endl << "update result:" << std::endl << resultContainer << std::endl;
 
+}
+
+void Sphere::serialWrite(const QDir &dIn)
+{
+  prj::srl::FeatureSphere sphereOut
+  (
+    CSysBase::serialOut(),
+    radius.serialOut()
+  );
+  
+  xml_schema::NamespaceInfomap infoMap;
+  std::ofstream stream(buildFilePathName(dIn).toUtf8().constData());
+  prj::srl::sphere(stream, sphereOut, infoMap);
+}
+
+void Sphere::serialRead(const prj::srl::FeatureSphere& sSphereIn)
+{
+  CSysBase::serialIn(sSphereIn.featureCSysBase());
+  radius.serialIn(sSphereIn.radius());
 }

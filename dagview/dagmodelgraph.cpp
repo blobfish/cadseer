@@ -94,6 +94,12 @@ void dag::eraseRecord(GraphLinkContainer& containerIn, const uuid& idIn)
   list.erase(it);
 }
 
+void dag::clear(GraphLinkContainer &containerIn)
+{
+  typedef GraphLinkContainer::index<VertexProperty::ByFeatureId>::type List;
+  List &list = containerIn.get<VertexProperty::ByFeatureId>();
+  list.clear();
+}
 
 // const GraphLinkRecord& Gui::DAG::findRecord(Vertex vertexIn, const GraphLinkContainer &containerIn)
 // {

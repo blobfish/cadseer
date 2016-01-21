@@ -30,7 +30,8 @@
 //http://www.utilities-online.info/xsdvalidation/#.Vf2u9ZOVvts
 
 //generate parsing files.
-//xsdcxx cxx-tree --std c++11 --generate-serialization --generate-doxygen --type-naming ucc --hxx-suffix .h --cxx-suffix .cpp --namespace-map =prf  preferencesXML.xsd
+//this assumes the core xml file has been generated from the project/serial/readme
+//xsdcxx cxx-tree --std c++11 --generate-serialization --generate-doxygen --type-naming ucc --hxx-suffix .h --cxx-suffix .cpp --namespace-map =prf --extern-xml-schema ../xmlbase.xsd preferencesXML.xsd
 
 //ok this is screwy. the parser, by default, validates the xml so it
 //needs the xsd at runtime. We have the xsd and a default xml in
