@@ -74,7 +74,8 @@ std::ostream& ftr::operator<<(std::ostream& os, const ResultRecord& record)
 {
   os << boost::uuids::to_string(record.id) << "      " << 
     gu::getShapeHash(record.shape) << "      " <<
-    record.shapeOffset << std::endl;
+    record.shapeOffset << "      " << 
+    shapeStrings.at(record.shape.ShapeType()) << std::endl;
   return os;
 }
 

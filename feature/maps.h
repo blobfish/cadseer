@@ -49,6 +49,8 @@ namespace ftr
     boost::uuids::uuid inId;
     boost::uuids::uuid outId;
     EvolutionRecord() : inId(boost::uuids::nil_generator()()), outId(boost::uuids::nil_generator()()) {}
+    EvolutionRecord(const boost::uuids::uuid &inIdIn, const boost::uuids::uuid &outIdIn):
+      inId(inIdIn), outId(outIdIn){}
     
     //@{
     //! used as tags.

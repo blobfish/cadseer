@@ -23,6 +23,9 @@
 #include <TopExp.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 
+#include <feature/shapeidmapper.h>
+#include <feature/booleanidmapper.h>
+#include <feature/booleanoperation.h>
 #include <project/serial/xsdcxxoutput/featureintersect.h>
 #include "intersect.h"
 
@@ -64,32 +67,30 @@ void Intersect::updateModel(const UpdateMap &mapIn)
     const TopoDS_Shape &toolShape = mapIn.at(InputTypes::tool)->getShape();
     assert(!targetShape.IsNull() && !toolShape.IsNull());
     
-    BRepAlgoAPI_Common commoner(targetShape, toolShape);
-    if (!commoner.IsDone())
-      throw std::runtime_error("OCC Common failed");
+    BooleanOperation intersector(targetShape, toolShape, BOPAlgo_COMMON);
+    intersector.Build();
+    if (!intersector.IsDone())
+      throw std::runtime_error("OCC intersect failed");
+    shape = intersector.Shape();
     
-    shape = commoner.Shape();
+    ResultContainerWrapper containerWrapper;
+    ResultContainer &freshContainer = containerWrapper.container;
+    freshContainer = createInitialContainer(shape);
+    shapeMatch(mapIn.at(InputTypes::target)->getResultContainer(), freshContainer);
+    shapeMatch(mapIn.at(InputTypes::tool)->getResultContainer(), freshContainer);
+    uniqueTypeMatch(mapIn.at(InputTypes::target)->getResultContainer(), freshContainer);
+    BooleanIdMapper idMapper(mapIn, intersector.getBuilder(), containerWrapper);
+    idMapper.go();
+    outerWireMatch(mapIn.at(InputTypes::target)->getResultContainer(), freshContainer);
+    outerWireMatch(mapIn.at(InputTypes::tool)->getResultContainer(), freshContainer);
+    updateSplits(freshContainer, evolutionContainer);
+    derivedMatch(shape, freshContainer, derivedContainer);
+    dumpNils(freshContainer, "Union feature");
+    ensureNoNils(freshContainer);
     
+//     std::cout << std::endl << "intersection fresh container:" << std::endl << freshContainer << std::endl;
     
-    
-    //this is just temp so that the viz generation works.
-    //this will have to be completely reworked to follow id scheme.
-    TopTools_IndexedMapOfShape shapeMap;
-    TopExp::MapShapes(shape, shapeMap);
-    
-    for (int index = 1; index <= shapeMap.Extent(); ++index)
-    {
-      boost::uuids::uuid tempId = idGenerator();
-      
-      ResultRecord record;
-      record.id = tempId;
-      record.shape = shapeMap(index);
-      resultContainer.insert(record);
-      
-      EvolutionRecord evolutionRecord;
-      evolutionRecord.outId = tempId;
-      evolutionContainer.insert(evolutionRecord);
-    }
+    resultContainer = freshContainer;
     
     setSuccess();
   }

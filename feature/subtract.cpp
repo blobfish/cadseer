@@ -23,6 +23,9 @@
 #include <TopExp.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 
+#include <feature/shapeidmapper.h>
+#include <feature/booleanidmapper.h>
+#include <feature/booleanoperation.h>
 #include <project/serial/xsdcxxoutput/featuresubtract.h>
 #include "subtract.h"
 
@@ -64,43 +67,41 @@ void Subtract::updateModel(const UpdateMap &mapIn)
     const TopoDS_Shape &toolShape = mapIn.at(InputTypes::tool)->getShape();
     assert(!targetShape.IsNull() && !toolShape.IsNull());
     
-    BRepAlgoAPI_Cut cutter(targetShape, toolShape);
-    if (!cutter.IsDone())
-      throw std::runtime_error("OCC Cut failed");
+    BooleanOperation subtracter(targetShape, toolShape, BOPAlgo_CUT);
+    subtracter.Build();
+    if (!subtracter.IsDone())
+      throw std::runtime_error("OCC subtraction failed");
+    shape = subtracter.Shape();
     
-    shape = cutter.Shape();
+    ResultContainerWrapper containerWrapper;
+    ResultContainer &freshContainer = containerWrapper.container;
+    freshContainer = createInitialContainer(shape);
+    shapeMatch(mapIn.at(InputTypes::target)->getResultContainer(), freshContainer);
+    shapeMatch(mapIn.at(InputTypes::tool)->getResultContainer(), freshContainer);
+    uniqueTypeMatch(mapIn.at(InputTypes::target)->getResultContainer(), freshContainer);
+    BooleanIdMapper idMapper(mapIn, subtracter.getBuilder(), containerWrapper);
+    idMapper.go();
+    outerWireMatch(mapIn.at(InputTypes::target)->getResultContainer(), freshContainer);
+    outerWireMatch(mapIn.at(InputTypes::tool)->getResultContainer(), freshContainer);
+    updateSplits(freshContainer, evolutionContainer);
+    derivedMatch(shape, freshContainer, derivedContainer);
+    dumpNils(freshContainer, "Union feature");
+    ensureNoNils(freshContainer);
     
+//     std::cout << std::endl << "subtraction fresh container:" << std::endl << freshContainer << std::endl;
     
-    
-    //this is just temp so that the viz generation works.
-    //this will have to be completely reworked to follow id scheme.
-    TopTools_IndexedMapOfShape shapeMap;
-    TopExp::MapShapes(shape, shapeMap);
-    
-    for (int index = 1; index <= shapeMap.Extent(); ++index)
-    {
-      boost::uuids::uuid tempId = idGenerator();
-      
-      ResultRecord record;
-      record.id = tempId;
-      record.shape = shapeMap(index);
-      resultContainer.insert(record);
-      
-      EvolutionRecord evolutionRecord;
-      evolutionRecord.outId = tempId;
-      evolutionContainer.insert(evolutionRecord);
-    }
+    resultContainer = freshContainer;
     
     setSuccess();
   }
   catch (Standard_Failure)
   {
     Handle_Standard_Failure e = Standard_Failure::Caught();
-    std::cout << std::endl << "Error in union update. " << e->GetMessageString() << std::endl;
+    std::cout << std::endl << "Error in subtract update. " << e->GetMessageString() << std::endl;
   }
   catch (std::exception &e)
   {
-    std::cout << std::endl << "Error in union update. " << e.what() << std::endl;
+    std::cout << std::endl << "Error in subtract update. " << e.what() << std::endl;
   }
   setModelClean();
 }

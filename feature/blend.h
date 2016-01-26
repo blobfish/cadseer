@@ -58,16 +58,8 @@ class Blend : public Base
     DerivedContainer derivedContainer;
     
 private:
-    void shapeMatch(const Base* targetFeatureIn);
-    void modifiedMatch(BRepFilletAPI_MakeFillet&, const Base *);
-    void generatedMatch(BRepFilletAPI_MakeFillet&, const Base *);
-    void uniqueTypeMatch(const Base *);
-    void outerWireMatch(const Base *);
-    void innerWireMatch(BRepFilletAPI_MakeFillet &, const Base *);
-    void derivedMatch(BRepFilletAPI_MakeFillet&, const Base *);
-    
+    void generatedMatch(BRepFilletAPI_MakeFillet&, const Base *, ResultContainer &);
     void dumpInfo(BRepFilletAPI_MakeFillet&, const Base *);
-    void dumpResultStats();
     
     static QIcon icon;
 };

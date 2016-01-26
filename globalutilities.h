@@ -21,10 +21,13 @@
 #define GLOBALUTILITIES_H
 
 #include <string>
+#include <vector>
 
 #include <boost/uuid/uuid.hpp>
 
-class TopoDS_Shape;
+#include <Standard_StdAllocator.hxx>
+#include <TopoDS_Shape.hxx>
+
 class gp_Vec;
 class gp_Pnt;
 class gp_Ax2;
@@ -52,6 +55,9 @@ osg::Vec3d getXVector(const osg::Matrixd &m);
 osg::Vec3d getYVector(const osg::Matrixd &m);
 osg::Vec3d getZVector(const osg::Matrixd &m);
 osg::Vec3d gleanVector(const TopoDS_Shape &shapeIn, const osg::Vec3d &pickPoint);
+typedef std::vector<TopoDS_Shape, Standard_StdAllocator<TopoDS_Shape> > ShapeVector;
 }
+
+std::ostream& operator<<(std::ostream &, const TopoDS_Shape &);
 
 #endif // GLOBALUTILITIES_H

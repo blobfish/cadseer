@@ -85,6 +85,9 @@ SET(FEATURE_SOURCES
     feature/union.cpp
     feature/subtract.cpp
     feature/intersect.cpp
+    feature/booleanidmapper.cpp
+    feature/shapeidmapper.cpp
+    feature/booleanoperation.cpp
     )
     
 SET(SELECTION_SOURCES

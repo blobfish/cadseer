@@ -40,6 +40,8 @@ namespace ftr
     
   private:
     static QIcon icon;
+    /*! map from known faces to edges and edges to vertices.*/
+    DerivedContainer derivedContainer; //TODO serial support.
   };
 }
 

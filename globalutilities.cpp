@@ -195,3 +195,10 @@ osg::Vec3d gu::gleanVector(const TopoDS_Shape& shapeIn, const osg::Vec3d &pickPo
   
   return out;
 }
+
+std::ostream& operator<<(std::ostream &st, const TopoDS_Shape &sh)
+{
+  st << "Shape hash: " << gu::getShapeHash(sh)
+    << "    Shape type: " << gu::getShapeTypeString(sh);
+  return st;
+}

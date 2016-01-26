@@ -347,6 +347,7 @@ void Base::serialIn(const prj::srl::FeatureBase& sBaseIn)
   name = QString::fromStdString(sBaseIn.name());
   id = sg(sBaseIn.id());
   mainSwitch->setUserValue(gu::idAttributeTitle, boost::uuids::to_string(id));
+  overlaySwitch->setUserValue(gu::idAttributeTitle, boost::uuids::to_string(id));
   
   evolutionContainer.get<EvolutionRecord::ByInId>().clear();
   for (const prj::srl::EvolutionRecord &sERecord : sBaseIn.evolutionContainer().evolutionRecord())

@@ -27,13 +27,30 @@
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <TopExp.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
+#include <BOPAlgo_Builder.hxx>
 
 #include <project/serial/xsdcxxoutput/featureunion.h>
+#include <feature/booleanoperation.h>
+#include <feature/booleanidmapper.h>
+#include <feature/shapeidmapper.h>
 #include <feature/union.h>
 
 using namespace ftr;
 
 QIcon Union::icon;
+
+static const std::vector<std::string> shapeStrings
+({
+     "Compound",
+     "CompSolid",
+     "Solid",
+     "Shell",
+     "Face",
+     "Wire",
+     "Edge",
+     "Vertex",
+     "Shape",
+ });
 
 Union::Union() : Base()
 {
@@ -69,32 +86,30 @@ void Union::updateModel(const UpdateMap &mapIn)
     const TopoDS_Shape &toolShape = mapIn.at(InputTypes::tool)->getShape();
     assert(!targetShape.IsNull() && !toolShape.IsNull());
     
-    BRepAlgoAPI_Fuse fuser(targetShape, toolShape);
+    BooleanOperation fuser(targetShape, toolShape, BOPAlgo_FUSE);
+    fuser.Build();
     if (!fuser.IsDone())
       throw std::runtime_error("OCC fuse failed");
-    
     shape = fuser.Shape();
     
+    ResultContainerWrapper containerWrapper;
+    ResultContainer &freshContainer = containerWrapper.container;
+    freshContainer = createInitialContainer(shape);
+    shapeMatch(mapIn.at(InputTypes::target)->getResultContainer(), freshContainer);
+    shapeMatch(mapIn.at(InputTypes::tool)->getResultContainer(), freshContainer);
+    uniqueTypeMatch(mapIn.at(InputTypes::target)->getResultContainer(), freshContainer);
+    BooleanIdMapper idMapper(mapIn, fuser.getBuilder(), containerWrapper);
+    idMapper.go();
+    outerWireMatch(mapIn.at(InputTypes::target)->getResultContainer(), freshContainer);
+    outerWireMatch(mapIn.at(InputTypes::tool)->getResultContainer(), freshContainer);
+    updateSplits(freshContainer, evolutionContainer);
+    derivedMatch(shape, freshContainer, derivedContainer);
+    dumpNils(freshContainer, "Union feature");
+    ensureNoNils(freshContainer);
     
+//     std::cout << std::endl << "union fresh container:" << std::endl << freshContainer << std::endl;
     
-    //this is just temp so that the viz generation works.
-    //this will have to be completely reworked to follow id scheme.
-    TopTools_IndexedMapOfShape shapeMap;
-    TopExp::MapShapes(shape, shapeMap);
-    
-    for (int index = 1; index <= shapeMap.Extent(); ++index)
-    {
-      boost::uuids::uuid tempId = idGenerator();
-      
-      ResultRecord record;
-      record.id = tempId;
-      record.shape = shapeMap(index);
-      resultContainer.insert(record);
-      
-      EvolutionRecord evolutionRecord;
-      evolutionRecord.outId = tempId;
-      evolutionContainer.insert(evolutionRecord);
-    }
+    resultContainer = freshContainer;
     
     setSuccess();
   }
