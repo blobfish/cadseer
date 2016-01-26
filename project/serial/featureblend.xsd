@@ -19,7 +19,6 @@
     <xs:element name="radius" type="xs:double" default="NaN"/>
     <xs:element name="edgeIds" type="srl:EdgeIds"/>
     <xs:element name="shapeMap" type="srl:EvolutionContainer"/>
-    <xs:element name="derivedContainer" type="srl:DerivedContainer"/>
   </xs:all>
 </xs:complexType>
 

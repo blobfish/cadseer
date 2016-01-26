@@ -508,64 +508,6 @@ namespace prj
       //@}
 
       /**
-       * @name derivedContainer
-       *
-       * @brief Accessor and modifier functions for the %derivedContainer
-       * required element.
-       */
-      //@{
-
-      /**
-       * @brief Element type.
-       */
-      typedef ::prj::srl::DerivedContainer DerivedContainerType;
-
-      /**
-       * @brief Element traits type.
-       */
-      typedef ::xsd::cxx::tree::traits< DerivedContainerType, char > DerivedContainerTraits;
-
-      /**
-       * @brief Return a read-only (constant) reference to the element.
-       *
-       * @return A constant reference to the element.
-       */
-      const DerivedContainerType&
-      derivedContainer () const;
-
-      /**
-       * @brief Return a read-write reference to the element.
-       *
-       * @return A reference to the element.
-       */
-      DerivedContainerType&
-      derivedContainer ();
-
-      /**
-       * @brief Set the element value.
-       *
-       * @param x A new value to set.
-       *
-       * This function makes a copy of its argument and sets it as
-       * the new value of the element.
-       */
-      void
-      derivedContainer (const DerivedContainerType& x);
-
-      /**
-       * @brief Set the element value without copying.
-       *
-       * @param p A new value to use.
-       *
-       * This function will try to use the passed value directly
-       * instead of making a copy.
-       */
-      void
-      derivedContainer (::std::unique_ptr< DerivedContainerType > p);
-
-      //@}
-
-      /**
        * @name Constructors
        */
       //@{
@@ -577,8 +519,7 @@ namespace prj
       FeatureBlend (const FeatureBaseType&,
                     const RadiusType&,
                     const EdgeIdsType&,
-                    const ShapeMapType&,
-                    const DerivedContainerType&);
+                    const ShapeMapType&);
 
       /**
        * @brief Create an instance from the ultimate base and
@@ -591,8 +532,7 @@ namespace prj
       FeatureBlend (::std::unique_ptr< FeatureBaseType >,
                     const RadiusType&,
                     ::std::unique_ptr< EdgeIdsType >,
-                    ::std::unique_ptr< ShapeMapType >,
-                    ::std::unique_ptr< DerivedContainerType >);
+                    ::std::unique_ptr< ShapeMapType >);
 
       /**
        * @brief Create an instance from a DOM element.
@@ -668,7 +608,6 @@ namespace prj
       ::xsd::cxx::tree::one< RadiusType > radius_;
       ::xsd::cxx::tree::one< EdgeIdsType > edgeIds_;
       ::xsd::cxx::tree::one< ShapeMapType > shapeMap_;
-      ::xsd::cxx::tree::one< DerivedContainerType > derivedContainer_;
 
       //@endcond
     };

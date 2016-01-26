@@ -2418,6 +2418,64 @@ namespace prj
       //@}
 
       /**
+       * @name derivedContainer
+       *
+       * @brief Accessor and modifier functions for the %derivedContainer
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::DerivedContainer DerivedContainerType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< DerivedContainerType, char > DerivedContainerTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const DerivedContainerType&
+      derivedContainer () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      DerivedContainerType&
+      derivedContainer ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      derivedContainer (const DerivedContainerType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      derivedContainer (::std::unique_ptr< DerivedContainerType > p);
+
+      //@}
+
+      /**
        * @name Constructors
        */
       //@{
@@ -2430,7 +2488,8 @@ namespace prj
                    const IdType&,
                    const EvolutionContainerType&,
                    const ResultContainerType&,
-                   const FeatureContainerType&);
+                   const FeatureContainerType&,
+                   const DerivedContainerType&);
 
       /**
        * @brief Create an instance from the ultimate base and
@@ -2444,7 +2503,8 @@ namespace prj
                    const IdType&,
                    ::std::unique_ptr< EvolutionContainerType >,
                    ::std::unique_ptr< ResultContainerType >,
-                   ::std::unique_ptr< FeatureContainerType >);
+                   ::std::unique_ptr< FeatureContainerType >,
+                   ::std::unique_ptr< DerivedContainerType >);
 
       /**
        * @brief Create an instance from a DOM element.
@@ -2523,6 +2583,7 @@ namespace prj
       ::xsd::cxx::tree::one< EvolutionContainerType > evolutionContainer_;
       ::xsd::cxx::tree::one< ResultContainerType > resultContainer_;
       ::xsd::cxx::tree::one< FeatureContainerType > featureContainer_;
+      ::xsd::cxx::tree::one< DerivedContainerType > derivedContainer_;
 
       //@endcond
     };

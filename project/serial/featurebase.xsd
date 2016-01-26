@@ -78,6 +78,7 @@
     <xs:element name="evolutionContainer" type="srl:EvolutionContainer"/>
     <xs:element name="resultContainer" type="srl:ResultContainer"/>
     <xs:element name="featureContainer" type="srl:FeatureContainer"/>
+    <xs:element name="derivedContainer" type="srl:DerivedContainer"/>
   </xs:all>
 </xs:complexType>
 

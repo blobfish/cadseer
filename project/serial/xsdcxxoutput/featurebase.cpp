@@ -620,6 +620,30 @@ namespace prj
     {
       this->featureContainer_.set (std::move (x));
     }
+
+    const FeatureBase::DerivedContainerType& FeatureBase::
+    derivedContainer () const
+    {
+      return this->derivedContainer_.get ();
+    }
+
+    FeatureBase::DerivedContainerType& FeatureBase::
+    derivedContainer ()
+    {
+      return this->derivedContainer_.get ();
+    }
+
+    void FeatureBase::
+    derivedContainer (const DerivedContainerType& x)
+    {
+      this->derivedContainer_.set (x);
+    }
+
+    void FeatureBase::
+    derivedContainer (::std::unique_ptr< DerivedContainerType > x)
+    {
+      this->derivedContainer_.set (std::move (x));
+    }
   }
 }
 
@@ -1693,13 +1717,15 @@ namespace prj
                  const IdType& id,
                  const EvolutionContainerType& evolutionContainer,
                  const ResultContainerType& resultContainer,
-                 const FeatureContainerType& featureContainer)
+                 const FeatureContainerType& featureContainer,
+                 const DerivedContainerType& derivedContainer)
     : ::xml_schema::Type (),
       name_ (name, this),
       id_ (id, this),
       evolutionContainer_ (evolutionContainer, this),
       resultContainer_ (resultContainer, this),
-      featureContainer_ (featureContainer, this)
+      featureContainer_ (featureContainer, this),
+      derivedContainer_ (derivedContainer, this)
     {
     }
 
@@ -1708,13 +1734,15 @@ namespace prj
                  const IdType& id,
                  ::std::unique_ptr< EvolutionContainerType > evolutionContainer,
                  ::std::unique_ptr< ResultContainerType > resultContainer,
-                 ::std::unique_ptr< FeatureContainerType > featureContainer)
+                 ::std::unique_ptr< FeatureContainerType > featureContainer,
+                 ::std::unique_ptr< DerivedContainerType > derivedContainer)
     : ::xml_schema::Type (),
       name_ (name, this),
       id_ (id, this),
       evolutionContainer_ (std::move (evolutionContainer), this),
       resultContainer_ (std::move (resultContainer), this),
-      featureContainer_ (std::move (featureContainer), this)
+      featureContainer_ (std::move (featureContainer), this),
+      derivedContainer_ (std::move (derivedContainer), this)
     {
     }
 
@@ -1727,7 +1755,8 @@ namespace prj
       id_ (x.id_, f, this),
       evolutionContainer_ (x.evolutionContainer_, f, this),
       resultContainer_ (x.resultContainer_, f, this),
-      featureContainer_ (x.featureContainer_, f, this)
+      featureContainer_ (x.featureContainer_, f, this),
+      derivedContainer_ (x.derivedContainer_, f, this)
     {
     }
 
@@ -1740,7 +1769,8 @@ namespace prj
       id_ (this),
       evolutionContainer_ (this),
       resultContainer_ (this),
-      featureContainer_ (this)
+      featureContainer_ (this),
+      derivedContainer_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -1829,6 +1859,20 @@ namespace prj
           }
         }
 
+        // derivedContainer
+        //
+        if (n.name () == "derivedContainer" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< DerivedContainerType > r (
+            DerivedContainerTraits::create (i, f, this));
+
+          if (!derivedContainer_.present ())
+          {
+            this->derivedContainer_.set (::std::move (r));
+            continue;
+          }
+        }
+
         break;
       }
 
@@ -1866,6 +1910,13 @@ namespace prj
           "featureContainer",
           "");
       }
+
+      if (!derivedContainer_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "derivedContainer",
+          "");
+      }
     }
 
     FeatureBase* FeatureBase::
@@ -1886,6 +1937,7 @@ namespace prj
         this->evolutionContainer_ = x.evolutionContainer_;
         this->resultContainer_ = x.resultContainer_;
         this->featureContainer_ = x.featureContainer_;
+        this->derivedContainer_ = x.derivedContainer_;
       }
 
       return *this;
@@ -2226,6 +2278,17 @@ namespace prj
             e));
 
         s << i.featureContainer ();
+      }
+
+      // derivedContainer
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "derivedContainer",
+            e));
+
+        s << i.derivedContainer ();
       }
     }
   }

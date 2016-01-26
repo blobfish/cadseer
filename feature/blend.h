@@ -54,9 +54,6 @@ class Blend : public Base
      */ 
     EvolutionContainer shapeMap;
     
-    /*! map from known faces to new blended faces' edges and vertices.*/
-    DerivedContainer derivedContainer;
-    
 private:
     void generatedMatch(BRepFilletAPI_MakeFillet&, const Base *, ResultContainer &);
     void dumpInfo(BRepFilletAPI_MakeFillet&, const Base *);

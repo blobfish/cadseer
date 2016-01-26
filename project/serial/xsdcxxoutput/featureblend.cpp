@@ -170,30 +170,6 @@ namespace prj
     {
       this->shapeMap_.set (std::move (x));
     }
-
-    const FeatureBlend::DerivedContainerType& FeatureBlend::
-    derivedContainer () const
-    {
-      return this->derivedContainer_.get ();
-    }
-
-    FeatureBlend::DerivedContainerType& FeatureBlend::
-    derivedContainer ()
-    {
-      return this->derivedContainer_.get ();
-    }
-
-    void FeatureBlend::
-    derivedContainer (const DerivedContainerType& x)
-    {
-      this->derivedContainer_.set (x);
-    }
-
-    void FeatureBlend::
-    derivedContainer (::std::unique_ptr< DerivedContainerType > x)
-    {
-      this->derivedContainer_.set (std::move (x));
-    }
   }
 }
 
@@ -295,14 +271,12 @@ namespace prj
     FeatureBlend (const FeatureBaseType& featureBase,
                   const RadiusType& radius,
                   const EdgeIdsType& edgeIds,
-                  const ShapeMapType& shapeMap,
-                  const DerivedContainerType& derivedContainer)
+                  const ShapeMapType& shapeMap)
     : ::xml_schema::Type (),
       featureBase_ (featureBase, this),
       radius_ (radius, this),
       edgeIds_ (edgeIds, this),
-      shapeMap_ (shapeMap, this),
-      derivedContainer_ (derivedContainer, this)
+      shapeMap_ (shapeMap, this)
     {
     }
 
@@ -310,14 +284,12 @@ namespace prj
     FeatureBlend (::std::unique_ptr< FeatureBaseType > featureBase,
                   const RadiusType& radius,
                   ::std::unique_ptr< EdgeIdsType > edgeIds,
-                  ::std::unique_ptr< ShapeMapType > shapeMap,
-                  ::std::unique_ptr< DerivedContainerType > derivedContainer)
+                  ::std::unique_ptr< ShapeMapType > shapeMap)
     : ::xml_schema::Type (),
       featureBase_ (std::move (featureBase), this),
       radius_ (radius, this),
       edgeIds_ (std::move (edgeIds), this),
-      shapeMap_ (std::move (shapeMap), this),
-      derivedContainer_ (std::move (derivedContainer), this)
+      shapeMap_ (std::move (shapeMap), this)
     {
     }
 
@@ -329,8 +301,7 @@ namespace prj
       featureBase_ (x.featureBase_, f, this),
       radius_ (x.radius_, f, this),
       edgeIds_ (x.edgeIds_, f, this),
-      shapeMap_ (x.shapeMap_, f, this),
-      derivedContainer_ (x.derivedContainer_, f, this)
+      shapeMap_ (x.shapeMap_, f, this)
     {
     }
 
@@ -342,8 +313,7 @@ namespace prj
       featureBase_ (this),
       radius_ (this),
       edgeIds_ (this),
-      shapeMap_ (this),
-      derivedContainer_ (this)
+      shapeMap_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -415,20 +385,6 @@ namespace prj
           }
         }
 
-        // derivedContainer
-        //
-        if (n.name () == "derivedContainer" && n.namespace_ ().empty ())
-        {
-          ::std::unique_ptr< DerivedContainerType > r (
-            DerivedContainerTraits::create (i, f, this));
-
-          if (!derivedContainer_.present ())
-          {
-            this->derivedContainer_.set (::std::move (r));
-            continue;
-          }
-        }
-
         break;
       }
 
@@ -459,13 +415,6 @@ namespace prj
           "shapeMap",
           "");
       }
-
-      if (!derivedContainer_.present ())
-      {
-        throw ::xsd::cxx::tree::expected_element< char > (
-          "derivedContainer",
-          "");
-      }
     }
 
     FeatureBlend* FeatureBlend::
@@ -485,7 +434,6 @@ namespace prj
         this->radius_ = x.radius_;
         this->edgeIds_ = x.edgeIds_;
         this->shapeMap_ = x.shapeMap_;
-        this->derivedContainer_ = x.derivedContainer_;
       }
 
       return *this;
@@ -849,17 +797,6 @@ namespace prj
             e));
 
         s << i.shapeMap ();
-      }
-
-      // derivedContainer
-      //
-      {
-        ::xercesc::DOMElement& s (
-          ::xsd::cxx::xml::dom::create_element (
-            "derivedContainer",
-            e));
-
-        s << i.derivedContainer ();
       }
     }
 

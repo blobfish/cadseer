@@ -280,6 +280,8 @@ void Base::serialWrite(const QDir&)
 
 prj::srl::FeatureBase Base::serialOut()
 {
+  using boost::uuids::to_string;
+  
   //update the shape offset in result container. we use the
   //shape offset to map id to shape when reading data from disk.
   TopTools_IndexedMapOfShape shapeMap;
@@ -330,13 +332,30 @@ prj::srl::FeatureBase Base::serialOut()
     fContainerOut.featureRecord().push_back(fRecord);
   }
   
+  prj::srl::DerivedContainer dContainerOut;
+  for (DerivedContainer::const_iterator dIt = derivedContainer.begin(); dIt != derivedContainer.end(); ++dIt)
+  {
+    prj::srl::IdSet setIn;
+    for (IdSet::const_iterator sIt = dIt->first.begin(); sIt != dIt->first.end(); ++sIt)
+      setIn.id().push_back(to_string(*sIt));
+    prj::srl::DerivedRecord::IdType mId(to_string(dIt->second));
+    prj::srl::DerivedRecord record
+    (
+      setIn,
+      mId
+    );
+    
+    dContainerOut.derivedRecord().push_back(record);
+  }
+  
   return prj::srl::FeatureBase
   (
     name.toStdString(),
     boost::uuids::to_string(id),
     eContainerOut,
     rContainerOut,
-    fContainerOut
+    fContainerOut,
+    dContainerOut
   ); 
 }
 
@@ -382,6 +401,16 @@ void Base::serialIn(const prj::srl::FeatureBase& sBaseIn)
     record.id = sg(sFRecord.id());
     record.tag = sFRecord.tag();
     featureContainer.insert(record);
+  }
+  
+  derivedContainer.clear();
+  for (const prj::srl::DerivedRecord &sDRecord : sBaseIn.derivedContainer().derivedRecord())
+  {
+    IdSet setIn;
+    for (const auto &idSet : sDRecord.idSet().id())
+      setIn.insert(sg(idSet));
+    boost::uuids::uuid mId = sg(sDRecord.id());
+    derivedContainer.insert(std::make_pair(setIn, mId));
   }
 }
 

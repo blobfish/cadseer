@@ -141,6 +141,7 @@ protected:
   EvolutionContainer evolutionContainer;
   ResultContainer resultContainer;
   FeatureContainer featureContainer;
+  DerivedContainer derivedContainer;
   
   osg::ref_ptr<osg::Switch> mainSwitch;
   osg::ref_ptr<osg::MatrixTransform> mainTransform;
