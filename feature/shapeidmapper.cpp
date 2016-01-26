@@ -304,8 +304,8 @@ void ftr::updateSplits(ResultContainer &target, EvolutionContainer &evo)
     
     auto evoRange = evoList.equal_range(record.id);
     //ensure we have enough ids in evorange to do a parallel iteration.
-    std::size_t difference = std::distance(resultRange.first, resultRange.second) - std::distance(evoRange.first, evoRange.second);
-    for (std::size_t index = 0; index < difference; ++index)
+    int difference = std::distance(resultRange.first, resultRange.second) - std::distance(evoRange.first, evoRange.second);
+    for (int index = 0; index < difference; ++index)
       evoList.insert(EvolutionRecord(record.id, idGenerator()));
     evoRange = evoList.equal_range(record.id); //update range.
     
