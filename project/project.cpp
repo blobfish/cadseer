@@ -119,8 +119,11 @@ void Project::updateModel()
     projectGraph[currentVertex].feature->serialWrite(QDir(QString::fromStdString(saveDirectory)));
   }
   
-  serialWrite();
-  gitManager->update();
+  if (!isLoading)
+  {
+    serialWrite();
+    gitManager->update();
+  }
   
   updateLeafStatus();
   
@@ -235,10 +238,13 @@ void Project::addFeature(std::shared_ptr<ftr::Base> feature)
   projectGraph[newVertex].feature = feature;
   map.insert(std::make_pair(feature->getId(), newVertex));
   
-  //log action to git.
-  std::ostringstream gitMessage;
-  gitMessage << QObject::tr("Adding feature ").toStdString() << feature->getTypeString();
-  gitManager->appendGitMessage(gitMessage.str());
+  //log action to git if not loading.
+  if (!isLoading)
+  {
+    std::ostringstream gitMessage;
+    gitMessage << QObject::tr("Adding feature ").toStdString() << feature->getTypeString();
+    gitManager->appendGitMessage(gitMessage.str());
+  }
   
   msg::Message postMessage;
   postMessage.mask = msg::Response | msg::Post | msg::AddFeature;
@@ -724,6 +730,8 @@ void Project::open()
   preMessage.mask = msg::Response | msg::Pre | msg::OpenProject;
   messageOutSignal(preMessage);
   
+  isLoading = true;
+  
   std::string projectPath = saveDirectory + QDir::separator().toLatin1() + "project.prjt";
   std::string shapePath = saveDirectory + QDir::separator().toLatin1() + "project.brep";
   
@@ -769,6 +777,8 @@ void Project::open()
   {
     std::cerr << e << std::endl;
   }
+  
+  isLoading = false;
   
   msg::Message postMessage;
   postMessage.mask = msg::Response | msg::Post | msg::OpenProject;

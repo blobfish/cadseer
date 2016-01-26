@@ -86,6 +86,7 @@ private:
     std::string saveDirectory;
     void serialWrite();
     std::unique_ptr<GitManager> gitManager;
+    bool isLoading = false;
     
     MessageOutSignal messageOutSignal; //new message system.
     msg::MessageDispatcher dispatcher;
