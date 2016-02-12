@@ -83,6 +83,11 @@ void Blend::updateModel(const UpdateMap& mapIn)
     BRepFilletAPI_MakeFillet blendMaker(targetShape);
     for (const auto &currentId : edgeIds)
     {
+      if (!hasResult(targetResultContainer, currentId))
+      {
+	std::cout << "Blend: can't find target edge id. Skipping id: " << boost::uuids::to_string(currentId) << std::endl;
+	continue;
+      }
       TopoDS_Shape tempShape = findResultById(targetResultContainer, currentId).shape;
       assert(!tempShape.IsNull());
       assert(tempShape.ShapeType() == TopAbs_EDGE);
@@ -101,7 +106,9 @@ void Blend::updateModel(const UpdateMap& mapIn)
     outerWireMatch(targetResultContainer, freshContainer);
     derivedMatch(shape, freshContainer, derivedContainer);
     dumpNils(freshContainer, "blend feature"); //only if there are shapes with nil ids.
+    dumpDuplicates(freshContainer, "blend feature");
     ensureNoNils(freshContainer);
+    ensureNoDuplicates(freshContainer);
     resultContainer = freshContainer;
     
     setSuccess();

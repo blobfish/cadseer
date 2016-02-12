@@ -37,6 +37,7 @@ namespace ftr
     Cylinder, //!< feature cylinder class.
     Blend, //!< feature blend class.
     Inert, //!< feature inert class.
+    Boolean, //!< feature boolean base class.
     Union, //!< feature union class.
     Subtract, //!< feature subtract class.
     Intersect //!< feature intersect class.
@@ -55,6 +56,7 @@ namespace ftr
       {Type::Cylinder, "Cylinder"},
       {Type::Blend, "Blend"},
       {Type::Inert, "Inert"},
+      {Type::Boolean, "Boolean"},
       {Type::Union, "Union"},
       {Type::Subtract, "Subtract"},
       {Type::Intersect, "Intersect"}

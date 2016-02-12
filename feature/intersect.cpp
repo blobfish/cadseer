@@ -33,7 +33,7 @@ using namespace ftr;
 
 QIcon Intersect::icon;
 
-Intersect::Intersect() : Base()
+Intersect::Intersect() : BooleanBase()
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionIntersect.svg");
@@ -79,14 +79,15 @@ void Intersect::updateModel(const UpdateMap &mapIn)
     shapeMatch(mapIn.at(InputTypes::target)->getResultContainer(), freshContainer);
     shapeMatch(mapIn.at(InputTypes::tool)->getResultContainer(), freshContainer);
     uniqueTypeMatch(mapIn.at(InputTypes::target)->getResultContainer(), freshContainer);
-    BooleanIdMapper idMapper(mapIn, intersector.getBuilder(), containerWrapper);
+    BooleanIdMapper idMapper(mapIn, intersector.getBuilder(), iMapWrapper, containerWrapper);
     idMapper.go();
     outerWireMatch(mapIn.at(InputTypes::target)->getResultContainer(), freshContainer);
     outerWireMatch(mapIn.at(InputTypes::tool)->getResultContainer(), freshContainer);
-    updateSplits(freshContainer, evolutionContainer);
     derivedMatch(shape, freshContainer, derivedContainer);
-    dumpNils(freshContainer, "Union feature");
+    dumpNils(freshContainer, "Intersect feature");
+    dumpDuplicates(freshContainer, "Intersect feature");
     ensureNoNils(freshContainer);
+    ensureNoDuplicates(freshContainer);
     
 //     std::cout << std::endl << "intersection fresh container:" << std::endl << freshContainer << std::endl;
     
@@ -110,7 +111,7 @@ void Intersect::serialWrite(const QDir &dIn)
 {
   prj::srl::FeatureIntersect intersectOut
   (
-    Base::serialOut()
+    BooleanBase::serialOut()
   );
   
   xml_schema::NamespaceInfomap infoMap;
@@ -120,5 +121,5 @@ void Intersect::serialWrite(const QDir &dIn)
 
 void Intersect::serialRead(const prj::srl::FeatureIntersect& sIntersectIn)
 {
-  Base::serialIn(sIntersectIn.featureBase());
+  BooleanBase::serialIn(sIntersectIn.featureBooleanBase());
 }

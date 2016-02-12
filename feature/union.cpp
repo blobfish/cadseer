@@ -52,7 +52,7 @@ static const std::vector<std::string> shapeStrings
      "Shape",
  });
 
-Union::Union() : Base()
+Union::Union() : BooleanBase()
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionUnion.svg");
@@ -98,16 +98,21 @@ void Union::updateModel(const UpdateMap &mapIn)
     shapeMatch(mapIn.at(InputTypes::target)->getResultContainer(), freshContainer);
     shapeMatch(mapIn.at(InputTypes::tool)->getResultContainer(), freshContainer);
     uniqueTypeMatch(mapIn.at(InputTypes::target)->getResultContainer(), freshContainer);
-    BooleanIdMapper idMapper(mapIn, fuser.getBuilder(), containerWrapper);
+    
+//     std::cout << std::endl << "union fresh container before booleanidmapper:" << std::endl << freshContainer << std::endl;
+    
+    BooleanIdMapper idMapper(mapIn, fuser.getBuilder(), iMapWrapper, containerWrapper);
     idMapper.go();
+    
+//     std::cout << std::endl << "union fresh container after booleanidmapper:" << std::endl << freshContainer << std::endl;
+    
     outerWireMatch(mapIn.at(InputTypes::target)->getResultContainer(), freshContainer);
     outerWireMatch(mapIn.at(InputTypes::tool)->getResultContainer(), freshContainer);
-    updateSplits(freshContainer, evolutionContainer);
     derivedMatch(shape, freshContainer, derivedContainer);
     dumpNils(freshContainer, "Union feature");
+    dumpDuplicates(freshContainer, "Union feature");
     ensureNoNils(freshContainer);
-    
-//     std::cout << std::endl << "union fresh container:" << std::endl << freshContainer << std::endl;
+    ensureNoDuplicates(freshContainer);
     
     resultContainer = freshContainer;
     
@@ -129,7 +134,7 @@ void Union::serialWrite(const QDir &dIn)
 {
   prj::srl::FeatureUnion unionOut
   (
-    Base::serialOut()
+    BooleanBase::serialOut()
   );
   
   xml_schema::NamespaceInfomap infoMap;
@@ -139,5 +144,5 @@ void Union::serialWrite(const QDir &dIn)
 
 void Union::serialRead(const prj::srl::FeatureUnion& sUnionIn)
 {
-  Base::serialIn(sUnionIn.featureBase());
+  BooleanBase::serialIn(sUnionIn.featureBooleanBase());
 }

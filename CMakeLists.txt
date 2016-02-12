@@ -82,12 +82,14 @@ SET(FEATURE_SOURCES
     feature/blend.cpp
     feature/maps.cpp
     feature/cylinderbuilder.cpp
+    feature/booleanbase.cpp
     feature/union.cpp
     feature/subtract.cpp
     feature/intersect.cpp
     feature/booleanidmapper.cpp
     feature/shapeidmapper.cpp
     feature/booleanoperation.cpp
+    feature/intersectionmapping.cpp
     )
     
 SET(SELECTION_SOURCES
@@ -125,6 +127,7 @@ SET(PROJECT_SOURCES
     project/serial/xsdcxxoutput/featurecylinder.cpp
     project/serial/xsdcxxoutput/featuresphere.cpp
     project/serial/xsdcxxoutput/featurecone.cpp
+    project/serial/xsdcxxoutput/featurebooleanbase.cpp
     project/serial/xsdcxxoutput/featureunion.cpp
     project/serial/xsdcxxoutput/featureintersect.cpp
     project/serial/xsdcxxoutput/featuresubtract.cpp

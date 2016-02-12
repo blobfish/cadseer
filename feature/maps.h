@@ -155,6 +155,7 @@ namespace ftr
   void updateOffset(ResultContainer& containerIn, const TopoDS_Shape &shapeIn, std::size_t offsetIn);
   //! stats/count of shape against conatiner shapes. this is basically for testing/debug. equal, same, partner, respectively.
   std::tuple<int, int, int> stats(ResultContainer& containerIn, const TopoDS_Shape &shapeIn);
+  void dump(const ResultContainer&, const std::string&);
   
   //FeatureMap
   struct FeatureRecord

@@ -20,13 +20,13 @@
 #ifndef FTR_INTERSECT_H
 #define FTR_INTERSECT_H
 
-#include <feature/base.h>
+#include <feature/booleanbase.h>
 
 namespace prj{namespace srl{class FeatureIntersect;}}
 
 namespace ftr
 {
-  class Intersect : public Base
+  class Intersect : public BooleanBase
   {
   public:
     Intersect();

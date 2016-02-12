@@ -284,13 +284,16 @@ prj::srl::FeatureBase Base::serialOut()
   
   //update the shape offset in result container. we use the
   //shape offset to map id to shape when reading data from disk.
-  TopTools_IndexedMapOfShape shapeMap;
-  TopExp::MapShapes(shape, shapeMap);
-  for (std::size_t index = 1; index <= static_cast<std::size_t>(shapeMap.Extent()); ++index)
+  if (!shape.IsNull())
   {
-    if (!hasResult(resultContainer, shapeMap(index)))
-      continue; //things like degenerated edges exist in shape but not in result.
-    ftr::updateOffset(resultContainer, shapeMap(index), index);
+    TopTools_IndexedMapOfShape shapeMap;
+    TopExp::MapShapes(shape, shapeMap);
+    for (std::size_t index = 1; index <= static_cast<std::size_t>(shapeMap.Extent()); ++index)
+    {
+      if (!hasResult(resultContainer, shapeMap(index)))
+	continue; //things like degenerated edges exist in shape but not in result.
+      ftr::updateOffset(resultContainer, shapeMap(index), index);
+    }
   }
   
   prj::srl::EvolutionContainer eContainerOut;

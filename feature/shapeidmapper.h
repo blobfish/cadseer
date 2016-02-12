@@ -62,18 +62,21 @@ namespace ftr
    */
   void dumpNils(const ResultContainer &, const std::string &);
   
+  /*! give some development feedback if the container has duplicate entries for id
+   */
+  void dumpDuplicates(const ResultContainer &, const std::string&);
+  
   /*! nil ids will eventually cause a crash. So this help keep a running program, but
    * will also hide errors from development. Best to call dumpNils before this, so
    * there is a sign of failed mappings.
    */
   void ensureNoNils(ResultContainer &);
   
-  /*! when topology gets split we end up with duplicates in the result container.
-   * this function scans the evolution container to find an entry for the duplicate. if
-   * it finds it, update the resultContainer. if it doesn't find it creates an entry
-   * for the evolution container and also updates the result container.
+  /*! scans container generates new ids for duplicate. This is a fail safe to keep things
+   * working while developing id mapping system. Shouldn't do anything and some day
+   * should be excluded.
    */
-  void updateSplits(ResultContainer &, EvolutionContainer&);
+  void ensureNoDuplicates(ResultContainer &);
 }
 
 #endif // FTR_SHAPEIDMAPPER_H

@@ -17,10 +17,10 @@
  *
  */
 
-#ifndef UNION_H
-#define UNION_H
+#ifndef FTR_UNION_H
+#define FTR_UNION_H
 
-#include <feature/base.h>
+#include <feature/booleanbase.h>
 
 class QDir;
 
@@ -28,7 +28,7 @@ namespace prj{namespace srl{class FeatureUnion;}}
 
 namespace ftr
 {
-  class Union : public Base
+  class Union : public BooleanBase
   {
   public:
     Union();
@@ -45,4 +45,4 @@ namespace ftr
   };
 }
 
-#endif // UNION_H
+#endif // FTR_UNION_H

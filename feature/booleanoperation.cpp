@@ -29,7 +29,7 @@ BooleanOperation::BooleanOperation(const TopoDS_Shape &shape1, const TopoDS_Shap
   //let caller call build outside of construction.
 }
 
-const BOPAlgo_Builder& BooleanOperation::getBuilder()
+BOPAlgo_Builder& BooleanOperation::getBuilder()
 {
   return *myBuilder;
 }

@@ -27,6 +27,7 @@
 #include <BRep_Builder.hxx>
 #include <BRepTools.hxx>
 #include <TopoDS_Iterator.hxx>
+#include <BRepBuilderAPI_MakeVertex.hxx>
 
 #include <osg/ValueObject>
 
@@ -675,10 +676,17 @@ void Project::serialWrite()
   BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
   {
     ftr::Base *f = projectGraph[currentVertex].feature.get();
+    
+    //we can't add a null shape to the compound.
+    //so we check for null and add 1 vertex as a place holder.
+    TopoDS_Shape shapeOut = f->getShape();
+    if (shapeOut.IsNull())
+      shapeOut = BRepBuilderAPI_MakeVertex(gp_Pnt(0.0, 0.0, 0.0)).Vertex();
+    
     features.feature().push_back(prj::srl::Feature(to_string(f->getId()), f->getTypeString(), offset));
     
     //add to master compound
-    builder.Add(compound, f->getShape());
+    builder.Add(compound, shapeOut);
     
     offset++;
   }

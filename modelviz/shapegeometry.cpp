@@ -482,6 +482,8 @@ void ShapeGeometryBuilder::edgeConstruct(const TopoDS_Edge &edgeIn)
   }
   else
     //ensure that edges have the same primitive index between lod calls.
+    //asserts here prior to having lod implemented is probably duplicate ids
+    //for different geometry.
     assert(lastPrimitiveIndex == idPSetWrapperEdge->findPSetFromId(id));
 }
 

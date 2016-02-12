@@ -20,13 +20,13 @@
 #ifndef FTR_SUBTRACT_H
 #define FTR_SUBTRACT_H
 
-#include <feature/base.h>
+#include <feature/booleanbase.h>
 
 namespace prj{namespace srl{class FeatureSubtract;}}
 
 namespace ftr
 {
-  class Subtract : public Base
+  class Subtract : public BooleanBase
   {
   public:
     Subtract();

@@ -21,6 +21,9 @@
 #define FTR_BOOLEANIDMAPPER_H
 
 #include <map>
+#include <set>
+
+#include <boost/uuid/uuid.hpp>
 
 #include <feature/inputtypes.h>
 
@@ -31,17 +34,27 @@ namespace ftr
 {
   class Base;
   class ResultContainerWrapper;
+  class IMapWrapper;
   typedef std::map<InputTypes, const Base*> UpdateMap;
   
   class BooleanIdMapper
   {
   public:
-    BooleanIdMapper(const UpdateMap &, const BOPAlgo_Builder &, ResultContainerWrapper &);
+    BooleanIdMapper(const UpdateMap &, BOPAlgo_Builder &, IMapWrapper &, ResultContainerWrapper &);
     void go();
     
     const UpdateMap &updateMap;
-    const BOPAlgo_Builder &builder; //couldn't make const. accessor functions not const.
+    BOPAlgo_Builder &builder; //couldn't make const. accessor functions not const.
+    IMapWrapper &iMapWrapper;
     ResultContainerWrapper &outContainer;
+  private:
+    void goIntersectionEdges();
+    void goSingleSplits();
+    
+    std::set<boost::uuids::uuid> iEdgeCache;
+    void goSplitFaces();
+    
+    TopoDS_Shape rootShape; //!< root shape(compound) of the result container. used for mapping.
   };
 }
 

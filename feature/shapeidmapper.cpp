@@ -263,7 +263,29 @@ void ftr::dumpNils(const ResultContainer &target, const std::string &headerIn)
   
   
   if (!stream.str().empty())
-    std::cout << std::endl << headerIn << std::endl << stream.str() << std::endl;
+    std::cout << std::endl << headerIn << " nils" << std::endl << stream.str() << std::endl;
+}
+
+void ftr::dumpDuplicates(const ftr::ResultContainer &target, const std::string &headerIn)
+{
+  std::ostringstream stream;
+  
+  std::set<boost::uuids::uuid> processed;
+  typedef ResultContainer::index<ResultRecord::ById>::type List;
+  const List &list = target.get<ResultRecord::ById>();
+  for (const auto &record : list)
+  {
+    if (processed.count(record.id) > 0)
+      continue;
+    std::size_t count = target.count(record.id);
+    if (count > 1)
+    {
+      processed.insert(record.id);
+      stream << record.id << "    " << count << "    " << record.shape << std::endl;
+    }
+  }
+  if (!stream.str().empty())
+    std::cout << std::endl << headerIn << " duplicates" << std::endl << stream.str() << std::endl;
 }
 
 void ftr::ensureNoNils(ResultContainer &target)
@@ -280,39 +302,19 @@ void ftr::ensureNoNils(ResultContainer &target)
     updateId(target, idGenerator(), shape);
 }
 
-void ftr::updateSplits(ResultContainer &target, EvolutionContainer &evo)
+void ftr::ensureNoDuplicates(ResultContainer &target)
 {
-  //this all seems a little precarious. The assignment of
-  //the duplicate ids in the result container from the evo container is
-  //dependent on the order of both lists. We will be back here.
-  
-  std::vector<std::pair<TopoDS_Shape, boost::uuids::uuid> > updateVector;
-  
-  std::set<boost::uuids::uuid> doneIds;
-  typedef EvolutionContainer::index<EvolutionRecord::ByInId>::type EvoList;
-  EvoList &evoList = evo.get<EvolutionRecord::ByInId>();
+  std::set<boost::uuids::uuid> processed;
+  gu::ShapeVector shapes;
   typedef ResultContainer::index<ResultRecord::ById>::type List;
   const List &list = target.get<ResultRecord::ById>();
   for (const auto &record : list)
   {
-    if (doneIds.count(record.id) > 0)
-      continue;
-    doneIds.insert(record.id);
-    
-    auto resultRange = list.equal_range(record.id);
-    resultRange.first++; //we know there is a least one and that first one won't be in the evo
-    
-    auto evoRange = evoList.equal_range(record.id);
-    //ensure we have enough ids in evorange to do a parallel iteration.
-    int difference = std::distance(resultRange.first, resultRange.second) - std::distance(evoRange.first, evoRange.second);
-    for (int index = 0; index < difference; ++index)
-      evoList.insert(EvolutionRecord(record.id, idGenerator()));
-    evoRange = evoList.equal_range(record.id); //update range.
-    
-    for (;resultRange.first != resultRange.second; ++resultRange.first, ++evoRange.first)
-      updateVector.push_back(std::make_pair(resultRange.first->shape, evoRange.first->outId));
+    if (processed.count(record.id) > 0)
+      shapes.push_back(record.shape);
+    else
+      processed.insert(record.id);
   }
-  
-  for (const auto &couple : updateVector)
-    updateId(target, couple.second, couple.first);
+  for (const auto &shape : shapes)
+    updateId(target, idGenerator(), shape);
 }

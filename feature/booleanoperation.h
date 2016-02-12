@@ -40,7 +40,7 @@ namespace ftr
   {
   public:
     BooleanOperation(const TopoDS_Shape &, const TopoDS_Shape &, BOPAlgo_Operation);
-    const BOPAlgo_Builder& getBuilder();
+    BOPAlgo_Builder& getBuilder();
   };
 }
 

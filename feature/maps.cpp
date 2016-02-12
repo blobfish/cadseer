@@ -21,6 +21,8 @@
 
 #include <boost/uuid/random_generator.hpp>
 
+#include <BRepTools.hxx>
+
 #include <globalutilities.h>
 #include <feature/maps.h>
 
@@ -29,7 +31,7 @@ using namespace ftr; //needed for parameters.
 static const std::vector<std::string> shapeStrings
 ({
      "Compound",
-     "Compound Solid",
+     "Compound_Solid",
      "Solid",
      "Shell",
      "Face",
@@ -174,6 +176,37 @@ std::tuple<int, int, int> ftr::stats(ResultContainer& containerIn, const TopoDS_
       partnerCount++;
   }
   return std::make_tuple(equalCount, sameCount, partnerCount);
+}
+
+void ftr::dump(const ResultContainer &containerIn, const std::string &pathIn)
+{
+  //dumping duplicates is part of the reason for this function.
+  //so we need to keep track of multiples and keep and index number.
+  typedef std::map <boost::uuids::uuid, std::size_t> Map;
+  Map map;
+  
+  typedef ResultContainer::index<ResultRecord::ById>::type List;
+  const List &list = containerIn.get<ResultRecord::ById>();
+  for (const auto &record : list)
+  {
+    std::size_t count = 0;
+    Map::iterator it = map.find(record.id);
+    if (it == map.end())
+      map.insert(std::make_pair(record.id, count));
+    else
+    {
+      it->second++;
+      count = it->second;
+    }
+    
+    std::ostringstream stream;
+    stream << pathIn;
+    if (pathIn.back() != '/')
+      stream << '/';
+    stream << boost::uuids::to_string(record.id) << "_" << shapeStrings.at(record.shape.ShapeType())
+      << "_" << ((count < 10) ? "0" : "") << count << ".brep";
+    BRepTools::Write(record.shape, stream.str().c_str());
+  }
 }
 
 ostream& ftr::operator<<(ostream& os, const FeatureRecord& record)

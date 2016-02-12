@@ -33,7 +33,7 @@ using namespace ftr;
 
 QIcon Subtract::icon;
 
-Subtract::Subtract() : Base()
+Subtract::Subtract() : BooleanBase()
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionSubtract.svg");
@@ -79,14 +79,15 @@ void Subtract::updateModel(const UpdateMap &mapIn)
     shapeMatch(mapIn.at(InputTypes::target)->getResultContainer(), freshContainer);
     shapeMatch(mapIn.at(InputTypes::tool)->getResultContainer(), freshContainer);
     uniqueTypeMatch(mapIn.at(InputTypes::target)->getResultContainer(), freshContainer);
-    BooleanIdMapper idMapper(mapIn, subtracter.getBuilder(), containerWrapper);
+    BooleanIdMapper idMapper(mapIn, subtracter.getBuilder(), iMapWrapper, containerWrapper);
     idMapper.go();
     outerWireMatch(mapIn.at(InputTypes::target)->getResultContainer(), freshContainer);
     outerWireMatch(mapIn.at(InputTypes::tool)->getResultContainer(), freshContainer);
-    updateSplits(freshContainer, evolutionContainer);
     derivedMatch(shape, freshContainer, derivedContainer);
-    dumpNils(freshContainer, "Union feature");
+    dumpNils(freshContainer, "Subtraction feature");
+    dumpDuplicates(freshContainer, "Subtraction feature");
     ensureNoNils(freshContainer);
+    ensureNoDuplicates(freshContainer);
     
 //     std::cout << std::endl << "subtraction fresh container:" << std::endl << freshContainer << std::endl;
     
@@ -110,7 +111,7 @@ void Subtract::serialWrite(const QDir &dIn)
 {
   prj::srl::FeatureSubtract subtractOut
   (
-    Base::serialOut()
+    BooleanBase::serialOut()
   );
   
   xml_schema::NamespaceInfomap infoMap;
@@ -120,6 +121,6 @@ void Subtract::serialWrite(const QDir &dIn)
 
 void Subtract::serialRead(const prj::srl::FeatureSubtract& sSubtractIn)
 {
-  Base::serialIn(sSubtractIn.featureBase());
+  BooleanBase::serialIn(sSubtractIn.featureBooleanBase());
 }
 

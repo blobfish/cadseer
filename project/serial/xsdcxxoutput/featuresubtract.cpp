@@ -47,28 +47,28 @@ namespace prj
     // FeatureSubtract
     // 
 
-    const FeatureSubtract::FeatureBaseType& FeatureSubtract::
-    featureBase () const
+    const FeatureSubtract::FeatureBooleanBaseType& FeatureSubtract::
+    featureBooleanBase () const
     {
-      return this->featureBase_.get ();
+      return this->featureBooleanBase_.get ();
     }
 
-    FeatureSubtract::FeatureBaseType& FeatureSubtract::
-    featureBase ()
+    FeatureSubtract::FeatureBooleanBaseType& FeatureSubtract::
+    featureBooleanBase ()
     {
-      return this->featureBase_.get ();
-    }
-
-    void FeatureSubtract::
-    featureBase (const FeatureBaseType& x)
-    {
-      this->featureBase_.set (x);
+      return this->featureBooleanBase_.get ();
     }
 
     void FeatureSubtract::
-    featureBase (::std::unique_ptr< FeatureBaseType > x)
+    featureBooleanBase (const FeatureBooleanBaseType& x)
     {
-      this->featureBase_.set (std::move (x));
+      this->featureBooleanBase_.set (x);
+    }
+
+    void FeatureSubtract::
+    featureBooleanBase (::std::unique_ptr< FeatureBooleanBaseType > x)
+    {
+      this->featureBooleanBase_.set (std::move (x));
     }
   }
 }
@@ -83,16 +83,16 @@ namespace prj
     //
 
     FeatureSubtract::
-    FeatureSubtract (const FeatureBaseType& featureBase)
+    FeatureSubtract (const FeatureBooleanBaseType& featureBooleanBase)
     : ::xml_schema::Type (),
-      featureBase_ (featureBase, this)
+      featureBooleanBase_ (featureBooleanBase, this)
     {
     }
 
     FeatureSubtract::
-    FeatureSubtract (::std::unique_ptr< FeatureBaseType > featureBase)
+    FeatureSubtract (::std::unique_ptr< FeatureBooleanBaseType > featureBooleanBase)
     : ::xml_schema::Type (),
-      featureBase_ (std::move (featureBase), this)
+      featureBooleanBase_ (std::move (featureBooleanBase), this)
     {
     }
 
@@ -101,7 +101,7 @@ namespace prj
                      ::xml_schema::Flags f,
                      ::xml_schema::Container* c)
     : ::xml_schema::Type (x, f, c),
-      featureBase_ (x.featureBase_, f, this)
+      featureBooleanBase_ (x.featureBooleanBase_, f, this)
     {
     }
 
@@ -110,7 +110,7 @@ namespace prj
                      ::xml_schema::Flags f,
                      ::xml_schema::Container* c)
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
-      featureBase_ (this)
+      featureBooleanBase_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -129,16 +129,16 @@ namespace prj
         const ::xsd::cxx::xml::qualified_name< char > n (
           ::xsd::cxx::xml::dom::name< char > (i));
 
-        // featureBase
+        // featureBooleanBase
         //
-        if (n.name () == "featureBase" && n.namespace_ ().empty ())
+        if (n.name () == "featureBooleanBase" && n.namespace_ ().empty ())
         {
-          ::std::unique_ptr< FeatureBaseType > r (
-            FeatureBaseTraits::create (i, f, this));
+          ::std::unique_ptr< FeatureBooleanBaseType > r (
+            FeatureBooleanBaseTraits::create (i, f, this));
 
-          if (!featureBase_.present ())
+          if (!featureBooleanBase_.present ())
           {
-            this->featureBase_.set (::std::move (r));
+            this->featureBooleanBase_.set (::std::move (r));
             continue;
           }
         }
@@ -146,10 +146,10 @@ namespace prj
         break;
       }
 
-      if (!featureBase_.present ())
+      if (!featureBooleanBase_.present ())
       {
         throw ::xsd::cxx::tree::expected_element< char > (
-          "featureBase",
+          "featureBooleanBase",
           "");
       }
     }
@@ -167,7 +167,7 @@ namespace prj
       if (this != &x)
       {
         static_cast< ::xml_schema::Type& > (*this) = x;
-        this->featureBase_ = x.featureBase_;
+        this->featureBooleanBase_ = x.featureBooleanBase_;
       }
 
       return *this;
@@ -469,15 +469,15 @@ namespace prj
     {
       e << static_cast< const ::xml_schema::Type& > (i);
 
-      // featureBase
+      // featureBooleanBase
       //
       {
         ::xercesc::DOMElement& s (
           ::xsd::cxx::xml::dom::create_element (
-            "featureBase",
+            "featureBooleanBase",
             e));
 
-        s << i.featureBase ();
+        s << i.featureBooleanBase ();
       }
     }
 

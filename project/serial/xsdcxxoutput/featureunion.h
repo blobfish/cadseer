@@ -64,7 +64,7 @@
 
 #include <xsd/cxx/pre.hxx>
 
-#include "featurebase.h"
+#include "featurebooleanbase.h"
 
 // Forward declarations.
 //
@@ -91,7 +91,7 @@ namespace prj
 
 #include <xsd/cxx/xml/dom/parsing-header.hxx>
 
-#include "featurebase.h"
+#include "featurebooleanbase.h"
 
 namespace prj
 {
@@ -110,9 +110,9 @@ namespace prj
     {
       public:
       /**
-       * @name featureBase
+       * @name featureBooleanBase
        *
-       * @brief Accessor and modifier functions for the %featureBase
+       * @brief Accessor and modifier functions for the %featureBooleanBase
        * required element.
        */
       //@{
@@ -120,28 +120,28 @@ namespace prj
       /**
        * @brief Element type.
        */
-      typedef ::prj::srl::FeatureBase FeatureBaseType;
+      typedef ::prj::srl::FeatureBooleanBase FeatureBooleanBaseType;
 
       /**
        * @brief Element traits type.
        */
-      typedef ::xsd::cxx::tree::traits< FeatureBaseType, char > FeatureBaseTraits;
+      typedef ::xsd::cxx::tree::traits< FeatureBooleanBaseType, char > FeatureBooleanBaseTraits;
 
       /**
        * @brief Return a read-only (constant) reference to the element.
        *
        * @return A constant reference to the element.
        */
-      const FeatureBaseType&
-      featureBase () const;
+      const FeatureBooleanBaseType&
+      featureBooleanBase () const;
 
       /**
        * @brief Return a read-write reference to the element.
        *
        * @return A reference to the element.
        */
-      FeatureBaseType&
-      featureBase ();
+      FeatureBooleanBaseType&
+      featureBooleanBase ();
 
       /**
        * @brief Set the element value.
@@ -152,7 +152,7 @@ namespace prj
        * the new value of the element.
        */
       void
-      featureBase (const FeatureBaseType& x);
+      featureBooleanBase (const FeatureBooleanBaseType& x);
 
       /**
        * @brief Set the element value without copying.
@@ -163,7 +163,7 @@ namespace prj
        * instead of making a copy.
        */
       void
-      featureBase (::std::unique_ptr< FeatureBaseType > p);
+      featureBooleanBase (::std::unique_ptr< FeatureBooleanBaseType > p);
 
       //@}
 
@@ -176,7 +176,7 @@ namespace prj
        * @brief Create an instance from the ultimate base and
        * initializers for required elements and attributes.
        */
-      FeatureUnion (const FeatureBaseType&);
+      FeatureUnion (const FeatureBooleanBaseType&);
 
       /**
        * @brief Create an instance from the ultimate base and
@@ -186,7 +186,7 @@ namespace prj
        * This constructor will try to use the passed values directly
        * instead of making copies.
        */
-      FeatureUnion (::std::unique_ptr< FeatureBaseType >);
+      FeatureUnion (::std::unique_ptr< FeatureBooleanBaseType >);
 
       /**
        * @brief Create an instance from a DOM element.
@@ -258,7 +258,7 @@ namespace prj
              ::xml_schema::Flags);
 
       protected:
-      ::xsd::cxx::tree::one< FeatureBaseType > featureBase_;
+      ::xsd::cxx::tree::one< FeatureBooleanBaseType > featureBooleanBase_;
 
       //@endcond
     };
