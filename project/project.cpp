@@ -165,7 +165,7 @@ void Project::updateVisual()
       feature->isModelClean() &&
       feature->isVisible3D() &&
       feature->isActive() &&
-      feature->isSuccess() &&
+//       feature->isSuccess() && //regenerate from parent shape on failure.
       feature->isVisualDirty()
     )
       feature->updateVisual();

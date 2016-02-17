@@ -20,22 +20,61 @@
 #ifndef BLEND_H
 #define BLEND_H
 
+#include <memory>
+
+#include <osg/ref_ptr>
+
+#include <library/plabel.h>
+#include <feature/parameter.h>
 #include <feature/base.h>
 
 class BRepFilletAPI_MakeFillet;
+class TopoDS_Edge;
 
 namespace prj{namespace srl{class FeatureBlend;}}
 
 namespace ftr
 {
+struct BlendPick
+{
+  boost::uuids::uuid id; //!< id of edge or face object picked.
+  double u; //!< u parameter on picked object
+  double v;//!< v parameter on picked object
+};
+
+struct SimpleBlend
+{
+  std::vector<BlendPick> picks; //!< vector of picked objects
+  std::shared_ptr<Parameter> radius; //!< parameter containing blend radius.
+  osg::ref_ptr<lbr::PLabel> label; //!< graphic icon
+};
+
+struct VariableEntry
+{
+  boost::uuids::uuid id; //!< edge or vertex.
+  std::shared_ptr<Parameter> position; //!< parameter along edge 0 to 1. ignored if vertex. maybe invalid
+  std::shared_ptr<Parameter> radius; //!< value of blend.
+};
+
+struct VariableBlend
+{
+  BlendPick pick; //!< pick object.
+  std::vector<VariableEntry> entries;
+};
+  
 class Blend : public Base
 {
   public:
     Blend();
-    void setRadius(const double &radiusIn);
-    double getRadius() const {return radius;}
-    void setEdgeIds(const std::vector<boost::uuids::uuid>& edgeIdsIn);
-    const std::vector<boost::uuids::uuid>& getEdgeIds(){return edgeIds;}
+    
+    static std::shared_ptr<Parameter> buildRadiusParameter();
+    static std::shared_ptr<Parameter> buildPositionParameter();
+    static VariableBlend buildDefaultVariable(const ResultContainer &, const BlendPick &);
+    static double calculateUParameter(const TopoDS_Edge&, const osg::Vec3d&);
+    static osg::Vec3d calculateUPoint(const TopoDS_Edge&, double);
+    
+    void addSimpleBlend(const SimpleBlend&);
+    void addVariableBlend(const VariableBlend&);
     
     virtual void updateModel(const UpdateMap&) override;
     virtual Type getType() const override {return Type::Blend;}
@@ -46,8 +85,8 @@ class Blend : public Base
     void serialRead(const prj::srl::FeatureBlend &); //!<initializes this from sBox. not virtual, type already known.
   
   protected:
-    double radius;
-    std::vector<boost::uuids::uuid> edgeIds;
+    std::vector<SimpleBlend> simpleBlends;
+    std::vector<VariableBlend> variableBlends;
     
     /*! used to map the edges that are blended away to the face generated.
      * used to map new generated face to outer wire.
@@ -56,6 +95,7 @@ class Blend : public Base
     
 private:
     void generatedMatch(BRepFilletAPI_MakeFillet&, const Base *, ResultContainer &);
+    void ensureNoFaceNils(ResultContainer&);
     void dumpInfo(BRepFilletAPI_MakeFillet&, const Base *);
     
     static QIcon icon;

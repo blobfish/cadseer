@@ -26,6 +26,8 @@
 #include <boost/uuid/uuid.hpp>
 
 #include <BRepTools.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS.hxx>
 
 #include <message/dispatch.h>
 #include <project/project.h>
@@ -170,6 +172,7 @@ void Factory::selectionAdditionDispatched(const msg::Message &messageIn)
   aContainer.selectionType = sMessage.type;
   aContainer.featureId = sMessage.featureId;
   aContainer.shapeId = sMessage.shapeId;
+  aContainer.pointLocation = sMessage.pointLocation;
   containers.push_back(aContainer);
 }
 
@@ -389,12 +392,15 @@ void Factory::newBlendDispatched(const msg::Message&)
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
   msg::dispatch().dumpString(debug.str());
   
+  assert(project);
+  
   if (containers.empty())
     return;
   
   //get targetId and filter out edges not belonging to first target.
   uuid targetFeatureId = containers.at(0).featureId;
-  std::vector<uuid> edgeIds;
+  ftr::SimpleBlend simpleBlend;
+  ftr::VariableBlend vBlend;
   for (const auto &currentSelection : containers)
   {
     if
@@ -404,9 +410,22 @@ void Factory::newBlendDispatched(const msg::Message&)
     )
       continue;
     
-    edgeIds.push_back(currentSelection.shapeId);
+    TopoDS_Edge edge = TopoDS::Edge(ftr::findResultById
+      (project->findFeature(targetFeatureId)->getResultContainer(), currentSelection.shapeId).shape);  
+    ftr::BlendPick pick;
+    pick.id = currentSelection.shapeId;
+    pick.u = ftr::Blend::calculateUParameter(edge, currentSelection.pointLocation);
+    
+    //simple radius test  
+    simpleBlend.picks.push_back(pick);
+    auto simpleRadius = ftr::Blend::buildRadiusParameter();
+    simpleRadius->setValue(2.0);
+    simpleBlend.radius = simpleRadius;
+    
+    //variable blend radius test. really shouldn't be in loop.
+//     vBlend = ftr::Blend::buildDefaultVariable(project->findFeature(targetFeatureId)->getResultContainer(), pick);
   }
-  if (edgeIds.empty())
+  if (simpleBlend.picks.empty() && vBlend.entries.empty())
     return;
   
   assert(project);
@@ -414,7 +433,10 @@ void Factory::newBlendDispatched(const msg::Message&)
   std::shared_ptr<ftr::Blend> blend(new ftr::Blend());
   project->addFeature(blend);
   project->connect(targetFeatureId, blend->getId(), ftr::InputTypes::target);
-  blend->setEdgeIds(edgeIds);
+  if (!simpleBlend.picks.empty())
+    blend->addSimpleBlend(simpleBlend);
+  if (!vBlend.entries.empty())
+    blend->addVariableBlend(vBlend);
   
   ftr::Base *targetFeature = project->findFeature(targetFeatureId);
   targetFeature->hide3D();

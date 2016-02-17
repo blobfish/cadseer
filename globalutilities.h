@@ -31,6 +31,7 @@
 class gp_Vec;
 class gp_Pnt;
 class gp_Ax2;
+class gp_Trsf;
 
 namespace osg
 {
@@ -50,6 +51,7 @@ std::string getShapeTypeString(const TopoDS_Shape&);
 osg::Vec3d toOsg(const gp_Vec &occVecIn);
 osg::Vec3d toOsg(const gp_Pnt &occPointIn);
 osg::Matrixd toOsg(const gp_Ax2 &systemIn);
+osg::Matrixd toOsg(const gp_Trsf&);
 gp_Ax2 toOcc(const osg::Matrixd &m);
 osg::Vec3d getXVector(const osg::Matrixd &m);
 osg::Vec3d getYVector(const osg::Matrixd &m);

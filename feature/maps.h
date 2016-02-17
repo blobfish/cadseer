@@ -156,6 +156,7 @@ namespace ftr
   //! stats/count of shape against conatiner shapes. this is basically for testing/debug. equal, same, partner, respectively.
   std::tuple<int, int, int> stats(ResultContainer& containerIn, const TopoDS_Shape &shapeIn);
   void dump(const ResultContainer&, const std::string&);
+  const TopoDS_Shape& findRootShape(const ResultContainer &);
   
   //FeatureMap
   struct FeatureRecord

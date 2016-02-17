@@ -57,7 +57,7 @@ void Inert::updateModel(const UpdateMap &mapIn)
   gp_Trsf tempTrsf; tempTrsf.SetTransformation(tempAx3); tempTrsf.Invert();
   TopLoc_Location freshLocation(tempTrsf);
   
-  if (shape.Location() != freshLocation)
+  if (gu::toOsg(shape.Location().Transformation()) != gu::toOsg(tempTrsf))
   {
     shape.Location(freshLocation);
     

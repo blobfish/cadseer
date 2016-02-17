@@ -209,6 +209,17 @@ void ftr::dump(const ResultContainer &containerIn, const std::string &pathIn)
   }
 }
 
+const TopoDS_Shape& ftr::findRootShape(const ResultContainer &containerIn)
+{
+  //result containers are expected to have 1 compound root shape.
+  for (const auto &c : containerIn)
+  {
+    if (c.shape.ShapeType() == TopAbs_COMPOUND)
+      return c.shape;
+  }
+  assert(0); //no root shape in container.
+}
+
 ostream& ftr::operator<<(ostream& os, const FeatureRecord& record)
 {
   os << boost::uuids::to_string(record.id) << "      " << record.tag << std::endl;

@@ -7,18 +7,66 @@
   
 <xs:include schemaLocation="featurebase.xsd"/>
 
-<xs:complexType name="EdgeIds">
-  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+<xs:complexType name="BlendPick">
+  <xs:all>
     <xs:element name="id" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+    <xs:element name="u" type="xs:double" default="NaN"/>
+    <xs:element name="v" type="xs:double" default="NaN"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="BlendPicks">
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+    <xs:element name="array" type="srl:BlendPick"/>
   </xs:sequence>
 </xs:complexType>
 
+<xs:complexType name="SimpleBlend">
+  <xs:all>
+    <xs:element name="blendPicks" type="srl:BlendPicks"/>
+    <xs:element name="radius" type="srl:Parameter"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="SimpleBlends">
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+    <xs:element name="array" type="srl:SimpleBlend"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="VariableEntry">
+  <xs:all>
+    <xs:element name="id" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+    <xs:element name="position" type="srl:Parameter"/>
+    <xs:element name="radius" type="srl:Parameter"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="VariableEntries">
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+    <xs:element name="array" type="srl:VariableEntry"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="VariableBlend">
+  <xs:all>
+    <xs:element name="blendPick" type="srl:BlendPick"/>
+    <xs:element name="variableEntries" type="srl:VariableEntries"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="VariableBlends">
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+    <xs:element name="array" type="srl:VariableBlend"/>
+  </xs:sequence>
+</xs:complexType>
+  
 <xs:complexType name="FeatureBlend">
   <xs:all>
     <xs:element name="featureBase" type="srl:FeatureBase"/>
-    <xs:element name="radius" type="xs:double" default="NaN"/>
-    <xs:element name="edgeIds" type="srl:EdgeIds"/>
     <xs:element name="shapeMap" type="srl:EvolutionContainer"/>
+    <xs:element name="simpleBlends" type="srl:SimpleBlends"/>
+    <xs:element name="variableBlends" type="srl:VariableBlends"/>
   </xs:all>
 </xs:complexType>
 

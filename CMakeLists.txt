@@ -162,6 +162,7 @@ SET(LIBRARY_SOURCES
     library/lineardragger.cpp
     library/lineardimension.cpp
     library/ipgroup.cpp
+    library/plabel.cpp
     )
 
 SET(CADSEER_SOURCES

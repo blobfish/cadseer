@@ -36,6 +36,7 @@ namespace ftr
     static const std::string Width = "Width"; //!< box
     static const std::string Radius1 = "Radius1"; //!< cone
     static const std::string Radius2 = "Radius2"; //!< cone
+    static const std::string Position = "Position"; //!< blend
     
   }
   

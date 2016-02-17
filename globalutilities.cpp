@@ -118,6 +118,19 @@ osg::Matrixd gu::toOsg(const gp_Ax2 &systemIn)
   return out;
 }
 
+osg::Matrixd gu::toOsg(const gp_Trsf &t)
+{
+  osg::Matrixd out
+  (
+    t.Value(1, 1), t.Value(2, 1), t.Value(3, 1), 0.0,
+    t.Value(1, 2), t.Value(2, 2), t.Value(3, 2), 0.0,
+    t.Value(1, 3), t.Value(2, 3), t.Value(3, 3), 0.0,
+    t.Value(1, 4), t.Value(2, 4), t.Value(3, 4), 1.0
+  );
+  
+  return out;
+}
+
 gp_Ax2 gu::toOcc(const osg::Matrixd &m)
 {
   gp_Ax2 out
