@@ -33,6 +33,7 @@
     <file>resources/images/constructionCylinder.svg</file>
     <file>resources/images/constructionFinishing.svg</file>
     <file>resources/images/constructionBlend.svg</file>
+    <file>resources/images/constructionChamfer.svg</file>
     <file>resources/images/constructionInert.svg</file>
     <file>resources/images/constructionBoolean.svg</file>
     <file>resources/images/constructionUnion.svg</file>
