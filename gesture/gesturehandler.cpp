@@ -328,6 +328,11 @@ void GestureHandler::constructMenu()
     constructionBlend->setUserValue(attributeTitle, (msg::Request | msg::Construct | msg::Blend).to_string());
     constructionFinishing->insertChild(constructionFinishing->getNumChildren() - 2, constructionBlend);
     
+    osg::MatrixTransform *constructionChamfer = gsn::buildCommandNode(":/resources/images/constructionChamfer.svg");
+    constructionChamfer->setMatrix(dummy);
+    constructionChamfer->setUserValue(attributeTitle, (msg::Request | msg::Construct | msg::Chamfer).to_string());
+    constructionFinishing->insertChild(constructionFinishing->getNumChildren() - 2, constructionChamfer);
+    
     //booleans
     osg::MatrixTransform *constructionBoolean;
     constructionBoolean = gsn::buildMenuNode(":/resources/images/constructionBoolean.svg");

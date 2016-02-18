@@ -80,6 +80,7 @@ SET(FEATURE_SOURCES
     feature/conebuilder.cpp
     feature/cylinder.cpp
     feature/blend.cpp
+    feature/chamfer.cpp
     feature/maps.cpp
     feature/cylinderbuilder.cpp
     feature/booleanbase.cpp
@@ -133,6 +134,7 @@ SET(PROJECT_SOURCES
     project/serial/xsdcxxoutput/featuresubtract.cpp
     project/serial/xsdcxxoutput/featureinert.cpp
     project/serial/xsdcxxoutput/featureblend.cpp
+    project/serial/xsdcxxoutput/featurechamfer.cpp
     )
     
 SET(APPLICATION_SOURCES

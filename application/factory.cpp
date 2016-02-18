@@ -45,6 +45,7 @@
 #include <feature/subtract.h>
 #include <feature/intersect.h>
 #include <feature/blend.h>
+#include <feature/chamfer.h>
 
 using namespace app;
 using boost::uuids::uuid;
@@ -109,6 +110,9 @@ void Factory::setupDispatcher()
   
   mask = msg::Request | msg::Construct | msg::Blend;
   dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newBlendDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Construct | msg::Chamfer;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newChamferDispatched, this, _1)));
   
   mask = msg::Request | msg::ImportOCC;
   dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::importOCCDispatched, this, _1)));
@@ -437,6 +441,53 @@ void Factory::newBlendDispatched(const msg::Message&)
     blend->addSimpleBlend(simpleBlend);
   if (!vBlend.entries.empty())
     blend->addVariableBlend(vBlend);
+  
+  ftr::Base *targetFeature = project->findFeature(targetFeatureId);
+  targetFeature->hide3D();
+  
+  msg::Message clearSelectionMessage;
+  clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
+  messageOutSignal(clearSelectionMessage);
+  
+  triggerUpdate();
+}
+
+void Factory::newChamferDispatched(const msg::Message&)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  assert(project);
+  
+  if (containers.empty())
+    return;
+  uuid targetFeatureId = containers.at(0).featureId;
+  
+  ftr::SymChamfer symChamfer;
+  symChamfer.distance = ftr::Chamfer::buildSymParameter();
+  const ftr::ResultContainer &targetContainer = project->findFeature(targetFeatureId)->getResultContainer();
+  for (const auto &currentSelection : containers)
+  {
+    if
+    (
+      currentSelection.featureId != targetFeatureId ||
+      currentSelection.selectionType != slc::Type::Edge //just edges for now.
+    )
+      continue;
+      
+    TopoDS_Edge edge = TopoDS::Edge(ftr::findResultById(targetContainer, currentSelection.shapeId).shape);  
+    ftr::ChamferPick pick;
+    pick.edgeId = currentSelection.shapeId;
+    pick.u = ftr::Chamfer::calculateUParameter(edge, currentSelection.pointLocation);
+    pick.faceId = ftr::Chamfer::referenceFaceId(targetContainer, pick.edgeId);
+    symChamfer.picks.push_back(pick);
+  }
+  
+  std::shared_ptr<ftr::Chamfer> chamfer(new ftr::Chamfer());
+  chamfer->addSymChamfer(symChamfer);
+  project->addFeature(chamfer);
+  project->connect(targetFeatureId, chamfer->getId(), ftr::InputTypes::target);
   
   ftr::Base *targetFeature = project->findFeature(targetFeatureId);
   targetFeature->hide3D();

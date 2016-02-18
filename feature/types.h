@@ -36,6 +36,7 @@ namespace ftr
     Cone, //!< feature cone class.
     Cylinder, //!< feature cylinder class.
     Blend, //!< feature blend class.
+    Chamfer, //!< feature chamfer class.
     Inert, //!< feature inert class.
     Boolean, //!< feature boolean base class.
     Union, //!< feature union class.
@@ -55,6 +56,7 @@ namespace ftr
       {Type::Cone, "Cone"},
       {Type::Cylinder, "Cylinder"},
       {Type::Blend, "Blend"},
+      {Type::Chamfer, "Chamfer"},
       {Type::Inert, "Inert"},
       {Type::Boolean, "Boolean"},
       {Type::Union, "Union"},

@@ -27,6 +27,7 @@
 #include <feature/subtract.h>
 #include <feature/intersect.h>
 #include <feature/blend.h>
+#include <feature/chamfer.h>
 #include <feature/inert.h>
 #include <project/serial/xsdcxxoutput/featurebox.h>
 #include <project/serial/xsdcxxoutput/featurecylinder.h>
@@ -37,6 +38,7 @@
 #include <project/serial/xsdcxxoutput/featuresubtract.h>
 #include <project/serial/xsdcxxoutput/featureinert.h>
 #include <project/serial/xsdcxxoutput/featureblend.h>
+#include <project/serial/xsdcxxoutput/featurechamfer.h>
 
 #include "featureload.h"
 
@@ -57,6 +59,7 @@ directory(directoryIn), fileExtension(".fetr")
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Subtract), std::bind(&FeatureLoad::loadSubtract, this, std::placeholders::_1, std::placeholders::_2)));
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Inert), std::bind(&FeatureLoad::loadInert, this, std::placeholders::_1, std::placeholders::_2)));
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Blend), std::bind(&FeatureLoad::loadBlend, this, std::placeholders::_1, std::placeholders::_2)));
+  functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Chamfer), std::bind(&FeatureLoad::loadChamfer, this, std::placeholders::_1, std::placeholders::_2)));
 }
 
 FeatureLoad::~FeatureLoad()
@@ -199,3 +202,16 @@ std::shared_ptr< ftr::Base > FeatureLoad::loadBlend(const std::string& fileNameI
   
   return freshBlend;
 }
+
+std::shared_ptr< ftr::Base > FeatureLoad::loadChamfer(const std::string &fileNameIn, std::size_t shapeOffsetIn)
+{
+  auto sChamfer = srl::chamfer(fileNameIn, ::xml_schema::Flags::dont_validate);
+  assert(sChamfer);
+  
+  std::shared_ptr<ftr::Chamfer> freshChamfer = std::shared_ptr<ftr::Chamfer>(new ftr::Chamfer());
+  freshChamfer->setShape(shapeVector.at(shapeOffsetIn));
+  freshChamfer->serialRead(*sChamfer);
+  
+  return freshChamfer;
+}
+

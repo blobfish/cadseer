@@ -159,6 +159,7 @@ void Blend::addVariableBlend(const VariableBlend &variableBlendIn)
 
 void Blend::updateModel(const UpdateMap& mapIn)
 {
+  setFailure();
   if (mapIn.count(InputTypes::target) < 1)
   {
     std::cout << "no parent for blend" << std::endl; //much better error handeling.
@@ -173,7 +174,6 @@ void Blend::updateModel(const UpdateMap& mapIn)
   //set the shape and container to the parent.
   shape = targetShape;
   resultContainer = targetResultContainer;
-  setFailure();
   
   try
   {

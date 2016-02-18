@@ -72,19 +72,20 @@ namespace msg
   static const Mask Cone(Mask().		set(33));//!< command
   static const Mask Cylinder(Mask().		set(34));//!< command
   static const Mask Blend(Mask().		set(35));//!< command
-  static const Mask Union(Mask().		set(36));//!< command
-  static const Mask Subtract(Mask().		set(37));//!< command
-  static const Mask Intersect(Mask().		set(38));//!< command
-  static const Mask ImportOCC(Mask().		set(39));//!< command
-  static const Mask ExportOCC(Mask().		set(40));//!< command
-  static const Mask ExportOSG(Mask().		set(41));//!< command
-  static const Mask Preferences(Mask().		set(42));//!< command
-  static const Mask Remove(Mask().		set(43));//!< command
-  static const Mask Cancel(Mask().		set(44));//!< active command
-  static const Mask Done(Mask().		set(45));//!< active command
-  static const Mask Command(Mask().		set(46));//!< active command
-  static const Mask StatusText(Mask().		set(47));//!< display text for info cam
-  static const Mask CommandText(Mask().		set(48));//!< display text for info cam
+  static const Mask Chamfer(Mask().		set(36));//!< command
+  static const Mask Union(Mask().		set(37));//!< command
+  static const Mask Subtract(Mask().		set(38));//!< command
+  static const Mask Intersect(Mask().		set(39));//!< command
+  static const Mask ImportOCC(Mask().		set(40));//!< command
+  static const Mask ExportOCC(Mask().		set(41));//!< command
+  static const Mask ExportOSG(Mask().		set(42));//!< command
+  static const Mask Preferences(Mask().		set(43));//!< command
+  static const Mask Remove(Mask().		set(44));//!< command
+  static const Mask Cancel(Mask().		set(45));//!< active command
+  static const Mask Done(Mask().		set(46));//!< active command
+  static const Mask Command(Mask().		set(47));//!< active command
+  static const Mask StatusText(Mask().		set(48));//!< display text for info cam
+  static const Mask CommandText(Mask().		set(49));//!< display text for info cam
   
   typedef boost::variant<prj::Message, slc::Message, app::Message, vwr::Message> Payload;
   

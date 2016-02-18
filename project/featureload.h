@@ -58,6 +58,7 @@ namespace prj
     std::shared_ptr<ftr::Base> loadSubtract(const std::string &, std::size_t);
     std::shared_ptr<ftr::Base> loadInert(const std::string &, std::size_t);
     std::shared_ptr<ftr::Base> loadBlend(const std::string &, std::size_t);
+    std::shared_ptr<ftr::Base> loadChamfer(const std::string &, std::size_t);
   };
 }
 
