@@ -33,6 +33,7 @@
 #include <feature/booleanoperation.h>
 #include <feature/booleanidmapper.h>
 #include <feature/shapeidmapper.h>
+#include <feature/shapecheck.h>
 #include <feature/union.h>
 
 using namespace ftr;
@@ -62,7 +63,6 @@ Union::Union() : BooleanBase()
 
 void Union::updateModel(const UpdateMap &mapIn)
 {
-  shape = TopoDS_Shape();
   setFailure(); //assume failure until success.
   
   try
@@ -83,31 +83,35 @@ void Union::updateModel(const UpdateMap &mapIn)
       
     //UpdateMap is going to have to be a multimap for multiple tools.
     const TopoDS_Shape &targetShape = mapIn.at(InputTypes::target)->getShape();
+    const ResultContainer& targetResultContainer = mapIn.at(InputTypes::target)->getResultContainer();
     const TopoDS_Shape &toolShape = mapIn.at(InputTypes::tool)->getShape();
+    const ResultContainer& toolResultContainer = mapIn.at(InputTypes::tool)->getResultContainer();
     assert(!targetShape.IsNull() && !toolShape.IsNull());
+    
+    //set default on failure to parent target.
+    shape = targetShape;
+    resultContainer = targetResultContainer;
     
     BooleanOperation fuser(targetShape, toolShape, BOPAlgo_FUSE);
     fuser.Build();
     if (!fuser.IsDone())
       throw std::runtime_error("OCC fuse failed");
+    ShapeCheck check(fuser.Shape());
+    if (!check.isValid())
+      throw std::runtime_error("shapeCheck failed");
+    
     shape = fuser.Shape();
     
     ResultContainerWrapper containerWrapper;
     ResultContainer &freshContainer = containerWrapper.container;
     freshContainer = createInitialContainer(shape);
-    shapeMatch(mapIn.at(InputTypes::target)->getResultContainer(), freshContainer);
-    shapeMatch(mapIn.at(InputTypes::tool)->getResultContainer(), freshContainer);
-    uniqueTypeMatch(mapIn.at(InputTypes::target)->getResultContainer(), freshContainer);
-    
-//     std::cout << std::endl << "union fresh container before booleanidmapper:" << std::endl << freshContainer << std::endl;
-    
+    shapeMatch(targetResultContainer, freshContainer);
+    shapeMatch(toolResultContainer, freshContainer);
+    uniqueTypeMatch(targetResultContainer, freshContainer);
     BooleanIdMapper idMapper(mapIn, fuser.getBuilder(), iMapWrapper, containerWrapper);
     idMapper.go();
-    
-//     std::cout << std::endl << "union fresh container after booleanidmapper:" << std::endl << freshContainer << std::endl;
-    
-    outerWireMatch(mapIn.at(InputTypes::target)->getResultContainer(), freshContainer);
-    outerWireMatch(mapIn.at(InputTypes::tool)->getResultContainer(), freshContainer);
+    outerWireMatch(targetResultContainer, freshContainer);
+    outerWireMatch(toolResultContainer, freshContainer);
     derivedMatch(shape, freshContainer, derivedContainer);
     dumpNils(freshContainer, "Union feature");
     dumpDuplicates(freshContainer, "Union feature");

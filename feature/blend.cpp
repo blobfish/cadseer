@@ -41,6 +41,7 @@
 
 #include <globalutilities.h>
 #include <project/serial/xsdcxxoutput/featureblend.h>
+#include <feature/shapecheck.h>
 #include <feature/shapeidmapper.h>
 #include <feature/blend.h>
 
@@ -160,23 +161,19 @@ void Blend::addVariableBlend(const VariableBlend &variableBlendIn)
 void Blend::updateModel(const UpdateMap& mapIn)
 {
   setFailure();
-  if (mapIn.count(InputTypes::target) < 1)
-  {
-    std::cout << "no parent for blend" << std::endl; //much better error handeling.
-    setModelClean();
-    return;
-  }
-  
-  const TopoDS_Shape &targetShape = mapIn.at(InputTypes::target)->getShape();
-  const ResultContainer& targetResultContainer = mapIn.at(InputTypes::target)->getResultContainer();
-  
-  //starting from the stand point that this feature has failed.
-  //set the shape and container to the parent.
-  shape = targetShape;
-  resultContainer = targetResultContainer;
-  
   try
   {
+    if (mapIn.count(InputTypes::target) < 1)
+      throw std::runtime_error("no parent for blend");
+    
+    const TopoDS_Shape &targetShape = mapIn.at(InputTypes::target)->getShape();
+    const ResultContainer& targetResultContainer = mapIn.at(InputTypes::target)->getResultContainer();
+    
+    //starting from the stand point that this feature has failed.
+    //set the shape and container to the parent target.
+    shape = targetShape;
+    resultContainer = targetResultContainer;
+  
     BRepFilletAPI_MakeFillet blendMaker(targetShape);
     for (const auto &simpleBlend : simpleBlends)
     {
@@ -223,10 +220,11 @@ void Blend::updateModel(const UpdateMap& mapIn)
     }
     blendMaker.Build();
     if (!blendMaker.IsDone())
-    {
-      setModelClean();
-      return;
-    }
+      throw std::runtime_error("blendMaker failed");
+    ShapeCheck check(blendMaker.Shape());
+    if (!check.isValid())
+      throw std::runtime_error("shapeCheck failed");
+    
 //     dumpInfo(blendMaker, mapIn.at(InputTypes::target));
     shape = blendMaker.Shape();
     ResultContainer freshContainer = createInitialContainer(shape);
@@ -249,6 +247,10 @@ void Blend::updateModel(const UpdateMap& mapIn)
   {
     Handle_Standard_Failure e = Standard_Failure::Caught();
     std::cout << std::endl << "Error in blend update. " << e->GetMessageString() << std::endl;
+  }
+  catch (std::exception &e)
+  {
+    std::cout << std::endl << "Error in blend update. " << e.what() << std::endl;
   }
   setModelClean();
 }

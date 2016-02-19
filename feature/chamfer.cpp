@@ -34,6 +34,7 @@
 
 #include <project/serial/xsdcxxoutput/featurechamfer.h>
 #include <feature/shapeidmapper.h>
+#include <feature/shapecheck.h>
 #include <feature/chamfer.h>
 
 using namespace ftr;
@@ -121,23 +122,19 @@ void Chamfer::addSymChamfer(const SymChamfer &chamferIn)
 void Chamfer::updateModel(const UpdateMap &mapIn)
 {
   setFailure();
-  if (mapIn.count(InputTypes::target) < 1)
-  {
-    std::cout << "no parent for chamfer" << std::endl; //much better error handeling.
-    setModelClean();
-    return;
-  }
-  
-  const TopoDS_Shape &targetShape = mapIn.at(InputTypes::target)->getShape();
-  const ResultContainer& targetResultContainer = mapIn.at(InputTypes::target)->getResultContainer();
-  
-  //starting from the stand point that this feature has failed.
-  //set the shape and container to the parent.
-  shape = targetShape;
-  resultContainer = targetResultContainer;
-  
   try
   {
+    if (mapIn.count(InputTypes::target) < 1)
+      throw std::runtime_error("no parent for chamfer");
+    
+    const TopoDS_Shape &targetShape = mapIn.at(InputTypes::target)->getShape();
+    const ResultContainer& targetResultContainer = mapIn.at(InputTypes::target)->getResultContainer();
+    
+    //starting from the stand point that this feature has failed.
+    //set the shape and container to the parent target.
+    shape = targetShape;
+    resultContainer = targetResultContainer;
+  
     //this probably temp.
     TopTools_IndexedDataMapOfShapeListOfShape eToF;
     TopExp::MapShapesAndAncestors(targetShape, TopAbs_EDGE, TopAbs_FACE, eToF);
@@ -172,10 +169,11 @@ void Chamfer::updateModel(const UpdateMap &mapIn)
     }
     chamferMaker.Build();
     if (!chamferMaker.IsDone())
-    {
-      setModelClean();
-      return;
-    }
+      throw std::runtime_error("chamferMaker failed");
+    ShapeCheck check(chamferMaker.Shape());
+    if (!check.isValid())
+      throw std::runtime_error("shapeCheck failed");
+
     shape = chamferMaker.Shape();
     ResultContainer freshContainer = createInitialContainer(shape);
     shapeMatch(targetResultContainer, freshContainer);
@@ -197,6 +195,10 @@ void Chamfer::updateModel(const UpdateMap &mapIn)
   {
     Handle_Standard_Failure e = Standard_Failure::Caught();
     std::cout << std::endl << "Error in chamfer update. " << e->GetMessageString() << std::endl;
+  }
+  catch (std::exception &e)
+  {
+    std::cout << std::endl << "Error in chamfer update. " << e.what() << std::endl;
   }
   setModelClean();
 }

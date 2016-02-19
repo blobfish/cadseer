@@ -27,7 +27,8 @@
 #include <feature/booleanidmapper.h>
 #include <feature/booleanoperation.h>
 #include <project/serial/xsdcxxoutput/featureintersect.h>
-#include "intersect.h"
+#include <feature/shapecheck.h>
+#include <feature/intersect.h>
 
 using namespace ftr;
 
@@ -43,9 +44,7 @@ Intersect::Intersect() : BooleanBase()
 
 void Intersect::updateModel(const UpdateMap &mapIn)
 {
-  shape = TopoDS_Shape();
   setFailure(); //assume failure until success.
-  
   try
   {
     if
@@ -64,25 +63,35 @@ void Intersect::updateModel(const UpdateMap &mapIn)
       
     //UpdateMap is going to have to be a multimap for multiple tools.
     const TopoDS_Shape &targetShape = mapIn.at(InputTypes::target)->getShape();
+    const ResultContainer& targetResultContainer = mapIn.at(InputTypes::target)->getResultContainer();
     const TopoDS_Shape &toolShape = mapIn.at(InputTypes::tool)->getShape();
+    const ResultContainer& toolResultContainer = mapIn.at(InputTypes::tool)->getResultContainer();
     assert(!targetShape.IsNull() && !toolShape.IsNull());
+    
+    //set default on failure to parent target.
+    shape = targetShape;
+    resultContainer = targetResultContainer;
     
     BooleanOperation intersector(targetShape, toolShape, BOPAlgo_COMMON);
     intersector.Build();
     if (!intersector.IsDone())
       throw std::runtime_error("OCC intersect failed");
+    ShapeCheck check(intersector.Shape());
+    if (!check.isValid())
+      throw std::runtime_error("shapeCheck failed");
+    
     shape = intersector.Shape();
     
     ResultContainerWrapper containerWrapper;
     ResultContainer &freshContainer = containerWrapper.container;
     freshContainer = createInitialContainer(shape);
-    shapeMatch(mapIn.at(InputTypes::target)->getResultContainer(), freshContainer);
-    shapeMatch(mapIn.at(InputTypes::tool)->getResultContainer(), freshContainer);
-    uniqueTypeMatch(mapIn.at(InputTypes::target)->getResultContainer(), freshContainer);
+    shapeMatch(targetResultContainer, freshContainer);
+    shapeMatch(toolResultContainer, freshContainer);
+    uniqueTypeMatch(targetResultContainer, freshContainer);
     BooleanIdMapper idMapper(mapIn, intersector.getBuilder(), iMapWrapper, containerWrapper);
     idMapper.go();
-    outerWireMatch(mapIn.at(InputTypes::target)->getResultContainer(), freshContainer);
-    outerWireMatch(mapIn.at(InputTypes::tool)->getResultContainer(), freshContainer);
+    outerWireMatch(targetResultContainer, freshContainer);
+    outerWireMatch(toolResultContainer, freshContainer);
     derivedMatch(shape, freshContainer, derivedContainer);
     dumpNils(freshContainer, "Intersect feature");
     dumpDuplicates(freshContainer, "Intersect feature");

@@ -91,6 +91,7 @@ SET(FEATURE_SOURCES
     feature/shapeidmapper.cpp
     feature/booleanoperation.cpp
     feature/intersectionmapping.cpp
+    feature/shapecheck.cpp
     )
     
 SET(SELECTION_SOURCES
