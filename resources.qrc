@@ -62,6 +62,13 @@
     <file>resources/images/preferences.svg</file>
     <file>resources/images/linkIcon.svg</file>
     <file>resources/images/unlinkIcon.svg</file>
+    <file>resources/images/systemBase.svg</file>
+    <file>resources/images/systemReset.svg</file>
+    <file>resources/images/systemToggle.svg</file>
+    <file>resources/images/featureToSystem.svg</file>
+    <file>resources/images/systemToFeature.svg</file>
+    <file>resources/images/editDraggerToFeature.svg</file>
+    <file>resources/images/editFeatureToDragger.svg</file>
     <file>preferences/preferences.xml</file>
     <file>preferences/preferencesXML.xsd</file>
   </qresource>
