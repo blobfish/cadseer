@@ -20,6 +20,7 @@
 #include <boost/uuid/uuid_io.hpp>
 
 #include <osg/Geometry>
+#include <osg/io_utils>
 
 #include <selection/container.h>
 
@@ -36,7 +37,8 @@ std::ostream& slc::operator<<(std::ostream& os, const Container& container)
   os << 
     "type is: " << getNameOfType(container.selectionType) << 
     "      featureid is: " << boost::uuids::to_string(container.featureId) <<
-    "      id is: " << boost::uuids::to_string(container.shapeId) << std::endl;
+    "      shape id is: " << boost::uuids::to_string(container.shapeId) << std::endl <<
+    "      point location: " << container.pointLocation << std::endl;
   return os;
 }
 

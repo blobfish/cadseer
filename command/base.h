@@ -23,6 +23,8 @@
 #include <string>
 #include <memory>
 
+#include <QObject> //for string translation.
+
 #include <boost/signals2.hpp>
 
 #include <message/message.h>

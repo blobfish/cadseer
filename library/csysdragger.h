@@ -17,8 +17,12 @@
  *
  */
 
-#ifndef CSYSDRAGGER_H
-#define CSYSDRAGGER_H
+#ifndef LBR_CSYSDRAGGER_H
+#define LBR_CSYSDRAGGER_H
+
+#include <boost/signals2.hpp>
+
+#include <message/message.h>
 
 #include <osgManipulator/Translate1DDragger>
 #include <osg/ShapeDrawable>
@@ -33,7 +37,7 @@ namespace osgManipulator{class GridConstraint;}
 
 namespace lbr
 {
-
+  
 /*! @brief Coordinate system dragger
  * 
  * Has depth test turned off and cull back face enabled.
@@ -111,6 +115,29 @@ protected:
   osg::ref_ptr<osgManipulator::GridConstraint> translateConstraint;
   osg::ref_ptr<AngleConstraint> rotateConstraint;
 };
+
+/*! @brief class to control csys drag parameters.
+* 
+* this is for coordinate systems that aren't owned by a feature.
+* for those see csysbase.
+*/
+class CSysCallBack : public osgManipulator::DraggerTransformCallback
+{
+public:
+  CSysCallBack(osg::MatrixTransform *t);
+  virtual bool receive(const osgManipulator::MotionCommand &) override;
+  
+      
+  typedef boost::signals2::signal<void (const msg::Message &)> MessageOutSignal;
+  boost::signals2::connection connectMessageOut(const MessageOutSignal::slot_type &subscriber)
+  {
+    return messageOutSignal.connect(subscriber);
+  }
+  
+private:
+  osg::Vec3d originStart;
+  MessageOutSignal messageOutSignal;
+};
 }
 
-#endif // CSYSDRAGGER_H
+#endif // LBR_CSYSDRAGGER_H

@@ -18,13 +18,24 @@
  */
 
 #include <assert.h>
+#include <sstream>
+#include <iomanip>
+#include <cmath>
+#include <limits>
+
+#include <boost/uuid/nil_generator.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 #include <osgManipulator/Constraint>
 #include <osgUtil/SmoothingVisitor>
 
-#include "geometrylibrary.h"
+#include <globalutilities.h>
 #include <nodemaskdefs.h>
-#include "csysdragger.h"
+#include <message/dispatch.h>
+#include <preferences/preferencesXML.h>
+#include <preferences/manager.h>
+#include <library/geometrylibrary.h>
+#include <library/csysdragger.h>
 
 using namespace osg;
 using namespace osgManipulator;
@@ -33,6 +44,7 @@ using namespace lbr;
 CSysDragger::CSysDragger()
 {
   this->setNodeMask(NodeMaskDef::csys);
+  setUserValue(gu::idAttributeTitle, boost::uuids::to_string(boost::uuids::nil_generator()()));
   
   autoTransform = new osg::AutoTransform();
   autoTransform->setAutoScaleToScreen(true);
@@ -311,3 +323,80 @@ void CSysDragger::updateMatrix(const Matrixd &mIn)
   this->setMatrix(mIn);
 }
 
+CSysCallBack::CSysCallBack(osg::MatrixTransform *t) : 
+      osgManipulator::DraggerTransformCallback(t)
+{
+  connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
+  //we don't intake messages from the dispatcher.
+}
+
+bool CSysCallBack::receive(const osgManipulator::MotionCommand &commandIn)
+{
+  bool out = osgManipulator::DraggerCallback::receive(commandIn);
+  
+  static double lastTranslation = 0.0;
+  static int lastRotation = 0.0;
+  
+  const osgManipulator::TranslateInLineCommand *tCommand = 
+    dynamic_cast<const osgManipulator::TranslateInLineCommand *>(&commandIn);
+  const osgManipulator::Rotate3DCommand *rCommand = 
+    dynamic_cast<const osgManipulator::Rotate3DCommand *>(&commandIn);
+  
+  std::ostringstream stream;
+  if (commandIn.getStage() == osgManipulator::MotionCommand::START)
+  {
+    if (tCommand)
+      originStart = tCommand->getTranslation() * tCommand->getLocalToWorld();
+    lastTranslation = 0.0;
+    lastRotation = 0.0;
+    
+    lbr::CSysDragger *dragger = dynamic_cast<lbr::CSysDragger *>(_transform.get());
+    assert(dragger);
+    dragger->setTranslationIncrement(prf::manager().rootPtr->dragger().linearIncrement());
+    dragger->setRotationIncrement(prf::manager().rootPtr->dragger().angularIncrement());
+  }
+    
+  if (commandIn.getStage() == osgManipulator::MotionCommand::MOVE)
+  {
+    if (tCommand)
+    {
+      osg::Vec3d tVec = tCommand->getTranslation() * tCommand->getLocalToWorld();
+      double diff = (tVec-originStart).length();
+      if (std::fabs(diff - lastTranslation) < std::numeric_limits<double>::epsilon())
+	return out;
+      lastTranslation = diff;
+      stream << QObject::tr("Translation Increment: ").toUtf8().data() << std::setprecision(3) << std::fixed <<
+	prf::manager().rootPtr->dragger().linearIncrement() << std::endl <<
+        QObject::tr("Translation: ").toUtf8().data() << std::setprecision(3) << std::fixed << diff;
+    }
+    if (rCommand)
+    {
+      double w = rCommand->getRotation().asVec4().w();
+      int angle = static_cast<int>(std::round(osg::RadiansToDegrees(2.0 * std::acos(w))));
+      if (angle == lastRotation)
+	return out;
+      lastRotation = angle;
+      stream << QObject::tr("Rotation Increment: ").toUtf8().data() << 
+	static_cast<int>(prf::manager().rootPtr->dragger().angularIncrement()) <<
+	std::endl << QObject::tr("Rotation: ").toUtf8().data() << angle;
+    }
+  }
+  
+  //not doing anything for finish.
+//   if (commandIn.getStage() == osgManipulator::MotionCommand::FINISH)
+//   {
+//     if (lastTranslation != 0.0 || lastRotation != 0.0)
+//     {
+//     }
+//   }
+  
+
+  msg::Message messageOut;
+  messageOut.mask = msg::Request | msg::StatusText;
+  vwr::Message vMessageOut;
+  vMessageOut.text = stream.str();
+  messageOut.payload = vMessageOut;
+  messageOutSignal(messageOut);
+  
+  return out;
+}

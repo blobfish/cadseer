@@ -21,6 +21,10 @@
 
 #include <osg/Geometry> //need this for containers.
 
+#include <command/featuretosystem.h>
+#include <command/systemtofeature.h>
+#include <command/featuretodragger.h>
+#include <command/draggertofeature.h>
 #include <message/dispatch.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
@@ -28,6 +32,12 @@
 #include <command/manager.h>
 
 using namespace cmd;
+
+Manager& cmd::manager()
+{
+  static Manager localManager;
+  return localManager;
+}
 
 Manager::Manager()
 {
@@ -55,6 +65,18 @@ void Manager::setupDispatcher()
   
   mask = msg::Request | msg::Command | msg::Done;
   dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::doneCommandDispatched, this, _1)));
+  
+  mask = msg::Request | msg::FeatureToSystem;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::featureToSystemDispatched, this, _1)));
+  
+  mask = msg::Request | msg::SystemToFeature;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::systemToFeatureDispatched, this, _1)));
+  
+  mask = msg::Request | msg::FeatureToDragger;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::featureToDraggerDispatched, this, _1)));
+  
+  mask = msg::Request | msg::DraggerToFeature;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::draggerToFeatureDispatched, this, _1)));
 }
 
 void Manager::cancelCommandDispatched(const msg::Message &)
@@ -72,14 +94,13 @@ void Manager::doneCommandDispatched(const msg::Message&)
 
 void Manager::addCommand(BasePtr pointerIn)
 {
+  //preselection will only work if the command stack is empty.
   if (!stack.empty())
+  {
     stack.top()->deactivate();
+    clearSelection();
+  }
   stack.push(pointerIn);
-  
-  msg::Message clearMessage;
-  clearMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  messageOutSignal(clearMessage);
-  
   activateTop();
 }
 
@@ -89,11 +110,7 @@ void Manager::doneSlot()
   if (!stack.empty())
     stack.top()->deactivate();
   stack.pop();
-  
-  msg::Message clearMessage;
-  clearMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  messageOutSignal(clearMessage);
-  
+  clearSelection();
   sendStatusMessage("");
   
   if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
@@ -142,8 +159,33 @@ void Manager::sendCommandMessage(const std::string& messageIn)
   messageOutSignal(statusMessage);
 }
 
-Manager& cmd::manager()
+void Manager::clearSelection()
 {
-  static Manager localManager;
-  return localManager;
+  msg::Message clearMessage;
+  clearMessage.mask = msg::Request | msg::Selection | msg::Clear;
+  messageOutSignal(clearMessage);
+}
+
+void Manager::featureToSystemDispatched(const msg::Message&)
+{
+  std::shared_ptr<cmd::FeatureToSystem> featureToSystem(new cmd::FeatureToSystem());
+  cmd::manager().addCommand(featureToSystem);
+}
+
+void Manager::systemToFeatureDispatched(const msg::Message&)
+{
+  std::shared_ptr<cmd::SystemToFeature> systemToFeature(new cmd::SystemToFeature());
+  cmd::manager().addCommand(systemToFeature);
+}
+
+void Manager::draggerToFeatureDispatched(const msg::Message&)
+{
+  std::shared_ptr<cmd::DraggerToFeature> draggerToFeature(new cmd::DraggerToFeature());
+  cmd::manager().addCommand(draggerToFeature);
+}
+
+void Manager::featureToDraggerDispatched(const msg::Message&)
+{
+  std::shared_ptr<cmd::FeatureToDragger> featureToDragger(new cmd::FeatureToDragger());
+  cmd::manager().addCommand(featureToDragger);
 }

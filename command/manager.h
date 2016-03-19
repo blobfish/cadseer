@@ -54,8 +54,14 @@ namespace cmd
     void sendStatusMessage(const std::string &messageIn);
     void sendCommandMessage(const std::string &messageIn);
     
+    void clearSelection();
+    
     std::stack<BasePtr> stack;
     
+    void featureToSystemDispatched(const msg::Message &);
+    void systemToFeatureDispatched(const msg::Message &);
+    void featureToDraggerDispatched(const msg::Message &);
+    void draggerToFeatureDispatched(const msg::Message &);
   };
   
   Manager& manager();

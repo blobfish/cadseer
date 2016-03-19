@@ -151,9 +151,12 @@ void CSysEdit::analyzeSelections()
     csysDragger->updateMatrix(freshMatrix);
     
     boost::uuids::uuid id = gu::getId(csysDragger);
-    ftr::CSysBase *feature = dynamic_cast<ftr::CSysBase*>(project->findFeature(id));
-    assert(feature);
-    feature->setModelDirty();
+    if (!id.is_nil())
+    {
+      ftr::CSysBase *feature = dynamic_cast<ftr::CSysBase*>(project->findFeature(id));
+      assert(feature);
+      feature->setModelDirty();
+    }
       
     sendDone();
     return;
@@ -239,9 +242,12 @@ void CSysEdit::updateToVector(const osg::Vec3d& toVector)
   
   
   boost::uuids::uuid id = gu::getId(csysDragger);
-  ftr::CSysBase *feature = dynamic_cast<ftr::CSysBase*>(project->findFeature(id));
-  assert(feature);
-  feature->setModelDirty();
+  if (!id.is_nil())
+  {
+    ftr::CSysBase *feature = dynamic_cast<ftr::CSysBase*>(project->findFeature(id));
+    assert(feature);
+    feature->setModelDirty();
+  }
 }
 
 void CSysEdit::activate()

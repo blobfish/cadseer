@@ -35,6 +35,7 @@
 #include <preferences/manager.h>
 #include <message/dispatch.h>
 #include <application/factory.h>
+#include <command/manager.h>
 #include <project/projectdialog.h>
 
 #include <spnav.h>
@@ -54,6 +55,8 @@ Application::Application(int &argc, char **argv) :
     
     std::unique_ptr<Factory> tempFactory(new Factory());
     factory = std::move(tempFactory);
+    
+    cmd::manager(); //just to construct the singleton and get it ready for messages.
     
     //some day pass the preferences file from user home directory to the manager constructor.
     prf::Manager &manager = prf::manager(); //this should cause preferences file to be read.

@@ -24,6 +24,7 @@
 #include <QTimer>
 #include <osgViewer/CompositeViewer>
 #ifndef Q_MOC_RUN
+#include <library/csysdragger.h>
 #include <selection/eventhandler.h>
 #include <selection/overlayhandler.h>
 #include <viewer/spaceballmanipulator.h>
@@ -45,6 +46,8 @@ public:
     slc::EventHandler* getSelectionEventHandler(){return selectionHandler.get();}
     const slc::Containers& getSelections() const {return selectionHandler->getSelections();}
     void clearSelections() const {selectionHandler->clearSelections();}
+    const osg::Matrixd& getCurrentSystem() const {return currentSystem->getMatrix();}
+    void setCurrentSystem(const osg::Matrixd &mIn){currentSystem->setMatrix(mIn);}
     
     //new messaging system
     void messageInSlot(const msg::Message &);
@@ -67,6 +70,9 @@ protected:
     osg::ref_ptr<slc::EventHandler> selectionHandler;
     osg::ref_ptr<slc::OverlayHandler> overlayHandler;
     osg::ref_ptr<osgGA::SpaceballManipulator> spaceballManipulator;
+    osg::ref_ptr<osg::Switch> systemSwitch;
+    osg::ref_ptr<lbr::CSysDragger> currentSystem;
+    osg::ref_ptr<lbr::CSysCallBack> currentSystemCallBack;
     int glWidgetWidth;
     int glWidgetHeight;
     osgQt::GraphicsWindowQt *windowQt;
@@ -84,6 +90,8 @@ protected:
     void viewLineDispatched(const msg::Message &);
     void exportOSGDispatched(const msg::Message &);
     void closeProjectDispatched(const msg::Message &);
+    void systemResetDispatched(const msg::Message &);
+    void systemToggleDispatched(const msg::Message &);
 };
 
 class VisibleVisitor : public osg::NodeVisitor

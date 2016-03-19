@@ -105,18 +105,23 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     oCamera->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
     msg::dispatch().connectMessageOut(boost::bind(&OverlayCamera::messageInSlot, oCamera, _1));
     
-    lbr::CSysDragger *origin = new lbr::CSysDragger();
-    origin->setScreenScale(100.0f);
-    origin->setRotationIncrement(15.0);
-    origin->setTranslationIncrement(0.25);
-    origin->setHandleEvents(false);
-    origin->setupDefaultGeometry();
-    origin->setUnlink();
-    origin->hide(lbr::CSysDragger::SwitchIndexes::XRotate);
-    origin->hide(lbr::CSysDragger::SwitchIndexes::YRotate);
-    origin->hide(lbr::CSysDragger::SwitchIndexes::ZRotate);
-    origin->hide(lbr::CSysDragger::SwitchIndexes::LinkIcon);
-    oCamera->addChild(origin);
+    systemSwitch = new osg::Switch();
+    oCamera->addChild(systemSwitch);
+    
+    currentSystem = new lbr::CSysDragger();
+    currentSystem->setScreenScale(100.0f);
+    currentSystem->setRotationIncrement(15.0);
+    currentSystem->setTranslationIncrement(0.25);
+    currentSystem->setHandleEvents(false);
+    currentSystem->setupDefaultGeometry();
+    currentSystem->setUnlink();
+//     currentSystem->hide(lbr::CSysDragger::SwitchIndexes::XRotate);
+//     currentSystem->hide(lbr::CSysDragger::SwitchIndexes::YRotate);
+//     currentSystem->hide(lbr::CSysDragger::SwitchIndexes::ZRotate);
+    currentSystem->hide(lbr::CSysDragger::SwitchIndexes::LinkIcon);
+    currentSystemCallBack = new lbr::CSysCallBack(currentSystem.get());
+    currentSystem->addDraggerCallback(currentSystemCallBack.get());
+    systemSwitch->addChild(currentSystem);
 
     view->setSceneData(root);
     view->addEventHandler(new osgViewer::StatsHandler);
@@ -394,6 +399,12 @@ void ViewerWidget::setupDispatcher()
   
   mask = msg::Response | msg::Pre | msg::CloseProject;;
   dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::closeProjectDispatched, this, _1)));
+  
+  mask = msg::Request | msg::SystemReset;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::systemResetDispatched, this, _1)));
+  
+  mask = msg::Request | msg::SystemToggle;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::systemToggleDispatched, this, _1)));
 }
 
 void ViewerWidget::messageInSlot(const msg::Message &messageIn)
@@ -434,6 +445,19 @@ void ViewerWidget::closeProjectDispatched(const msg::Message&)
 {
   //don't need to keep any children of the viewer.
   root->removeChildren(0, root->getNumChildren());
+}
+
+void ViewerWidget::systemResetDispatched(const msg::Message&)
+{
+  currentSystem->setMatrix(osg::Matrixd::identity());
+}
+
+void ViewerWidget::systemToggleDispatched(const msg::Message&)
+{
+  if (systemSwitch->getValue(0))
+    systemSwitch->setAllChildrenOff();
+  else
+    systemSwitch->setAllChildrenOn();
 }
 
 VisibleVisitor::VisibleVisitor(bool visIn) : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), visibility(visIn)

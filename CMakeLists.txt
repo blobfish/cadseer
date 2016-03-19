@@ -149,6 +149,10 @@ SET(COMMAND_SOURCES
     command/manager.cpp
     command/base.cpp
     command/csysedit.cpp
+    command/featuretosystem.cpp
+    command/systemtofeature.cpp
+    command/featuretodragger.cpp
+    command/draggertofeature.cpp
     )
     
 SET(LIBRARY_SOURCES

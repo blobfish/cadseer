@@ -33,6 +33,7 @@
 #include <project/project.h>
 #include <application/application.h>
 #include <application/mainwindow.h>
+#include <viewer/viewerwidget.h>
 #include <preferences/dialog.h>
 #include <application/factory.h>
 #include <preferences/manager.h>
@@ -191,6 +192,7 @@ void Factory::selectionSubtractionDispatched(const msg::Message &messageIn)
   aContainer.selectionType = sMessage.type;
   aContainer.featureId = sMessage.featureId;
   aContainer.shapeId = sMessage.shapeId;
+  aContainer.pointLocation = sMessage.pointLocation;
   
   slc::Containers::iterator it = std::find(containers.begin(), containers.end(), aContainer);
   assert(it != containers.end());
@@ -205,10 +207,12 @@ void Factory::newBoxDispatched(const msg::Message &)
   
   assert(project);
   
+  app::Application *application = dynamic_cast<app::Application *>(qApp);
+  assert(application);
+  const osg::Matrixd &currentSystem = application->getMainWindow()->getViewer()->getCurrentSystem();
+  
   std::shared_ptr<ftr::Box> boxPtr(new ftr::Box());
-  gp_Ax2 location;
-  location.SetLocation(gp_Pnt(1.0, 1.0, 1.0));
-  boxPtr->setSystem(location);
+  boxPtr->setSystem(currentSystem);
   boxPtr->updateDragger();
   boxPtr->setParameters(20.0, 10.0, 2.0);
   project->addFeature(boxPtr);
@@ -224,12 +228,14 @@ void Factory::newCylinderDispatched(const msg::Message &)
   
   assert(project);
   
+  app::Application *application = dynamic_cast<app::Application *>(qApp);
+  assert(application);
+  const osg::Matrixd &currentSystem = application->getMainWindow()->getViewer()->getCurrentSystem();
+  
   std::shared_ptr<ftr::Cylinder> cylinder(new ftr::Cylinder());
   cylinder->setRadius(2.0);
   cylinder->setHeight(8.0);
-  gp_Ax2 location;
-  location.SetLocation(gp_Pnt(16.0, 6.0, 2.5));
-  cylinder->setSystem(location);
+  cylinder->setSystem(currentSystem);
   cylinder->updateDragger();
   project->addFeature(cylinder);
   
@@ -244,11 +250,13 @@ void Factory::newSphereDispatched(const msg::Message&)
   
   assert(project);
   
+  app::Application *application = dynamic_cast<app::Application *>(qApp);
+  assert(application);
+  const osg::Matrixd &currentSystem = application->getMainWindow()->getViewer()->getCurrentSystem();
+  
   std::shared_ptr<ftr::Sphere> sphere(new ftr::Sphere());
   sphere->setRadius(4.0);
-  gp_Ax2 location;
-  location.SetLocation(gp_Pnt(11.0, 6.0, -1.5));
-  sphere->setSystem(location);
+  sphere->setSystem(currentSystem);
   sphere->updateDragger();
   project->addFeature(sphere);
   
@@ -263,13 +271,15 @@ void Factory::newConeDispatched(const msg::Message&)
   
   assert(project);
   
+  app::Application *application = dynamic_cast<app::Application *>(qApp);
+  assert(application);
+  const osg::Matrixd &currentSystem = application->getMainWindow()->getViewer()->getCurrentSystem();
+  
   std::shared_ptr<ftr::Cone> cone(new ftr::Cone());
   cone->setRadius1(2.0);
   cone->setRadius2(0.5);
   cone->setHeight(8.0);
-  gp_Ax2 location;
-  location.SetLocation(gp_Pnt(6.0, 6.0, 2.5));
-  cone->setSystem(location);
+  cone->setSystem(currentSystem);
   cone->updateDragger();
   project->addFeature(cone);
   

@@ -375,6 +375,26 @@ void GestureHandler::constructMenu()
     editForceUpdate->setUserValue(attributeTitle, (msg::Request | msg::ForceUpdate).to_string());
     editBase->insertChild(editBase->getNumChildren() - 2, editForceUpdate);
     
+    osg::MatrixTransform *editSystemBase;
+    editSystemBase = gsn::buildMenuNode(":/resources/images/systemBase.svg");
+    editSystemBase->setMatrix(dummy);
+    editBase->insertChild(editBase->getNumChildren() - 2, editSystemBase);
+    
+    osg::MatrixTransform *featureToSystem = gsn::buildCommandNode(":/resources/images/featureToSystem.svg");
+    featureToSystem->setMatrix(dummy);
+    featureToSystem->setUserValue(attributeTitle, (msg::Request | msg::FeatureToSystem).to_string());
+    editSystemBase->insertChild(editSystemBase->getNumChildren() - 2, featureToSystem);
+    
+    osg::MatrixTransform *editFeatureToDragger = gsn::buildCommandNode(":/resources/images/editFeatureToDragger.svg");
+    editFeatureToDragger->setMatrix(dummy);
+    editFeatureToDragger->setUserValue(attributeTitle, (msg::Request | msg::FeatureToDragger).to_string());
+    editSystemBase->insertChild(editSystemBase->getNumChildren() - 2, editFeatureToDragger);
+    
+    osg::MatrixTransform *editDraggerToFeature = gsn::buildCommandNode(":/resources/images/editDraggerToFeature.svg");
+    editDraggerToFeature->setMatrix(dummy);
+    editDraggerToFeature->setUserValue(attributeTitle, (msg::Request | msg::DraggerToFeature).to_string());
+    editSystemBase->insertChild(editSystemBase->getNumChildren() - 2, editDraggerToFeature);
+    
     //file base
     osg::MatrixTransform *fileBase;
     fileBase = gsn::buildMenuNode(":/resources/images/fileBase.svg");
@@ -421,6 +441,27 @@ void GestureHandler::constructMenu()
     preferences->setMatrix(dummy);
     preferences->setUserValue(attributeTitle, (msg::Request | msg::Preferences).to_string());
     fileBase->insertChild(fileBase->getNumChildren() - 2, preferences);
+    
+    //system base
+    osg::MatrixTransform *systemBase;
+    systemBase = gsn::buildMenuNode(":/resources/images/systemBase.svg");
+    systemBase->setMatrix(dummy);
+    startNode->insertChild(startNode->getNumChildren() - 2, systemBase);
+    
+    osg::MatrixTransform *systemReset = gsn::buildCommandNode(":/resources/images/systemReset.svg");
+    systemReset->setMatrix(dummy);
+    systemReset->setUserValue(attributeTitle, (msg::Request | msg::SystemReset).to_string());
+    systemBase->insertChild(systemBase->getNumChildren() - 2, systemReset);
+    
+    osg::MatrixTransform *systemToggle = gsn::buildCommandNode(":/resources/images/systemToggle.svg");
+    systemToggle->setMatrix(dummy);
+    systemToggle->setUserValue(attributeTitle, (msg::Request | msg::SystemToggle).to_string());
+    systemBase->insertChild(systemBase->getNumChildren() - 2, systemToggle);
+    
+    osg::MatrixTransform *systemToFeature = gsn::buildCommandNode(":/resources/images/systemToFeature.svg");
+    systemToFeature->setMatrix(dummy);
+    systemToFeature->setUserValue(attributeTitle, (msg::Request | msg::SystemToFeature).to_string());
+    systemBase->insertChild(systemBase->getNumChildren() - 2, systemToFeature);
 }
 
 std::vector<osg::Vec3> GestureHandler::buildNodeLocations(osg::Vec3 direction, int nodeCount)
