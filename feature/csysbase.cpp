@@ -197,6 +197,7 @@ prj::srl::FeatureCSysBase CSysBase::serialOut()
 void CSysBase::serialIn(const prj::srl::FeatureCSysBase& sCSysBaseIn)
 {
   Base::serialIn(sCSysBaseIn.featureBase());
+  dragger->setUserValue(gu::idAttributeTitle, boost::uuids::to_string(id));
   
   const prj::srl::CSys &s = sCSysBaseIn.csys();
   osg::Matrixd m;
