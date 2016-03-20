@@ -143,6 +143,7 @@ SET(APPLICATION_SOURCES
     application/application.cpp
     application/factory.cpp
     application/message.cpp
+    application/incrementwidget.cpp
     )
     
 SET(COMMAND_SOURCES

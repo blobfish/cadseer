@@ -581,6 +581,10 @@ void Factory::preferencesDispatched(const msg::Message&)
     project->setAllVisualDirty();
     project->updateVisual();
   }
+  
+  msg::Message prfResponse;
+  prfResponse.mask = msg::Response | msg::Preferences;
+  messageOutSignal(prfResponse);
 }
 
 void Factory::removeDispatched(const msg::Message&)

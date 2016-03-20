@@ -21,7 +21,13 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+
 #include <osg/Node>
+
+#ifndef Q_MOC_RUN
+#include <boost/signals2.hpp>
+#include <message/message.h>
+#endif
 
 class ViewerWidget;
 namespace slc{class Manager;}
@@ -37,6 +43,7 @@ class TopoDS_Shape;
 
 namespace app
 {
+class IncrementWidgetAction;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -46,6 +53,13 @@ public:
     ~MainWindow();
     ViewerWidget* getViewer(){return viewWidget;}
     slc::Manager* getSelectionManager(){return selectionManager;}
+    
+    void messageInSlot(const msg::Message &);
+    typedef boost::signals2::signal<void (const msg::Message &)> MessageOutSignal;
+    boost::signals2::connection connectMessageOut(const MessageOutSignal::slot_type &subscriber)
+    {
+      return messageOutSignal.connect(subscriber);
+    }
 
 private:
     void setupSelectionToolbar();
@@ -54,6 +68,15 @@ private:
     dag::Model *dagModel;
     dag::View *dagView;
     slc::Manager *selectionManager;
+    IncrementWidgetAction *incrementWidget;
+    
+    MessageOutSignal messageOutSignal;
+    msg::MessageDispatcher dispatcher;
+    void setupDispatcher();
+    void preferencesChanged(const msg::Message&);
+    
+private Q_SLOTS:
+    void incrementChangedSlot();
 };
 }
 

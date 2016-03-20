@@ -26,23 +26,18 @@
 #include <QSplitter>
 #include <QDir>
 
-#include <application/mainwindow.h>
+#include <message/dispatch.h>
 #include <dagview/dagmodel.h>
 #include <dagview/dagview.h>
 #include <application/application.h>
-#include <ui_mainwindow.h>
 #include <viewer/viewerwidget.h>
 #include <selection/manager.h>
-#include <project/project.h>
-#include <feature/box.h>
-#include <feature/sphere.h>
-#include <feature/cone.h>
-#include <feature/cylinder.h>
-#include <feature/blend.h>
-#include <feature/union.h>
-#include <dialogs/boxdialog.h>
-#include <preferences/dialog.h>
 #include <message/dispatch.h>
+#include <application/incrementwidget.h>
+#include <preferences/preferencesXML.h>
+#include <preferences/manager.h>
+#include <ui_mainwindow.h>
+#include <application/mainwindow.h>
 
 using boost::uuids::uuid;
 using namespace app;
@@ -92,6 +87,19 @@ MainWindow::MainWindow(QWidget *parent) :
       ~slc::NearestPointsSelectable &
       ~slc::ScreenPointsSelectable
     );
+    
+    //add increment widgets to toolbar.
+    ui->toolBar->setContentsMargins(0, 0, 0, 0);
+    ui->toolBar->addSeparator();
+    incrementWidget = new IncrementWidgetAction
+      (this, tr("Translation Increment:"), tr("Rotation Increment:"));
+    ui->toolBar->addAction(incrementWidget);
+    incrementWidget->lineEdit1->setText(QString::number(prf::manager().rootPtr->dragger().linearIncrement(), 'f', 12));
+    incrementWidget->lineEdit2->setText(QString::number(prf::manager().rootPtr->dragger().angularIncrement(), 'f', 12));
+    incrementWidget->lineEdit1->setCursorPosition(0);
+    incrementWidget->lineEdit2->setCursorPosition(0);
+    connect(incrementWidget->lineEdit1, SIGNAL(editingFinished()), this, SLOT(incrementChangedSlot()));
+    connect(incrementWidget->lineEdit2, SIGNAL(editingFinished()), this, SLOT(incrementChangedSlot()));
 
     //new message system.
     dagModel->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
@@ -102,6 +110,10 @@ MainWindow::MainWindow(QWidget *parent) :
 						  viewWidget->getSelectionEventHandler(), _1));
     viewWidget->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
     msg::dispatch().connectMessageOut(boost::bind(&ViewerWidget::messageInSlot, viewWidget, _1));
+    
+    setupDispatcher();
+    this->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
+    msg::dispatch().connectMessageOut(boost::bind(&MainWindow::messageInSlot, this, _1));
 }
 
 MainWindow::~MainWindow()
@@ -142,60 +154,49 @@ void MainWindow::setupSelectionToolbar()
     connect(ui->actionSelectScreenPoints, SIGNAL(triggered(bool)), selectionManager, SLOT(triggeredScreenPoints(bool)));
 }
 
-// void MainWindow::constructionBoxSlot()
-// {
-//     app::Application *application = dynamic_cast<app::Application *>(qApp);
-//     assert(application);
-//     prj::Project *project = application->getProject();
-//     
-//     ftr::Box *box = nullptr;
-//     const slc::Containers &selections = viewWidget->getSelections();
-//     //find first box.
-//     for (const auto &currentSelection : selections)
-//     {
-//       ftr::Base *feature = project->findFeature(currentSelection.featureId);
-//       assert(feature);
-//       if (feature->getType() != ftr::Type::Box)
-//         continue;
-//       
-//       box = dynamic_cast<ftr::Box*>(feature);
-//       assert(box);
-//       break;
-//     }
-//     
-//     viewWidget->clearSelections();
-//     
-//     BoxDialog dialog;
-//     dialog.setModal(true);
-//     if (box)
-//     {
-//       //editing.
-//       dialog.setParameters(box->getLength(), box->getWidth(), box->getHeight());
-//       if (!dialog.exec())
-//         return;
-//     }
-//     else
-//     {
-//       //constructing.
-//       dialog.setParameters(20.0, 10.0, 2.0);
-//       
-//       if (!dialog.exec())
-//         return;
-//       
-//       std::shared_ptr<ftr::Box> boxPtr(new ftr::Box());
-//       box = boxPtr.get();
-//       gp_Ax2 location;
-//       location.SetLocation(gp_Pnt(1.0, 1.0, 1.0));
-//       boxPtr->setSystem(location);
-//       project->addFeature(boxPtr);
-//     }
-//     
-//     box->setParameters
-//     (
-//       dialog.lengthEdit->text().toDouble(),
-//       dialog.widthEdit->text().toDouble(),
-//       dialog.heightEdit->text().toDouble()
-//     );
-//     project->updateModel();
-//     project->updateVisual();
-// }
+void MainWindow::incrementChangedSlot()
+{
+  double temp;
+  
+  temp = incrementWidget->lineEdit1->text().toDouble();
+  if (temp != 0.0)
+    prf::manager().rootPtr->dragger().linearIncrement() = temp;
+  else
+    incrementWidget->lineEdit1->setText(QString::number(prf::manager().rootPtr->dragger().linearIncrement(), 'f', 12));
+  
+  temp = incrementWidget->lineEdit2->text().toDouble();
+  if (temp != 0.0)
+    prf::manager().rootPtr->dragger().angularIncrement() = temp;
+  else
+    incrementWidget->lineEdit2->setText(QString::number(prf::manager().rootPtr->dragger().angularIncrement(), 'f', 12));
+  
+  incrementWidget->lineEdit1->setCursorPosition(0);
+  incrementWidget->lineEdit2->setCursorPosition(0);
+  
+  prf::manager().saveConfig();
+}
+
+void MainWindow::setupDispatcher()
+{
+  msg::Mask mask;
+  
+  mask = msg::Response | msg::Preferences;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&MainWindow::preferencesChanged, this, _1)));
+}
+
+void MainWindow::messageInSlot(const msg::Message &messageIn)
+{
+  msg::MessageDispatcher::iterator it = dispatcher.find(messageIn.mask);
+  if (it == dispatcher.end())
+    return;
+  
+  it->second(messageIn);
+}
+
+void MainWindow::preferencesChanged(const msg::Message&)
+{
+  incrementWidget->lineEdit1->setText(QString::number(prf::manager().rootPtr->dragger().linearIncrement(), 'f', 12));
+  incrementWidget->lineEdit2->setText(QString::number(prf::manager().rootPtr->dragger().angularIncrement(), 'f', 12));
+  incrementWidget->lineEdit1->setCursorPosition(0);
+  incrementWidget->lineEdit2->setCursorPosition(0);
+}
