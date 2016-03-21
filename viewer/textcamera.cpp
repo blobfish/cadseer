@@ -147,7 +147,7 @@ TextCamera::TextCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
   statusLabel->setCharacterSize(qApp->font().pointSizeF()); //this is 9.0 here.
   statusLabel->setPosition(pos);
   statusLabel->setAlignment(osgText::TextBase::LEFT_TOP);
-  statusLabel->setText("Status");
+  statusLabel->setText("Status: ");
   infoSwitch->addChild(statusLabel.get());
   
   commandLabel = new osgText::Text();
@@ -254,7 +254,10 @@ void TextCamera::statusTextDispatched(const msg::Message &messageIn)
   msg::dispatch().dumpString(debug.str());
   
   vwr::Message sMessage = boost::get<vwr::Message>(messageIn.payload);
-  statusLabel->setText(sMessage.text);
+  std::string display = "Status: ";
+  if (!sMessage.text.empty())
+    display = sMessage.text;
+  statusLabel->setText(display);
 }
 
 void TextCamera::updateSelectionLabel()
