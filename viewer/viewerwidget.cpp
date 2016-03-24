@@ -28,8 +28,6 @@
 #include <QFileDialog>
 
 #include <osgViewer/ViewerEventHandlers>
-#include <osgGA/TrackballManipulator>
-#include <osgGA/StandardManipulator>
 #include <osgGA/OrbitManipulator>
 #include <osgDB/ReadFile>
 #include <osgDB/WriteFile>
@@ -41,6 +39,7 @@
 #include <osg/BlendFunc>
 #include <osg/ValueObject>
 
+#include <viewer/spaceballmanipulator.h>
 #include <viewer/viewerwidget.h>
 #include <viewer/gleventwidget.h>
 #include <nodemaskdefs.h>
@@ -54,7 +53,7 @@
 #include <viewer/overlaycamera.h>
 #include <feature/base.h>
 
-ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel) : QWidget()
+ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel) : QWidget(), osgViewer::CompositeViewer()
 {
     setupDispatcher();
     
@@ -134,9 +133,8 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     //come into play for application. I have proven out that our qactions
     //between gesture camera a mainwindlow slots are synchronized.
     view->addEventHandler(new GestureHandler(gestureCamera));
-//    view->setCameraManipulator(new osgGA::TrackballManipulator);
     view->addEventHandler(new ResizeEventHandler(infoCamera));
-    spaceballManipulator = new osgGA::SpaceballManipulator(view->getCamera());
+    spaceballManipulator = new vwr::SpaceballManipulator(view->getCamera());
     view->setCameraManipulator(spaceballManipulator);
     
     addView(view);
@@ -146,6 +144,11 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     setLayout(layout);
 
     _timer.start( 10 );
+}
+
+ViewerWidget::~ViewerWidget() //for forward declarations.
+{
+
 }
 
 void dumpLookAt(const osg::Vec3d &eye, const osg::Vec3d &center, const osg::Vec3d &up)

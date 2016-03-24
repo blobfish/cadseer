@@ -96,6 +96,12 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
                     osgGA::GUIActionAdapter& actionAdapter, osg::Object*,
                                    osg::NodeVisitor*)
 {
+    if (eventAdapter.getModKeyMask() & osgGA::GUIEventAdapter::MODKEY_LEFT_CTRL)
+    {
+      clearPrehighlight();
+      return false;
+    }
+  
     if(eventAdapter.getHandled())
     {
       clearPrehighlight();

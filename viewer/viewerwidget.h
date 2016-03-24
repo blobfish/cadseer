@@ -22,24 +22,26 @@
 
 #include <QWidget>
 #include <QTimer>
+
+#include <osg/ref_ptr>
 #include <osgViewer/CompositeViewer>
+
 #ifndef Q_MOC_RUN
 #include <library/csysdragger.h>
 #include <selection/eventhandler.h>
 #include <selection/overlayhandler.h>
-#include <viewer/spaceballmanipulator.h>
 #endif
 
-namespace osgQt
-{
-class GraphicsWindowQt;
-}
+namespace osgQt{class GraphicsWindowQt;}
+namespace vwr{class SpaceballManipulator;}
 
 class ViewerWidget : public QWidget, public osgViewer::CompositeViewer
 {
     Q_OBJECT
 public:
     ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel=osgViewer::CompositeViewer::SingleThreaded);
+    virtual ~ViewerWidget() override;
+    
     virtual void paintEvent(QPaintEvent* event);
     void update();
     osg::Group* getRoot(){return root;}
@@ -69,7 +71,7 @@ protected:
     osg::ref_ptr<osg::Switch> infoSwitch;
     osg::ref_ptr<slc::EventHandler> selectionHandler;
     osg::ref_ptr<slc::OverlayHandler> overlayHandler;
-    osg::ref_ptr<osgGA::SpaceballManipulator> spaceballManipulator;
+    osg::ref_ptr<vwr::SpaceballManipulator> spaceballManipulator;
     osg::ref_ptr<osg::Switch> systemSwitch;
     osg::ref_ptr<lbr::CSysDragger> currentSystem;
     osg::ref_ptr<lbr::CSysCallBack> currentSystemCallBack;

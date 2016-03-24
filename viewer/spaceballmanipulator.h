@@ -17,36 +17,53 @@
  *
  */
 
-#ifndef SPACEBALLMANIPULATOR_H
-#define SPACEBALLMANIPULATOR_H
+#ifndef VWR_SPACEBALLMANIPULATOR_H
+#define VWR_SPACEBALLMANIPULATOR_H
 
-#include <osgGA/CameraManipulator>
+#include <bitset>
+
+#include <osgGA/StandardManipulator>
 
 namespace spb{class SpaceballOSGEvent;}
 
-namespace osgGA
+namespace vwr
 {
-class OSGGA_EXPORT SpaceballManipulator : public osgGA::CameraManipulator
+  
+typedef std::bitset<64> StateMask;
+//mouse support.
+static const StateMask ControlKey(StateMask().set(0));
+static const StateMask LeftButton(StateMask().set(1));
+static const StateMask MiddleButton(StateMask().set(2));
+static const StateMask RightButton(StateMask().set(3));
+
+static const StateMask Rotate(ControlKey | LeftButton);
+static const StateMask Pan(ControlKey | MiddleButton);
+
+class SpaceballManipulator : public osgGA::StandardManipulator
 {
-    typedef osgGA::CameraManipulator inherited;
+    typedef StandardManipulator inherited;
 public:
-    META_Object(osgGA::osgGA, SpaceballManipulator)
+    META_Object(osgGA, SpaceballManipulator)
     SpaceballManipulator(osg::Camera *camIn = 0);
     SpaceballManipulator(const SpaceballManipulator& manipIn,
                          const osg::CopyOp& copyOp = osg::CopyOp::SHALLOW_COPY);
-    virtual ~SpaceballManipulator(){}
-    virtual void setByMatrix(const osg::Matrixd& matrix);
-    virtual void setByInverseMatrix(const osg::Matrixd& matrix);
-    virtual osg::Matrixd getMatrix() const;
-    virtual osg::Matrixd getInverseMatrix() const;
-    virtual void setNode(osg::Node *);
-    virtual osg::Node* getNode(){return node.get();}
-    virtual const osg::Node* getNode() const {return node.get();}
-    virtual void computeHomePosition(const osg::Camera *camera, bool useBoundingBox);
-    virtual void home(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us);
-    virtual void home(double);
-    virtual bool handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &us);
-    virtual void init(const GUIEventAdapter &ea, GUIActionAdapter &us);
+    virtual ~SpaceballManipulator() override;
+    
+    virtual void setByMatrix(const osg::Matrixd& matrix) override;
+    virtual void setByInverseMatrix(const osg::Matrixd& matrix) override;
+    virtual osg::Matrixd getMatrix() const override;
+    virtual osg::Matrixd getInverseMatrix() const override;
+    
+    virtual void setTransformation(const osg::Vec3d&, const osg::Quat&) override;
+    virtual void setTransformation(const osg::Vec3d&, const osg::Vec3d&, const osg::Vec3d&) override;
+    virtual void getTransformation(osg::Vec3d&, osg::Quat&) const override;
+    virtual void getTransformation(osg::Vec3d&, osg::Vec3d&, osg::Vec3d&) const override;
+    
+    virtual void computeHomePosition(const osg::Camera *camera, bool useBoundingBox) override;
+    virtual void home(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us) override;
+    virtual void home(double) override;
+    virtual bool handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &us) override;
+    virtual void init(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &us) override;
 
     void dump();
     void setView(osg::Vec3d lookDirection, osg::Vec3d upDirection);
@@ -64,7 +81,6 @@ protected:
     void scaleView(double scaleFactor);//used for ortho zoom.
     void scaleFit();
     osg::Vec3d projectToBound(const osg::Vec3d &eye, osg::Vec3d lookCenter) const;
-    osg::ref_ptr<osg::Node> node;
     osg::BoundingSphere boundingSphere;
     osg::BoundingSphere camSphere;
     osg::ref_ptr<osg::Camera> cam;
@@ -76,6 +92,8 @@ protected:
     {
         double fovy, aspectRatio, left, right, top, bottom, near, far;
         bool isCamOrtho;
+	double width(){return (right - left);}
+	double height(){return (top - bottom);}
     };
     ProjectionData projectionData;
 
@@ -84,7 +102,12 @@ protected:
         osg::Vec3d x, y, z;
     };
     ViewData viewData;
+    
+    bool handleMouse(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &us);
+    bool windowToWorld(float xIn, float yIn, osg::Vec3d &startOut, osg::Vec3d &endOut) const;
+    StateMask currentStateMask;
+    osg::Vec2f lastScreenPoint;
 };
 }
 
-#endif // SPACEBALLMANIPULATOR_H
+#endif // VWR_SPACEBALLMANIPULATOR_H

@@ -18,6 +18,8 @@
  */
 
 #include <iostream>
+#include <cassert>
+#include <limits>
 
 #include <osg/ComputeBoundsVisitor>
 
@@ -25,7 +27,7 @@
 #include <viewer/spaceballosgevent.h>
 #include <viewer/spaceballmanipulator.h>
 
-using namespace osgGA;
+using namespace vwr;
 
 SpaceballManipulator::SpaceballManipulator(osg::Camera *camIn) : inherited(), boundingSphere(),
     cam(camIn), spaceEye(0.0, 0.0, 1.0), spaceCenter(0.0, 0.0, 0.0), spaceUp(0.0, 1.0, 0.0)
@@ -50,7 +52,12 @@ SpaceballManipulator::SpaceballManipulator
   spaceUp = manipIn.spaceUp;
 }
 
-void SpaceballManipulator::init(const GUIEventAdapter &, GUIActionAdapter &us)
+SpaceballManipulator::~SpaceballManipulator() //need here for forward declarations
+{
+
+}
+
+void SpaceballManipulator::init(const osgGA::GUIEventAdapter &, osgGA::GUIActionAdapter &us)
 {
     us.requestContinuousUpdate(false);
 }
@@ -80,17 +87,32 @@ osg::Matrixd SpaceballManipulator::getInverseMatrix() const
     return out;
 }
 
+void SpaceballManipulator::setTransformation(const osg::Vec3d&, const osg::Quat&)
+{
+  assert(0); //not used.
+}
+
+void SpaceballManipulator::setTransformation(const osg::Vec3d&, const osg::Vec3d&, const osg::Vec3d&)
+{
+  assert(0); //not used.
+}
+
+void SpaceballManipulator::getTransformation(osg::Vec3d&, osg::Quat&) const
+{
+  assert(0); //not used.
+}
+
+void SpaceballManipulator::getTransformation(osg::Vec3d&, osg::Vec3d&, osg::Vec3d&) const
+{
+  assert(0); //not used.
+}
+
 void SpaceballManipulator::dump()
 {
     std::cout << std::endl << "stats: " << std::endl <<
                  "   spaceEye: " << spaceEye.x() << "   " << spaceEye.y() << "   " << spaceEye.z() << std::endl <<
                  "   spaceCenter: " << spaceCenter.x() << "   " << spaceCenter.y() << "   " << spaceCenter.z() << std::endl <<
                  "   spaceUp: " << spaceUp.x() << "   " << spaceUp.y() << "   " << spaceUp.z() << std::endl;
-}
-
-void SpaceballManipulator::setNode(osg::Node *nodeIn)
-{
-    node = nodeIn;
 }
 
 void SpaceballManipulator::computeHomePosition(const osg::Camera *, bool useBoundingBox)
@@ -100,15 +122,15 @@ void SpaceballManipulator::computeHomePosition(const osg::Camera *, bool useBoun
       // (bounding box computes model center more precisely than bounding sphere)
       osg::ComputeBoundsVisitor cbVisitor;
       cbVisitor.setTraversalMask(~(NodeMaskDef::csys));
-      node->accept(cbVisitor);
+      _node->accept(cbVisitor);
       osg::BoundingBox &boundingBox = cbVisitor.getBoundingBox();
       if (boundingBox.valid())
         boundingSphere = osg::BoundingSphere(boundingBox);
       else
-        boundingSphere = node->getBound();
+        boundingSphere = _node->getBound();
     }
     else
-      boundingSphere = node->getBound();
+      boundingSphere = _node->getBound();
     
     //when there is nothing in scene getBound returns -1 and the view is screwy.
     if (boundingSphere.radius() < 0)
@@ -167,7 +189,7 @@ bool SpaceballManipulator::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIAc
     if (ea.getEventType() == osgGA::GUIEventAdapter::USER)
     {
         const spb::SpaceballOSGEvent *event = static_cast<const spb::SpaceballOSGEvent *>(ea.getUserData());
-        if (!event || !cam || !node.get())
+        if (!event || !cam || !_node.get())
         {
             std::cout << "error in spaceball event" << std::endl;
             return true;
@@ -181,7 +203,188 @@ bool SpaceballManipulator::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIAc
         us.requestRedraw();
         return true;
     }
-    return inherited::handle(ea, us);
+    
+    if (handleMouse(ea, us))
+      return true;
+    else
+      return inherited::handle(ea, us);
+}
+
+bool SpaceballManipulator::handleMouse(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter &aa)
+{
+  using namespace osgGA;
+  typedef GUIEventAdapter EA;
+  
+  //control key is going to have to be down before dragging occurs.
+  //if a drag followed by the control key won't work.
+  if (ea.getKey() & EA::KEY_Control_L)
+  {
+    if (ea.getEventType() == EA::KEYDOWN)
+    {
+      currentStateMask = ControlKey; //this resets the state.
+      return true;
+    }
+    if (ea.getEventType() == EA::KEYUP)
+    {
+      currentStateMask.reset();
+      return true;
+    }
+  }
+  
+  //nothing works unless the control is down.
+  if ((currentStateMask & ControlKey).none())
+    return false;
+  
+  //left button
+  static double rotationFactor = 0.0;
+  if (ea.getButton() == EA::LEFT_MOUSE_BUTTON)
+  {
+    if (ea.getEventType() == EA::PUSH)
+    {
+      currentStateMask |= LeftButton;
+      lastScreenPoint = osg::Vec2f(ea.getX(), ea.getY());
+      //setup rotation factor.
+      //min of width and height of viewport make 1 complete rotation
+      getProjectionData();
+      rotationFactor = std::min(projectionData.width(), projectionData.height()) / (2.0 * osg::PI);
+      
+      return true;
+    }
+    if (ea.getEventType() == EA::RELEASE)
+    {
+      currentStateMask &= ~LeftButton;
+      return true;
+    }
+  }
+  
+  //middle button
+  if (ea.getButton() == EA::MIDDLE_MOUSE_BUTTON)
+  {
+    if (ea.getEventType() == EA::PUSH)
+    {
+      currentStateMask |= MiddleButton;
+      lastScreenPoint = osg::Vec2f(ea.getX(), ea.getY());
+      return true;
+    }
+    if (ea.getEventType() == EA::RELEASE)
+    {
+      currentStateMask &= ~MiddleButton;
+      return true;
+    }
+  }
+  
+  //scroll wheel
+  if (ea.getEventType() == EA::SCROLL)
+  {
+    if
+    (
+      (ea.getScrollingMotion() != EA::SCROLL_DOWN)
+      && (ea.getScrollingMotion() != EA::SCROLL_UP)
+    )
+      return false;
+      
+    getProjectionData();
+    
+    static const double scrollFactor = 0.05;
+    double directionFactor = 1.0; //assume scroll down.
+    
+    //establish 2 screen points. 1 will be viewport center and the other
+    //will be the current cursor position. These points will be transformed
+    //into world coordinates. The cursor position will be on the front clipping
+    //plane for ortho views and be on the back clipping plane for perspective.
+    //The camera will be shifted along a line constructed from both points.
+    //implemented with perspective in mind but no testing has been done.
+    osg::Vec3d worldPoint1, dummy1;
+    windowToWorld(cam->getViewport()->width() / 2.0, cam->getViewport()->height() / 2.0, worldPoint1, dummy1);
+    
+    osg::Vec3d worldPoint2Front, worldPoint2Back;
+    windowToWorld(ea.getX(), ea.getY(), worldPoint2Front, worldPoint2Back);
+    
+    osg::Vec3d worldPoint2 = worldPoint2Back; //assume perspective camera.
+    
+    if (ea.getScrollingMotion() == EA::SCROLL_UP)
+      directionFactor = -1.0;
+    
+    if (projectionData.isCamOrtho)
+    {
+      projectionData.left -= projectionData.left * scrollFactor * directionFactor;
+      projectionData.right -= projectionData.right * scrollFactor * directionFactor;
+      projectionData.top -= projectionData.top * scrollFactor * directionFactor;
+      projectionData.bottom -= projectionData.bottom * scrollFactor * directionFactor;
+      
+      cam->setProjectionMatrixAsOrtho(projectionData.left, projectionData.right, projectionData.bottom,
+				      projectionData.top, projectionData.near, projectionData.far);
+      worldPoint2 = worldPoint2Front;
+    }
+    
+    osg::Vec3d cLine = worldPoint2 - worldPoint1;
+    double mag = cLine.length() * scrollFactor; //5 percent along line.
+    cLine.normalize();
+    cLine *= mag * directionFactor;
+    spaceEye += cLine;
+    spaceCenter += cLine;
+    aa.requestRedraw();
+    return true;
+  }
+  
+  //dragging
+  if (ea.getEventType() == EA::DRAG)
+  {
+    if
+    (
+      (currentStateMask != Rotate)
+      && (currentStateMask != Pan)
+    )
+      return false;
+      
+    osg::Vec3d oldStart, oldEnd;
+    windowToWorld(lastScreenPoint.x(), lastScreenPoint.y(), oldStart, oldEnd);
+    osg::Vec3d newStart, newEnd;
+    windowToWorld(ea.getX(), ea.getY(), newStart, newEnd);
+    osg::Vec3d movement = oldStart - newStart;
+    double moveLength = movement.length();
+    if (moveLength < static_cast<double>(std::numeric_limits<float>::epsilon()))
+      return true;  
+    
+    if (currentStateMask == Rotate)
+    {
+      getViewData();
+      
+      //rotation axis will be normal to drag vector.
+      osg::Quat dragRotation(osg::PI_2, viewData.z);
+      osg::Vec3d axis = dragRotation * movement;
+      axis.normalize();
+      axis = -axis;
+      
+      osg::Quat viewRotation(moveLength / rotationFactor, axis);
+      spaceEye = viewRotation * spaceEye;
+      spaceUp = viewRotation * spaceUp;
+    }
+    
+    if (currentStateMask == Pan)
+    {
+      spaceEye += movement;
+      spaceCenter += movement;
+    }
+    
+    lastScreenPoint = osg::Vec2f(ea.getX(), ea.getY());
+    aa.requestRedraw();
+    return true;
+  }
+
+  return false;
+}
+
+bool SpaceballManipulator::windowToWorld(float xIn, float yIn, osg::Vec3d &startOut, osg::Vec3d &endOut) const
+{
+  //build matrix.
+  osg::Matrixd m = cam->getViewMatrix();
+  m.postMult(cam->getProjectionMatrix()); //shouldn't be necessary as working with only ortho.
+  m.postMult(cam->getViewport()->computeWindowMatrix());
+  osg::Matrixd i = osg::Matrixd::inverse(m);
+  startOut = osg::Vec3d(xIn, yIn, 0.0) * i;
+  endOut = osg::Vec3d(xIn, yIn, 1.0) * i;
+  return true;
 }
 
 void SpaceballManipulator::getProjectionData()
@@ -231,9 +434,7 @@ void SpaceballManipulator::goOrtho(const spb::SpaceballOSGEvent *event)
     rotationPoint = newCenter;
 
     //derive motion factor.
-    double width = projectionData.right - projectionData.left;
-    double height = projectionData.top - projectionData.bottom;
-    double gauge = std::min(width, height) / 512.0d;
+    double gauge = std::min(projectionData.width(), projectionData.height()) / 512.0d;
 
     double rotateFactor = .0002;
     osg::Quat rx, ry, rz;
@@ -268,12 +469,6 @@ void SpaceballManipulator::goOrtho(const spb::SpaceballOSGEvent *event)
     spaceEye = newEye;
     spaceCenter = newCenter;
     spaceUp = newUp;
-}
-
-void dumpVector(const osg::Vec3d &vector)
-{
-    std::cout << vector.x() << "         " << vector.y() << "          " << vector.z() << "           length: " << vector.length();
-
 }
 
 osg::Vec3d SpaceballManipulator::projectToBound(const osg::Vec3d &eye, osg::Vec3d lookCenter) const

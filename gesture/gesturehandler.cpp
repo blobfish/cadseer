@@ -62,6 +62,31 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
                             osgGA::GUIActionAdapter&, osg::Object *,
                             osg::NodeVisitor *)
 {
+    //lambda to clear status.
+    auto clearStatus = [&]()
+    {
+      //clear any status message
+      msg::Message statusClear;
+      statusClear.mask = msg::Request | msg::StatusText;
+      vwr::Message vMessageOut;
+      vMessageOut.text = std::string();
+      statusClear.payload = vMessageOut;
+      messageOutSignal(statusClear);
+    };
+    
+    if (eventAdapter.getModKeyMask() & osgGA::GUIEventAdapter::MODKEY_LEFT_CTRL)
+    {
+	if (dragStarted)
+	{
+	  clearStatus();
+	  GestureAllSwitchesOffVisitor visitor;
+	  gestureCamera->accept(visitor);
+	  dragStarted = false;
+	  gestureSwitch->setAllChildrenOff();
+	}
+	return false;
+    }
+  
     if (!gestureSwitch.valid())
         return false;
 
@@ -77,13 +102,7 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
 
         if (eventAdapter.getEventType() == osgGA::GUIEventAdapter::RELEASE)
         {
-	    //clear any status message
-	    msg::Message statusClear;
-	    statusClear.mask = msg::Request | msg::StatusText;
-	    vwr::Message vMessageOut;
-	    vMessageOut.text = std::string();
-	    statusClear.payload = vMessageOut;
-	    messageOutSignal(statusClear);
+	    clearStatus();
 	  
             rightButtonDown = false;
             if (!dragStarted)

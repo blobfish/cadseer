@@ -51,6 +51,17 @@ bool OverlayHandler::handle
   osg::NodeVisitor* /*nodeVistor*/
 )
 {
+  //control key 'shuts off' the overlay handler unless it is in
+  //the middle of a drag.
+  if
+  (
+    !isDrag
+    && (eventAdapter.getModKeyMask() & osgGA::GUIEventAdapter::MODKEY_LEFT_CTRL)
+  )
+  {
+    return false;
+  }
+  
   auto doIntersection = [&]() -> osgUtil::LineSegmentIntersector::Intersections
   {
     osgViewer::View *viewer = dynamic_cast<osgViewer::View *>(actionAdapter.asView());
