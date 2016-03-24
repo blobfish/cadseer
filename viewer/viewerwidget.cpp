@@ -48,10 +48,14 @@
 #include <gesture/gesturehandler.h>
 #include <globalutilities.h>
 #include <library/csysdragger.h>
+#include <selection/eventhandler.h>
+#include <selection/overlayhandler.h>
 #include <message/dispatch.h>
 #include <viewer/textcamera.h>
 #include <viewer/overlaycamera.h>
 #include <feature/base.h>
+
+using namespace vwr;
 
 ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel) : QWidget(), osgViewer::CompositeViewer()
 {
@@ -151,32 +155,31 @@ ViewerWidget::~ViewerWidget() //for forward declarations.
 
 }
 
-void dumpLookAt(const osg::Vec3d &eye, const osg::Vec3d &center, const osg::Vec3d &up)
+slc::EventHandler* ViewerWidget::getSelectionEventHandler()
 {
-    std::cout << std::endl << "stats: " << std::endl <<
-                 "   eye: " << eye.x() << "   " << eye.y() << "   " << eye.z() << std::endl <<
-                 "   center: " << center.x() << "   " << center.y() << "   " << center.z() << std::endl <<
-                 "   up: " << up.x() << "   " << up.y() << "   " << up.z() << std::endl;
-
+  return selectionHandler.get();
+}
+const slc::Containers& ViewerWidget::getSelections() const
+{
+  return selectionHandler->getSelections();
+}
+void ViewerWidget::clearSelections() const
+{
+  selectionHandler->clearSelections();
+}
+const osg::Matrixd& ViewerWidget::getCurrentSystem() const
+{
+  return currentSystem->getMatrix();
+}
+void ViewerWidget::setCurrentSystem(const osg::Matrixd &mIn)
+{
+  currentSystem->setMatrix(mIn);
 }
 
 void ViewerWidget::update()
 {
     osgUtil::Optimizer opt;
     opt.optimize(root);
-
-
-//    osg::Vec3d eye, center, up;
-//    camManip->getHomePosition(eye, center, up);
-//    dumpLookAt(eye, center, up);
-
-//    osg::Matrixd theMatrix;
-//    theMatrix.makeLookAt(eye, center, up);
-
-//    osg::Vec3d eyeOut, centerOut, upOut;
-//    theMatrix.getLookAt(eyeOut, centerOut, upOut, (center-eye).length());
-//    dumpLookAt(eyeOut, centerOut, upOut);
-
 }
 
 void ViewerWidget::createMainCamera(osg::Camera *camera)
@@ -199,7 +202,7 @@ void ViewerWidget::createMainCamera(osg::Camera *camera)
     QGLFormat format = QGLFormat::defaultFormat();
     format.setSamples(4); //big slowdown.
 
-    GLEventWidget *glWidget = new GLEventWidget(format, this);
+    vwr::GLEventWidget *glWidget = new vwr::GLEventWidget(format, this);
     windowQt = new osgQt::GraphicsWindowQt(glWidget);
 
     camera->setGraphicsContext(windowQt);

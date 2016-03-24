@@ -29,7 +29,7 @@
 #include <message/message.h>
 #endif
 
-class ViewerWidget;
+namespace vwr{class ViewerWidget;}
 namespace slc{class Manager;}
 
 namespace dag{class View; class Model;}
@@ -51,7 +51,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    ViewerWidget* getViewer(){return viewWidget;}
+    vwr::ViewerWidget* getViewer(){return viewWidget;}
     slc::Manager* getSelectionManager(){return selectionManager;}
     
     void messageInSlot(const msg::Message &);
@@ -64,7 +64,7 @@ public:
 private:
     void setupSelectionToolbar();
     Ui::MainWindow *ui;
-    ViewerWidget* viewWidget;
+    vwr::ViewerWidget* viewWidget;
     dag::Model *dagModel;
     dag::View *dagView;
     slc::Manager *selectionManager;

@@ -23,6 +23,8 @@
 #include <viewer/spaceballqevent.h>
 #include <viewer/spaceballosgevent.h>
 
+using namespace vwr;
+
 GLEventWidget::GLEventWidget(const QGLFormat& format, QWidget* parent, const QGLWidget* shareWidget,
                              Qt::WindowFlags f, bool forwardKeyEvents) :
     inherited(format, parent, shareWidget, f, forwardKeyEvents)

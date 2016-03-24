@@ -120,7 +120,7 @@ void SpaceballManipulator::computeHomePosition(const osg::Camera *, bool useBoun
     if (useBoundingBox)
     {
       // (bounding box computes model center more precisely than bounding sphere)
-      osg::ComputeBoundsVisitor cbVisitor;
+      osg::ComputeBoundsVisitor cbVisitor(osg::ComputeBoundsVisitor::TRAVERSE_ACTIVE_CHILDREN);
       cbVisitor.setTraversalMask(~(NodeMaskDef::csys));
       _node->accept(cbVisitor);
       osg::BoundingBox &boundingBox = cbVisitor.getBoundingBox();

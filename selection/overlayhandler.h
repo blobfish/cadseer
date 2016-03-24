@@ -24,7 +24,7 @@
 #include <osgGA/GUIEventHandler>
 #include <osgManipulator/Dragger> //needed for pointerInfo
 
-class OverlayCamera;
+namespace vwr{class OverlayCamera;}
 
 namespace lbr {class IPGroup; class PLabel;}
 
@@ -33,12 +33,12 @@ namespace slc
   class OverlayHandler : public osgGA::GUIEventHandler
   {
   public:
-    OverlayHandler(OverlayCamera *cameraIn);
+    OverlayHandler(vwr::OverlayCamera *cameraIn);
   protected:
     virtual bool handle(const osgGA::GUIEventAdapter& eventAdapter,
 		      osgGA::GUIActionAdapter& actionAdapter, osg::Object *object,
 		      osg::NodeVisitor *nodeVistor) override;
-    osg::ref_ptr<OverlayCamera> camera;
+    osg::ref_ptr<vwr::OverlayCamera> camera;
     osgManipulator::Dragger *dragger = nullptr;
     osgManipulator::PointerInfo pointer;
     osg::ref_ptr<lbr::IPGroup> dimension;

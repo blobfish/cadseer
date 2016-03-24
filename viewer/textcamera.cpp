@@ -33,9 +33,10 @@
 #include <osgQt/QFontImplementation>
 
 #include <selection/definitions.h>
-#include <selection/message.h>
 #include <message/dispatch.h>
 #include <viewer/textcamera.h>
+
+using namespace vwr;
 
 ResizeEventHandler::ResizeEventHandler(const osg::observer_ptr< osg::Camera > slaveCameraIn) :
                                        osgGA::GUIEventHandler(), slaveCamera(slaveCameraIn)
@@ -163,6 +164,11 @@ TextCamera::TextCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
   infoSwitch->addChild(commandLabel.get());
   
   infoSwitch->setAllChildrenOn();
+}
+
+TextCamera::~TextCamera() //for ref_ptr and forward declare.
+{
+
 }
 
 void TextCamera::setupDispatcher()

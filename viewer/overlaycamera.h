@@ -30,6 +30,8 @@
 
 namespace osgViewer{class GraphicsWindow;}
 
+namespace vwr
+{
 class OverlayCamera : public osg::Camera
 {
 public:
@@ -49,5 +51,6 @@ private:
   void featureRemovedDispatched(const msg::Message &);
   void closeProjectDispatched(const msg::Message&);
 };
+}
 
 #endif // OVERLAYCAMERA_H

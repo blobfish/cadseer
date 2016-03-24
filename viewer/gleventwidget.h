@@ -24,6 +24,8 @@
 
 namespace spb{class SpaceballOSGEvent;}
 
+namespace vwr
+{
 class GLEventWidget : public osgQt::GLWidget
 {
     typedef osgQt::GLWidget inherited;
@@ -36,5 +38,6 @@ protected:
 private:
     osg::ref_ptr<spb::SpaceballOSGEvent> convertEvent(QEvent* qEvent);
 };
+}
 
 #endif // GLEVENTWIDGET_H

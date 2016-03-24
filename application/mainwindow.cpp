@@ -48,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    viewWidget = new ViewerWidget(osgViewer::ViewerBase::SingleThreaded);
+    viewWidget = new vwr::ViewerWidget(osgViewer::ViewerBase::SingleThreaded);
     viewWidget->setGeometry( 100, 100, 800, 600 );
     
     dagModel = new dag::Model(this);
@@ -104,12 +104,9 @@ MainWindow::MainWindow(QWidget *parent) :
     //new message system.
     dagModel->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
     msg::dispatch().connectMessageOut(boost::bind(&dag::Model::messageInSlot, dagModel, _1));
-    viewWidget->getSelectionEventHandler()->connectMessageOut
-      (boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
-    msg::dispatch().connectMessageOut(boost::bind(&slc::EventHandler::messageInSlot,
-						  viewWidget->getSelectionEventHandler(), _1));
+    
     viewWidget->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
-    msg::dispatch().connectMessageOut(boost::bind(&ViewerWidget::messageInSlot, viewWidget, _1));
+    msg::dispatch().connectMessageOut(boost::bind(&vwr::ViewerWidget::messageInSlot, viewWidget, _1));
     
     setupDispatcher();
     this->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));

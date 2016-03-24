@@ -38,7 +38,7 @@
 
 using namespace slc;
 
-OverlayHandler::OverlayHandler(OverlayCamera* cameraIn) : camera(cameraIn)
+OverlayHandler::OverlayHandler(vwr::OverlayCamera* cameraIn) : camera(cameraIn)
 {
 
 }

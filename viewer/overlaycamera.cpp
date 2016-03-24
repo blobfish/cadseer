@@ -30,6 +30,8 @@
 #include <message/dispatch.h>
 #include <viewer/overlaycamera.h>
 
+using namespace vwr;
+
 OverlayCamera::OverlayCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
 {
   setNodeMask(NodeMaskDef::overlayCamera);

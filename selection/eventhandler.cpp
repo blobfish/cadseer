@@ -54,6 +54,10 @@ EventHandler::EventHandler(osg::Group *viewerRootIn) : osgGA::GUIEventHandler()
     preHighlightColor = Vec4(1.0, 1.0, 0.0, 1.0);
     selectionColor = Vec4(1.0, 1.0, 1.0, 1.0);
     nodeMask = ~(NodeMaskDef::backGroundCamera | NodeMaskDef::gestureCamera | NodeMaskDef::csys | NodeMaskDef::point);
+    
+    connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
+    msg::dispatch().connectMessageOut(boost::bind(&EventHandler::messageInSlot, this, _1));
+    
     setupDispatcher();
 }
 

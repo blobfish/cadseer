@@ -20,17 +20,18 @@
 #ifndef TEXTCAMERA_H
 #define TEXTCAMERA_H
 
-#include <boost/uuid/uuid.hpp>
-
 #include <osg/Camera>
-#include <osg/Switch>
-#include <osgText/Text>
 #include <osg/observer_ptr>
 #include <osgGA/GUIEventHandler>
 
 #include <selection/message.h>
 #include <message/message.h>
 
+namespace osgViewer{class GraphicsWindow;}
+namespace osg{class Switch;}
+namespace osgText{class osgText;}
+namespace vwr
+{
 class ResizeEventHandler : public osgGA::GUIEventHandler
 {
 public:
@@ -45,12 +46,12 @@ protected:
   osg::observer_ptr<osg::Camera> slaveCamera;
 };
 
-namespace osgViewer{class GraphicsWindow;}
 
 class TextCamera : public osg::Camera
 {
 public:
     TextCamera(osgViewer::GraphicsWindow *);
+    virtual ~TextCamera() override;
     
     //new messaging system
     void messageInSlot(const msg::Message &);
@@ -84,5 +85,6 @@ private:
   osg::ref_ptr<osgText::Text> statusLabel;
   osg::ref_ptr<osgText::Text> commandLabel;
 };
+}
 
 #endif // TEXTCAMERA_H

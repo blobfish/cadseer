@@ -23,9 +23,7 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/nil_generator.hpp>
 
-#include <osg/observer_ptr>
 #include <osg/ref_ptr>
-#include <osg/Vec4>
 #include <osg/Vec3d>
 
 #include <selection/definitions.h>

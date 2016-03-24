@@ -20,21 +20,26 @@
 #ifndef VIEWERWIDGET_H
 #define VIEWERWIDGET_H
 
+#ifndef Q_MOC_RUN
+#include <boost/signals2.hpp>
+#endif
+
 #include <QWidget>
 #include <QTimer>
 
 #include <osg/ref_ptr>
 #include <osgViewer/CompositeViewer>
 
-#ifndef Q_MOC_RUN
-#include <library/csysdragger.h>
-#include <selection/eventhandler.h>
-#include <selection/overlayhandler.h>
-#endif
+#include <selection/container.h>
+#include <message/message.h>
 
 namespace osgQt{class GraphicsWindowQt;}
 namespace vwr{class SpaceballManipulator;}
+namespace slc{class EventHandler; class OverlayHandler;}
+namespace lbr{class CSysDragger; class CSysCallBack;}
 
+namespace vwr
+{
 class ViewerWidget : public QWidget, public osgViewer::CompositeViewer
 {
     Q_OBJECT
@@ -45,11 +50,11 @@ public:
     virtual void paintEvent(QPaintEvent* event);
     void update();
     osg::Group* getRoot(){return root;}
-    slc::EventHandler* getSelectionEventHandler(){return selectionHandler.get();}
-    const slc::Containers& getSelections() const {return selectionHandler->getSelections();}
-    void clearSelections() const {selectionHandler->clearSelections();}
-    const osg::Matrixd& getCurrentSystem() const {return currentSystem->getMatrix();}
-    void setCurrentSystem(const osg::Matrixd &mIn){currentSystem->setMatrix(mIn);}
+    slc::EventHandler* getSelectionEventHandler();
+    const slc::Containers& getSelections() const;
+    void clearSelections() const;
+    const osg::Matrixd& getCurrentSystem() const;
+    void setCurrentSystem(const osg::Matrixd &mIn);
     
     //new messaging system
     void messageInSlot(const msg::Message &);
@@ -104,5 +109,6 @@ public:
 protected:
     bool visibility;
 };
+}
 
 #endif // VIEWERWIDGET_H

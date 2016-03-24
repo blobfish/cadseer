@@ -21,6 +21,7 @@
 #include <feature/csysbase.h>
 #include <application/mainwindow.h>
 #include <viewer/viewerwidget.h>
+#include <selection/eventhandler.h>
 #include <command/systemtofeature.h>
 
 using namespace cmd;
