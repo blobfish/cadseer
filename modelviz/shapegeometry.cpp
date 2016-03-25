@@ -287,16 +287,24 @@ void ShapeGeometryBuilder::recursiveConstruct(const TopoDS_Shape &shapeIn)
       recursiveConstruct(currentShape);
       continue;
     }
-    if (currentType == TopAbs_FACE)
+    try
     {
-      faceConstruct(TopoDS::Face(currentShape));
-      recursiveConstruct(currentShape);
-      continue;
+      if (currentType == TopAbs_FACE)
+      {
+	faceConstruct(TopoDS::Face(currentShape));
+	recursiveConstruct(currentShape);
+	continue;
+      }
+      if (currentType == TopAbs_EDGE)
+      {
+	edgeConstruct(TopoDS::Edge(currentShape));
+	recursiveConstruct(currentShape); // for obsolete vertices?
+      }
     }
-    if (currentType == TopAbs_EDGE)
+    catch(const std::exception &error)
     {
-      edgeConstruct(TopoDS::Edge(currentShape));
-      recursiveConstruct(currentShape);
+      std::cout << "Warning! Problem building model vizualization. Message: " <<
+		    error.what() << std::endl;
     }
   }
 }
