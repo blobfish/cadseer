@@ -390,6 +390,12 @@ void GestureHandler::constructMenu()
     constructionChamfer->setUserValue(attributeStatus, QObject::tr("Chamfer Command").toStdString());
     constructionFinishing->insertChild(constructionFinishing->getNumChildren() - 2, constructionChamfer);
     
+    osg::MatrixTransform *constructionDraft = gsn::buildCommandNode(":/resources/images/constructionDraft.svg");
+    constructionDraft->setMatrix(dummy);
+    constructionDraft->setUserValue(attributeMask, (msg::Request | msg::Construct | msg::Draft).to_string());
+    constructionDraft->setUserValue(attributeStatus, QObject::tr("Draft Command").toStdString());
+    constructionFinishing->insertChild(constructionFinishing->getNumChildren() - 2, constructionDraft);
+    
     //booleans
     osg::MatrixTransform *constructionBoolean;
     constructionBoolean = gsn::buildMenuNode(":/resources/images/constructionBoolean.svg");

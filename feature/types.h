@@ -37,6 +37,7 @@ namespace ftr
     Cylinder, //!< feature cylinder class.
     Blend, //!< feature blend class.
     Chamfer, //!< feature chamfer class.
+    Draft, //!< feature draft class.
     Inert, //!< feature inert class.
     Boolean, //!< feature boolean base class.
     Union, //!< feature union class.
@@ -57,6 +58,7 @@ namespace ftr
       {Type::Cylinder, "Cylinder"},
       {Type::Blend, "Blend"},
       {Type::Chamfer, "Chamfer"},
+      {Type::Draft, "Draft"},
       {Type::Inert, "Inert"},
       {Type::Boolean, "Boolean"},
       {Type::Union, "Union"},
@@ -67,30 +69,6 @@ namespace ftr
     assert(strings.count(typeIn) > 0);
     return strings.at(typeIn);
   }
-  
-  //yuck duplicate. fix me
-  inline const static Type& typeFromString(const std::string &stringIn)
-  {
-    typedef std::map<const std::string, Type> LocalMap;
-    const static LocalMap types = 
-    {
-      {"Base", Type::Base},
-      {"CSys", Type::CSys},
-      {"Box", Type::Box},
-      {"Sphere", Type::Sphere},
-      {"Cone", Type::Cone},
-      {"Cylinder", Type::Cylinder},
-      {"Blend", Type::Blend},
-      {"Inert", Type::Inert},
-      {"Union", Type::Union},
-      {"Subtract", Type::Subtract},
-      {"Intersect", Type::Intersect}
-    };
-    
-    assert(types.count(stringIn) > 0);
-    return types.at(stringIn);
-  }
-  
 }
 
 

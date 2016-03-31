@@ -28,6 +28,7 @@
 #include <BRepBuilderAPI_MakeShape.hxx>
 
 #include <globalutilities.h>
+#include <feature/base.h>
 #include <feature/shapeidmapper.h>
 
 static const std::vector<std::string> shapeStrings
@@ -317,4 +318,139 @@ void ftr::ensureNoDuplicates(ResultContainer &target)
   }
   for (const auto &shape : shapes)
     updateId(target, idGenerator(), shape);
+}
+
+void ftr::faceEdgeMatch(const ResultContainer &sourceContainer, ResultContainer &freshContainer)
+{
+  using boost::uuids::uuid;
+  
+  gu::ShapeVector nilEdges;
+  typedef ResultContainer::index<ResultRecord::ById>::type List;
+  List &list = freshContainer.get<ResultRecord::ById>();
+  auto rangeItPair = list.equal_range(boost::uuids::nil_generator()());
+  for (; rangeItPair.first != rangeItPair.second; ++rangeItPair.first)
+  {
+    if (rangeItPair.first->shape.ShapeType() != TopAbs_EDGE)
+      continue;
+    nilEdges.push_back(rangeItPair.first->shape);
+  }
+  
+  const TopoDS_Shape &rootShape = ftr::findRootShape(freshContainer);
+  TopTools_IndexedDataMapOfShapeListOfShape eToF;
+  TopExp::MapShapesAndAncestors(rootShape, TopAbs_EDGE, TopAbs_FACE, eToF);
+  for (const auto &nilEdge : nilEdges)
+  {
+    //get 2 parent faces id. need 2 to make edge unique.
+    const TopTools_ListOfShape &parentFaces = eToF.FindFromKey(nilEdge);
+    if (parentFaces.Extent() != 2)
+      continue;
+    std::vector<uuid> faceIds;
+    TopTools_ListIteratorOfListOfShape faceIt(parentFaces);
+    for (; faceIt.More(); faceIt.Next())
+    {
+      const uuid &faceId = findResultByShape(freshContainer, faceIt.Value()).id;
+      if (faceId.is_nil())
+	continue;
+      faceIds.push_back(faceId);
+    }
+    if (faceIds.size() != 2)
+      continue;
+    
+    if
+    (!(
+      (hasResult(sourceContainer, faceIds.front())) &&
+      (hasResult(sourceContainer, faceIds.back()))
+    ))
+      continue;
+    
+    TopTools_IndexedMapOfShape face1Edges, face2Edges;
+    TopExp::MapShapes(findResultById(sourceContainer, faceIds.front()).shape, TopAbs_EDGE,  face1Edges);
+    TopExp::MapShapes(findResultById(sourceContainer, faceIds.back()).shape, TopAbs_EDGE, face2Edges);
+    
+    uuid edgeId = boost::uuids::nil_generator()();
+    for (int index = 1; index <= face1Edges.Extent(); ++index)
+    {
+      const TopoDS_Shape &edge = face1Edges(index);
+      if (face2Edges.Contains(edge))
+      {
+	assert(hasResult(sourceContainer, edge));
+	edgeId = findResultByShape(sourceContainer, edge).id;
+	break;
+      }
+    }
+    if (!edgeId.is_nil())
+      updateId(freshContainer, edgeId, nilEdge);
+  }
+}
+
+void ftr::edgeVertexMatch(const ResultContainer &sourceContainer, ResultContainer &freshContainer)
+{
+  using boost::uuids::uuid;
+  
+  gu::ShapeVector nilVertices;
+  typedef ResultContainer::index<ResultRecord::ById>::type List;
+  List &list = freshContainer.get<ResultRecord::ById>();
+  auto rangeItPair = list.equal_range(boost::uuids::nil_generator()());
+  for (; rangeItPair.first != rangeItPair.second; ++rangeItPair.first)
+  {
+    if (rangeItPair.first->shape.ShapeType() != TopAbs_VERTEX)
+      continue;
+    nilVertices.push_back(rangeItPair.first->shape);
+  }
+  
+  const TopoDS_Shape &rootShape = ftr::findRootShape(freshContainer);
+  TopTools_IndexedDataMapOfShapeListOfShape vToE;
+  TopExp::MapShapesAndAncestors(rootShape, TopAbs_VERTEX, TopAbs_EDGE, vToE);
+  for (const auto &nilVertex : nilVertices)
+  {
+    //get 2 parent faces id. need 2 to make edge unique.
+    const TopTools_ListOfShape &parentEdgesList = vToE.FindFromKey(nilVertex);
+    TopTools_IndexedMapOfShape parentEdges;
+    TopTools_ListIteratorOfListOfShape edgeIt(parentEdgesList);
+    for (; edgeIt.More(); edgeIt.Next())
+      parentEdges.Add(edgeIt.Value());
+    std::size_t parentEdgeCount = parentEdges.Extent();
+    if (parentEdgeCount != 2 && parentEdgeCount != 3)
+      continue;
+    std::vector<uuid> edgeIds;
+    for (int index = 1; index <= parentEdges.Extent(); index++)
+    {
+      const uuid &edgeId = findResultByShape(freshContainer, parentEdges(index)).id;
+      if (edgeId.is_nil())
+	continue;
+      edgeIds.push_back(edgeId);
+    }
+    if (edgeIds.size() != parentEdgeCount)
+      continue;
+    
+    std::vector<TopTools_IndexedMapOfShape> maps;
+    for (const auto edgeId : edgeIds)
+    {
+      maps.push_back(TopTools_IndexedMapOfShape());
+      TopExp::MapShapes(findResultById(sourceContainer, edgeId).shape, TopAbs_VERTEX, maps.back());
+    }
+    
+    uuid vertexId = boost::uuids::nil_generator()();
+    for (int index = 1; index <= maps.front().Extent(); ++index)
+    {
+      const TopoDS_Shape &vertex = maps.front()(index);
+      bool missing = false;
+      std::vector<TopTools_IndexedMapOfShape>::const_iterator it = maps.begin();
+      it++; //don't check against itself
+      while ((it != maps.end()) && (missing == false))
+      {
+	if (!(it->Contains(vertex)))
+	  missing = true;
+	++it;
+      }
+      if (!missing)
+      {
+	assert(hasResult(sourceContainer, vertex));
+	vertexId = findResultByShape(sourceContainer, vertex).id;
+	break;
+      }
+    }
+    if (!vertexId.is_nil())
+      updateId(freshContainer, vertexId, nilVertex);
+  }
 }

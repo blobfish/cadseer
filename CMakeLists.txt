@@ -14,7 +14,7 @@ find_package(Boost REQUIRED COMPONENTS system graph)
 find_package(OCE REQUIRED COMPONENTS TKernel TKBRep TKMesh TKFeat TKFillet)
 #override the libraries settings.
 #message(${OCE_LIBRARIES})
-SET(OCE_LIBRARIES "TKernel;TKBRep;TKMesh;TKFeat;TKFillet")
+SET(OCE_LIBRARIES "TKernel;TKBRep;TKMesh;TKFeat;TKFillet;TKOffset")
 
 FIND_PACKAGE(OpenSceneGraph REQUIRED)
 SET(OPENSCENEGRAPH_LIBRARIES "OpenThreads;osg;osgDB;osgUtil;osgViewer;osgQt;osgGA;osgText;osgManipulator")
@@ -81,6 +81,7 @@ SET(FEATURE_SOURCES
     feature/cylinder.cpp
     feature/blend.cpp
     feature/chamfer.cpp
+    feature/draft.cpp
     feature/maps.cpp
     feature/cylinderbuilder.cpp
     feature/booleanbase.cpp
@@ -136,6 +137,7 @@ SET(PROJECT_SOURCES
     project/serial/xsdcxxoutput/featureinert.cpp
     project/serial/xsdcxxoutput/featureblend.cpp
     project/serial/xsdcxxoutput/featurechamfer.cpp
+    project/serial/xsdcxxoutput/featuredraft.cpp
     )
     
 SET(APPLICATION_SOURCES

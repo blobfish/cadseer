@@ -67,6 +67,7 @@ namespace app
     void newIntersectDispatched(const msg::Message&);
     void newBlendDispatched(const msg::Message&);
     void newChamferDispatched(const msg::Message&);
+    void newDraftDispatched(const msg::Message&);
     void importOCCDispatched(const msg::Message&);
     void exportOCCDispatched(const msg::Message&);
     void preferencesDispatched(const msg::Message&);

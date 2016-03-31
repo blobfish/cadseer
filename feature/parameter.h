@@ -38,6 +38,7 @@ namespace ftr
     static const std::string Radius2 = "Radius2"; //!< cone
     static const std::string Position = "Position"; //!< blend
     static const std::string Distance = "Distance"; //!< chamfer
+    static const std::string Angle = "Angle"; //!< draft
   }
   
   class Parameter

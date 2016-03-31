@@ -27,6 +27,7 @@
 
 #include <BRepTools.hxx>
 #include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
 #include <TopoDS.hxx>
 
 #include <message/dispatch.h>
@@ -47,6 +48,7 @@
 #include <feature/intersect.h>
 #include <feature/blend.h>
 #include <feature/chamfer.h>
+#include <feature/draft.h>
 
 using namespace app;
 using boost::uuids::uuid;
@@ -114,6 +116,9 @@ void Factory::setupDispatcher()
   
   mask = msg::Request | msg::Construct | msg::Chamfer;
   dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newChamferDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Construct | msg::Draft;
+  dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newDraftDispatched, this, _1)));
   
   mask = msg::Request | msg::ImportOCC;
   dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::importOCCDispatched, this, _1)));
@@ -498,6 +503,57 @@ void Factory::newChamferDispatched(const msg::Message&)
   chamfer->addSymChamfer(symChamfer);
   project->addFeature(chamfer);
   project->connect(targetFeatureId, chamfer->getId(), ftr::InputTypes::target);
+  
+  ftr::Base *targetFeature = project->findFeature(targetFeatureId);
+  targetFeature->hide3D();
+  
+  msg::Message clearSelectionMessage;
+  clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
+  messageOutSignal(clearSelectionMessage);
+  
+  triggerUpdate();
+}
+
+void Factory::newDraftDispatched(const msg::Message&)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  assert(project);
+  
+  if (containers.empty())
+    return;
+  uuid targetFeatureId = containers.at(0).featureId;
+  
+  ftr::DraftConvey convey;
+  const ftr::ResultContainer &targetContainer = project->findFeature(targetFeatureId)->getResultContainer();
+  for (const auto &currentSelection : containers)
+  {
+    if
+    (
+      currentSelection.featureId != targetFeatureId ||
+      currentSelection.selectionType != slc::Type::Face //just edges for now.
+    )
+      continue;
+      
+    TopoDS_Face face = TopoDS::Face(ftr::findResultById(targetContainer, currentSelection.shapeId).shape);  
+    ftr::DraftPick pick;
+    pick.faceId = currentSelection.shapeId;
+    ftr::Draft::calculateUVParameter(face, currentSelection.pointLocation, pick.u, pick.v);
+    convey.targets.push_back(pick);
+  }
+  if (convey.targets.empty())
+    return;
+  
+  //for now last pick is the neutral plane.
+  convey.neutralPlane = convey.targets.back();
+  convey.targets.pop_back();
+  
+  std::shared_ptr<ftr::Draft> draft(new ftr::Draft());
+  draft->setDraft(convey);
+  project->addFeature(draft);
+  project->connect(targetFeatureId, draft->getId(), ftr::InputTypes::target);
   
   ftr::Base *targetFeature = project->findFeature(targetFeatureId);
   targetFeature->hide3D();

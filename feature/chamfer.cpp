@@ -135,10 +135,6 @@ void Chamfer::updateModel(const UpdateMap &mapIn)
     shape = targetShape;
     resultContainer = targetResultContainer;
   
-    //this probably temp.
-    TopTools_IndexedDataMapOfShapeListOfShape eToF;
-    TopExp::MapShapesAndAncestors(targetShape, TopAbs_EDGE, TopAbs_FACE, eToF);
-    
     BRepFilletAPI_MakeChamfer chamferMaker(targetShape);
     for (const auto &chamfer : symChamfers)
     {

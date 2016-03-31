@@ -30,6 +30,8 @@ class BRepBuilderAPI_MakeShape;
 
 namespace ftr
 {
+  class Base;
+  
   /*! Create a container with all the shapes of shapeIn. ids will be nil.*/
   ResultContainer createInitialContainer(const TopoDS_Shape &shapeIn);
   
@@ -77,6 +79,18 @@ namespace ftr
    * should be excluded.
    */
   void ensureNoDuplicates(ResultContainer &);
+  
+  /*! a lot of occ routines when reporting generated, modified etc.., only deal with faces.
+   * so here when an edge has no id but both faces do, we try to derived what the id of the old
+   * edge is and assign it to the new edge. Have to be careful when 2 faces share more than 1 edge.
+   * 
+   * any access to the containers through the base pointer is const so we use a different container and
+   * let the calling function set the container for the feature.
+   */
+  void faceEdgeMatch(const ResultContainer &, ResultContainer &);
+  
+  /*! same as above only using edges and vertices. */
+  void edgeVertexMatch(const ResultContainer &, ResultContainer &);
 }
 
 #endif // FTR_SHAPEIDMAPPER_H

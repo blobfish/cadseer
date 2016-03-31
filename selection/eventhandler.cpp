@@ -154,7 +154,11 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
 	   }
 	   
 	   if (newContainer == lastPrehighlight)
+	   {
+	     //update the point location though.
+	     lastPrehighlight.pointLocation = newContainer.pointLocation;
 	     return false;
+	   }
 	   
            clearPrehighlight();
 	   

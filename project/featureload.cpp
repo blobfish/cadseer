@@ -28,6 +28,7 @@
 #include <feature/intersect.h>
 #include <feature/blend.h>
 #include <feature/chamfer.h>
+#include <feature/draft.h>
 #include <feature/inert.h>
 #include <project/serial/xsdcxxoutput/featurebox.h>
 #include <project/serial/xsdcxxoutput/featurecylinder.h>
@@ -39,6 +40,7 @@
 #include <project/serial/xsdcxxoutput/featureinert.h>
 #include <project/serial/xsdcxxoutput/featureblend.h>
 #include <project/serial/xsdcxxoutput/featurechamfer.h>
+#include <project/serial/xsdcxxoutput/featuredraft.h>
 
 #include "featureload.h"
 
@@ -60,6 +62,7 @@ directory(directoryIn), fileExtension(".fetr")
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Inert), std::bind(&FeatureLoad::loadInert, this, std::placeholders::_1, std::placeholders::_2)));
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Blend), std::bind(&FeatureLoad::loadBlend, this, std::placeholders::_1, std::placeholders::_2)));
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Chamfer), std::bind(&FeatureLoad::loadChamfer, this, std::placeholders::_1, std::placeholders::_2)));
+  functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Draft), std::bind(&FeatureLoad::loadDraft, this, std::placeholders::_1, std::placeholders::_2)));
 }
 
 FeatureLoad::~FeatureLoad()
@@ -213,5 +216,17 @@ std::shared_ptr< ftr::Base > FeatureLoad::loadChamfer(const std::string &fileNam
   freshChamfer->serialRead(*sChamfer);
   
   return freshChamfer;
+}
+
+std::shared_ptr< ftr::Base > FeatureLoad::loadDraft(const std::string &fileNameIn, std::size_t shapeOffsetIn)
+{
+  auto sDraft = srl::draft(fileNameIn, ::xml_schema::Flags::dont_validate);
+  assert(sDraft);
+  
+  std::shared_ptr<ftr::Draft> freshDraft = std::shared_ptr<ftr::Draft>(new ftr::Draft());
+  freshDraft->setShape(shapeVector.at(shapeOffsetIn));
+  freshDraft->serialRead(*sDraft);
+  
+  return freshDraft;
 }
 
