@@ -51,6 +51,7 @@
 #include <selection/eventhandler.h>
 #include <selection/overlayhandler.h>
 #include <message/dispatch.h>
+#include <message/observer.h>
 #include <viewer/textcamera.h>
 #include <viewer/overlaycamera.h>
 #include <feature/base.h>
@@ -59,6 +60,7 @@ using namespace vwr;
 
 ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel) : QWidget(), osgViewer::CompositeViewer()
 {
+    observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
     setupDispatcher();
     
     setThreadingModel(threadingModel);
@@ -99,14 +101,9 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     infoCamera->setViewport(0, 0, glWidgetWidth, glWidgetHeight);
     infoCamera->setProjectionResizePolicy(osg::Camera::ProjectionResizePolicy::FIXED);
     view->addSlave(infoCamera, false);
-    //wire up to message system.
-    infoCamera->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
-    msg::dispatch().connectMessageOut(boost::bind(&TextCamera::messageInSlot, infoCamera, _1));
     
     OverlayCamera *oCamera = new OverlayCamera(windowQt);
     view->addSlave(oCamera, false);
-    oCamera->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
-    msg::dispatch().connectMessageOut(boost::bind(&OverlayCamera::messageInSlot, oCamera, _1));
     
     systemSwitch = new osg::Switch();
     oCamera->addChild(systemSwitch);
@@ -374,52 +371,43 @@ void ViewerWidget::setupDispatcher()
   msg::Mask mask;
   
   mask = msg::Response | msg::Post | msg::AddFeature;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::featureAddedDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::featureAddedDispatched, this, _1)));
   
   mask = msg::Response | msg::Pre | msg::RemoveFeature;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::featureRemovedDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::featureRemovedDispatched, this, _1)));
   
   mask = msg::Response | msg::Post | msg::UpdateVisual;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::visualUpdatedDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::visualUpdatedDispatched, this, _1)));
   
   mask = msg::Request | msg::ViewTop;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewTopDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewTopDispatched, this, _1)));
   
   mask = msg::Request | msg::ViewFront;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewFrontDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewFrontDispatched, this, _1)));
   
   mask = msg::Request | msg::ViewRight;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewRightDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewRightDispatched, this, _1)));
   
   mask = msg::Request | msg::ViewFit;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewFitDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewFitDispatched, this, _1)));
   
   mask = msg::Request | msg::ViewFill;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewFillDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewFillDispatched, this, _1)));
   
   mask = msg::Request | msg::ViewLine;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewLineDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewLineDispatched, this, _1)));
   
   mask = msg::Request | msg::ExportOSG;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::exportOSGDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::exportOSGDispatched, this, _1)));
   
   mask = msg::Response | msg::Pre | msg::CloseProject;;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::closeProjectDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::closeProjectDispatched, this, _1)));
   
   mask = msg::Request | msg::SystemReset;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::systemResetDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::systemResetDispatched, this, _1)));
   
   mask = msg::Request | msg::SystemToggle;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::systemToggleDispatched, this, _1)));
-}
-
-void ViewerWidget::messageInSlot(const msg::Message &messageIn)
-{
-  msg::MessageDispatcher::iterator it = dispatcher.find(messageIn.mask);
-  if (it == dispatcher.end())
-    return;
-  
-  it->second(messageIn);
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::systemToggleDispatched, this, _1)));
 }
 
 void ViewerWidget::featureAddedDispatched(const msg::Message &messageIn)

@@ -32,6 +32,7 @@
 #include <nodemaskdefs.h>
 #include <globalutilities.h>
 #include <message/dispatch.h>
+#include <message/observer.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <project/serial/xsdcxxoutput/featurecsysbase.h>
@@ -42,8 +43,7 @@ using namespace ftr;
 DCallBack::DCallBack(osg::MatrixTransform *t, CSysBase *csysBaseIn) : 
       osgManipulator::DraggerTransformCallback(t), csysBase(csysBaseIn)
 {
-  connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
-  //we don't intake messages from the dispatcher.
+  observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
 }
 
 bool DCallBack::receive(const osgManipulator::MotionCommand &commandIn)
@@ -115,13 +115,13 @@ bool DCallBack::receive(const osgManipulator::MotionCommand &commandIn)
       prj::Message pMessage;
       pMessage.gitMessage = gitStream.str();
       gitMessage.payload = pMessage;
-      messageOutSignal(gitMessage);
+      observer->messageOutSignal(gitMessage);
       
       if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
       {
 	msg::Message uMessage;
 	uMessage.mask = msg::Request | msg::Update;
-	messageOutSignal(uMessage);
+	observer->messageOutSignal(uMessage);
       }
     }
   }
@@ -131,7 +131,7 @@ bool DCallBack::receive(const osgManipulator::MotionCommand &commandIn)
   vwr::Message vMessageOut;
   vMessageOut.text = stream.str();
   messageOut.payload = vMessageOut;
-  messageOutSignal(messageOut);
+  observer->messageOutSignal(messageOut);
   
   return out;
 }

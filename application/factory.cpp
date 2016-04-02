@@ -31,6 +31,8 @@
 #include <TopoDS.hxx>
 
 #include <message/dispatch.h>
+#include <message/message.h>
+#include <message/observer.h>
 #include <project/project.h>
 #include <application/application.h>
 #include <application/mainwindow.h>
@@ -55,19 +57,8 @@ using boost::uuids::uuid;
 
 Factory::Factory()
 {
+  observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
   setupDispatcher();
-  
-  this->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
-  msg::dispatch().connectMessageOut(boost::bind(&Factory::messageInSlot, this, _1));
-}
-
-void Factory::messageInSlot(const msg::Message &messageIn)
-{
-  msg::MessageDispatcher::iterator it = dispatcher.find(messageIn.mask);
-  if (it == dispatcher.end())
-    return;
-  
-  it->second(messageIn);
 }
 
 void Factory::setupDispatcher()
@@ -76,68 +67,68 @@ void Factory::setupDispatcher()
   
   //main dispatcher.
   mask = msg::Response | msg::Post | msg::NewProject;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newProjectDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newProjectDispatched, this, _1)));
   
   mask = msg::Response | msg::Post | msg::OpenProject;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::openProjectDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::openProjectDispatched, this, _1)));
   
   mask = msg::Response | msg::Pre | msg::CloseProject;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::closeProjectDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::closeProjectDispatched, this, _1)));
   
   mask = msg::Response | msg::Post | msg::Selection | msg::Addition;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::selectionAdditionDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::selectionAdditionDispatched, this, _1)));
   
   mask = msg::Response | msg::Pre | msg::Selection | msg::Subtraction;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::selectionSubtractionDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::selectionSubtractionDispatched, this, _1)));
   
   mask = msg::Request | msg::Construct | msg::Box;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newBoxDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newBoxDispatched, this, _1)));
   
   mask = msg::Request | msg::Construct | msg::Cylinder;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newCylinderDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newCylinderDispatched, this, _1)));
   
   mask = msg::Request | msg::Construct | msg::Sphere;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newSphereDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newSphereDispatched, this, _1)));
   
   mask = msg::Request | msg::Construct | msg::Cone;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newConeDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newConeDispatched, this, _1)));
   
   mask = msg::Request | msg::Construct | msg::Union;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newUnionDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newUnionDispatched, this, _1)));
   
   mask = msg::Request | msg::Construct | msg::Subtract;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newSubtractDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newSubtractDispatched, this, _1)));
   
   mask = msg::Request | msg::Construct | msg::Intersect;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newIntersectDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newIntersectDispatched, this, _1)));
   
   mask = msg::Request | msg::Construct | msg::Blend;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newBlendDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newBlendDispatched, this, _1)));
   
   mask = msg::Request | msg::Construct | msg::Chamfer;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newChamferDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newChamferDispatched, this, _1)));
   
   mask = msg::Request | msg::Construct | msg::Draft;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newDraftDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newDraftDispatched, this, _1)));
   
   mask = msg::Request | msg::ImportOCC;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::importOCCDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::importOCCDispatched, this, _1)));
   
   mask = msg::Request | msg::ExportOCC;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::exportOCCDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::exportOCCDispatched, this, _1)));
   
   mask = msg::Request | msg::Preferences;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::preferencesDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::preferencesDispatched, this, _1)));
   
   mask = msg::Request | msg::Remove;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::removeDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::removeDispatched, this, _1)));
 }
 
 void Factory::triggerUpdate()
 {
   msg::Message updateMessage;
   updateMessage.mask = msg::Request | msg::Update;
-  msg::dispatch().messageInSlot(updateMessage);
+  observer->messageOutSignal(updateMessage);
 }
 
 void Factory::newProjectDispatched(const msg::Message& /*messageIn*/)
@@ -324,7 +315,7 @@ void Factory::newUnionDispatched(const msg::Message&)
   
   msg::Message clearSelectionMessage;
   clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  messageOutSignal(clearSelectionMessage);
+  observer->messageOutSignal(clearSelectionMessage);
   
   triggerUpdate();
 }
@@ -362,7 +353,7 @@ void Factory::newSubtractDispatched(const msg::Message&)
   
   msg::Message clearSelectionMessage;
   clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  messageOutSignal(clearSelectionMessage);
+  observer->messageOutSignal(clearSelectionMessage);
   
   triggerUpdate();
 }
@@ -400,7 +391,7 @@ void Factory::newIntersectDispatched(const msg::Message&)
   
   msg::Message clearSelectionMessage;
   clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  messageOutSignal(clearSelectionMessage);
+  observer->messageOutSignal(clearSelectionMessage);
   
   triggerUpdate();
 }
@@ -462,7 +453,7 @@ void Factory::newBlendDispatched(const msg::Message&)
   
   msg::Message clearSelectionMessage;
   clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  messageOutSignal(clearSelectionMessage);
+  observer->messageOutSignal(clearSelectionMessage);
   
   triggerUpdate();
 }
@@ -509,7 +500,7 @@ void Factory::newChamferDispatched(const msg::Message&)
   
   msg::Message clearSelectionMessage;
   clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  messageOutSignal(clearSelectionMessage);
+  observer->messageOutSignal(clearSelectionMessage);
   
   triggerUpdate();
 }
@@ -560,7 +551,7 @@ void Factory::newDraftDispatched(const msg::Message&)
   
   msg::Message clearSelectionMessage;
   clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  messageOutSignal(clearSelectionMessage);
+  observer->messageOutSignal(clearSelectionMessage);
   
   triggerUpdate();
 }
@@ -616,7 +607,7 @@ void Factory::exportOCCDispatched(const msg::Message&)
   BRepTools::Write(project->findFeature(containers.at(0).featureId)->getShape(), fileName.toStdString().c_str());
   msg::Message clearSelectionMessage;
   clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  messageOutSignal(clearSelectionMessage);
+  observer->messageOutSignal(clearSelectionMessage);
 }
 
 void Factory::preferencesDispatched(const msg::Message&)
@@ -640,7 +631,7 @@ void Factory::preferencesDispatched(const msg::Message&)
   
   msg::Message prfResponse;
   prfResponse.mask = msg::Response | msg::Preferences;
-  messageOutSignal(prfResponse);
+  observer->messageOutSignal(prfResponse);
 }
 
 void Factory::removeDispatched(const msg::Message&)
@@ -655,7 +646,7 @@ void Factory::removeDispatched(const msg::Message&)
   
   msg::Message clearSelectionMessage;
   clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  messageOutSignal(clearSelectionMessage);
+  observer->messageOutSignal(clearSelectionMessage);
   
   for (const auto &current : selection)
   {
@@ -666,7 +657,7 @@ void Factory::removeDispatched(const msg::Message&)
     prj::Message payload;
     payload.featureId = current.featureId;
     removeMessage.payload = payload;
-    messageOutSignal(removeMessage);
+    observer->messageOutSignal(removeMessage);
   }
   
   triggerUpdate();

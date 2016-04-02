@@ -22,11 +22,11 @@
 #define CMD_MANAGER_H
 
 #include <stack>
+#include <memory>
 
-#include <boost/signals2.hpp>
-
-#include <message/message.h>
 #include <command/base.h>
+
+namespace msg{class Message; class Observer;}
 
 namespace cmd
 {
@@ -35,17 +35,9 @@ namespace cmd
   public:
     Manager();
     
-    typedef boost::signals2::signal<void (const msg::Message&)> MessageOutSignal;
-    boost::signals2::connection connectMessageOut(const MessageOutSignal::slot_type &subscriber)
-    {
-      return messageOutSignal.connect(subscriber);
-    }
-    
-    void messageInSlot(const msg::Message&);
     void addCommand(BasePtr);
   private:
-    MessageOutSignal messageOutSignal;
-    msg::MessageDispatcher dispatcher;
+    std::unique_ptr<msg::Observer> observer;
     void cancelCommandDispatched(const msg::Message &);
     void doneCommandDispatched(const msg::Message &);
     void setupDispatcher();

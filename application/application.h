@@ -25,15 +25,9 @@
 #include <QApplication>
 #include <QDir>
 
-#ifndef Q_MOC_RUN
-#include <boost/signals2.hpp>
-#include <message/message.h>
-#endif
-
-
-
 namespace prf{class Manager;}
 namespace prj{class Project;}
+namespace msg{class Message; class Observer;}
 
 namespace app
 {
@@ -51,14 +45,6 @@ public:
     MainWindow* getMainWindow(){return mainWindow.get();}
     QDir getApplicationDirectory();
     
-    //new messaging system
-    void messageInSlot(const msg::Message &);
-    typedef boost::signals2::signal<void (const msg::Message &)> MessageOutSignal;
-    boost::signals2::connection connectMessageOut(const MessageOutSignal::slot_type &subscriber)
-    {
-      return messageOutSignal.connect(subscriber);
-    }
-
 public Q_SLOTS:
     void quittingSlot();
     void appStartSlot();
@@ -73,8 +59,7 @@ private:
     void closeProject();
     void updateTitle();
     
-    MessageOutSignal messageOutSignal;
-    msg::MessageDispatcher dispatcher;
+    std::unique_ptr<msg::Observer> observer;
     void setupDispatcher();
     void newProjectRequestDispatched(const msg::Message &);
     void openProjectRequestDispatched(const msg::Message &);

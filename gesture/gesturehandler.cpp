@@ -32,9 +32,10 @@
 
 #include <viewer/message.h>
 #include <gesture/gesturenode.h>
-#include <gesture/gesturehandler.h>
 #include <nodemaskdefs.h>
 #include <message/dispatch.h>
+#include <message/observer.h>
+#include <gesture/gesturehandler.h>
 
 static const std::string attributeMask = "CommandAttributeTitle";
 static const std::string attributeStatus = "CommandAttributeStatus";
@@ -42,6 +43,8 @@ static const std::string attributeStatus = "CommandAttributeStatus";
 GestureHandler::GestureHandler(osg::Camera *cameraIn) : osgGA::GUIEventHandler(), rightButtonDown(false),
     currentNodeLeft(false), iconRadius(32.0), includedAngle(90.0)
 {
+    observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+  
     gestureCamera = cameraIn;
     if (!gestureCamera.valid())
         return;
@@ -52,10 +55,6 @@ GestureHandler::GestureHandler(osg::Camera *cameraIn) : osgGA::GUIEventHandler()
     mininumSprayRadius = iconRadius * 7.0;
     nodeSpread = iconRadius * 3.0;
     constructMenu();
-    
-    setupDispatcher();
-    this->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
-    msg::dispatch().connectMessageOut(boost::bind(&GestureHandler::messageInSlot, this, _1));
 }
 
 bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
@@ -71,7 +70,7 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
       vwr::Message vMessageOut;
       vMessageOut.text = std::string();
       statusClear.payload = vMessageOut;
-      messageOutSignal(statusClear);
+      observer->messageOutSignal(statusClear);
     };
     
     if (eventAdapter.getModKeyMask() & osgGA::GUIEventAdapter::MODKEY_LEFT_CTRL)
@@ -117,7 +116,7 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
 		msg::Mask msgMask(msgMaskString);
 		msg::Message messageOut;
 		messageOut.mask = msgMask;
-		messageOutSignal(messageOut);
+		observer->messageOutSignal(messageOut);
 	      }
 	      else
 		assert(0); //gesture node doesn't have msgMask attribute;
@@ -177,7 +176,7 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
 		  vwr::Message vMessageOut;
 		  vMessageOut.text = statusString;
 		  messageOut.payload = vMessageOut;
-		  messageOutSignal(messageOut);
+		  observer->messageOutSignal(messageOut);
 		}
 
                 osg::Switch *geometrySwitch = dynamic_cast<osg::Switch*>(parentNode->getChild(parentNode->getNumChildren() - 1));
@@ -605,7 +604,7 @@ void GestureHandler::startDrag(const osgGA::GUIEventAdapter& eventAdapter)
     vwr::Message vMessageOut;
     vMessageOut.text = QObject::tr("Start Menu").toStdString();
     messageOut.payload = vMessageOut;
-    messageOutSignal(messageOut);
+    observer->messageOutSignal(messageOut);
   
     gestureSwitch->setAllChildrenOn();
     osg::Switch *startSwitch = dynamic_cast<osg::Switch *>(startNode->getChild(startNode->getNumChildren() - 1));
@@ -628,28 +627,6 @@ void GestureHandler::startDrag(const osgGA::GUIEventAdapter& eventAdapter)
 
     aggregateMatrix = startNode->getMatrix();
 }
-
-void GestureHandler::messageInSlot(const msg::Message &)
-{
-  //not using yet
-  
-//   msg::MessageDispatcher::iterator it = dispatcher.find(messageIn.mask);
-//   if (it == dispatcher.end())
-//     return;
-//   
-//   it->second(messageIn);
-}
-
-void GestureHandler::setupDispatcher()
-{
-  //not using yet
-  
-//   msg::Mask mask;
-//   
-//   mask = msg::Response | msg::Post | msg::NewProject;
-//   dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newProjectDispatched, this, _1)));
-}
-
 
 GestureAllSwitchesOffVisitor::GestureAllSwitchesOffVisitor() :
     osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)

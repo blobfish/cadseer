@@ -25,13 +25,12 @@
 
 #include <QObject> //for string translation.
 
-#include <boost/signals2.hpp>
-
-#include <message/message.h>
+#include <selection/message.h> //for derived classes
 
 namespace app{class Application; class MainWindow;}
 namespace prj{class Project;}
-namespace slc{class Manager; class EventHandler; class Message;}
+namespace slc{class Manager; class EventHandler;}
+namespace msg{class Message; class Observer;}
 
 namespace cmd
 {
@@ -49,15 +48,7 @@ namespace cmd
     virtual void deactivate() = 0;
     
   protected:
-    typedef boost::signals2::signal<void (const msg::Message&)> MessageOutSignal;
-    boost::signals2::connection connectMessageOut(const MessageOutSignal::slot_type &subscriber)
-    {
-      return messageOutSignal.connect(subscriber);
-    }
-    boost::signals2::scoped_connection connection; //connection to dispatch.
-    void messageInSlot(const msg::Message&);
-    MessageOutSignal messageOutSignal;
-    msg::MessageDispatcher dispatcher;
+    std::unique_ptr<msg::Observer> observer;
     void sendDone();
     
     app::Application *application;

@@ -22,7 +22,6 @@
 #include <assert.h>
 
 #include <boost/uuid/uuid_io.hpp>
-#include <boost/signals2.hpp>
 
 #include <QApplication>
 
@@ -34,6 +33,7 @@
 
 #include <selection/definitions.h>
 #include <message/dispatch.h>
+#include <message/observer.h>
 #include <viewer/textcamera.h>
 
 using namespace vwr;
@@ -103,7 +103,9 @@ void ResizeEventHandler::positionSelection()
 
 TextCamera::TextCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
 {
+  observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
   setupDispatcher();
+  
   setGraphicsContext(windowIn);
   setProjectionMatrix(osg::Matrix::ortho2D(0, windowIn->getTraits()->width, 0, windowIn->getTraits()->width));
   setReferenceFrame(osg::Transform::ABSOLUTE_RF);
@@ -176,32 +178,22 @@ void TextCamera::setupDispatcher()
   msg::Mask mask;
   
   mask = msg::Response | msg::Post | msg::Preselection | msg::Addition;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&TextCamera::preselectionAdditionDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&TextCamera::preselectionAdditionDispatched, this, _1)));
   
   mask = msg::Response | msg::Pre | msg::Preselection | msg::Subtraction;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&TextCamera::preselectionSubtractionDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&TextCamera::preselectionSubtractionDispatched, this, _1)));
   
   mask = msg::Response | msg::Post | msg::Selection | msg::Addition;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&TextCamera::selectionAdditionDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&TextCamera::selectionAdditionDispatched, this, _1)));
   
   mask = msg::Response | msg::Pre | msg::Selection | msg::Subtraction;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&TextCamera::selectionSubtractionDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&TextCamera::selectionSubtractionDispatched, this, _1)));
   
   mask = msg::Request | msg::StatusText;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&TextCamera::statusTextDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&TextCamera::statusTextDispatched, this, _1)));
   
   mask = msg::Request | msg::CommandText;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&TextCamera::commandTextDispatched, this, _1)));
-}
-
-void TextCamera::messageInSlot(const msg::Message &messageIn)
-{
-  msg::MessageDispatcher::iterator it = dispatcher.find(messageIn.mask);
-  if (it == dispatcher.end())
-    return;
-  
-  it->second(messageIn);
-  updateSelectionLabel();
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&TextCamera::commandTextDispatched, this, _1)));
 }
 
 void TextCamera::preselectionAdditionDispatched(const msg::Message &messageIn)
@@ -219,6 +211,7 @@ void TextCamera::preselectionAdditionDispatched(const msg::Message &messageIn)
     "Feature id: " << sMessage.featureId << std::endl <<
     "Shape id: " << sMessage.shapeId << std::endl;
   preselectionText = preselectStream.str();
+  updateSelectionLabel();
 }
 
 void TextCamera::preselectionSubtractionDispatched(const msg::Message &)
@@ -228,6 +221,7 @@ void TextCamera::preselectionSubtractionDispatched(const msg::Message &)
   msg::dispatch().dumpString(debug.str());
   
   preselectionText.clear();
+  updateSelectionLabel();
 }
 
 void TextCamera::selectionAdditionDispatched(const msg::Message &messageIn)
@@ -239,6 +233,7 @@ void TextCamera::selectionAdditionDispatched(const msg::Message &messageIn)
   slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
   assert(std::find(selections.begin(), selections.end(), sMessage) == selections.end());
   selections.push_back(sMessage);
+  updateSelectionLabel();
 }
 
 void TextCamera::selectionSubtractionDispatched(const msg::Message &messageIn)
@@ -251,6 +246,7 @@ void TextCamera::selectionSubtractionDispatched(const msg::Message &messageIn)
   auto it = std::find(selections.begin(), selections.end(), sMessage); 
   assert(it != selections.end());
   selections.erase(it);
+  updateSelectionLabel();
 }
 
 void TextCamera::statusTextDispatched(const msg::Message &messageIn)

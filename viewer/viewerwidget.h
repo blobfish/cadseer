@@ -20,9 +20,7 @@
 #ifndef VIEWERWIDGET_H
 #define VIEWERWIDGET_H
 
-#ifndef Q_MOC_RUN
-#include <boost/signals2.hpp>
-#endif
+#include <memory>
 
 #include <QWidget>
 #include <QTimer>
@@ -31,12 +29,12 @@
 #include <osgViewer/CompositeViewer>
 
 #include <selection/container.h>
-#include <message/message.h>
 
 namespace osgQt{class GraphicsWindowQt;}
 namespace vwr{class SpaceballManipulator;}
 namespace slc{class EventHandler; class OverlayHandler;}
 namespace lbr{class CSysDragger; class CSysCallBack;}
+namespace msg{class Message; class Observer;}
 
 namespace vwr
 {
@@ -55,14 +53,6 @@ public:
     void clearSelections() const;
     const osg::Matrixd& getCurrentSystem() const;
     void setCurrentSystem(const osg::Matrixd &mIn);
-    
-    //new messaging system
-    void messageInSlot(const msg::Message &);
-    typedef boost::signals2::signal<void (const msg::Message &)> MessageOutSignal;
-    boost::signals2::connection connectMessageOut(const MessageOutSignal::slot_type &subscriber)
-    {
-      return messageOutSignal.connect(subscriber);
-    }
 
 public Q_SLOTS:
     void setSelectionMask(const int &maskIn);
@@ -83,8 +73,7 @@ protected:
     int glWidgetWidth;
     int glWidgetHeight;
     osgQt::GraphicsWindowQt *windowQt;
-    MessageOutSignal messageOutSignal;
-    msg::MessageDispatcher dispatcher;
+    std::unique_ptr<msg::Observer> observer;
     void setupDispatcher();
     void featureAddedDispatched(const msg::Message &);
     void featureRemovedDispatched(const msg::Message &);

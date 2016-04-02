@@ -41,6 +41,7 @@
 #include <modelviz/shapegeometry.h>
 #include <selection/message.h>
 #include <message/dispatch.h>
+#include <message/observer.h>
 #include <selection/interpreter.h>
 
 using namespace osg;
@@ -49,16 +50,14 @@ using namespace slc;
 
 EventHandler::EventHandler(osg::Group *viewerRootIn) : osgGA::GUIEventHandler()
 {
+    observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+    setupDispatcher();
+  
     viewerRoot = viewerRootIn;
     
     preHighlightColor = Vec4(1.0, 1.0, 0.0, 1.0);
     selectionColor = Vec4(1.0, 1.0, 1.0, 1.0);
     nodeMask = ~(NodeMaskDef::backGroundCamera | NodeMaskDef::gestureCamera | NodeMaskDef::csys | NodeMaskDef::point);
-    
-    connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
-    msg::dispatch().connectMessageOut(boost::bind(&EventHandler::messageInSlot, this, _1));
-    
-    setupDispatcher();
 }
 
 void EventHandler::setSelectionMask(const unsigned int &maskIn)
@@ -117,7 +116,7 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
     {
       if (eventAdapter.getKey() == osgGA::GUIEventAdapter::KEY_Escape)
       {
-	messageOutSignal(msg::Request | msg::Command | msg::Cancel);
+	observer->messageOutSignal(msg::Request | msg::Command | msg::Cancel);
 	return true;
       }
     }
@@ -195,7 +194,7 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
 	    msg::Message clearMessage;
 	    clearMessage.mask = msg::Response | msg::Pre | msg::Preselection | msg::Subtraction;
 	    clearMessage.payload = containerToMessage(lastPrehighlight);
-	    messageOutSignal(clearMessage);
+	    observer->messageOutSignal(clearMessage);
 	    
 	    if (slc::isPointType(lastPrehighlight.selectionType))
 	    {
@@ -215,7 +214,7 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
 	    msg::Message addMessage;
 	    addMessage.mask = msg::Response | msg::Post | msg::Selection | msg::Addition;
 	    addMessage.payload = containerToMessage(lastPrehighlight);
-	    messageOutSignal(addMessage);
+	    observer->messageOutSignal(addMessage);
 	    
             lastPrehighlight = Container();
         }
@@ -255,7 +254,7 @@ void EventHandler::clearSelections()
 	msg::Message removeMessage;
 	removeMessage.mask = msg::Response | msg::Pre | msg::Selection | msg::Subtraction;
 	removeMessage.payload = containerToMessage(*it);
-	messageOutSignal(removeMessage);
+	observer->messageOutSignal(removeMessage);
       
 	if (slc::isPointType(it->selectionType))
 	{
@@ -297,7 +296,7 @@ void EventHandler::setPrehighlight(slc::Container &selected)
     msg::Message addMessage;
     addMessage.mask = msg::Response | msg::Post | msg::Preselection | msg::Addition;
     addMessage.payload = containerToMessage(lastPrehighlight);
-    messageOutSignal(addMessage);
+    observer->messageOutSignal(addMessage);
 }
 
 void EventHandler::clearPrehighlight()
@@ -308,7 +307,7 @@ void EventHandler::clearPrehighlight()
     msg::Message removeMessage;
     removeMessage.mask = msg::Response | msg::Pre | msg::Preselection | msg::Subtraction;
     removeMessage.payload = containerToMessage(lastPrehighlight);
-    messageOutSignal(removeMessage);
+    observer->messageOutSignal(removeMessage);
     
     if (slc::isPointType(lastPrehighlight.selectionType))
     {
@@ -334,28 +333,19 @@ void EventHandler::setupDispatcher()
   msg::Mask mask;
   
   mask = msg::Request | msg::Preselection | msg::Addition;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&EventHandler::requestPreselectionAdditionDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&EventHandler::requestPreselectionAdditionDispatched, this, _1)));
   
   mask = msg::Request | msg::Preselection | msg::Subtraction;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&EventHandler::requestPreselectionSubtractionDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&EventHandler::requestPreselectionSubtractionDispatched, this, _1)));
   
   mask = msg::Request | msg::Selection | msg::Addition;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&EventHandler::requestSelectionAdditionDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&EventHandler::requestSelectionAdditionDispatched, this, _1)));
   
   mask = msg::Request | msg::Selection | msg::Subtraction;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&EventHandler::requestSelectionSubtractionDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&EventHandler::requestSelectionSubtractionDispatched, this, _1)));
 
   mask = msg::Request | msg::Selection | msg::Clear;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&EventHandler::requestSelectionClearDispatched, this, _1)));
-}
-
-void EventHandler::messageInSlot(const msg::Message &messageIn)
-{
-  msg::MessageDispatcher::iterator it = dispatcher.find(messageIn.mask);
-  if (it == dispatcher.end())
-    return;
-  
-  it->second(messageIn);
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&EventHandler::requestSelectionClearDispatched, this, _1)));
 }
 
 void EventHandler::selectionOperation
@@ -439,7 +429,7 @@ void EventHandler::requestSelectionAdditionDispatched(const msg::Message &messag
   msg::Message messageOut = messageIn;
   messageOut.mask &= ~msg::Request;
   messageOut.mask |= msg::Response | msg::Post;
-  messageOutSignal(messageOut);
+  observer->messageOutSignal(messageOut);
 }
 
 void EventHandler::requestSelectionSubtractionDispatched(const msg::Message &messageIn)
@@ -459,7 +449,7 @@ void EventHandler::requestSelectionSubtractionDispatched(const msg::Message &mes
   msg::Message messageOut = messageIn;
   messageOut.mask &= ~msg::Request;
   messageOut.mask |= msg::Response | msg::Pre;
-  messageOutSignal(messageOut);
+  observer->messageOutSignal(messageOut);
   
   if (slc::isPointType(container.selectionType))
   {

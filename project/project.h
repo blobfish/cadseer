@@ -21,13 +21,13 @@
 #define PROJECT_H
 
 #include <map>
+#include <memory>
 
-#include <boost/signals2.hpp>
-
-#include <message/message.h>
 #include <project/projectgraph.h>
 
 class TopoDS_Shape;
+
+namespace msg{class Message; class Observer;}
 
 typedef std::map<boost::uuids::uuid, prg::Vertex> IdVertexMap;
 
@@ -61,14 +61,6 @@ public:
     
     void stateChangedSlot(const boost::uuids::uuid &featureIdIn, std::size_t stateIn); //!< received from each feature.
     
-    //new messaging system
-    void messageInSlot(const msg::Message &);
-    typedef boost::signals2::signal<void (const msg::Message &)> MessageOutSignal;
-    boost::signals2::connection connectMessageOut(const MessageOutSignal::slot_type &subscriber)
-    {
-      return messageOutSignal.connect(subscriber);
-    }
-    
 private:
     //! index all the vertices of the graph. needed for algorthims when using listS.
     void indexVerticesEdges();
@@ -88,9 +80,7 @@ private:
     std::unique_ptr<GitManager> gitManager;
     bool isLoading = false;
     
-    MessageOutSignal messageOutSignal; //new message system.
-    msg::MessageDispatcher dispatcher;
-    boost::signals2::connection connection;
+    std::unique_ptr<msg::Observer> observer;
     void setupDispatcher();
     void setCurrentLeafDispatched(const msg::Message &);
     void removeFeatureDispatched(const msg::Message &);

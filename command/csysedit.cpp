@@ -22,6 +22,8 @@
 #include <globalutilities.h>
 #include <library/csysdragger.h>
 #include <project/project.h>
+#include <message/message.h>
+#include <message/observer.h>
 #include <feature/csysbase.h>
 #include <command/csysedit.h>
 
@@ -66,10 +68,10 @@ void CSysEdit::setupDispatcher()
   msg::Mask mask;
   
   mask = msg::Response | msg::Post | msg::Selection | msg::Addition;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&CSysEdit::selectionAdditionDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&CSysEdit::selectionAdditionDispatched, this, _1)));
   
   mask = msg::Response | msg::Pre | msg::Selection | msg::Subtraction;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&CSysEdit::selectionSubtractionDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&CSysEdit::selectionSubtractionDispatched, this, _1)));
 }
 
 
@@ -257,13 +259,13 @@ void CSysEdit::activate()
   if (type == Type::Origin)
     csysDragger->highlightOrigin();
   
-  boost::signals2::shared_connection_block block(connection);
+  boost::signals2::shared_connection_block block(observer->connection);
   msg::Message messageOut;
   messageOut.mask = msg::Request | msg::Selection | msg::Addition;
   for (const auto &sMessage : messages)
   {
     messageOut.payload = sMessage;
-    messageOutSignal(messageOut);
+    observer->messageOutSignal(messageOut);
   }
   isActive = true;
 }

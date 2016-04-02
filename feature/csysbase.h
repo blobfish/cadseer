@@ -17,16 +17,18 @@
  *
  */
 
-#ifndef CSYSBASE_H
-#define CSYSBASE_H
+#ifndef FTR_CSYSBASE_H
+#define FTR_CSYSBASE_H
+
+#include <memory>
 
 #include <gp_Ax2.hxx>
 
 #include <library/csysdragger.h>
 #include <feature/base.h>
-#include <message/message.h>
 
 namespace prj{namespace srl{class FeatureCSysBase;}}
+namespace msg{class Observer;}
 
 namespace ftr
 {
@@ -71,18 +73,11 @@ namespace ftr
     DCallBack(osg::MatrixTransform *t, CSysBase *csysBaseIn);
     virtual bool receive(const osgManipulator::MotionCommand &) override;
     
-        
-    typedef boost::signals2::signal<void (const msg::Message &)> MessageOutSignal;
-    boost::signals2::connection connectMessageOut(const MessageOutSignal::slot_type &subscriber)
-    {
-      return messageOutSignal.connect(subscriber);
-    }
-    
   private:
+    std::unique_ptr<msg::Observer> observer;
     CSysBase *csysBase = nullptr;
     osg::Vec3d originStart;
-    MessageOutSignal messageOutSignal;
   };
 }
 
-#endif // CSYSBASE_H
+#endif // FTR_CSYSBASE_H

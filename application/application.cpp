@@ -34,6 +34,8 @@
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <message/dispatch.h>
+#include <message/message.h>
+#include <message/observer.h>
 #include <application/factory.h>
 #include <command/manager.h>
 #include <project/projectdialog.h>
@@ -47,6 +49,7 @@ Application::Application(int &argc, char **argv) :
     QApplication(argc, argv)
 {
     spaceballPresent = false;
+    observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
     setupDispatcher();
     
     //didn't have any luck using std::make_shared. weird behavior.
@@ -172,7 +175,7 @@ void Application::createNewProject(const std::string &directoryIn)
 {
   msg::Message preMessage;
   preMessage.mask = msg::Response | msg::Pre | msg::NewProject;
-  messageOutSignal(preMessage);
+  observer->messageOutSignal(preMessage);
   
   //directoryIn has been verified to exist before this call.
   std::unique_ptr<prj::Project> tempProject(new prj::Project());
@@ -184,14 +187,14 @@ void Application::createNewProject(const std::string &directoryIn)
   
   msg::Message postMessage;
   postMessage.mask = msg::Response | msg::Post | msg::NewProject;
-  messageOutSignal(postMessage);
+  observer->messageOutSignal(postMessage);
 }
 
 void Application::openProject(const std::string &directoryIn)
 {
   msg::Message preMessage;
   preMessage.mask = msg::Response | msg::Pre | msg::OpenProject;
-  messageOutSignal(preMessage);
+  observer->messageOutSignal(preMessage);
   
   assert(!project);
   //directoryIn has been verified to exist before this call.
@@ -204,7 +207,7 @@ void Application::openProject(const std::string &directoryIn)
   
   msg::Message postMessage;
   postMessage.mask = msg::Response | msg::Post | msg::OpenProject;
-  messageOutSignal(postMessage);
+  observer->messageOutSignal(postMessage);
 }
 
 void Application::closeProject()
@@ -213,7 +216,7 @@ void Application::closeProject()
   
   msg::Message preMessage;
   preMessage.mask = msg::Response | msg::Pre | msg::CloseProject;
-  messageOutSignal(preMessage);
+  observer->messageOutSignal(preMessage);
  
   if (project)
   {
@@ -223,7 +226,7 @@ void Application::closeProject()
   
   msg::Message postMessage;
   postMessage.mask = msg::Response | msg::Post | msg::CloseProject;
-  messageOutSignal(postMessage);
+  observer->messageOutSignal(postMessage);
 }
 
 void Application::updateTitle()
@@ -238,25 +241,13 @@ void Application::updateTitle()
 
 void Application::setupDispatcher()
 {
-  this->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
-    msg::dispatch().connectMessageOut(boost::bind(&Application::messageInSlot, this, _1));
-  
   msg::Mask mask;
   mask = msg::Request | msg::NewProject;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Application::newProjectRequestDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Application::newProjectRequestDispatched, this, _1)));
   mask = msg::Request | msg::OpenProject;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Application::openProjectRequestDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Application::openProjectRequestDispatched, this, _1)));
   mask = msg::Request | msg::ProjectDialog;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Application::ProjectDialogRequestDispatched, this, _1)));
-}
-
-void Application::messageInSlot(const msg::Message &messageIn)
-{
-  msg::MessageDispatcher::iterator it = dispatcher.find(messageIn.mask);
-  if (it == dispatcher.end())
-    return;
-  
-  it->second(messageIn);
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Application::ProjectDialogRequestDispatched, this, _1)));
 }
 
 void Application::ProjectDialogRequestDispatched(const msg::Message&)

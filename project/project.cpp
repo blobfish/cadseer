@@ -38,6 +38,7 @@
 #include <project/message.h>
 #include <message/message.h>
 #include <message/dispatch.h>
+#include <message/observer.h>
 #include <project/gitmanager.h>
 #include <project/featureload.h>
 #include <project/serial/xsdcxxoutput/project.h>
@@ -49,10 +50,8 @@ using boost::uuids::uuid;
 
 Project::Project()
 {
+  observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
   setupDispatcher();
-  
-  connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
-  connection = msg::dispatch().connectMessageOut(boost::bind(&prj::Project::messageInSlot, this, _1));
   
   std::unique_ptr<GitManager> tempManager(new GitManager());
   gitManager = std::move(tempManager);
@@ -60,14 +59,13 @@ Project::Project()
 
 Project::~Project()
 {
-  connection.disconnect();
 }
 
 void Project::updateModel()
 {
   msg::Message preMessage;
   preMessage.mask = msg::Response | msg::Pre | msg::UpdateModel;
-  messageOutSignal(preMessage);
+  observer->messageOutSignal(preMessage);
   
   //something here to check preferences about writing this out.
   QString fileName = static_cast<app::Application *>(qApp)->getApplicationDirectory().path();
@@ -130,7 +128,7 @@ void Project::updateModel()
   
   msg::Message postMessage;
   postMessage.mask = msg::Response | msg::Post | msg::UpdateModel;
-  messageOutSignal(postMessage);
+  observer->messageOutSignal(postMessage);
 }
 
 void Project::updateVisual()
@@ -139,11 +137,11 @@ void Project::updateVisual()
   //the visual updates, things get out of sync. so clear the selection.
   msg::Message clearSelectionMessage;
   clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  messageOutSignal(clearSelectionMessage);
+  observer->messageOutSignal(clearSelectionMessage);
   
   msg::Message preMessage;
   preMessage.mask = msg::Response | msg::Pre | msg::UpdateVisual;
-  messageOutSignal(preMessage);
+  observer->messageOutSignal(preMessage);
   
   Path sorted;
   try
@@ -173,7 +171,7 @@ void Project::updateVisual()
   
   msg::Message postMessage;
   postMessage.mask = msg::Response | msg::Post | msg::UpdateVisual;
-  messageOutSignal(postMessage);
+  observer->messageOutSignal(postMessage);
 }
 
 void Project::writeGraphViz(const std::string& fileName)
@@ -252,7 +250,7 @@ void Project::addFeature(std::shared_ptr<ftr::Base> feature)
   prj::Message pMessage;
   pMessage.feature = feature;
   postMessage.payload = pMessage;
-  messageOutSignal(postMessage);
+  observer->messageOutSignal(postMessage);
   
   projectGraph[newVertex].connection = feature->connectState(boost::bind(&Project::stateChangedSlot, this, _1, _2));
 }
@@ -293,7 +291,7 @@ void Project::removeFeature(const uuid& idIn)
     pMessage.featureId2 = idIn;
     pMessage.inputType = projectGraph[current.second].inputType;
     preMessage.payload = pMessage;
-    messageOutSignal(preMessage);
+    observer->messageOutSignal(preMessage);
   }
   
   for (const auto &current : children)
@@ -305,7 +303,7 @@ void Project::removeFeature(const uuid& idIn)
     pMessage.featureId2 = projectGraph[current.first].feature->getId();
     pMessage.inputType = projectGraph[current.second].inputType;
     preMessage.payload = pMessage;
-    messageOutSignal(preMessage);
+    observer->messageOutSignal(preMessage);
   }
   
   msg::Message preMessage;
@@ -313,7 +311,7 @@ void Project::removeFeature(const uuid& idIn)
   prj::Message pMessage;
   pMessage.feature = feature;
   preMessage.payload = pMessage;
-  messageOutSignal(preMessage);
+  observer->messageOutSignal(preMessage);
   
   //remove file if exists.
   QString fileName = QString::fromStdString(feature->getFileName());
@@ -342,7 +340,7 @@ void Project::setFeatureActive(const uuid& idIn)
   //we will destroy the old geometry that is highlighted. So clear the seleciton.
   msg::Message clearSelectionMessage;
   clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  messageOutSignal(clearSelectionMessage);
+  observer->messageOutSignal(clearSelectionMessage);
   
   //the visitor will be setting features to an inactive state which
   //triggers the signal and we would end up back into this->stateChangedSlot.
@@ -418,7 +416,7 @@ void Project::connect(const boost::uuids::uuid& parentIn, const boost::uuids::uu
   pMessage.featureId2 = childIn; 
   pMessage.inputType = type;
   postMessage.payload = pMessage;
-  messageOutSignal(postMessage);
+  observer->messageOutSignal(postMessage);
 }
 
 void Project::stateChangedSlot(const uuid& featureIdIn, std::size_t stateIn)
@@ -442,53 +440,33 @@ void Project::stateChangedSlot(const uuid& featureIdIn, std::size_t stateIn)
   boost::breadth_first_search(projectGraph, vertex, boost::visitor(visitor));
 }
 
-void Project::messageInSlot(const msg::Message &messageIn)
-{
-//   std::cout << "inside: " << __PRETTY_FUNCTION__ << std::endl;
-  msg::MessageDispatcher::iterator it = dispatcher.find(messageIn.mask);
-  if (it == dispatcher.end())
-    return;
-  
-  //block the signals back into project. should this be done here
-  //or should this be done in dispatched function on a case by case basis?
-  //to be determined.
-  std::vector<boost::signals2::shared_connection_block> blockVector;
-  BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
-  {
-    boost::signals2::shared_connection_block currentBlock(projectGraph[currentVertex].connection);
-    blockVector.push_back(currentBlock);
-  }
-  
-  it->second(messageIn);
-}
-
 void Project::setupDispatcher()
 {
   msg::Mask mask;
   
   mask = msg::Request | msg::SetCurrentLeaf;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Project::setCurrentLeafDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::setCurrentLeafDispatched, this, _1)));
   
   mask = msg::Request | msg::RemoveFeature;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Project::removeFeatureDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::removeFeatureDispatched, this, _1)));
   
   mask = msg::Request | msg::Update;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Project::updateDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::updateDispatched, this, _1)));
   
   mask = msg::Request | msg::ForceUpdate;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Project::forceUpdateDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::forceUpdateDispatched, this, _1)));
   
   mask = msg::Request | msg::UpdateModel;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Project::updateModelDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::updateModelDispatched, this, _1)));
   
   mask = msg::Request | msg::UpdateVisual;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Project::updateVisualDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::updateVisualDispatched, this, _1)));
   
   mask = msg::Request | msg::SaveProject;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Project::saveProjectRequestDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::saveProjectRequestDispatched, this, _1)));
   
   mask = msg::Request | msg::GitMessage;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Project::gitMessageRequestDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::gitMessageRequestDispatched, this, _1)));
 }
 
 void Project::setCurrentLeafDispatched(const msg::Message &messageIn)
@@ -602,7 +580,7 @@ Edge Project::connect(Vertex parentIn, Vertex childIn, ftr::InputTypes type)
   pMessage.featureId2 = projectGraph[childIn].feature->getId(); 
   pMessage.inputType = type;
   postMessage.payload = pMessage;
-  messageOutSignal(postMessage);
+  observer->messageOutSignal(postMessage);
   
   return edge;
 }
@@ -717,13 +695,13 @@ void Project::save()
 {
   msg::Message preMessage;
   preMessage.mask = msg::Response | msg::Pre | msg::SaveProject;
-  messageOutSignal(preMessage);
+  observer->messageOutSignal(preMessage);
   
   gitManager->save();
   
   msg::Message postMessage;
   postMessage.mask = msg::Response | msg::Post | msg::SaveProject;
-  messageOutSignal(postMessage);
+  observer->messageOutSignal(postMessage);
 }
 
 void Project::initializeNew()
@@ -736,7 +714,7 @@ void Project::open()
 {
   msg::Message preMessage;
   preMessage.mask = msg::Response | msg::Pre | msg::OpenProject;
-  messageOutSignal(preMessage);
+  observer->messageOutSignal(preMessage);
   
   isLoading = true;
   
@@ -801,10 +779,10 @@ void Project::open()
   
   msg::Message postMessage;
   postMessage.mask = msg::Response | msg::Post | msg::OpenProject;
-  messageOutSignal(postMessage);
+  observer->messageOutSignal(postMessage);
   
   msg::Message viewFitMessage;
   viewFitMessage.mask = msg::Request | msg::ViewFit;
-  messageOutSignal(viewFitMessage);
+  observer->messageOutSignal(viewFitMessage);
 }
 

@@ -27,7 +27,6 @@
 namespace osgManipulator{class Translate1DDragger;}
 
 namespace lbr{class CSysDragger;}
-namespace slc{class Message;}
 
 namespace cmd
 {

@@ -20,9 +20,7 @@
 #ifndef LBR_CSYSDRAGGER_H
 #define LBR_CSYSDRAGGER_H
 
-#include <boost/signals2.hpp>
-
-#include <message/message.h>
+#include <memory>
 
 #include <osgManipulator/Translate1DDragger>
 #include <osg/ShapeDrawable>
@@ -34,6 +32,7 @@
 #include "rotatecirculardragger.h"
 
 namespace osgManipulator{class GridConstraint;}
+namespace msg{class Message; class Observer;}
 
 namespace lbr
 {
@@ -127,16 +126,9 @@ public:
   CSysCallBack(osg::MatrixTransform *t);
   virtual bool receive(const osgManipulator::MotionCommand &) override;
   
-      
-  typedef boost::signals2::signal<void (const msg::Message &)> MessageOutSignal;
-  boost::signals2::connection connectMessageOut(const MessageOutSignal::slot_type &subscriber)
-  {
-    return messageOutSignal.connect(subscriber);
-  }
-  
 private:
+  std::unique_ptr<msg::Observer> observer;
   osg::Vec3d originStart;
-  MessageOutSignal messageOutSignal;
 };
 }
 

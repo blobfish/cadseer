@@ -34,18 +34,16 @@
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/composite_key.hpp>
-#include <boost/signals2.hpp>
 
 #include <dagview/dagmodelgraph.h>
-#include <message/message.h>
-#include <selection/message.h>
-#include <project/message.h>
 #endif
 
 // #include "DAGFilter.h"
 
 class QGraphicsSceneHoverEvent;
 class QGraphicsProxyWidget;
+
+namespace msg{class Message; class Observer;}
 
 namespace dag
 {
@@ -68,14 +66,6 @@ namespace dag
     Model(QObject *parentIn);
     virtual ~Model() override;
     
-    //new messaging system
-    void messageInSlot(const msg::Message &);
-    typedef boost::signals2::signal<void (const msg::Message &)> MessageOutSignal;
-    boost::signals2::connection connectMessageOut(const MessageOutSignal::slot_type &subscriber)
-    {
-      return messageOutSignal.connect(subscriber);
-    }
-    
   protected:
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     virtual void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
@@ -94,11 +84,9 @@ namespace dag
 //     void editingFinishedSlot();
     
   private:
-    Model(){}
     void indexVerticesEdges();
     void stateChangedSlot(const uuid& featureIdIn, std::size_t); //!< received from each feature.
-    MessageOutSignal messageOutSignal; //new message system.
-    msg::MessageDispatcher dispatcher;
+    std::unique_ptr<msg::Observer> observer;
     void setupDispatcher();
     void featureAddedDispatched(const msg::Message &);
     void featureRemovedDispatched(const msg::Message &);

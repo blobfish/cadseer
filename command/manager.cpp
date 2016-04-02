@@ -26,6 +26,7 @@
 #include <command/featuretodragger.h>
 #include <command/draggertofeature.h>
 #include <message/dispatch.h>
+#include <message/observer.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <viewer/message.h>
@@ -41,19 +42,8 @@ Manager& cmd::manager()
 
 Manager::Manager()
 {
-  this->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
-  msg::dispatch().connectMessageOut(boost::bind(&Manager::messageInSlot, this, _1));
-  
+  observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
   setupDispatcher();
-}
-
-void Manager::messageInSlot(const msg::Message &messageIn)
-{
-  msg::MessageDispatcher::iterator it = dispatcher.find(messageIn.mask);
-  if (it == dispatcher.end())
-    return;
-  
-  it->second(messageIn);
 }
 
 void Manager::setupDispatcher()
@@ -61,22 +51,22 @@ void Manager::setupDispatcher()
   msg::Mask mask;
   
   mask = msg::Request | msg::Command | msg::Cancel;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::cancelCommandDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::cancelCommandDispatched, this, _1)));
   
   mask = msg::Request | msg::Command | msg::Done;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::doneCommandDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::doneCommandDispatched, this, _1)));
   
   mask = msg::Request | msg::FeatureToSystem;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::featureToSystemDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::featureToSystemDispatched, this, _1)));
   
   mask = msg::Request | msg::SystemToFeature;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::systemToFeatureDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::systemToFeatureDispatched, this, _1)));
   
   mask = msg::Request | msg::FeatureToDragger;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::featureToDraggerDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::featureToDraggerDispatched, this, _1)));
   
   mask = msg::Request | msg::DraggerToFeature;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::draggerToFeatureDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::draggerToFeatureDispatched, this, _1)));
 }
 
 void Manager::cancelCommandDispatched(const msg::Message &)
@@ -117,7 +107,7 @@ void Manager::doneSlot()
   {
     msg::Message uMessage;
     uMessage.mask = msg::Request | msg::Update;
-    messageOutSignal(uMessage);
+    observer->messageOutSignal(uMessage);
   }
   
   if (!stack.empty())
@@ -146,7 +136,7 @@ void Manager::sendStatusMessage(const std::string& messageIn)
   vwr::Message statusVMessage;
   statusVMessage.text = messageIn;
   statusMessage.payload = statusVMessage;
-  messageOutSignal(statusMessage);
+  observer->messageOutSignal(statusMessage);
 }
 
 void Manager::sendCommandMessage(const std::string& messageIn)
@@ -156,14 +146,14 @@ void Manager::sendCommandMessage(const std::string& messageIn)
   vwr::Message statusVMessage;
   statusVMessage.text = messageIn;
   statusMessage.payload = statusVMessage;
-  messageOutSignal(statusMessage);
+  observer->messageOutSignal(statusMessage);
 }
 
 void Manager::clearSelection()
 {
   msg::Message clearMessage;
   clearMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  messageOutSignal(clearMessage);
+  observer->messageOutSignal(clearMessage);
 }
 
 void Manager::featureToSystemDispatched(const msg::Message&)

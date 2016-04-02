@@ -20,17 +20,18 @@
 #ifndef SELECTIONEVENTHANDLER_H
 #define SELECTIONEVENTHANDLER_H
 
-#include <boost/signals2.hpp>
+#include <memory>
 
 #include <osgGA/GUIEventHandler>
 #include <osgUtil/LineSegmentIntersector>
 
 #include <selection/container.h>
-#include <message/message.h>
+#include <selection/message.h>
 #include <selection/visitors.h>
 
 namespace osg{class Switch;}
 namespace mdv{class ShapeGeometry;}
+namespace msg{class Message; class Observer;}
 
 namespace slc
 {
@@ -41,14 +42,7 @@ public:
     const Containers& getSelections() const {return selectionContainers;}
     void clearSelections();
     void setSelectionMask(const unsigned int &maskIn);
-    
-    //new messaging system
-    void messageInSlot(const msg::Message &);
-    typedef boost::signals2::signal<void (const msg::Message &)> MessageOutSignal;
-    boost::signals2::connection connectMessageOut(const MessageOutSignal::slot_type &subscriber)
-    {
-      return messageOutSignal.connect(subscriber);
-    }
+
 protected:
     virtual bool handle(const osgGA::GUIEventAdapter& eventAdapter,
                         osgGA::GUIActionAdapter& actionAdapter, osg::Object *object,
@@ -70,8 +64,7 @@ protected:
     
     osg::ref_ptr<osg::Group> viewerRoot;
     
-    MessageOutSignal messageOutSignal;
-    msg::MessageDispatcher dispatcher;
+    std::unique_ptr<msg::Observer> observer;
     void setupDispatcher();
     void requestPreselectionAdditionDispatched(const msg::Message &);
     void requestPreselectionSubtractionDispatched(const msg::Message &);

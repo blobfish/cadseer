@@ -30,6 +30,7 @@
 
 #include <feature/parameter.h>
 #include <message/dispatch.h>
+#include <message/observer.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <library/lineardimension.h>
@@ -50,6 +51,8 @@ differenceDim(),
 overallDim(),
 parameter(parameterIn)
 {
+  observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+  
   rotation = new osg::AutoTransform();
   this->addChild(rotation.get());
   
@@ -86,7 +89,6 @@ parameter(parameterIn)
   
   parameter->connectValue(boost::bind(&IPGroup::valueHasChanged, this));
   parameter->connectConstant(boost::bind(&IPGroup::constantHasChanged, this));
-  connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
 }
 
 IPGroup::IPGroup(const IPGroup& copy, const osg::CopyOp& copyOp) : osg::MatrixTransform(copy, copyOp)
@@ -258,13 +260,13 @@ bool IPGroup::processMotion(const osgManipulator::MotionCommand &commandIn)
     prj::Message pMessage;
     pMessage.gitMessage = gitStream.str();
     gitMessage.payload = pMessage;
-    messageOutSignal(gitMessage);
+    observer->messageOutSignal(gitMessage);
     
     if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
     {
       msg::Message uMessage;
       uMessage.mask = msg::Request | msg::Update;
-      messageOutSignal(uMessage);
+      observer->messageOutSignal(uMessage);
     }
   }
   
@@ -273,7 +275,7 @@ bool IPGroup::processMotion(const osgManipulator::MotionCommand &commandIn)
   vwr::Message vMessageOut;
   vMessageOut.text = stream.str();
   messageOut.payload = vMessageOut;
-  messageOutSignal(messageOut);
+  observer->messageOutSignal(messageOut);
   
   return true;
 }

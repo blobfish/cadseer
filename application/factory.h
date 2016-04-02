@@ -22,15 +22,12 @@
 
 #include <functional>
 #include <map>
+#include <memory>
 
-#include <boost/signals2.hpp>
-
-#include <message/message.h>
-#include <application/message.h>
 #include <selection/container.h>
 
 namespace prj{class Project;}
-class ViewerWidget;
+namespace msg{class Message; class Observer;}
 
 namespace app
 {
@@ -38,21 +35,12 @@ namespace app
   {
   public:
     Factory();
-    void messageInSlot(const msg::Message &);
-    typedef boost::signals2::signal<void (const msg::Message &)> MessageOutSignal;
-    boost::signals2::connection connectMessageOut(const MessageOutSignal::slot_type &subscriber)
-    {
-      return messageOutSignal.connect(subscriber);
-    }
-//     void setViewer(ViewerWidget *viewerIn){viewer = viewerIn;}
     
   private:
     prj::Project *project = nullptr;
-//     ViewerWidget *viewer = nullptr;
     slc::Containers containers;
     
-    MessageOutSignal messageOutSignal;
-    msg::MessageDispatcher dispatcher;
+    std::unique_ptr<msg::Observer> observer;
     void setupDispatcher();
     void triggerUpdate(); //!< just convenience.
     void newProjectDispatched(const msg::Message&);

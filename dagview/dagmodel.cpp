@@ -37,9 +37,10 @@
 
 #include <application/application.h>
 #include <globalutilities.h>
+#include <message/dispatch.h>
+#include <message/observer.h>
 #include <dagview/dagcontrolleddfs.h>
 #include <dagview/dagmodel.h>
-#include <message/dispatch.h>
 
 using namespace dag;
 
@@ -81,6 +82,7 @@ using namespace dag;
 
 Model::Model(QObject *parentIn) : QGraphicsScene(parentIn)
 {
+  observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
   setupDispatcher();
   
   //turned off BSP as it was giving inconsistent discovery of items
@@ -386,48 +388,39 @@ void Model::stateChangedSlot(const boost::uuids::uuid &featureIdIn, std::size_t 
   graph[vertex].stateIconRaw->setToolTip(toolTip);
 }
 
-void Model::messageInSlot(const msg::Message &messageIn)
-{
-  msg::MessageDispatcher::iterator it = dispatcher.find(messageIn.mask);
-  if (it == dispatcher.end())
-    return;
-  
-  it->second(messageIn);
-}
-
 void Model::setupDispatcher()
 {
   msg::Mask mask;
   
   mask = msg::Response | msg::Post | msg::AddFeature;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Model::featureAddedDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::featureAddedDispatched, this, _1)));
   
   mask = msg::Response | msg::Pre | msg::RemoveFeature;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Model::featureRemovedDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::featureRemovedDispatched, this, _1)));
   
   mask = msg::Response | msg::Post | msg::AddConnection;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Model::connectionAddedDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::connectionAddedDispatched, this, _1)));
   
   mask = msg::Response | msg::Pre | msg::RemoveConnection;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Model::connectionRemovedDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::connectionRemovedDispatched, this, _1)));
   
   mask = msg::Response | msg::Post | msg::UpdateModel;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Model::projectUpdatedDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::projectUpdatedDispatched, this, _1)));
   
   mask = msg::Response | msg::Post | msg::Preselection | msg::Addition;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Model::preselectionAdditionDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::preselectionAdditionDispatched, this, _1)));
   
   mask = msg::Response | msg::Pre | msg::Preselection | msg::Subtraction;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Model::preselectionSubtractionDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::preselectionSubtractionDispatched, this, _1)));
   
   mask = msg::Response | msg::Post | msg::Selection | msg::Addition;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Model::selectionAdditionDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::selectionAdditionDispatched, this, _1)));
   
   mask = msg::Response | msg::Pre | msg::Selection | msg::Subtraction;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Model::selectionSubtractionDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::selectionSubtractionDispatched, this, _1)));
   
   mask = msg::Response | msg::Pre | msg::CloseProject;;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&Model::closeProjectDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::closeProjectDispatched, this, _1)));
 }
 
 void Model::preselectionAdditionDispatched(const msg::Message &messageIn)
@@ -955,7 +948,7 @@ void Model::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     sMessage.featureId = record.featureId;
     sMessage.shapeId = boost::uuids::nil_generator()();
     message.payload = sMessage;
-    messageOutSignal(message);
+    observer->messageOutSignal(message);
   };
   
   auto setPrehighlight = [this](RectItem *rectIn)
@@ -969,7 +962,7 @@ void Model::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     sMessage.featureId = record.featureId;
     sMessage.shapeId = boost::uuids::nil_generator()();
     message.payload = sMessage;
-    messageOutSignal(message);
+    observer->messageOutSignal(message);
   };
   
   RectItem *rect = getRectFromPosition(event->scenePos());
@@ -996,7 +989,7 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
     sMessage.featureId = featureIdIn;
     sMessage.shapeId = boost::uuids::nil_generator()();
     message.payload = sMessage;
-    messageOutSignal(message);
+    observer->messageOutSignal(message);
   };
   
   auto getFeatureIdFromRect = [this](RectItem *rectIn)
@@ -1069,7 +1062,7 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
     message.mask = msg::Request | msg::Selection | msg::Clear;
     slc::Message sMessage;
     message.payload = sMessage;
-    messageOutSignal(message);
+    observer->messageOutSignal(message);
   }
   
   QGraphicsScene::mousePressEvent(event);
@@ -1120,7 +1113,7 @@ void Model::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
       sMessage.type = slc::Type::Object;
       sMessage.featureId = record.featureId;
       message.payload = sMessage;
-      messageOutSignal(message);
+      observer->messageOutSignal(message);
     }
     
     QMenu contextMenu;
@@ -1188,13 +1181,13 @@ void Model::setCurrentLeafSlot()
   msg::Message messageOut;
   messageOut.mask = msg::Request | msg::SetCurrentLeaf;
   messageOut.payload = prjMessageOut;
-  messageOutSignal(messageOut);
+  observer->messageOutSignal(messageOut);
 }
 
 void Model::removeFeatureSlot()
 {
   msg::Message message(msg::Request | msg::Remove);
-  messageOutSignal(message);
+  observer->messageOutSignal(message);
 }
 
 void Model::toggleOverlaySlot()
@@ -1203,7 +1196,7 @@ void Model::toggleOverlaySlot()
   
   msg::Message message;
   message.mask = msg::Request | msg::Selection | msg::Clear;
-  messageOutSignal(message);
+  observer->messageOutSignal(message);
   
   for (auto v : currentSelections)
     graph[v].feature.lock()->toggleOverlay();

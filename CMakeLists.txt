@@ -66,6 +66,7 @@ SET(GESTURE_SOURCES
 SET(MESSAGE_SOURCES
     message/message.cpp
     message/dispatch.cpp
+    message/observer.cpp
     )
     
 SET(FEATURE_SOURCES

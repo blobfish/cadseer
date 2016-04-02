@@ -21,7 +21,6 @@
 #include <assert.h>
 #include <limits>
 
-
 #include <QHBoxLayout>
 #include <QSplitter>
 #include <QDir>
@@ -33,6 +32,8 @@
 #include <viewer/viewerwidget.h>
 #include <selection/manager.h>
 #include <message/dispatch.h>
+#include <message/message.h>
+#include <message/observer.h>
 #include <application/incrementwidget.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
@@ -101,16 +102,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(incrementWidget->lineEdit1, SIGNAL(editingFinished()), this, SLOT(incrementChangedSlot()));
     connect(incrementWidget->lineEdit2, SIGNAL(editingFinished()), this, SLOT(incrementChangedSlot()));
 
-    //new message system.
-    dagModel->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
-    msg::dispatch().connectMessageOut(boost::bind(&dag::Model::messageInSlot, dagModel, _1));
-    
-    viewWidget->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
-    msg::dispatch().connectMessageOut(boost::bind(&vwr::ViewerWidget::messageInSlot, viewWidget, _1));
-    
+    observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
     setupDispatcher();
-    this->connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
-    msg::dispatch().connectMessageOut(boost::bind(&MainWindow::messageInSlot, this, _1));
 }
 
 MainWindow::~MainWindow()
@@ -178,16 +171,7 @@ void MainWindow::setupDispatcher()
   msg::Mask mask;
   
   mask = msg::Response | msg::Preferences;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&MainWindow::preferencesChanged, this, _1)));
-}
-
-void MainWindow::messageInSlot(const msg::Message &messageIn)
-{
-  msg::MessageDispatcher::iterator it = dispatcher.find(messageIn.mask);
-  if (it == dispatcher.end())
-    return;
-  
-  it->second(messageIn);
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&MainWindow::preferencesChanged, this, _1)));
 }
 
 void MainWindow::preferencesChanged(const msg::Message&)

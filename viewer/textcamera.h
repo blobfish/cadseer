@@ -25,11 +25,12 @@
 #include <osgGA/GUIEventHandler>
 
 #include <selection/message.h>
-#include <message/message.h>
 
 namespace osgViewer{class GraphicsWindow;}
 namespace osg{class Switch;}
 namespace osgText{class osgText;}
+
+namespace msg{class Message; class Observer;}
 namespace vwr
 {
 class ResizeEventHandler : public osgGA::GUIEventHandler
@@ -52,17 +53,8 @@ class TextCamera : public osg::Camera
 public:
     TextCamera(osgViewer::GraphicsWindow *);
     virtual ~TextCamera() override;
-    
-    //new messaging system
-    void messageInSlot(const msg::Message &);
-    typedef boost::signals2::signal<void (const msg::Message &)> MessageOutSignal;
-    boost::signals2::connection connectMessageOut(const MessageOutSignal::slot_type &subscriber)
-    {
-      return messageOutSignal.connect(subscriber);
-    }
 private:
-  MessageOutSignal messageOutSignal; //new message system.
-  msg::MessageDispatcher dispatcher;
+  std::unique_ptr<msg::Observer> observer;
   void setupDispatcher();
   void preselectionAdditionDispatched(const msg::Message &);
   void preselectionSubtractionDispatched(const msg::Message &);

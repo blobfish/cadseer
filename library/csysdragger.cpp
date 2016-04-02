@@ -32,6 +32,7 @@
 #include <globalutilities.h>
 #include <nodemaskdefs.h>
 #include <message/dispatch.h>
+#include <message/observer.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <library/geometrylibrary.h>
@@ -326,8 +327,7 @@ void CSysDragger::updateMatrix(const Matrixd &mIn)
 CSysCallBack::CSysCallBack(osg::MatrixTransform *t) : 
       osgManipulator::DraggerTransformCallback(t)
 {
-  connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
-  //we don't intake messages from the dispatcher.
+  observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
 }
 
 bool CSysCallBack::receive(const osgManipulator::MotionCommand &commandIn)
@@ -396,7 +396,7 @@ bool CSysCallBack::receive(const osgManipulator::MotionCommand &commandIn)
   vwr::Message vMessageOut;
   vMessageOut.text = stream.str();
   messageOut.payload = vMessageOut;
-  messageOutSignal(messageOut);
+  observer->messageOutSignal(messageOut);
   
   return out;
 }

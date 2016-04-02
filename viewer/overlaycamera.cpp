@@ -21,19 +21,20 @@
 #include <sstream>
 #include <assert.h>
 
-#include <boost/signals2.hpp>
-
 #include <osgViewer/GraphicsWindow>
 
 #include <nodemaskdefs.h>
 #include <feature/base.h>
 #include <message/dispatch.h>
+#include <message/observer.h>
 #include <viewer/overlaycamera.h>
 
 using namespace vwr;
 
 OverlayCamera::OverlayCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
 {
+  observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+  
   setNodeMask(NodeMaskDef::overlayCamera);
   setupDispatcher();
   setGraphicsContext(windowIn);
@@ -59,22 +60,13 @@ void OverlayCamera::setupDispatcher()
   msg::Mask mask;
 
   mask = msg::Response | msg::Post | msg::AddFeature;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::featureAddedDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::featureAddedDispatched, this, _1)));
   
   mask = msg::Response | msg::Pre | msg::RemoveFeature;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::featureRemovedDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::featureRemovedDispatched, this, _1)));
   
   mask = msg::Response | msg::Pre | msg::CloseProject;;
-  dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::closeProjectDispatched, this, _1)));
-}
-
-void OverlayCamera::messageInSlot(const msg::Message &messageIn)
-{
-  msg::MessageDispatcher::iterator it = dispatcher.find(messageIn.mask);
-  if (it == dispatcher.end())
-    return;
-  
-  it->second(messageIn);
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::closeProjectDispatched, this, _1)));
 }
 
 void OverlayCamera::featureAddedDispatched(const msg::Message &messageIn)

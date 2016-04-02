@@ -1,6 +1,6 @@
 /*
  * CadSeer. Parametric Solid Modeling.
- * Copyright (C) 2015  Thomas S. Anderson blobfish.at.gmx.com
+ * Copyright (C) 2016  Thomas S. Anderson blobfish.at.gmx.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,32 +17,29 @@
  *
  */
 
-#ifndef OVERLAYCAMERA_H
-#define OVERLAYCAMERA_H
+#ifndef MSG_OBSERVER_H
+#define MSG_OBSERVER_H
 
-#include <memory>
+#include <boost/signals2.hpp>
 
-#include <osg/Camera>
-#include <osg/Switch>
-#include <osg/observer_ptr>
+#include <message/message.h>
 
-namespace osgViewer{class GraphicsWindow;}
-
-namespace msg{class Message; class Observer;}
-namespace vwr
+namespace msg
 {
-class OverlayCamera : public osg::Camera
-{
-public:
-    OverlayCamera(osgViewer::GraphicsWindow *);
-
-private:
-  std::unique_ptr<msg::Observer> observer;
-  void setupDispatcher();
-  void featureAddedDispatched(const msg::Message &);
-  void featureRemovedDispatched(const msg::Message &);
-  void closeProjectDispatched(const msg::Message&);
-};
+  class Observer
+  {
+  public:
+    Observer();
+    ~Observer();
+    std::string name = "no name"; //used for any error messages.
+    typedef boost::signals2::signal<void (const msg::Message &)> MessageOutSignal;
+    MessageOutSignal messageOutSignal; //outgoing messages
+    MessageDispatcher dispatcher; //incoming message map.
+    boost::signals2::connection connection;
+  private:
+    void messageInSlot(const Message &);
+    std::size_t stackDepth = 0;
+  };
 }
 
-#endif // OVERLAYCAMERA_H
+#endif // OBSERVER_H

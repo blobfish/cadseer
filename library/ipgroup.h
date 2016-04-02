@@ -17,19 +17,18 @@
  *
  */
 
-#ifndef IPGROUP_H
-#define IPGROUP_H
+#ifndef LBR_IPGROUP_H
+#define LBR_IPGROUP_H
 
-#include <boost/signals2.hpp>
+#include <memory>
 
 #include <osg/ref_ptr>
 #include <osg/MatrixTransform>
 #include <osgManipulator/Dragger>
 
-#include <message/message.h>
-
 namespace osg{class Switch; class AutoTransform;}
 namespace ftr{class Parameter;}
+namespace msg{class Message; class Observer;}
 
 namespace lbr
 {
@@ -68,12 +67,6 @@ namespace lbr
     void setMatrixDragger(const osg::Matrixd &matrixIn);
     void setDimsFlipped(bool flippedIn);
     
-    typedef boost::signals2::signal<void (const msg::Message &)> MessageOutSignal;
-    boost::signals2::connection connectMessageOut(const MessageOutSignal::slot_type &subscriber)
-    {
-      return messageOutSignal.connect(subscriber);
-    }
-    
   protected:
     IPGroup();
     ftr::Parameter *parameter = nullptr;
@@ -84,7 +77,7 @@ namespace lbr
     osg::ref_ptr<osg::Switch> draggerSwitch;
     osg::ref_ptr<osg::MatrixTransform> draggerMatrix;
     osg::ref_ptr<IPCallback> ipCallback;
-    MessageOutSignal messageOutSignal;
+    std::unique_ptr<msg::Observer> observer;
   };
   
 
@@ -103,4 +96,4 @@ namespace lbr
   };
 }
 
-#endif // IPGROUP_H
+#endif // LBR_IPGROUP_H
