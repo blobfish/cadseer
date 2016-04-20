@@ -20,6 +20,8 @@
 #ifndef FTR_CHAMFER_H
 #define FTR_CHAMFER_H
 
+#include <map>
+
 #include <library/plabel.h>
 #include <feature/base.h>
 
@@ -28,6 +30,7 @@ namespace prj{namespace srl{class FeatureChamfer;}}
 
 namespace ftr
 {
+  class SeerShape;
   struct ChamferPick
   {
     boost::uuids::uuid edgeId; //!< id of picked edge or maybe face?
@@ -56,15 +59,15 @@ namespace ftr
     void serialRead(const prj::srl::FeatureChamfer &);
     
     static std::shared_ptr<Parameter> buildSymParameter();
-    static boost::uuids::uuid referenceFaceId(const ResultContainer&, const boost::uuids::uuid&);
+    static boost::uuids::uuid referenceFaceId(const SeerShape&, const boost::uuids::uuid&);
     static double calculateUParameter(const TopoDS_Edge&, const osg::Vec3d&);
     static osg::Vec3d calculateUPoint(const TopoDS_Edge&, double);
     
     void addSymChamfer(const SymChamfer &);
   private:
-    void generatedMatch(BRepFilletAPI_MakeChamfer&, const Base *, ResultContainer &);
+    void generatedMatch(BRepFilletAPI_MakeChamfer&, const SeerShape &);
     std::vector<SymChamfer> symChamfers;
-    EvolutionContainer shapeMap; //!< map edges or vertices to faces
+    std::map<boost::uuids::uuid, boost::uuids::uuid> shapeMap; //!< map edges or vertices to faces
     
     static QIcon icon;
   };

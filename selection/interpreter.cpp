@@ -22,10 +22,9 @@
 #include <nodemaskdefs.h>
 #include <globalutilities.h>
 #include <feature/base.h>
-#include <application/application.h>
+#include <feature/seershape.h>
 #include <project/project.h>
 #include <modelviz/shapegeometry.h>
-#include <modelviz/connector.h>
 #include <selection/visitors.h>
 #include <selection/interpreter.h>
 
@@ -45,14 +44,6 @@ static uuid getFeatureId(mdv::ShapeGeometry *geometryIn)
   return gu::getId(featureRoot);
 }
 
-//helper function
-static const mdv::Connector& getConnector(const uuid &idIn)
-{
-  const ftr::Base *feature = dynamic_cast<app::Application *>(qApp)->getProject()->findFeature(idIn);
-  assert(feature);
-  return feature->getConnector();
-}
-
 Interpreter::Interpreter(const osgUtil::LineSegmentIntersector::Intersections& intersectionsIn, std::size_t selectionMaskIn) :
   intersections(intersectionsIn), selectionMask(selectionMaskIn)
 {
@@ -69,7 +60,6 @@ void Interpreter::go()
     int localNodeMask = intersection.nodePath.back()->getNodeMask();
     uuid selectedId = shapeGeometry->getId(intersection.primitiveIndex);
     uuid featureId = getFeatureId(shapeGeometry);
-    const mdv::Connector &connector = getConnector(featureId);
     
     Container container;
     container.featureId = featureId;
@@ -100,7 +90,7 @@ void Interpreter::go()
 	
 	if (canSelectEndPoints(selectionMask))
 	{
-	  std::vector<osg::Vec3d> endPoints = connector.useGetEndPoints(selectedId);
+	  std::vector<osg::Vec3d> endPoints = shapeGeometry->seerShape->useGetEndPoints(selectedId);
 	  if (endPoints.size() > 0)
 	  {
 	    std::vector<osg::Vec3d> startPoint;
@@ -119,28 +109,28 @@ void Interpreter::go()
 	
 	if (canSelectMidPoints(selectionMask))
 	{
-	  std::vector<osg::Vec3d> midPoints = connector.useGetMidPoint(selectedId);
+	  std::vector<osg::Vec3d> midPoints = shapeGeometry->seerShape->useGetMidPoint(selectedId);
 	  if (updateSnaps(midPoints))
 	    sType = slc::Type::MidPoint;
 	}
 	
 	if (canSelectCenterPoints(selectionMask))
 	{
-	  std::vector<osg::Vec3d> centerPoints = connector.useGetCenterPoint(selectedId);
+	  std::vector<osg::Vec3d> centerPoints = shapeGeometry->seerShape->useGetCenterPoint(selectedId);
 	  if (updateSnaps(centerPoints))
 	    sType = slc::Type::CenterPoint;
 	}
 	
 	if (canSelectQuadrantPoints(selectionMask))
 	{
-	  std::vector<osg::Vec3d> quadrantPoints = connector.useGetQuadrantPoints(selectedId);
+	  std::vector<osg::Vec3d> quadrantPoints = shapeGeometry->seerShape->useGetQuadrantPoints(selectedId);
 	  if (updateSnaps(quadrantPoints))
 	    sType = slc::Type::QuadrantPoint;
 	}
 	
 	if (canSelectNearestPoints(selectionMask))
 	{
-	  std::vector<osg::Vec3d> nearestPoints = connector.useGetNearestPoint(selectedId, intersection.getWorldIntersectPoint());
+	  std::vector<osg::Vec3d> nearestPoints = shapeGeometry->seerShape->useGetNearestPoint(selectedId, intersection.getWorldIntersectPoint());
 	  if (updateSnaps(nearestPoints))
 	    sType = slc::Type::NearestPoint;
 	}
@@ -164,11 +154,11 @@ void Interpreter::go()
 	//face intersection.
 	
 	uuid edgeId = selectedId;
-	std::vector<uuid> wireIds = connector.useGetFacelessWires(edgeId);
+	std::vector<uuid> wireIds = shapeGeometry->seerShape->useGetFacelessWires(edgeId);
 	if (!wireIds.empty())
 	{
 	  container.selectionType = Type::Wire;
-	  container.selectionIds = connector.useGetChildrenOfType(wireIds.front(), TopAbs_EDGE);
+	  container.selectionIds = shapeGeometry->seerShape->useGetChildrenOfType(wireIds.front(), TopAbs_EDGE);
 	  container.shapeId = wireIds.front();
 	  container.pointLocation = intersection.getWorldIntersectPoint();
 	  add(containersOut, container);
@@ -179,10 +169,10 @@ void Interpreter::go()
     {
       if (canSelectWires(selectionMask))
       {
-	uuid wire = connector.useGetClosestWire(selectedId, intersection.getWorldIntersectPoint());
+	uuid wire = shapeGeometry->seerShape->useGetClosestWire(selectedId, intersection.getWorldIntersectPoint());
 	if (!wire.is_nil())
 	{
-	  container.selectionIds = connector.useGetChildrenOfType(wire, TopAbs_EDGE);
+	  container.selectionIds = shapeGeometry->seerShape->useGetChildrenOfType(wire, TopAbs_EDGE);
 	  container.selectionType = Type::Wire;
 	  container.shapeId = wire;
 	  container.pointLocation = intersection.getWorldIntersectPoint();
@@ -199,14 +189,14 @@ void Interpreter::go()
       }
       if (canSelectShells(selectionMask))
       {
-	std::vector<uuid> shells = connector.useGetParentsOfType(selectedId, TopAbs_SHELL);
+	std::vector<uuid> shells = shapeGeometry->seerShape->useGetParentsOfType(selectedId, TopAbs_SHELL);
 	if (shells.size() == 1)
 	{
 	  container.selectionType = Type::Shell;
 	  container.shapeId = shells.at(0);
 	  if (!has(containersOut, container)) //don't run again
 	  {
-	    container.selectionIds = connector.useGetChildrenOfType(shells.at(0), TopAbs_FACE);
+	    container.selectionIds = shapeGeometry->seerShape->useGetChildrenOfType(shells.at(0), TopAbs_FACE);
 	    container.pointLocation = intersection.getWorldIntersectPoint();
 	    add(containersOut, container);
 	  }
@@ -214,7 +204,7 @@ void Interpreter::go()
       }
       if (canSelectSolids(selectionMask))
       {
-	std::vector<uuid> solids = connector.useGetParentsOfType(selectedId, TopAbs_SOLID);
+	std::vector<uuid> solids = shapeGeometry->seerShape->useGetParentsOfType(selectedId, TopAbs_SOLID);
 	//should be only 1 solid
 	if (solids.size() == 1)
 	{
@@ -222,7 +212,7 @@ void Interpreter::go()
 	  container.shapeId = solids.at(0);
 	  if (!has(containersOut, container)) //don't run again
 	  {
-	    container.selectionIds = connector.useGetChildrenOfType(solids.at(0), TopAbs_FACE);
+	    container.selectionIds = shapeGeometry->seerShape->useGetChildrenOfType(solids.at(0), TopAbs_FACE);
 	    container.pointLocation = intersection.getWorldIntersectPoint();
 	    add(containersOut, container);
 	  }
@@ -230,14 +220,14 @@ void Interpreter::go()
       }
       if (canSelectObjects(selectionMask))
       {
-	uuid object = connector.useGetRoot();
+	uuid object = shapeGeometry->seerShape->getRootShapeId();
 	if (!object.is_nil())
 	{
 	  container.selectionType = Type::Object;
 	  container.shapeId = nil_generator()();
 	  if (!has(containersOut, container)) //don't run again
 	  {
-	    container.selectionIds = connector.useGetChildrenOfType(object, TopAbs_FACE);
+	    container.selectionIds = shapeGeometry->seerShape->useGetChildrenOfType(object, TopAbs_FACE);
 	    container.pointLocation = intersection.getWorldIntersectPoint();
 	    add(containersOut, container);
 	  }

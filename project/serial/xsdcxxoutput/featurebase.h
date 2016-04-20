@@ -73,15 +73,16 @@ namespace prj
   namespace srl
   {
     class Parameter;
-    class EvolutionRecord;
-    class EvolutionContainer;
-    class ResultRecord;
-    class ResultContainer;
-    class FeatureRecord;
-    class FeatureContainer;
+    class EvolveRecord;
+    class EvolveContainer;
+    class ShapeIdRecord;
+    class ShapeIdContainer;
+    class FeatureTagRecord;
+    class FeatureTagContainer;
     class IdSet;
     class DerivedRecord;
     class DerivedContainer;
+    class SeerShape;
     class FeatureBase;
   }
 }
@@ -386,11 +387,11 @@ namespace prj
     };
 
     /**
-     * @brief Class corresponding to the %EvolutionRecord schema type.
+     * @brief Class corresponding to the %EvolveRecord schema type.
      *
      * @nosubgrouping
      */
-    class EvolutionRecord: public ::xml_schema::Type
+    class EvolveRecord: public ::xml_schema::Type
     {
       public:
       /**
@@ -536,8 +537,8 @@ namespace prj
        * @brief Create an instance from the ultimate base and
        * initializers for required elements and attributes.
        */
-      EvolutionRecord (const IdInType&,
-                       const IdOutType&);
+      EvolveRecord (const IdInType&,
+                    const IdOutType&);
 
       /**
        * @brief Create an instance from a DOM element.
@@ -547,9 +548,9 @@ namespace prj
        * @param c A pointer to the object that will contain the new
        * instance.
        */
-      EvolutionRecord (const ::xercesc::DOMElement& e,
-                       ::xml_schema::Flags f = 0,
-                       ::xml_schema::Container* c = 0);
+      EvolveRecord (const ::xercesc::DOMElement& e,
+                    ::xml_schema::Flags f = 0,
+                    ::xml_schema::Container* c = 0);
 
       /**
        * @brief Copy constructor.
@@ -560,9 +561,9 @@ namespace prj
        *
        * For polymorphic object models use the @c _clone function instead.
        */
-      EvolutionRecord (const EvolutionRecord& x,
-                       ::xml_schema::Flags f = 0,
-                       ::xml_schema::Container* c = 0);
+      EvolveRecord (const EvolveRecord& x,
+                    ::xml_schema::Flags f = 0,
+                    ::xml_schema::Container* c = 0);
 
       /**
        * @brief Copy the instance polymorphically.
@@ -575,7 +576,7 @@ namespace prj
        * used for copying and should be used for polymorphic object
        * models instead of the copy constructor.
        */
-      virtual EvolutionRecord*
+      virtual EvolveRecord*
       _clone (::xml_schema::Flags f = 0,
               ::xml_schema::Container* c = 0) const;
 
@@ -587,8 +588,8 @@ namespace prj
        *
        * For polymorphic object models use the @c _clone function instead.
        */
-      EvolutionRecord&
-      operator= (const EvolutionRecord& x);
+      EvolveRecord&
+      operator= (const EvolveRecord& x);
 
       //@}
 
@@ -596,7 +597,7 @@ namespace prj
        * @brief Destructor.
        */
       virtual 
-      ~EvolutionRecord ();
+      ~EvolveRecord ();
 
       // Implementation.
       //
@@ -618,17 +619,17 @@ namespace prj
     };
 
     /**
-     * @brief Class corresponding to the %EvolutionContainer schema type.
+     * @brief Class corresponding to the %EvolveContainer schema type.
      *
      * @nosubgrouping
      */
-    class EvolutionContainer: public ::xml_schema::Type
+    class EvolveContainer: public ::xml_schema::Type
     {
       public:
       /**
-       * @name evolutionRecord
+       * @name evolveRecord
        *
-       * @brief Accessor and modifier functions for the %evolutionRecord
+       * @brief Accessor and modifier functions for the %evolveRecord
        * sequence element.
        */
       //@{
@@ -636,27 +637,27 @@ namespace prj
       /**
        * @brief Element type.
        */
-      typedef ::prj::srl::EvolutionRecord EvolutionRecordType;
+      typedef ::prj::srl::EvolveRecord EvolveRecordType;
 
       /**
        * @brief Element sequence container type.
        */
-      typedef ::xsd::cxx::tree::sequence< EvolutionRecordType > EvolutionRecordSequence;
+      typedef ::xsd::cxx::tree::sequence< EvolveRecordType > EvolveRecordSequence;
 
       /**
        * @brief Element iterator type.
        */
-      typedef EvolutionRecordSequence::iterator EvolutionRecordIterator;
+      typedef EvolveRecordSequence::iterator EvolveRecordIterator;
 
       /**
        * @brief Element constant iterator type.
        */
-      typedef EvolutionRecordSequence::const_iterator EvolutionRecordConstIterator;
+      typedef EvolveRecordSequence::const_iterator EvolveRecordConstIterator;
 
       /**
        * @brief Element traits type.
        */
-      typedef ::xsd::cxx::tree::traits< EvolutionRecordType, char > EvolutionRecordTraits;
+      typedef ::xsd::cxx::tree::traits< EvolveRecordType, char > EvolveRecordTraits;
 
       /**
        * @brief Return a read-only (constant) reference to the element
@@ -664,16 +665,16 @@ namespace prj
        *
        * @return A constant reference to the sequence container.
        */
-      const EvolutionRecordSequence&
-      evolutionRecord () const;
+      const EvolveRecordSequence&
+      evolveRecord () const;
 
       /**
        * @brief Return a read-write reference to the element sequence.
        *
        * @return A reference to the sequence container.
        */
-      EvolutionRecordSequence&
-      evolutionRecord ();
+      EvolveRecordSequence&
+      evolveRecord ();
 
       /**
        * @brief Copy elements from a given sequence.
@@ -685,7 +686,7 @@ namespace prj
        * sequence and all old elements will be lost.
        */
       void
-      evolutionRecord (const EvolutionRecordSequence& s);
+      evolveRecord (const EvolveRecordSequence& s);
 
       //@}
 
@@ -698,7 +699,7 @@ namespace prj
        * @brief Create an instance from the ultimate base and
        * initializers for required elements and attributes.
        */
-      EvolutionContainer ();
+      EvolveContainer ();
 
       /**
        * @brief Create an instance from a DOM element.
@@ -708,9 +709,9 @@ namespace prj
        * @param c A pointer to the object that will contain the new
        * instance.
        */
-      EvolutionContainer (const ::xercesc::DOMElement& e,
-                          ::xml_schema::Flags f = 0,
-                          ::xml_schema::Container* c = 0);
+      EvolveContainer (const ::xercesc::DOMElement& e,
+                       ::xml_schema::Flags f = 0,
+                       ::xml_schema::Container* c = 0);
 
       /**
        * @brief Copy constructor.
@@ -721,9 +722,9 @@ namespace prj
        *
        * For polymorphic object models use the @c _clone function instead.
        */
-      EvolutionContainer (const EvolutionContainer& x,
-                          ::xml_schema::Flags f = 0,
-                          ::xml_schema::Container* c = 0);
+      EvolveContainer (const EvolveContainer& x,
+                       ::xml_schema::Flags f = 0,
+                       ::xml_schema::Container* c = 0);
 
       /**
        * @brief Copy the instance polymorphically.
@@ -736,7 +737,7 @@ namespace prj
        * used for copying and should be used for polymorphic object
        * models instead of the copy constructor.
        */
-      virtual EvolutionContainer*
+      virtual EvolveContainer*
       _clone (::xml_schema::Flags f = 0,
               ::xml_schema::Container* c = 0) const;
 
@@ -748,8 +749,8 @@ namespace prj
        *
        * For polymorphic object models use the @c _clone function instead.
        */
-      EvolutionContainer&
-      operator= (const EvolutionContainer& x);
+      EvolveContainer&
+      operator= (const EvolveContainer& x);
 
       //@}
 
@@ -757,7 +758,7 @@ namespace prj
        * @brief Destructor.
        */
       virtual 
-      ~EvolutionContainer ();
+      ~EvolveContainer ();
 
       // Implementation.
       //
@@ -770,17 +771,17 @@ namespace prj
              ::xml_schema::Flags);
 
       protected:
-      EvolutionRecordSequence evolutionRecord_;
+      EvolveRecordSequence evolveRecord_;
 
       //@endcond
     };
 
     /**
-     * @brief Class corresponding to the %ResultRecord schema type.
+     * @brief Class corresponding to the %ShapeIdRecord schema type.
      *
      * @nosubgrouping
      */
-    class ResultRecord: public ::xml_schema::Type
+    class ShapeIdRecord: public ::xml_schema::Type
     {
       public:
       /**
@@ -914,8 +915,8 @@ namespace prj
        * @brief Create an instance from the ultimate base and
        * initializers for required elements and attributes.
        */
-      ResultRecord (const IdType&,
-                    const ShapeOffsetType&);
+      ShapeIdRecord (const IdType&,
+                     const ShapeOffsetType&);
 
       /**
        * @brief Create an instance from a DOM element.
@@ -925,9 +926,9 @@ namespace prj
        * @param c A pointer to the object that will contain the new
        * instance.
        */
-      ResultRecord (const ::xercesc::DOMElement& e,
-                    ::xml_schema::Flags f = 0,
-                    ::xml_schema::Container* c = 0);
+      ShapeIdRecord (const ::xercesc::DOMElement& e,
+                     ::xml_schema::Flags f = 0,
+                     ::xml_schema::Container* c = 0);
 
       /**
        * @brief Copy constructor.
@@ -938,9 +939,9 @@ namespace prj
        *
        * For polymorphic object models use the @c _clone function instead.
        */
-      ResultRecord (const ResultRecord& x,
-                    ::xml_schema::Flags f = 0,
-                    ::xml_schema::Container* c = 0);
+      ShapeIdRecord (const ShapeIdRecord& x,
+                     ::xml_schema::Flags f = 0,
+                     ::xml_schema::Container* c = 0);
 
       /**
        * @brief Copy the instance polymorphically.
@@ -953,7 +954,7 @@ namespace prj
        * used for copying and should be used for polymorphic object
        * models instead of the copy constructor.
        */
-      virtual ResultRecord*
+      virtual ShapeIdRecord*
       _clone (::xml_schema::Flags f = 0,
               ::xml_schema::Container* c = 0) const;
 
@@ -965,8 +966,8 @@ namespace prj
        *
        * For polymorphic object models use the @c _clone function instead.
        */
-      ResultRecord&
-      operator= (const ResultRecord& x);
+      ShapeIdRecord&
+      operator= (const ShapeIdRecord& x);
 
       //@}
 
@@ -974,7 +975,7 @@ namespace prj
        * @brief Destructor.
        */
       virtual 
-      ~ResultRecord ();
+      ~ShapeIdRecord ();
 
       // Implementation.
       //
@@ -995,17 +996,17 @@ namespace prj
     };
 
     /**
-     * @brief Class corresponding to the %ResultContainer schema type.
+     * @brief Class corresponding to the %ShapeIdContainer schema type.
      *
      * @nosubgrouping
      */
-    class ResultContainer: public ::xml_schema::Type
+    class ShapeIdContainer: public ::xml_schema::Type
     {
       public:
       /**
-       * @name resultRecord
+       * @name shapeIdRecord
        *
-       * @brief Accessor and modifier functions for the %resultRecord
+       * @brief Accessor and modifier functions for the %shapeIdRecord
        * sequence element.
        */
       //@{
@@ -1013,27 +1014,27 @@ namespace prj
       /**
        * @brief Element type.
        */
-      typedef ::prj::srl::ResultRecord ResultRecordType;
+      typedef ::prj::srl::ShapeIdRecord ShapeIdRecordType;
 
       /**
        * @brief Element sequence container type.
        */
-      typedef ::xsd::cxx::tree::sequence< ResultRecordType > ResultRecordSequence;
+      typedef ::xsd::cxx::tree::sequence< ShapeIdRecordType > ShapeIdRecordSequence;
 
       /**
        * @brief Element iterator type.
        */
-      typedef ResultRecordSequence::iterator ResultRecordIterator;
+      typedef ShapeIdRecordSequence::iterator ShapeIdRecordIterator;
 
       /**
        * @brief Element constant iterator type.
        */
-      typedef ResultRecordSequence::const_iterator ResultRecordConstIterator;
+      typedef ShapeIdRecordSequence::const_iterator ShapeIdRecordConstIterator;
 
       /**
        * @brief Element traits type.
        */
-      typedef ::xsd::cxx::tree::traits< ResultRecordType, char > ResultRecordTraits;
+      typedef ::xsd::cxx::tree::traits< ShapeIdRecordType, char > ShapeIdRecordTraits;
 
       /**
        * @brief Return a read-only (constant) reference to the element
@@ -1041,16 +1042,16 @@ namespace prj
        *
        * @return A constant reference to the sequence container.
        */
-      const ResultRecordSequence&
-      resultRecord () const;
+      const ShapeIdRecordSequence&
+      shapeIdRecord () const;
 
       /**
        * @brief Return a read-write reference to the element sequence.
        *
        * @return A reference to the sequence container.
        */
-      ResultRecordSequence&
-      resultRecord ();
+      ShapeIdRecordSequence&
+      shapeIdRecord ();
 
       /**
        * @brief Copy elements from a given sequence.
@@ -1062,7 +1063,7 @@ namespace prj
        * sequence and all old elements will be lost.
        */
       void
-      resultRecord (const ResultRecordSequence& s);
+      shapeIdRecord (const ShapeIdRecordSequence& s);
 
       //@}
 
@@ -1075,7 +1076,7 @@ namespace prj
        * @brief Create an instance from the ultimate base and
        * initializers for required elements and attributes.
        */
-      ResultContainer ();
+      ShapeIdContainer ();
 
       /**
        * @brief Create an instance from a DOM element.
@@ -1085,9 +1086,9 @@ namespace prj
        * @param c A pointer to the object that will contain the new
        * instance.
        */
-      ResultContainer (const ::xercesc::DOMElement& e,
-                       ::xml_schema::Flags f = 0,
-                       ::xml_schema::Container* c = 0);
+      ShapeIdContainer (const ::xercesc::DOMElement& e,
+                        ::xml_schema::Flags f = 0,
+                        ::xml_schema::Container* c = 0);
 
       /**
        * @brief Copy constructor.
@@ -1098,9 +1099,9 @@ namespace prj
        *
        * For polymorphic object models use the @c _clone function instead.
        */
-      ResultContainer (const ResultContainer& x,
-                       ::xml_schema::Flags f = 0,
-                       ::xml_schema::Container* c = 0);
+      ShapeIdContainer (const ShapeIdContainer& x,
+                        ::xml_schema::Flags f = 0,
+                        ::xml_schema::Container* c = 0);
 
       /**
        * @brief Copy the instance polymorphically.
@@ -1113,7 +1114,7 @@ namespace prj
        * used for copying and should be used for polymorphic object
        * models instead of the copy constructor.
        */
-      virtual ResultContainer*
+      virtual ShapeIdContainer*
       _clone (::xml_schema::Flags f = 0,
               ::xml_schema::Container* c = 0) const;
 
@@ -1125,8 +1126,8 @@ namespace prj
        *
        * For polymorphic object models use the @c _clone function instead.
        */
-      ResultContainer&
-      operator= (const ResultContainer& x);
+      ShapeIdContainer&
+      operator= (const ShapeIdContainer& x);
 
       //@}
 
@@ -1134,7 +1135,7 @@ namespace prj
        * @brief Destructor.
        */
       virtual 
-      ~ResultContainer ();
+      ~ShapeIdContainer ();
 
       // Implementation.
       //
@@ -1147,17 +1148,17 @@ namespace prj
              ::xml_schema::Flags);
 
       protected:
-      ResultRecordSequence resultRecord_;
+      ShapeIdRecordSequence shapeIdRecord_;
 
       //@endcond
     };
 
     /**
-     * @brief Class corresponding to the %FeatureRecord schema type.
+     * @brief Class corresponding to the %FeatureTagRecord schema type.
      *
      * @nosubgrouping
      */
-    class FeatureRecord: public ::xml_schema::Type
+    class FeatureTagRecord: public ::xml_schema::Type
     {
       public:
       /**
@@ -1303,8 +1304,8 @@ namespace prj
        * @brief Create an instance from the ultimate base and
        * initializers for required elements and attributes.
        */
-      FeatureRecord (const IdType&,
-                     const TagType&);
+      FeatureTagRecord (const IdType&,
+                        const TagType&);
 
       /**
        * @brief Create an instance from a DOM element.
@@ -1314,9 +1315,9 @@ namespace prj
        * @param c A pointer to the object that will contain the new
        * instance.
        */
-      FeatureRecord (const ::xercesc::DOMElement& e,
-                     ::xml_schema::Flags f = 0,
-                     ::xml_schema::Container* c = 0);
+      FeatureTagRecord (const ::xercesc::DOMElement& e,
+                        ::xml_schema::Flags f = 0,
+                        ::xml_schema::Container* c = 0);
 
       /**
        * @brief Copy constructor.
@@ -1327,9 +1328,9 @@ namespace prj
        *
        * For polymorphic object models use the @c _clone function instead.
        */
-      FeatureRecord (const FeatureRecord& x,
-                     ::xml_schema::Flags f = 0,
-                     ::xml_schema::Container* c = 0);
+      FeatureTagRecord (const FeatureTagRecord& x,
+                        ::xml_schema::Flags f = 0,
+                        ::xml_schema::Container* c = 0);
 
       /**
        * @brief Copy the instance polymorphically.
@@ -1342,7 +1343,7 @@ namespace prj
        * used for copying and should be used for polymorphic object
        * models instead of the copy constructor.
        */
-      virtual FeatureRecord*
+      virtual FeatureTagRecord*
       _clone (::xml_schema::Flags f = 0,
               ::xml_schema::Container* c = 0) const;
 
@@ -1354,8 +1355,8 @@ namespace prj
        *
        * For polymorphic object models use the @c _clone function instead.
        */
-      FeatureRecord&
-      operator= (const FeatureRecord& x);
+      FeatureTagRecord&
+      operator= (const FeatureTagRecord& x);
 
       //@}
 
@@ -1363,7 +1364,7 @@ namespace prj
        * @brief Destructor.
        */
       virtual 
-      ~FeatureRecord ();
+      ~FeatureTagRecord ();
 
       // Implementation.
       //
@@ -1385,17 +1386,17 @@ namespace prj
     };
 
     /**
-     * @brief Class corresponding to the %FeatureContainer schema type.
+     * @brief Class corresponding to the %FeatureTagContainer schema type.
      *
      * @nosubgrouping
      */
-    class FeatureContainer: public ::xml_schema::Type
+    class FeatureTagContainer: public ::xml_schema::Type
     {
       public:
       /**
-       * @name featureRecord
+       * @name featureTagRecord
        *
-       * @brief Accessor and modifier functions for the %featureRecord
+       * @brief Accessor and modifier functions for the %featureTagRecord
        * sequence element.
        */
       //@{
@@ -1403,27 +1404,27 @@ namespace prj
       /**
        * @brief Element type.
        */
-      typedef ::prj::srl::FeatureRecord FeatureRecordType;
+      typedef ::prj::srl::FeatureTagRecord FeatureTagRecordType;
 
       /**
        * @brief Element sequence container type.
        */
-      typedef ::xsd::cxx::tree::sequence< FeatureRecordType > FeatureRecordSequence;
+      typedef ::xsd::cxx::tree::sequence< FeatureTagRecordType > FeatureTagRecordSequence;
 
       /**
        * @brief Element iterator type.
        */
-      typedef FeatureRecordSequence::iterator FeatureRecordIterator;
+      typedef FeatureTagRecordSequence::iterator FeatureTagRecordIterator;
 
       /**
        * @brief Element constant iterator type.
        */
-      typedef FeatureRecordSequence::const_iterator FeatureRecordConstIterator;
+      typedef FeatureTagRecordSequence::const_iterator FeatureTagRecordConstIterator;
 
       /**
        * @brief Element traits type.
        */
-      typedef ::xsd::cxx::tree::traits< FeatureRecordType, char > FeatureRecordTraits;
+      typedef ::xsd::cxx::tree::traits< FeatureTagRecordType, char > FeatureTagRecordTraits;
 
       /**
        * @brief Return a read-only (constant) reference to the element
@@ -1431,16 +1432,16 @@ namespace prj
        *
        * @return A constant reference to the sequence container.
        */
-      const FeatureRecordSequence&
-      featureRecord () const;
+      const FeatureTagRecordSequence&
+      featureTagRecord () const;
 
       /**
        * @brief Return a read-write reference to the element sequence.
        *
        * @return A reference to the sequence container.
        */
-      FeatureRecordSequence&
-      featureRecord ();
+      FeatureTagRecordSequence&
+      featureTagRecord ();
 
       /**
        * @brief Copy elements from a given sequence.
@@ -1452,7 +1453,7 @@ namespace prj
        * sequence and all old elements will be lost.
        */
       void
-      featureRecord (const FeatureRecordSequence& s);
+      featureTagRecord (const FeatureTagRecordSequence& s);
 
       //@}
 
@@ -1465,7 +1466,7 @@ namespace prj
        * @brief Create an instance from the ultimate base and
        * initializers for required elements and attributes.
        */
-      FeatureContainer ();
+      FeatureTagContainer ();
 
       /**
        * @brief Create an instance from a DOM element.
@@ -1475,9 +1476,9 @@ namespace prj
        * @param c A pointer to the object that will contain the new
        * instance.
        */
-      FeatureContainer (const ::xercesc::DOMElement& e,
-                        ::xml_schema::Flags f = 0,
-                        ::xml_schema::Container* c = 0);
+      FeatureTagContainer (const ::xercesc::DOMElement& e,
+                           ::xml_schema::Flags f = 0,
+                           ::xml_schema::Container* c = 0);
 
       /**
        * @brief Copy constructor.
@@ -1488,9 +1489,9 @@ namespace prj
        *
        * For polymorphic object models use the @c _clone function instead.
        */
-      FeatureContainer (const FeatureContainer& x,
-                        ::xml_schema::Flags f = 0,
-                        ::xml_schema::Container* c = 0);
+      FeatureTagContainer (const FeatureTagContainer& x,
+                           ::xml_schema::Flags f = 0,
+                           ::xml_schema::Container* c = 0);
 
       /**
        * @brief Copy the instance polymorphically.
@@ -1503,7 +1504,7 @@ namespace prj
        * used for copying and should be used for polymorphic object
        * models instead of the copy constructor.
        */
-      virtual FeatureContainer*
+      virtual FeatureTagContainer*
       _clone (::xml_schema::Flags f = 0,
               ::xml_schema::Container* c = 0) const;
 
@@ -1515,8 +1516,8 @@ namespace prj
        *
        * For polymorphic object models use the @c _clone function instead.
        */
-      FeatureContainer&
-      operator= (const FeatureContainer& x);
+      FeatureTagContainer&
+      operator= (const FeatureTagContainer& x);
 
       //@}
 
@@ -1524,7 +1525,7 @@ namespace prj
        * @brief Destructor.
        */
       virtual 
-      ~FeatureContainer ();
+      ~FeatureTagContainer ();
 
       // Implementation.
       //
@@ -1537,7 +1538,7 @@ namespace prj
              ::xml_schema::Flags);
 
       protected:
-      FeatureRecordSequence featureRecord_;
+      FeatureTagRecordSequence featureTagRecord_;
 
       //@endcond
     };
@@ -2102,6 +2103,422 @@ namespace prj
     };
 
     /**
+     * @brief Class corresponding to the %SeerShape schema type.
+     *
+     * @nosubgrouping
+     */
+    class SeerShape: public ::xml_schema::Type
+    {
+      public:
+      /**
+       * @name rootShapeId
+       *
+       * @brief Accessor and modifier functions for the %rootShapeId
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::xml_schema::String RootShapeIdType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< RootShapeIdType, char > RootShapeIdTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const RootShapeIdType&
+      rootShapeId () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      RootShapeIdType&
+      rootShapeId ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      rootShapeId (const RootShapeIdType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      rootShapeId (::std::unique_ptr< RootShapeIdType > p);
+
+      /**
+       * @brief Return the default value for the element.
+       *
+       * @return A read-only (constant) reference to the element's
+       * default value.
+       */
+      static const RootShapeIdType&
+      rootShapeId_default_value ();
+
+      //@}
+
+      /**
+       * @name shapeIdContainer
+       *
+       * @brief Accessor and modifier functions for the %shapeIdContainer
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::ShapeIdContainer ShapeIdContainerType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< ShapeIdContainerType, char > ShapeIdContainerTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const ShapeIdContainerType&
+      shapeIdContainer () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      ShapeIdContainerType&
+      shapeIdContainer ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      shapeIdContainer (const ShapeIdContainerType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      shapeIdContainer (::std::unique_ptr< ShapeIdContainerType > p);
+
+      //@}
+
+      /**
+       * @name evolveContainer
+       *
+       * @brief Accessor and modifier functions for the %evolveContainer
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::EvolveContainer EvolveContainerType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< EvolveContainerType, char > EvolveContainerTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const EvolveContainerType&
+      evolveContainer () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      EvolveContainerType&
+      evolveContainer ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      evolveContainer (const EvolveContainerType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      evolveContainer (::std::unique_ptr< EvolveContainerType > p);
+
+      //@}
+
+      /**
+       * @name featureTagContainer
+       *
+       * @brief Accessor and modifier functions for the %featureTagContainer
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::FeatureTagContainer FeatureTagContainerType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< FeatureTagContainerType, char > FeatureTagContainerTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const FeatureTagContainerType&
+      featureTagContainer () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      FeatureTagContainerType&
+      featureTagContainer ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      featureTagContainer (const FeatureTagContainerType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      featureTagContainer (::std::unique_ptr< FeatureTagContainerType > p);
+
+      //@}
+
+      /**
+       * @name derivedContainer
+       *
+       * @brief Accessor and modifier functions for the %derivedContainer
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::DerivedContainer DerivedContainerType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< DerivedContainerType, char > DerivedContainerTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const DerivedContainerType&
+      derivedContainer () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      DerivedContainerType&
+      derivedContainer ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      derivedContainer (const DerivedContainerType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      derivedContainer (::std::unique_ptr< DerivedContainerType > p);
+
+      //@}
+
+      /**
+       * @name Constructors
+       */
+      //@{
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes.
+       */
+      SeerShape (const RootShapeIdType&,
+                 const ShapeIdContainerType&,
+                 const EvolveContainerType&,
+                 const FeatureTagContainerType&,
+                 const DerivedContainerType&);
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes
+       * (::std::unique_ptr version).
+       *
+       * This constructor will try to use the passed values directly
+       * instead of making copies.
+       */
+      SeerShape (const RootShapeIdType&,
+                 ::std::unique_ptr< ShapeIdContainerType >,
+                 ::std::unique_ptr< EvolveContainerType >,
+                 ::std::unique_ptr< FeatureTagContainerType >,
+                 ::std::unique_ptr< DerivedContainerType >);
+
+      /**
+       * @brief Create an instance from a DOM element.
+       *
+       * @param e A DOM element to extract the data from.
+       * @param f Flags to create the new instance with.
+       * @param c A pointer to the object that will contain the new
+       * instance.
+       */
+      SeerShape (const ::xercesc::DOMElement& e,
+                 ::xml_schema::Flags f = 0,
+                 ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy constructor.
+       *
+       * @param x An instance to make a copy of.
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      SeerShape (const SeerShape& x,
+                 ::xml_schema::Flags f = 0,
+                 ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy the instance polymorphically.
+       *
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       * @return A pointer to the dynamically allocated copy.
+       *
+       * This function ensures that the dynamic type of the instance is
+       * used for copying and should be used for polymorphic object
+       * models instead of the copy constructor.
+       */
+      virtual SeerShape*
+      _clone (::xml_schema::Flags f = 0,
+              ::xml_schema::Container* c = 0) const;
+
+      /**
+       * @brief Copy assignment operator.
+       *
+       * @param x An instance to make a copy of.
+       * @return A reference to itself.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      SeerShape&
+      operator= (const SeerShape& x);
+
+      //@}
+
+      /**
+       * @brief Destructor.
+       */
+      virtual 
+      ~SeerShape ();
+
+      // Implementation.
+      //
+
+      //@cond
+
+      protected:
+      void
+      parse (::xsd::cxx::xml::dom::parser< char >&,
+             ::xml_schema::Flags);
+
+      protected:
+      ::xsd::cxx::tree::one< RootShapeIdType > rootShapeId_;
+      static const RootShapeIdType rootShapeId_default_value_;
+      ::xsd::cxx::tree::one< ShapeIdContainerType > shapeIdContainer_;
+      ::xsd::cxx::tree::one< EvolveContainerType > evolveContainer_;
+      ::xsd::cxx::tree::one< FeatureTagContainerType > featureTagContainer_;
+      ::xsd::cxx::tree::one< DerivedContainerType > derivedContainer_;
+
+      //@endcond
+    };
+
+    /**
      * @brief Class corresponding to the %FeatureBase schema type.
      *
      * @nosubgrouping
@@ -2244,9 +2661,9 @@ namespace prj
       //@}
 
       /**
-       * @name evolutionContainer
+       * @name seerShape
        *
-       * @brief Accessor and modifier functions for the %evolutionContainer
+       * @brief Accessor and modifier functions for the %seerShape
        * required element.
        */
       //@{
@@ -2254,28 +2671,28 @@ namespace prj
       /**
        * @brief Element type.
        */
-      typedef ::prj::srl::EvolutionContainer EvolutionContainerType;
+      typedef ::prj::srl::SeerShape SeerShapeType;
 
       /**
        * @brief Element traits type.
        */
-      typedef ::xsd::cxx::tree::traits< EvolutionContainerType, char > EvolutionContainerTraits;
+      typedef ::xsd::cxx::tree::traits< SeerShapeType, char > SeerShapeTraits;
 
       /**
        * @brief Return a read-only (constant) reference to the element.
        *
        * @return A constant reference to the element.
        */
-      const EvolutionContainerType&
-      evolutionContainer () const;
+      const SeerShapeType&
+      seerShape () const;
 
       /**
        * @brief Return a read-write reference to the element.
        *
        * @return A reference to the element.
        */
-      EvolutionContainerType&
-      evolutionContainer ();
+      SeerShapeType&
+      seerShape ();
 
       /**
        * @brief Set the element value.
@@ -2286,7 +2703,7 @@ namespace prj
        * the new value of the element.
        */
       void
-      evolutionContainer (const EvolutionContainerType& x);
+      seerShape (const SeerShapeType& x);
 
       /**
        * @brief Set the element value without copying.
@@ -2297,181 +2714,7 @@ namespace prj
        * instead of making a copy.
        */
       void
-      evolutionContainer (::std::unique_ptr< EvolutionContainerType > p);
-
-      //@}
-
-      /**
-       * @name resultContainer
-       *
-       * @brief Accessor and modifier functions for the %resultContainer
-       * required element.
-       */
-      //@{
-
-      /**
-       * @brief Element type.
-       */
-      typedef ::prj::srl::ResultContainer ResultContainerType;
-
-      /**
-       * @brief Element traits type.
-       */
-      typedef ::xsd::cxx::tree::traits< ResultContainerType, char > ResultContainerTraits;
-
-      /**
-       * @brief Return a read-only (constant) reference to the element.
-       *
-       * @return A constant reference to the element.
-       */
-      const ResultContainerType&
-      resultContainer () const;
-
-      /**
-       * @brief Return a read-write reference to the element.
-       *
-       * @return A reference to the element.
-       */
-      ResultContainerType&
-      resultContainer ();
-
-      /**
-       * @brief Set the element value.
-       *
-       * @param x A new value to set.
-       *
-       * This function makes a copy of its argument and sets it as
-       * the new value of the element.
-       */
-      void
-      resultContainer (const ResultContainerType& x);
-
-      /**
-       * @brief Set the element value without copying.
-       *
-       * @param p A new value to use.
-       *
-       * This function will try to use the passed value directly
-       * instead of making a copy.
-       */
-      void
-      resultContainer (::std::unique_ptr< ResultContainerType > p);
-
-      //@}
-
-      /**
-       * @name featureContainer
-       *
-       * @brief Accessor and modifier functions for the %featureContainer
-       * required element.
-       */
-      //@{
-
-      /**
-       * @brief Element type.
-       */
-      typedef ::prj::srl::FeatureContainer FeatureContainerType;
-
-      /**
-       * @brief Element traits type.
-       */
-      typedef ::xsd::cxx::tree::traits< FeatureContainerType, char > FeatureContainerTraits;
-
-      /**
-       * @brief Return a read-only (constant) reference to the element.
-       *
-       * @return A constant reference to the element.
-       */
-      const FeatureContainerType&
-      featureContainer () const;
-
-      /**
-       * @brief Return a read-write reference to the element.
-       *
-       * @return A reference to the element.
-       */
-      FeatureContainerType&
-      featureContainer ();
-
-      /**
-       * @brief Set the element value.
-       *
-       * @param x A new value to set.
-       *
-       * This function makes a copy of its argument and sets it as
-       * the new value of the element.
-       */
-      void
-      featureContainer (const FeatureContainerType& x);
-
-      /**
-       * @brief Set the element value without copying.
-       *
-       * @param p A new value to use.
-       *
-       * This function will try to use the passed value directly
-       * instead of making a copy.
-       */
-      void
-      featureContainer (::std::unique_ptr< FeatureContainerType > p);
-
-      //@}
-
-      /**
-       * @name derivedContainer
-       *
-       * @brief Accessor and modifier functions for the %derivedContainer
-       * required element.
-       */
-      //@{
-
-      /**
-       * @brief Element type.
-       */
-      typedef ::prj::srl::DerivedContainer DerivedContainerType;
-
-      /**
-       * @brief Element traits type.
-       */
-      typedef ::xsd::cxx::tree::traits< DerivedContainerType, char > DerivedContainerTraits;
-
-      /**
-       * @brief Return a read-only (constant) reference to the element.
-       *
-       * @return A constant reference to the element.
-       */
-      const DerivedContainerType&
-      derivedContainer () const;
-
-      /**
-       * @brief Return a read-write reference to the element.
-       *
-       * @return A reference to the element.
-       */
-      DerivedContainerType&
-      derivedContainer ();
-
-      /**
-       * @brief Set the element value.
-       *
-       * @param x A new value to set.
-       *
-       * This function makes a copy of its argument and sets it as
-       * the new value of the element.
-       */
-      void
-      derivedContainer (const DerivedContainerType& x);
-
-      /**
-       * @brief Set the element value without copying.
-       *
-       * @param p A new value to use.
-       *
-       * This function will try to use the passed value directly
-       * instead of making a copy.
-       */
-      void
-      derivedContainer (::std::unique_ptr< DerivedContainerType > p);
+      seerShape (::std::unique_ptr< SeerShapeType > p);
 
       //@}
 
@@ -2486,10 +2729,7 @@ namespace prj
        */
       FeatureBase (const NameType&,
                    const IdType&,
-                   const EvolutionContainerType&,
-                   const ResultContainerType&,
-                   const FeatureContainerType&,
-                   const DerivedContainerType&);
+                   const SeerShapeType&);
 
       /**
        * @brief Create an instance from the ultimate base and
@@ -2501,10 +2741,7 @@ namespace prj
        */
       FeatureBase (const NameType&,
                    const IdType&,
-                   ::std::unique_ptr< EvolutionContainerType >,
-                   ::std::unique_ptr< ResultContainerType >,
-                   ::std::unique_ptr< FeatureContainerType >,
-                   ::std::unique_ptr< DerivedContainerType >);
+                   ::std::unique_ptr< SeerShapeType >);
 
       /**
        * @brief Create an instance from a DOM element.
@@ -2580,10 +2817,7 @@ namespace prj
       static const NameType name_default_value_;
       ::xsd::cxx::tree::one< IdType > id_;
       static const IdType id_default_value_;
-      ::xsd::cxx::tree::one< EvolutionContainerType > evolutionContainer_;
-      ::xsd::cxx::tree::one< ResultContainerType > resultContainer_;
-      ::xsd::cxx::tree::one< FeatureContainerType > featureContainer_;
-      ::xsd::cxx::tree::one< DerivedContainerType > derivedContainer_;
+      ::xsd::cxx::tree::one< SeerShapeType > seerShape_;
 
       //@endcond
     };
@@ -2619,22 +2853,22 @@ namespace prj
     operator<< (::xercesc::DOMElement&, const Parameter&);
 
     void
-    operator<< (::xercesc::DOMElement&, const EvolutionRecord&);
+    operator<< (::xercesc::DOMElement&, const EvolveRecord&);
 
     void
-    operator<< (::xercesc::DOMElement&, const EvolutionContainer&);
+    operator<< (::xercesc::DOMElement&, const EvolveContainer&);
 
     void
-    operator<< (::xercesc::DOMElement&, const ResultRecord&);
+    operator<< (::xercesc::DOMElement&, const ShapeIdRecord&);
 
     void
-    operator<< (::xercesc::DOMElement&, const ResultContainer&);
+    operator<< (::xercesc::DOMElement&, const ShapeIdContainer&);
 
     void
-    operator<< (::xercesc::DOMElement&, const FeatureRecord&);
+    operator<< (::xercesc::DOMElement&, const FeatureTagRecord&);
 
     void
-    operator<< (::xercesc::DOMElement&, const FeatureContainer&);
+    operator<< (::xercesc::DOMElement&, const FeatureTagContainer&);
 
     void
     operator<< (::xercesc::DOMElement&, const IdSet&);
@@ -2644,6 +2878,9 @@ namespace prj
 
     void
     operator<< (::xercesc::DOMElement&, const DerivedContainer&);
+
+    void
+    operator<< (::xercesc::DOMElement&, const SeerShape&);
 
     void
     operator<< (::xercesc::DOMElement&, const FeatureBase&);

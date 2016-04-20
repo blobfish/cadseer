@@ -23,6 +23,7 @@
 #include <boost/graph/topological_sort.hpp>
 #include <boost/graph/filtered_graph.hpp>
 #include <boost/uuid/string_generator.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 #include <BRep_Builder.hxx>
 #include <BRepTools.hxx>

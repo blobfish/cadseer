@@ -37,19 +37,17 @@
 #include <osg/MatrixTransform>
 #include <osg/LOD>
 
-#include <feature/maps.h>
 #include <feature/types.h>
 #include <feature/inputtypes.h>
 #include <feature/states.h>
 #include <feature/parameter.h>
-#include <modelviz/connector.h>
 
 class QDir;
-
 namespace prj{namespace srl{class FeatureBase;}}
 
 namespace ftr
 {
+  class SeerShape;
   class Base;
   typedef std::map<InputTypes, const Base*> UpdateMap;
   
@@ -93,16 +91,14 @@ public:
   virtual const std::string& getTypeString() const = 0;
   virtual const QIcon& getIcon() const = 0;
   virtual Descriptor getDescriptor() const = 0;
-  const EvolutionContainer& getEvolutioncontainer() const {return evolutionContainer;}
-  const ResultContainer& getResultContainer() const {return resultContainer;}
   boost::uuids::uuid getId() const {return id;}
-  const TopoDS_Shape& getShape() const {return shape;}
-  void setShape(const TopoDS_Shape &in){shape = in;} //!< only used for serialize in!
+  const TopoDS_Shape& getShape() const;
+  void setShape(const TopoDS_Shape &in); //!< only used for serialize in!
   static TopoDS_Compound compoundWrap(const TopoDS_Shape &shapeIn);
   osg::Switch* getMainSwitch() const {return mainSwitch.get();}
   osg::Switch* getOverlaySwitch() const {return overlaySwitch.get();}
   osg::MatrixTransform* getMainTransform() const {return mainTransform.get();}
-  const mdv::Connector& getConnector() const {return connector;}
+  const SeerShape& getSeerShape() const {return *seerShape;}
   
   virtual void serialWrite(const QDir &); //!< override in leaf classes only.
   std::string getFileName() const; //!< used by git.
@@ -136,18 +132,12 @@ protected:
   ftr::State state;
   std::size_t constructionIndex; //!< for consistently ordered iteration. @see DAGView
   
-  TopoDS_Shape shape;
-  
-  EvolutionContainer evolutionContainer;
-  ResultContainer resultContainer;
-  FeatureContainer featureContainer;
-  DerivedContainer derivedContainer;
+  std::shared_ptr<SeerShape> seerShape;
   
   osg::ref_ptr<osg::Switch> mainSwitch;
   osg::ref_ptr<osg::MatrixTransform> mainTransform;
   osg::ref_ptr<osg::Switch> overlaySwitch;
   osg::ref_ptr<osg::LOD> lod;
-  mdv::Connector connector;
 };
 }
 

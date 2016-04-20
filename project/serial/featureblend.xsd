@@ -64,7 +64,7 @@
 <xs:complexType name="FeatureBlend">
   <xs:all>
     <xs:element name="featureBase" type="srl:FeatureBase"/>
-    <xs:element name="shapeMap" type="srl:EvolutionContainer"/>
+    <xs:element name="shapeMap" type="srl:EvolveContainer"/>
     <xs:element name="simpleBlends" type="srl:SimpleBlends"/>
     <xs:element name="variableBlends" type="srl:VariableBlends"/>
   </xs:all>

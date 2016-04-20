@@ -13,42 +13,42 @@
   </xs:all>
 </xs:complexType>
 
-<xs:complexType name="EvolutionRecord">
+<xs:complexType name="EvolveRecord">
   <xs:all>
     <xs:element name="idIn" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
     <xs:element name="idOut" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
   </xs:all>
 </xs:complexType>
 
-<xs:complexType name="EvolutionContainer">
+<xs:complexType name="EvolveContainer">
   <xs:sequence minOccurs="0" maxOccurs="unbounded">
-    <xs:element name="evolutionRecord" type="srl:EvolutionRecord"/>
+    <xs:element name="evolveRecord" type="srl:EvolveRecord"/>
   </xs:sequence>
 </xs:complexType>
 
-<xs:complexType name="ResultRecord">
+<xs:complexType name="ShapeIdRecord">
   <xs:all>
     <xs:element name="id" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
     <xs:element name="shapeOffset" type="xs:unsignedLong" default="18446744073709551615"/>
   </xs:all>
 </xs:complexType>
 
-<xs:complexType name="ResultContainer">
+<xs:complexType name="ShapeIdContainer">
   <xs:sequence minOccurs="0" maxOccurs="unbounded">
-    <xs:element name="resultRecord" type="srl:ResultRecord"/>
+    <xs:element name="shapeIdRecord" type="srl:ShapeIdRecord"/>
   </xs:sequence>
 </xs:complexType>
 
-<xs:complexType name="FeatureRecord">
+<xs:complexType name="FeatureTagRecord">
   <xs:all>
     <xs:element name="id" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
     <xs:element name="tag" type="xs:string" default=""/>
   </xs:all>
 </xs:complexType>
 
-<xs:complexType name="FeatureContainer">
+<xs:complexType name="FeatureTagContainer">
   <xs:sequence minOccurs="0" maxOccurs="unbounded">
-    <xs:element name="featureRecord" type="srl:FeatureRecord"/>
+    <xs:element name="featureTagRecord" type="srl:FeatureTagRecord"/>
   </xs:sequence>
 </xs:complexType>
 
@@ -71,14 +71,21 @@
   </xs:sequence>
 </xs:complexType>
 
+<xs:complexType name="SeerShape">
+  <xs:all>
+    <xs:element name="rootShapeId" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+    <xs:element name="shapeIdContainer" type="srl:ShapeIdContainer"/>
+    <xs:element name="evolveContainer" type="srl:EvolveContainer"/>
+    <xs:element name="featureTagContainer" type="srl:FeatureTagContainer"/>
+    <xs:element name="derivedContainer" type="srl:DerivedContainer"/>
+  </xs:all>
+</xs:complexType>
+
 <xs:complexType name="FeatureBase">
   <xs:all>
     <xs:element name="name" type="xs:string" default="Empty"/>
     <xs:element name="id" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
-    <xs:element name="evolutionContainer" type="srl:EvolutionContainer"/>
-    <xs:element name="resultContainer" type="srl:ResultContainer"/>
-    <xs:element name="featureContainer" type="srl:FeatureContainer"/>
-    <xs:element name="derivedContainer" type="srl:DerivedContainer"/>
+    <xs:element name="seerShape" type="srl:SeerShape"/>
   </xs:all>
 </xs:complexType>
 

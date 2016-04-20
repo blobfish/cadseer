@@ -1834,7 +1834,7 @@ namespace prj
       /**
        * @brief Element type.
        */
-      typedef ::prj::srl::EvolutionContainer ShapeMapType;
+      typedef ::prj::srl::EvolveContainer ShapeMapType;
 
       /**
        * @brief Element traits type.

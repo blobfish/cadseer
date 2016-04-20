@@ -26,6 +26,7 @@
 #include <library/ipgroup.h>
 #include <project/serial/xsdcxxoutput/featurecylinder.h>
 #include <feature/cylinderbuilder.h>
+#include <feature/seershape.h>
 #include <feature/cylinder.h>
 
 using namespace ftr;
@@ -163,8 +164,6 @@ void Cylinder::getParameters(double& radiusOut, double& heightOut) const
 
 void Cylinder::updateModel(const UpdateMap& mapIn)
 {
-  //clear shape so if we fail the feature will be empty.
-  shape = TopoDS_Shape();
   setFailure();
   
   CSysBase::updateModel(mapIn);
@@ -172,7 +171,7 @@ void Cylinder::updateModel(const UpdateMap& mapIn)
   try
   {
     CylinderBuilder cylinderMaker(radius, height, system);
-    shape = compoundWrap(cylinderMaker.getSolid());
+    seerShape->setOCCTShape(cylinderMaker.getSolid());
     updateResult(cylinderMaker);
     setSuccess();
   }
@@ -197,23 +196,18 @@ void Cylinder::initializeMaps()
     uuid tempId = idGenerator();
     tempIds.push_back(tempId);
     
-    ResultRecord resultRecord;
-    resultRecord.id = tempId;
-    resultRecord.shape = TopoDS_Shape();
-    resultContainer.insert(resultRecord);
-    
-    EvolutionRecord evolutionRecord;
-    evolutionRecord.outId = tempId;
-    evolutionContainer.insert(evolutionRecord);
+    EvolveRecord evolveRecord;
+    evolveRecord.outId = tempId;
+    seerShape->insertEvolve(evolveRecord);
   }
   
   //helper lamda
   auto insertIntoFeatureMap = [this](const uuid &idIn, FeatureTag featureTagIn)
   {
-    FeatureRecord record;
+    FeatureTagRecord record;
     record.id = idIn;
     record.tag = featureTagMap.at(featureTagIn);
-    featureContainer.insert(record);
+    seerShape->insertFeatureTag(record);
   };
   
   //first we do the compound that is root. this is not in box maker.
@@ -243,11 +237,11 @@ void Cylinder::updateResult(const CylinderBuilder &cylinderBuilderIn)
   //helper lamda
   auto updateShapeByTag = [this](const TopoDS_Shape &shapeIn, FeatureTag featureTagIn)
   {
-    uuid localId = findFeatureByTag(featureContainer, featureTagMap.at(featureTagIn)).id;
-    updateShapeById(resultContainer, localId, shapeIn);
+    uuid localId = seerShape->featureTagId(featureTagMap.at(featureTagIn));
+    seerShape->updateShapeIdRecord(shapeIn, localId);
   };
   
-  updateShapeByTag(shape, FeatureTag::Root);
+  updateShapeByTag(seerShape->getRootOCCTShape(), FeatureTag::Root);
   updateShapeByTag(cylinderBuilderIn.getSolid(), FeatureTag::Solid);
   updateShapeByTag(cylinderBuilderIn.getShell(), FeatureTag::Shell);
   updateShapeByTag(cylinderBuilderIn.getFaceBottom(), FeatureTag::FaceBottom);
@@ -262,7 +256,8 @@ void Cylinder::updateResult(const CylinderBuilder &cylinderBuilderIn)
   updateShapeByTag(cylinderBuilderIn.getVertexBottom(), FeatureTag::VertexBottom);
   updateShapeByTag(cylinderBuilderIn.getVertexTop(), FeatureTag::VertexTop);
   
-//   std::cout << std::endl << "update result:" << std::endl << resultContainer << std::endl;
+  seerShape->setRootShapeId(seerShape->featureTagId(featureTagMap.at(FeatureTag::Root)));
+  
 }
 
 void Cylinder::serialWrite(const QDir &dIn)

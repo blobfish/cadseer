@@ -32,26 +32,26 @@
 #include <BRepExtrema_DistShapeShape.hxx>
 #include <Geom_Curve.hxx>
 
+#include <globalutilities.h>
 #include <project/serial/xsdcxxoutput/featurechamfer.h>
-#include <feature/shapeidmapper.h>
+#include <feature/seershape.h>
 #include <feature/shapecheck.h>
 #include <feature/chamfer.h>
 
 using namespace ftr;
+using boost::uuids::uuid;
 
 QIcon Chamfer::icon;
 
-boost::uuids::uuid Chamfer::referenceFaceId(const ResultContainer &cIn, const boost::uuids::uuid &edgeIdIn)
+boost::uuids::uuid Chamfer::referenceFaceId(const SeerShape &seerShapeIn, const boost::uuids::uuid &edgeIdIn)
 {
-  assert(hasResult(cIn, edgeIdIn));
-  TopoDS_Shape edgeShape = findResultById(cIn, edgeIdIn).shape;
+  assert(seerShapeIn.hasShapeIdRecord(edgeIdIn));
+  TopoDS_Shape edgeShape = seerShapeIn.findShapeIdRecord(edgeIdIn).shape;
   assert(edgeShape.ShapeType() == TopAbs_EDGE);
   
-  TopTools_IndexedDataMapOfShapeListOfShape eToF;
-  TopExp::MapShapesAndAncestors(findRootShape(cIn), TopAbs_EDGE, TopAbs_FACE, eToF);
-  TopoDS_Face faceShape = TopoDS::Face(eToF.FindFromKey(edgeShape).First());
-  assert(hasResult(cIn, faceShape));
-  return findResultByShape(cIn, faceShape).id;
+  std::vector<boost::uuids::uuid> faceIds = seerShapeIn.useGetParentsOfType(edgeIdIn, TopAbs_FACE);
+  assert(!faceIds.empty());
+  return faceIds.front();
 }
 
 std::shared_ptr< Parameter > Chamfer::buildSymParameter()
@@ -127,33 +127,31 @@ void Chamfer::updateModel(const UpdateMap &mapIn)
     if (mapIn.count(InputTypes::target) < 1)
       throw std::runtime_error("no parent for chamfer");
     
-    const TopoDS_Shape &targetShape = mapIn.at(InputTypes::target)->getShape();
-    const ResultContainer& targetResultContainer = mapIn.at(InputTypes::target)->getResultContainer();
+    const SeerShape &targetSeerShape = mapIn.at(InputTypes::target)->getSeerShape();
     
     //starting from the stand point that this feature has failed.
     //set the shape and container to the parent target.
-    shape = targetShape;
-    resultContainer = targetResultContainer;
+    seerShape->partialAssign(targetSeerShape);
   
-    BRepFilletAPI_MakeChamfer chamferMaker(targetShape);
+    BRepFilletAPI_MakeChamfer chamferMaker(targetSeerShape.getRootOCCTShape());
     for (const auto &chamfer : symChamfers)
     {
       assert(chamfer.distance);
       bool labelDone = false; //set label position to first pick.
       for (const auto &pick : chamfer.picks)
       {
-	if (!hasResult(targetResultContainer, pick.edgeId))
+	if (!targetSeerShape.hasShapeIdRecord(pick.edgeId))
 	{
 	  std::cout << "edge id of: " << boost::uuids::to_string(pick.edgeId) << " not found in chamfer" << std::endl;
 	  continue;
 	}
-	if (!hasResult(targetResultContainer, pick.faceId))
+	if (!targetSeerShape.hasShapeIdRecord(pick.faceId))
 	{
 	  std::cout << "face id of: " << boost::uuids::to_string(pick.faceId) << " not found in chamfer" << std::endl;
 	  continue;
 	}
-	TopoDS_Edge edge = TopoDS::Edge(findResultById(targetResultContainer, pick.edgeId).shape);
-	TopoDS_Face face = TopoDS::Face(findResultById(targetResultContainer, pick.faceId).shape);
+	TopoDS_Edge edge = TopoDS::Edge(targetSeerShape.findShapeIdRecord(pick.edgeId).shape);
+	TopoDS_Face face = TopoDS::Face(targetSeerShape.findShapeIdRecord(pick.faceId).shape);
 	chamferMaker.Add(chamfer.distance->getValue(), edge, face);
 	//update location of parameter label.
 	if (!labelDone)
@@ -170,20 +168,17 @@ void Chamfer::updateModel(const UpdateMap &mapIn)
     if (!check.isValid())
       throw std::runtime_error("shapeCheck failed");
 
-    shape = chamferMaker.Shape();
-    ResultContainer freshContainer = createInitialContainer(shape);
-    shapeMatch(targetResultContainer, freshContainer);
-    uniqueTypeMatch(targetResultContainer, freshContainer);
-    modifiedMatch(chamferMaker, mapIn.at(InputTypes::target)->getResultContainer(), freshContainer);
-    generatedMatch(chamferMaker, mapIn.at(InputTypes::target), freshContainer);
-//     ensureNoFaceNils(freshContainer);
-    outerWireMatch(targetResultContainer, freshContainer);
-    derivedMatch(shape, freshContainer, derivedContainer);
-    dumpNils(freshContainer, "chamfer feature"); //only if there are shapes with nil ids.
-    dumpDuplicates(freshContainer, "chamfer feature");
-    ensureNoNils(freshContainer);
-    ensureNoDuplicates(freshContainer);
-    resultContainer = freshContainer;
+    seerShape->setOCCTShape(chamferMaker.Shape());
+    seerShape->shapeMatch(targetSeerShape);
+    seerShape->uniqueTypeMatch(targetSeerShape);
+    seerShape->modifiedMatch(chamferMaker, targetSeerShape);
+    generatedMatch(chamferMaker, targetSeerShape);
+    seerShape->outerWireMatch(targetSeerShape);
+    seerShape->derivedMatch();
+    seerShape->dumpNils("chamfer feature"); //only if there are shapes with nil ids.
+    seerShape->dumpDuplicates("chamfer feature");
+    seerShape->ensureNoNils();
+    seerShape->ensureNoDuplicates();
     
     setSuccess();
   }
@@ -199,64 +194,40 @@ void Chamfer::updateModel(const UpdateMap &mapIn)
   setModelClean();
 }
 
-//duplicated code from blend.
-void Chamfer::generatedMatch(BRepFilletAPI_MakeChamfer &chamferMakerIn, const Base *targetFeatureIn, ResultContainer &freshContainer)
+//duplicated with blend.
+void Chamfer::generatedMatch(BRepFilletAPI_MakeChamfer &chamferMakerIn, const SeerShape &targetShapeIn)
 {
   using boost::uuids::uuid;
   
-  TopTools_IndexedMapOfShape targetShapeMap;
-  TopExp::MapShapes(targetFeatureIn->getShape(), targetShapeMap);
+  std::vector<uuid> targetShapeIds = targetShapeIn.getAllShapeIds();
   
-  for (int index = 1; index <= targetShapeMap.Extent(); ++index)
+  for (const auto &cId : targetShapeIds)
   {
-    const TopoDS_Shape &currentShape = targetShapeMap(index);
+    const TopoDS_Shape &currentShape = targetShapeIn.findShapeIdRecord(cId).shape;
     TopTools_ListOfShape generated = chamferMakerIn.Generated(currentShape);
     if (generated.IsEmpty())
       continue;
-    if(generated.Extent() != 1) //see ensure noFaceNils
+    if(generated.Extent() != 1)
       std::cout << "Warning: more than one generated shape in chamfer::generatedMatch" << std::endl;
     const TopoDS_Shape &chamferFace = generated.First();
     assert(!chamferFace.IsNull());
     assert(chamferFace.ShapeType() == TopAbs_FACE);
     
-    //targetEdgeId should also be in member edgeIds
-    uuid targetEdgeId = findResultByShape(targetFeatureIn->getResultContainer(), currentShape).id;
-    uuid chamferedFaceId = boost::uuids::nil_generator()();
-    //first time edge has been blended
-    if (!hasInId(shapeMap, targetEdgeId))
-    {
-      //build new record.
-      EvolutionRecord record;
-      record.inId = targetEdgeId;
-      record.outId = idGenerator();
-      shapeMap.insert(record);
-      
-      chamferedFaceId = record.outId;
-    }
-    else
-      chamferedFaceId = findRecordByIn(shapeMap, targetEdgeId).outId;
+    std::map<uuid, uuid>::iterator mapItFace;
+    bool dummy;
+    std::tie(mapItFace, dummy) = shapeMap.insert(std::make_pair(cId, idGenerator()));
     
     //now we have the id for the face, just update the result map.
-    updateId(freshContainer, chamferedFaceId, chamferFace);
+    seerShape->updateShapeIdRecord(chamferFace, mapItFace->second);
     
     //now look for outerwire for newly generated face.
-    uuid chamferedFaceWireId = boost::uuids::nil_generator()();
-    if (!hasInId(shapeMap, chamferedFaceId))
-    {
-      //this means that the face id is in both columns.
-      EvolutionRecord record;
-      record.inId = chamferedFaceId;
-      record.outId = idGenerator();
-      shapeMap.insert(record);
-      
-      chamferedFaceWireId = record.outId;
-    }
-    else
-      chamferedFaceWireId = findRecordByIn(shapeMap, chamferedFaceId).outId;
+    //we use the generated face id to map to outer wire.
+    std::map<uuid, uuid>::iterator mapItWire;
+    std::tie(mapItWire, dummy) = shapeMap.insert(std::make_pair(mapItFace->second, idGenerator()));
     
     //now get the wire and update the result to id.
     const TopoDS_Shape &chamferedFaceWire = BRepTools::OuterWire(TopoDS::Face(chamferFace));
-    updateId(freshContainer, chamferedFaceWireId, chamferedFaceWire);
+    seerShape->updateShapeIdRecord(chamferedFaceWire, mapItWire->second);
   }
 }
 
@@ -265,16 +236,14 @@ void Chamfer::serialWrite(const QDir &dIn)
   using boost::uuids::to_string;
   
   prj::srl::FeatureChamfer::ShapeMapType shapeMapOut;
-  typedef EvolutionContainer::index<EvolutionRecord::ByInId>::type EList;
-  const EList &eList = shapeMap.get<EvolutionRecord::ByInId>();
-  for (EList::const_iterator it = eList.begin(); it != eList.end(); ++it)
+  for (const auto &p : shapeMap)
   {
-    prj::srl::EvolutionRecord eRecord
+    prj::srl::EvolveRecord eRecord
     (
-      to_string(it->inId),
-      to_string(it->outId)
+      to_string(p.first),
+      to_string(p.second)
     );
-    shapeMapOut.evolutionRecord().push_back(eRecord);
+    shapeMapOut.evolveRecord().push_back(eRecord);
   }
   
   prj::srl::SymChamfers sSymChamfersOut;
@@ -318,12 +287,12 @@ void Chamfer::serialRead(const prj::srl::FeatureChamfer &sChamferIn)
   
   Base::serialIn(sChamferIn.featureBase());
   
-  shapeMap.get<EvolutionRecord::ByInId>().clear();
-  for (const prj::srl::EvolutionRecord &sERecord : sChamferIn.shapeMap().evolutionRecord())
+  shapeMap.clear();
+  for (const prj::srl::EvolveRecord &sERecord : sChamferIn.shapeMap().evolveRecord())
   {
-    EvolutionRecord record;
-    record.inId = gen(sERecord.idIn());
-    record.outId = gen(sERecord.idOut());
+    std::pair<uuid, uuid> record;
+    record.first = gen(sERecord.idIn());
+    record.second = gen(sERecord.idOut());
     shapeMap.insert(record);
   }
   

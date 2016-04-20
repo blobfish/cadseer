@@ -31,6 +31,7 @@
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/ordered_index.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 #include <feature/base.h>
 #include <feature/inputtypes.h>
@@ -154,7 +155,7 @@ namespace dag
       out <<
 	"[label=\"" <<
         graphVW[vertexW].textRaw->toPlainText().toAscii().data() << "\\n" <<
-        graphVW[vertexW].feature.lock()->getId() <<
+        boost::uuids::to_string(graphVW[vertexW].feature.lock()->getId()) <<
         "\"]";
     }
   private:

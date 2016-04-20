@@ -45,7 +45,6 @@ namespace ftr
     
   private:
     Inert(){};
-    void generateIds(); //toForce id generation. see comments in source.
     static QIcon icon;
   };
 }

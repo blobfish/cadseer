@@ -23,11 +23,11 @@
 #include <TopExp.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 
-#include <feature/shapeidmapper.h>
 #include <feature/booleanidmapper.h>
 #include <feature/booleanoperation.h>
 #include <project/serial/xsdcxxoutput/featureintersect.h>
 #include <feature/shapecheck.h>
+#include <feature/seershape.h>
 #include <feature/intersect.h>
 
 using namespace ftr;
@@ -62,17 +62,14 @@ void Intersect::updateModel(const UpdateMap &mapIn)
     }
       
     //UpdateMap is going to have to be a multimap for multiple tools.
-    const TopoDS_Shape &targetShape = mapIn.at(InputTypes::target)->getShape();
-    const ResultContainer& targetResultContainer = mapIn.at(InputTypes::target)->getResultContainer();
-    const TopoDS_Shape &toolShape = mapIn.at(InputTypes::tool)->getShape();
-    const ResultContainer& toolResultContainer = mapIn.at(InputTypes::tool)->getResultContainer();
-    assert(!targetShape.IsNull() && !toolShape.IsNull());
+    const SeerShape &targetSeerShape = mapIn.at(InputTypes::target)->getSeerShape();
+    const SeerShape &toolSeerShape = mapIn.at(InputTypes::tool)->getSeerShape();
+    assert(!targetSeerShape.isNull() && !toolSeerShape.isNull());
     
     //set default on failure to parent target.
-    shape = targetShape;
-    resultContainer = targetResultContainer;
+    seerShape->partialAssign(targetSeerShape);
     
-    BooleanOperation intersector(targetShape, toolShape, BOPAlgo_COMMON);
+    BooleanOperation intersector(targetSeerShape.getRootOCCTShape(), toolSeerShape.getRootOCCTShape(), BOPAlgo_COMMON);
     intersector.Build();
     if (!intersector.IsDone())
       throw std::runtime_error("OCC intersect failed");
@@ -80,27 +77,19 @@ void Intersect::updateModel(const UpdateMap &mapIn)
     if (!check.isValid())
       throw std::runtime_error("shapeCheck failed");
     
-    shape = intersector.Shape();
-    
-    ResultContainerWrapper containerWrapper;
-    ResultContainer &freshContainer = containerWrapper.container;
-    freshContainer = createInitialContainer(shape);
-    shapeMatch(targetResultContainer, freshContainer);
-    shapeMatch(toolResultContainer, freshContainer);
-    uniqueTypeMatch(targetResultContainer, freshContainer);
-    BooleanIdMapper idMapper(mapIn, intersector.getBuilder(), iMapWrapper, containerWrapper);
+    seerShape->setOCCTShape(intersector.Shape());
+    seerShape->shapeMatch(targetSeerShape);
+    seerShape->shapeMatch(toolSeerShape);
+    seerShape->uniqueTypeMatch(targetSeerShape);
+    BooleanIdMapper idMapper(mapIn, intersector.getBuilder(), iMapWrapper, seerShape.get());
     idMapper.go();
-    outerWireMatch(targetResultContainer, freshContainer);
-    outerWireMatch(toolResultContainer, freshContainer);
-    derivedMatch(shape, freshContainer, derivedContainer);
-    dumpNils(freshContainer, "Intersect feature");
-    dumpDuplicates(freshContainer, "Intersect feature");
-    ensureNoNils(freshContainer);
-    ensureNoDuplicates(freshContainer);
-    
-//     std::cout << std::endl << "intersection fresh container:" << std::endl << freshContainer << std::endl;
-    
-    resultContainer = freshContainer;
+    seerShape->outerWireMatch(targetSeerShape);
+    seerShape->outerWireMatch(toolSeerShape);
+    seerShape->derivedMatch();
+    seerShape->dumpNils("intersect feature"); //only if there are shapes with nil ids.
+    seerShape->dumpDuplicates("intersect feature");
+    seerShape->ensureNoNils();
+    seerShape->ensureNoDuplicates();
     
     setSuccess();
   }

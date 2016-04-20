@@ -35,18 +35,19 @@ namespace ftr
   class Base;
   class ResultContainerWrapper;
   class IMapWrapper;
+  class SeerShape;
   typedef std::map<InputTypes, const Base*> UpdateMap;
   
   class BooleanIdMapper
   {
   public:
-    BooleanIdMapper(const UpdateMap &, BOPAlgo_Builder &, IMapWrapper &, ResultContainerWrapper &);
+    BooleanIdMapper(const UpdateMap &, BOPAlgo_Builder &, IMapWrapper &, SeerShape *);
     void go();
     
     const UpdateMap &updateMap;
     BOPAlgo_Builder &builder; //couldn't make const. accessor functions not const.
     IMapWrapper &iMapWrapper;
-    ResultContainerWrapper &outContainer;
+    SeerShape *seerShapeOut;
   private:
     void goIntersectionEdges();
     void goSingleSplits();
@@ -54,7 +55,8 @@ namespace ftr
     std::set<boost::uuids::uuid> iEdgeCache;
     void goSplitFaces();
     
-    TopoDS_Shape rootShape; //!< root shape(compound) of the result container. used for mapping.
+    const SeerShape &inputTarget;
+    const SeerShape &inputTool; //TODO make a vector.
   };
 }
 

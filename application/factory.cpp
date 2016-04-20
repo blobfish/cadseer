@@ -40,6 +40,7 @@
 #include <preferences/dialog.h>
 #include <application/factory.h>
 #include <preferences/manager.h>
+#include <feature/seershape.h>
 #include <feature/types.h>
 #include <feature/box.h>
 #include <feature/cylinder.h>
@@ -409,6 +410,7 @@ void Factory::newBlendDispatched(const msg::Message&)
   
   //get targetId and filter out edges not belonging to first target.
   uuid targetFeatureId = containers.at(0).featureId;
+  const ftr::SeerShape &targetSeerShape = project->findFeature(targetFeatureId)->getSeerShape();
   ftr::SimpleBlend simpleBlend;
   ftr::VariableBlend vBlend;
   for (const auto &currentSelection : containers)
@@ -420,8 +422,7 @@ void Factory::newBlendDispatched(const msg::Message&)
     )
       continue;
     
-    TopoDS_Edge edge = TopoDS::Edge(ftr::findResultById
-      (project->findFeature(targetFeatureId)->getResultContainer(), currentSelection.shapeId).shape);  
+    TopoDS_Edge edge = TopoDS::Edge(targetSeerShape.getOCCTShape(currentSelection.shapeId));  
     ftr::BlendPick pick;
     pick.id = currentSelection.shapeId;
     pick.u = ftr::Blend::calculateUParameter(edge, currentSelection.pointLocation);
@@ -472,7 +473,7 @@ void Factory::newChamferDispatched(const msg::Message&)
   
   ftr::SymChamfer symChamfer;
   symChamfer.distance = ftr::Chamfer::buildSymParameter();
-  const ftr::ResultContainer &targetContainer = project->findFeature(targetFeatureId)->getResultContainer();
+  const ftr::SeerShape &targetSeerShape = project->findFeature(targetFeatureId)->getSeerShape();
   for (const auto &currentSelection : containers)
   {
     if
@@ -482,11 +483,11 @@ void Factory::newChamferDispatched(const msg::Message&)
     )
       continue;
       
-    TopoDS_Edge edge = TopoDS::Edge(ftr::findResultById(targetContainer, currentSelection.shapeId).shape);  
+    TopoDS_Edge edge = TopoDS::Edge(targetSeerShape.findShapeIdRecord(currentSelection.shapeId).shape);  
     ftr::ChamferPick pick;
     pick.edgeId = currentSelection.shapeId;
     pick.u = ftr::Chamfer::calculateUParameter(edge, currentSelection.pointLocation);
-    pick.faceId = ftr::Chamfer::referenceFaceId(targetContainer, pick.edgeId);
+    pick.faceId = ftr::Chamfer::referenceFaceId(targetSeerShape, pick.edgeId);
     symChamfer.picks.push_back(pick);
   }
   
@@ -518,7 +519,7 @@ void Factory::newDraftDispatched(const msg::Message&)
   uuid targetFeatureId = containers.at(0).featureId;
   
   ftr::DraftConvey convey;
-  const ftr::ResultContainer &targetContainer = project->findFeature(targetFeatureId)->getResultContainer();
+  const ftr::SeerShape &targetSeerShape = project->findFeature(targetFeatureId)->getSeerShape();
   for (const auto &currentSelection : containers)
   {
     if
@@ -528,7 +529,7 @@ void Factory::newDraftDispatched(const msg::Message&)
     )
       continue;
       
-    TopoDS_Face face = TopoDS::Face(ftr::findResultById(targetContainer, currentSelection.shapeId).shape);  
+    TopoDS_Face face = TopoDS::Face(targetSeerShape.findShapeIdRecord(currentSelection.shapeId).shape);  
     ftr::DraftPick pick;
     pick.faceId = currentSelection.shapeId;
     ftr::Draft::calculateUVParameter(face, currentSelection.pointLocation, pick.u, pick.v);

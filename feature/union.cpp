@@ -32,26 +32,13 @@
 #include <project/serial/xsdcxxoutput/featureunion.h>
 #include <feature/booleanoperation.h>
 #include <feature/booleanidmapper.h>
-#include <feature/shapeidmapper.h>
 #include <feature/shapecheck.h>
+#include <feature/seershape.h>
 #include <feature/union.h>
 
 using namespace ftr;
 
 QIcon Union::icon;
-
-static const std::vector<std::string> shapeStrings
-({
-     "Compound",
-     "CompSolid",
-     "Solid",
-     "Shell",
-     "Face",
-     "Wire",
-     "Edge",
-     "Vertex",
-     "Shape",
- });
 
 Union::Union() : BooleanBase()
 {
@@ -81,18 +68,14 @@ void Union::updateModel(const UpdateMap &mapIn)
       throw std::runtime_error(stream.str());
     }
       
-    //UpdateMap is going to have to be a multimap for multiple tools.
-    const TopoDS_Shape &targetShape = mapIn.at(InputTypes::target)->getShape();
-    const ResultContainer& targetResultContainer = mapIn.at(InputTypes::target)->getResultContainer();
-    const TopoDS_Shape &toolShape = mapIn.at(InputTypes::tool)->getShape();
-    const ResultContainer& toolResultContainer = mapIn.at(InputTypes::tool)->getResultContainer();
-    assert(!targetShape.IsNull() && !toolShape.IsNull());
+    const SeerShape &targetSeerShape = mapIn.at(InputTypes::target)->getSeerShape();
+    const SeerShape &toolSeerShape = mapIn.at(InputTypes::tool)->getSeerShape();
+    assert(!targetSeerShape.isNull() && !toolSeerShape.isNull());
     
     //set default on failure to parent target.
-    shape = targetShape;
-    resultContainer = targetResultContainer;
+    seerShape->partialAssign(targetSeerShape);
     
-    BooleanOperation fuser(targetShape, toolShape, BOPAlgo_FUSE);
+    BooleanOperation fuser(targetSeerShape.getRootOCCTShape(), toolSeerShape.getRootOCCTShape(), BOPAlgo_FUSE);
     fuser.Build();
     if (!fuser.IsDone())
       throw std::runtime_error("OCC fuse failed");
@@ -100,26 +83,20 @@ void Union::updateModel(const UpdateMap &mapIn)
     if (!check.isValid())
       throw std::runtime_error("shapeCheck failed");
     
-    shape = fuser.Shape();
-    
-    ResultContainerWrapper containerWrapper;
-    ResultContainer &freshContainer = containerWrapper.container;
-    freshContainer = createInitialContainer(shape);
-    shapeMatch(targetResultContainer, freshContainer);
-    shapeMatch(toolResultContainer, freshContainer);
-    uniqueTypeMatch(targetResultContainer, freshContainer);
-    BooleanIdMapper idMapper(mapIn, fuser.getBuilder(), iMapWrapper, containerWrapper);
+    seerShape->setOCCTShape(fuser.Shape());
+    seerShape->shapeMatch(targetSeerShape);
+    seerShape->shapeMatch(toolSeerShape);
+    seerShape->uniqueTypeMatch(targetSeerShape);
+    BooleanIdMapper idMapper(mapIn, fuser.getBuilder(), iMapWrapper, seerShape.get());
     idMapper.go();
-    outerWireMatch(targetResultContainer, freshContainer);
-    outerWireMatch(toolResultContainer, freshContainer);
-    derivedMatch(shape, freshContainer, derivedContainer);
-    dumpNils(freshContainer, "Union feature");
-    dumpDuplicates(freshContainer, "Union feature");
-    ensureNoNils(freshContainer);
-    ensureNoDuplicates(freshContainer);
-    
-    resultContainer = freshContainer;
-    
+    seerShape->outerWireMatch(targetSeerShape);
+    seerShape->outerWireMatch(toolSeerShape);
+    seerShape->derivedMatch();
+    seerShape->dumpNils(getTypeString()); //only if there are shapes with nil ids.
+    seerShape->dumpDuplicates(getTypeString());
+    seerShape->ensureNoNils();
+    seerShape->ensureNoDuplicates();
+
     setSuccess();
   }
   catch (Standard_Failure)

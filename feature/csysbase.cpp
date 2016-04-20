@@ -22,6 +22,8 @@
 #include <cmath>
 #include <limits>
 
+#include <boost/uuid/uuid_io.hpp>
+
 #include <gp_Trsf.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Ax2.hxx>

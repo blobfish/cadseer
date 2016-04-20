@@ -98,8 +98,10 @@ void Manager::doneSlot()
 {
   //only active command should trigger it is done.
   if (!stack.empty())
+  {
     stack.top()->deactivate();
-  stack.pop();
+    stack.pop();
+  }
   clearSelection();
   sendStatusMessage("");
   

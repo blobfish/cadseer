@@ -34,9 +34,9 @@
 
 #include <globalutilities.h>
 #include <feature/shapecheck.h>
-#include <feature/shapeidmapper.h>
 #include <library/plabel.h>
 #include <project/serial/xsdcxxoutput/featuredraft.h>
+#include <feature/seershape.h>
 #include <feature/draft.h>
 
 using namespace ftr;
@@ -83,13 +83,12 @@ void Draft::updateModel(const UpdateMap& mapIn)
     if (mapIn.count(InputTypes::target) < 1)
       throw std::runtime_error("no parent for blend");
     
-    const TopoDS_Shape &targetShape = mapIn.at(InputTypes::target)->getShape();
-    const ResultContainer& targetResultContainer = mapIn.at(InputTypes::target)->getResultContainer();
+   const SeerShape &targetSeerShape = mapIn.at(InputTypes::target)->getSeerShape();
     
     //starting from the stand point that this feature has failed.
     //set the shape and container to the parent target.
-    shape = targetShape;
-    resultContainer = targetResultContainer;
+    seerShape->partialAssign(targetSeerShape);
+    
     
     //neutral plane might be outside of target, if so we should have an input with a type of 'tool'
 //     const TopoDS_Shape &tool; //TODO
@@ -102,22 +101,22 @@ void Draft::updateModel(const UpdateMap& mapIn)
     //not going to expose pull direction yet. Not sure how useful it is.
     //of course we will have a reverse direction, but the direction will be derived from the neutral plane.
     
-    BRepOffsetAPI_DraftAngle dMaker(targetShape);
+    BRepOffsetAPI_DraftAngle dMaker(targetSeerShape.getRootOCCTShape());
     
-    TopoDS_Shape neutralShape = findResultById(targetResultContainer, neutralPick.faceId).shape;
+    TopoDS_Shape neutralShape = targetSeerShape.findShapeIdRecord(neutralPick.faceId).shape;
     gp_Pln plane = derivePlaneFromShape(neutralShape);
     
     double localAngle = osg::DegreesToRadians(angle->getValue());
-    gp_Dir direction(0.0, 0.0, 1.0);
+    gp_Dir direction = plane.Axis().Direction();
     bool labelDone = false; //set label position to first pick.
     for (const auto &p : targetPicks)
     {
-      if (!hasResult(targetResultContainer, p.faceId))
+      if (!targetSeerShape.hasShapeIdRecord(p.faceId))
       {
 	std::cout << boost::uuids::to_string(id) << " Draft missing: " << boost::uuids::to_string(p.faceId) << std::endl;
 	continue;
       }
-      const TopoDS_Face &face = TopoDS::Face(findResultById(targetResultContainer, p.faceId).shape);
+      const TopoDS_Face &face = TopoDS::Face(targetSeerShape.findShapeIdRecord(p.faceId).shape);
       dMaker.Add(face, direction, localAngle, plane);
       if (!dMaker.AddDone())
       {
@@ -137,25 +136,18 @@ void Draft::updateModel(const UpdateMap& mapIn)
     if (!check.isValid())
       throw std::runtime_error("shapeCheck failed");
     
-    shape = dMaker.Shape();
-    ResultContainer freshContainer = createInitialContainer(shape);
-    shapeMatch(targetResultContainer, freshContainer);
-    uniqueTypeMatch(targetResultContainer, freshContainer);
-//     dumpNils(freshContainer, "Draft feature before modified");
-    modifiedMatch(dMaker, targetResultContainer, freshContainer);
-//     dumpNils(freshContainer, "Draft feature after modified");
-    generatedMatch(dMaker, mapIn.at(InputTypes::target), freshContainer);
-//     dumpNils(freshContainer, "Draft feature after generated match");
-    faceEdgeMatch(targetResultContainer, freshContainer);
-//     dumpNils(freshContainer, "Draft feature after faceEdge match");
-    edgeVertexMatch(targetResultContainer, freshContainer);
-//     dumpNils(freshContainer, "Draft feature after edgeVertex match");
-    outerWireMatch(targetResultContainer, freshContainer);
-    dumpNils(freshContainer, "Draft feature after outerwirematch");
+    seerShape->setOCCTShape(dMaker.Shape());
+    seerShape->shapeMatch(targetSeerShape);
+    seerShape->uniqueTypeMatch(targetSeerShape);
+    seerShape->modifiedMatch(dMaker, targetSeerShape);
+    generatedMatch(dMaker, targetSeerShape);
+    seerShape->outerWireMatch(targetSeerShape);
+    seerShape->derivedMatch();
+    seerShape->dumpNils("draft feature"); //only if there are shapes with nil ids.
+    seerShape->dumpDuplicates("draft feature");
+    seerShape->ensureNoNils();
+    seerShape->ensureNoDuplicates();
     
-    ensureNoNils(freshContainer);//just add new ids for everything for now.
-    resultContainer = freshContainer;
-  
     setSuccess();
   }
   catch (Standard_Failure)
@@ -178,17 +170,19 @@ gp_Pln Draft::derivePlaneFromShape(const TopoDS_Shape &shapeIn)
 }
 
 
-void Draft::generatedMatch(BRepOffsetAPI_DraftAngle &dMaker, const Base *targetFeatureIn, ResultContainer &freshContainer)
+void Draft::generatedMatch(BRepOffsetAPI_DraftAngle &dMaker, const SeerShape &targetShapeIn)
 {
-  typedef ResultContainer::index<ResultRecord::ById>::type List;
-  const List &list = targetFeatureIn->getResultContainer().get<ResultRecord::ById>();
-  for (const auto &record : list)
+  using boost::uuids::uuid;
+  std::vector<uuid> targetShapeIds = targetShapeIn.getAllShapeIds();
+  
+  for (const auto &cId : targetShapeIds)
   {
+    const ShapeIdRecord &record = targetShapeIn.findShapeIdRecord(cId);
     const TopTools_ListOfShape &shapes = dMaker.Generated(record.shape);
     if (shapes.Extent() < 1)
       continue;
     assert(shapes.Extent() == 1); //want to know about a situation where we have more than 1.
-    updateId(freshContainer, record.id, shapes.First());
+    seerShape->updateShapeIdRecord(shapes.First(), record.id);
   }
 }
 

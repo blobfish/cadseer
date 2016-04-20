@@ -23,12 +23,12 @@
 #include <TopExp.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 
-#include <feature/shapeidmapper.h>
 #include <feature/booleanidmapper.h>
 #include <feature/booleanoperation.h>
 #include <feature/shapecheck.h>
 #include <project/serial/xsdcxxoutput/featuresubtract.h>
-#include "subtract.h"
+#include <feature/seershape.h>
+#include <feature/subtract.h>
 
 using namespace ftr;
 
@@ -62,18 +62,14 @@ void Subtract::updateModel(const UpdateMap &mapIn)
       throw std::runtime_error(stream.str());
     }
       
-    //UpdateMap is going to have to be a multimap for multiple tools.
-    const TopoDS_Shape &targetShape = mapIn.at(InputTypes::target)->getShape();
-    const ResultContainer& targetResultContainer = mapIn.at(InputTypes::target)->getResultContainer();
-    const TopoDS_Shape &toolShape = mapIn.at(InputTypes::tool)->getShape();
-    const ResultContainer& toolResultContainer = mapIn.at(InputTypes::tool)->getResultContainer();
-    assert(!targetShape.IsNull() && !toolShape.IsNull());
+    const SeerShape &targetSeerShape = mapIn.at(InputTypes::target)->getSeerShape();
+    const SeerShape &toolSeerShape = mapIn.at(InputTypes::tool)->getSeerShape();
+    assert(!targetSeerShape.isNull() && !toolSeerShape.isNull());
     
     //set default on failure to parent target.
-    shape = targetShape;
-    resultContainer = targetResultContainer;
+    seerShape->partialAssign(targetSeerShape);
     
-    BooleanOperation subtracter(targetShape, toolShape, BOPAlgo_CUT);
+    BooleanOperation subtracter(targetSeerShape.getRootOCCTShape(), toolSeerShape.getRootOCCTShape(), BOPAlgo_CUT);
     subtracter.Build();
     if (!subtracter.IsDone())
       throw std::runtime_error("OCC subtraction failed");
@@ -81,27 +77,19 @@ void Subtract::updateModel(const UpdateMap &mapIn)
     if (!check.isValid())
       throw std::runtime_error("shapeCheck failed");
     
-    shape = subtracter.Shape();
-    
-    ResultContainerWrapper containerWrapper;
-    ResultContainer &freshContainer = containerWrapper.container;
-    freshContainer = createInitialContainer(shape);
-    shapeMatch(targetResultContainer, freshContainer);
-    shapeMatch(toolResultContainer, freshContainer);
-    uniqueTypeMatch(targetResultContainer, freshContainer);
-    BooleanIdMapper idMapper(mapIn, subtracter.getBuilder(), iMapWrapper, containerWrapper);
+    seerShape->setOCCTShape(subtracter.Shape());
+    seerShape->shapeMatch(targetSeerShape);
+    seerShape->shapeMatch(toolSeerShape);
+    seerShape->uniqueTypeMatch(targetSeerShape);
+    BooleanIdMapper idMapper(mapIn, subtracter.getBuilder(), iMapWrapper, seerShape.get());
     idMapper.go();
-    outerWireMatch(targetResultContainer, freshContainer);
-    outerWireMatch(toolResultContainer, freshContainer);
-    derivedMatch(shape, freshContainer, derivedContainer);
-    dumpNils(freshContainer, "Subtraction feature");
-    dumpDuplicates(freshContainer, "Subtraction feature");
-    ensureNoNils(freshContainer);
-    ensureNoDuplicates(freshContainer);
-    
-//     std::cout << std::endl << "subtraction fresh container:" << std::endl << freshContainer << std::endl;
-    
-    resultContainer = freshContainer;
+    seerShape->outerWireMatch(targetSeerShape);
+    seerShape->outerWireMatch(toolSeerShape);
+    seerShape->derivedMatch();
+    seerShape->dumpNils(getTypeString()); //only if there are shapes with nil ids.
+    seerShape->dumpDuplicates(getTypeString());
+    seerShape->ensureNoNils();
+    seerShape->ensureNoDuplicates();
     
     setSuccess();
   }

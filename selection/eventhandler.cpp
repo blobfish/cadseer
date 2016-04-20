@@ -37,8 +37,8 @@
 #include <globalutilities.h>
 #include <application/application.h>
 #include <project/project.h>
-#include <modelviz/connector.h>
 #include <modelviz/shapegeometry.h>
+#include <feature/seershape.h>
 #include <selection/message.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
@@ -514,7 +514,7 @@ Container EventHandler::messageToContainer(const Message &messageIn)
   assert(!messageIn.featureId.is_nil());
   const ftr::Base *feature = dynamic_cast<app::Application *>(qApp)->getProject()->findFeature(messageIn.featureId);
   assert(feature);
-  const mdv::Connector &connector = feature->getConnector();
+  const ftr::SeerShape &seerShape = feature->getSeerShape();
   
   slc::Container container;
   container.selectionType = messageIn.type;
@@ -529,7 +529,7 @@ Container EventHandler::messageToContainer(const Message &messageIn)
     (messageIn.type == slc::Type::Shell)
   )
   {
-    container.selectionIds = connector.useGetChildrenOfType(connector.useGetRoot(), TopAbs_FACE);
+    container.selectionIds = seerShape.useGetChildrenOfType(seerShape.getRootOCCTShape(), TopAbs_FACE);
   }
   //skip feature for now.
   else if
@@ -542,7 +542,7 @@ Container EventHandler::messageToContainer(const Message &messageIn)
   }
   else if (messageIn.type == slc::Type::Wire)
   {
-    container.selectionIds = connector.useGetChildrenOfType(container.shapeId, TopAbs_EDGE);
+    container.selectionIds = seerShape.useGetChildrenOfType(container.shapeId, TopAbs_EDGE);
   }
   else if (isPointType(messageIn.type))
   {

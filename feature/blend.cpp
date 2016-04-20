@@ -42,7 +42,7 @@
 #include <globalutilities.h>
 #include <project/serial/xsdcxxoutput/featureblend.h>
 #include <feature/shapecheck.h>
-#include <feature/shapeidmapper.h>
+#include <feature/seershape.h>
 #include <feature/blend.h>
 
 using namespace ftr;
@@ -71,24 +71,24 @@ std::shared_ptr< Parameter > Blend::buildPositionParameter()
   return out;
 }
 
-VariableBlend Blend::buildDefaultVariable(const ResultContainer &containerIn, const BlendPick &pickIn)
+VariableBlend Blend::buildDefaultVariable(const SeerShape &seerShapeIn, const BlendPick &pickIn)
 {
   VariableBlend out;
   out.pick = pickIn;
   
-  const TopoDS_Shape &rootShape = findRootShape(containerIn);
+  const TopoDS_Shape &rootShape = seerShapeIn.getRootOCCTShape();
   BRepFilletAPI_MakeFillet blendMaker(rootShape);
-  const TopoDS_Shape &edge = findResultById(containerIn, pickIn.id).shape; //TODO might be face!
+  const TopoDS_Shape &edge = seerShapeIn.getOCCTShape(pickIn.id); //TODO might be face!
   blendMaker.Add(TopoDS::Edge(edge));
   
   //no position parameter for vertices
   VariableEntry entry1;
-  entry1.id = findResultByShape(containerIn, blendMaker.FirstVertex(1)).id;
+  entry1.id = seerShapeIn.findShapeIdRecord(blendMaker.FirstVertex(1)).id;
   entry1.radius = buildRadiusParameter();
   out.entries.push_back(entry1);
   
   VariableEntry entry2;
-  entry2.id = findResultByShape(containerIn, blendMaker.LastVertex(1)).id;
+  entry2.id = seerShapeIn.findShapeIdRecord(blendMaker.LastVertex(1)).id;
   entry2.radius = buildRadiusParameter();
   entry2.radius->setValue(1.5);
   out.entries.push_back(entry2);
@@ -166,26 +166,24 @@ void Blend::updateModel(const UpdateMap& mapIn)
     if (mapIn.count(InputTypes::target) < 1)
       throw std::runtime_error("no parent for blend");
     
-    const TopoDS_Shape &targetShape = mapIn.at(InputTypes::target)->getShape();
-    const ResultContainer& targetResultContainer = mapIn.at(InputTypes::target)->getResultContainer();
+    const SeerShape &targetSeerShape = mapIn.at(InputTypes::target)->getSeerShape();
     
     //starting from the stand point that this feature has failed.
     //set the shape and container to the parent target.
-    shape = targetShape;
-    resultContainer = targetResultContainer;
+    seerShape->partialAssign(targetSeerShape);
   
-    BRepFilletAPI_MakeFillet blendMaker(targetShape);
+    BRepFilletAPI_MakeFillet blendMaker(targetSeerShape.getRootOCCTShape());
     for (const auto &simpleBlend : simpleBlends)
     {
       bool labelDone = false; //set label position to first pick.
       for (const auto &pick : simpleBlend.picks)
       {
-	if (!hasResult(targetResultContainer, pick.id))
+	if (!targetSeerShape.hasShapeIdRecord(pick.id))
 	{
 	  std::cout << "Blend: can't find target edge id. Skipping id: " << boost::uuids::to_string(pick.id) << std::endl;
 	  continue;
 	}
-	TopoDS_Shape tempShape = findResultById(targetResultContainer, pick.id).shape;
+	TopoDS_Shape tempShape = targetSeerShape.getOCCTShape(pick.id);
 	assert(!tempShape.IsNull());
 	assert(tempShape.ShapeType() == TopAbs_EDGE);
 	blendMaker.Add(simpleBlend.radius->getValue(), TopoDS::Edge(tempShape));
@@ -200,18 +198,18 @@ void Blend::updateModel(const UpdateMap& mapIn)
     std::size_t vBlendIndex = 1;
     for (const auto &vBlend : variableBlends)
     {
-      if (!hasResult(targetResultContainer, vBlend.pick.id))
+      if (!targetSeerShape.hasShapeIdRecord(vBlend.pick.id))
       {
 	std::cout << "Blend: can't find target edge id. Skipping id: " << boost::uuids::to_string(vBlend.pick.id) << std::endl;
 	continue;
       }
-      TopoDS_Shape tempShape = findResultById(targetResultContainer, vBlend.pick.id).shape;
+      TopoDS_Shape tempShape = targetSeerShape.getOCCTShape(vBlend.pick.id);
       assert(!tempShape.IsNull());
       assert(tempShape.ShapeType() == TopAbs_EDGE); //TODO faces someday.
       blendMaker.Add(TopoDS::Edge(tempShape));
       for (const auto &e : vBlend.entries)
       {
-	const TopoDS_Shape &blendShape = findResultById(targetResultContainer, e.id).shape;
+	const TopoDS_Shape &blendShape = targetSeerShape.getOCCTShape(e.id);
 	if (blendShape.ShapeType() == TopAbs_VERTEX)
 	  blendMaker.SetRadius(e.radius->getValue(), vBlendIndex, TopoDS::Vertex(blendShape));
 	//TODO deal with edges.
@@ -225,21 +223,18 @@ void Blend::updateModel(const UpdateMap& mapIn)
     if (!check.isValid())
       throw std::runtime_error("shapeCheck failed");
     
-//     dumpInfo(blendMaker, mapIn.at(InputTypes::target));
-    shape = blendMaker.Shape();
-    ResultContainer freshContainer = createInitialContainer(shape);
-    shapeMatch(targetResultContainer, freshContainer);
-    uniqueTypeMatch(targetResultContainer, freshContainer);
-    modifiedMatch(blendMaker, mapIn.at(InputTypes::target)->getResultContainer(), freshContainer);
-    generatedMatch(blendMaker, mapIn.at(InputTypes::target), freshContainer);
-    ensureNoFaceNils(freshContainer); //see note in function.
-    outerWireMatch(targetResultContainer, freshContainer);
-    derivedMatch(shape, freshContainer, derivedContainer);
-    dumpNils(freshContainer, "blend feature"); //only if there are shapes with nil ids.
-    dumpDuplicates(freshContainer, "blend feature");
-    ensureNoNils(freshContainer);
-    ensureNoDuplicates(freshContainer);
-    resultContainer = freshContainer;
+    seerShape->setOCCTShape(blendMaker.Shape());
+    seerShape->shapeMatch(targetSeerShape);
+    seerShape->uniqueTypeMatch(targetSeerShape);
+    seerShape->modifiedMatch(blendMaker, targetSeerShape);
+    generatedMatch(blendMaker, targetSeerShape);
+    ensureNoFaceNils(); //hack see notes in function.
+    seerShape->outerWireMatch(targetSeerShape);
+    seerShape->derivedMatch();
+    seerShape->dumpNils("blend feature");
+    seerShape->dumpDuplicates("blend feature");
+    seerShape->ensureNoNils();
+    seerShape->ensureNoDuplicates();
     
     setSuccess();
   }
@@ -261,65 +256,44 @@ void Blend::updateModel(const UpdateMap& mapIn)
  * blends are made from vertices. blending 3 edges of a box corner is such a situation.
  * so we will iterate over all the shapes of the targe object.
  */
-void Blend::generatedMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *targetFeatureIn, ResultContainer &freshContainer)
+void Blend::generatedMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const SeerShape &targetShapeIn)
 {
-  TopTools_IndexedMapOfShape targetShapeMap;
-  TopExp::MapShapes(targetFeatureIn->getShape(), targetShapeMap);
+  //duplicated with chamfer.
+  using boost::uuids::uuid;
   
-  for (int index = 1; index <= targetShapeMap.Extent(); ++index)
+  std::vector<uuid> targetShapeIds = targetShapeIn.getAllShapeIds();
+  
+  for (const auto &cId : targetShapeIds)
   {
-    const TopoDS_Shape &currentShape = targetShapeMap(index);
+    const TopoDS_Shape &currentShape = targetShapeIn.findShapeIdRecord(cId).shape;
     TopTools_ListOfShape generated = blendMakerIn.Generated(currentShape);
     if (generated.IsEmpty())
       continue;
     if(generated.Extent() != 1) //see ensure noFaceNils
-      std::cout << "Warning: more than one generated shape in Blend::generatedMatch" << std::endl;
-    const TopoDS_Shape &blendedFace = generated.First();
-    assert(!blendedFace.IsNull());
-    assert(blendedFace.ShapeType() == TopAbs_FACE);
+      std::cout << "Warning: more than one generated shape in blend::generatedMatch" << std::endl;
+    const TopoDS_Shape &blendFace = generated.First();
+    assert(!blendFace.IsNull());
+    assert(blendFace.ShapeType() == TopAbs_FACE);
     
-    //targetEdgeId should also be in member edgeIds
-    uuid targetEdgeId = findResultByShape(targetFeatureIn->getResultContainer(), currentShape).id;
-    uuid blendedFaceId = boost::uuids::nil_generator()();
-    //first time edge has been blended
-    if (!hasInId(shapeMap, targetEdgeId))
-    {
-      //build new record.
-      EvolutionRecord record;
-      record.inId = targetEdgeId;
-      record.outId = idGenerator();
-      shapeMap.insert(record);
-      
-      blendedFaceId = record.outId;
-    }
-    else
-      blendedFaceId = findRecordByIn(shapeMap, targetEdgeId).outId;
+    std::map<uuid, uuid>::iterator mapItFace;
+    bool dummy;
+    std::tie(mapItFace, dummy) = shapeMap.insert(std::make_pair(cId, idGenerator()));
     
     //now we have the id for the face, just update the result map.
-    updateId(freshContainer, blendedFaceId, blendedFace);
+    seerShape->updateShapeIdRecord(blendFace, mapItFace->second);
     
     //now look for outerwire for newly generated face.
-    uuid blendedFaceWireId = boost::uuids::nil_generator()();
-    if (!hasInId(shapeMap, blendedFaceId))
-    {
-      //this means that the face id is in both columns.
-      EvolutionRecord record;
-      record.inId = blendedFaceId;
-      record.outId = idGenerator();
-      shapeMap.insert(record);
-      
-      blendedFaceWireId = record.outId;
-    }
-    else
-      blendedFaceWireId = findRecordByIn(shapeMap, blendedFaceId).outId;
+    //we use the generated face id to map to outer wire.
+    std::map<uuid, uuid>::iterator mapItWire;
+    std::tie(mapItWire, dummy) = shapeMap.insert(std::make_pair(mapItFace->second, idGenerator()));
     
     //now get the wire and update the result to id.
-    const TopoDS_Shape &blendedFaceWire = BRepTools::OuterWire(TopoDS::Face(blendedFace));
-    updateId(freshContainer, blendedFaceWireId, blendedFaceWire);
+    const TopoDS_Shape &blendFaceWire = BRepTools::OuterWire(TopoDS::Face(blendFace));
+    seerShape->updateShapeIdRecord(blendFaceWire, mapItWire->second);
   }
 }
 
-void Blend::ensureNoFaceNils(ResultContainer &c)
+void Blend::ensureNoFaceNils()
 {
   //ok this is a hack. Because of an OCCT bug, generated is missing
   //an edge to blended face mapping and on another edge has 2 faces
@@ -327,33 +301,29 @@ void Blend::ensureNoFaceNils(ResultContainer &c)
   //shapes (edges and verts) can't be assigned an id. This causes a lot
   //of id failures. So for now just assign an id and check for bug
   //in next release.
-  gu::ShapeVector nilShapes;
   
-  typedef ResultContainer::index<ResultRecord::ById>::type List;
-  List &list = c.get<ResultRecord::ById>();
-  auto rangeItPair = list.equal_range(boost::uuids::nil_generator()());
-  for (; rangeItPair.first != rangeItPair.second; ++rangeItPair.first)
+  
+  auto shapes = seerShape->getAllShapes();
+  for (const auto &shape : shapes)
   {
-    if (rangeItPair.first->shape.ShapeType() == TopAbs_FACE)
-      nilShapes.push_back(rangeItPair.first->shape);
+    if (shape.ShapeType() != TopAbs_FACE)
+      continue;
+    if (!seerShape->findShapeIdRecord(shape).id.is_nil())
+      continue;
+    
+    seerShape->updateShapeIdRecord(shape, idGenerator());
   }
-  
-  for (const auto &cShape : nilShapes)
-    updateId(c, idGenerator(), cShape);
 }
 
-void Blend::dumpInfo(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *targetFeatureIn)
+void Blend::dumpInfo(BRepFilletAPI_MakeFillet &blendMakerIn, const SeerShape &targetFeatureIn)
 {
   std::cout << std::endl << std::endl <<
     "shape out type is: " << gu::getShapeTypeString(blendMakerIn.Shape()) << std::endl <<
     "fillet dump:" << std::endl;
   
-  const TopoDS_Shape &targetShape = targetFeatureIn->getShape();
-  TopTools_IndexedMapOfShape localShapeMap;
-  TopExp::MapShapes(targetShape, localShapeMap);
-  for (int index = 1; index <= localShapeMap.Extent(); ++index)
+  auto shapes = targetFeatureIn.getAllShapes();
+  for (const auto &currentShape : shapes)
   {
-    const TopoDS_Shape &currentShape = localShapeMap(index);
     std::cout << "ShapeType is: " << std::setw(10) << gu::getShapeTypeString(currentShape) << 
       "      Generated Count is: " << blendMakerIn.Generated(currentShape).Extent() <<
       "      Modified Count is: " << blendMakerIn.Modified(currentShape).Extent() <<
@@ -364,16 +334,16 @@ void Blend::dumpInfo(BRepFilletAPI_MakeFillet &blendMakerIn, const Base *targetF
           gu::getShapeTypeString(blendMakerIn.Generated(currentShape).First()) << std::endl;
   }
   
-  std::cout << std::endl << std::endl << "output of blend: " << std::endl;
-  TopTools_IndexedMapOfShape outShapeMap;
-  TopExp::MapShapes(blendMakerIn.Shape(), outShapeMap);
-  for (int index = 1; index <= outShapeMap.Extent(); ++index)
-  {
-    const TopoDS_Shape &currentShape = outShapeMap(index);
-    std::cout << "ShapteType is: " << std::setw(10) << gu::getShapeTypeString(currentShape) <<
-    "      is in targetResults: " <<
-      ((hasResult(targetFeatureIn->getResultContainer(), currentShape)) ? "true" : "false") << std::endl;
-  }
+//   std::cout << std::endl << std::endl << "output of blend: " << std::endl;
+//   TopTools_IndexedMapOfShape outShapeMap;
+//   TopExp::MapShapes(blendMakerIn.Shape(), outShapeMap);
+//   for (int index = 1; index <= outShapeMap.Extent(); ++index)
+//   {
+//     const TopoDS_Shape &currentShape = outShapeMap(index);
+//     std::cout << "ShapteType is: " << std::setw(10) << gu::getShapeTypeString(currentShape) <<
+//     "      is in targetResults: " <<
+//       ((hasResult(targetFeatureIn->getResultContainer(), currentShape)) ? "true" : "false") << std::endl;
+//   }
 }
 
 void Blend::serialWrite(const QDir &dIn)
@@ -381,16 +351,14 @@ void Blend::serialWrite(const QDir &dIn)
   using boost::uuids::to_string;
   
   prj::srl::FeatureBlend::ShapeMapType shapeMapOut;
-  typedef EvolutionContainer::index<EvolutionRecord::ByInId>::type EList;
-  const EList &eList = shapeMap.get<EvolutionRecord::ByInId>();
-  for (EList::const_iterator it = eList.begin(); it != eList.end(); ++it)
+  for (const auto &p : shapeMap)
   {
-    prj::srl::EvolutionRecord eRecord
+    prj::srl::EvolveRecord eRecord
     (
-      to_string(it->inId),
-      to_string(it->outId)
+      to_string(p.first),
+      to_string(p.second)
     );
-    shapeMapOut.evolutionRecord().push_back(eRecord);
+    shapeMapOut.evolveRecord().push_back(eRecord);
   }
   
   prj::srl::SimpleBlends sBlendsOut;
@@ -463,12 +431,12 @@ void Blend::serialRead(const prj::srl::FeatureBlend& sBlendIn)
   
   Base::serialIn(sBlendIn.featureBase());
   
-  shapeMap.get<EvolutionRecord::ByInId>().clear();
-  for (const prj::srl::EvolutionRecord &sERecord : sBlendIn.shapeMap().evolutionRecord())
+  shapeMap.clear();
+  for (const prj::srl::EvolveRecord &sERecord : sBlendIn.shapeMap().evolveRecord())
   {
-    EvolutionRecord record;
-    record.inId = gen(sERecord.idIn());
-    record.outId = gen(sERecord.idOut());
+    std::pair<uuid, uuid> record;
+    record.first = gen(sERecord.idIn());
+    record.second = gen(sERecord.idOut());
     shapeMap.insert(record);
   }
   

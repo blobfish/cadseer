@@ -34,6 +34,7 @@
 
 #include <globalutilities.h>
 #include <feature/base.h>
+#include <feature/seershape.h>
 #include <feature/intersectionmapping.h>
 #include <feature/booleanidmapper.h>
 
@@ -47,23 +48,18 @@ BooleanIdMapper::BooleanIdMapper
   const UpdateMap& updateMapIn,
   BOPAlgo_Builder &builderIn,
   IMapWrapper &iMapWrapperIn,
-  ResultContainerWrapper &outContainerIn 
+  SeerShape *seerShapeOutIn 
 ):
 updateMap(updateMapIn),
 builder(builderIn),
 iMapWrapper(iMapWrapperIn),
-outContainer(outContainerIn)
+seerShapeOut(seerShapeOutIn),
+inputTarget(updateMap.find(ftr::InputTypes::target)->second->getSeerShape()),
+inputTool(updateMap.find(ftr::InputTypes::tool)->second->getSeerShape())
 {
-  //result containers are expected to have 1 compound root shape.
-  for (const auto &c : outContainer.container)
-  {
-    if (c.shape.ShapeType() == TopAbs_COMPOUND)
-    {
-      rootShape = c.shape;
-      break;
-    }
-  }
-  assert(!rootShape.IsNull());
+  assert(!inputTarget.isNull());
+  assert(!inputTool.isNull());
+  assert(!seerShapeOut->isNull());
 }
 
 void BooleanIdMapper::go()
@@ -86,19 +82,12 @@ void BooleanIdMapper::go()
 
 void BooleanIdMapper::goIntersectionEdges()
 {
-  ResultContainer &work = outContainer.container;
-  const ResultContainer &targetContainer = updateMap.find(ftr::InputTypes::target)->second->getResultContainer();
-  const ResultContainer &toolContainer = updateMap.find(ftr::InputTypes::tool)->second->getResultContainer();
   const BOPDS_DS &bopDS = *(builder.PDS());
   const BOPCol_DataMapOfShapeShape &origins = builder.Origins();
   boost::uuids::nil_generator ng;
   using boost::uuids::to_string;
   using boost::uuids::uuid;
   
-  TopTools_IndexedDataMapOfShapeListOfShape eToF; //edges to faces
-  TopExp::MapShapesAndAncestors(rootShape, TopAbs_EDGE, TopAbs_FACE, eToF);
-  TopTools_IndexedDataMapOfShapeListOfShape vToF; //vertices to faces
-  TopExp::MapShapesAndAncestors(rootShape, TopAbs_VERTEX, TopAbs_FACE, vToF);
   std::set<IntersectionEdge> cIEdges; //current intersection edges.
   for (int index = 0; index < bopDS.NbShapes(); ++index)
   {
@@ -107,24 +96,24 @@ void BooleanIdMapper::goIntersectionEdges()
     const TopoDS_Shape &shape = bopDS.Shape(index);
     if (shape.ShapeType() != TopAbs_EDGE)
       continue;
-    if (!hasResult(work, shape))
+    if (!seerShapeOut->hasShapeIdRecord(shape))
       continue;
-    if (!findResultByShape(work, shape).id.is_nil())
+    if (!seerShapeOut->findShapeIdRecord(shape).id.is_nil())
       continue;
     
     IntersectionEdge tempIntersection;
-    const TopTools_ListOfShape &parents = eToF.FindFromKey(shape);
-    TopTools_ListIteratorOfListOfShape pIt;
-    for (pIt.Initialize(parents); pIt.More(); pIt.Next())
+    gu::ShapeVector parentShapes = seerShapeOut->useGetParentsOfType(shape, TopAbs_FACE);
+    
+    for (const auto &cShape : parentShapes)
     {
-      if (!origins.IsBound(pIt.Value()))
+      if (!origins.IsBound(cShape))
 	continue;
       
       uuid sourceFaceId = ng();
-      if (hasResult(targetContainer, origins(pIt.Value())))
-	sourceFaceId = findResultByShape(targetContainer, origins(pIt.Value())).id;
-      if (hasResult(toolContainer, origins(pIt.Value())))
-	sourceFaceId = findResultByShape(toolContainer, origins(pIt.Value())).id;
+      if (inputTarget.hasShapeIdRecord(origins(cShape)))
+	sourceFaceId = inputTarget.findShapeIdRecord(origins(cShape)).id;
+      if (inputTool.hasShapeIdRecord(origins(cShape)))
+	sourceFaceId = inputTool.findShapeIdRecord(origins(cShape)).id;
       if (sourceFaceId.is_nil())
 	continue;
       
@@ -151,7 +140,7 @@ void BooleanIdMapper::goIntersectionEdges()
       tempIntersection.resultEdge = idGenerator();
       iMapWrapper.intersectionEdges.insert(tempIntersection);
     }
-    updateId(work, tempIntersection.resultEdge, shape);
+    seerShapeOut->updateShapeIdRecord(shape, tempIntersection.resultEdge);
     iEdgeCache.insert(tempIntersection.resultEdge);
     cIEdges.insert(tempIntersection);
   }
@@ -161,10 +150,6 @@ void BooleanIdMapper::goSingleSplits()
 {
   //it appears splits only contain faces that have been split. It ignores edges.
   //key is in original solid. values maybe in the output solid.
-  
-  ResultContainer &work = outContainer.container;
-  const ResultContainer &targetContainer = updateMap.find(ftr::InputTypes::target)->second->getResultContainer();
-  const ResultContainer &toolContainer = updateMap.find(ftr::InputTypes::tool)->second->getResultContainer();
   
   //loop through splits and find occurences where a face is split
   //but has only one of it's split faces in the output shape.
@@ -180,7 +165,7 @@ void BooleanIdMapper::goSingleSplits()
     std::size_t count = 0;
     for (;shapeListIt.More();shapeListIt.Next())
     {
-      if (hasResult(work, shapeListIt.Value()))
+      if (seerShapeOut->hasShapeIdRecord(shapeListIt.Value()))
       {
 	count++;
 	value = shapeListIt.Value();
@@ -191,13 +176,13 @@ void BooleanIdMapper::goSingleSplits()
     
     //assign face id.
     uuid faceId = boost::uuids::nil_generator()();
-    if (hasResult(targetContainer, key))
-      faceId = findResultByShape(targetContainer, key).id;
-    else if(hasResult(toolContainer, key))
-      faceId = findResultByShape(toolContainer, key).id;
+    if (inputTarget.hasShapeIdRecord(key))
+      faceId = inputTarget.findShapeIdRecord(key).id;
+    else if(inputTool.hasShapeIdRecord(key))
+      faceId = inputTool.findShapeIdRecord(key).id;
     assert(!faceId.is_nil());
-    assert(hasResult(work, value));
-    updateId(work, faceId, value);
+    assert(seerShapeOut->hasShapeIdRecord(value));
+    seerShapeOut->updateShapeIdRecord(value, faceId);
     
     //i could assign the outside wireid here, but should happen in general shape mapping
   }
@@ -205,19 +190,10 @@ void BooleanIdMapper::goSingleSplits()
 
 void BooleanIdMapper::goSplitFaces()
 {
-  ResultContainer &work = outContainer.container;
-  const ResultContainer &targetContainer = updateMap.find(ftr::InputTypes::target)->second->getResultContainer();
-  const ResultContainer &toolContainer = updateMap.find(ftr::InputTypes::tool)->second->getResultContainer();
   const BOPCol_DataMapOfShapeShape &origins = builder.Origins();
   const BOPCol_DataMapOfShapeListOfShape &splits = builder.Splits();
   
-  gu::ShapeVector nilShapes;
-  typedef ResultContainer::index<ResultRecord::ById>::type List;
-  const List &list = work.get<ResultRecord::ById>();
-  auto rangeItPair = list.equal_range(boost::uuids::nil_generator()());
-  for (; rangeItPair.first != rangeItPair.second; ++rangeItPair.first)
-    nilShapes.push_back(rangeItPair.first->shape);
-  
+  gu::ShapeVector nilShapes = seerShapeOut->getAllNilShapes();
   std::vector<std::pair<SplitFace, TopoDS_Shape> > weakSplits;
   
   for (const auto &currentShape : nilShapes)
@@ -232,10 +208,10 @@ void BooleanIdMapper::goSplitFaces()
     //now we should have proved out current shape is a split.
     
     uuid originId = boost::uuids::nil_generator()();
-    if (hasResult(targetContainer, origin))
-      originId = findResultByShape(targetContainer, origin).id;
-    else if (hasResult(toolContainer, origin))
-      originId = findResultByShape(toolContainer, origin).id;
+    if (inputTarget.hasShapeIdRecord(origin))
+      originId = inputTarget.findShapeIdRecord(origin).id;
+    else if (inputTool.hasShapeIdRecord(origin))
+      originId = inputTool.findShapeIdRecord(origin).id;
     else
       assert(0); //no origin id in input containers.
       
@@ -247,8 +223,8 @@ void BooleanIdMapper::goSplitFaces()
     BOPTools::MapShapes(currentShape, TopAbs_EDGE, edges);
     for (int index = 1; index <= edges.Extent(); ++index)
     {
-      assert(hasResult(work, edges(index)));
-      uuid tempId = findResultByShape(work, edges(index)).id;
+      assert(seerShapeOut->hasShapeIdRecord(edges(index)));
+      uuid tempId = seerShapeOut->findShapeIdRecord(edges(index)).id;
       if (iEdgeCache.count(tempId) == 0)
 	continue;
       faceIEdges.insert(tempId);
@@ -266,14 +242,14 @@ void BooleanIdMapper::goSplitFaces()
     if (results)
     {
       //have a strong match.
-      assert(!hasResult(work, splitFaceOut.resultFace));
-      updateId(work, splitFaceOut.resultFace, currentShape);
+      assert(!seerShapeOut->hasShapeIdRecord(splitFaceOut.resultFace));
+      seerShapeOut->updateShapeIdRecord(currentShape, splitFaceOut.resultFace);
       
-      assert(!hasResult(work, splitFaceOut.resultWire));
+      assert(!seerShapeOut->hasShapeIdRecord(splitFaceOut.resultWire));
       TopoDS_Shape outerWire = BRepTools::OuterWire(TopoDS::Face(currentShape));
       assert(!outerWire.IsNull());
-      assert(hasResult(work, outerWire));
-      updateId(work, splitFaceOut.resultWire, outerWire);
+      assert(seerShapeOut->hasShapeIdRecord(outerWire));
+      seerShapeOut->updateShapeIdRecord(outerWire, splitFaceOut.resultWire);
     }
     else
       weakSplits.push_back(std::make_pair(splitFace, currentShape));
@@ -288,15 +264,15 @@ void BooleanIdMapper::goSplitFaces()
     auto matches = iMapWrapper.matchWeak(sFace.first);
     for (const auto &match : matches)
     {
-      if (!hasResult(work, match.resultFace))
+      if (!seerShapeOut->hasShapeIdRecord(match.resultFace))
       {
-	updateId(work, match.resultFace, sFace.second);
+	seerShapeOut->updateShapeIdRecord(sFace.second, match.resultFace);
 	
-	assert(!hasResult(work, match.resultWire));
+	assert(!seerShapeOut->hasShapeIdRecord(match.resultWire));
 	TopoDS_Shape outerWire = BRepTools::OuterWire(TopoDS::Face(sFace.second));
 	assert(!outerWire.IsNull());
-	assert(hasResult(work, outerWire));
-	updateId(work, match.resultWire, outerWire);
+	assert(seerShapeOut->hasShapeIdRecord(outerWire));
+	seerShapeOut->updateShapeIdRecord(outerWire, match.resultWire);
 	foundMatch = true;
 	break;
       }
@@ -304,12 +280,12 @@ void BooleanIdMapper::goSplitFaces()
     if (foundMatch)
       continue;
     iMapWrapper.add(sFace.first);
-    updateId(work, sFace.first.resultFace, sFace.second);
+    seerShapeOut->updateShapeIdRecord(sFace.second, sFace.first.resultFace);
     
-    assert(!hasResult(work, sFace.first.resultWire));
+    assert(!seerShapeOut->hasShapeIdRecord(sFace.first.resultWire));
     TopoDS_Shape outerWire = BRepTools::OuterWire(TopoDS::Face(sFace.second));
     assert(!outerWire.IsNull());
-    assert(hasResult(work, outerWire));
-    updateId(work, sFace.first.resultWire, outerWire);
+    assert(seerShapeOut->hasShapeIdRecord(outerWire));
+    seerShapeOut->updateShapeIdRecord(outerWire, sFace.first.resultWire);
   }
 }

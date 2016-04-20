@@ -18,6 +18,7 @@
  */
 
 #include <boost/uuid/string_generator.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 #include <project/serial/xsdcxxoutput/featurebooleanbase.h>
 #include "booleanbase.h"

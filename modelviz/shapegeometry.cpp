@@ -32,7 +32,7 @@
 #include <osg/LineWidth>
 #include <osg/Point>
 
-#include <feature/maps.h>
+#include <feature/seershape.h>
 #include <modelviz/shapegeometryprivate.h>
 #include <modelviz/shapegeometry.h>
 #include <nodemaskdefs.h>
@@ -137,8 +137,9 @@ const osg::BoundingSphere& ShapeGeometry::getBSphereFromPSet(std::size_t primiti
   return idPSetWrapper->findBSphereFromPSet(primitiveIndexIn);
 }
 
-ShapeGeometryBuilder::ShapeGeometryBuilder(const TopoDS_Shape &shapeIn, const ftr::ResultContainerWrapper &resultIn) : 
-  originalShape(shapeIn), copiedShape(shapeIn), resultWrapper(resultIn), bound(), edgeToFace(),
+ShapeGeometryBuilder::ShapeGeometryBuilder(std::shared_ptr<ftr::SeerShape> seerShapeIn) : 
+  originalShape(seerShapeIn->getRootOCCTShape()), copiedShape(seerShapeIn->getRootOCCTShape()),
+  seerShape(seerShapeIn), bound(), edgeToFace(),
   processed(), idPSetWrapperFace(new IdPSetWrapper()), idPSetWrapperEdge(new IdPSetWrapper())
 {
   BRepBndLib::Add(copiedShape, bound);
@@ -220,6 +221,8 @@ void ShapeGeometryBuilder::initialize()
     faceGeometry->setIdPSetWrapper(idPSetWrapperFace);
     faceGeometry->setColor(osg::Vec4(.1f, .7f, .1f, .5f));
     
+    faceGeometry->seerShape = seerShape;
+    
     pSetTriangleWrapper = std::shared_ptr<PSetVertexWrapper>(new PSetVertexWrapper());
     faceGeometry->setPSetVertexWrapper(pSetTriangleWrapper);
     
@@ -242,6 +245,8 @@ void ShapeGeometryBuilder::initialize()
     
     edgeGeometry->setIdPSetWrapper(idPSetWrapperEdge);
     edgeGeometry->setColor(osg::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
+    
+    edgeGeometry->seerShape = seerShape;
     
     out->addChild(edgeGeometry.get());
   }
@@ -272,7 +277,7 @@ void ShapeGeometryBuilder::recursiveConstruct(const TopoDS_Shape &shapeIn)
     if (processed.Contains(currentShape))
 	continue;
     processed.Add(currentShape);
-    if (!(ftr::hasResult(resultWrapper.container, currentShape)))
+    if (!(seerShape->hasShapeIdRecord(currentShape)))
       continue; //probably seam edge.
 
     if
@@ -415,7 +420,7 @@ void ShapeGeometryBuilder::faceConstruct(const TopoDS_Face &faceIn)
     (*normals)[(*indices)[factor + 2]] = tempNormal;
   }
   faceGeometry->addPrimitiveSet(indices.get());
-  boost::uuids::uuid id = ftr::findResultByShape(resultWrapper.container, faceIn).id;
+  boost::uuids::uuid id = seerShape->findShapeIdRecord(faceIn).id;
   std::size_t lastPrimitiveIndex = faceGeometry->getNumPrimitiveSets() - 1;
   if (!idPSetWrapperFace->hasId(id))
   {
@@ -478,7 +483,7 @@ void ShapeGeometryBuilder::edgeConstruct(const TopoDS_Edge &edgeIn)
       bSphere.expandBy(vertices->back());
   }
   edgeGeometry->addPrimitiveSet(indices.get());
-  boost::uuids::uuid id = ftr::findResultByShape(resultWrapper.container, edgeIn).id;
+  boost::uuids::uuid id = seerShape->findShapeIdRecord(edgeIn).id;
   std::size_t lastPrimitiveIndex = edgeGeometry->getNumPrimitiveSets() - 1;
   if (!idPSetWrapperEdge->hasId(id))
   {

@@ -34,6 +34,7 @@
 #include <nodemaskdefs.h>
 #include <modelviz/shapegeometry.h>
 #include <globalutilities.h>
+#include <feature/seershape.h>
 #include <project/serial/xsdcxxoutput/featurebase.h>
 #include <feature/base.h>
 
@@ -77,6 +78,8 @@ Base::Base()
   state.set(ftr::StateOffset::Failure, false);
   state.set(ftr::StateOffset::Inactive, false);
   state.set(ftr::StateOffset::NonLeaf, false);
+  
+  seerShape = std::shared_ptr<SeerShape>(new SeerShape());
 }
 
 Base::~Base()
@@ -135,20 +138,14 @@ void Base::updateVisual()
   //clear all the children from the main transform.
   lod->removeChildren(0, mainTransform->getNumChildren());
   
-  if (shape.IsNull())
+  if (seerShape->isNull())
     return;
 
-  mdv::BuildConnector connectBuilder(shape, resultContainer);
-  connector = connectBuilder.getConnector();
-  connector.outputGraphviz();
-  
   //get deflection values.
   double linear = prf::manager().rootPtr->visual().mesh().linearDeflection();
   double angular = prf::manager().rootPtr->visual().mesh().angularDeflection();
 
-  ftr::ResultContainerWrapper wrapper;
-  wrapper.container = resultContainer;
-  mdv::ShapeGeometryBuilder sBuilder(shape, wrapper);
+  mdv::ShapeGeometryBuilder sBuilder(seerShape);
   sBuilder.go(linear, angular);
   assert(sBuilder.success);
   
@@ -282,139 +279,34 @@ prj::srl::FeatureBase Base::serialOut()
 {
   using boost::uuids::to_string;
   
-  //update the shape offset in result container. we use the
-  //shape offset to map id to shape when reading data from disk.
-  if (!shape.IsNull())
-  {
-    TopTools_IndexedMapOfShape shapeMap;
-    TopExp::MapShapes(shape, shapeMap);
-    for (std::size_t index = 1; index <= static_cast<std::size_t>(shapeMap.Extent()); ++index)
-    {
-      if (!hasResult(resultContainer, shapeMap(index)))
-	continue; //things like degenerated edges exist in shape but not in result.
-      ftr::updateOffset(resultContainer, shapeMap(index), index);
-    }
-  }
-  
-  prj::srl::EvolutionContainer eContainerOut;
-  typedef EvolutionContainer::index<EvolutionRecord::ByInId>::type EList;
-  const EList &eList = evolutionContainer.get<EvolutionRecord::ByInId>();
-  for (EList::const_iterator it = eList.begin(); it != eList.end(); ++it)
-  {
-    prj::srl::EvolutionRecord eRecord
-    (
-      boost::uuids::to_string(it->inId),
-      boost::uuids::to_string(it->outId)
-    );
-    eContainerOut.evolutionRecord().push_back(eRecord);
-  }
-  
-  prj::srl::ResultContainer rContainerOut;
-  typedef ResultContainer::index<ResultRecord::ById>::type RList;
-  const RList &rList = resultContainer.get<ResultRecord::ById>();
-  for (RList::const_iterator it = rList.begin(); it != rList.end(); ++it)
-  {
-    prj::srl::ResultRecord rRecord
-    (
-      boost::uuids::to_string(it->id),
-      it->shapeOffset
-    );
-    rContainerOut.resultRecord().push_back(rRecord);
-  }
-  
-  prj::srl::FeatureContainer fContainerOut;
-  typedef FeatureContainer::index<FeatureRecord::ById>::type FList;
-  const FList &fList = featureContainer.get<FeatureRecord::ById>();
-  for (FList::const_iterator it = fList.begin(); it != fList.end(); ++it)
-  {
-    prj::srl::FeatureRecord fRecord
-    (
-      boost::uuids::to_string(it->id),
-      it->tag
-    );
-    fContainerOut.featureRecord().push_back(fRecord);
-  }
-  
-  prj::srl::DerivedContainer dContainerOut;
-  for (DerivedContainer::const_iterator dIt = derivedContainer.begin(); dIt != derivedContainer.end(); ++dIt)
-  {
-    prj::srl::IdSet setIn;
-    for (IdSet::const_iterator sIt = dIt->first.begin(); sIt != dIt->first.end(); ++sIt)
-      setIn.id().push_back(to_string(*sIt));
-    prj::srl::DerivedRecord::IdType mId(to_string(dIt->second));
-    prj::srl::DerivedRecord record
-    (
-      setIn,
-      mId
-    );
-    
-    dContainerOut.derivedRecord().push_back(record);
-  }
-  
   return prj::srl::FeatureBase
   (
     name.toStdString(),
     boost::uuids::to_string(id),
-    eContainerOut,
-    rContainerOut,
-    fContainerOut,
-    dContainerOut
+    seerShape->serialOut()
   ); 
 }
 
 void Base::serialIn(const prj::srl::FeatureBase& sBaseIn)
 {
   boost::uuids::string_generator sg;
-  
+//   
   name = QString::fromStdString(sBaseIn.name());
   id = sg(sBaseIn.id());
   mainSwitch->setUserValue(gu::idAttributeTitle, boost::uuids::to_string(id));
   overlaySwitch->setUserValue(gu::idAttributeTitle, boost::uuids::to_string(id));
   
-  evolutionContainer.get<EvolutionRecord::ByInId>().clear();
-  for (const prj::srl::EvolutionRecord &sERecord : sBaseIn.evolutionContainer().evolutionRecord())
-  {
-    EvolutionRecord record;
-    record.inId = sg(sERecord.idIn());
-    record.outId = sg(sERecord.idOut());
-    evolutionContainer.insert(record);
-  }
-  
-  //fill in shape vector
-  std::vector<TopoDS_Shape, Standard_StdAllocator<TopoDS_Shape> > shapeVector;
-  TopTools_IndexedMapOfShape shapeMap;
-  TopExp::MapShapes(shape, shapeMap);
-  for (std::size_t index = 1; index <= static_cast<std::size_t>(shapeMap.Extent()); ++index)
-    shapeVector.push_back(shapeMap(index));
-  resultContainer.get<ResultRecord::ById>().clear();
-  for (const prj::srl::ResultRecord &sRRecord : sBaseIn.resultContainer().resultRecord())
-  {
-    ResultRecord record;
-    record.id = sg(sRRecord.id());
-    //shapeOffset not needed at runtime.
-    record.shapeOffset = sRRecord.shapeOffset();
-    record.shape = shapeVector.at(sRRecord.shapeOffset() - 1);
-    resultContainer.insert(record);
-  }
-  
-  featureContainer.get<FeatureRecord::ById>().clear();
-  for (const prj::srl::FeatureRecord &sFRecord : sBaseIn.featureContainer().featureRecord())
-  {
-    FeatureRecord record;
-    record.id = sg(sFRecord.id());
-    record.tag = sFRecord.tag();
-    featureContainer.insert(record);
-  }
-  
-  derivedContainer.clear();
-  for (const prj::srl::DerivedRecord &sDRecord : sBaseIn.derivedContainer().derivedRecord())
-  {
-    IdSet setIn;
-    for (const auto &idSet : sDRecord.idSet().id())
-      setIn.insert(sg(idSet));
-    boost::uuids::uuid mId = sg(sDRecord.id());
-    derivedContainer.insert(std::make_pair(setIn, mId));
-  }
+  seerShape->serialIn(sBaseIn.seerShape());
+}
+
+const TopoDS_Shape& Base::getShape() const
+{
+  return seerShape->getRootOCCTShape();
+}
+
+void Base::setShape(const TopoDS_Shape &in)
+{
+  seerShape->setOCCTShape(in);
 }
 
 std::string Base::getFileName() const

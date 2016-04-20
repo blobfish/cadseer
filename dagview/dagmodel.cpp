@@ -19,6 +19,8 @@
 
 #include <iostream>
 
+#include <boost/uuid/nil_generator.hpp>
+
 #include <QString>
 #include <QTextStream>
 #include <QGraphicsTextItem>

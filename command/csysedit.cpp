@@ -24,6 +24,7 @@
 #include <project/project.h>
 #include <message/message.h>
 #include <message/observer.h>
+#include <feature/seershape.h>
 #include <feature/csysbase.h>
 #include <command/csysedit.h>
 
@@ -111,9 +112,9 @@ void CSysEdit::analyzeSelections()
       {
 	ftr::CSysBase *feature = dynamic_cast<ftr::CSysBase*>(project->findFeature(messages.at(0).featureId));
 	assert(feature);
-	const mdv::Connector &connector = feature->getConnector();
+	const ftr::SeerShape &seerShape = feature->getSeerShape();
 	
-	osg::Vec3d direction = gu::gleanVector(connector.getShape(messages.at(0).shapeId), messages.at(0).pointLocation);
+	osg::Vec3d direction = gu::gleanVector(seerShape.getOCCTShape(messages.at(0).shapeId), messages.at(0).pointLocation);
 	if (direction.isNaN())
 	  return;
 	

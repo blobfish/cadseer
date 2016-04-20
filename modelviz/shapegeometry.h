@@ -33,7 +33,7 @@
 namespace boost{namespace uuids{class uuid;}}
 class TopoDS_Face; class TopoDS_Edge;
 namespace osg{class Switch; class Depth; class LineWidth;}
-namespace ftr{class ResultContainerWrapper;}
+namespace ftr{class SeerShape;}
 
 namespace mdv
 {
@@ -69,6 +69,8 @@ namespace mdv
     void setToPreHighlight(const boost::uuids::uuid&); //!< set to prehighlight of primitive index.
     void setToHighlight(const boost::uuids::uuid&); //!< set to highlight of primitive index.
     
+    std::shared_ptr<ftr::SeerShape> seerShape;
+    
   protected:
     void setColor(const boost::uuids::uuid&, const osg::Vec4&); //set color of primitive index.
     
@@ -82,7 +84,7 @@ namespace mdv
   class ShapeGeometryBuilder
   {
   public:
-    ShapeGeometryBuilder(const TopoDS_Shape &, const ftr::ResultContainerWrapper &);
+    ShapeGeometryBuilder(std::shared_ptr<ftr::SeerShape>);
     ~ShapeGeometryBuilder();
     void go(double, double);
     void buildFaces(bool in){shouldBuildFaces = in;}
@@ -97,7 +99,7 @@ namespace mdv
     void faceConstruct(const TopoDS_Face &faceIn);
     const TopoDS_Shape &originalShape;
     TopoDS_Shape copiedShape;
-    const ftr::ResultContainerWrapper &resultWrapper;
+    std::shared_ptr<ftr::SeerShape> seerShape;
     Bnd_Box bound;
     TopTools_IndexedDataMapOfShapeListOfShape edgeToFace;
     TopTools_MapOfShape processed;

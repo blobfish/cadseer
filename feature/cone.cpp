@@ -17,9 +17,11 @@
  *
  */
 
+#include <globalutilities.h>
 #include <library/lineardimension.h>
 #include <library/ipgroup.h>
 #include <project/serial/xsdcxxoutput/featurecone.h>
+#include <feature/seershape.h>
 #include <feature/conebuilder.h>
 #include <feature/cone.h>
 
@@ -189,8 +191,6 @@ void Cone::getParameters(double& radius1Out, double& radius2Out, double& heightO
 
 void Cone::updateModel(const UpdateMap& mapIn)
 {
-  //clear shape so if we fail the feature will be empty.
-  shape = TopoDS_Shape();
   setFailure();
   
   CSysBase::updateModel(mapIn);
@@ -198,7 +198,7 @@ void Cone::updateModel(const UpdateMap& mapIn)
   try
   {
     ConeBuilder coneBuilder(radius1, radius2, height, system);
-    shape = compoundWrap(coneBuilder.getSolid());
+    seerShape->setOCCTShape(coneBuilder.getSolid());
     updateResult(coneBuilder);
     setSuccess();
   }
@@ -216,11 +216,11 @@ void Cone::updateResult(const ConeBuilder& coneBuilderIn)
   //helper lamda
   auto updateShapeByTag = [this](const TopoDS_Shape &shapeIn, FeatureTag featureTagIn)
   {
-    uuid localId = findFeatureByTag(featureContainer, featureTagMap.at(featureTagIn)).id;
-    updateShapeById(resultContainer, localId, shapeIn);
+    uuid localId = seerShape->featureTagId(featureTagMap.at(featureTagIn));
+    seerShape->updateShapeIdRecord(shapeIn, localId);
   };
   
-  updateShapeByTag(shape, FeatureTag::Root);
+  updateShapeByTag(seerShape->getRootOCCTShape(), FeatureTag::Root);
   updateShapeByTag(coneBuilderIn.getSolid(), FeatureTag::Solid);
   updateShapeByTag(coneBuilderIn.getShell(), FeatureTag::Shell);
   updateShapeByTag(coneBuilderIn.getFaceBottom(), FeatureTag::FaceBottom);
@@ -235,7 +235,7 @@ void Cone::updateResult(const ConeBuilder& coneBuilderIn)
   updateShapeByTag(coneBuilderIn.getVertexBottom(), FeatureTag::VertexBottom);
   updateShapeByTag(coneBuilderIn.getVertexTop(), FeatureTag::VertexTop);
   
-//   std::cout << std::endl << "update result:" << std::endl << resultContainer << std::endl;
+  seerShape->setRootShapeId(seerShape->featureTagId(featureTagMap.at(FeatureTag::Root)));
 }
 
 //the quantity of cone shapes can change so generating maps from first update can lead to missing
@@ -249,23 +249,18 @@ void Cone::initializeMaps()
     uuid tempId = idGenerator();
     tempIds.push_back(tempId);
     
-    ResultRecord resultRecord;
-    resultRecord.id = tempId;
-    resultRecord.shape = TopoDS_Shape();
-    resultContainer.insert(resultRecord);
-    
-    EvolutionRecord evolutionRecord;
-    evolutionRecord.outId = tempId;
-    evolutionContainer.insert(evolutionRecord);
+    EvolveRecord evolveRecord;
+    evolveRecord.outId = tempId;
+    seerShape->insertEvolve(evolveRecord);
   }
   
   //helper lamda
   auto insertIntoFeatureMap = [this](const uuid &idIn, FeatureTag featureTagIn)
   {
-    FeatureRecord record;
+    FeatureTagRecord record;
     record.id = idIn;
     record.tag = featureTagMap.at(featureTagIn);
-    featureContainer.insert(record);
+    seerShape->insertFeatureTag(record);
   };
   
   //first we do the compound that is root. this is not in box maker.

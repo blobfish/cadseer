@@ -35,6 +35,7 @@ namespace prj{namespace srl{class FeatureBlend;}}
 
 namespace ftr
 {
+  class SeerShape;
 struct BlendPick
 {
   boost::uuids::uuid id; //!< id of edge or face object picked.
@@ -69,7 +70,7 @@ class Blend : public Base
     
     static std::shared_ptr<Parameter> buildRadiusParameter();
     static std::shared_ptr<Parameter> buildPositionParameter();
-    static VariableBlend buildDefaultVariable(const ResultContainer &, const BlendPick &);
+    static VariableBlend buildDefaultVariable(const SeerShape&, const BlendPick &);
     static double calculateUParameter(const TopoDS_Edge&, const osg::Vec3d&);
     static osg::Vec3d calculateUPoint(const TopoDS_Edge&, double);
     
@@ -91,12 +92,12 @@ class Blend : public Base
     /*! used to map the edges that are blended away to the face generated.
      * used to map new generated face to outer wire.
      */ 
-    EvolutionContainer shapeMap;
+    std::map<boost::uuids::uuid, boost::uuids::uuid> shapeMap; //!< map edges or vertices to faces
     
 private:
-    void generatedMatch(BRepFilletAPI_MakeFillet&, const Base *, ResultContainer &);
-    void ensureNoFaceNils(ResultContainer&);
-    void dumpInfo(BRepFilletAPI_MakeFillet&, const Base *);
+    void generatedMatch(BRepFilletAPI_MakeFillet&, const SeerShape &);
+    void ensureNoFaceNils();
+    void dumpInfo(BRepFilletAPI_MakeFillet&, const SeerShape&);
     
     static QIcon icon;
 };

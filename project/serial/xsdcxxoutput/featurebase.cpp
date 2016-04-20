@@ -126,255 +126,255 @@ namespace prj
     }
 
 
-    // EvolutionRecord
+    // EvolveRecord
     // 
 
-    const EvolutionRecord::IdInType& EvolutionRecord::
+    const EvolveRecord::IdInType& EvolveRecord::
     idIn () const
     {
       return this->idIn_.get ();
     }
 
-    EvolutionRecord::IdInType& EvolutionRecord::
+    EvolveRecord::IdInType& EvolveRecord::
     idIn ()
     {
       return this->idIn_.get ();
     }
 
-    void EvolutionRecord::
+    void EvolveRecord::
     idIn (const IdInType& x)
     {
       this->idIn_.set (x);
     }
 
-    void EvolutionRecord::
+    void EvolveRecord::
     idIn (::std::unique_ptr< IdInType > x)
     {
       this->idIn_.set (std::move (x));
     }
 
-    const EvolutionRecord::IdInType& EvolutionRecord::
+    const EvolveRecord::IdInType& EvolveRecord::
     idIn_default_value ()
     {
       return idIn_default_value_;
     }
 
-    const EvolutionRecord::IdOutType& EvolutionRecord::
+    const EvolveRecord::IdOutType& EvolveRecord::
     idOut () const
     {
       return this->idOut_.get ();
     }
 
-    EvolutionRecord::IdOutType& EvolutionRecord::
+    EvolveRecord::IdOutType& EvolveRecord::
     idOut ()
     {
       return this->idOut_.get ();
     }
 
-    void EvolutionRecord::
+    void EvolveRecord::
     idOut (const IdOutType& x)
     {
       this->idOut_.set (x);
     }
 
-    void EvolutionRecord::
+    void EvolveRecord::
     idOut (::std::unique_ptr< IdOutType > x)
     {
       this->idOut_.set (std::move (x));
     }
 
-    const EvolutionRecord::IdOutType& EvolutionRecord::
+    const EvolveRecord::IdOutType& EvolveRecord::
     idOut_default_value ()
     {
       return idOut_default_value_;
     }
 
 
-    // EvolutionContainer
+    // EvolveContainer
     // 
 
-    const EvolutionContainer::EvolutionRecordSequence& EvolutionContainer::
-    evolutionRecord () const
+    const EvolveContainer::EvolveRecordSequence& EvolveContainer::
+    evolveRecord () const
     {
-      return this->evolutionRecord_;
+      return this->evolveRecord_;
     }
 
-    EvolutionContainer::EvolutionRecordSequence& EvolutionContainer::
-    evolutionRecord ()
+    EvolveContainer::EvolveRecordSequence& EvolveContainer::
+    evolveRecord ()
     {
-      return this->evolutionRecord_;
+      return this->evolveRecord_;
     }
 
-    void EvolutionContainer::
-    evolutionRecord (const EvolutionRecordSequence& s)
+    void EvolveContainer::
+    evolveRecord (const EvolveRecordSequence& s)
     {
-      this->evolutionRecord_ = s;
+      this->evolveRecord_ = s;
     }
 
 
-    // ResultRecord
+    // ShapeIdRecord
     // 
 
-    const ResultRecord::IdType& ResultRecord::
+    const ShapeIdRecord::IdType& ShapeIdRecord::
     id () const
     {
       return this->id_.get ();
     }
 
-    ResultRecord::IdType& ResultRecord::
+    ShapeIdRecord::IdType& ShapeIdRecord::
     id ()
     {
       return this->id_.get ();
     }
 
-    void ResultRecord::
+    void ShapeIdRecord::
     id (const IdType& x)
     {
       this->id_.set (x);
     }
 
-    void ResultRecord::
+    void ShapeIdRecord::
     id (::std::unique_ptr< IdType > x)
     {
       this->id_.set (std::move (x));
     }
 
-    const ResultRecord::IdType& ResultRecord::
+    const ShapeIdRecord::IdType& ShapeIdRecord::
     id_default_value ()
     {
       return id_default_value_;
     }
 
-    const ResultRecord::ShapeOffsetType& ResultRecord::
+    const ShapeIdRecord::ShapeOffsetType& ShapeIdRecord::
     shapeOffset () const
     {
       return this->shapeOffset_.get ();
     }
 
-    ResultRecord::ShapeOffsetType& ResultRecord::
+    ShapeIdRecord::ShapeOffsetType& ShapeIdRecord::
     shapeOffset ()
     {
       return this->shapeOffset_.get ();
     }
 
-    void ResultRecord::
+    void ShapeIdRecord::
     shapeOffset (const ShapeOffsetType& x)
     {
       this->shapeOffset_.set (x);
     }
 
-    ResultRecord::ShapeOffsetType ResultRecord::
+    ShapeIdRecord::ShapeOffsetType ShapeIdRecord::
     shapeOffset_default_value ()
     {
       return ShapeOffsetType (18446744073709551615ULL);
     }
 
 
-    // ResultContainer
+    // ShapeIdContainer
     // 
 
-    const ResultContainer::ResultRecordSequence& ResultContainer::
-    resultRecord () const
+    const ShapeIdContainer::ShapeIdRecordSequence& ShapeIdContainer::
+    shapeIdRecord () const
     {
-      return this->resultRecord_;
+      return this->shapeIdRecord_;
     }
 
-    ResultContainer::ResultRecordSequence& ResultContainer::
-    resultRecord ()
+    ShapeIdContainer::ShapeIdRecordSequence& ShapeIdContainer::
+    shapeIdRecord ()
     {
-      return this->resultRecord_;
+      return this->shapeIdRecord_;
     }
 
-    void ResultContainer::
-    resultRecord (const ResultRecordSequence& s)
+    void ShapeIdContainer::
+    shapeIdRecord (const ShapeIdRecordSequence& s)
     {
-      this->resultRecord_ = s;
+      this->shapeIdRecord_ = s;
     }
 
 
-    // FeatureRecord
+    // FeatureTagRecord
     // 
 
-    const FeatureRecord::IdType& FeatureRecord::
+    const FeatureTagRecord::IdType& FeatureTagRecord::
     id () const
     {
       return this->id_.get ();
     }
 
-    FeatureRecord::IdType& FeatureRecord::
+    FeatureTagRecord::IdType& FeatureTagRecord::
     id ()
     {
       return this->id_.get ();
     }
 
-    void FeatureRecord::
+    void FeatureTagRecord::
     id (const IdType& x)
     {
       this->id_.set (x);
     }
 
-    void FeatureRecord::
+    void FeatureTagRecord::
     id (::std::unique_ptr< IdType > x)
     {
       this->id_.set (std::move (x));
     }
 
-    const FeatureRecord::IdType& FeatureRecord::
+    const FeatureTagRecord::IdType& FeatureTagRecord::
     id_default_value ()
     {
       return id_default_value_;
     }
 
-    const FeatureRecord::TagType& FeatureRecord::
+    const FeatureTagRecord::TagType& FeatureTagRecord::
     tag () const
     {
       return this->tag_.get ();
     }
 
-    FeatureRecord::TagType& FeatureRecord::
+    FeatureTagRecord::TagType& FeatureTagRecord::
     tag ()
     {
       return this->tag_.get ();
     }
 
-    void FeatureRecord::
+    void FeatureTagRecord::
     tag (const TagType& x)
     {
       this->tag_.set (x);
     }
 
-    void FeatureRecord::
+    void FeatureTagRecord::
     tag (::std::unique_ptr< TagType > x)
     {
       this->tag_.set (std::move (x));
     }
 
-    const FeatureRecord::TagType& FeatureRecord::
+    const FeatureTagRecord::TagType& FeatureTagRecord::
     tag_default_value ()
     {
       return tag_default_value_;
     }
 
 
-    // FeatureContainer
+    // FeatureTagContainer
     // 
 
-    const FeatureContainer::FeatureRecordSequence& FeatureContainer::
-    featureRecord () const
+    const FeatureTagContainer::FeatureTagRecordSequence& FeatureTagContainer::
+    featureTagRecord () const
     {
-      return this->featureRecord_;
+      return this->featureTagRecord_;
     }
 
-    FeatureContainer::FeatureRecordSequence& FeatureContainer::
-    featureRecord ()
+    FeatureTagContainer::FeatureTagRecordSequence& FeatureTagContainer::
+    featureTagRecord ()
     {
-      return this->featureRecord_;
+      return this->featureTagRecord_;
     }
 
-    void FeatureContainer::
-    featureRecord (const FeatureRecordSequence& s)
+    void FeatureTagContainer::
+    featureTagRecord (const FeatureTagRecordSequence& s)
     {
-      this->featureRecord_ = s;
+      this->featureTagRecord_ = s;
     }
 
 
@@ -486,6 +486,136 @@ namespace prj
     }
 
 
+    // SeerShape
+    // 
+
+    const SeerShape::RootShapeIdType& SeerShape::
+    rootShapeId () const
+    {
+      return this->rootShapeId_.get ();
+    }
+
+    SeerShape::RootShapeIdType& SeerShape::
+    rootShapeId ()
+    {
+      return this->rootShapeId_.get ();
+    }
+
+    void SeerShape::
+    rootShapeId (const RootShapeIdType& x)
+    {
+      this->rootShapeId_.set (x);
+    }
+
+    void SeerShape::
+    rootShapeId (::std::unique_ptr< RootShapeIdType > x)
+    {
+      this->rootShapeId_.set (std::move (x));
+    }
+
+    const SeerShape::RootShapeIdType& SeerShape::
+    rootShapeId_default_value ()
+    {
+      return rootShapeId_default_value_;
+    }
+
+    const SeerShape::ShapeIdContainerType& SeerShape::
+    shapeIdContainer () const
+    {
+      return this->shapeIdContainer_.get ();
+    }
+
+    SeerShape::ShapeIdContainerType& SeerShape::
+    shapeIdContainer ()
+    {
+      return this->shapeIdContainer_.get ();
+    }
+
+    void SeerShape::
+    shapeIdContainer (const ShapeIdContainerType& x)
+    {
+      this->shapeIdContainer_.set (x);
+    }
+
+    void SeerShape::
+    shapeIdContainer (::std::unique_ptr< ShapeIdContainerType > x)
+    {
+      this->shapeIdContainer_.set (std::move (x));
+    }
+
+    const SeerShape::EvolveContainerType& SeerShape::
+    evolveContainer () const
+    {
+      return this->evolveContainer_.get ();
+    }
+
+    SeerShape::EvolveContainerType& SeerShape::
+    evolveContainer ()
+    {
+      return this->evolveContainer_.get ();
+    }
+
+    void SeerShape::
+    evolveContainer (const EvolveContainerType& x)
+    {
+      this->evolveContainer_.set (x);
+    }
+
+    void SeerShape::
+    evolveContainer (::std::unique_ptr< EvolveContainerType > x)
+    {
+      this->evolveContainer_.set (std::move (x));
+    }
+
+    const SeerShape::FeatureTagContainerType& SeerShape::
+    featureTagContainer () const
+    {
+      return this->featureTagContainer_.get ();
+    }
+
+    SeerShape::FeatureTagContainerType& SeerShape::
+    featureTagContainer ()
+    {
+      return this->featureTagContainer_.get ();
+    }
+
+    void SeerShape::
+    featureTagContainer (const FeatureTagContainerType& x)
+    {
+      this->featureTagContainer_.set (x);
+    }
+
+    void SeerShape::
+    featureTagContainer (::std::unique_ptr< FeatureTagContainerType > x)
+    {
+      this->featureTagContainer_.set (std::move (x));
+    }
+
+    const SeerShape::DerivedContainerType& SeerShape::
+    derivedContainer () const
+    {
+      return this->derivedContainer_.get ();
+    }
+
+    SeerShape::DerivedContainerType& SeerShape::
+    derivedContainer ()
+    {
+      return this->derivedContainer_.get ();
+    }
+
+    void SeerShape::
+    derivedContainer (const DerivedContainerType& x)
+    {
+      this->derivedContainer_.set (x);
+    }
+
+    void SeerShape::
+    derivedContainer (::std::unique_ptr< DerivedContainerType > x)
+    {
+      this->derivedContainer_.set (std::move (x));
+    }
+
+
     // FeatureBase
     // 
 
@@ -549,100 +679,28 @@ namespace prj
       return id_default_value_;
     }
 
-    const FeatureBase::EvolutionContainerType& FeatureBase::
-    evolutionContainer () const
+    const FeatureBase::SeerShapeType& FeatureBase::
+    seerShape () const
     {
-      return this->evolutionContainer_.get ();
+      return this->seerShape_.get ();
     }
 
-    FeatureBase::EvolutionContainerType& FeatureBase::
-    evolutionContainer ()
+    FeatureBase::SeerShapeType& FeatureBase::
+    seerShape ()
     {
-      return this->evolutionContainer_.get ();
-    }
-
-    void FeatureBase::
-    evolutionContainer (const EvolutionContainerType& x)
-    {
-      this->evolutionContainer_.set (x);
+      return this->seerShape_.get ();
     }
 
     void FeatureBase::
-    evolutionContainer (::std::unique_ptr< EvolutionContainerType > x)
+    seerShape (const SeerShapeType& x)
     {
-      this->evolutionContainer_.set (std::move (x));
-    }
-
-    const FeatureBase::ResultContainerType& FeatureBase::
-    resultContainer () const
-    {
-      return this->resultContainer_.get ();
-    }
-
-    FeatureBase::ResultContainerType& FeatureBase::
-    resultContainer ()
-    {
-      return this->resultContainer_.get ();
+      this->seerShape_.set (x);
     }
 
     void FeatureBase::
-    resultContainer (const ResultContainerType& x)
+    seerShape (::std::unique_ptr< SeerShapeType > x)
     {
-      this->resultContainer_.set (x);
-    }
-
-    void FeatureBase::
-    resultContainer (::std::unique_ptr< ResultContainerType > x)
-    {
-      this->resultContainer_.set (std::move (x));
-    }
-
-    const FeatureBase::FeatureContainerType& FeatureBase::
-    featureContainer () const
-    {
-      return this->featureContainer_.get ();
-    }
-
-    FeatureBase::FeatureContainerType& FeatureBase::
-    featureContainer ()
-    {
-      return this->featureContainer_.get ();
-    }
-
-    void FeatureBase::
-    featureContainer (const FeatureContainerType& x)
-    {
-      this->featureContainer_.set (x);
-    }
-
-    void FeatureBase::
-    featureContainer (::std::unique_ptr< FeatureContainerType > x)
-    {
-      this->featureContainer_.set (std::move (x));
-    }
-
-    const FeatureBase::DerivedContainerType& FeatureBase::
-    derivedContainer () const
-    {
-      return this->derivedContainer_.get ();
-    }
-
-    FeatureBase::DerivedContainerType& FeatureBase::
-    derivedContainer ()
-    {
-      return this->derivedContainer_.get ();
-    }
-
-    void FeatureBase::
-    derivedContainer (const DerivedContainerType& x)
-    {
-      this->derivedContainer_.set (x);
-    }
-
-    void FeatureBase::
-    derivedContainer (::std::unique_ptr< DerivedContainerType > x)
-    {
-      this->derivedContainer_.set (std::move (x));
+      this->seerShape_.set (std::move (x));
     }
   }
 }
@@ -794,38 +852,38 @@ namespace prj
     {
     }
 
-    // EvolutionRecord
+    // EvolveRecord
     //
 
-    const EvolutionRecord::IdInType EvolutionRecord::idIn_default_value_ (
+    const EvolveRecord::IdInType EvolveRecord::idIn_default_value_ (
       "00000000-0000-0000-0000-000000000000");
 
-    const EvolutionRecord::IdOutType EvolutionRecord::idOut_default_value_ (
+    const EvolveRecord::IdOutType EvolveRecord::idOut_default_value_ (
       "00000000-0000-0000-0000-000000000000");
 
-    EvolutionRecord::
-    EvolutionRecord (const IdInType& idIn,
-                     const IdOutType& idOut)
+    EvolveRecord::
+    EvolveRecord (const IdInType& idIn,
+                  const IdOutType& idOut)
     : ::xml_schema::Type (),
       idIn_ (idIn, this),
       idOut_ (idOut, this)
     {
     }
 
-    EvolutionRecord::
-    EvolutionRecord (const EvolutionRecord& x,
-                     ::xml_schema::Flags f,
-                     ::xml_schema::Container* c)
+    EvolveRecord::
+    EvolveRecord (const EvolveRecord& x,
+                  ::xml_schema::Flags f,
+                  ::xml_schema::Container* c)
     : ::xml_schema::Type (x, f, c),
       idIn_ (x.idIn_, f, this),
       idOut_ (x.idOut_, f, this)
     {
     }
 
-    EvolutionRecord::
-    EvolutionRecord (const ::xercesc::DOMElement& e,
-                     ::xml_schema::Flags f,
-                     ::xml_schema::Container* c)
+    EvolveRecord::
+    EvolveRecord (const ::xercesc::DOMElement& e,
+                  ::xml_schema::Flags f,
+                  ::xml_schema::Container* c)
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
       idIn_ (this),
       idOut_ (this)
@@ -837,7 +895,7 @@ namespace prj
       }
     }
 
-    void EvolutionRecord::
+    void EvolveRecord::
     parse (::xsd::cxx::xml::dom::parser< char >& p,
            ::xml_schema::Flags f)
     {
@@ -893,15 +951,15 @@ namespace prj
       }
     }
 
-    EvolutionRecord* EvolutionRecord::
+    EvolveRecord* EvolveRecord::
     _clone (::xml_schema::Flags f,
             ::xml_schema::Container* c) const
     {
-      return new class EvolutionRecord (*this, f, c);
+      return new class EvolveRecord (*this, f, c);
     }
 
-    EvolutionRecord& EvolutionRecord::
-    operator= (const EvolutionRecord& x)
+    EvolveRecord& EvolveRecord::
+    operator= (const EvolveRecord& x)
     {
       if (this != &x)
       {
@@ -913,36 +971,36 @@ namespace prj
       return *this;
     }
 
-    EvolutionRecord::
-    ~EvolutionRecord ()
+    EvolveRecord::
+    ~EvolveRecord ()
     {
     }
 
-    // EvolutionContainer
+    // EvolveContainer
     //
 
-    EvolutionContainer::
-    EvolutionContainer ()
+    EvolveContainer::
+    EvolveContainer ()
     : ::xml_schema::Type (),
-      evolutionRecord_ (this)
+      evolveRecord_ (this)
     {
     }
 
-    EvolutionContainer::
-    EvolutionContainer (const EvolutionContainer& x,
-                        ::xml_schema::Flags f,
-                        ::xml_schema::Container* c)
+    EvolveContainer::
+    EvolveContainer (const EvolveContainer& x,
+                     ::xml_schema::Flags f,
+                     ::xml_schema::Container* c)
     : ::xml_schema::Type (x, f, c),
-      evolutionRecord_ (x.evolutionRecord_, f, this)
+      evolveRecord_ (x.evolveRecord_, f, this)
     {
     }
 
-    EvolutionContainer::
-    EvolutionContainer (const ::xercesc::DOMElement& e,
-                        ::xml_schema::Flags f,
-                        ::xml_schema::Container* c)
+    EvolveContainer::
+    EvolveContainer (const ::xercesc::DOMElement& e,
+                     ::xml_schema::Flags f,
+                     ::xml_schema::Container* c)
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
-      evolutionRecord_ (this)
+      evolveRecord_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -951,7 +1009,7 @@ namespace prj
       }
     }
 
-    void EvolutionContainer::
+    void EvolveContainer::
     parse (::xsd::cxx::xml::dom::parser< char >& p,
            ::xml_schema::Flags f)
     {
@@ -961,14 +1019,14 @@ namespace prj
         const ::xsd::cxx::xml::qualified_name< char > n (
           ::xsd::cxx::xml::dom::name< char > (i));
 
-        // evolutionRecord
+        // evolveRecord
         //
-        if (n.name () == "evolutionRecord" && n.namespace_ ().empty ())
+        if (n.name () == "evolveRecord" && n.namespace_ ().empty ())
         {
-          ::std::unique_ptr< EvolutionRecordType > r (
-            EvolutionRecordTraits::create (i, f, this));
+          ::std::unique_ptr< EvolveRecordType > r (
+            EvolveRecordTraits::create (i, f, this));
 
-          this->evolutionRecord_.push_back (::std::move (r));
+          this->evolveRecord_.push_back (::std::move (r));
           continue;
         }
 
@@ -976,59 +1034,59 @@ namespace prj
       }
     }
 
-    EvolutionContainer* EvolutionContainer::
+    EvolveContainer* EvolveContainer::
     _clone (::xml_schema::Flags f,
             ::xml_schema::Container* c) const
     {
-      return new class EvolutionContainer (*this, f, c);
+      return new class EvolveContainer (*this, f, c);
     }
 
-    EvolutionContainer& EvolutionContainer::
-    operator= (const EvolutionContainer& x)
+    EvolveContainer& EvolveContainer::
+    operator= (const EvolveContainer& x)
     {
       if (this != &x)
       {
         static_cast< ::xml_schema::Type& > (*this) = x;
-        this->evolutionRecord_ = x.evolutionRecord_;
+        this->evolveRecord_ = x.evolveRecord_;
       }
 
       return *this;
     }
 
-    EvolutionContainer::
-    ~EvolutionContainer ()
+    EvolveContainer::
+    ~EvolveContainer ()
     {
     }
 
-    // ResultRecord
+    // ShapeIdRecord
     //
 
-    const ResultRecord::IdType ResultRecord::id_default_value_ (
+    const ShapeIdRecord::IdType ShapeIdRecord::id_default_value_ (
       "00000000-0000-0000-0000-000000000000");
 
-    ResultRecord::
-    ResultRecord (const IdType& id,
-                  const ShapeOffsetType& shapeOffset)
+    ShapeIdRecord::
+    ShapeIdRecord (const IdType& id,
+                   const ShapeOffsetType& shapeOffset)
     : ::xml_schema::Type (),
       id_ (id, this),
       shapeOffset_ (shapeOffset, this)
     {
     }
 
-    ResultRecord::
-    ResultRecord (const ResultRecord& x,
-                  ::xml_schema::Flags f,
-                  ::xml_schema::Container* c)
+    ShapeIdRecord::
+    ShapeIdRecord (const ShapeIdRecord& x,
+                   ::xml_schema::Flags f,
+                   ::xml_schema::Container* c)
     : ::xml_schema::Type (x, f, c),
       id_ (x.id_, f, this),
       shapeOffset_ (x.shapeOffset_, f, this)
     {
     }
 
-    ResultRecord::
-    ResultRecord (const ::xercesc::DOMElement& e,
-                  ::xml_schema::Flags f,
-                  ::xml_schema::Container* c)
+    ShapeIdRecord::
+    ShapeIdRecord (const ::xercesc::DOMElement& e,
+                   ::xml_schema::Flags f,
+                   ::xml_schema::Container* c)
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
       id_ (this),
       shapeOffset_ (this)
@@ -1040,7 +1098,7 @@ namespace prj
       }
     }
 
-    void ResultRecord::
+    void ShapeIdRecord::
     parse (::xsd::cxx::xml::dom::parser< char >& p,
            ::xml_schema::Flags f)
     {
@@ -1093,15 +1151,15 @@ namespace prj
       }
     }
 
-    ResultRecord* ResultRecord::
+    ShapeIdRecord* ShapeIdRecord::
     _clone (::xml_schema::Flags f,
             ::xml_schema::Container* c) const
     {
-      return new class ResultRecord (*this, f, c);
+      return new class ShapeIdRecord (*this, f, c);
     }
 
-    ResultRecord& ResultRecord::
-    operator= (const ResultRecord& x)
+    ShapeIdRecord& ShapeIdRecord::
+    operator= (const ShapeIdRecord& x)
     {
       if (this != &x)
       {
@@ -1113,36 +1171,36 @@ namespace prj
       return *this;
     }
 
-    ResultRecord::
-    ~ResultRecord ()
+    ShapeIdRecord::
+    ~ShapeIdRecord ()
     {
     }
 
-    // ResultContainer
+    // ShapeIdContainer
     //
 
-    ResultContainer::
-    ResultContainer ()
+    ShapeIdContainer::
+    ShapeIdContainer ()
     : ::xml_schema::Type (),
-      resultRecord_ (this)
+      shapeIdRecord_ (this)
     {
     }
 
-    ResultContainer::
-    ResultContainer (const ResultContainer& x,
-                     ::xml_schema::Flags f,
-                     ::xml_schema::Container* c)
+    ShapeIdContainer::
+    ShapeIdContainer (const ShapeIdContainer& x,
+                      ::xml_schema::Flags f,
+                      ::xml_schema::Container* c)
     : ::xml_schema::Type (x, f, c),
-      resultRecord_ (x.resultRecord_, f, this)
+      shapeIdRecord_ (x.shapeIdRecord_, f, this)
     {
     }
 
-    ResultContainer::
-    ResultContainer (const ::xercesc::DOMElement& e,
-                     ::xml_schema::Flags f,
-                     ::xml_schema::Container* c)
+    ShapeIdContainer::
+    ShapeIdContainer (const ::xercesc::DOMElement& e,
+                      ::xml_schema::Flags f,
+                      ::xml_schema::Container* c)
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
-      resultRecord_ (this)
+      shapeIdRecord_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -1151,7 +1209,7 @@ namespace prj
       }
     }
 
-    void ResultContainer::
+    void ShapeIdContainer::
     parse (::xsd::cxx::xml::dom::parser< char >& p,
            ::xml_schema::Flags f)
     {
@@ -1161,14 +1219,14 @@ namespace prj
         const ::xsd::cxx::xml::qualified_name< char > n (
           ::xsd::cxx::xml::dom::name< char > (i));
 
-        // resultRecord
+        // shapeIdRecord
         //
-        if (n.name () == "resultRecord" && n.namespace_ ().empty ())
+        if (n.name () == "shapeIdRecord" && n.namespace_ ().empty ())
         {
-          ::std::unique_ptr< ResultRecordType > r (
-            ResultRecordTraits::create (i, f, this));
+          ::std::unique_ptr< ShapeIdRecordType > r (
+            ShapeIdRecordTraits::create (i, f, this));
 
-          this->resultRecord_.push_back (::std::move (r));
+          this->shapeIdRecord_.push_back (::std::move (r));
           continue;
         }
 
@@ -1176,62 +1234,62 @@ namespace prj
       }
     }
 
-    ResultContainer* ResultContainer::
+    ShapeIdContainer* ShapeIdContainer::
     _clone (::xml_schema::Flags f,
             ::xml_schema::Container* c) const
     {
-      return new class ResultContainer (*this, f, c);
+      return new class ShapeIdContainer (*this, f, c);
     }
 
-    ResultContainer& ResultContainer::
-    operator= (const ResultContainer& x)
+    ShapeIdContainer& ShapeIdContainer::
+    operator= (const ShapeIdContainer& x)
     {
       if (this != &x)
       {
         static_cast< ::xml_schema::Type& > (*this) = x;
-        this->resultRecord_ = x.resultRecord_;
+        this->shapeIdRecord_ = x.shapeIdRecord_;
       }
 
       return *this;
     }
 
-    ResultContainer::
-    ~ResultContainer ()
+    ShapeIdContainer::
+    ~ShapeIdContainer ()
     {
     }
 
-    // FeatureRecord
+    // FeatureTagRecord
     //
 
-    const FeatureRecord::IdType FeatureRecord::id_default_value_ (
+    const FeatureTagRecord::IdType FeatureTagRecord::id_default_value_ (
       "00000000-0000-0000-0000-000000000000");
 
-    const FeatureRecord::TagType FeatureRecord::tag_default_value_ (
+    const FeatureTagRecord::TagType FeatureTagRecord::tag_default_value_ (
       "");
 
-    FeatureRecord::
-    FeatureRecord (const IdType& id,
-                   const TagType& tag)
+    FeatureTagRecord::
+    FeatureTagRecord (const IdType& id,
+                      const TagType& tag)
     : ::xml_schema::Type (),
       id_ (id, this),
       tag_ (tag, this)
     {
     }
 
-    FeatureRecord::
-    FeatureRecord (const FeatureRecord& x,
-                   ::xml_schema::Flags f,
-                   ::xml_schema::Container* c)
+    FeatureTagRecord::
+    FeatureTagRecord (const FeatureTagRecord& x,
+                      ::xml_schema::Flags f,
+                      ::xml_schema::Container* c)
     : ::xml_schema::Type (x, f, c),
       id_ (x.id_, f, this),
       tag_ (x.tag_, f, this)
     {
     }
 
-    FeatureRecord::
-    FeatureRecord (const ::xercesc::DOMElement& e,
-                   ::xml_schema::Flags f,
-                   ::xml_schema::Container* c)
+    FeatureTagRecord::
+    FeatureTagRecord (const ::xercesc::DOMElement& e,
+                      ::xml_schema::Flags f,
+                      ::xml_schema::Container* c)
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
       id_ (this),
       tag_ (this)
@@ -1243,7 +1301,7 @@ namespace prj
       }
     }
 
-    void FeatureRecord::
+    void FeatureTagRecord::
     parse (::xsd::cxx::xml::dom::parser< char >& p,
            ::xml_schema::Flags f)
     {
@@ -1299,15 +1357,15 @@ namespace prj
       }
     }
 
-    FeatureRecord* FeatureRecord::
+    FeatureTagRecord* FeatureTagRecord::
     _clone (::xml_schema::Flags f,
             ::xml_schema::Container* c) const
     {
-      return new class FeatureRecord (*this, f, c);
+      return new class FeatureTagRecord (*this, f, c);
     }
 
-    FeatureRecord& FeatureRecord::
-    operator= (const FeatureRecord& x)
+    FeatureTagRecord& FeatureTagRecord::
+    operator= (const FeatureTagRecord& x)
     {
       if (this != &x)
       {
@@ -1319,36 +1377,36 @@ namespace prj
       return *this;
     }
 
-    FeatureRecord::
-    ~FeatureRecord ()
+    FeatureTagRecord::
+    ~FeatureTagRecord ()
     {
     }
 
-    // FeatureContainer
+    // FeatureTagContainer
     //
 
-    FeatureContainer::
-    FeatureContainer ()
+    FeatureTagContainer::
+    FeatureTagContainer ()
     : ::xml_schema::Type (),
-      featureRecord_ (this)
+      featureTagRecord_ (this)
     {
     }
 
-    FeatureContainer::
-    FeatureContainer (const FeatureContainer& x,
-                      ::xml_schema::Flags f,
-                      ::xml_schema::Container* c)
+    FeatureTagContainer::
+    FeatureTagContainer (const FeatureTagContainer& x,
+                         ::xml_schema::Flags f,
+                         ::xml_schema::Container* c)
     : ::xml_schema::Type (x, f, c),
-      featureRecord_ (x.featureRecord_, f, this)
+      featureTagRecord_ (x.featureTagRecord_, f, this)
     {
     }
 
-    FeatureContainer::
-    FeatureContainer (const ::xercesc::DOMElement& e,
-                      ::xml_schema::Flags f,
-                      ::xml_schema::Container* c)
+    FeatureTagContainer::
+    FeatureTagContainer (const ::xercesc::DOMElement& e,
+                         ::xml_schema::Flags f,
+                         ::xml_schema::Container* c)
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
-      featureRecord_ (this)
+      featureTagRecord_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -1357,7 +1415,7 @@ namespace prj
       }
     }
 
-    void FeatureContainer::
+    void FeatureTagContainer::
     parse (::xsd::cxx::xml::dom::parser< char >& p,
            ::xml_schema::Flags f)
     {
@@ -1367,14 +1425,14 @@ namespace prj
         const ::xsd::cxx::xml::qualified_name< char > n (
           ::xsd::cxx::xml::dom::name< char > (i));
 
-        // featureRecord
+        // featureTagRecord
         //
-        if (n.name () == "featureRecord" && n.namespace_ ().empty ())
+        if (n.name () == "featureTagRecord" && n.namespace_ ().empty ())
         {
-          ::std::unique_ptr< FeatureRecordType > r (
-            FeatureRecordTraits::create (i, f, this));
+          ::std::unique_ptr< FeatureTagRecordType > r (
+            FeatureTagRecordTraits::create (i, f, this));
 
-          this->featureRecord_.push_back (::std::move (r));
+          this->featureTagRecord_.push_back (::std::move (r));
           continue;
         }
 
@@ -1382,27 +1440,27 @@ namespace prj
       }
     }
 
-    FeatureContainer* FeatureContainer::
+    FeatureTagContainer* FeatureTagContainer::
     _clone (::xml_schema::Flags f,
             ::xml_schema::Container* c) const
     {
-      return new class FeatureContainer (*this, f, c);
+      return new class FeatureTagContainer (*this, f, c);
     }
 
-    FeatureContainer& FeatureContainer::
-    operator= (const FeatureContainer& x)
+    FeatureTagContainer& FeatureTagContainer::
+    operator= (const FeatureTagContainer& x)
     {
       if (this != &x)
       {
         static_cast< ::xml_schema::Type& > (*this) = x;
-        this->featureRecord_ = x.featureRecord_;
+        this->featureTagRecord_ = x.featureTagRecord_;
       }
 
       return *this;
     }
 
-    FeatureContainer::
-    ~FeatureContainer ()
+    FeatureTagContainer::
+    ~FeatureTagContainer ()
     {
     }
 
@@ -1703,6 +1761,220 @@ namespace prj
     {
     }
 
+    // SeerShape
+    //
+
+    const SeerShape::RootShapeIdType SeerShape::rootShapeId_default_value_ (
+      "00000000-0000-0000-0000-000000000000");
+
+    SeerShape::
+    SeerShape (const RootShapeIdType& rootShapeId,
+               const ShapeIdContainerType& shapeIdContainer,
+               const EvolveContainerType& evolveContainer,
+               const FeatureTagContainerType& featureTagContainer,
+               const DerivedContainerType& derivedContainer)
+    : ::xml_schema::Type (),
+      rootShapeId_ (rootShapeId, this),
+      shapeIdContainer_ (shapeIdContainer, this),
+      evolveContainer_ (evolveContainer, this),
+      featureTagContainer_ (featureTagContainer, this),
+      derivedContainer_ (derivedContainer, this)
+    {
+    }
+
+    SeerShape::
+    SeerShape (const RootShapeIdType& rootShapeId,
+               ::std::unique_ptr< ShapeIdContainerType > shapeIdContainer,
+               ::std::unique_ptr< EvolveContainerType > evolveContainer,
+               ::std::unique_ptr< FeatureTagContainerType > featureTagContainer,
+               ::std::unique_ptr< DerivedContainerType > derivedContainer)
+    : ::xml_schema::Type (),
+      rootShapeId_ (rootShapeId, this),
+      shapeIdContainer_ (std::move (shapeIdContainer), this),
+      evolveContainer_ (std::move (evolveContainer), this),
+      featureTagContainer_ (std::move (featureTagContainer), this),
+      derivedContainer_ (std::move (derivedContainer), this)
+    {
+    }
+
+    SeerShape::
+    SeerShape (const SeerShape& x,
+               ::xml_schema::Flags f,
+               ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      rootShapeId_ (x.rootShapeId_, f, this),
+      shapeIdContainer_ (x.shapeIdContainer_, f, this),
+      evolveContainer_ (x.evolveContainer_, f, this),
+      featureTagContainer_ (x.featureTagContainer_, f, this),
+      derivedContainer_ (x.derivedContainer_, f, this)
+    {
+    }
+
+    SeerShape::
+    SeerShape (const ::xercesc::DOMElement& e,
+               ::xml_schema::Flags f,
+               ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      rootShapeId_ (this),
+      shapeIdContainer_ (this),
+      evolveContainer_ (this),
+      featureTagContainer_ (this),
+      derivedContainer_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void SeerShape::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // rootShapeId
+        //
+        if (n.name () == "rootShapeId" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< RootShapeIdType > r (
+            RootShapeIdTraits::create (i, f, this));
+
+          if (!rootShapeId_.present ())
+          {
+            this->rootShapeId_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // shapeIdContainer
+        //
+        if (n.name () == "shapeIdContainer" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< ShapeIdContainerType > r (
+            ShapeIdContainerTraits::create (i, f, this));
+
+          if (!shapeIdContainer_.present ())
+          {
+            this->shapeIdContainer_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // evolveContainer
+        //
+        if (n.name () == "evolveContainer" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< EvolveContainerType > r (
+            EvolveContainerTraits::create (i, f, this));
+
+          if (!evolveContainer_.present ())
+          {
+            this->evolveContainer_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // featureTagContainer
+        //
+        if (n.name () == "featureTagContainer" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< FeatureTagContainerType > r (
+            FeatureTagContainerTraits::create (i, f, this));
+
+          if (!featureTagContainer_.present ())
+          {
+            this->featureTagContainer_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // derivedContainer
+        //
+        if (n.name () == "derivedContainer" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< DerivedContainerType > r (
+            DerivedContainerTraits::create (i, f, this));
+
+          if (!derivedContainer_.present ())
+          {
+            this->derivedContainer_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        break;
+      }
+
+      if (!rootShapeId_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "rootShapeId",
+          "");
+      }
+
+      if (!shapeIdContainer_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "shapeIdContainer",
+          "");
+      }
+
+      if (!evolveContainer_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "evolveContainer",
+          "");
+      }
+
+      if (!featureTagContainer_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "featureTagContainer",
+          "");
+      }
+
+      if (!derivedContainer_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "derivedContainer",
+          "");
+      }
+    }
+
+    SeerShape* SeerShape::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class SeerShape (*this, f, c);
+    }
+
+    SeerShape& SeerShape::
+    operator= (const SeerShape& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->rootShapeId_ = x.rootShapeId_;
+        this->shapeIdContainer_ = x.shapeIdContainer_;
+        this->evolveContainer_ = x.evolveContainer_;
+        this->featureTagContainer_ = x.featureTagContainer_;
+        this->derivedContainer_ = x.derivedContainer_;
+      }
+
+      return *this;
+    }
+
+    SeerShape::
+    ~SeerShape ()
+    {
+    }
+
     // FeatureBase
     //
 
@@ -1715,34 +1987,22 @@ namespace prj
     FeatureBase::
     FeatureBase (const NameType& name,
                  const IdType& id,
-                 const EvolutionContainerType& evolutionContainer,
-                 const ResultContainerType& resultContainer,
-                 const FeatureContainerType& featureContainer,
-                 const DerivedContainerType& derivedContainer)
+                 const SeerShapeType& seerShape)
     : ::xml_schema::Type (),
       name_ (name, this),
       id_ (id, this),
-      evolutionContainer_ (evolutionContainer, this),
-      resultContainer_ (resultContainer, this),
-      featureContainer_ (featureContainer, this),
-      derivedContainer_ (derivedContainer, this)
+      seerShape_ (seerShape, this)
     {
     }
 
     FeatureBase::
     FeatureBase (const NameType& name,
                  const IdType& id,
-                 ::std::unique_ptr< EvolutionContainerType > evolutionContainer,
-                 ::std::unique_ptr< ResultContainerType > resultContainer,
-                 ::std::unique_ptr< FeatureContainerType > featureContainer,
-                 ::std::unique_ptr< DerivedContainerType > derivedContainer)
+                 ::std::unique_ptr< SeerShapeType > seerShape)
     : ::xml_schema::Type (),
       name_ (name, this),
       id_ (id, this),
-      evolutionContainer_ (std::move (evolutionContainer), this),
-      resultContainer_ (std::move (resultContainer), this),
-      featureContainer_ (std::move (featureContainer), this),
-      derivedContainer_ (std::move (derivedContainer), this)
+      seerShape_ (std::move (seerShape), this)
     {
     }
 
@@ -1753,10 +2013,7 @@ namespace prj
     : ::xml_schema::Type (x, f, c),
       name_ (x.name_, f, this),
       id_ (x.id_, f, this),
-      evolutionContainer_ (x.evolutionContainer_, f, this),
-      resultContainer_ (x.resultContainer_, f, this),
-      featureContainer_ (x.featureContainer_, f, this),
-      derivedContainer_ (x.derivedContainer_, f, this)
+      seerShape_ (x.seerShape_, f, this)
     {
     }
 
@@ -1767,10 +2024,7 @@ namespace prj
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
       name_ (this),
       id_ (this),
-      evolutionContainer_ (this),
-      resultContainer_ (this),
-      featureContainer_ (this),
-      derivedContainer_ (this)
+      seerShape_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -1817,58 +2071,16 @@ namespace prj
           }
         }
 
-        // evolutionContainer
+        // seerShape
         //
-        if (n.name () == "evolutionContainer" && n.namespace_ ().empty ())
+        if (n.name () == "seerShape" && n.namespace_ ().empty ())
         {
-          ::std::unique_ptr< EvolutionContainerType > r (
-            EvolutionContainerTraits::create (i, f, this));
+          ::std::unique_ptr< SeerShapeType > r (
+            SeerShapeTraits::create (i, f, this));
 
-          if (!evolutionContainer_.present ())
+          if (!seerShape_.present ())
           {
-            this->evolutionContainer_.set (::std::move (r));
-            continue;
-          }
-        }
-
-        // resultContainer
-        //
-        if (n.name () == "resultContainer" && n.namespace_ ().empty ())
-        {
-          ::std::unique_ptr< ResultContainerType > r (
-            ResultContainerTraits::create (i, f, this));
-
-          if (!resultContainer_.present ())
-          {
-            this->resultContainer_.set (::std::move (r));
-            continue;
-          }
-        }
-
-        // featureContainer
-        //
-        if (n.name () == "featureContainer" && n.namespace_ ().empty ())
-        {
-          ::std::unique_ptr< FeatureContainerType > r (
-            FeatureContainerTraits::create (i, f, this));
-
-          if (!featureContainer_.present ())
-          {
-            this->featureContainer_.set (::std::move (r));
-            continue;
-          }
-        }
-
-        // derivedContainer
-        //
-        if (n.name () == "derivedContainer" && n.namespace_ ().empty ())
-        {
-          ::std::unique_ptr< DerivedContainerType > r (
-            DerivedContainerTraits::create (i, f, this));
-
-          if (!derivedContainer_.present ())
-          {
-            this->derivedContainer_.set (::std::move (r));
+            this->seerShape_.set (::std::move (r));
             continue;
           }
         }
@@ -1890,31 +2102,10 @@ namespace prj
           "");
       }
 
-      if (!evolutionContainer_.present ())
+      if (!seerShape_.present ())
       {
         throw ::xsd::cxx::tree::expected_element< char > (
-          "evolutionContainer",
-          "");
-      }
-
-      if (!resultContainer_.present ())
-      {
-        throw ::xsd::cxx::tree::expected_element< char > (
-          "resultContainer",
-          "");
-      }
-
-      if (!featureContainer_.present ())
-      {
-        throw ::xsd::cxx::tree::expected_element< char > (
-          "featureContainer",
-          "");
-      }
-
-      if (!derivedContainer_.present ())
-      {
-        throw ::xsd::cxx::tree::expected_element< char > (
-          "derivedContainer",
+          "seerShape",
           "");
       }
     }
@@ -1934,10 +2125,7 @@ namespace prj
         static_cast< ::xml_schema::Type& > (*this) = x;
         this->name_ = x.name_;
         this->id_ = x.id_;
-        this->evolutionContainer_ = x.evolutionContainer_;
-        this->resultContainer_ = x.resultContainer_;
-        this->featureContainer_ = x.featureContainer_;
-        this->derivedContainer_ = x.derivedContainer_;
+        this->seerShape_ = x.seerShape_;
       }
 
       return *this;
@@ -2009,7 +2197,7 @@ namespace prj
     }
 
     void
-    operator<< (::xercesc::DOMElement& e, const EvolutionRecord& i)
+    operator<< (::xercesc::DOMElement& e, const EvolveRecord& i)
     {
       e << static_cast< const ::xml_schema::Type& > (i);
 
@@ -2037,19 +2225,19 @@ namespace prj
     }
 
     void
-    operator<< (::xercesc::DOMElement& e, const EvolutionContainer& i)
+    operator<< (::xercesc::DOMElement& e, const EvolveContainer& i)
     {
       e << static_cast< const ::xml_schema::Type& > (i);
 
-      // evolutionRecord
+      // evolveRecord
       //
-      for (EvolutionContainer::EvolutionRecordConstIterator
-           b (i.evolutionRecord ().begin ()), n (i.evolutionRecord ().end ());
+      for (EvolveContainer::EvolveRecordConstIterator
+           b (i.evolveRecord ().begin ()), n (i.evolveRecord ().end ());
            b != n; ++b)
       {
         ::xercesc::DOMElement& s (
           ::xsd::cxx::xml::dom::create_element (
-            "evolutionRecord",
+            "evolveRecord",
             e));
 
         s << *b;
@@ -2057,7 +2245,7 @@ namespace prj
     }
 
     void
-    operator<< (::xercesc::DOMElement& e, const ResultRecord& i)
+    operator<< (::xercesc::DOMElement& e, const ShapeIdRecord& i)
     {
       e << static_cast< const ::xml_schema::Type& > (i);
 
@@ -2085,19 +2273,19 @@ namespace prj
     }
 
     void
-    operator<< (::xercesc::DOMElement& e, const ResultContainer& i)
+    operator<< (::xercesc::DOMElement& e, const ShapeIdContainer& i)
     {
       e << static_cast< const ::xml_schema::Type& > (i);
 
-      // resultRecord
+      // shapeIdRecord
       //
-      for (ResultContainer::ResultRecordConstIterator
-           b (i.resultRecord ().begin ()), n (i.resultRecord ().end ());
+      for (ShapeIdContainer::ShapeIdRecordConstIterator
+           b (i.shapeIdRecord ().begin ()), n (i.shapeIdRecord ().end ());
            b != n; ++b)
       {
         ::xercesc::DOMElement& s (
           ::xsd::cxx::xml::dom::create_element (
-            "resultRecord",
+            "shapeIdRecord",
             e));
 
         s << *b;
@@ -2105,7 +2293,7 @@ namespace prj
     }
 
     void
-    operator<< (::xercesc::DOMElement& e, const FeatureRecord& i)
+    operator<< (::xercesc::DOMElement& e, const FeatureTagRecord& i)
     {
       e << static_cast< const ::xml_schema::Type& > (i);
 
@@ -2133,19 +2321,19 @@ namespace prj
     }
 
     void
-    operator<< (::xercesc::DOMElement& e, const FeatureContainer& i)
+    operator<< (::xercesc::DOMElement& e, const FeatureTagContainer& i)
     {
       e << static_cast< const ::xml_schema::Type& > (i);
 
-      // featureRecord
+      // featureTagRecord
       //
-      for (FeatureContainer::FeatureRecordConstIterator
-           b (i.featureRecord ().begin ()), n (i.featureRecord ().end ());
+      for (FeatureTagContainer::FeatureTagRecordConstIterator
+           b (i.featureTagRecord ().begin ()), n (i.featureTagRecord ().end ());
            b != n; ++b)
       {
         ::xercesc::DOMElement& s (
           ::xsd::cxx::xml::dom::create_element (
-            "featureRecord",
+            "featureTagRecord",
             e));
 
         s << *b;
@@ -2221,6 +2409,67 @@ namespace prj
     }
 
     void
+    operator<< (::xercesc::DOMElement& e, const SeerShape& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // rootShapeId
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "rootShapeId",
+            e));
+
+        s << i.rootShapeId ();
+      }
+
+      // shapeIdContainer
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "shapeIdContainer",
+            e));
+
+        s << i.shapeIdContainer ();
+      }
+
+      // evolveContainer
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "evolveContainer",
+            e));
+
+        s << i.evolveContainer ();
+      }
+
+      // featureTagContainer
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "featureTagContainer",
+            e));
+
+        s << i.featureTagContainer ();
+      }
+
+      // derivedContainer
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "derivedContainer",
+            e));
+
+        s << i.derivedContainer ();
+      }
+    }
+
+    void
     operator<< (::xercesc::DOMElement& e, const FeatureBase& i)
     {
       e << static_cast< const ::xml_schema::Type& > (i);
@@ -2247,48 +2496,15 @@ namespace prj
         s << i.id ();
       }
 
-      // evolutionContainer
+      // seerShape
       //
       {
         ::xercesc::DOMElement& s (
           ::xsd::cxx::xml::dom::create_element (
-            "evolutionContainer",
+            "seerShape",
             e));
 
-        s << i.evolutionContainer ();
-      }
-
-      // resultContainer
-      //
-      {
-        ::xercesc::DOMElement& s (
-          ::xsd::cxx::xml::dom::create_element (
-            "resultContainer",
-            e));
-
-        s << i.resultContainer ();
-      }
-
-      // featureContainer
-      //
-      {
-        ::xercesc::DOMElement& s (
-          ::xsd::cxx::xml::dom::create_element (
-            "featureContainer",
-            e));
-
-        s << i.featureContainer ();
-      }
-
-      // derivedContainer
-      //
-      {
-        ::xercesc::DOMElement& s (
-          ::xsd::cxx::xml::dom::create_element (
-            "derivedContainer",
-            e));
-
-        s << i.derivedContainer ();
+        s << i.seerShape ();
       }
     }
   }

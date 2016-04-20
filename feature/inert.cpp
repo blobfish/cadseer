@@ -28,6 +28,8 @@
 #include <TopLoc_Location.hxx>
 
 #include <project/serial/xsdcxxoutput/featureinert.h>
+#include <globalutilities.h>
+#include <feature/seershape.h>
 #include <feature/inert.h>
 
 using namespace ftr;
@@ -42,12 +44,8 @@ Inert::Inert(const TopoDS_Shape &shapeIn) : CSysBase()
   
   name = QObject::tr("Inert");
   
-  if (shapeIn.ShapeType() == TopAbs_COMPOUND)
-    shape = shapeIn;
-  else
-    shape = compoundWrap(shapeIn);
-  
-  generateIds();
+  seerShape->setOCCTShape(shapeIn);
+  seerShape->ensureNoNils();
 }
 
 void Inert::updateModel(const UpdateMap &mapIn)
@@ -59,45 +57,15 @@ void Inert::updateModel(const UpdateMap &mapIn)
   gp_Trsf tempTrsf; tempTrsf.SetTransformation(tempAx3); tempTrsf.Invert();
   TopLoc_Location freshLocation(tempTrsf);
   
-  if (gu::toOsg(shape.Location().Transformation()) != gu::toOsg(tempTrsf))
+  if (gu::toOsg(seerShape->getRootOCCTShape().Location().Transformation()) != gu::toOsg(tempTrsf))
   {
-    shape.Location(freshLocation);
-    generateIds();
+    TopoDS_Shape tempShape(seerShape->getRootOCCTShape());
+    tempShape.Location(freshLocation);
+    seerShape->ensureNoNils(); //TODO have to reconcile reposition items.
   }
   
   setSuccess();
   setModelClean();
-}
-
-void Inert::generateIds()
-{
-  //right now the regeneration of ids are dependent on the whether the feature
-  //has been repositioned or not. That allows some temporary consistency between
-  //updates in order for testing id mapping. the problem comes in during construction
-  //of the inert feature as the default positions match and the ids never get generated.
-  //so we factor out the id generation and call directly when constructing as a temp solution.
-  
-  //here we are just generating new ids every update.
-  //this is temp as we are going to have reconcile the ids
-  //from before to after.
-  evolutionContainer.get<EvolutionRecord::ByInId>().clear();
-  resultContainer.get<ResultRecord::ById>().clear();
-  TopTools_IndexedMapOfShape shapeMap;
-  TopExp::MapShapes(shape, shapeMap);
-  for (int index = 1; index <= shapeMap.Extent(); ++index)
-  {
-    uuid tempId = idGenerator();
-    
-    ResultRecord record;
-    record.id = tempId;
-    record.shape = shapeMap(index);
-    resultContainer.insert(record);
-    
-    EvolutionRecord evolutionRecord;
-    evolutionRecord.outId = tempId;
-    evolutionContainer.insert(evolutionRecord);
-  }
-  //not using feature container;
 }
 
 void Inert::serialWrite(const QDir &dIn)

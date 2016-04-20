@@ -50,7 +50,6 @@ SET(LOCAL_INCLUDE_PATHS
 INCLUDE_DIRECTORIES(${LIBRARY_INCLUDE_PATHS})
 
 SET(MODELVIZ_SOURCES
-    modelviz/connector.cpp
     modelviz/shapegeometry.cpp
     )
 
@@ -83,17 +82,16 @@ SET(FEATURE_SOURCES
     feature/blend.cpp
     feature/chamfer.cpp
     feature/draft.cpp
-    feature/maps.cpp
     feature/cylinderbuilder.cpp
     feature/booleanbase.cpp
     feature/union.cpp
     feature/subtract.cpp
     feature/intersect.cpp
     feature/booleanidmapper.cpp
-    feature/shapeidmapper.cpp
     feature/booleanoperation.cpp
     feature/intersectionmapping.cpp
     feature/shapecheck.cpp
+    feature/seershape.cpp
     )
     
 SET(SELECTION_SOURCES

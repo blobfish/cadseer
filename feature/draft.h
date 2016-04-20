@@ -33,6 +33,7 @@ namespace prj{namespace srl{class FeatureDraft;}}
 
 namespace ftr
 {
+  class SeerShape;
   struct DraftPick
   {
     boost::uuids::uuid faceId; //!< reference face. set with referenceFaceId.
@@ -76,7 +77,7 @@ namespace ftr
       
     private:
       static QIcon icon;
-      void generatedMatch(BRepOffsetAPI_DraftAngle&, const Base *, ResultContainer &);
+      void generatedMatch(BRepOffsetAPI_DraftAngle&, const SeerShape &);
       gp_Pln derivePlaneFromShape(const TopoDS_Shape &);
   };
 }

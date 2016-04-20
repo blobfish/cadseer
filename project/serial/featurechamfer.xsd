@@ -38,7 +38,7 @@
 <xs:complexType name="FeatureChamfer">
   <xs:all>
     <xs:element name="featureBase" type="srl:FeatureBase"/>
-    <xs:element name="shapeMap" type="srl:EvolutionContainer"/>
+    <xs:element name="shapeMap" type="srl:EvolveContainer"/>
     <xs:element name="symChamfers" type="srl:SymChamfers"/>
   </xs:all>
 </xs:complexType>
