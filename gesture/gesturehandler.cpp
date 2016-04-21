@@ -44,6 +44,7 @@ GestureHandler::GestureHandler(osg::Camera *cameraIn) : osgGA::GUIEventHandler()
     currentNodeLeft(false), iconRadius(32.0), includedAngle(90.0)
 {
     observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+    observer->name = "GestureHandler";
   
     gestureCamera = cameraIn;
     if (!gestureCamera.valid())

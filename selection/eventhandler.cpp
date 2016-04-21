@@ -51,6 +51,7 @@ using namespace slc;
 EventHandler::EventHandler(osg::Group *viewerRootIn) : osgGA::GUIEventHandler()
 {
     observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+    observer->name = "slc::EventHandler";
     setupDispatcher();
   
     viewerRoot = viewerRootIn;

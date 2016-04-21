@@ -50,6 +50,7 @@ Application::Application(int &argc, char **argv) :
 {
     spaceballPresent = false;
     observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+    observer->name = "app::Application";
     setupDispatcher();
     
     //didn't have any luck using std::make_shared. weird behavior.

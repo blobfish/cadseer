@@ -61,6 +61,7 @@ using namespace vwr;
 ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel) : QWidget(), osgViewer::CompositeViewer()
 {
     observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+    observer->name = "vwr::ViewerWidget";
     setupDispatcher();
     
     setThreadingModel(threadingModel);

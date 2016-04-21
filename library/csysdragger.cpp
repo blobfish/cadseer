@@ -328,6 +328,7 @@ CSysCallBack::CSysCallBack(osg::MatrixTransform *t) :
       osgManipulator::DraggerTransformCallback(t)
 {
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+  observer->name = "CSysCallBack";
 }
 
 bool CSysCallBack::receive(const osgManipulator::MotionCommand &commandIn)

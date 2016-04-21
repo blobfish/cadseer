@@ -52,6 +52,7 @@ overallDim(),
 parameter(parameterIn)
 {
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+  observer->name = "IPGroup";
   
   rotation = new osg::AutoTransform();
   this->addChild(rotation.get());

@@ -59,6 +59,7 @@ using boost::uuids::uuid;
 Factory::Factory()
 {
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+  observer->name = "app::Factory";
   setupDispatcher();
 }
 

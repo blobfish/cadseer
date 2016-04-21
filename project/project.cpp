@@ -52,6 +52,7 @@ using boost::uuids::uuid;
 Project::Project()
 {
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+  observer->name = "prj::Project";
   setupDispatcher();
   
   std::unique_ptr<GitManager> tempManager(new GitManager());

@@ -34,6 +34,7 @@ using namespace vwr;
 OverlayCamera::OverlayCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
 {
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+  observer->name = "vwr::OverlayCamera";
   
   setNodeMask(NodeMaskDef::overlayCamera);
   setupDispatcher();

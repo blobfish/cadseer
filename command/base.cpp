@@ -35,6 +35,7 @@ using namespace cmd;
 Base::Base()
 {
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+  observer->name = "cmd::Base";
   application = static_cast<app::Application*>(qApp); assert(application);
   mainWindow = application->getMainWindow(); assert(mainWindow);
   project = application->getProject(); assert(project);

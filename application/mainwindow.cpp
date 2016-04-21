@@ -103,6 +103,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(incrementWidget->lineEdit2, SIGNAL(editingFinished()), this, SLOT(incrementChangedSlot()));
 
     observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+    observer->name = "app::MainWindow";
     setupDispatcher();
 }
 

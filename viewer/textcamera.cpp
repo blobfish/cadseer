@@ -104,6 +104,7 @@ void ResizeEventHandler::positionSelection()
 TextCamera::TextCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
 {
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+  observer->name = "vwr::TextCamera";
   setupDispatcher();
   
   setGraphicsContext(windowIn);

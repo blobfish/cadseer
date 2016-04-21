@@ -46,6 +46,7 @@ DCallBack::DCallBack(osg::MatrixTransform *t, CSysBase *csysBaseIn) :
       osgManipulator::DraggerTransformCallback(t), csysBase(csysBaseIn)
 {
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+  observer->name = "ftr::DCallBack";
 }
 
 bool DCallBack::receive(const osgManipulator::MotionCommand &commandIn)

@@ -43,6 +43,7 @@ Manager& cmd::manager()
 Manager::Manager()
 {
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+  observer->name = "cmd::Manager";
   setupDispatcher();
 }
 

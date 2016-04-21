@@ -85,6 +85,7 @@ using namespace dag;
 Model::Model(QObject *parentIn) : QGraphicsScene(parentIn)
 {
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+  observer->name = "dag::Model";
   setupDispatcher();
   
   //turned off BSP as it was giving inconsistent discovery of items
