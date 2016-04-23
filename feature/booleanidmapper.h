@@ -36,7 +36,7 @@ namespace ftr
   class ResultContainerWrapper;
   class IMapWrapper;
   class SeerShape;
-  typedef std::map<InputTypes, const Base*> UpdateMap;
+  typedef std::multimap<InputTypes, const Base*> UpdateMap;
   
   class BooleanIdMapper
   {
@@ -56,7 +56,7 @@ namespace ftr
     void goSplitFaces();
     
     const SeerShape &inputTarget;
-    const SeerShape &inputTool; //TODO make a vector.
+    std::vector<const SeerShape *> inputTools;
   };
 }
 

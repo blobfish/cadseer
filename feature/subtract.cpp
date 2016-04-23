@@ -61,15 +61,23 @@ void Subtract::updateModel(const UpdateMap &mapIn)
         "tool count is: " << mapIn.count(InputTypes::tool);
       throw std::runtime_error(stream.str());
     }
-      
-    const SeerShape &targetSeerShape = mapIn.at(InputTypes::target)->getSeerShape();
-    const SeerShape &toolSeerShape = mapIn.at(InputTypes::tool)->getSeerShape();
-    assert(!targetSeerShape.isNull() && !toolSeerShape.isNull());
+    
+    //target
+    const SeerShape &targetSeerShape = mapIn.equal_range(InputTypes::target).first->second->getSeerShape();
+    assert(!targetSeerShape.isNull());
+    //tools
+    gu::ShapeVector toolOCCTShapes;
+    for (auto pairIt = mapIn.equal_range(InputTypes::tool); pairIt.first != pairIt.second; ++pairIt.first)
+    {
+      const SeerShape &toolSeerShape = pairIt.first->second->getSeerShape();
+      assert(!toolSeerShape.isNull());
+      toolOCCTShapes.push_back(toolSeerShape.getRootOCCTShape());
+    }
     
     //set default on failure to parent target.
     seerShape->partialAssign(targetSeerShape);
     
-    BooleanOperation subtracter(targetSeerShape.getRootOCCTShape(), toolSeerShape.getRootOCCTShape(), BOPAlgo_CUT);
+    BooleanOperation subtracter(targetSeerShape.getRootOCCTShape(), toolOCCTShapes, BOPAlgo_CUT);
     subtracter.Build();
     if (!subtracter.IsDone())
       throw std::runtime_error("OCC subtraction failed");
@@ -79,12 +87,14 @@ void Subtract::updateModel(const UpdateMap &mapIn)
     
     seerShape->setOCCTShape(subtracter.Shape());
     seerShape->shapeMatch(targetSeerShape);
-    seerShape->shapeMatch(toolSeerShape);
+    for (auto pairIt = mapIn.equal_range(InputTypes::tool); pairIt.first != pairIt.second; ++pairIt.first)
+      seerShape->shapeMatch(pairIt.first->second->getSeerShape());
     seerShape->uniqueTypeMatch(targetSeerShape);
     BooleanIdMapper idMapper(mapIn, subtracter.getBuilder(), iMapWrapper, seerShape.get());
     idMapper.go();
     seerShape->outerWireMatch(targetSeerShape);
-    seerShape->outerWireMatch(toolSeerShape);
+    for (auto pairIt = mapIn.equal_range(InputTypes::tool); pairIt.first != pairIt.second; ++pairIt.first)
+      seerShape->outerWireMatch(pairIt.first->second->getSeerShape());
     seerShape->derivedMatch();
     seerShape->dumpNils(getTypeString()); //only if there are shapes with nil ids.
     seerShape->dumpDuplicates(getTypeString());

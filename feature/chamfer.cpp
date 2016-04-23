@@ -124,10 +124,10 @@ void Chamfer::updateModel(const UpdateMap &mapIn)
   setFailure();
   try
   {
-    if (mapIn.count(InputTypes::target) < 1)
+    if (mapIn.count(InputTypes::target) != 1)
       throw std::runtime_error("no parent for chamfer");
     
-    const SeerShape &targetSeerShape = mapIn.at(InputTypes::target)->getSeerShape();
+    const SeerShape &targetSeerShape = mapIn.equal_range(InputTypes::target).first->second->getSeerShape();
     
     //starting from the stand point that this feature has failed.
     //set the shape and container to the parent target.

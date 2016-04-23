@@ -22,6 +22,8 @@
 
 #include <BRepAlgoAPI_BooleanOperation.hxx>
 
+#include <globalutilities.h>
+
 class BOPAlgo_Builder;
 
 namespace ftr
@@ -40,6 +42,7 @@ namespace ftr
   {
   public:
     BooleanOperation(const TopoDS_Shape &, const TopoDS_Shape &, BOPAlgo_Operation);
+    BooleanOperation(const TopoDS_Shape &, const gu::ShapeVector &, BOPAlgo_Operation);
     BOPAlgo_Builder& getBuilder();
   };
 }

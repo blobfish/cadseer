@@ -54,11 +54,17 @@ updateMap(updateMapIn),
 builder(builderIn),
 iMapWrapper(iMapWrapperIn),
 seerShapeOut(seerShapeOutIn),
-inputTarget(updateMap.find(ftr::InputTypes::target)->second->getSeerShape()),
-inputTool(updateMap.find(ftr::InputTypes::tool)->second->getSeerShape())
+inputTarget(updateMap.find(ftr::InputTypes::target)->second->getSeerShape())
 {
+  for (auto pairIt = updateMapIn.equal_range(InputTypes::tool); pairIt.first != pairIt.second; ++pairIt.first)
+  {
+    const SeerShape &toolSeerShape = pairIt.first->second->getSeerShape();
+    assert(!toolSeerShape.isNull());
+    inputTools.push_back(&toolSeerShape);
+  }
+  
   assert(!inputTarget.isNull());
-  assert(!inputTool.isNull());
+  assert(!inputTools.empty());
   assert(!seerShapeOut->isNull());
 }
 
@@ -112,8 +118,14 @@ void BooleanIdMapper::goIntersectionEdges()
       uuid sourceFaceId = ng();
       if (inputTarget.hasShapeIdRecord(origins(cShape)))
 	sourceFaceId = inputTarget.findShapeIdRecord(origins(cShape)).id;
-      if (inputTool.hasShapeIdRecord(origins(cShape)))
-	sourceFaceId = inputTool.findShapeIdRecord(origins(cShape)).id;
+      for(const auto &tool : inputTools)
+      {
+	if (tool->hasShapeIdRecord(origins(cShape)))
+	{
+	  sourceFaceId = tool->findShapeIdRecord(origins(cShape)).id;
+	  break;
+	}
+      }
       if (sourceFaceId.is_nil())
 	continue;
       
@@ -178,8 +190,18 @@ void BooleanIdMapper::goSingleSplits()
     uuid faceId = boost::uuids::nil_generator()();
     if (inputTarget.hasShapeIdRecord(key))
       faceId = inputTarget.findShapeIdRecord(key).id;
-    else if(inputTool.hasShapeIdRecord(key))
-      faceId = inputTool.findShapeIdRecord(key).id;
+    else
+    {
+      for(const auto &tool : inputTools)
+      {
+	if (tool->hasShapeIdRecord(key))
+	{
+	  faceId = tool->findShapeIdRecord(key).id;
+	  break;
+	}
+      }
+    }
+    
     assert(!faceId.is_nil());
     assert(seerShapeOut->hasShapeIdRecord(value));
     seerShapeOut->updateShapeIdRecord(value, faceId);
@@ -210,10 +232,18 @@ void BooleanIdMapper::goSplitFaces()
     uuid originId = boost::uuids::nil_generator()();
     if (inputTarget.hasShapeIdRecord(origin))
       originId = inputTarget.findShapeIdRecord(origin).id;
-    else if (inputTool.hasShapeIdRecord(origin))
-      originId = inputTool.findShapeIdRecord(origin).id;
     else
-      assert(0); //no origin id in input containers.
+    {
+      for(const auto &tool : inputTools)
+      {
+	if (tool->hasShapeIdRecord(origin))
+	{
+	  originId = tool->findShapeIdRecord(origin).id;
+	  break;
+	}
+      }
+    }
+    assert(!originId.is_nil()); //no origin id in input containers.
       
     //TODO we will need the origin id and the split id into evolution container.
     

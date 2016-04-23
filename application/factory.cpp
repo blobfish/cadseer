@@ -291,29 +291,44 @@ void Factory::newUnionDispatched(const msg::Message&)
   msg::dispatch().dumpString(debug.str());
   
   if (containers.size() < 2)
+  {
+    msg::Message wrongTypeMessage;
+    wrongTypeMessage.mask = msg::Request | msg::StatusText;
+    vwr::Message statusMessage;
+    statusMessage.text = QObject::tr("Wrong selection count for operation").toStdString();
+    wrongTypeMessage.payload = statusMessage;
+    observer->messageOutSignal(wrongTypeMessage);
     return;
+  }
   
+  std::vector<uuid> featureIds;
   //for now only accept objects.
-  if
-  (
-    containers.at(0).selectionType != slc::Type::Object ||
-    containers.at(1).selectionType != slc::Type::Object
-  )
-    return;
+  for (const auto &selection : containers)
+  {
+    featureIds.push_back(selection.featureId);
+    if (selection.selectionType != slc::Type::Object)
+    {
+      msg::Message wrongTypeMessage;
+      wrongTypeMessage.mask = msg::Request | msg::StatusText;
+      vwr::Message statusMessage;
+      statusMessage.text = QObject::tr("Wrong selection type for operation").toStdString();
+      wrongTypeMessage.payload = statusMessage;
+      observer->messageOutSignal(wrongTypeMessage);
+      return;
+    }
+  }
     
   assert(project);
-    
-  uuid targetFeatureId = containers.at(0).featureId;
-  uuid toolFeatureId = containers.at(1).featureId; //only 1 tool right now.
   
-  project->findFeature(targetFeatureId)->hide3D();
-  project->findFeature(toolFeatureId)->hide3D();
+  for (const auto &id : featureIds)  
+    project->findFeature(id)->hide3D();
   
   //union keyword. whoops
   std::shared_ptr<ftr::Union> onion(new ftr::Union());
   project->addFeature(onion);
-  project->connect(targetFeatureId, onion->getId(), ftr::InputTypes::target);
-  project->connect(toolFeatureId, onion->getId(), ftr::InputTypes::tool);
+  project->connect(featureIds.at(0), onion->getId(), ftr::InputTypes::target);
+  for (auto it = featureIds.begin() + 1; it != featureIds.end(); ++it)
+    project->connect(*it, onion->getId(), ftr::InputTypes::tool);
   
   msg::Message clearSelectionMessage;
   clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
@@ -329,29 +344,43 @@ void Factory::newSubtractDispatched(const msg::Message&)
   msg::dispatch().dumpString(debug.str());
   
   if (containers.size() < 2)
+  {
+    msg::Message wrongTypeMessage;
+    wrongTypeMessage.mask = msg::Request | msg::StatusText;
+    vwr::Message statusMessage;
+    statusMessage.text = QObject::tr("Wrong selection count for operation").toStdString();
+    wrongTypeMessage.payload = statusMessage;
+    observer->messageOutSignal(wrongTypeMessage);
     return;
+  }
   
+  std::vector<uuid> featureIds;
   //for now only accept objects.
-  if
-  (
-    containers.at(0).selectionType != slc::Type::Object ||
-    containers.at(1).selectionType != slc::Type::Object
-  )
-    return;
+  for (const auto &selection : containers)
+  {
+    featureIds.push_back(selection.featureId);
+    if (selection.selectionType != slc::Type::Object)
+    {
+      msg::Message wrongTypeMessage;
+      wrongTypeMessage.mask = msg::Request | msg::StatusText;
+      vwr::Message statusMessage;
+      statusMessage.text = QObject::tr("Wrong selection type for operation").toStdString();
+      wrongTypeMessage.payload = statusMessage;
+      observer->messageOutSignal(wrongTypeMessage);
+      return;
+    }
+  }
     
   assert(project);
-    
-  uuid targetFeatureId = containers.at(0).featureId;
-  uuid toolFeatureId = containers.at(1).featureId; //only 1 tool right now.
   
-  project->findFeature(targetFeatureId)->hide3D();
-  project->findFeature(toolFeatureId)->hide3D();
+  for (const auto &id : featureIds)  
+    project->findFeature(id)->hide3D();
   
-  //union keyword. whoops
   std::shared_ptr<ftr::Subtract> subtract(new ftr::Subtract());
   project->addFeature(subtract);
-  project->connect(targetFeatureId, subtract->getId(), ftr::InputTypes::target);
-  project->connect(toolFeatureId, subtract->getId(), ftr::InputTypes::tool);
+  project->connect(featureIds.at(0), subtract->getId(), ftr::InputTypes::target);
+  for (auto it = featureIds.begin() + 1; it != featureIds.end(); ++it)
+    project->connect(*it, subtract->getId(), ftr::InputTypes::tool);
   
   msg::Message clearSelectionMessage;
   clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
@@ -367,29 +396,43 @@ void Factory::newIntersectDispatched(const msg::Message&)
   msg::dispatch().dumpString(debug.str());
   
   if (containers.size() < 2)
+  {
+    msg::Message wrongTypeMessage;
+    wrongTypeMessage.mask = msg::Request | msg::StatusText;
+    vwr::Message statusMessage;
+    statusMessage.text = QObject::tr("Wrong selection count for operation").toStdString();
+    wrongTypeMessage.payload = statusMessage;
+    observer->messageOutSignal(wrongTypeMessage);
     return;
+  }
   
+  std::vector<uuid> featureIds;
   //for now only accept objects.
-  if
-  (
-    containers.at(0).selectionType != slc::Type::Object ||
-    containers.at(1).selectionType != slc::Type::Object
-  )
-    return;
+  for (const auto &selection : containers)
+  {
+    featureIds.push_back(selection.featureId);
+    if (selection.selectionType != slc::Type::Object)
+    {
+      msg::Message wrongTypeMessage;
+      wrongTypeMessage.mask = msg::Request | msg::StatusText;
+      vwr::Message statusMessage;
+      statusMessage.text = QObject::tr("Wrong selection type for operation").toStdString();
+      wrongTypeMessage.payload = statusMessage;
+      observer->messageOutSignal(wrongTypeMessage);
+      return;
+    }
+  }
     
   assert(project);
-    
-  uuid targetFeatureId = containers.at(0).featureId;
-  uuid toolFeatureId = containers.at(1).featureId; //only 1 tool right now.
   
-  project->findFeature(targetFeatureId)->hide3D();
-  project->findFeature(toolFeatureId)->hide3D();
+  for (const auto &id : featureIds)  
+    project->findFeature(id)->hide3D();
   
-  //union keyword. whoops
   std::shared_ptr<ftr::Intersect> intersect(new ftr::Intersect());
   project->addFeature(intersect);
-  project->connect(targetFeatureId, intersect->getId(), ftr::InputTypes::target);
-  project->connect(toolFeatureId, intersect->getId(), ftr::InputTypes::tool);
+  project->connect(featureIds.at(0), intersect->getId(), ftr::InputTypes::target);
+  for (auto it = featureIds.begin() + 1; it != featureIds.end(); ++it)
+    project->connect(*it, intersect->getId(), ftr::InputTypes::tool);
   
   msg::Message clearSelectionMessage;
   clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;

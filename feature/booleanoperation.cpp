@@ -29,6 +29,21 @@ BooleanOperation::BooleanOperation(const TopoDS_Shape &shape1, const TopoDS_Shap
   //let caller call build outside of construction.
 }
 
+BooleanOperation::BooleanOperation(const TopoDS_Shape &target, const gu::ShapeVector &tools, BOPAlgo_Operation op):
+  BRepAlgoAPI_BooleanOperation()
+{
+  TopTools_ListOfShape targetList;
+  targetList.Append(target);
+  SetArguments(targetList);
+  
+  TopTools_ListOfShape toolList;
+  for (const auto &cTool : tools)
+    toolList.Append(cTool);
+  SetTools(toolList);
+  
+  SetOperation(op);
+}
+
 BOPAlgo_Builder& BooleanOperation::getBuilder()
 {
   return *myBuilder;

@@ -49,7 +49,7 @@ namespace ftr
 {
   class SeerShape;
   class Base;
-  typedef std::map<InputTypes, const Base*> UpdateMap;
+  typedef std::multimap<InputTypes, const Base*> UpdateMap;
   
 class Base
 {
