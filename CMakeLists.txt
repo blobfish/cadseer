@@ -40,14 +40,9 @@ SET(LIBRARY_INCLUDE_PATHS
     ${EIGEN3_INCLUDE_DIR}
     ${XSDCXX_INCLUDE_DIR}
     ${XERCESC_INCLUDE_DIR}
+    ${CMAKE_SOURCE_DIR}/project/libgit2pp/libgit2/include/
     )
 INCLUDE_DIRECTORIES(SYSTEM ${LIBRARY_INCLUDE_PATHS}) #system suppresses warnings for those libraries.
-
-SET(LOCAL_INCLUDE_PATHS
-    ${CMAKE_SOURCE_DIR}
-    ${CMAKE_CURRENT_BINARY_DIR} #needed to find moc files.
-    )
-INCLUDE_DIRECTORIES(${LIBRARY_INCLUDE_PATHS})
 
 SET(MODELVIZ_SOURCES
     modelviz/shapegeometry.cpp

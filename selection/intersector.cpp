@@ -118,7 +118,7 @@ void Intersector::intersect(osgUtil::IntersectionVisitor &iv, osg::Drawable *dra
     assert(currentVertices);
 
     setScale(iv);
-    if (isnan(scale))
+    if (std::isnan(scale))
         return;
     if (!getLocalStartEnd())
         return;
@@ -193,7 +193,7 @@ void Intersector::goPoints(const osg::ref_ptr<osg::PrimitiveSet> primitive, cons
     projectionVector += localStart;
     double distance = (projectionVector - currentVertex).length();
 
-    if (isnan(distance) || distance <= pickRadius / scale)
+    if (std::isnan(distance) || distance <= pickRadius / scale)
     {
 //        std::cout << "distance: " << distance << std::endl;
         Intersection hit = hitBase;
@@ -263,7 +263,7 @@ void Intersector::goEdges(const osg::ref_ptr<osg::PrimitiveSet> primitive, const
 
         double distance = (segmentPoint - intersectionPoint).length();
 //        std::cout << "distance: " << distance << std::endl;
-        if (isnan(distance) || distance <= pickRadius / scale)
+        if (std::isnan(distance) || distance <= pickRadius / scale)
         {
             Intersection hit = hitBase;
             hit.ratio = (segmentPoint - _start).length() / ((_end - _start).length() * 1.01);
