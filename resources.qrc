@@ -40,6 +40,7 @@
     <file>resources/images/constructionUnion.svg</file>
     <file>resources/images/constructionSubtract.svg</file>
     <file>resources/images/constructionIntersect.svg</file>
+    <file>resources/images/constructionDatumPlane.svg</file>
     <file>resources/images/editBase.svg</file>
     <file>resources/images/editRemove.svg</file>
     <file>resources/images/editUpdate.svg</file>
