@@ -301,6 +301,9 @@ void Base::serialIn(const prj::srl::FeatureBase& sBaseIn)
 
 const TopoDS_Shape& Base::getShape() const
 {
+  static TopoDS_Shape dummy;
+  if (seerShape->isNull())
+    return dummy;
   return seerShape->getRootOCCTShape();
 }
 

@@ -42,7 +42,8 @@ namespace ftr
     Boolean, //!< feature boolean base class.
     Union, //!< feature union class.
     Subtract, //!< feature subtract class.
-    Intersect //!< feature intersect class.
+    Intersect, //!< feature intersect class.
+    DatumPlane //!< feature intersect class.
   };
   
   inline const static std::string& toString(Type typeIn)
@@ -63,7 +64,8 @@ namespace ftr
       {Type::Boolean, "Boolean"},
       {Type::Union, "Union"},
       {Type::Subtract, "Subtract"},
-      {Type::Intersect, "Intersect"}
+      {Type::Intersect, "Intersect"},
+      {Type::DatumPlane, "DatumPlane"}
     };
     
     assert(strings.count(typeIn) > 0);

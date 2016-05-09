@@ -37,7 +37,6 @@
 #include <globalutilities.h>
 #include <application/application.h>
 #include <project/project.h>
-#include <modelviz/shapegeometry.h>
 #include <feature/seershape.h>
 #include <selection/message.h>
 #include <message/dispatch.h>

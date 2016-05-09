@@ -52,6 +52,7 @@
 #include <feature/blend.h>
 #include <feature/chamfer.h>
 #include <feature/draft.h>
+#include <feature/datumplane.h>
 
 using namespace app;
 using boost::uuids::uuid;
@@ -112,6 +113,9 @@ void Factory::setupDispatcher()
   
   mask = msg::Request | msg::Construct | msg::Draft;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newDraftDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Construct | msg::DatumPlane;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newDatumPlaneDispatched, this, _1)));
   
   mask = msg::Request | msg::ImportOCC;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::importOCCDispatched, this, _1)));
@@ -597,6 +601,20 @@ void Factory::newDraftDispatched(const msg::Message&)
   msg::Message clearSelectionMessage;
   clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
   observer->messageOutSignal(clearSelectionMessage);
+  
+  triggerUpdate();
+}
+
+void Factory::newDatumPlaneDispatched(const msg::Message&)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  assert(project);
+  
+  std::shared_ptr<ftr::DatumPlane> dPlane(new ftr::DatumPlane());
+  project->addFeature(dPlane);
   
   triggerUpdate();
 }

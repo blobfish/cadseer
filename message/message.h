@@ -93,6 +93,7 @@ namespace msg
   static const Mask SystemToFeature(Mask().	set(54));//!< command
   static const Mask DraggerToFeature(Mask().	set(55));//!< command
   static const Mask FeatureToDragger(Mask().	set(56));//!< command
+  static const Mask DatumPlane(Mask().		set(57));//!< command
   
   typedef boost::variant<prj::Message, slc::Message, app::Message, vwr::Message> Payload;
   

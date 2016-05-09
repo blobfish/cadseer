@@ -39,9 +39,10 @@ namespace NodeMaskDef
     static const unsigned int object =                  1 << 9;
     static const unsigned int csys =                    1 << 10;
     static const unsigned int overlaySwitch =           1 << 11;
+    static const unsigned int datum =		        1 << 12;
 
-    static const unsigned int gestureMenu =             1 << 12;
-    static const unsigned int gestureCommand =          1 << 13;
+    static const unsigned int gestureMenu =             1 << 13;
+    static const unsigned int gestureCommand =          1 << 14;
 }
 
 

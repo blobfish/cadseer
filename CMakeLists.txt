@@ -87,6 +87,7 @@ SET(FEATURE_SOURCES
     feature/intersectionmapping.cpp
     feature/shapecheck.cpp
     feature/seershape.cpp
+    feature/datumplane.cpp
     )
     
 SET(SELECTION_SOURCES
