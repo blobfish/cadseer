@@ -110,7 +110,7 @@ TextCamera::TextCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
   setGraphicsContext(windowIn);
   setProjectionMatrix(osg::Matrix::ortho2D(0, windowIn->getTraits()->width, 0, windowIn->getTraits()->width));
   setReferenceFrame(osg::Transform::ABSOLUTE_RF);
-  setRenderOrder(osg::Camera::POST_RENDER, 2);
+  setRenderOrder(osg::Camera::NESTED_RENDER, 3);
   setAllowEventFocus(false);
   setViewMatrix(osg::Matrix::identity());
   setClearMask(0);

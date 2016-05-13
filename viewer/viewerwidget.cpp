@@ -205,6 +205,8 @@ void ViewerWidget::createMainCamera(osg::Camera *camera)
 
     camera->setGraphicsContext(windowQt);
     camera->setName("main");
+    camera->setRenderOrder(osg::Camera::NESTED_RENDER, 1);
+    camera->setClearMask(GL_DEPTH_BUFFER_BIT);
 
     QPixmap cursorImage(":/resources/images/cursor.png");
     QCursor cursor(cursorImage.scaled(32, 32));//hot point defaults to center.
@@ -256,10 +258,9 @@ osg::Camera* ViewerWidget::createBackgroundCamera()
     osg::Camera *bgCamera = new osg::Camera();
     bgCamera->setGraphicsContext(windowQt);
     bgCamera->setCullingActive(false);
-    bgCamera->setClearMask(0);
     bgCamera->setAllowEventFocus(false);
     bgCamera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
-    bgCamera->setRenderOrder(osg::Camera::POST_RENDER, 0);
+    bgCamera->setRenderOrder(osg::Camera::NESTED_RENDER, 0);
     bgCamera->setProjectionMatrix(osg::Matrix::ortho2D(0.0, 1.0, 0.0, 1.0));
     bgCamera->addChild(geode.get());
     bgCamera->setNodeMask(NodeMaskDef::backGroundCamera);
@@ -290,7 +291,7 @@ osg::Camera* ViewerWidget::createGestureCamera()
     fadeCamera->setClearMask(GL_DEPTH_BUFFER_BIT);
     fadeCamera->setAllowEventFocus(false);
     fadeCamera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
-    fadeCamera->setRenderOrder(osg::Camera::POST_RENDER, 3);
+    fadeCamera->setRenderOrder(osg::Camera::NESTED_RENDER, 4);
     fadeCamera->setProjectionMatrix(osg::Matrix::ortho2D(0.0, 1000.0, 0.0, 1000.0));
     fadeCamera->setViewMatrix(osg::Matrix::identity());
     fadeCamera->setGraphicsContext(windowQt);

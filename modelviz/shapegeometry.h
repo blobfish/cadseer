@@ -22,13 +22,14 @@
 
 #include <memory>
 
-#include <osg/Geometry>
 #include <osg/BoundingSphere>
 
 #include <TopoDS_Shape.hxx>
 #include <Bnd_Box.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
+
+#include <modelviz/base.h>
 
 namespace boost{namespace uuids{class uuid;}}
 class TopoDS_Face; class TopoDS_Edge;
@@ -40,7 +41,7 @@ namespace mdv
   class IdPSetWrapper;
   class PSetVertexWrapper;
   
-  class ShapeGeometry : public osg::Geometry
+  class ShapeGeometry : public Base
   {
   public:
     ShapeGeometry();
@@ -60,10 +61,7 @@ namespace mdv
     std::size_t getPSetFromVertex(std::size_t) const;
     const osg::BoundingSphere& getBSphereFromPSet(std::size_t primitiveIndexIn) const;
     
-    void setColor(const osg::Vec4 &colorIn);
-    osg::Vec4 getColor() const {return color;}
-    void setPreHighlightColor(const osg::Vec4 &colorIn);
-    void setHighlightColor(const osg::Vec4 &colorIn);
+    virtual void setColor(const osg::Vec4 &colorIn) override;
     
     void setToColor(const boost::uuids::uuid&); //!< set to color of primitive index.
     void setToPreHighlight(const boost::uuids::uuid&); //!< set to prehighlight of primitive index.
@@ -76,9 +74,6 @@ namespace mdv
     
     std::shared_ptr<IdPSetWrapper> idPSetWrapper;
     std::shared_ptr<PSetVertexWrapper> pSetVertexWrapper;
-    osg::Vec4 color = osg::Vec4(.1f, .7f, .1f, .5f);
-    osg::Vec4 colorPreHighlight = osg::Vec4(1.0, 1.0, 0.0, 1.0);
-    osg::Vec4 colorHighlight = osg::Vec4(1.0, 1.0, 1.0, 1.0);
   };
   
   class ShapeGeometryBuilder

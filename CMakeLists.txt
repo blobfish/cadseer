@@ -45,7 +45,9 @@ SET(LIBRARY_INCLUDE_PATHS
 INCLUDE_DIRECTORIES(SYSTEM ${LIBRARY_INCLUDE_PATHS}) #system suppresses warnings for those libraries.
 
 SET(MODELVIZ_SOURCES
+    modelviz/base.cpp
     modelviz/shapegeometry.cpp
+    modelviz/datumplane.cpp
     )
 
 SET(TESTING_SOURCES

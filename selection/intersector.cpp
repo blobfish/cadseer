@@ -136,9 +136,9 @@ void Intersector::intersect(osgUtil::IntersectionVisitor &iv, osg::Drawable *dra
       
       //result intersections has a member called primitiveindex.
       //this is an index for the triangle(I believe) NOT the PrimitiveSET.
-      if (sGeometry)
+      for (const auto &current : getIntersections())
       {
-	for (const auto &current : getIntersections())
+	if (sGeometry)
 	{
 	  //apparently LineSegmentIntersector::intersect doesn't limit itself
 	  //to the passed in drawable?
@@ -150,6 +150,8 @@ void Intersector::intersect(osgUtil::IntersectionVisitor &iv, osg::Drawable *dra
 	  temp.primitiveIndex = pSetIndex;
 	  insertMyIntersection(temp);
 	}
+	else
+	  insertMyIntersection(current);
       }
     }
     else

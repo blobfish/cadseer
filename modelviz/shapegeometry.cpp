@@ -40,7 +40,7 @@
 using namespace mdv;
 using namespace osg;
 
-ShapeGeometry::ShapeGeometry() : Geometry()
+ShapeGeometry::ShapeGeometry() : Base()
 {
   setUseDisplayList(false);
   setDataVariance(osg::Object::DYNAMIC);
@@ -48,7 +48,7 @@ ShapeGeometry::ShapeGeometry() : Geometry()
 }
 
 ShapeGeometry::ShapeGeometry(const ShapeGeometry &rhs, const CopyOp& copyOperation) :
-  osg::Geometry(rhs, copyOperation)
+  Base(rhs, copyOperation)
 {
   setUseDisplayList(false);
   setDataVariance(osg::Object::DYNAMIC);
@@ -78,16 +78,6 @@ void ShapeGeometry::setColor(const Vec4& colorIn)
   for (auto &c : *colors)
     c = color;
   _colorArray->dirty();
-}
-
-void ShapeGeometry::setPreHighlightColor(const Vec4& colorIn)
-{
-  colorPreHighlight = colorIn;
-}
-
-void ShapeGeometry::setHighlightColor(const Vec4& colorIn)
-{
-  colorHighlight = colorIn;
 }
 
 void ShapeGeometry::setColor(const boost::uuids::uuid &idIn, const osg::Vec4 &colorIn)

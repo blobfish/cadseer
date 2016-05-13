@@ -23,7 +23,8 @@
 #include <feature/base.h>
 
 class QDir;
-namespace osg{class Geometry;}
+namespace osg{class MatrixTransform;}
+namespace mdv{class DatumPlane;}
 
 namespace ftr
 {
@@ -44,7 +45,8 @@ namespace ftr
     
   private:
     static QIcon icon;
-    osg::ref_ptr<osg::Geometry> geometry;
+    osg::ref_ptr<mdv::DatumPlane> display;
+    osg::ref_ptr<osg::MatrixTransform> transform;
     
     void updateGeometry();
   };

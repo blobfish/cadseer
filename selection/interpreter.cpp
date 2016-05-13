@@ -35,10 +35,10 @@ using boost::uuids::nil_generator;
 //We need to make the containers a set so we don't put multiple items in.
 
 //helper function
-static uuid getFeatureId(mdv::ShapeGeometry *geometryIn)
+static uuid getFeatureId(osg::Drawable &drawableIn) //can't be const, accept discards.
 {
   ParentMaskVisitor visitor(NodeMaskDef::object);
-  geometryIn->accept(visitor);
+  drawableIn.accept(visitor);
   osg::Node *featureRoot = visitor.out;
   assert(featureRoot);
   return gu::getId(featureRoot);
@@ -54,15 +54,20 @@ void Interpreter::go()
 {
   for (auto const &intersection : intersections)
   {
+    Container container;
+    container.featureId = getFeatureId(*intersection.drawable);
+    container.pointLocation = intersection.getWorldIntersectPoint(); //default to intersection world point.
+    
     mdv::ShapeGeometry *shapeGeometry = dynamic_cast<mdv::ShapeGeometry *>(intersection.drawable.get());
     if (!shapeGeometry)
-	continue;
-    int localNodeMask = intersection.nodePath.back()->getNodeMask();
+    {
+      container.selectionType = Type::Object;
+      add(containersOut, container);
+      continue;
+    }
     uuid selectedId = shapeGeometry->getId(intersection.primitiveIndex);
-    uuid featureId = getFeatureId(shapeGeometry);
+    int localNodeMask = intersection.nodePath.back()->getNodeMask();
     
-    Container container;
-    container.featureId = featureId;
     if (localNodeMask == NodeMaskDef::edge)
     {
       if (canSelectPoints(selectionMask))
@@ -144,7 +149,6 @@ void Interpreter::go()
 	container.selectionType = Type::Edge;
 	container.shapeId = selectedId;
 	container.selectionIds.push_back(selectedId);
-	container.pointLocation = intersection.getWorldIntersectPoint();
 	add(containersOut, container);
       }
       if (canSelectWires(selectionMask))
@@ -160,7 +164,6 @@ void Interpreter::go()
 	  container.selectionType = Type::Wire;
 	  container.selectionIds = shapeGeometry->seerShape->useGetChildrenOfType(wireIds.front(), TopAbs_EDGE);
 	  container.shapeId = wireIds.front();
-	  container.pointLocation = intersection.getWorldIntersectPoint();
 	  add(containersOut, container);
 	}
       }
@@ -175,7 +178,6 @@ void Interpreter::go()
 	  container.selectionIds = shapeGeometry->seerShape->useGetChildrenOfType(wire, TopAbs_EDGE);
 	  container.selectionType = Type::Wire;
 	  container.shapeId = wire;
-	  container.pointLocation = intersection.getWorldIntersectPoint();
 	  add(containersOut, container);
 	}
       }
@@ -184,7 +186,6 @@ void Interpreter::go()
 	container.selectionType = Type::Face;
 	container.shapeId = selectedId;
 	container.selectionIds.push_back(selectedId);
-	container.pointLocation = intersection.getWorldIntersectPoint();
 	add(containersOut,container);
       }
       if (canSelectShells(selectionMask))
@@ -197,7 +198,6 @@ void Interpreter::go()
 	  if (!has(containersOut, container)) //don't run again
 	  {
 	    container.selectionIds = shapeGeometry->seerShape->useGetChildrenOfType(shells.at(0), TopAbs_FACE);
-	    container.pointLocation = intersection.getWorldIntersectPoint();
 	    add(containersOut, container);
 	  }
 	}
@@ -213,7 +213,6 @@ void Interpreter::go()
 	  if (!has(containersOut, container)) //don't run again
 	  {
 	    container.selectionIds = shapeGeometry->seerShape->useGetChildrenOfType(solids.at(0), TopAbs_FACE);
-	    container.pointLocation = intersection.getWorldIntersectPoint();
 	    add(containersOut, container);
 	  }
 	}
@@ -228,7 +227,6 @@ void Interpreter::go()
 	  if (!has(containersOut, container)) //don't run again
 	  {
 	    container.selectionIds = shapeGeometry->seerShape->useGetChildrenOfType(object, TopAbs_FACE);
-	    container.pointLocation = intersection.getWorldIntersectPoint();
 	    add(containersOut, container);
 	  }
 	}

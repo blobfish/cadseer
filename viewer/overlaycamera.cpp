@@ -40,7 +40,7 @@ OverlayCamera::OverlayCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera(
   setupDispatcher();
   setGraphicsContext(windowIn);
   setClearMask(GL_DEPTH_BUFFER_BIT);
-  setRenderOrder(osg::Camera::POST_RENDER, 1);
+  setRenderOrder(osg::Camera::NESTED_RENDER, 2);
   
   osg::Camera *mainCamera = nullptr;
   const osg::GraphicsContext::Cameras &cameras = windowIn->getCameras();

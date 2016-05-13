@@ -182,11 +182,7 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
     if (eventAdapter.getButton() == osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON &&
             eventAdapter.getEventType() == osgGA::GUIEventAdapter::RELEASE)
     {
-        if
-	(
-	  (!lastPrehighlight.selectionIds.empty()) ||
-	  (slc::isPointType(lastPrehighlight.selectionType))
-	)
+        if(lastPrehighlight.selectionType != slc::Type::None)
         {
 	  //prehighlight gets 'moved' into selections so can't call
 	  //clear prehighlight, but we still clear the prehighlight
@@ -522,33 +518,35 @@ Container EventHandler::messageToContainer(const Message &messageIn)
   container.shapeId = messageIn.shapeId;
   container.pointLocation = messageIn.pointLocation;
   
-  if
-  (
-    (messageIn.type == slc::Type::Object) ||
-    (messageIn.type == slc::Type::Solid) ||
-    (messageIn.type == slc::Type::Shell)
-  )
+  if (!seerShape.isNull())
   {
-    container.selectionIds = seerShape.useGetChildrenOfType(seerShape.getRootOCCTShape(), TopAbs_FACE);
+    if
+    (
+      (messageIn.type == slc::Type::Object) ||
+      (messageIn.type == slc::Type::Solid) ||
+      (messageIn.type == slc::Type::Shell)
+    )
+    {
+      container.selectionIds = seerShape.useGetChildrenOfType(seerShape.getRootOCCTShape(), TopAbs_FACE);
+    }
+    //skip feature for now.
+    else if
+    (
+      (messageIn.type == slc::Type::Face) ||
+      (messageIn.type == slc::Type::Edge)
+    )
+    {
+      container.selectionIds.push_back(container.shapeId);
+    }
+    else if (messageIn.type == slc::Type::Wire)
+    {
+      container.selectionIds = seerShape.useGetChildrenOfType(container.shapeId, TopAbs_EDGE);
+    }
+    else if (isPointType(messageIn.type))
+    {
+      container.pointGeometry = buildTempPoint(messageIn.pointLocation);
+    }
   }
-  //skip feature for now.
-  else if
-  (
-    (messageIn.type == slc::Type::Face) ||
-    (messageIn.type == slc::Type::Edge)
-  )
-  {
-    container.selectionIds.push_back(container.shapeId);
-  }
-  else if (messageIn.type == slc::Type::Wire)
-  {
-    container.selectionIds = seerShape.useGetChildrenOfType(container.shapeId, TopAbs_EDGE);
-  }
-  else if (isPointType(messageIn.type))
-  {
-    container.pointGeometry = buildTempPoint(messageIn.pointLocation);
-  }
-
   
   return container;
 }
