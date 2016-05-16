@@ -20,14 +20,64 @@
 #ifndef FTR_DATUMPLANE_H
 #define FTR_DATUMPLANE_H
 
+#include <boost/uuid/nil_generator.hpp>
+
+#include <osg/ref_ptr>
+
 #include <feature/base.h>
 
 class QDir;
 namespace osg{class MatrixTransform;}
 namespace mdv{class DatumPlane;}
+namespace lbr{class IPGroup;}
 
 namespace ftr
 {
+  enum class DatumPlaneType
+  {
+    None = 0,
+    PlanarOffset
+  };
+  
+  inline const static QString getDatumPlaneTypeString(DatumPlaneType typeIn)
+  {
+    const static QStringList strings 
+    ({
+      QObject::tr("None"),
+      QObject::tr("Planar Offset")
+    });
+    
+    int casted = static_cast<int>(typeIn);
+    assert(casted < strings.size());
+    return strings.at(casted);
+  }
+  
+  //! Base class for different types of datum plane generation
+  class DatumPlaneGenre
+  {
+  public:
+    virtual DatumPlaneType getType() = 0;
+    virtual osg::Matrixd solve(const UpdateMap&) = 0; //throw std::runtime;
+    virtual lbr::IPGroup* getIPGroup(){return nullptr;}
+    virtual void connect(Base *){}
+    double xmin = -0.5, xmax = -0.5, ymin = -0.5, ymax = -0.5;
+  };
+  
+  class DatumPlanePlanarOffset : public DatumPlaneGenre
+  {
+  public:
+    DatumPlanePlanarOffset();
+    ~DatumPlanePlanarOffset();
+    virtual DatumPlaneType getType() override {return DatumPlaneType::PlanarOffset;}
+    virtual osg::Matrixd solve(const UpdateMap&) override;
+    virtual lbr::IPGroup* getIPGroup() override;
+    virtual void connect(Base *) override;
+    
+    boost::uuids::uuid faceId = boost::uuids::nil_uuid();
+    std::shared_ptr<Parameter> offset;
+    osg::ref_ptr<lbr::IPGroup> offsetIP;
+  };
+  
   class DatumPlane : public Base
   {
   public:
@@ -43,10 +93,18 @@ namespace ftr
     virtual void serialWrite(const QDir&) override;
 //     void serialRead(const prj::srl::FeatureDraft &);
     
+    void setSolver(std::shared_ptr<DatumPlaneGenre> solverIn);
+    
   private:
     static QIcon icon;
     osg::ref_ptr<mdv::DatumPlane> display;
     osg::ref_ptr<osg::MatrixTransform> transform;
+    std::shared_ptr<DatumPlaneGenre> solver;
+    
+    double xmin; //parametric value for left edge.
+    double xmax; //parametric value for right edge.
+    double ymin; //parametric value for bottom edge.
+    double ymax; //parametric value for top edge.
     
     void updateGeometry();
   };

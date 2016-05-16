@@ -154,7 +154,11 @@ void ParameterDialog::messageInSlot(const msg::Message &messageIn)
 void ParameterDialog::updateSlot()
 {
   double temp = editLine->text().toDouble();
-  if (temp > 0.0)
+  if
+  (
+    (parameter->canBeNegative()) ||
+    ((!parameter->canBeNegative()) && (temp > 0.0))
+  )
   {
     parameter->setValue(temp);
     if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())

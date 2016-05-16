@@ -229,7 +229,7 @@ bool IPGroup::processMotion(const osgManipulator::MotionCommand &commandIn)
     
     //limit to positive overall size.
     //might make this a custom manipulator constraint.
-    if (freshOverall <= 0.0)
+    if ((!parameter->canBeNegative()) && (freshOverall <= 0.0))
     {
       osg::Matrixd temp = dragger->getMatrix();
       temp.setTrans(osg::Vec3d(0.0, 0.0, overallDim->getSpread()));

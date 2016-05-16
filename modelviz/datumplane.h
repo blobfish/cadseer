@@ -40,6 +40,8 @@ namespace mdv
     virtual void setToPreHighlight() override;
     virtual void setToHighlight() override;
     
+    void setParameters(double, double, double, double);
+    
   protected:
     void setFaceColor(const osg::Vec4&);
     

@@ -138,12 +138,12 @@ void Intersector::intersect(osgUtil::IntersectionVisitor &iv, osg::Drawable *dra
       //this is an index for the triangle(I believe) NOT the PrimitiveSET.
       for (const auto &current : getIntersections())
       {
+	//apparently LineSegmentIntersector::intersect doesn't limit itself
+	//to the passed in drawable?
+	if (current.nodePath.back() != currentGeometry)
+	  continue;
 	if (sGeometry)
 	{
-	  //apparently LineSegmentIntersector::intersect doesn't limit itself
-	  //to the passed in drawable?
-	  if (current.nodePath.back() != sGeometry)
-	    continue;
 	  assert(!current.indexList.empty());
 	  std::size_t pSetIndex = sGeometry->getPSetFromVertex(current.indexList.front());
 	  Intersection temp = current;

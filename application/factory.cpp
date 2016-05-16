@@ -613,8 +613,21 @@ void Factory::newDatumPlaneDispatched(const msg::Message&)
   
   assert(project);
   
+  if (containers.empty())
+    return;
+  
   std::shared_ptr<ftr::DatumPlane> dPlane(new ftr::DatumPlane());
   project->addFeature(dPlane);
+  std::shared_ptr<ftr::DatumPlanePlanarOffset> offset(new ftr::DatumPlanePlanarOffset());
+  offset->offset->setValue(2.0);
+  offset->faceId = containers.at(0).shapeId;
+  dPlane->setSolver(offset);
+  
+  project->connect(containers.at(0).featureId, dPlane->getId(), ftr::InputTypes::DatumPlanarOffset);
+  
+  msg::Message clearSelectionMessage;
+  clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
+  observer->messageOutSignal(clearSelectionMessage);
   
   triggerUpdate();
 }

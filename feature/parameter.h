@@ -39,6 +39,7 @@ namespace ftr
     static const std::string Position = "Position"; //!< blend
     static const std::string Distance = "Distance"; //!< chamfer
     static const std::string Angle = "Angle"; //!< draft
+    static const std::string Offset = "Offset"; //!< datum plane
   }
   
   class Parameter
@@ -54,6 +55,8 @@ namespace ftr
     void setConstant(bool constantIn);
     operator double() const {return value;}
     Parameter& operator=(double valueIn);
+    bool canBeNegative(){return couldBeNegative;}
+    void setCanBeNegative(bool negIn){couldBeNegative = negIn;}
     
     typedef boost::signals2::signal<void ()> ValueChangedSignal;
     boost::signals2::connection connectValue(const ValueChangedSignal::slot_type &subscriber) const
@@ -74,6 +77,7 @@ namespace ftr
     bool constant = true;
     std::string name;
     double value;
+    bool couldBeNegative = false;
     
     //mutable allows us to connect to the signal through a const object.
     mutable ValueChangedSignal valueChangedSignal;

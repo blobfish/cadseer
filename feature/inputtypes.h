@@ -31,7 +31,8 @@ namespace ftr
   {
     none = 0,
     target,
-    tool
+    tool,
+    DatumPlanarOffset
   };
     
   inline const static std::string& getInputTypeString(InputTypes typeIn)
@@ -40,7 +41,8 @@ namespace ftr
     {
       "None",
       "Target",
-      "Tool"
+      "Tool",
+      "Datum Planar Offset"
     };
     
     std::size_t casted = static_cast<std::size_t>(typeIn);

@@ -129,3 +129,18 @@ void DatumPlane::setToHighlight()
 {
   setFaceColor(colorHighlight);
 }
+
+void DatumPlane::setParameters(double xmin, double xmax, double ymin, double ymax)
+{
+  osg::Vec3Array *vertices = dynamic_cast<osg::Vec3Array *>(getVertexArray());
+  (*vertices)[0] = (osg::Vec3d(xmax, ymin, 0.0));
+  (*vertices)[1] = (osg::Vec3d(xmax, ymax, 0.0));
+  (*vertices)[2] = (osg::Vec3d(xmin, ymax, 0.0));
+  (*vertices)[3] = (osg::Vec3d(xmin, ymin, 0.0));
+  (*vertices)[4] = (osg::Vec3d(xmax, ymin, 0.0));
+  (*vertices)[5] = (osg::Vec3d(xmax, ymax, 0.0));
+  (*vertices)[6] = (osg::Vec3d(xmin, ymax, 0.0));
+  (*vertices)[7] = (osg::Vec3d(xmin, ymin, 0.0));
+  
+  _vertexArray->dirty();
+}
