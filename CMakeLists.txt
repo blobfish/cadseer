@@ -11,10 +11,8 @@ ADD_DEFINITIONS(${QT_DEFINITIONS})
 
 find_package(Boost REQUIRED COMPONENTS system graph)
 
-find_package(OCE REQUIRED COMPONENTS TKernel TKBRep TKMesh TKFeat TKFillet)
-#override the libraries settings.
-#message(${OCE_LIBRARIES})
-SET(OCE_LIBRARIES "TKernel;TKBRep;TKMesh;TKFeat;TKFillet;TKOffset")
+find_package(OpenCasCade REQUIRED)
+SET(OCE_LIBRARIES ${OCC_LIBRARIES})
 
 FIND_PACKAGE(OpenSceneGraph REQUIRED)
 SET(OPENSCENEGRAPH_LIBRARIES "OpenThreads;osg;osgDB;osgUtil;osgViewer;osgQt;osgGA;osgText;osgManipulator")
@@ -36,7 +34,7 @@ SET(LIBRARY_INCLUDE_PATHS
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR} #needed to find moc files.
     ${OPENSCENEGRAPH_INCLUDE_DIRS}
-    ${OCE_INCLUDE_DIRS}
+    ${OCC_INCLUDE_DIR}
     ${EIGEN3_INCLUDE_DIR}
     ${XSDCXX_INCLUDE_DIR}
     ${XERCESC_INCLUDE_DIR}
