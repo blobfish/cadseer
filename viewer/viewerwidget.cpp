@@ -358,12 +358,22 @@ void ViewerWidget::viewLineDispatched(const msg::Message&)
 
 void ViewerWidget::exportOSGDispatched(const msg::Message&)
 {
-  QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), QDir::homePath(), tr("Scene (*.osg)"));
+  //ive doesn't appear to be working?
+  
+  QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), QDir::homePath(),
+    tr("Scene (*.osgt *.osgx *.osgb *.osg *.ive)"));
   if (fileName.isEmpty())
     return;
   
-  if (!fileName.endsWith(QObject::tr(".osg")))
-    fileName += QObject::tr(".osg");
+  if
+  (
+    (!fileName.endsWith(QObject::tr(".osgt"))) &&
+    (!fileName.endsWith(QObject::tr(".osgx"))) &&
+    (!fileName.endsWith(QObject::tr(".osgb"))) &&
+    (!fileName.endsWith(QObject::tr(".osg"))) &&
+    (!fileName.endsWith(QObject::tr(".ive")))
+  )
+    fileName += QObject::tr(".osgt");
   
   osgDB::writeNodeFile(*root, fileName.toStdString());
 }

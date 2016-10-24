@@ -143,4 +143,5 @@ void DatumPlane::setParameters(double xmin, double xmax, double ymin, double yma
   (*vertices)[7] = (osg::Vec3d(xmin, ymin, 0.0));
   
   _vertexArray->dirty();
+  dirtyBound();
 }

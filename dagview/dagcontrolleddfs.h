@@ -17,15 +17,15 @@
  *
  */
 
+#ifndef CONTROLLEDDAGDFS_H
+#define CONTROLLEDDAGDFS_H
+
 #include <tuple>
 #include <vector>
 #include <stack>
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/iteration_macros.hpp>
-
-#ifndef CONTROLLEDDAGDFS_H
-#define CONTROLLEDDAGDFS_H
 
 namespace dag
 {
@@ -60,8 +60,8 @@ namespace dag
     typedef typename boost::graph_traits<GraphT>::adjacency_iterator AdjacencyIteratorT;
     typedef typename boost::graph_traits<GraphT>::in_edge_iterator InEdgeIteratorT;
     typedef typename std::vector<VertexT> VerticesT;
-    typedef typename std::vector<VertexT>::iterator VerticesTIterator;
-    typedef typename std::tuple<VertexT, VerticesT, VerticesTIterator, VerticesTIterator> IterationRecord;
+    // 0 = parent, 1 = vector of children, 2 = next child to process.
+    typedef typename std::tuple<VertexT, VerticesT, std::size_t> IterationRecord;
     
     ControlledDFS(VisitorT &visitorIn) : graph(visitorIn.getGraph()), visitor(visitorIn) 
     {
@@ -74,7 +74,7 @@ namespace dag
       for (auto currentVertex : startVertices)
       {
         VerticesT children = getSortedChildren(currentVertex);
-        recordStack.push(std::make_tuple(currentVertex, children, children.begin(), children.end()));
+        recordStack.push(std::make_tuple(currentVertex, children, 0));
         colorMap.at(currentVertex) = Color::Gray;
         visitor.discoverVertex(currentVertex);
         
@@ -102,27 +102,25 @@ namespace dag
         auto currentParent = std::get<0>(recordStack.top());
         auto currentChildren = std::get<1>(recordStack.top());
         auto currentChildIt = std::get<2>(recordStack.top());
-        auto currentChildItEnd = std::get<3>(recordStack.top());
         recordStack.pop();
         
-        while (currentChildIt != currentChildItEnd)
+        while (currentChildIt < currentChildren.size())
         {
-          if (colorMap.at(*currentChildIt) == Color::White)
+          if (colorMap.at(currentChildren.at(currentChildIt)) == Color::White)
           {
-            auto currentChild = *currentChildIt;
+            auto currentChild = currentChildren.at(currentChildIt);
             currentChildIt++;
             
             if (!parentScan(currentChild)) //has parents not visited yet. don't continue;
               continue;
             
-            recordStack.push(std::make_tuple(currentParent, currentChildren, currentChildIt, currentChildItEnd));
+            recordStack.push(std::make_tuple(currentParent, currentChildren, currentChildIt));
             
             colorMap.at(currentChild) = Color::Gray;
             visitor.discoverVertex(currentChild);
             currentParent = currentChild;
             currentChildren = getSortedChildren(currentChild);
-            currentChildIt = currentChildren.begin();
-            currentChildItEnd = currentChildren.end();
+            currentChildIt = 0;
           }
           else //gray or black, we just skip.
           {

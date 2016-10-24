@@ -363,6 +363,17 @@ void Project::setFeatureActive(const uuid& idIn)
   boost::breadth_first_search(rGraph, vertex, boost::visitor(activeVisitorParents));
   SetHiddenVisitor hideVisitorParents;
   boost::breadth_first_search(rGraph, vertex, boost::visitor(hideVisitorParents));
+  //if this is a create feature we don't want to hide the immediate parents.
+  if (projectGraph[vertex].feature->getDescriptor() == ftr::Descriptor::Create)
+  {
+    GraphReversed::adjacency_iterator it, itEnd;
+    boost::tie(it, itEnd) = boost::adjacent_vertices(vertex, rGraph);
+    for (; it != itEnd; ++it)
+    {
+      projectGraph[*it].feature->setActive();
+      projectGraph[*it].feature->show3D();
+    }
+  }
   
   //children
   SetInactiveVisitor inactiveVisitor;
@@ -401,6 +412,23 @@ void Project::updateLeafStatus()
   {
     if (boost::out_degree(*vIt, filteredGraph) == 0)
       filteredGraph[*vIt].feature->setLeaf();
+    else
+    {
+      //if all children are of the type 'create' then it is also considered leaf.
+      boost::graph_traits<FilteredGraphType>::adjacency_iterator vItNested, vItEndNested;
+      boost::tie(vItNested, vItEndNested) = boost::adjacent_vertices(*vIt, filteredGraph);
+      bool allCreate = true;
+      for (; vItNested != vItEndNested; ++vItNested)
+      {
+	if (filteredGraph[*vItNested].feature->getDescriptor() != ftr::Descriptor::Create)
+	{
+	  allCreate = false;
+	  break;
+	}
+      }
+      if (allCreate)
+	filteredGraph[*vIt].feature->setLeaf();
+    }
   }
 }
 

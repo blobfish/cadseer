@@ -24,6 +24,7 @@
 #include <gp_Pln.hxx>
 #include <BRepBndLib.hxx>
 #include <Bnd_Box.hxx>
+#include <BRep_Builder.hxx>
 
 #include <osg/Geometry>
 #include <osg/MatrixTransform>
@@ -79,7 +80,7 @@ osg::Matrixd DatumPlanePlanarOffset::solve(const UpdateMap &mapIn)
   if (faceId.is_nil())
     throw std::runtime_error("DatumPlanePlanarOffset: nil faceId");
   
-  UpdateMap::const_iterator it = mapIn.find(InputTypes::DatumPlanarOffset);
+  UpdateMap::const_iterator it = mapIn.find(InputTypes::datumPlanarOffset);
   if (it == mapIn.end())
     throw std::runtime_error("DatumPlanePlanarOffset: no input feature");
   
@@ -140,6 +141,96 @@ lbr::IPGroup* DatumPlanePlanarOffset::getIPGroup()
 void DatumPlanePlanarOffset::connect(Base *baseIn)
 {
   offset->connectValue(boost::bind(&Base::setModelDirty, baseIn));
+}
+
+DatumPlanePlanarCenter::DatumPlanePlanarCenter()
+  {}
+
+DatumPlanePlanarCenter::~DatumPlanePlanarCenter()
+  {}
+
+osg::Matrixd DatumPlanePlanarCenter::solve(const UpdateMap &mapIn)
+{
+  auto getFaceSystem = [](const TopoDS_Shape &faceShape)
+  {
+    BRepAdaptor_Surface adaptor(TopoDS::Face(faceShape));
+    if (adaptor.GetType() != GeomAbs_Plane)
+      throw std::runtime_error("DatumPlanePlanarCenter: wrong surface type");
+    gp_Ax2 tempSystem = adaptor.Plane().Position().Ax2();
+    if (faceShape.Orientation() == TopAbs_REVERSED)
+      tempSystem.SetDirection(tempSystem.Direction().Reversed());
+    osg::Matrixd faceSystem = gu::toOsg(tempSystem);
+    
+    gp_Pnt centerPoint, cornerPoint;
+    centerRadius(getBoundingBox(faceShape), centerPoint, cornerPoint);
+    double centerDistance = adaptor.Plane().Distance(centerPoint);
+    double cornerDistance = adaptor.Plane().Distance(cornerPoint);
+    osg::Vec3d workVector = gu::getZVector(faceSystem);
+    osg::Vec3d centerVec = gu::toOsg(centerPoint) + (workVector * centerDistance);
+    osg::Vec3d cornerVec = gu::toOsg(cornerPoint) + (workVector * cornerDistance);
+    faceSystem.setTrans(centerVec);
+    
+    return faceSystem;
+  };
+  
+  TopoDS_Shape face1, face2;
+  
+  if (mapIn.size() == 1)
+  {
+    UpdateMap::const_iterator it = mapIn.find(InputTypes::datumPlanarCenterBoth);
+    if (it == mapIn.end())
+      throw std::runtime_error("DatumPlanePlanarCenter: Conflict between map size and count");
+  
+    const SeerShape &shape = it->second->getSeerShape();
+    if (shape.isNull())
+      throw std::runtime_error("DatumPlanePlanarCenter: null seer shape");
+    if (!shape.hasShapeIdRecord(faceId1))
+      throw std::runtime_error("DatumPlanePlanarCenter: no faceId1 in seer shape");
+    if (!shape.hasShapeIdRecord(faceId2))
+      throw std::runtime_error("DatumPlanePlanarCenter: no faceId2 in seer shape");
+  
+    face1 = shape.getOCCTShape(faceId1); assert(!face1.IsNull());
+    face2 = shape.getOCCTShape(faceId2); assert(!face2.IsNull());
+    
+    osg::Matrixd face1System = getFaceSystem(face1);
+    osg::Matrixd face2System = getFaceSystem(face2);
+    osg::Vec3d normal1 = gu::getZVector(face1System);
+    osg::Vec3d normal2 = gu::getZVector(face2System);
+    
+    if (!(gu::toOcc(normal1).IsParallel(gu::toOcc(normal2), Precision::Angular())))
+      throw std::runtime_error("DatumPlanePlanarCenter: planes not parallel");
+    
+    osg::Vec3d projection = face2System.getTrans() - face1System.getTrans();
+    double mag = projection.length() / 2.0;
+    projection.normalize();
+    projection *= mag;
+    osg::Vec3d freshOrigin = face1System.getTrans() + projection;
+    
+    osg::Matrixd newSystem = face1System;
+    newSystem.setTrans(freshOrigin);
+    
+    //calculate size.
+    TopoDS_Compound compound;
+    BRep_Builder builder;
+    builder.MakeCompound(compound);
+    builder.Add(compound, face1);
+    builder.Add(compound, face2);
+    
+    gp_Pnt sizeCenterPoint, sizeCornerPoint;
+    centerRadius(getBoundingBox(compound), sizeCenterPoint, sizeCornerPoint);
+    double radius = sizeCenterPoint.Distance(sizeCornerPoint);
+    
+    xmin = -radius;
+    xmax = radius;
+    ymin = -radius;
+    ymax = radius;
+    
+    return newSystem;
+  }
+
+  throw std::runtime_error("DatumPlanePlanarCenter: wrong parameters");
+  
+  return osg::Matrixd::identity();
 }
 
 //default constructed plane is 2.0 x 2.0

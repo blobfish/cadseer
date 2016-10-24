@@ -36,7 +36,8 @@ namespace ftr
   enum class DatumPlaneType
   {
     None = 0,
-    PlanarOffset
+    PlanarOffset,
+    PlanarCenter //!< to parallel planar faces
   };
   
   inline const static QString getDatumPlaneTypeString(DatumPlaneType typeIn)
@@ -44,7 +45,8 @@ namespace ftr
     const static QStringList strings 
     ({
       QObject::tr("None"),
-      QObject::tr("Planar Offset")
+      QObject::tr("Planar Offset"),
+      QObject::tr("Planar Center")
     });
     
     int casted = static_cast<int>(typeIn);
@@ -60,7 +62,7 @@ namespace ftr
     virtual osg::Matrixd solve(const UpdateMap&) = 0; //throw std::runtime;
     virtual lbr::IPGroup* getIPGroup(){return nullptr;}
     virtual void connect(Base *){}
-    double xmin = -0.5, xmax = -0.5, ymin = -0.5, ymax = -0.5;
+    double xmin = -0.5, xmax = 0.5, ymin = -0.5, ymax = 0.5;
   };
   
   class DatumPlanePlanarOffset : public DatumPlaneGenre
@@ -76,6 +78,18 @@ namespace ftr
     boost::uuids::uuid faceId = boost::uuids::nil_uuid();
     std::shared_ptr<Parameter> offset;
     osg::ref_ptr<lbr::IPGroup> offsetIP;
+  };
+  
+  class DatumPlanePlanarCenter : public DatumPlaneGenre
+  {
+  public:
+    DatumPlanePlanarCenter();
+    ~DatumPlanePlanarCenter();
+    virtual DatumPlaneType getType() override {return DatumPlaneType::PlanarCenter;}
+    virtual osg::Matrixd solve(const UpdateMap&) override;
+    
+    boost::uuids::uuid faceId1 = boost::uuids::nil_uuid();
+    boost::uuids::uuid faceId2 = boost::uuids::nil_uuid();
   };
   
   class DatumPlane : public Base

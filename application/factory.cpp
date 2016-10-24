@@ -618,12 +618,23 @@ void Factory::newDatumPlaneDispatched(const msg::Message&)
   
   std::shared_ptr<ftr::DatumPlane> dPlane(new ftr::DatumPlane());
   project->addFeature(dPlane);
-  std::shared_ptr<ftr::DatumPlanePlanarOffset> offset(new ftr::DatumPlanePlanarOffset());
-  offset->offset->setValue(2.0);
-  offset->faceId = containers.at(0).shapeId;
-  dPlane->setSolver(offset);
   
-  project->connect(containers.at(0).featureId, dPlane->getId(), ftr::InputTypes::DatumPlanarOffset);
+  if (containers.size() == 1)
+  {
+    std::shared_ptr<ftr::DatumPlanePlanarOffset> offset(new ftr::DatumPlanePlanarOffset());
+    offset->offset->setValue(2.0);
+    offset->faceId = containers.at(0).shapeId;
+    dPlane->setSolver(offset);
+    project->connect(containers.at(0).featureId, dPlane->getId(), ftr::InputTypes::datumPlanarOffset);
+  }
+  else if (containers.size() == 2 && (containers.front().featureId == containers.back().featureId))
+  {
+    std::shared_ptr<ftr::DatumPlanePlanarCenter> center(new ftr::DatumPlanePlanarCenter());
+    center->faceId1 = containers.front().shapeId;
+    center->faceId2 = containers.back().shapeId;
+    dPlane->setSolver(center);
+    project->connect(containers.front().featureId, dPlane->getId(), ftr::InputTypes::datumPlanarCenterBoth);
+  }
   
   msg::Message clearSelectionMessage;
   clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;

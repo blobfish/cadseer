@@ -143,6 +143,17 @@ gp_Ax2 gu::toOcc(const osg::Matrixd &m)
   return out;
 }
 
+gp_Vec gu::toOcc(const osg::Vec3d& v)
+{
+  return gp_Vec
+  (
+    v.x(),
+    v.y(),
+    v.z()
+  );
+}
+
+
 osg::Vec3d gu::getXVector(const osg::Matrixd& m)
 {
   osg::Vec3d out;

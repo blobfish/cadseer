@@ -32,7 +32,10 @@ namespace ftr
     none = 0,
     target,
     tool,
-    DatumPlanarOffset
+    datumPlanarOffset,
+    datumPlanarCenter1,
+    datumPlanarCenter2,
+    datumPlanarCenterBoth
   };
     
   inline const static std::string& getInputTypeString(InputTypes typeIn)
@@ -42,7 +45,10 @@ namespace ftr
       "None",
       "Target",
       "Tool",
-      "Datum Planar Offset"
+      "Datum Planar Offset",
+      "Datum Planar Center1",
+      "Datum Planar Center2",
+      "Datum Planar Center Both"
     };
     
     std::size_t casted = static_cast<std::size_t>(typeIn);
@@ -56,7 +62,11 @@ namespace ftr
     {
       {"None", InputTypes::none},
       {"Target", InputTypes::target},
-      {"Tool", InputTypes::tool}
+      {"Tool", InputTypes::tool},
+      {"Datum Planar Offset", InputTypes::datumPlanarOffset},
+      {"Datum Planar Center1", InputTypes::datumPlanarCenter1},
+      {"Datum Planar Center2", InputTypes::datumPlanarCenter2},
+      {"Datum Planar Center Both", InputTypes::datumPlanarCenterBoth}
     };
     
     auto it = map.find(stringIn);
