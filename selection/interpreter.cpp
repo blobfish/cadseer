@@ -58,15 +58,28 @@ void Interpreter::go()
     container.featureId = getFeatureId(*intersection.drawable);
     container.pointLocation = intersection.getWorldIntersectPoint(); //default to intersection world point.
     
+    int localNodeMask = intersection.nodePath.back()->getNodeMask();
     mdv::ShapeGeometry *shapeGeometry = dynamic_cast<mdv::ShapeGeometry *>(intersection.drawable.get());
     if (!shapeGeometry)
     {
-      container.selectionType = Type::Object;
-      add(containersOut, container);
+      if (localNodeMask == NodeMaskDef::datum)
+      {
+	if (canSelectFeatures(selectionMask))
+	{
+	  container.selectionType = Type::Feature;
+	  add(containersOut, container);
+	  continue;
+	}
+	if (canSelectObjects(selectionMask))
+	{
+	  container.selectionType = Type::Object;
+	  add(containersOut, container);
+	  continue;
+	}
+      }
       continue;
     }
     uuid selectedId = shapeGeometry->getId(intersection.primitiveIndex);
-    int localNodeMask = intersection.nodePath.back()->getNodeMask();
     
     if (localNodeMask == NodeMaskDef::edge)
     {
