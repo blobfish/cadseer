@@ -208,7 +208,7 @@ void ViewerWidget::createMainCamera(osg::Camera *camera)
     camera->setRenderOrder(osg::Camera::NESTED_RENDER, 1);
     camera->setClearMask(GL_DEPTH_BUFFER_BIT);
 
-    QPixmap cursorImage(":/resources/images/cursor.png");
+    QPixmap cursorImage(":/resources/images/cursor.svg");
     QCursor cursor(cursorImage.scaled(32, 32));//hot point defaults to center.
     glWidget->setCursor(cursor);
 
