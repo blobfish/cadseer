@@ -40,6 +40,7 @@ Intersect::Intersect() : BooleanBase()
     icon = QIcon(":/resources/images/constructionIntersect.svg");
   
   name = QObject::tr("Intersect");
+  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
 }
 
 void Intersect::updateModel(const UpdateMap &mapIn)

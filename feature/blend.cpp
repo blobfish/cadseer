@@ -56,6 +56,7 @@ Blend::Blend() : Base()
     icon = QIcon(":/resources/images/constructionBlend.svg");
   
   name = QObject::tr("Blend");
+  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
 }
 
 std::shared_ptr< Parameter > Blend::buildRadiusParameter()

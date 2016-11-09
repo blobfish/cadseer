@@ -43,6 +43,7 @@ Inert::Inert(const TopoDS_Shape &shapeIn) : CSysBase()
     icon = QIcon(":/resources/images/constructionInert.svg");
   
   name = QObject::tr("Inert");
+  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   seerShape->setOCCTShape(shapeIn);
   seerShape->ensureNoNils();

@@ -103,6 +103,7 @@ Chamfer::Chamfer() : Base()
     icon = QIcon(":/resources/images/constructionChamfer.svg");
   
   name = QObject::tr("Chamfer");
+  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
 }
 
 void Chamfer::addSymChamfer(const SymChamfer &chamferIn)

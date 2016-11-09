@@ -49,6 +49,7 @@ Draft::Draft() : Base()
     icon = QIcon(":/resources/images/constructionDraft.svg");
   
   name = QObject::tr("Draft");
+  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
 }
 
 Draft::~Draft() //for forward declare with osg::ref_ptr

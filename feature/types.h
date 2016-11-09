@@ -43,7 +43,7 @@ namespace ftr
     Union, //!< feature union class.
     Subtract, //!< feature subtract class.
     Intersect, //!< feature intersect class.
-    DatumPlane //!< feature intersect class.
+    DatumPlane //!< feature datum plane class.
   };
   
   inline const static std::string& toString(Type typeIn)

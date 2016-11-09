@@ -77,6 +77,7 @@ Cone::Cone() : CSysBase(),
     icon = QIcon(":/resources/images/constructionCone.svg");
   
   name = QObject::tr("Cone");
+  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   initializeMaps();
   

@@ -127,6 +127,7 @@ Box::Box() :
     icon = QIcon(":/resources/images/constructionBox.svg");
   
   name = QObject::tr("Box");
+  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   initializeMaps();
   

@@ -46,6 +46,7 @@ Union::Union() : BooleanBase()
     icon = QIcon(":/resources/images/constructionUnion.svg");
   
   name = QObject::tr("Union");
+  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
 }
 
 void Union::updateModel(const UpdateMap &mapIn)

@@ -949,6 +949,7 @@ void Model::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     slc::Message sMessage;
     sMessage.type = slc::Type::Object;
     sMessage.featureId = record.featureId;
+    sMessage.featureType = record.feature.lock()->getType();
     sMessage.shapeId = boost::uuids::nil_generator()();
     message.payload = sMessage;
     observer->messageOutSignal(message);
@@ -963,6 +964,7 @@ void Model::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     slc::Message sMessage;
     sMessage.type = slc::Type::Object;
     sMessage.featureId = record.featureId;
+    sMessage.featureType = record.feature.lock()->getType();
     sMessage.shapeId = boost::uuids::nil_generator()();
     message.payload = sMessage;
     observer->messageOutSignal(message);
@@ -990,6 +992,7 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
     slc::Message sMessage;
     sMessage.type = slc::Type::Object;
     sMessage.featureId = featureIdIn;
+    sMessage.featureType = findRecord(graphLink, featureIdIn).feature.lock()->getType();
     sMessage.shapeId = boost::uuids::nil_generator()();
     message.payload = sMessage;
     observer->messageOutSignal(message);
@@ -1115,6 +1118,7 @@ void Model::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
       slc::Message sMessage;
       sMessage.type = slc::Type::Object;
       sMessage.featureId = record.featureId;
+      sMessage.featureType = record.feature.lock()->getType();
       message.payload = sMessage;
       observer->messageOutSignal(message);
     }

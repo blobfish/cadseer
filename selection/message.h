@@ -26,6 +26,7 @@
 
 #include <osg/Vec3d>
 
+#include <feature/types.h>
 #include <selection/definitions.h>
 
 namespace slc
@@ -34,6 +35,7 @@ namespace slc
   {
     Message();
     slc::Type type;
+    ftr::Type featureType;
     boost::uuids::uuid featureId;
     boost::uuids::uuid shapeId;
     osg::Vec3d pointLocation;
@@ -47,6 +49,7 @@ namespace slc
       (lhs.featureId == rhs.featureId) &&
       (lhs.shapeId == rhs.shapeId)
       //we ignore point location.
+      //shouldn't need to test featureType if id's are the same
     );
   }
   

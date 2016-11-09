@@ -26,6 +26,7 @@
 #include <osg/ref_ptr>
 #include <osg/Vec3d>
 
+#include <feature/types.h>
 #include <selection/definitions.h>
 
 namespace osg {class Geometry;}
@@ -41,6 +42,7 @@ namespace slc
   public:
       ~Container();
       Type selectionType = Type::None;
+      ftr::Type featureType = ftr::Type::Base;
       boost::uuids::uuid featureId = boost::uuids::nil_generator()();
       boost::uuids::uuid shapeId = boost::uuids::nil_generator()();
       std::vector<boost::uuids::uuid> selectionIds; //!< objects to color. i.e. faces for a solid

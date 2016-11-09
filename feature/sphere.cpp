@@ -61,6 +61,7 @@ Sphere::Sphere() : CSysBase(), radius(ParameterNames::Radius, 5.0)
     icon = QIcon(":/resources/images/constructionSphere.svg");
   
   name = QObject::tr("Sphere");
+  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   initializeMaps();
   

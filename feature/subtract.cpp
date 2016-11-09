@@ -40,6 +40,7 @@ Subtract::Subtract() : BooleanBase()
     icon = QIcon(":/resources/images/constructionSubtract.svg");
   
   name = QObject::tr("Subtract");
+  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
 }
 
 void Subtract::updateModel(const UpdateMap &mapIn)

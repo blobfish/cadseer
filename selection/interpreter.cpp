@@ -23,7 +23,6 @@
 #include <globalutilities.h>
 #include <feature/base.h>
 #include <feature/seershape.h>
-#include <project/project.h>
 #include <modelviz/shapegeometry.h>
 #include <selection/visitors.h>
 #include <selection/interpreter.h>
@@ -44,6 +43,18 @@ static uuid getFeatureId(osg::Drawable &drawableIn) //can't be const, accept dis
   return gu::getId(featureRoot);
 }
 
+static ftr::Type getFeatureType(osg::Drawable &drawableIn)
+{
+  ParentMaskVisitor visitor(NodeMaskDef::object);
+  drawableIn.accept(visitor);
+  osg::Node *featureRoot = visitor.out;
+  assert(featureRoot);
+  int featureTypeInteger;
+  if (!featureRoot->getUserValue(gu::featureTypeAttributeTitle, featureTypeInteger))
+      assert(0);
+  return static_cast<ftr::Type>(featureTypeInteger);
+}
+
 Interpreter::Interpreter(const osgUtil::LineSegmentIntersector::Intersections& intersectionsIn, std::size_t selectionMaskIn) :
   intersections(intersectionsIn), selectionMask(selectionMaskIn)
 {
@@ -56,6 +67,7 @@ void Interpreter::go()
   {
     Container container;
     container.featureId = getFeatureId(*intersection.drawable);
+    container.featureType = getFeatureType(*intersection.drawable);
     container.pointLocation = intersection.getWorldIntersectPoint(); //default to intersection world point.
     
     int localNodeMask = intersection.nodePath.back()->getNodeMask();

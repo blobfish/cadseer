@@ -24,6 +24,7 @@
 
 #include <osg/ref_ptr>
 
+#include <selection/container.h>
 #include <feature/base.h>
 
 class QDir;
@@ -37,7 +38,8 @@ namespace ftr
   {
     None = 0,
     PlanarOffset,
-    PlanarCenter //!< to parallel planar faces
+    PlanarCenter, //!< 2 parallel planar faces
+    PlanarParallelThroughEdge //!< planar parallel through edge.
   };
   
   inline const static QString getDatumPlaneTypeString(DatumPlaneType typeIn)
@@ -46,13 +48,22 @@ namespace ftr
     ({
       QObject::tr("None"),
       QObject::tr("Planar Offset"),
-      QObject::tr("Planar Center")
+      QObject::tr("Planar Center"),
+      QObject::tr("Planar Parallel Through Edge")
     });
     
     int casted = static_cast<int>(typeIn);
     assert(casted < strings.size());
     return strings.at(casted);
   }
+  
+  //! just used to relay connection info to to dplane feature. 
+  struct DatumPlaneConnection
+  {
+    boost::uuids::uuid parentId;
+    InputTypes inputType;
+  };
+  typedef std::vector<DatumPlaneConnection> DatumPlaneConnections;
   
   //! Base class for different types of datum plane generation
   class DatumPlaneGenre
@@ -62,7 +73,8 @@ namespace ftr
     virtual osg::Matrixd solve(const UpdateMap&) = 0; //throw std::runtime;
     virtual lbr::IPGroup* getIPGroup(){return nullptr;}
     virtual void connect(Base *){}
-    double xmin = -0.5, xmax = 0.5, ymin = -0.5, ymax = 0.5;
+    virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &) = 0;
+    double radius;
   };
   
   class DatumPlanePlanarOffset : public DatumPlaneGenre
@@ -74,10 +86,13 @@ namespace ftr
     virtual osg::Matrixd solve(const UpdateMap&) override;
     virtual lbr::IPGroup* getIPGroup() override;
     virtual void connect(Base *) override;
+    virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &) override;
     
     boost::uuids::uuid faceId = boost::uuids::nil_uuid();
     std::shared_ptr<Parameter> offset;
     osg::ref_ptr<lbr::IPGroup> offsetIP;
+    
+    static bool canDoTypes(const slc::Containers &);
   };
   
   class DatumPlanePlanarCenter : public DatumPlaneGenre
@@ -87,9 +102,27 @@ namespace ftr
     ~DatumPlanePlanarCenter();
     virtual DatumPlaneType getType() override {return DatumPlaneType::PlanarCenter;}
     virtual osg::Matrixd solve(const UpdateMap&) override;
+    virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &) override;
     
     boost::uuids::uuid faceId1 = boost::uuids::nil_uuid();
     boost::uuids::uuid faceId2 = boost::uuids::nil_uuid();
+    
+    static bool canDoTypes(const slc::Containers &);
+  };
+  
+  class DatumPlanePlanarParallelThroughEdge : public DatumPlaneGenre
+  {
+  public:
+    DatumPlanePlanarParallelThroughEdge();
+    ~DatumPlanePlanarParallelThroughEdge();
+    virtual DatumPlaneType getType() override {return DatumPlaneType::PlanarParallelThroughEdge;}
+    virtual osg::Matrixd solve(const UpdateMap&) override;
+    virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &) override;
+    
+    boost::uuids::uuid faceId = boost::uuids::nil_uuid();
+    boost::uuids::uuid edgeId = boost::uuids::nil_uuid();
+    
+    static bool canDoTypes(const slc::Containers &);
   };
   
   class DatumPlane : public Base
@@ -108,6 +141,10 @@ namespace ftr
 //     void serialRead(const prj::srl::FeatureDraft &);
     
     void setSolver(std::shared_ptr<DatumPlaneGenre> solverIn);
+    osg::Matrixd getSystem() const {return transform->getMatrix();}
+    double getRadius() const {return radius;}
+    
+    static std::vector<std::shared_ptr<DatumPlaneGenre> > solversFromSelection(const slc::Containers &);
     
   private:
     static QIcon icon;
@@ -115,10 +152,8 @@ namespace ftr
     osg::ref_ptr<osg::MatrixTransform> transform;
     std::shared_ptr<DatumPlaneGenre> solver;
     
-    double xmin; //parametric value for left edge.
-    double xmax; //parametric value for right edge.
-    double ymin; //parametric value for bottom edge.
-    double ymax; //parametric value for top edge.
+    double radius = 1.0; //!< boundary size of plane.
+    bool autoSize = true; //!< whether the plane sizes itself.
     
     void updateGeometry();
   };

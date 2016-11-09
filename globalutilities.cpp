@@ -26,8 +26,10 @@
 
 #include <TopoDS_Shape.hxx>
 #include <TopoDS.hxx>
+#include <TopoDS_Vertex.hxx>
 #include <gp_Ax2.hxx>
 #include <BRepAdaptor_Curve.hxx>
+#include <BRep_Tool.hxx>
 
 #include <osg/Geode>
 #include <osg/Geometry>
@@ -96,6 +98,11 @@ osg::Vec3d gu::toOsg(const gp_Pnt &occPointIn)
   out.z() = occPointIn.Z();
   
   return out;
+}
+
+osg::Vec3d gu::toOsg(const TopoDS_Vertex &vertexIn)
+{
+  return gu::toOsg(BRep_Tool::Pnt(vertexIn));
 }
 
 osg::Matrixd gu::toOsg(const gp_Ax2 &systemIn)

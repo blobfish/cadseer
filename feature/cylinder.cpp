@@ -76,6 +76,7 @@ Cylinder::Cylinder() : CSysBase(), radius(ParameterNames::Radius, 5.0), height(P
     icon = QIcon(":/resources/images/constructionCylinder.svg");
   
   name = QObject::tr("Cylinder");
+  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   initializeMaps();
   

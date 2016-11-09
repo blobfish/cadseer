@@ -495,6 +495,7 @@ Message EventHandler::containerToMessage(const Container &containerIn)
   slc::Message out;
   out.type = containerIn.selectionType;
   out.featureId = containerIn.featureId;
+  out.featureType = containerIn.featureType;
   out.shapeId = containerIn.shapeId;
   out.pointLocation = containerIn.pointLocation;
   
@@ -515,6 +516,7 @@ Container EventHandler::messageToContainer(const Message &messageIn)
   slc::Container container;
   container.selectionType = messageIn.type;
   container.featureId = messageIn.featureId;
+  container.featureType = messageIn.featureType;
   container.shapeId = messageIn.shapeId;
   container.pointLocation = messageIn.pointLocation;
   

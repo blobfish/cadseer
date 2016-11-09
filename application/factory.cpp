@@ -178,6 +178,7 @@ void Factory::selectionAdditionDispatched(const msg::Message &messageIn)
   slc::Container aContainer;
   aContainer.selectionType = sMessage.type;
   aContainer.featureId = sMessage.featureId;
+  aContainer.featureType = sMessage.featureType;
   aContainer.shapeId = sMessage.shapeId;
   aContainer.pointLocation = sMessage.pointLocation;
   containers.push_back(aContainer);
@@ -193,6 +194,7 @@ void Factory::selectionSubtractionDispatched(const msg::Message &messageIn)
   slc::Container aContainer;
   aContainer.selectionType = sMessage.type;
   aContainer.featureId = sMessage.featureId;
+  aContainer.featureType = sMessage.featureType;
   aContainer.shapeId = sMessage.shapeId;
   aContainer.pointLocation = sMessage.pointLocation;
   
@@ -616,26 +618,21 @@ void Factory::newDatumPlaneDispatched(const msg::Message&)
   if (containers.empty())
     return;
   
+  std::vector<std::shared_ptr<ftr::DatumPlaneGenre> > solvers = ftr::DatumPlane::solversFromSelection(containers);
+  if (solvers.empty()) //temp. really we should build the feature and go into edit mode.
+    return;
+  
   std::shared_ptr<ftr::DatumPlane> dPlane(new ftr::DatumPlane());
   project->addFeature(dPlane);
   
-  if (containers.size() == 1)
-  {
-    std::shared_ptr<ftr::DatumPlanePlanarOffset> offset(new ftr::DatumPlanePlanarOffset());
-    offset->offset->setValue(2.0);
-    offset->faceId = containers.at(0).shapeId;
-    dPlane->setSolver(offset);
-    project->connect(containers.at(0).featureId, dPlane->getId(), ftr::InputTypes::datumPlanarOffset);
-  }
-  else if (containers.size() == 2 && (containers.front().featureId == containers.back().featureId))
-  {
-    std::shared_ptr<ftr::DatumPlanePlanarCenter> center(new ftr::DatumPlanePlanarCenter());
-    center->faceId1 = containers.front().shapeId;
-    center->faceId2 = containers.back().shapeId;
-    dPlane->setSolver(center);
-    project->connect(containers.front().featureId, dPlane->getId(), ftr::InputTypes::datumPlanarCenterBoth);
-  }
+  //just use the first one.
+  std::shared_ptr<ftr::DatumPlaneGenre> solver = solvers.front();
+  dPlane->setSolver(solver);
+  ftr::DatumPlaneConnections connections = solver->setUpFromSelection(containers);
   
+  for (const auto &connection : connections)
+    project->connect(connection.parentId, dPlane->getId(), connection.inputType);
+
   msg::Message clearSelectionMessage;
   clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
   observer->messageOutSignal(clearSelectionMessage);

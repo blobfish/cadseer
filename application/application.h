@@ -40,6 +40,7 @@ public:
     explicit Application(int &argc, char **argv);
     ~Application();
     bool x11EventFilter(XEvent *event);
+    bool notify(QObject * receiver, QEvent * e) override;
     void initializeSpaceball();
     prj::Project* getProject(){return project.get();}
     MainWindow* getMainWindow(){return mainWindow.get();}

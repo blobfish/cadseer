@@ -143,6 +143,20 @@ bool Application::x11EventFilter(XEvent *event)
     return false;
 }
 
+bool Application::notify(QObject* receiver, QEvent* e)
+{
+  try
+  {
+    return QApplication::notify(receiver, e);
+  }
+  catch(...)
+  {
+    std::cerr << "unhandled exception in Application::notify" << std::endl;
+  }
+  return false;
+}
+
+
 void Application::initializeSpaceball()
 {
     if (!mainWindow)

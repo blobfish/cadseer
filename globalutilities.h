@@ -32,6 +32,7 @@ class gp_Vec;
 class gp_Pnt;
 class gp_Ax2;
 class gp_Trsf;
+class TopoDS_Vertex;
 
 namespace osg
 {
@@ -47,9 +48,11 @@ int getShapeHash(const TopoDS_Shape &shape);
 boost::uuids::uuid getId(const osg::Geometry *geometry);
 boost::uuids::uuid getId(const osg::Node *node);
 static const std::string idAttributeTitle = "id";
+static const std::string featureTypeAttributeTitle = "featureType";
 std::string getShapeTypeString(const TopoDS_Shape&);
 osg::Vec3d toOsg(const gp_Vec &occVecIn);
 osg::Vec3d toOsg(const gp_Pnt &occPointIn);
+osg::Vec3d toOsg(const TopoDS_Vertex &vertexIn);
 osg::Matrixd toOsg(const gp_Ax2 &systemIn);
 osg::Matrixd toOsg(const gp_Trsf&);
 gp_Ax2 toOcc(const osg::Matrixd &m);

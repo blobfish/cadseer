@@ -35,7 +35,10 @@ namespace ftr
     datumPlanarOffset,
     datumPlanarCenter1,
     datumPlanarCenter2,
-    datumPlanarCenterBoth
+    datumPlanarCenterBoth,
+    datumPlanarParallelThroughEdgeFace,
+    datumPlanarParallelThroughEdgeEdge,
+    datumPlanarParallelThroughEdgeBoth
   };
     
   inline const static std::string& getInputTypeString(InputTypes typeIn)
@@ -48,7 +51,10 @@ namespace ftr
       "Datum Planar Offset",
       "Datum Planar Center1",
       "Datum Planar Center2",
-      "Datum Planar Center Both"
+      "Datum Planar Center Both",
+      "Datum Planar Parallel Through Edge1",
+      "Datum Planar Parallel Through Edge2",
+      "Datum Planar Parallel Through EdgeBoth"
     };
     
     std::size_t casted = static_cast<std::size_t>(typeIn);
