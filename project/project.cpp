@@ -35,6 +35,7 @@
 #include <application/application.h>
 #include <globalutilities.h>
 #include <feature/base.h>
+#include <feature/seershape.h>
 #include <feature/inert.h>
 #include <project/message.h>
 #include <message/message.h>
@@ -497,6 +498,9 @@ void Project::setupDispatcher()
   
   mask = msg::Request | msg::GitMessage;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::gitMessageRequestDispatched, this, _1)));
+  
+  mask = msg::Request | msg::CheckShapeIds;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::checkShapeIdsDispatched, this, _1)));
 }
 
 void Project::setCurrentLeafDispatched(const msg::Message &messageIn)
@@ -577,6 +581,53 @@ void Project::gitMessageRequestDispatched(const msg::Message &messageIn)
 {
   Message pMessage = boost::get<prj::Message>(messageIn.payload);
   gitManager->appendGitMessage(pMessage.gitMessage);
+}
+
+void Project::checkShapeIdsDispatched(const msg::Message&)
+{
+  /* initially shapeIds were being copied from parent feature to child feature.
+   * decided to make each shape unique to feature and use evolution container
+   * to map shapes between related features. This command visits graph and checks 
+   * for duplicated ids, which we shouldn't have anymore.
+   */
+  
+  using boost::uuids::uuid;
+  
+  typedef std::vector<uuid> FeaturesIds;
+  typedef std::map<uuid, FeaturesIds> IdMap;
+  IdMap idMap;
+  
+  BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
+  {
+    const ftr::Base *feature = projectGraph[currentVertex].feature.get();
+    for (const auto &id : feature->getSeerShape().getAllShapeIds())
+    {
+      IdMap::iterator it = idMap.find(id);
+      if (it == idMap.end())
+      {
+	std::vector<uuid> freshFeatureIds;
+	freshFeatureIds.push_back(feature->getId());
+	idMap.insert(std::make_pair(id, freshFeatureIds));
+      }
+      else
+      {
+	it->second.push_back(id);
+      }
+    }
+  }
+  
+  std::cout << std::endl << std::endl << "Check shape ids:";
+  
+  for (const auto &entry : idMap)
+  {
+    if (entry.second.size() < 2)
+      continue;
+    std::cout << std::endl << "shape id of: " << boost::to_string(entry.first) << "    is in feature id of:";
+    for (const auto &it : entry.second)
+    {
+      std::cout << " " << boost::to_string(it);
+    }
+  }
 }
 
 void Project::indexVerticesEdges()

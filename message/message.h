@@ -94,6 +94,8 @@ namespace msg
   static const Mask DraggerToFeature(Mask().	set(55));//!< command
   static const Mask FeatureToDragger(Mask().	set(56));//!< command
   static const Mask DatumPlane(Mask().		set(57));//!< command
+  static const Mask CheckShapeIds(Mask().	set(58));//!< command
+  static const Mask DebugDump(Mask().		set(59));//!< command
   
   typedef boost::variant<prj::Message, slc::Message, app::Message, vwr::Message> Payload;
   

@@ -74,7 +74,11 @@ void BooleanIdMapper::go()
   //and the ids, that can be, have been set by the 'general'
   //shape id mapper function.
   
-  goSingleSplits();
+  //when face changes from a single split to an acutally split(2 or more faces)
+  //the face id changes. If it is actually a split face, it should have an
+  //intersection edge. NOT running goSingleSplits and letting goIntersectionEdges
+  //map the 'single splits', has better update success.
+//   goSingleSplits();
   goIntersectionEdges();
   goSplitFaces();
   
@@ -151,6 +155,7 @@ void BooleanIdMapper::goIntersectionEdges()
     {
       tempIntersection.resultEdge = idGenerator();
       iMapWrapper.intersectionEdges.insert(tempIntersection);
+      seerShapeOut->insertEvolve(boost::uuids::nil_generator()(), tempIntersection.resultEdge);
     }
     seerShapeOut->updateShapeIdRecord(shape, tempIntersection.resultEdge);
     iEdgeCache.insert(tempIntersection.resultEdge);
@@ -245,8 +250,6 @@ void BooleanIdMapper::goSplitFaces()
     }
     assert(!originId.is_nil()); //no origin id in input containers.
       
-    //TODO we will need the origin id and the split id into evolution container.
-    
     //find the edges of current shape that are intersection edges.
     std::set<uuid> faceIEdges;
     BOPCol_IndexedMapOfShape edges;
@@ -311,11 +314,13 @@ void BooleanIdMapper::goSplitFaces()
       continue;
     iMapWrapper.add(sFace.first);
     seerShapeOut->updateShapeIdRecord(sFace.second, sFace.first.resultFace);
+    seerShapeOut->insertEvolve(sFace.first.sourceFace, sFace.first.resultFace);
     
     assert(!seerShapeOut->hasShapeIdRecord(sFace.first.resultWire));
     TopoDS_Shape outerWire = BRepTools::OuterWire(TopoDS::Face(sFace.second));
     assert(!outerWire.IsNull());
     assert(seerShapeOut->hasShapeIdRecord(outerWire));
     seerShapeOut->updateShapeIdRecord(outerWire, sFace.first.resultWire);
+    //no outer wire support yet to fill in evolve container.
   }
 }

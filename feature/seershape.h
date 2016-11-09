@@ -57,16 +57,12 @@ static const std::vector<std::string> shapeStrings
      "Shape",
  });
 
-//TODO move into ftr namespace when maps.h is gone.
-namespace ftr2
+namespace ftr
 {
   //maping a set of ids to one id. this is for deriving an id from multiple parent shapes.
   typedef std::set<boost::uuids::uuid> IdSet;
   typedef std::map<IdSet, boost::uuids::uuid> DerivedContainer;
-}
-
-namespace ftr
-{
+  
   typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS> Graph;
   typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
   typedef boost::graph_traits<Graph>::edge_descriptor Edge;
@@ -358,6 +354,7 @@ namespace ftr
     /*! a lot of occ routines when reporting generated, modified etc.., only deal with faces.
     * so here when an edge has no id but both faces do, we try to derived what the id of the old
     * edge is and assign it to the new edge. Have to be careful when 2 faces share more than 1 edge.
+    * These 2 functions are not used anywhere.
     */
     void faceEdgeMatch(const SeerShape &);
     
@@ -369,13 +366,10 @@ namespace ftr
     //! debug related functions
     void dumpGraph(const std::string &) const;
     void dumpReverseGraph(const std::string &) const;
-    void dumpShapeIdContainer(const std::string &) const;
-    void dumpEvolveContainer(const std::string &) const;
-    void dumpFeatureTagContainer(const std::string &) const;
+    void dumpShapeIdContainer(std::ostream &) const;
+    void dumpEvolveContainer(std::ostream &) const;
+    void dumpFeatureTagContainer(std::ostream &) const;
     //@}
-    
-    //! copy everything except featureTag and derived Containers. Starting point for updates.
-    void partialAssign(const SeerShape &other);
     
     prj::srl::SeerShape serialOut(); //!<convert this into serializable object.
     void serialIn(const prj::srl::SeerShape &); //intialize this from serial object.
@@ -385,7 +379,7 @@ namespace ftr
     ShapeIdContainer shapeIdContainer;
     EvolveContainer evolveContainer;
     FeatureTagContainer featureTagContainer;
-    ftr2::DerivedContainer derivedContainer;
+    ftr::DerivedContainer derivedContainer;
     Graph graph;
     Graph rGraph; //reversed graph.
     

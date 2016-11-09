@@ -63,6 +63,7 @@ namespace app
     void removeDispatched(const msg::Message&);
     void openProjectDispatched(const msg::Message&);
     void closeProjectDispatched(const msg::Message&);
+    void debugDumpDispatched(const msg::Message&);
   };
 }
 

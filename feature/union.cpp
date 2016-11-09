@@ -81,9 +81,6 @@ void Union::updateModel(const UpdateMap &mapIn)
       toolOCCTShapes.push_back(toolSeerShape.getRootOCCTShape());
     }
     
-    //set default on failure to parent target.
-    seerShape->partialAssign(targetSeerShape);
-    
     BooleanOperation fuser(targetSeerShape.getRootOCCTShape(), toolOCCTShapes, BOPAlgo_FUSE);
     fuser.Build();
     if (!fuser.IsDone())

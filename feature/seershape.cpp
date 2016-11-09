@@ -107,7 +107,6 @@ void SeerShape::setOCCTShape(const TopoDS_Shape& shapeIn)
 {
   rootShapeId = nil_generator()();
   shapeIdContainer.get<ShapeIdRecord::ById>().clear();
-  evolveContainer.get<EvolveRecord::ByInId>().clear();
   graph = Graph();
   rGraph = graph;
   
@@ -239,6 +238,7 @@ const ShapeIdRecord& SeerShape::findShapeIdRecord(const TopoDS_Shape& shapeIn) c
   return *it;
 }
 
+//! updates the shape by matching id.
 void SeerShape::updateShapeIdRecord(const uuid& idIn, const TopoDS_Shape& shapeIn)
 {
   typedef ShapeIdContainer::index<ShapeIdRecord::ById>::type List;
@@ -250,6 +250,7 @@ void SeerShape::updateShapeIdRecord(const uuid& idIn, const TopoDS_Shape& shapeI
   list.replace(it, record);
 }
 
+//! updates the vertex by matching id.
 void SeerShape::updateShapeIdRecord(const uuid& idIn, const Vertex& vertexIn)
 {
   typedef ShapeIdContainer::index<ShapeIdRecord::ById>::type List;
@@ -261,6 +262,7 @@ void SeerShape::updateShapeIdRecord(const uuid& idIn, const Vertex& vertexIn)
   list.replace(it, record);
 }
 
+//! updates the id by matching shape.
 void SeerShape::updateShapeIdRecord(const TopoDS_Shape& shapeIn, const uuid& idIn)
 {
   typedef ShapeIdContainer::index<ShapeIdRecord::ByShape>::type List;
@@ -698,11 +700,21 @@ void SeerShape::shapeMatch(const SeerShape &source)
   typedef ShapeIdContainer::index<ShapeIdRecord::ByShape>::type List;
   const List &list = source.shapeIdContainer.get<ShapeIdRecord::ByShape>();
   
+  //every feature shape has unique id even if it is the same topoDS_shape.
+  //all tracking of shapes between feature will have to use evolve container.
   for (const auto &record : list)
   {
     if (!hasShapeIdRecord(record.shape))
       continue;
-    updateShapeIdRecord(record.shape, record.id);
+    uuid freshId = nil_generator()();
+    if (hasEvolveRecordIn(record.id))
+      freshId = evolve(record.id).front(); //multiple returns?
+    else
+    {
+      freshId = idGenerator();
+      insertEvolve(record.id, freshId);
+    }
+    updateShapeIdRecord(record.shape, freshId);
   }
 }
 
@@ -753,36 +765,54 @@ void SeerShape::uniqueTypeMatch(const SeerShape &source)
     )
       continue;
       
-    updateShapeIdRecord(targetRecord.shape, sourceRecord.id);
-    if (currentShapeType == TopAbs_COMPOUND)
-      setRootShapeId(sourceRecord.id);
+    uuid freshId = nil_generator()();
+    if (hasEvolveRecordIn(sourceRecord.id))
+      freshId = evolve(sourceRecord.id).front(); //multiple returns?
+    else
+    {
+      freshId = idGenerator();
+      insertEvolve(sourceRecord.id, freshId);
+    }
+    updateShapeIdRecord(targetRecord.shape, freshId);
+    if (currentShapeType == TopAbs_COMPOUND) //no compound of compounds? I think not.
+      setRootShapeId(freshId);
   }
 }
 
 void SeerShape::outerWireMatch(const SeerShape &source)
 {
-  typedef ShapeIdContainer::index<ShapeIdRecord::ById>::type List;
-  const List &targetList = shapeIdContainer.get<ShapeIdRecord::ById>();
-  const List &sourceList = source.shapeIdContainer.get<ShapeIdRecord::ById>();
-  for (const auto &targetFaceRecord : targetList)
+  for (const auto &id : getAllShapeIds())
   {
-    if (targetFaceRecord.shape.ShapeType() != TopAbs_FACE)
+    const ShapeIdRecord &faceRecord = findShapeIdRecord(id);
+    if (faceRecord.shape.ShapeType() != TopAbs_FACE)
       continue;
-    const TopoDS_Shape &targetOuterWire = BRepTools::OuterWire(TopoDS::Face(targetFaceRecord.shape));
-    assert(hasShapeIdRecord(targetOuterWire)); //shouldn't have a result container with a face and no outer wire.
-    if (!findShapeIdRecord(targetOuterWire).id.is_nil())
+    const TopoDS_Shape &thisOuterWire = BRepTools::OuterWire(TopoDS::Face(faceRecord.shape));
+    assert(hasShapeIdRecord(thisOuterWire)); //shouldn't have a result container with a face and no outer wire.
+    const ShapeIdRecord &wireRecord = findShapeIdRecord(thisOuterWire);
+    if (!wireRecord.id.is_nil())
       continue; //only set id for nil wires.
       
-    //now find entries in source.
-    List::const_iterator faceIt = sourceList.find(targetFaceRecord.id);
-    if (faceIt == sourceList.end())
+    if (!hasEvolveRecordOut(faceRecord.id))
       continue;
-    const TopoDS_Shape &sourceOuterWire = BRepTools::OuterWire(TopoDS::Face(faceIt->shape));
+    uuid sourceFaceId = devolve(faceRecord.id).front();
+      
+    //now find entries in source.
+    if (!source.hasShapeIdRecord(sourceFaceId))
+      continue;
+    const ShapeIdRecord &sourceFaceRecord = source.findShapeIdRecord(sourceFaceId);
+    const TopoDS_Shape &sourceOuterWire = BRepTools::OuterWire(TopoDS::Face(sourceFaceRecord.shape));
     assert(!sourceOuterWire.IsNull());
-    auto sourceId = source.findShapeIdRecord(sourceOuterWire).id;
+    auto sourceWireId = source.findShapeIdRecord(sourceOuterWire).id;
     
-    //save for later
-    updateShapeIdRecord(targetOuterWire, sourceId);
+    uuid freshId;
+    if (hasEvolveRecordIn(sourceWireId))
+      freshId = evolve(sourceWireId).front(); //multiple returns?
+    else
+    {
+      freshId = idGenerator();
+      insertEvolve(sourceWireId, freshId);
+    }
+    updateShapeIdRecord(thisOuterWire, freshId);
   }
 }
 
@@ -810,7 +840,16 @@ void SeerShape::modifiedMatch
       //this situation. In short, no assert on shape not present.
       if(!hasShapeIdRecord(it.Value()))
 	continue;
-      updateShapeIdRecord(it.Value(), sourceRecord.id);
+      
+      uuid freshId = nil_generator()();
+      if (hasEvolveRecordIn(sourceRecord.id))
+	freshId = evolve(sourceRecord.id).front(); //multiple returns?
+      else
+      {
+	freshId = idGenerator();
+	insertEvolve(sourceRecord.id, freshId);
+      }
+      updateShapeIdRecord(it.Value(), freshId);
     }
   }
 }
@@ -842,7 +881,7 @@ void SeerShape::derivedMatch()
     for (const auto &shape : nilShapes)
     {
       bool bail = false;
-      ftr2::IdSet set;
+      ftr::IdSet set;
       const TopTools_ListOfShape &parents = ancestors.FindFromKey(shape);
       TopTools_ListIteratorOfListOfShape it;
       for (it.Initialize(parents); it.More(); it.Next())
@@ -859,18 +898,20 @@ void SeerShape::derivedMatch()
       }
       if (bail)
 	continue;
-      ftr2::DerivedContainer::iterator derivedIt = derivedContainer.find(set);
+      uuid id = nil_generator()();
+      ftr::DerivedContainer::iterator derivedIt = derivedContainer.find(set);
       if (derivedIt == derivedContainer.end())
       {
-	auto id = idGenerator();
-	updateShapeIdRecord(shape, id);
-	ftr2::DerivedContainer::value_type newEntry(set, id);
+	id = idGenerator();
+	ftr::DerivedContainer::value_type newEntry(set, id);
 	derivedContainer.insert(newEntry);
+	insertEvolve(nil_generator()(), id);
       }
       else
       {
-	updateShapeIdRecord(shape, derivedIt->second);
+	id = derivedIt->second;
       }
+      updateShapeIdRecord(shape, id);
     }
   };
   
@@ -927,7 +968,11 @@ void SeerShape::ensureNoNils()
     nilShapes.push_back(rangeItPair.first->shape);
   
   for (const auto &shape : nilShapes)
-    updateShapeIdRecord(shape, idGenerator());
+  {
+    auto freshId = idGenerator();
+    updateShapeIdRecord(shape, freshId);
+    insertEvolve(nil_generator()(), freshId);
+  }
 }
 
 void SeerShape::ensureNoDuplicates()
@@ -944,7 +989,11 @@ void SeerShape::ensureNoDuplicates()
       processed.insert(record.id);
   }
   for (const auto &shape : shapes)
-    updateShapeIdRecord(shape, idGenerator());
+  {
+    auto freshId = idGenerator();
+    updateShapeIdRecord(shape, freshId);
+    insertEvolve(nil_generator()(), freshId);
+  }
 }
 
 void SeerShape::faceEdgeMatch(const SeerShape &source)
@@ -998,7 +1047,17 @@ void SeerShape::faceEdgeMatch(const SeerShape &source)
     );
 
     if (commonEdges.size() == 1)
-      updateShapeIdRecord(nilEdge, commonEdges.front());
+    {
+      uuid freshId = nil_generator()();
+      if (hasEvolveRecordIn(commonEdges.front()))
+	freshId = evolve(commonEdges.front()).front(); //multiple returns?
+      else
+      {
+	freshId = idGenerator();
+	insertEvolve(commonEdges.front(), freshId);
+      }
+      updateShapeIdRecord(nilEdge, freshId);
+    }
   }
 }
 
@@ -1062,7 +1121,17 @@ void SeerShape::edgeVertexMatch(const SeerShape &source)
     }
     
     if (intersectedVertices.size() == 1)
-      updateShapeIdRecord(nilVertex, intersectedVertices.front());
+    {
+      uuid freshId = nil_generator()();
+      if (hasEvolveRecordIn(intersectedVertices.front()))
+	freshId = evolve(intersectedVertices.front()).front(); //multiple returns?
+      else
+      {
+	freshId = idGenerator();
+	insertEvolve(intersectedVertices.front(), freshId);
+      }
+      updateShapeIdRecord(nilVertex, freshId);
+    }
   }
 }
 
@@ -1078,31 +1147,19 @@ void SeerShape::dumpReverseGraph(const std::string &filePathIn) const
   boost::write_graphviz(file, rGraph, Node_writer<Graph>(rGraph, *this), boost::default_writer());
 }
 
-void SeerShape::dumpShapeIdContainer(const std::string &filePathIn) const
+void SeerShape::dumpShapeIdContainer(std::ostream &streamIn) const
 {
-  std::ofstream file(filePathIn.c_str());
-  file << shapeIdContainer << std::endl;
+  streamIn << shapeIdContainer << std::endl;
 }
 
-void SeerShape::dumpEvolveContainer(const std::string &filePathIn) const
+void SeerShape::dumpEvolveContainer(std::ostream &streamIn) const
 {
-  std::ofstream file(filePathIn.c_str());
-  file << evolveContainer << std::endl;
+  streamIn << evolveContainer << std::endl;
 }
 
-void SeerShape::dumpFeatureTagContainer(const std::string &filePathIn) const
+void SeerShape::dumpFeatureTagContainer(std::ostream &streamIn) const
 {
-  std::ofstream file(filePathIn.c_str());
-  file << featureTagContainer << std::endl;
-}
-
-void SeerShape::partialAssign(const SeerShape& other)
-{
-  rootShapeId = other.rootShapeId;
-  shapeIdContainer = other.shapeIdContainer;
-  evolveContainer = other.evolveContainer;
-  graph = other.graph;
-  rGraph = other.rGraph;
+  streamIn << featureTagContainer << std::endl;
 }
 
 prj::srl::SeerShape SeerShape::serialOut()
@@ -1156,10 +1213,10 @@ prj::srl::SeerShape SeerShape::serialOut()
   }
   
   prj::srl::DerivedContainer dContainerOut;
-  for (ftr2::DerivedContainer::const_iterator dIt = derivedContainer.begin(); dIt != derivedContainer.end(); ++dIt)
+  for (ftr::DerivedContainer::const_iterator dIt = derivedContainer.begin(); dIt != derivedContainer.end(); ++dIt)
   {
     prj::srl::IdSet setIn;
-    for (ftr2::IdSet::const_iterator sIt = dIt->first.begin(); sIt != dIt->first.end(); ++sIt)
+    for (ftr::IdSet::const_iterator sIt = dIt->first.begin(); sIt != dIt->first.end(); ++sIt)
       setIn.id().push_back(to_string(*sIt));
     prj::srl::DerivedRecord::IdType mId(to_string(dIt->second));
     prj::srl::DerivedRecord record
@@ -1218,7 +1275,7 @@ void SeerShape::serialIn(const prj::srl::SeerShape &sSeerShapeIn)
   derivedContainer.clear();
   for (const prj::srl::DerivedRecord &sDRecord : sSeerShapeIn.derivedContainer().derivedRecord())
   {
-    ftr2::IdSet setIn;
+    ftr::IdSet setIn;
     for (const auto &idSet : sDRecord.idSet().id())
       setIn.insert(sg(idSet));
     boost::uuids::uuid mId = sg(sDRecord.id());

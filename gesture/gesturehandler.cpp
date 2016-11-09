@@ -227,6 +227,8 @@ void GestureHandler::spraySubNodes(osg::Vec3 cursorLocation)
 
     int childCount = currentNode->getNumChildren();
     assert(childCount > 2);//line, icon and sub items.
+    if (childCount < 3)
+      return;
     std::vector<osg::Vec3> locations = buildNodeLocations(direction, childCount - 2);
     for (unsigned int index = 0; index < locations.size(); ++index)
     {
@@ -556,6 +558,25 @@ void GestureHandler::constructMenu()
     systemToFeature->setUserValue(attributeMask, (msg::Request | msg::SystemToFeature).to_string());
     systemToFeature->setUserValue(attributeStatus, QObject::tr("Coordinate System To Feature Command").toStdString());
     systemBase->insertChild(systemBase->getNumChildren() - 2, systemToFeature);
+    
+    //debug base
+    osg::MatrixTransform *debugBase;
+    debugBase = gsn::buildMenuNode(":/resources/images/debugBase.svg");
+    debugBase->setMatrix(dummy);
+    debugBase->setUserValue(attributeStatus, QObject::tr("Debug Menu").toStdString());
+    startNode->insertChild(startNode->getNumChildren() - 2, debugBase);
+    
+    osg::MatrixTransform *checkShapeIds = gsn::buildCommandNode(":/resources/images/debugCheckShapeIds.svg");
+    checkShapeIds->setMatrix(dummy);
+    checkShapeIds->setUserValue(attributeMask, (msg::Request | msg::CheckShapeIds).to_string());
+    checkShapeIds->setUserValue(attributeStatus, QObject::tr("Check Shaped Ids").toStdString());
+    debugBase->insertChild(debugBase->getNumChildren() - 2, checkShapeIds);
+    
+    osg::MatrixTransform *debugDump = gsn::buildCommandNode(":/resources/images/debugDump.svg");
+    debugDump->setMatrix(dummy);
+    debugDump->setUserValue(attributeMask, (msg::Request | msg::DebugDump).to_string());
+    debugDump->setUserValue(attributeStatus, QObject::tr("Debug Dump").toStdString());
+    debugBase->insertChild(debugBase->getNumChildren() - 2, debugDump);
 }
 
 std::vector<osg::Vec3> GestureHandler::buildNodeLocations(osg::Vec3 direction, int nodeCount)

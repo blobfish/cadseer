@@ -128,6 +128,9 @@ void Factory::setupDispatcher()
   
   mask = msg::Request | msg::Remove;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::removeDispatched, this, _1)));
+  
+  mask = msg::Request | msg::DebugDump;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::debugDumpDispatched, this, _1)));
 }
 
 void Factory::triggerUpdate()
@@ -746,3 +749,38 @@ void Factory::removeDispatched(const msg::Message&)
   
   triggerUpdate();
 }
+
+void Factory::debugDumpDispatched(const msg::Message&)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  assert(project);
+  if (containers.empty())
+    return;
+  
+  std::cout << std::endl << std::endl << "begin debug dump:" << std::endl;
+  
+  for (const auto &container : containers)
+  {
+    if (container.selectionType != slc::Type::Object)
+      continue;
+    ftr::Base *feature = project->findFeature(container.featureId);
+    assert(feature);
+    if (!feature->hasSeerShape())
+      continue;
+    const ftr::SeerShape &seerShape = feature->getSeerShape();
+    std::cout << std::endl;
+    std::cout << "feature name: " << feature->getName().toStdString() << "    feature id: " << boost::to_string(feature->getId()) << std::endl;
+    std::cout << "shape id container:" << std::endl; seerShape.dumpShapeIdContainer(std::cout); std::cout << std::endl;
+    std::cout << "shape evolve container:" << std::endl; seerShape.dumpEvolveContainer(std::cout); std::cout << std::endl;
+    std::cout << "feature tag container:" << std::endl; seerShape.dumpFeatureTagContainer(std::cout); std::cout << std::endl;
+  }
+  
+  
+  msg::Message clearSelectionMessage;
+  clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
+  observer->messageOutSignal(clearSelectionMessage);
+}
+

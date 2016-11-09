@@ -98,7 +98,8 @@ public:
   osg::Switch* getMainSwitch() const {return mainSwitch.get();}
   osg::Switch* getOverlaySwitch() const {return overlaySwitch.get();}
   osg::MatrixTransform* getMainTransform() const {return mainTransform.get();}
-  const SeerShape& getSeerShape() const {return *seerShape;}
+  bool hasSeerShape() const {return static_cast<bool>(seerShape);}
+  const SeerShape& getSeerShape() const {assert(seerShape); return *seerShape;}
   
   virtual void serialWrite(const QDir &); //!< override in leaf classes only.
   std::string getFileName() const; //!< used by git.

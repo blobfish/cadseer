@@ -74,9 +74,6 @@ void Intersect::updateModel(const UpdateMap &mapIn)
       toolOCCTShapes.push_back(toolSeerShape.getRootOCCTShape());
     }
     
-    //set default on failure to parent target.
-    seerShape->partialAssign(targetSeerShape);
-    
     BooleanOperation intersector(targetSeerShape.getRootOCCTShape(), toolOCCTShapes, BOPAlgo_COMMON);
     intersector.Build();
     if (!intersector.IsDone())

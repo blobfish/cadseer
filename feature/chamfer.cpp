@@ -130,10 +130,6 @@ void Chamfer::updateModel(const UpdateMap &mapIn)
     
     const SeerShape &targetSeerShape = mapIn.equal_range(InputTypes::target).first->second->getSeerShape();
     
-    //starting from the stand point that this feature has failed.
-    //set the shape and container to the parent target.
-    seerShape->partialAssign(targetSeerShape);
-  
     BRepFilletAPI_MakeChamfer chamferMaker(targetSeerShape.getRootOCCTShape());
     for (const auto &chamfer : symChamfers)
     {
@@ -217,14 +213,16 @@ void Chamfer::generatedMatch(BRepFilletAPI_MakeChamfer &chamferMakerIn, const Se
     std::map<uuid, uuid>::iterator mapItFace;
     bool dummy;
     std::tie(mapItFace, dummy) = shapeMap.insert(std::make_pair(cId, idGenerator()));
-    
-    //now we have the id for the face, just update the result map.
+    if (!seerShape->hasEvolveRecordIn(mapItFace->first))
+      seerShape->insertEvolve(mapItFace->first, mapItFace->second);
     seerShape->updateShapeIdRecord(chamferFace, mapItFace->second);
     
     //now look for outerwire for newly generated face.
     //we use the generated face id to map to outer wire.
     std::map<uuid, uuid>::iterator mapItWire;
     std::tie(mapItWire, dummy) = shapeMap.insert(std::make_pair(mapItFace->second, idGenerator()));
+    if (!seerShape->hasEvolveRecordIn(mapItWire->first))
+      seerShape->insertEvolve(mapItWire->first, mapItWire->second);
     
     //now get the wire and update the result to id.
     const TopoDS_Shape &chamferedFaceWire = BRepTools::OuterWire(TopoDS::Face(chamferFace));

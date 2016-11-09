@@ -86,11 +86,6 @@ void Draft::updateModel(const UpdateMap& mapIn)
     
    const SeerShape &targetSeerShape = mapIn.equal_range(InputTypes::target).first->second->getSeerShape();
     
-    //starting from the stand point that this feature has failed.
-    //set the shape and container to the parent target.
-    seerShape->partialAssign(targetSeerShape);
-    
-    
     //neutral plane might be outside of target, if so we should have an input with a type of 'tool'
 //     const TopoDS_Shape &tool; //TODO
     
@@ -170,7 +165,6 @@ gp_Pln Draft::derivePlaneFromShape(const TopoDS_Shape &shapeIn)
   return sAdapt.Plane();
 }
 
-
 void Draft::generatedMatch(BRepOffsetAPI_DraftAngle &dMaker, const SeerShape &targetShapeIn)
 {
   using boost::uuids::uuid;
@@ -183,7 +177,16 @@ void Draft::generatedMatch(BRepOffsetAPI_DraftAngle &dMaker, const SeerShape &ta
     if (shapes.Extent() < 1)
       continue;
     assert(shapes.Extent() == 1); //want to know about a situation where we have more than 1.
-    seerShape->updateShapeIdRecord(shapes.First(), record.id);
+    uuid freshId;
+    if (seerShape->hasEvolveRecordIn(cId))
+      freshId = seerShape->evolve(cId).front();
+    else
+    {
+      freshId = idGenerator();
+      seerShape->insertEvolve(cId, freshId);
+    }
+    
+    seerShape->updateShapeIdRecord(shapes.First(), freshId);
   }
 }
 

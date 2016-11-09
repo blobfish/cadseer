@@ -75,9 +75,6 @@ void Subtract::updateModel(const UpdateMap &mapIn)
       toolOCCTShapes.push_back(toolSeerShape.getRootOCCTShape());
     }
     
-    //set default on failure to parent target.
-    seerShape->partialAssign(targetSeerShape);
-    
     BooleanOperation subtracter(targetSeerShape.getRootOCCTShape(), toolOCCTShapes, BOPAlgo_CUT);
     subtracter.Build();
     if (!subtracter.IsDone())
