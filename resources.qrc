@@ -67,6 +67,9 @@
     <file>resources/images/systemBase.svg</file>
     <file>resources/images/systemReset.svg</file>
     <file>resources/images/systemToggle.svg</file>
+    <file>resources/images/debugBase.svg</file>
+    <file>resources/images/debugCheckShapeIds.svg</file>
+    <file>resources/images/debugDump.svg</file>
     <file>resources/images/featureToSystem.svg</file>
     <file>resources/images/systemToFeature.svg</file>
     <file>resources/images/editDraggerToFeature.svg</file>
