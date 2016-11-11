@@ -59,6 +59,7 @@ namespace prg
   typedef boost::graph_traits<Graph>::out_edge_iterator OutEdgeIterator;
   typedef boost::graph_traits<Graph>::adjacency_iterator VertexAdjacencyIterator;
   typedef boost::reverse_graph<Graph, Graph&> GraphReversed;
+  typedef boost::graph_traits<GraphReversed>::vertex_descriptor VertexReversed;
   typedef std::vector<Vertex> Path;
   
   template <class GraphEW>

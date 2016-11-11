@@ -61,6 +61,9 @@ public:
     
     void stateChangedSlot(const boost::uuids::uuid &featureIdIn, std::size_t stateIn); //!< received from each feature.
     
+    void shapeTrackUp(const boost::uuids::uuid &featureIdIn, const boost::uuids::uuid &shapeId);
+    void shapeTrackDown(const boost::uuids::uuid &featureIdIn, const boost::uuids::uuid &shapeId);
+    
 private:
     //! index all the vertices of the graph. needed for algorthims when using listS.
     void indexVerticesEdges();

@@ -131,6 +131,12 @@ void Factory::setupDispatcher()
   
   mask = msg::Request | msg::DebugDump;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::debugDumpDispatched, this, _1)));
+  
+  mask = msg::Request | msg::DebugShapeTrackUp;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::debugShapeTrackUpDispatched, this, _1)));
+  
+  mask = msg::Request | msg::DebugShapeTrackDown;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::debugShapeTrackDownDispatched, this, _1)));
 }
 
 void Factory::triggerUpdate()
@@ -778,6 +784,53 @@ void Factory::debugDumpDispatched(const msg::Message&)
     std::cout << "feature tag container:" << std::endl; seerShape.dumpFeatureTagContainer(std::cout); std::cout << std::endl;
   }
   
+  msg::Message clearSelectionMessage;
+  clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
+  observer->messageOutSignal(clearSelectionMessage);
+}
+
+void Factory::debugShapeTrackUpDispatched(const msg::Message&)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  assert(project);
+  if (containers.empty())
+    return;
+  
+  std::cout << std::endl << "track shape up" << std::endl;
+  
+  for (const auto &container : containers)
+  {
+    if (container.featureId.is_nil() || container.shapeId.is_nil())
+      continue;
+    project->shapeTrackUp(container.featureId, container.shapeId);
+  }
+  
+  msg::Message clearSelectionMessage;
+  clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
+  observer->messageOutSignal(clearSelectionMessage);
+}
+
+void Factory::debugShapeTrackDownDispatched(const msg::Message&)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  assert(project);
+  if (containers.empty())
+    return;
+  
+  std::cout << std::endl << "track shape down" << std::endl;
+  
+  for (const auto &container : containers)
+  {
+    if (container.featureId.is_nil() || container.shapeId.is_nil())
+      continue;
+    project->shapeTrackDown(container.featureId, container.shapeId);
+  }
   
   msg::Message clearSelectionMessage;
   clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;

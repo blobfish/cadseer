@@ -19,9 +19,11 @@
 
 #include <assert.h>
 #include <iostream>
+#include <stack>
 
 #include <boost/graph/topological_sort.hpp>
 #include <boost/graph/filtered_graph.hpp>
+#include <boost/graph/depth_first_search.hpp>
 #include <boost/uuid/string_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
@@ -867,3 +869,218 @@ void Project::open()
   observer->messageOutSignal(viewFitMessage);
 }
 
+/* id of selected items is always the 'out' id of the evolution record. this affects
+ * the processing of the first graph vertex. When tracking down we don't want to process
+ * this vertex but when tracking up we do want to process the first graph vertex
+ */
+template < typename VertexT>
+class ShapeTrackVisitorUp : public boost::default_dfs_visitor
+{
+  public:
+    ShapeTrackVisitorUp(VertexT &startVertexIn, const boost::uuids::uuid &shapeId, std::stack<std::vector<boost::uuids::uuid> >&idsStackIn) :
+      startVertex(startVertexIn), idsStack(idsStackIn)
+    {
+      std::vector<boost::uuids::uuid> temp;
+      temp.push_back(shapeId);
+      idsStack.push(temp);
+    }
+  
+    template <typename GraphT >
+    void discover_vertex(VertexT vertexIn, const GraphT & graph) const
+    {
+      std::cout
+	<< "feature: " << std::setw(15) << std::left << graph[vertexIn].feature->getName().toStdString()
+	<< "    feature id: " << boost::to_string(graph[vertexIn].feature->getId()) << std::endl;
+      if (!graph[vertexIn].feature->hasSeerShape())
+      {
+	std::cout << " BREAK: no seer shape" << std::endl;
+	std::vector<boost::uuids::uuid> junkIds;
+	idsStack.push(junkIds);
+	return;
+      }
+      const ftr::SeerShape &shape = graph[vertexIn].feature->getSeerShape();
+      std::vector<boost::uuids::uuid> freshIds;
+      const std::vector<boost::uuids::uuid> &currentIds = idsStack.top();
+      for (const auto &currentId : currentIds)
+      {
+	std::cout << "    shape id out: " << boost::to_string(currentId);
+	if (!shape.hasEvolveRecordOut(currentId))
+	{
+	  std::cout << "    BREAK: no evolve record out" << std::endl;
+	  continue;
+	}
+	std::cout <<  "    ids in: ";
+	auto ids = shape.devolve(currentId);
+	for (const auto &id : ids)
+	{
+	  std::cout << id << " ";
+	  freshIds.push_back(id);
+	}
+	std::cout << std::endl;
+      }
+      idsStack.push(freshIds);
+    }
+    
+    template <typename GraphT >
+    void finish_vertex(VertexT, const GraphT &) const
+    {
+      idsStack.pop();
+    }
+    
+  private:
+    
+    VertexT &startVertex;
+    std::stack<std::vector<boost::uuids::uuid> >&idsStack;
+};
+
+template < typename VertexT>
+class ShapeTrackVisitorDown : public boost::default_dfs_visitor
+{
+  public:
+    ShapeTrackVisitorDown(VertexT &startVertexIn, const boost::uuids::uuid &shapeId, std::stack<std::vector<boost::uuids::uuid> >&idsStackIn) :
+      startVertex(startVertexIn), idsStack(idsStackIn)
+    {
+      std::vector<boost::uuids::uuid> temp;
+      temp.push_back(shapeId);
+      idsStack.push(temp);
+    }
+  
+    template <typename GraphT >
+    void discover_vertex(VertexT vertexIn, const GraphT & graph) const
+    {
+      std::cout
+	<< "feature: " << std::setw(15) << std::left << graph[vertexIn].feature->getName().toStdString()
+	<< "    feature id: " << boost::to_string(graph[vertexIn].feature->getId()) << std::endl;
+	
+      if (vertexIn == startVertex) //note constructor pushes to idstack so we are in sync with finish vertex.
+	return;
+	
+      if (!graph[vertexIn].feature->hasSeerShape())
+      {
+	std::cout << " BREAK: no seer shape" << std::endl;
+	std::vector<boost::uuids::uuid> junkIds;
+	idsStack.push(junkIds);
+	return;
+      }
+      const ftr::SeerShape &shape = graph[vertexIn].feature->getSeerShape();
+      std::vector<boost::uuids::uuid> freshIds;
+      const std::vector<boost::uuids::uuid> &currentIds = idsStack.top();
+      for (const auto &currentId : currentIds)
+      {
+	std::cout << "    shape id in: " << boost::to_string(currentId);
+	if (!shape.hasEvolveRecordIn(currentId))
+	{
+	  std::cout << "    BREAK: no evolve record in" << std::endl;
+	  continue;
+	}
+	std::cout <<  "    ids out: ";
+	auto ids = shape.evolve(currentId);
+	for (const auto &id : ids)
+	{
+	  std::cout << id << " ";
+	  freshIds.push_back(id);
+	}
+	std::cout << std::endl;
+      }
+      idsStack.push(freshIds);
+    }
+    
+    template <typename GraphT >
+    void finish_vertex(VertexT, const GraphT &) const
+    {
+      idsStack.pop();
+    }
+    
+  private:
+    
+    VertexT &startVertex;
+    std::stack<std::vector<boost::uuids::uuid> >&idsStack;
+};
+
+//! Combined with a BFS to accumulate related vertices
+template <typename VertexTypeIn>
+class BFSLimitVisitor : public boost::default_bfs_visitor
+{
+public:
+  BFSLimitVisitor(std::vector<VertexTypeIn> &verticesIn): vertices(verticesIn) {}
+  template <typename GraphTypeIn>
+  void discover_vertex(VertexTypeIn vertexIn, const GraphTypeIn &) const
+  {
+    vertices.push_back(vertexIn);
+  }
+private:
+  std::vector<VertexTypeIn> &vertices;
+};
+
+template <typename GraphTypeIn>
+struct SubsetFilter {
+  typedef typename boost::graph_traits<GraphTypeIn>::vertex_descriptor VertexTypeIn;
+  SubsetFilter() : graph(nullptr), vertices(nullptr){ }
+  SubsetFilter(const GraphTypeIn &graphIn, std::vector<VertexTypeIn> &verticesIn) :
+    graph(&graphIn), vertices(&verticesIn){ }
+  template <typename VertexType>
+  bool operator()(const VertexType& vertexIn) const
+  {
+    if(!graph)
+      return false;
+    if (std::find(vertices->begin(), vertices->end(), vertexIn) == vertices->end())
+      return false;
+    return true;
+  }
+  const GraphTypeIn *graph;
+  const std::vector<VertexTypeIn> *vertices;
+};
+
+void Project::shapeTrackUp(const uuid& featureIdIn, const uuid& shapeId)
+{
+  IdVertexMap::const_iterator it = map.find(featureIdIn);
+  assert(it != map.end());
+  prg::Vertex startVertex = it->second;
+  
+  if (!projectGraph[startVertex].feature->hasSeerShape())
+    return;
+  
+  assert(projectGraph[startVertex].feature->getSeerShape().hasShapeIdRecord(shapeId));
+  assert(projectGraph[startVertex].feature->getSeerShape().hasEvolveRecordOut(shapeId));
+  
+  GraphReversed rGraph = boost::make_reverse_graph(projectGraph);
+  
+  std::vector<VertexReversed> limitVertices;
+  BFSLimitVisitor<VertexReversed>limitVisitor(limitVertices);
+  boost::breadth_first_search(rGraph, startVertex, visitor(limitVisitor));
+  
+  SubsetFilter<GraphReversed> filter(rGraph, limitVertices);
+  typedef boost::filtered_graph<GraphReversed, boost::keep_all, SubsetFilter<GraphReversed> > FilteredGraph;
+  typedef boost::graph_traits<FilteredGraph>::vertex_descriptor FilteredVertex;
+  FilteredGraph filteredGraph(rGraph, boost::keep_all(), filter);
+  
+  std::stack<std::vector<boost::uuids::uuid> >idsStack;
+  ShapeTrackVisitorUp<FilteredVertex> shapeVisitor(startVertex, shapeId, idsStack);
+  boost::depth_first_search(filteredGraph, visitor(shapeVisitor).root_vertex(startVertex));
+}
+
+void Project::shapeTrackDown(const uuid& featureIdIn, const uuid& shapeId)
+{
+    IdVertexMap::const_iterator it = map.find(featureIdIn);
+  assert(it != map.end());
+  prg::Vertex startVertex = it->second;
+  
+  if (!projectGraph[startVertex].feature->hasSeerShape())
+    return;
+  
+  assert(projectGraph[startVertex].feature->getSeerShape().hasShapeIdRecord(shapeId));
+  
+  std::vector<Vertex> limitVertices;
+  BFSLimitVisitor<Vertex>limitVisitor(limitVertices);
+  boost::breadth_first_search(projectGraph, startVertex, visitor(limitVisitor));
+  
+  SubsetFilter<Graph> filter(projectGraph, limitVertices);
+  typedef boost::filtered_graph<Graph, boost::keep_all, SubsetFilter<Graph> > FilteredGraph;
+  typedef boost::graph_traits<FilteredGraph>::vertex_descriptor FilteredVertex;
+  FilteredGraph filteredGraph(projectGraph, boost::keep_all(), filter);
+  
+  std::stack<std::vector<boost::uuids::uuid> >idsStack;
+  ShapeTrackVisitorDown<FilteredVertex> shapeVisitor(startVertex, shapeId, idsStack);
+  boost::depth_first_search(filteredGraph, visitor(shapeVisitor).root_vertex(startVertex));
+
+}

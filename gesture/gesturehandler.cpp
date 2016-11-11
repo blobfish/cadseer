@@ -577,6 +577,18 @@ void GestureHandler::constructMenu()
     debugDump->setUserValue(attributeMask, (msg::Request | msg::DebugDump).to_string());
     debugDump->setUserValue(attributeStatus, QObject::tr("Debug Dump").toStdString());
     debugBase->insertChild(debugBase->getNumChildren() - 2, debugDump);
+    
+    osg::MatrixTransform *debugShapeTrackUp = gsn::buildCommandNode(":/resources/images/debugShapeTrackUp.svg");
+    debugShapeTrackUp->setMatrix(dummy);
+    debugShapeTrackUp->setUserValue(attributeMask, (msg::Request | msg::DebugShapeTrackUp).to_string());
+    debugShapeTrackUp->setUserValue(attributeStatus, QObject::tr("Track Shape Up").toStdString());
+    debugBase->insertChild(debugBase->getNumChildren() - 2, debugShapeTrackUp);
+    
+    osg::MatrixTransform *debugShapeTrackDown = gsn::buildCommandNode(":/resources/images/debugShapeTrackDown.svg");
+    debugShapeTrackDown->setMatrix(dummy);
+    debugShapeTrackDown->setUserValue(attributeMask, (msg::Request | msg::DebugShapeTrackDown).to_string());
+    debugShapeTrackDown->setUserValue(attributeStatus, QObject::tr("Track Shape Down").toStdString());
+    debugBase->insertChild(debugBase->getNumChildren() - 2, debugShapeTrackDown);
 }
 
 std::vector<osg::Vec3> GestureHandler::buildNodeLocations(osg::Vec3 direction, int nodeCount)
