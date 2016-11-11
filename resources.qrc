@@ -70,6 +70,8 @@
     <file>resources/images/debugBase.svg</file>
     <file>resources/images/debugCheckShapeIds.svg</file>
     <file>resources/images/debugDump.svg</file>
+    <file>resources/images/debugShapeTrackUp.svg</file>
+    <file>resources/images/debugShapeTrackDown.svg</file>
     <file>resources/images/featureToSystem.svg</file>
     <file>resources/images/systemToFeature.svg</file>
     <file>resources/images/editDraggerToFeature.svg</file>
