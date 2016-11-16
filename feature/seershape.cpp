@@ -1165,24 +1165,27 @@ void SeerShape::dumpFeatureTagContainer(std::ostream &streamIn) const
 prj::srl::SeerShape SeerShape::serialOut()
 {
   using boost::uuids::to_string;
-  const TopoDS_Shape &shape = getRootOCCTShape();
   
   prj::srl::ShapeIdContainer shapeIdContainerOut;
-  if (!shape.IsNull())
+  if (!rootShapeId.is_nil())
   {
-    TopTools_IndexedMapOfShape shapeMap;
-    TopExp::MapShapes(shape, shapeMap);
-    for (std::size_t index = 1; index <= static_cast<std::size_t>(shapeMap.Extent()); ++index)
+    const TopoDS_Shape &shape = getRootOCCTShape();
+    if (!shape.IsNull())
     {
-      if (!hasShapeIdRecord(shapeMap(index)))
-	continue; //things like degenerated edges exist in shape but not in result.
-	
-      prj::srl::ShapeIdRecord rRecord
-      (
-	boost::uuids::to_string(findShapeIdRecord(shapeMap(index)).id),
-	index
-      );
-      shapeIdContainerOut.shapeIdRecord().push_back(rRecord);
+      TopTools_IndexedMapOfShape shapeMap;
+      TopExp::MapShapes(shape, shapeMap);
+      for (std::size_t index = 1; index <= static_cast<std::size_t>(shapeMap.Extent()); ++index)
+      {
+	if (!hasShapeIdRecord(shapeMap(index)))
+	  continue; //things like degenerated edges exist in shape but not in result.
+	  
+	prj::srl::ShapeIdRecord rRecord
+	(
+	  boost::uuids::to_string(findShapeIdRecord(shapeMap(index)).id),
+	  index
+	);
+	shapeIdContainerOut.shapeIdRecord().push_back(rRecord);
+      }
     }
   }
   
