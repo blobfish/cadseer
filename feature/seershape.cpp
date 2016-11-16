@@ -856,38 +856,27 @@ void SeerShape::modifiedMatch
 
 void SeerShape::derivedMatch()
 {
-  gu::ShapeVector nilVertices, nilEdges;
-  
   typedef ShapeIdContainer::index<ShapeIdRecord::ById>::type List;
   List &list = shapeIdContainer.get<ShapeIdRecord::ById>();
+  gu::ShapeVector nilShapes;
   auto rangeItPair = list.equal_range(boost::uuids::nil_generator()());
   for (; rangeItPair.first != rangeItPair.second; ++rangeItPair.first)
-  {
-    if (rangeItPair.first->shape.ShapeType() == TopAbs_VERTEX)
-      nilVertices.push_back(rangeItPair.first->shape);
-    else if (rangeItPair.first->shape.ShapeType() == TopAbs_EDGE)
-      nilEdges.push_back(rangeItPair.first->shape);
-  }
+    nilShapes.push_back(rangeItPair.first->shape);
   
-  if (nilVertices.empty() && nilEdges.empty())
-    return;
-  
-  TopTools_IndexedDataMapOfShapeListOfShape vToE, eToF; //vertices to edges, edges to faces
-  TopExp::MapShapesAndAncestors(getRootOCCTShape(), TopAbs_VERTEX, TopAbs_EDGE, vToE);
-  TopExp::MapShapesAndAncestors(getRootOCCTShape(), TopAbs_EDGE, TopAbs_FACE, eToF);
-  
-  auto go = [&](const gu::ShapeVector &nilShapes, const TopTools_IndexedDataMapOfShapeListOfShape &ancestors)
+  auto match = [&](TopAbs_ShapeEnum shapeType, TopAbs_ShapeEnum parentType)
   {
     for (const auto &shape : nilShapes)
     {
+      if (shape.ShapeType() != shapeType)
+	continue;
+      
       bool bail = false;
       ftr::IdSet set;
-      const TopTools_ListOfShape &parents = ancestors.FindFromKey(shape);
-      TopTools_ListIteratorOfListOfShape it;
-      for (it.Initialize(parents); it.More(); it.Next())
+      gu::ShapeVector parents = useGetParentsOfType(shape, parentType);
+      for (const auto &parent : parents)
       {
-	assert(hasShapeIdRecord(it.Value()));
-	boost::uuids::uuid id = findShapeIdRecord(it.Value()).id;
+	assert(hasShapeIdRecord(parent));
+	boost::uuids::uuid id = findShapeIdRecord(parent).id;
 	if (id.is_nil())
 	{
 	  std::cout << "empty parent Id in: " << __PRETTY_FUNCTION__ << std::endl;
@@ -915,8 +904,8 @@ void SeerShape::derivedMatch()
     }
   };
   
-  go(nilEdges, eToF);
-  go(nilVertices, vToE);
+  match(TopAbs_EDGE, TopAbs_FACE);
+  match(TopAbs_VERTEX, TopAbs_EDGE);
 }
 
 void SeerShape::dumpNils(const std::string &headerIn)
