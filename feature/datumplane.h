@@ -31,6 +31,7 @@ class QDir;
 namespace osg{class MatrixTransform;}
 namespace mdv{class DatumPlane;}
 namespace lbr{class IPGroup;}
+namespace prj{namespace srl{class SolverChoice;}}
 
 namespace ftr
 {
@@ -74,6 +75,7 @@ namespace ftr
     virtual lbr::IPGroup* getIPGroup(){return nullptr;}
     virtual void connect(Base *){}
     virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &) = 0;
+    virtual void serialOut(prj::srl::SolverChoice &solverChoice) = 0;
     double radius;
   };
   
@@ -87,6 +89,7 @@ namespace ftr
     virtual lbr::IPGroup* getIPGroup() override;
     virtual void connect(Base *) override;
     virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &) override;
+    virtual void serialOut(prj::srl::SolverChoice &solverChoice) override;
     
     boost::uuids::uuid faceId = boost::uuids::nil_uuid();
     std::shared_ptr<Parameter> offset;
@@ -103,6 +106,7 @@ namespace ftr
     virtual DatumPlaneType getType() override {return DatumPlaneType::PlanarCenter;}
     virtual osg::Matrixd solve(const UpdateMap&) override;
     virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &) override;
+    virtual void serialOut(prj::srl::SolverChoice &solverChoice) override;
     
     boost::uuids::uuid faceId1 = boost::uuids::nil_uuid();
     boost::uuids::uuid faceId2 = boost::uuids::nil_uuid();
@@ -118,6 +122,7 @@ namespace ftr
     virtual DatumPlaneType getType() override {return DatumPlaneType::PlanarParallelThroughEdge;}
     virtual osg::Matrixd solve(const UpdateMap&) override;
     virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &) override;
+    virtual void serialOut(prj::srl::SolverChoice &solverChoice) override;
     
     boost::uuids::uuid faceId = boost::uuids::nil_uuid();
     boost::uuids::uuid edgeId = boost::uuids::nil_uuid();

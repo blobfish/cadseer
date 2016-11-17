@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="http://www.cadseer.com/prj/srl"
+  xmlns:srl="http://www.cadseer.com/prj/srl"
+>
+  
+<xs:include schemaLocation="featurebase.xsd"/>
+
+<xs:complexType name="DatumPlanePlanarOffset">
+  <xs:all>
+    <xs:element name="faceId" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+    <xs:element name="offset" type="srl:Parameter"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="DatumPlanePlanarCenter">
+  <xs:all>
+    <xs:element name="faceId1" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+    <xs:element name="faceId2" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="DatumPlanePlanarParallelThroughEdge">
+  <xs:all>
+    <xs:element name="faceId" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+    <xs:element name="edgeId" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="SolverChoice">
+  <xs:choice>
+    <xs:element name="offset" type="srl:DatumPlanePlanarOffset"/>
+    <xs:element name="center" type="srl:DatumPlanePlanarCenter"/>
+    <xs:element name="parallelThroughEdge" type="srl:DatumPlanePlanarParallelThroughEdge"/>
+  </xs:choice>
+</xs:complexType>
+  
+<xs:complexType name="FeatureDatumPlane">
+  <xs:all>
+    <xs:element name="featureBase" type="srl:FeatureBase"/>
+    <xs:element name="solverChoice" type="srl:SolverChoice"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:element name="datumPlane" type="srl:FeatureDatumPlane"/>
+  
+</xs:schema> 

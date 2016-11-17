@@ -39,6 +39,7 @@
 #include <modelviz/datumplane.h>
 #include <feature/seershape.h>
 #include <feature/datumplane.h>
+#include <project/serial/xsdcxxoutput/featuredatumplane.h>
 
 using namespace ftr;
 
@@ -207,6 +208,18 @@ DatumPlaneConnections DatumPlanePlanarOffset::setUpFromSelection(const slc::Cont
   
   return out;
 }
+
+void DatumPlanePlanarOffset::serialOut(prj::srl::SolverChoice& solverChoice)
+{
+  prj::srl::DatumPlanePlanarOffset srlOffset
+  (
+    boost::uuids::to_string(faceId),
+    offset->serialOut()
+  );
+  
+  solverChoice.offset() = srlOffset;
+}
+
 
 
 DatumPlanePlanarCenter::DatumPlanePlanarCenter()
@@ -382,6 +395,19 @@ DatumPlaneConnections DatumPlanePlanarCenter::setUpFromSelection(const slc::Cont
   }
   return out;
 }
+
+void DatumPlanePlanarCenter::serialOut(prj::srl::SolverChoice& solverChoice)
+{
+  prj::srl::DatumPlanePlanarCenter srlCenter
+  (
+    boost::uuids::to_string(faceId1),
+    boost::uuids::to_string(faceId2)
+  );
+  
+  solverChoice.center() = srlCenter;
+
+}
+
 
 DatumPlanePlanarParallelThroughEdge::DatumPlanePlanarParallelThroughEdge(){}
 
@@ -625,6 +651,16 @@ DatumPlaneConnections DatumPlanePlanarParallelThroughEdge::setUpFromSelection(co
   return out;
 }
 
+void DatumPlanePlanarParallelThroughEdge::serialOut(prj::srl::SolverChoice& solverChoice)
+{
+  prj::srl::DatumPlanePlanarParallelThroughEdge srlParallel
+  (
+    boost::uuids::to_string(faceId),
+    boost::uuids::to_string(edgeId)
+  );
+  
+  solverChoice.parallelThroughEdge() = srlParallel;
+}
 
 //default constructed plane is 2.0 x 2.0
 DatumPlane::DatumPlane() : Base()
@@ -693,15 +729,25 @@ void DatumPlane::updateVisual()
 }
 
 //serial support for datum plane needs to be done.
-void DatumPlane::serialWrite(const QDir &)//directoryIn)
+void DatumPlane::serialWrite(const QDir &dIn)
 {
-//   ftr::Base::serialWrite(directoryIn);
+  prj::srl::SolverChoice solverChoice;
+  solver->serialOut(solverChoice);
+  
+  prj::srl::FeatureDatumPlane datumPlaneOut
+  (
+    Base::serialOut(),
+    solverChoice
+  );
+  
+  xml_schema::NamespaceInfomap infoMap;
+  std::ofstream stream(buildFilePathName(dIn).toUtf8().constData());
+  prj::srl::datumPlane(stream, datumPlaneOut, infoMap);
 }
 
 void DatumPlane::updateGeometry()
 {
   display->setParameters(-radius, radius, -radius, radius);
-  
 }
 
 std::vector<std::shared_ptr<DatumPlaneGenre> > DatumPlane::solversFromSelection(const slc::Containers &containersIn)

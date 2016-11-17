@@ -133,6 +133,7 @@ SET(PROJECT_SOURCES
     project/serial/xsdcxxoutput/featureblend.cpp
     project/serial/xsdcxxoutput/featurechamfer.cpp
     project/serial/xsdcxxoutput/featuredraft.cpp
+    project/serial/xsdcxxoutput/featuredatumplane.cpp
     )
     
 SET(APPLICATION_SOURCES
