@@ -19,6 +19,8 @@
 
 #include <limits>
 
+#include <boost/uuid/string_generator.hpp>
+
 #include <QDir>
 
 #include <BRepAdaptor_Surface.hxx>
@@ -743,6 +745,34 @@ void DatumPlane::serialWrite(const QDir &dIn)
   xml_schema::NamespaceInfomap infoMap;
   std::ofstream stream(buildFilePathName(dIn).toUtf8().constData());
   prj::srl::datumPlane(stream, datumPlaneOut, infoMap);
+}
+
+void DatumPlane::serialRead(const prj::srl::FeatureDatumPlane &datumPlaneIn)
+{
+  boost::uuids::string_generator gen;
+  
+  Base::serialIn(datumPlaneIn.featureBase());
+  if (datumPlaneIn.solverChoice().offset().present())
+  {
+    std::shared_ptr<DatumPlanePlanarOffset> offsetSolver(new DatumPlanePlanarOffset);
+    offsetSolver->faceId = gen(datumPlaneIn.solverChoice().offset().get().faceId());
+    offsetSolver->offset->serialIn(datumPlaneIn.solverChoice().offset().get().offset());
+    setSolver(offsetSolver);
+  }
+  else if(datumPlaneIn.solverChoice().center().present())
+  {
+    std::shared_ptr<DatumPlanePlanarCenter> centerSolver(new DatumPlanePlanarCenter);
+    centerSolver->faceId1 = gen(datumPlaneIn.solverChoice().center().get().faceId1());
+    centerSolver->faceId2 = gen(datumPlaneIn.solverChoice().center().get().faceId2());
+    setSolver(centerSolver);
+  }
+  else if(datumPlaneIn.solverChoice().parallelThroughEdge().present())
+  {
+    std::shared_ptr<DatumPlanePlanarParallelThroughEdge> parallelSolver(new DatumPlanePlanarParallelThroughEdge);
+    parallelSolver->faceId = gen(datumPlaneIn.solverChoice().parallelThroughEdge().get().faceId());
+    parallelSolver->edgeId = gen(datumPlaneIn.solverChoice().parallelThroughEdge().get().edgeId());
+    setSolver(parallelSolver);
+  }
 }
 
 void DatumPlane::updateGeometry()

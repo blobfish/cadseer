@@ -31,7 +31,7 @@ class QDir;
 namespace osg{class MatrixTransform;}
 namespace mdv{class DatumPlane;}
 namespace lbr{class IPGroup;}
-namespace prj{namespace srl{class SolverChoice;}}
+namespace prj{namespace srl{class SolverChoice; class FeatureDatumPlane;}}
 
 namespace ftr
 {
@@ -143,7 +143,7 @@ namespace ftr
     virtual const QIcon& getIcon() const override {return icon;}
     virtual Descriptor getDescriptor() const override {return Descriptor::Create;}
     virtual void serialWrite(const QDir&) override;
-//     void serialRead(const prj::srl::FeatureDraft &);
+    void serialRead(const prj::srl::FeatureDatumPlane &);
     
     void setSolver(std::shared_ptr<DatumPlaneGenre> solverIn);
     osg::Matrixd getSystem() const {return transform->getMatrix();}

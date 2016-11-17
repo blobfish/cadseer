@@ -30,6 +30,7 @@
 #include <feature/chamfer.h>
 #include <feature/draft.h>
 #include <feature/inert.h>
+#include <feature/datumplane.h>
 #include <project/serial/xsdcxxoutput/featurebox.h>
 #include <project/serial/xsdcxxoutput/featurecylinder.h>
 #include <project/serial/xsdcxxoutput/featuresphere.h>
@@ -41,6 +42,7 @@
 #include <project/serial/xsdcxxoutput/featureblend.h>
 #include <project/serial/xsdcxxoutput/featurechamfer.h>
 #include <project/serial/xsdcxxoutput/featuredraft.h>
+#include <project/serial/xsdcxxoutput/featuredatumplane.h>
 
 #include "featureload.h"
 
@@ -63,6 +65,7 @@ directory(directoryIn), fileExtension(".fetr")
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Blend), std::bind(&FeatureLoad::loadBlend, this, std::placeholders::_1, std::placeholders::_2)));
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Chamfer), std::bind(&FeatureLoad::loadChamfer, this, std::placeholders::_1, std::placeholders::_2)));
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Draft), std::bind(&FeatureLoad::loadDraft, this, std::placeholders::_1, std::placeholders::_2)));
+  functionMap.insert(std::make_pair(ftr::toString(ftr::Type::DatumPlane), std::bind(&FeatureLoad::loadDatumPlane, this, std::placeholders::_1, std::placeholders::_2)));
 }
 
 FeatureLoad::~FeatureLoad()
@@ -230,3 +233,14 @@ std::shared_ptr< ftr::Base > FeatureLoad::loadDraft(const std::string &fileNameI
   return freshDraft;
 }
 
+std::shared_ptr< ftr::Base > FeatureLoad::loadDatumPlane(const std::string &fileNameIn, std::size_t shapeOffsetIn)
+{
+  auto sDatumPlane = srl::datumPlane(fileNameIn, ::xml_schema::Flags::dont_validate);
+  assert(sDatumPlane);
+  
+  std::shared_ptr<ftr::DatumPlane> freshDatumPlane(new ftr::DatumPlane);
+  freshDatumPlane->setShape(shapeVector.at(shapeOffsetIn));
+  freshDatumPlane->serialRead(*sDatumPlane);
+  
+  return freshDatumPlane;
+}
