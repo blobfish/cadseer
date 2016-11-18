@@ -51,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     viewWidget = new vwr::ViewerWidget(osgViewer::ViewerBase::SingleThreaded);
     viewWidget->setGeometry( 100, 100, 800, 600 );
+    viewWidget->setMinimumSize(QSize(100, 100)); //don't collapse view widget. osg nan erros.
     
     dagModel = new dag::Model(this);
     dagView = new dag::View(this);
@@ -64,6 +65,7 @@ MainWindow::MainWindow(QWidget *parent) :
     sizes.append(1000);
     sizes.append(300);
     splitter->setSizes(sizes);
+    splitter->setCollapsible(0, false); //don't collapse view widget. osg nan erros.
     
     QHBoxLayout *aLayout = new QHBoxLayout();
     aLayout->addWidget(splitter);
