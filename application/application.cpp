@@ -23,6 +23,7 @@
 #include <QX11Info>
 #include <QTimer>
 #include <QMessageBox>
+#include <QSettings>
 
 #include <project/libgit2pp/libgit2/include/git2/global.h> //for git start and shutdown.
 
@@ -70,6 +71,10 @@ Application::Application(int &argc, char **argv) :
       QTimer::singleShot(0, this, SLOT(quit()));
       return;
     }
+    
+    setOrganizationName("blobfish");
+    setOrganizationDomain("blobfish.org"); //doesn't exist.
+    setApplicationName("cadseer");
     
     git_libgit2_init();
 }
@@ -184,6 +189,17 @@ QDir Application::getApplicationDirectory()
   if (!appDir.exists())
     appDir.mkpath(homeDirName + QDir::separator() + appDirName);
   return appDir;
+}
+
+QSettings& Application::getUserSettings()
+{
+  static QSettings *out = nullptr;
+  if (!out)
+  {
+    QString fileName = getApplicationDirectory().absolutePath() + QDir::separator() + "QSettings.ini";
+    out = new QSettings(fileName, QSettings::IniFormat, this);
+  }
+  return *out;
 }
 
 void Application::createNewProject(const std::string &directoryIn)

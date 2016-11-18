@@ -25,6 +25,8 @@
 #include <QApplication>
 #include <QDir>
 
+class QSettings;
+
 namespace prf{class Manager;}
 namespace prj{class Project;}
 namespace msg{class Message; class Observer;}
@@ -45,6 +47,7 @@ public:
     prj::Project* getProject(){return project.get();}
     MainWindow* getMainWindow(){return mainWindow.get();}
     QDir getApplicationDirectory();
+    QSettings& getUserSettings();
     
 public Q_SLOTS:
     void quittingSlot();

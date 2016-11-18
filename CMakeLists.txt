@@ -90,6 +90,17 @@ SET(FEATURE_SOURCES
     feature/datumplane.cpp
     )
     
+SET(EXPRESSION_SOURCES
+    expressions/abstractnode.cpp
+    expressions/expressiongraph.cpp
+    expressions/expressionmanager.cpp
+    expressions/expressionwidget.cpp
+    expressions/scopedexpressionwidget.cpp
+    expressions/stringtranslator.cpp
+    expressions/tablemodel.cpp
+    expressions/tableview.cpp
+    )
+    
 SET(SELECTION_SOURCES
     selection/eventhandler.cpp
     selection/intersector.cpp
@@ -142,6 +153,7 @@ SET(APPLICATION_SOURCES
     application/factory.cpp
     application/message.cpp
     application/incrementwidget.cpp
+    application/splitterdecorated.cpp
     )
     
 SET(COMMAND_SOURCES
@@ -191,6 +203,7 @@ SET(CADSEER_SOURCES
     ${GESTURE_SOURCES}
     ${MESSAGE_SOURCES}
     ${FEATURE_SOURCES}
+    ${EXPRESSION_SOURCES}
     ${SELECTION_SOURCES}
     ${DIALOG_SOURCES}
     ${PREFERENCE_SOURCES}
@@ -206,11 +219,16 @@ SET(CADSEER_MOC_HDRS
     dagview/dagview.h
     dagview/dagmodel.h
     application/application.h
+    application/splitterdecorated.h
     selection/manager.h
     dialogs/boxdialog.h
     preferences/dialog.h
     dialogs/parameterdialog.h
     project/projectdialog.h
+    expressions/expressionwidget.h
+    expressions/scopedexpressionwidget.h
+    expressions/tablemodel.h
+    expressions/tableview.h
     )
 
 SET(CADSEER_LIBRARIES

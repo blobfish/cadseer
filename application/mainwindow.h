@@ -30,6 +30,7 @@ namespace vwr{class ViewerWidget;}
 namespace slc{class Manager;}
 namespace msg{class Message; class Observer;}
 namespace dag{class View; class Model;}
+namespace expr{class ExpressionWidget;}
 
 namespace Ui {
 class MainWindow;
@@ -57,6 +58,7 @@ private:
     vwr::ViewerWidget* viewWidget;
     dag::Model *dagModel;
     dag::View *dagView;
+    expr::ExpressionWidget *expressionWidget;
     slc::Manager *selectionManager;
     IncrementWidgetAction *incrementWidget;
     

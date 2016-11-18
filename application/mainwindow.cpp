@@ -22,13 +22,15 @@
 #include <limits>
 
 #include <QHBoxLayout>
-#include <QSplitter>
 #include <QDir>
 
 #include <message/dispatch.h>
 #include <dagview/dagmodel.h>
 #include <dagview/dagview.h>
+#include <expressions/expressionwidget.h>
+#include <expressions/expressionmanager.h>
 #include <application/application.h>
+#include <application/splitterdecorated.h>
 #include <viewer/viewerwidget.h>
 #include <selection/manager.h>
 #include <message/dispatch.h>
@@ -49,23 +51,33 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    dagModel = new dag::Model(this);
+    dagView = new dag::View(this);
+    dagView->setScene(dagModel);
+    //leak fix me.
+    expr::ExpressionManager *expressionManager = new expr::ExpressionManager();
+    expressionWidget = new expr::ExpressionWidget(*expressionManager, this);
+    SplitterDecorated *subSplitter = new SplitterDecorated(this);
+    subSplitter->setOrientation(Qt::Vertical);
+    subSplitter->addWidget(expressionWidget);
+    subSplitter->addWidget(dagView);
+    subSplitter->restoreSettings("mainWindowSubSplitter");
+    
     viewWidget = new vwr::ViewerWidget(osgViewer::ViewerBase::SingleThreaded);
     viewWidget->setGeometry( 100, 100, 800, 600 );
     viewWidget->setMinimumSize(QSize(100, 100)); //don't collapse view widget. osg nan erros.
     
-    dagModel = new dag::Model(this);
-    dagView = new dag::View(this);
-    dagView->setScene(dagModel);
-    
-    QSplitter *splitter = new QSplitter(Qt::Horizontal, this);
+    SplitterDecorated *splitter = new SplitterDecorated(this);
+    splitter->setOpaqueResize(Qt::Horizontal);
     splitter->addWidget(viewWidget);
-    splitter->addWidget(dagView);
+    splitter->addWidget(subSplitter);
     //size setup temp.
     QList<int> sizes;
     sizes.append(1000);
     sizes.append(300);
     splitter->setSizes(sizes);
     splitter->setCollapsible(0, false); //don't collapse view widget. osg nan erros.
+    splitter->restoreSettings("mainWindowSplitter");
     
     QHBoxLayout *aLayout = new QHBoxLayout();
     aLayout->addWidget(splitter);
