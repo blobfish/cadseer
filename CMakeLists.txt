@@ -95,7 +95,6 @@ SET(EXPRESSION_SOURCES
     expressions/expressiongraph.cpp
     expressions/expressionmanager.cpp
     expressions/expressionwidget.cpp
-    expressions/scopedexpressionwidget.cpp
     expressions/stringtranslator.cpp
     expressions/tablemodel.cpp
     expressions/tableview.cpp
@@ -226,7 +225,6 @@ SET(CADSEER_MOC_HDRS
     dialogs/parameterdialog.h
     project/projectdialog.h
     expressions/expressionwidget.h
-    expressions/scopedexpressionwidget.h
     expressions/tablemodel.h
     expressions/tableview.h
     )
