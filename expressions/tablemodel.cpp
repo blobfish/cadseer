@@ -37,12 +37,12 @@ TableModel::TableModel(ExpressionManager &eManagerIn, QObject* parent):
 
 }
 
-int TableModel::columnCount(const QModelIndex& parent) const
+int TableModel::columnCount(const QModelIndex&) const
 {
   return 3;
 }
 
-int TableModel::rowCount(const QModelIndex& parent) const
+int TableModel::rowCount(const QModelIndex&) const
 {
   return eManager.allGroup.formulaIds.size();
 }
@@ -97,7 +97,7 @@ Qt::ItemFlags TableModel::flags(const QModelIndex& index) const
   return Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsEnabled;
 }
 
-bool TableModel::setData(const QModelIndex& index, const QVariant& value, int role)
+bool TableModel::setData(const QModelIndex& index, const QVariant& value, int)
 {
   boost::uuids::uuid fId = ExpressionManager::stringToId(this->data(index, Qt::UserRole).toString().toStdString());
   assert(eManager.getGraphWrapper().hasFormula(fId));
@@ -140,7 +140,7 @@ bool TableModel::setData(const QModelIndex& index, const QVariant& value, int ro
         std::cout << "couldn't restore formula in tableModel::setdata" << std::endl;
         assert(0);
       }
-      eManager.recompute();
+      eManager.update();
       return false;
     }
     std::string cycleName;
@@ -154,12 +154,12 @@ bool TableModel::setData(const QModelIndex& index, const QVariant& value, int ro
         assert(0);
       }
       lastFailedPosition = value.toString().indexOf(QString::fromStdString(cycleName));
-      eManager.recompute();
+      eManager.update();
       return false;
     }
     //why don't I have to tell the model to update the dependent formulas?
     eManager.getGraphWrapper().setFormulaDependentsDirty(fId);
-    eManager.recompute();
+    eManager.update();
   }
   lastFailedText.clear();
   lastFailedMessage.clear();
@@ -200,7 +200,7 @@ void TableModel::addDefaultRow()
   
   this->beginInsertRows(QModelIndex(), eManager.allGroup.formulaIds.size(), eManager.allGroup.formulaIds.size());
   sTranslator->parseString(name);
-  eManager.recompute();
+  eManager.update();
   this->endInsertRows();
 }
 
@@ -304,7 +304,7 @@ void TableModel::importExpressions(std::istream &streamIn, boost::uuids::uuid gr
     }
     countAdded++;
   }
-  eManager.recompute();
+  eManager.update();
   
   /* ideally I would do the 'beginInsertRows' call before actually modifing the underlying
    * model data. The problem is, I don't know how many rows are going to be added until I
@@ -339,7 +339,7 @@ GroupProxyModel::GroupProxyModel(ExpressionManager &eManagerIn, boost::uuids::uu
 
 }
 
-bool GroupProxyModel::filterAcceptsRow(int source_row, const QModelIndex& source_parent) const
+bool GroupProxyModel::filterAcceptsRow(int source_row, const QModelIndex&) const
 {
   boost::uuids::uuid formulaId;
   std::stringstream stream;

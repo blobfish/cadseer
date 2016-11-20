@@ -437,7 +437,7 @@ ExpressionDelegate::ExpressionDelegate(QObject *parent): QStyledItemDelegate(par
 
 }
 
-QWidget* ExpressionDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
+QWidget* ExpressionDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&, const QModelIndex&) const
 {
   LineEdit *lineEdit = new LineEdit(parent);
   return lineEdit;
@@ -486,7 +486,7 @@ void ExpressionDelegate::setEditorData(QWidget* editor, const QModelIndex& index
   hackModel->lastFailedText.clear();
 }
 
-void ExpressionDelegate::updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const
+void ExpressionDelegate::updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex&) const
 {
   editor->setGeometry(option.rect);
 }

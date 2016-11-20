@@ -25,14 +25,15 @@
 #include <QWidget>
 
 namespace boost{namespace uuids{class uuid;}}
-class TableModel;
+namespace msg{class Message; class Observer;}
 class QTabWidget;
 class QToolBar;
 
 namespace expr
 {
   class ExpressionManager;
-  class StringTranslator;
+  class TableModel;
+  class TableViewAll;
 
 /*! @brief Widget for interacting with one ExpressionManager
  * 
@@ -42,16 +43,18 @@ class ExpressionWidget : public QWidget
 {
   Q_OBJECT
 public:
-    explicit ExpressionWidget(ExpressionManager &eManagerIn, QWidget* parent = 0, Qt::WindowFlags f = 0);
+    explicit ExpressionWidget(QWidget* parent = 0, Qt::WindowFlags f = 0);
+    virtual ~ExpressionWidget() override;
     
+    //! acts as a parent of all widgets and allows us to remove all the widgets between close and open of projects.
+    TableViewAll *tableViewAll = nullptr;
     //! Model interface between the ExpressionManager and the Qt MVC framework.
-    TableModel *mainTable;
+    TableModel *mainTable = nullptr;
     //! Each tab will be a group. Will have at least one, the allGroup.
-    QTabWidget *tabWidget;
+    QTabWidget *tabWidget = nullptr;
     //! Temp for develop convenience.
-    QToolBar *toolbar;
-    //! ExpressionManager to interface with.
-    ExpressionManager &eManager;
+    QToolBar *toolbar = nullptr;
+    
 public Q_SLOTS:
   //! Slot invoked upon renaming a group.
   void groupRenamedSlot(QWidget *tab, const QString &newName);
@@ -74,6 +77,12 @@ private:
   void addGroupView(const boost::uuids::uuid &idIn, const QString &name);
   //! Build examples string.
   std::string buildExamplesString();
+  //! ExpressionManager to interface with.
+  ExpressionManager *eManager = nullptr;
+  std::unique_ptr<msg::Observer> observer;
+  void setupDispatcher();
+  void closeProjectDispatched(const msg::Message &);
+  void openNewProjectDispatched(const msg::Message &);
 };
 }
 

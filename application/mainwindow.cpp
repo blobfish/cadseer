@@ -54,9 +54,7 @@ MainWindow::MainWindow(QWidget *parent) :
     dagModel = new dag::Model(this);
     dagView = new dag::View(this);
     dagView->setScene(dagModel);
-    //leak fix me.
-    expr::ExpressionManager *expressionManager = new expr::ExpressionManager();
-    expressionWidget = new expr::ExpressionWidget(*expressionManager, this);
+    expressionWidget = new expr::ExpressionWidget(this);
     SplitterDecorated *subSplitter = new SplitterDecorated(this);
     subSplitter->setOrientation(Qt::Vertical);
     subSplitter->addWidget(expressionWidget);

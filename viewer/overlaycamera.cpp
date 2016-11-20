@@ -92,7 +92,6 @@ void OverlayCamera::featureRemovedDispatched(const msg::Message &messageIn)
 
 void OverlayCamera::closeProjectDispatched(const msg::Message&)
 {
-  //this code assumes that the first child is the absolute csys.
-  assert(getChild(0)->getNodeMask() == NodeMaskDef::csys);
+  //this code assumes that the first child is the absolute csys switch.
   removeChildren(1, getNumChildren() - 1);
 }

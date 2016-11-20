@@ -32,20 +32,32 @@
 
 #include <application/application.h>
 #include <application/splitterdecorated.h>
+#include <message/dispatch.h>
+#include <message/observer.h>
 #include <expressions/tablemodel.h>
 #include <expressions/tableview.h>
 #include <expressions/expressionmanager.h>
 #include <expressions/stringtranslator.h>
 #include <expressions/expressionwidget.h>
+#include <project/project.h>
 
 using namespace expr;
 
 static QString defaultDirectory = QDir::homePath();
 
-ExpressionWidget::ExpressionWidget(ExpressionManager &eManagerIn, QWidget* parent, Qt::WindowFlags f):
-  QWidget(parent, f), eManager(eManagerIn)
+ExpressionWidget::ExpressionWidget(QWidget* parent, Qt::WindowFlags f):
+  QWidget(parent, f)
 {
+  observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+  observer->name = "expr::ExpressionWidget";
+  setupDispatcher();
+    
   setupGui();
+}
+
+ExpressionWidget::~ExpressionWidget()
+{
+
 }
 
 void ExpressionWidget::setupGui()
@@ -65,32 +77,15 @@ void ExpressionWidget::setupGui()
   splitter->setOrientation(Qt::Vertical);
   splitter->addWidget(toolbar);
   splitter->addWidget(tabWidget);
-  splitter->restoreSettings("scopedExpressionsSplitter");
+  splitter->restoreSettings("ExpressionsSplitter");
   mainLayout->addWidget(splitter);
-  
-  mainTable = new TableModel(eManager, this);
-  
-  TableViewAll *allView = new TableViewAll(this);
-  AllProxyModel *allModel = new AllProxyModel(this);
-  allModel->setSourceModel(mainTable);
-  allView->setModel(allModel);
-  NameDelegate *nameDelegate = new NameDelegate(allView);
-  allView->setItemDelegateForColumn(0, nameDelegate);
-  ExpressionDelegate *delegate = new ExpressionDelegate(allView);
-  allView->setItemDelegateForColumn(1, delegate);
-  tabWidget->addTab(allView, "All");
-  allView->horizontalHeader()->setResizeMode(1, QHeaderView::Stretch); //has to be done after the model is set.
-  connect(allView, SIGNAL(addGroupSignal()), this, SLOT(addGroupSlot()));
-  
-  for(std::vector<Group>::iterator it = eManager.userDefinedGroups.begin(); it != eManager.userDefinedGroups.end(); ++it)
-    addGroupView(it->id, QString::fromStdString(it->name));
 }
 
 void ExpressionWidget::writeOutGraphSlot()
 {
   QString filePath = static_cast<app::Application *>(qApp)->getApplicationDirectory().absolutePath() + 
     QDir::separator() + "expressionGraph.dot";
-  eManager.writeOutGraph(filePath.toStdString().c_str());
+  eManager->writeOutGraph(filePath.toStdString().c_str());
 }
 
 void ExpressionWidget::groupRenamedSlot(QWidget *tab, const QString &newName)
@@ -106,13 +101,13 @@ void ExpressionWidget::addGroupSlot()
   QString newName = QInputDialog::getText(this, tr("Enter Group Name"), tr("Name:"), QLineEdit::Normal, "Group Name", &ok);
   if (!ok || newName.isEmpty())
     return;
-  if (eManager.hasUserGroup(newName.toStdString()))
+  if (eManager->hasUserGroup(newName.toStdString()))
   {
     QMessageBox::critical(this, tr("Error:"), tr("Name Already Exists"));
     return;
   }
   boost::uuids::uuid groupId;
-  groupId = eManager.createUserGroup(newName.toStdString());
+  groupId = eManager->createUserGroup(newName.toStdString());
   
   addGroupView(groupId, newName);
 }
@@ -127,8 +122,8 @@ void ExpressionWidget::removeGroupSlot(QWidget *tab)
 
 void ExpressionWidget::addGroupView(const boost::uuids::uuid& idIn, const QString &name)
 {
-  TableViewGroup *userView = new TableViewGroup(this);
-  GroupProxyModel *userProxyModel = new GroupProxyModel(eManager, idIn, this);
+  TableViewGroup *userView = new TableViewGroup(tableViewAll);
+  GroupProxyModel *userProxyModel = new GroupProxyModel(*eManager, idIn, userView);
   userProxyModel->setSourceModel(mainTable);
   userView->setModel(userProxyModel);
   NameDelegate *nameDelegate = new NameDelegate(userView);
@@ -143,31 +138,31 @@ void ExpressionWidget::addGroupView(const boost::uuids::uuid& idIn, const QStrin
 
 void ExpressionWidget::fillInTestManagerSlot()
 {
-  StringTranslator sTranslator(eManager);
+  StringTranslator sTranslator(*eManager);
 
   std::string examplesString = buildExamplesString();
   std::istringstream inStream(examplesString.c_str());
   mainTable->importExpressions(inStream, boost::uuids::nil_generator()());
   
-  eManager.recompute();
+  eManager->update();
   
-  std::vector<boost::uuids::uuid> ids = eManager.getGraphWrapper().getAllFormulaIds();
+  std::vector<boost::uuids::uuid> ids = eManager->getGraphWrapper().getAllFormulaIds();
   boost::uuids::uuid groupId;
-  if (!eManager.hasUserGroup("Group 1") && ids.size() > 2)
+  if (!eManager->hasUserGroup("Group 1") && ids.size() > 2)
   {
-    groupId= eManager.createUserGroup("Group 1");
-    eManager.addFormulaToUserGroup(groupId, *(ids.begin()));
-    eManager.addFormulaToUserGroup(groupId, *(ids.begin() + 1));
-    eManager.addFormulaToUserGroup(groupId, *(ids.begin() + 2));
+    groupId= eManager->createUserGroup("Group 1");
+    eManager->addFormulaToUserGroup(groupId, *(ids.begin()));
+    eManager->addFormulaToUserGroup(groupId, *(ids.begin() + 1));
+    eManager->addFormulaToUserGroup(groupId, *(ids.begin() + 2));
     addGroupView(groupId, "Group 1");
   }
   
-  if (!eManager.hasUserGroup("Group 2") && ids.size() > 5)
+  if (!eManager->hasUserGroup("Group 2") && ids.size() > 5)
   {
-    groupId = eManager.createUserGroup("Group 2");
-    eManager.addFormulaToUserGroup(groupId, *(ids.begin() + 3));
-    eManager.addFormulaToUserGroup(groupId, *(ids.begin() + 4));
-    eManager.addFormulaToUserGroup(groupId, *(ids.begin() + 5));
+    groupId = eManager->createUserGroup("Group 2");
+    eManager->addFormulaToUserGroup(groupId, *(ids.begin() + 3));
+    eManager->addFormulaToUserGroup(groupId, *(ids.begin() + 4));
+    eManager->addFormulaToUserGroup(groupId, *(ids.begin() + 5));
     addGroupView(groupId, "Group 2");
   }
 }
@@ -176,7 +171,7 @@ void ExpressionWidget::dumpLinksSlot()
 {
   std::ostringstream stream;
   stream << std::endl;
-  eManager.dumpLinks(stream);
+  eManager->dumpLinks(stream);
   stream << std::endl;
 }
 
@@ -253,5 +248,57 @@ std::string ExpressionWidget::buildExamplesString()
   "exampleIftest7 = if(sin(degtorad(44)) < sin(degtorad(46))) then(exampleJunk1) else(exampleJunk2)" << std::endl;
   
   return stream.str();
+}
+
+void ExpressionWidget::setupDispatcher()
+{
+  msg::Mask mask;
+  
+  mask = msg::Response | msg::Pre | msg::CloseProject;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ExpressionWidget::closeProjectDispatched, this, boost::placeholders::_1)));
+  
+  mask = msg::Response | msg::Post | msg::OpenProject;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ExpressionWidget::openNewProjectDispatched, this, boost::placeholders::_1)));
+  
+  mask = msg::Response | msg::Post | msg::NewProject;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ExpressionWidget::openNewProjectDispatched, this, boost::placeholders::_1)));
+}
+
+void ExpressionWidget::closeProjectDispatched(const msg::Message&)
+{
+  tabWidget->clear();
+  tableViewAll->deleteLater(); //should delete all child models and views.
+  tableViewAll = nullptr;
+  mainTable = nullptr; //was a child of tabwidget, so should be deleted.
+  eManager = nullptr; //ExpressionManager owned by project. should be deleted there.
+
+}
+
+void ExpressionWidget::openNewProjectDispatched(const msg::Message&)
+{
+  assert(!eManager);
+  eManager = &(static_cast<app::Application *>(qApp)->getProject()->getExpressionManager());
+  assert(eManager);
+  
+  assert(!tableViewAll);
+  tableViewAll = new TableViewAll(tabWidget);
+  
+  assert(!mainTable);
+  mainTable = new TableModel(*eManager, tableViewAll);
+  
+  
+  AllProxyModel *allModel = new AllProxyModel(tableViewAll);
+  allModel->setSourceModel(mainTable);
+  tableViewAll->setModel(allModel);
+  NameDelegate *nameDelegate = new NameDelegate(tableViewAll);
+  tableViewAll->setItemDelegateForColumn(0, nameDelegate);
+  ExpressionDelegate *delegate = new ExpressionDelegate(tableViewAll);
+  tableViewAll->setItemDelegateForColumn(1, delegate);
+  tabWidget->addTab(tableViewAll, "All");
+  tableViewAll->horizontalHeader()->setResizeMode(1, QHeaderView::Stretch); //has to be done after the model is set.
+  connect(tableViewAll, SIGNAL(addGroupSignal()), this, SLOT(addGroupSlot()));
+  
+  for(std::vector<Group>::iterator it = eManager->userDefinedGroups.begin(); it != eManager->userDefinedGroups.end(); ++it)
+    addGroupView(it->id, QString::fromStdString(it->name));
 }
 

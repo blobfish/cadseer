@@ -239,6 +239,10 @@ void Application::openProject(const std::string &directoryIn)
   msg::Message postMessage;
   postMessage.mask = msg::Response | msg::Post | msg::OpenProject;
   observer->messageOutSignal(postMessage);
+  
+  msg::Message viewFitMessage;
+  viewFitMessage.mask = msg::Request | msg::ViewFit;
+  observer->messageOutSignal(viewFitMessage);
 }
 
 void Application::closeProject()

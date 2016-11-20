@@ -129,7 +129,7 @@ public:
   ~ExpressionManager();
   
   //! Cycle the graph and recalculate dirty nodes.
-  void recompute();
+  void update();
   
   //! return a reference to the GraphWrapper 
   GraphWrapper& getGraphWrapper();

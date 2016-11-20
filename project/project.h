@@ -28,6 +28,7 @@
 class TopoDS_Shape;
 
 namespace msg{class Message; class Observer;}
+namespace expr{class ExpressionManager;}
 
 typedef std::map<boost::uuids::uuid, prg::Vertex> IdVertexMap;
 
@@ -64,6 +65,8 @@ public:
     void shapeTrackUp(const boost::uuids::uuid &featureIdIn, const boost::uuids::uuid &shapeId);
     void shapeTrackDown(const boost::uuids::uuid &featureIdIn, const boost::uuids::uuid &shapeId);
     
+    expr::ExpressionManager& getExpressionManager(){return *expressionManager;}
+    
 private:
     //! index all the vertices of the graph. needed for algorthims when using listS.
     void indexVerticesEdges();
@@ -81,6 +84,7 @@ private:
     std::string saveDirectory;
     void serialWrite();
     std::unique_ptr<GitManager> gitManager;
+    std::unique_ptr<expr::ExpressionManager> expressionManager;
     bool isLoading = false;
     
     std::unique_ptr<msg::Observer> observer;

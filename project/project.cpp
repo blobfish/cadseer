@@ -39,6 +39,7 @@
 #include <feature/base.h>
 #include <feature/seershape.h>
 #include <feature/inert.h>
+#include <expressions/expressionmanager.h>
 #include <project/message.h>
 #include <message/message.h>
 #include <message/dispatch.h>
@@ -60,6 +61,9 @@ Project::Project()
   
   std::unique_ptr<GitManager> tempManager(new GitManager());
   gitManager = std::move(tempManager);
+  
+  std::unique_ptr<expr::ExpressionManager> tempEManager(new expr::ExpressionManager());
+  expressionManager = std::move(tempEManager);
 }
 
 Project::~Project()
@@ -795,10 +799,6 @@ void Project::initializeNew()
 
 void Project::open()
 {
-  msg::Message preMessage;
-  preMessage.mask = msg::Response | msg::Pre | msg::OpenProject;
-  observer->messageOutSignal(preMessage);
-  
   isLoading = true;
   
   std::string projectPath = saveDirectory + QDir::separator().toLatin1() + "project.prjt";
@@ -859,14 +859,6 @@ void Project::open()
   }
   
   isLoading = false;
-  
-  msg::Message postMessage;
-  postMessage.mask = msg::Response | msg::Post | msg::OpenProject;
-  observer->messageOutSignal(postMessage);
-  
-  msg::Message viewFitMessage;
-  viewFitMessage.mask = msg::Request | msg::ViewFit;
-  observer->messageOutSignal(viewFitMessage);
 }
 
 /* id of selected items is always the 'out' id of the evolution record. this affects

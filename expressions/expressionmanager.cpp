@@ -73,7 +73,7 @@ GraphWrapper& ExpressionManager::getGraphWrapper()
   return *graphPtr;
 }
 
-void ExpressionManager::recompute()
+void ExpressionManager::update()
 {
   graphPtr->recompute();
 }
@@ -348,14 +348,14 @@ void ExpressionManager::redo()
 
 void ExpressionManager::restoreState(const std::size_t &index)
 {
-  assert(index >= 0 && index < transArray.size());
+  assert(index < transArray.size());
   allGroup = boost::get<0>(transArray.at(index));
   userDefinedGroups = boost::get<1>(transArray.at(index));
   graphPtr = boost::get<2>(transArray.at(index));
   //should we recompute here?
   //should we mark everything dirty? we don't want to have to analyse the changes.
   graphPtr->setAllDirty();
-  recompute();
+  update();
 }
 
 void ExpressionManager::generateValueCache(ValueCache &out) const
@@ -414,7 +414,7 @@ void ExpressionManager::dispatchValueChanges(const ValueCache& virginCache)
   std::cout << std::endl << std::endl;
 }
 
-void ExpressionManager::updateLinkedProperty(const boost::uuids::uuid idIn, const double valueIn)
+void ExpressionManager::updateLinkedProperty(const boost::uuids::uuid /*idIn*/, const double /*valueIn*/)
 {
 //   assert(document);
   //get all links
