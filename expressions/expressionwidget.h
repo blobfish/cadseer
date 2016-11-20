@@ -38,11 +38,11 @@ namespace expr
  * 
  * Contains a tab widget containing a widget for each group.
  */
-class ScopedExpressionWidget : public QWidget
+class ExpressionWidget : public QWidget
 {
   Q_OBJECT
 public:
-    explicit ScopedExpressionWidget(ExpressionManager &eManagerIn, QWidget* parent = 0, Qt::WindowFlags f = 0);
+    explicit ExpressionWidget(ExpressionManager &eManagerIn, QWidget* parent = 0, Qt::WindowFlags f = 0);
     
     //! Model interface between the ExpressionManager and the Qt MVC framework.
     TableModel *mainTable;

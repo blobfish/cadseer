@@ -36,19 +36,19 @@
 #include <expressions/tableview.h>
 #include <expressions/expressionmanager.h>
 #include <expressions/stringtranslator.h>
-#include <expressions/scopedexpressionwidget.h>
+#include <expressions/expressionwidget.h>
 
 using namespace expr;
 
 static QString defaultDirectory = QDir::homePath();
 
-ScopedExpressionWidget::ScopedExpressionWidget(ExpressionManager &eManagerIn, QWidget* parent, Qt::WindowFlags f):
+ExpressionWidget::ExpressionWidget(ExpressionManager &eManagerIn, QWidget* parent, Qt::WindowFlags f):
   QWidget(parent, f), eManager(eManagerIn)
 {
   setupGui();
 }
 
-void ScopedExpressionWidget::setupGui()
+void ExpressionWidget::setupGui()
 {
   QVBoxLayout *mainLayout = new QVBoxLayout();
   this->setLayout(mainLayout);
@@ -86,21 +86,21 @@ void ScopedExpressionWidget::setupGui()
     addGroupView(it->id, QString::fromStdString(it->name));
 }
 
-void ScopedExpressionWidget::writeOutGraphSlot()
+void ExpressionWidget::writeOutGraphSlot()
 {
   QString filePath = static_cast<app::Application *>(qApp)->getApplicationDirectory().absolutePath() + 
     QDir::separator() + "expressionGraph.dot";
   eManager.writeOutGraph(filePath.toStdString().c_str());
 }
 
-void ScopedExpressionWidget::groupRenamedSlot(QWidget *tab, const QString &newName)
+void ExpressionWidget::groupRenamedSlot(QWidget *tab, const QString &newName)
 {
   int index = tabWidget->indexOf(tab);
   assert(index >= 0); //no such widget
   tabWidget->setTabText(index, newName);
 }
 
-void ScopedExpressionWidget::addGroupSlot()
+void ExpressionWidget::addGroupSlot()
 {
   bool ok;
   QString newName = QInputDialog::getText(this, tr("Enter Group Name"), tr("Name:"), QLineEdit::Normal, "Group Name", &ok);
@@ -117,7 +117,7 @@ void ScopedExpressionWidget::addGroupSlot()
   addGroupView(groupId, newName);
 }
 
-void ScopedExpressionWidget::removeGroupSlot(QWidget *tab)
+void ExpressionWidget::removeGroupSlot(QWidget *tab)
 {
   int tabIndex = tabWidget->indexOf(tab);
   assert(tabIndex >= 0); //no such widget
@@ -125,7 +125,7 @@ void ScopedExpressionWidget::removeGroupSlot(QWidget *tab)
   tab->deleteLater();
 }
 
-void ScopedExpressionWidget::addGroupView(const boost::uuids::uuid& idIn, const QString &name)
+void ExpressionWidget::addGroupView(const boost::uuids::uuid& idIn, const QString &name)
 {
   TableViewGroup *userView = new TableViewGroup(this);
   GroupProxyModel *userProxyModel = new GroupProxyModel(eManager, idIn, this);
@@ -141,7 +141,7 @@ void ScopedExpressionWidget::addGroupView(const boost::uuids::uuid& idIn, const 
   connect(userView, SIGNAL(groupRemovedSignal(QWidget*)), this, SLOT(removeGroupSlot(QWidget*)));
 }
 
-void ScopedExpressionWidget::fillInTestManagerSlot()
+void ExpressionWidget::fillInTestManagerSlot()
 {
   StringTranslator sTranslator(eManager);
 
@@ -172,7 +172,7 @@ void ScopedExpressionWidget::fillInTestManagerSlot()
   }
 }
 
-void ScopedExpressionWidget::dumpLinksSlot()
+void ExpressionWidget::dumpLinksSlot()
 {
   std::ostringstream stream;
   stream << std::endl;
@@ -180,7 +180,7 @@ void ScopedExpressionWidget::dumpLinksSlot()
   stream << std::endl;
 }
 
-void ScopedExpressionWidget::buildExamplesTabSlot()
+void ExpressionWidget::buildExamplesTabSlot()
 {
   static bool added = false;
   static QTextEdit *examplesTab = nullptr;
@@ -205,7 +205,7 @@ void ScopedExpressionWidget::buildExamplesTabSlot()
   }
 }
 
-std::string ScopedExpressionWidget::buildExamplesString()
+std::string ExpressionWidget::buildExamplesString()
 {
   std::ostringstream stream;
   stream << 
