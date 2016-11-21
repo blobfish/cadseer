@@ -83,8 +83,8 @@ public:
   
   //! Write out a graphviz(.dot) file.
   void writeOutGraph(const std::string &pathName);
-  //! Dependency sort and recompute dirty nodes.
-  void recompute();
+  //! Dependency sort and recompute update nodes.
+  void update();
   /*! @brief Construct EdgePropertiesMap from the graph.
    * 
    * Passed into each nodes calculate override.

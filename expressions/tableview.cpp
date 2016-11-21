@@ -22,6 +22,7 @@
 #include <fstream>
 
 #include <boost/uuid/nil_generator.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 #include <QtGui/QLineEdit>
 #include <QtGui/QHeaderView>
@@ -168,7 +169,7 @@ void TableViewAll::contextMenuEvent(QContextMenuEvent* event)
   for (std::vector<Group>::iterator it = groups.begin(); it != groups.end(); ++it)
   {
     QAction *currentAction = groupMenu->addAction(QString::fromStdString(it->name));
-    currentAction->setData(QVariant(QString::fromStdString(ExpressionManager::idToString(it->id))));
+    currentAction->setData(QVariant(QString::fromStdString(boost::uuids::to_string(it->id))));
     connect(currentAction, SIGNAL(triggered()), this, SLOT(addToGroupSlot()));
   }
     

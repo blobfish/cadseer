@@ -31,6 +31,8 @@
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/composite_key.hpp>
 
+namespace ftr{class Parameter;}
+
 namespace expr{
 
 class GraphWrapper;
@@ -59,27 +61,23 @@ public:
  * 
  * boost multi_index link.
  */
+
 struct FormulaLink
 {
-  std::string objectName;
-  std::string propertyName;
+  boost::uuids::uuid featureId;
+  std::string parameterName;
   boost::uuids::uuid formulaId;
+  ftr::Parameter *parameter = nullptr;
   
   //@{
   //! used as tags.
-  struct ByObjectName{};
-  struct ByPropertyName{}; 
+  struct ByFeatureId{};
+  struct ByParameterName{}; 
   struct ByFormulaId{};
   struct ByCKey{};
   //@}
 };
 
-//! Container to hold a transaction.
-typedef boost::tuple<Group, std::vector<Group>, boost::shared_ptr<GraphWrapper> > TransContainer;
-//! Array to hold transactions.
-typedef std::vector<TransContainer> TransArray;
-//! Temporary storage of all formula values.
-typedef boost::unordered_map<boost::uuids::uuid, double> ValueCache;
 namespace BMI = boost::multi_index;
 //! Container type to hold formula to property links.
 typedef boost::multi_index_container
@@ -89,8 +87,8 @@ typedef boost::multi_index_container
   <
     BMI::ordered_non_unique
     <
-      BMI::tag<FormulaLink::ByObjectName>,
-      BMI::member<FormulaLink, std::string, &FormulaLink::objectName>
+      BMI::tag<FormulaLink::ByFeatureId>,
+      BMI::member<FormulaLink, boost::uuids::uuid, &FormulaLink::featureId>
     >,
     BMI::ordered_unique
     <
@@ -98,8 +96,8 @@ typedef boost::multi_index_container
       BMI::composite_key
       <
         FormulaLink,
-        BMI::member<FormulaLink, std::string, &FormulaLink::objectName>,
-        BMI::member<FormulaLink, std::string, &FormulaLink::propertyName>
+        BMI::member<FormulaLink, boost::uuids::uuid, &FormulaLink::featureId>,
+        BMI::member<FormulaLink, std::string, &FormulaLink::parameterName>
       >
     >,
     BMI::ordered_non_unique
@@ -192,42 +190,17 @@ public:
   std::string getFormulaName(const boost::uuids::uuid &idIn) const;
   
   //@{
-  //! id, string conversions.
-  static boost::uuids::uuid stringToId(const std::string &stringIn);
-  static std::string idToString(const boost::uuids::uuid &idIn);
-  //@}
-  
-  //@{
   //! Remove formula from both groups and graph.
   void removeFormula(const boost::uuids::uuid &idIn);
   void removeFormula(const std::string &nameIn);
   //@}
   
-  //! Start a transaction.
-  void beginTransaction();
-  //! Commit a transaction.
-  void commitTransaction();
-  //! Reset a transaction.
-  void rejectTransaction();
-  //! Move back one index in transaction array.
-  void undo();
-  //! Move forward one index in transaction array.
-  void redo();
-  
-  //! Link property to formula.
-  void addFormulaLink(const std::string &objectNameIn, const std::string &propertyNameIn, const boost::uuids::uuid &idIn);
-  //! Link property to formula.
-  void addFormulaLink(const std::string &objectNameIn, const std::string &propertyNameIn, const std::string &nameIn);
-  //! Test whether an object has formula links.
-  bool isObjectLinked(const std::string &objectNameIn) const;
-  //! Test whether a property has formula links.
-  bool isPropertyLinked(const std::string &objectNameIn, const std::string &propertyNameIn) const;
-  //! Test whether a formula has links.
-  bool isFormulaLinked(const boost::uuids::uuid &idIn) const;
-  //! Remove link to property.
-  void removeFormulaLink(const std::string &objectNameIn, const std::string &propertyNameIn);
-  //! Remove all links to object.
-  void objectDeleted(const std::string &objectNameIn);
+  //! Link parameter to formula.
+  void addFormulaLink(const boost::uuids::uuid &, ftr::Parameter *, const boost::uuids::uuid &);
+  //! erase parameter link to formula.
+  void removeFormulaLink(const boost::uuids::uuid &, ftr::Parameter *);
+  //! Dispatch values to parameters.
+  void dispatchValues();
   //! Write a list of links to stream.
   void dumpLinks(std::ostream &stream);
   
@@ -237,27 +210,9 @@ public:
   //! Contains ids for a subset of expressions.
   std::vector<Group> userDefinedGroups;
   
-  
 private:
-  //! Restore the state from an index. used in undo/redo.
-  void restoreState(const std::size_t &index);
-  //! Store all current formula values.
-  void generateValueCache(ValueCache &out) const;
-  //! Notifications of formula changes.
-  void dispatchValueChanges(const ValueCache &virginCache);
-  //! Update properties linked to formula.
-  void updateLinkedProperty(const boost::uuids::uuid idIn, const double valueIn);
-  
   //! Pointer to GraphWrapper.
   boost::shared_ptr<GraphWrapper> graphPtr;
-  //! Array of transactions
-  TransArray transArray;
-  //! State of transaction. True is transaction started, but not finished. False is no transaction
-  bool transactionState;
-  //! Current location in the transaction array.
-  std::size_t transactionPosition;
-  //! Cache pre-recompute formula values for post-recompute comparison.
-  ValueCache valueCache;
   //! Container for formula to properties links.
   FormulaLinkContainerType formulaLinks;
 };

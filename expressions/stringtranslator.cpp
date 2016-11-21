@@ -70,7 +70,7 @@ StringTranslator::TotalState StringTranslator::parseString(const std::string &fo
     totalState = ParseFailed;
     return ParseFailed;
   }
-  std::cout << "parse succeeded" << std::endl;
+//   std::cout << "parse succeeded" << std::endl;
   
   totalState = ParseSucceeded;
   return totalState;

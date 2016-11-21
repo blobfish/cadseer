@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <fstream>
 #include <boost/uuid/uuid_io.hpp>
+#include <boost/uuid/string_generator.hpp>
 
 #include <QtCore/QTextStream>
 
@@ -99,7 +100,7 @@ Qt::ItemFlags TableModel::flags(const QModelIndex& index) const
 
 bool TableModel::setData(const QModelIndex& index, const QVariant& value, int)
 {
-  boost::uuids::uuid fId = ExpressionManager::stringToId(this->data(index, Qt::UserRole).toString().toStdString());
+  boost::uuids::uuid fId = boost::uuids::string_generator()(this->data(index, Qt::UserRole).toString().toStdString());
   assert(eManager.getGraphWrapper().hasFormula(fId));
   if (index.column() == 0)
   {
@@ -174,8 +175,9 @@ std::vector<Group> TableModel::getGroups()
 
 void TableModel::addFormulaToGroup(const QModelIndex& indexIn, const QString& groupIdIn)
 {
-  boost::uuids::uuid groupId = ExpressionManager::stringToId(groupIdIn.toStdString());
-  boost::uuids::uuid formulaId = ExpressionManager::stringToId(this->data(indexIn, Qt::UserRole).toString().toStdString());
+  boost::uuids::string_generator gen;
+  boost::uuids::uuid groupId = gen(groupIdIn.toStdString());
+  boost::uuids::uuid formulaId = gen(this->data(indexIn, Qt::UserRole).toString().toStdString());
   assert(eManager.hasUserGroup(groupId));
   assert(eManager.getGraphWrapper().hasFormula(formulaId));
   eManager.addFormulaToUserGroup(groupId, formulaId);
@@ -221,7 +223,7 @@ void TableModel::removeFormula(const QModelIndexList &indexesIn)
   
   for (std::vector<int>::const_iterator rowIt = mappedRows.begin(); rowIt != mappedRows.end(); ++rowIt)
   {
-    boost::uuids::uuid currentId = ExpressionManager::stringToId
+    boost::uuids::uuid currentId = boost::uuids::string_generator()
       (this->data(indexMap.value(*rowIt), Qt::UserRole).toString().toStdString());
     this->beginRemoveRows(QModelIndex(), indexMap.value(*rowIt).row(), indexMap.value(*rowIt).row());
     eManager.removeFormula(currentId);
@@ -231,16 +233,17 @@ void TableModel::removeFormula(const QModelIndexList &indexesIn)
 
 void TableModel::exportExpressions(QModelIndexList& indexesIn, std::ostream &streamIn) const
 {
+  boost::uuids::string_generator gen;
   std::set<boost::uuids::uuid> selectedIds;
   QModelIndexList::const_iterator it;
   for (it = indexesIn.constBegin(); it != indexesIn.constEnd(); ++it)
-    selectedIds.insert(ExpressionManager::stringToId(this->data(*it, Qt::UserRole).toString().toStdString()));
+    selectedIds.insert(gen(this->data(*it, Qt::UserRole).toString().toStdString()));
   
   //loop through all selected ids and get their dependents.
   std::vector<boost::uuids::uuid> dependentIds;
   for (it = indexesIn.constBegin(); it != indexesIn.constEnd(); ++it)
   {
-    boost::uuids::uuid currentId = ExpressionManager::stringToId(this->data(*it, Qt::UserRole).toString().toStdString());
+    boost::uuids::uuid currentId = gen(this->data(*it, Qt::UserRole).toString().toStdString());
     std::vector<boost::uuids::uuid> tempIds = eManager.getGraphWrapper().getDependentFormulaIds(currentId);
     std::copy(tempIds.begin(), tempIds.end(), std::back_inserter(dependentIds));
   }
@@ -356,7 +359,7 @@ QModelIndex GroupProxyModel::addDefaultRow()
   int rowCount = myModel->rowCount();
   myModel->addDefaultRow();
   QModelIndex sourceIndex = myModel->index(rowCount, 0);
-  boost::uuids::uuid formulaId = ExpressionManager::stringToId(myModel->data(sourceIndex, Qt::UserRole).toString().toStdString());
+  boost::uuids::uuid formulaId = boost::uuids::string_generator()(myModel->data(sourceIndex, Qt::UserRole).toString().toStdString());
   eManager.addFormulaToUserGroup(groupId, formulaId);
   this->invalidateFilter();
   QModelIndex out = this->mapFromSource(sourceIndex);
@@ -375,7 +378,7 @@ void GroupProxyModel::removeFromGroup(const QModelIndexList &indexesIn)
     if (std::find(processedRows.begin(), processedRows.end(),currentSource.row()) != processedRows.end())
       continue;
     processedRows.push_back(currentSource.row());
-    boost::uuids::uuid id = ExpressionManager::stringToId
+    boost::uuids::uuid id = boost::uuids::string_generator()
       (this->sourceModel()->data(currentSource, Qt::UserRole).toString().toStdString());
     assert(eManager.doesUserGroupContainFormula(groupId, id));
     eManager.removeFormulaFromUserGroup(groupId, id);

@@ -64,7 +64,7 @@ void GraphWrapper::writeOutGraph(const std::string& pathName)
                         Edge_writer<Graph>(graph), boost::default_writer(), pMap);
 }
 
-void GraphWrapper::recompute()
+void GraphWrapper::update()
 {
   VertexIndexMap vIndexMap;
   boost::associative_property_map<VertexIndexMap> pMap = buildVertexPropertyMap(vIndexMap);

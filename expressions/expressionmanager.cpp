@@ -27,6 +27,10 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/graph/adj_list_serialize.hpp>
 
+#include <application/application.h>
+#include <project/project.h>
+#include <feature/parameter.h>
+
 #include <expressions/expressionedgeproperty.h>
 #include <expressions/expressiongraph.h>
 #include <expressions/expressionmanager.h>
@@ -35,6 +39,7 @@
 #include <sstream>
 
 using namespace expr;
+using namespace boost::uuids;
 
 Group::Group() : id(boost::uuids::random_generator()()), name("default")
 {
@@ -56,8 +61,7 @@ void Group::removeFormula(const boost::uuids::uuid& fIdIn)
   formulaIds.erase(it);
 }
 
-ExpressionManager::ExpressionManager() : graphPtr(new GraphWrapper()), transArray(), transactionState(false),
-  transactionPosition(0)
+ExpressionManager::ExpressionManager() : graphPtr(new GraphWrapper())
 {
   //allgroup id set upon serialize restore.
   allGroup.name = "All";
@@ -75,7 +79,8 @@ GraphWrapper& ExpressionManager::getGraphWrapper()
 
 void ExpressionManager::update()
 {
-  graphPtr->recompute();
+  graphPtr->update();
+  dispatchValues();
 }
 
 void ExpressionManager::writeOutGraph(const std::string& pathName)
@@ -235,24 +240,6 @@ std::string ExpressionManager::getUserGroupName(const boost::uuids::uuid& groupI
   assert(0); //no user group of id.
 }
 
-std::string ExpressionManager::idToString(const boost::uuids::uuid& idIn)
-{
-  std::string out;
-  std::stringstream stream;
-  stream << idIn;
-  stream >> out;
-  return out;
-}
-
-boost::uuids::uuid ExpressionManager::stringToId(const std::string& stringIn)
-{
-  boost::uuids::uuid out;
-  std::stringstream stream;
-  stream << stringIn;
-  stream >> out;
-  return out;
-}
-
 void ExpressionManager::removeFormula(const std::string& nameIn)
 {
   assert(graphPtr->hasFormula(nameIn));
@@ -270,240 +257,56 @@ void ExpressionManager::removeFormula(const boost::uuids::uuid& idIn)
   }
   graphPtr->removeFormula(idIn);
   
-  //update any linked properties.
-//   FormulaLinkContainerType::index<FormulaLink::ByFormulaId>::type::iterator it, itEnd;
-//   it = formulaLinks.get<FormulaLink::ByFormulaId>().find(idIn);
-//   itEnd = formulaLinks.get<FormulaLink::ByFormulaId>().end();
-//   while (it != itEnd)
-//   {
-//     std::string objectName = it->objectName;
-//     std::string propertyName = it->propertyName;
-//     App::DocumentObject *object = document->getObject(objectName.c_str());
-//     //link might be alive, but the object is not.
-//     if (!object) continue;
-//     App::PropertyFloat *property = dynamic_cast<App::PropertyFloat *>(object->getPropertyByName(propertyName.c_str()));
-//     if (!property) continue;
-//     property->clearExpressionLinked();
-//     formulaLinks.get<FormulaLink::ByFormulaId>().erase(it);
-//     it = formulaLinks.get<FormulaLink::ByFormulaId>().find(idIn);
-//     itEnd = formulaLinks.get<FormulaLink::ByFormulaId>().end();
-//   }
-}
-
-//TODO: need to incorporate link container into transaction.
-void ExpressionManager::beginTransaction()
-{
-  assert(transactionState == false);
-  //chop off any beyond position.
-  transArray.resize(transactionPosition + 1);
-  boost::shared_ptr<GraphWrapper> copy(new GraphWrapper(*graphPtr));
-  transArray.push_back(boost::make_tuple(allGroup, userDefinedGroups, copy));
-  transactionState = true;
-  generateValueCache(valueCache);
-}
-
-void ExpressionManager::commitTransaction()
-{
-  assert(transactionState == true);
-  transactionPosition = transArray.size() - 1;
-  transactionState = false;
-  ValueCache virginCache;
-  generateValueCache(virginCache);
-  dispatchValueChanges(virginCache);
-}
-
-void ExpressionManager::rejectTransaction()
-{
-  assert(transactionState == true);
-  restoreState(transArray.size()-1);
-  transactionPosition = transArray.size() - 1;
-  transactionState = false;
-}
-
-void ExpressionManager::undo()
-{
-  assert(transactionState == false);
-  if (transactionPosition == 0)
+  //update any linked parameters.
+  FormulaLinkContainerType::index<FormulaLink::ByFormulaId>::type::iterator it, it2, itEnd;
+  
+  boost::tie(it, itEnd) = formulaLinks.get<FormulaLink::ByFormulaId>().equal_range(idIn);
+  if (it == itEnd)
     return;
-  generateValueCache(valueCache);
-  transactionPosition--;
-  restoreState(transactionPosition);
-  ValueCache virginCache;
-  generateValueCache(virginCache);
-  dispatchValueChanges(virginCache);
-}
-
-void ExpressionManager::redo()
-{
-  assert(transactionState == false);
-  if (transactionPosition >= transArray.size())
-    return;
-  generateValueCache(valueCache);
-  transactionPosition++;
-  restoreState(transactionPosition);
-  ValueCache virginCache;
-  generateValueCache(virginCache);
-  dispatchValueChanges(virginCache);
-}
-
-void ExpressionManager::restoreState(const std::size_t &index)
-{
-  assert(index < transArray.size());
-  allGroup = boost::get<0>(transArray.at(index));
-  userDefinedGroups = boost::get<1>(transArray.at(index));
-  graphPtr = boost::get<2>(transArray.at(index));
-  //should we recompute here?
-  //should we mark everything dirty? we don't want to have to analyse the changes.
-  graphPtr->setAllDirty();
-  update();
-}
-
-void ExpressionManager::generateValueCache(ValueCache &out) const
-{
-  out.clear();
-  std::vector<boost::uuids::uuid> ids = graphPtr->getAllFormulaIds();
-  std::vector<boost::uuids::uuid>::const_iterator it;
-  for (it = ids.begin(); it != ids.end(); ++it)
-    out.insert(std::make_pair(*it, graphPtr->getFormulaValue(*it)));
-}
-
-void ExpressionManager::dispatchValueChanges(const ValueCache& virginCache)
-{
-  std::set<boost::uuids::uuid> allIds;
-  ValueCache::const_iterator it;
-  for (it = virginCache.begin(); it != virginCache.end(); ++it)
-    allIds.insert((*it).first);
-  for (it = valueCache.begin(); it != valueCache.end(); ++it)
-    allIds.insert((*it).first);
+  it2 = it;
   
-  //now we should have one id contained in either or both arrays.
-  
-  std::cout << std::endl << std::endl;
-  
-  std::set<boost::uuids::uuid>::const_iterator allIt;
-  for (allIt = allIds.begin(); allIt != allIds.end(); ++allIt)
+  for(; it != itEnd; ++it)
   {
-    std::string stringId = idToString(*allIt);
-    bool inValueCache = (valueCache.find(*allIt) != valueCache.end());
-    bool inVirginCache = (virginCache.find(*allIt) != valueCache.end());
-    if (inValueCache && inVirginCache)
-    {
-      double value = valueCache.at(*allIt);
-      double virgin = virginCache.at(*allIt);
-        std::cout << stringId;
-      if (value == virgin) //epsilon for comparison?
-        std::cout << ": No change. " << value << std::endl; //do nothing.
-      else
-      {
-        std::cout << ": Change from: " << value << "   to: " << virgin << std::endl; //dispatch value changed
-        updateLinkedProperty(*allIt, virgin);
-      }
-    }
-    else if (!inValueCache && inVirginCache)
-    {
-      //new expression. shouldn't need to do anything.
-      std::cout << stringId << ": New expression" << std::endl;
-    }
-    else if (inValueCache && !inVirginCache)
-    {
-      std::cout << stringId << ": Expression removed" << std::endl;
-    }
+    it->parameter->setConstant(true); //change parameter constant to true.
   }
-//   document->recompute();
   
-  std::cout << std::endl << std::endl;
+  formulaLinks.get<FormulaLink::ByFormulaId>().erase(it2, itEnd);
 }
 
-void ExpressionManager::updateLinkedProperty(const boost::uuids::uuid /*idIn*/, const double /*valueIn*/)
-{
-//   assert(document);
-  //get all links
-//   FormulaLinkContainerType::index<FormulaLink::ByFormulaId>::type::iterator it, itEnd;
-//   boost::tie(it, itEnd) = formulaLinks.get<FormulaLink::ByFormulaId>().equal_range(idIn);
-//   for (;it != itEnd; ++it)
-//   {
-//     App::DocumentObject *dObject = document->getObject((*it).objectName.c_str());
-//     assert(dObject);
-//     App::Property *property = dObject->getPropertyByName((*it).propertyName.c_str());
-//     assert(property);
-//     App::PropertyFloat *fProperty = dynamic_cast<App::PropertyFloat *>(property);
-//     assert(fProperty);
-//     fProperty->setValue(valueIn);
-//   }
-}
-
-void ExpressionManager::addFormulaLink(const std::string& objectNameIn, const std::string& propertyNameIn, const boost::uuids::uuid& idIn)
+void ExpressionManager::addFormulaLink(const uuid &featureIdIn, ftr::Parameter *parameterIn, const uuid &formulaIdIn)
 {
   FormulaLink virginLink;
-  virginLink.objectName = objectNameIn;
-  virginLink.propertyName = propertyNameIn;
-  virginLink.formulaId = idIn;
+  virginLink.featureId = featureIdIn;
+  virginLink.parameterName = parameterIn->getName();
+  virginLink.formulaId = formulaIdIn;
+  virginLink.parameter = parameterIn;
   
   formulaLinks.insert(virginLink);
   
   //update current object.
-  double value = graphPtr->getFormulaValue(idIn);
-  updateLinkedProperty(idIn, value);
-//   document->recompute();
+  parameterIn->setConstant(false);
+  double value = graphPtr->getFormulaValue(formulaIdIn);
+  parameterIn->setValue(value);
 }
 
-void ExpressionManager::addFormulaLink(const std::string& objectNameIn, const std::string& propertyNameIn, const std::string& nameIn)
+void ExpressionManager::removeFormulaLink(const uuid &featureIdIn, ftr::Parameter *parameterIn)
 {
-  assert(graphPtr->hasFormula(nameIn));
-  addFormulaLink(objectNameIn, propertyNameIn, graphPtr->getFormulaId(nameIn));
+  FormulaLinkContainerType::index<FormulaLink::ByCKey>::type::iterator it, it2, itEnd;
+  
+  boost::tie(it, itEnd) = formulaLinks.get<FormulaLink::ByCKey>().equal_range(boost::make_tuple(featureIdIn, parameterIn->getName()));
+  formulaLinks.get<FormulaLink::ByCKey>().erase(it, itEnd);
 }
 
-bool ExpressionManager::isObjectLinked(const std::string& objectNameIn) const
+void ExpressionManager::dispatchValues()
 {
-  const FormulaLinkContainerType::index<FormulaLink::ByObjectName>::type &list = formulaLinks.get<FormulaLink::ByObjectName>();
-  FormulaLinkContainerType::index<FormulaLink::ByObjectName>::type::const_iterator it;
-  it = list.find(objectNameIn);
-  if (it != list.end())
-    return true;
-  return false;
-}
-
-bool ExpressionManager::isPropertyLinked(const std::string& objectNameIn, const std::string& propertyNameIn) const
-{
-  FormulaLinkContainerType::index<FormulaLink::ByCKey>::type::iterator itBegin, itEnd;
-  boost::tie(itBegin, itEnd) = formulaLinks.get<FormulaLink::ByCKey>().equal_range(boost::make_tuple(objectNameIn, propertyNameIn));
-  if (itBegin != itEnd)
-    return true;
-  else
-    return false;
-}
-
-bool ExpressionManager::isFormulaLinked(const boost::uuids::uuid& idIn) const
-{
-  FormulaLinkContainerType::index<FormulaLink::ByFormulaId>::type::iterator itBegin, itEnd;
-  boost::tie(itBegin, itEnd) = formulaLinks.get<FormulaLink::ByFormulaId>().equal_range(idIn);
-  if (itBegin != itEnd)
-    return true;
-  else
-    return false;
-}
-
-void ExpressionManager::removeFormulaLink(const std::string& objectNameIn, const std::string& propertyNameIn)
-{
-  FormulaLinkContainerType::index<FormulaLink::ByCKey>::type::iterator it;
-  it = formulaLinks.get<FormulaLink::ByCKey>().find(boost::make_tuple(objectNameIn, propertyNameIn));
-  if (it == formulaLinks.get<FormulaLink::ByCKey>().end())
-    return;
-  formulaLinks.get<FormulaLink::ByCKey>().erase(it);
-}
-
-void ExpressionManager::objectDeleted(const std::string& objectNameIn)
-{
-  //update any linked properties.
-  FormulaLinkContainerType::index<FormulaLink::ByObjectName>::type::iterator it, itEnd;
-  it = formulaLinks.get<FormulaLink::ByObjectName>().find(objectNameIn);
-  itEnd = formulaLinks.get<FormulaLink::ByObjectName>().end();
-  while (it != itEnd)
+  /* it is safe to just send all the values because, each parameter
+   * makes sure the new value is different than the old
+   */
+  FormulaLinkContainerType::const_iterator it;
+  for (it = formulaLinks.begin(); it != formulaLinks.end(); ++it)
   {
-    std::string objectName = it->objectName;
-    formulaLinks.get<FormulaLink::ByObjectName>().erase(it);
-    it = formulaLinks.get<FormulaLink::ByObjectName>().find(objectNameIn);
-    itEnd = formulaLinks.get<FormulaLink::ByObjectName>().end();
+    assert(it->parameter);
+    it->parameter->setValue(graphPtr->getFormulaValue(it->formulaId));
   }
 }
 
@@ -512,8 +315,8 @@ void ExpressionManager::dumpLinks(std::ostream& stream)
   FormulaLinkContainerType::const_iterator it;
   for (it = formulaLinks.begin(); it != formulaLinks.end(); ++it)
   {
-    stream << std::left << std::setw(30) << it->objectName <<
-      std::setw(30) << it->propertyName <<
-      std::setw(50) << idToString(it->formulaId) << std::endl;
+    stream << std::left << std::setw(30) << "feature id: " << boost::uuids::to_string(it->featureId) <<
+      std::setw(30) << "parameter name: " << it->parameterName <<
+      std::setw(50) << "formula id: " << boost::uuids::to_string(it->formulaId) << std::endl;
   }
 }
