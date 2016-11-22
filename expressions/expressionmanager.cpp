@@ -30,6 +30,10 @@
 #include <application/application.h>
 #include <project/project.h>
 #include <feature/parameter.h>
+#include <message/dispatch.h>
+#include <message/observer.h>
+#include <preferences/preferencesXML.h>
+#include <preferences/manager.h>
 
 #include <expressions/expressionedgeproperty.h>
 #include <expressions/expressiongraph.h>
@@ -63,6 +67,10 @@ void Group::removeFormula(const boost::uuids::uuid& fIdIn)
 
 ExpressionManager::ExpressionManager() : graphPtr(new GraphWrapper())
 {
+  observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+  observer->name = "expr::ExpressionWidget";
+  setupDispatcher();
+  
   //allgroup id set upon serialize restore.
   allGroup.name = "All";
 }
@@ -81,6 +89,12 @@ void ExpressionManager::update()
 {
   graphPtr->update();
   dispatchValues();
+  if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
+  {
+    msg::Message uMessage;
+    uMessage.mask = msg::Request | msg::Update;
+    observer->messageOutSignal(uMessage);
+  }
 }
 
 void ExpressionManager::writeOutGraph(const std::string& pathName)
@@ -227,6 +241,15 @@ std::string ExpressionManager::getFormulaName(const boost::uuids::uuid& idIn) co
   return graphPtr->getFormulaName(idIn);
 }
 
+bool ExpressionManager::hasFormula(const uuid& idIn) const
+{
+  return graphPtr->hasFormula(idIn);
+}
+
+bool ExpressionManager::hasFormula(const std::string& nameIn) const
+{
+  return graphPtr->hasFormula(nameIn);
+}
 
 std::string ExpressionManager::getUserGroupName(const boost::uuids::uuid& groupIdIn) const
 {
@@ -284,9 +307,9 @@ void ExpressionManager::addFormulaLink(const uuid &featureIdIn, ftr::Parameter *
   formulaLinks.insert(virginLink);
   
   //update current object.
-  parameterIn->setConstant(false);
   double value = graphPtr->getFormulaValue(formulaIdIn);
   parameterIn->setValue(value);
+  parameterIn->setConstant(false);
 }
 
 void ExpressionManager::removeFormulaLink(const uuid &featureIdIn, ftr::Parameter *parameterIn)
@@ -295,6 +318,22 @@ void ExpressionManager::removeFormulaLink(const uuid &featureIdIn, ftr::Paramete
   
   boost::tie(it, itEnd) = formulaLinks.get<FormulaLink::ByCKey>().equal_range(boost::make_tuple(featureIdIn, parameterIn->getName()));
   formulaLinks.get<FormulaLink::ByCKey>().erase(it, itEnd);
+  parameterIn->setConstant(true);
+}
+
+bool ExpressionManager::hasFormulaLink(const uuid &featureIdIn, ftr::Parameter *parameterIn) const
+{
+  FormulaLinkContainerType::index<FormulaLink::ByCKey>::type::iterator it;
+  it = formulaLinks.get<FormulaLink::ByCKey>().find(boost::make_tuple(featureIdIn, parameterIn->getName()));
+  return it != formulaLinks.get<FormulaLink::ByCKey>().end();
+}
+
+uuid ExpressionManager::getFormulaLink(const uuid &featureIdIn, ftr::Parameter *parameterIn) const
+{
+  FormulaLinkContainerType::index<FormulaLink::ByCKey>::type::iterator it;
+  it = formulaLinks.get<FormulaLink::ByCKey>().find(boost::make_tuple(featureIdIn, parameterIn->getName()));
+  assert(it != formulaLinks.get<FormulaLink::ByCKey>().end());
+  return it->formulaId;
 }
 
 void ExpressionManager::dispatchValues()
@@ -315,8 +354,13 @@ void ExpressionManager::dumpLinks(std::ostream& stream)
   FormulaLinkContainerType::const_iterator it;
   for (it = formulaLinks.begin(); it != formulaLinks.end(); ++it)
   {
-    stream << std::left << std::setw(30) << "feature id: " << boost::uuids::to_string(it->featureId) <<
-      std::setw(30) << "parameter name: " << it->parameterName <<
-      std::setw(50) << "formula id: " << boost::uuids::to_string(it->formulaId) << std::endl;
+    stream << "feature id: " << boost::uuids::to_string(it->featureId)
+      << "    parameter name: " << std::left << std::setw(20) << it->parameterName
+      << "    formula id: " << boost::uuids::to_string(it->formulaId) << std::endl;
   }
+}
+
+void ExpressionManager::setupDispatcher()
+{
+  //not using yet.
 }

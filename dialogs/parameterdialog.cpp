@@ -24,9 +24,13 @@
 #include <QPushButton>
 
 #include <boost/uuid/uuid.hpp>
+#include <boost/uuid/nil_generator.hpp>
+#include <boost/uuid/string_generator.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 #include <application/application.h>
 #include <project/project.h>
+#include <expressions/expressionmanager.h>
 #include <application/mainwindow.h>
 #include <feature/base.h>
 #include <feature/parameter.h>
@@ -50,6 +54,7 @@ ParameterDialog::ParameterDialog(ftr::Parameter *parameterIn, const boost::uuids
   parameter(parameterIn)
 {
   assert(parameter);
+  this->setAcceptDrops(true);
   
   feature = static_cast<app::Application*>(qApp)->getProject()->findFeature(idIn);
   assert(feature);
@@ -72,6 +77,7 @@ void ParameterDialog::buildGui()
   
   QLabel *nameLabel = new QLabel(QString::fromUtf8(parameter->getName().c_str()), this);
   editLine = new EnterEdit(this);
+  editLine->setAcceptDrops(false);
   QHBoxLayout *editLayout = new QHBoxLayout();
   editLayout->addWidget(nameLabel);
   editLayout->addWidget(editLine);
@@ -84,13 +90,16 @@ void ParameterDialog::buildGui()
   linkButton = new QPushButton(this);
   linkButton->setCheckable(true);
   linkButton->setFocusPolicy(Qt::ClickFocus);
+  linkLabel = new QLabel(this);
+  linkLabel->hide();
   buttonLayout->addWidget(linkButton);
   buttonLayout->addStretch();
+  buttonLayout->addWidget(linkLabel);
   mainLayout->addLayout(buttonLayout);
   
   connect(editLine, SIGNAL(goUpdateSignal()), this, SLOT(updateSlot()));
   connect(this, SIGNAL(accepted()), this, SLOT(updateSlot()));
-  connect(linkButton, SIGNAL(toggled(bool)), this, SLOT(linkButtonToggledSlot(bool)));
+  connect(linkButton, SIGNAL(clicked(bool)), this, SLOT(linkButtonClickedSlot(bool)));
 }
 
 void ParameterDialog::keyPressEvent(QKeyEvent *eventIn)
@@ -113,11 +122,67 @@ void ParameterDialog::keyPressEvent(QKeyEvent *eventIn)
   QDialog::keyPressEvent(eventIn);
 }
 
+static boost::uuids::uuid getId(const QString &stringIn)
+{
+  boost::uuids::uuid idOut = boost::uuids::nil_generator()();
+  if (stringIn.startsWith("ExpressionId;"))
+  {
+    QStringList split = stringIn.split(";");
+    if (split.size() == 2)
+      idOut = boost::uuids::string_generator()(split.at(1).toStdString());
+  }
+  return idOut;
+}
+
+void ParameterDialog::dragEnterEvent(QDragEnterEvent *event)
+{
+  if (event->mimeData()->hasText())
+  {
+    QString textIn = event->mimeData()->text();
+    boost::uuids::uuid id = getId(textIn);
+    if (!id.is_nil())
+    {
+      const expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
+      if (eManager.hasFormula(id))
+	event->acceptProposedAction();
+    }
+  }
+}
+
+void ParameterDialog::dropEvent(QDropEvent *event)
+{
+  if (event->mimeData()->hasText())
+  {
+    QString textIn = event->mimeData()->text();
+    boost::uuids::uuid id = getId(textIn);
+    if (!id.is_nil())
+    {
+      expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
+      if (!parameter->isConstant())
+      {
+	//parameter is already linked.
+	assert(eManager.hasFormulaLink(feature->getId(), parameter));
+	eManager.removeFormulaLink(feature->getId(), parameter);
+      }
+      
+      assert(eManager.hasFormula(id));
+      eManager.addFormulaLink(feature->getId(), parameter, id);
+      if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
+      {
+	msg::Message uMessage;
+	uMessage.mask = msg::Request | msg::Update;
+	messageOutSignal(uMessage);
+      }
+    }
+  }
+}
+
 void ParameterDialog::valueHasChanged()
 {
   lastValue = parameter->getValue();
   editLine->setText(QString::number(parameter->getValue(), 'f', 12));
-  editLine->selectAll();
+  if (parameter->isConstant())
+    editLine->selectAll();
 }
 
 void ParameterDialog::constantHasChanged()
@@ -127,18 +192,40 @@ void ParameterDialog::constantHasChanged()
     linkButton->setChecked(false);
     linkButton->setIcon(QIcon(":resources/images/unlinkIcon.svg"));
     linkButton->setText(tr("unlinked"));
+    linkButton->setDisabled(true);
+    linkLabel->hide();
+    editLine->setEnabled(true);
+    editLine->setFocus();
+    valueHasChanged();
   }
   else
   {
     linkButton->setChecked(true);
     linkButton->setIcon(QIcon(":resources/images/linkIcon.svg"));
     linkButton->setText(tr("linked"));
+    linkButton->setEnabled(true);
+    
+    const expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
+    assert(eManager.hasFormulaLink(feature->getId(), parameter));
+    std::string formulaName = eManager.getFormulaName(eManager.getFormulaLink(feature->getId(), parameter));
+    linkLabel->setText(QString::fromStdString(formulaName));
+    linkLabel->show();
+    
+    editLine->clearFocus();
+    editLine->deselect();
+    editLine->setDisabled(true);
   }
 }
 
-void ParameterDialog::linkButtonToggledSlot(bool checkedState)
+void ParameterDialog::linkButtonClickedSlot(bool checkedState)
 {
-  parameter->setConstant(!checkedState);
+  if (!checkedState)
+  {
+    expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
+    assert(eManager.hasFormulaLink(feature->getId(), parameter));
+    eManager.removeFormulaLink(feature->getId(), parameter);
+    //manager sets the parameter to constant or not.
+  }
 }
 
 void ParameterDialog::messageInSlot(const msg::Message &messageIn)

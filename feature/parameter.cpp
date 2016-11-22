@@ -52,8 +52,6 @@ void Parameter::setValue(double valueIn)
 {
   if (value == valueIn)
     return;
-  if (!isConstant())
-    return;
   
   value = valueIn;
   valueChangedSignal();

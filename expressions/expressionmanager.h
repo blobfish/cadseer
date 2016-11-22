@@ -32,6 +32,7 @@
 #include <boost/multi_index/composite_key.hpp>
 
 namespace ftr{class Parameter;}
+namespace msg{class Message; class Observer;}
 
 namespace expr{
 
@@ -188,6 +189,8 @@ public:
   
   boost::uuids::uuid getFormulaId(const std::string &nameIn) const;
   std::string getFormulaName(const boost::uuids::uuid &idIn) const;
+  bool hasFormula(const std::string &nameIn) const;
+  bool hasFormula(const boost::uuids::uuid &idIn) const;
   
   //@{
   //! Remove formula from both groups and graph.
@@ -195,10 +198,14 @@ public:
   void removeFormula(const std::string &nameIn);
   //@}
   
-  //! Link parameter to formula.
+  //! Link parameter to formula. first parameter is feature id. last is formula id.
   void addFormulaLink(const boost::uuids::uuid &, ftr::Parameter *, const boost::uuids::uuid &);
   //! erase parameter link to formula.
   void removeFormulaLink(const boost::uuids::uuid &, ftr::Parameter *);
+  //! checks for a formula link to feature id and to parameter.
+  bool hasFormulaLink(const boost::uuids::uuid &, ftr::Parameter *) const;
+  //! find formula id linked to feature id and to parameter. assert if not present
+  boost::uuids::uuid getFormulaLink(const boost::uuids::uuid &, ftr::Parameter *) const;
   //! Dispatch values to parameters.
   void dispatchValues();
   //! Write a list of links to stream.
@@ -215,6 +222,11 @@ private:
   boost::shared_ptr<GraphWrapper> graphPtr;
   //! Container for formula to properties links.
   FormulaLinkContainerType formulaLinks;
+  
+  std::unique_ptr<msg::Observer> observer;
+  void setupDispatcher();
+  void closeProjectDispatched(const msg::Message &);
+  void openNewProjectDispatched(const msg::Message &);
 };
 
 }

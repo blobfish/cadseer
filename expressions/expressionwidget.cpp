@@ -123,6 +123,7 @@ void ExpressionWidget::removeGroupSlot(QWidget *tab)
 void ExpressionWidget::addGroupView(const boost::uuids::uuid& idIn, const QString &name)
 {
   TableViewGroup *userView = new TableViewGroup(tableViewAll);
+  userView->setDragEnabled(true);
   GroupProxyModel *userProxyModel = new GroupProxyModel(*eManager, idIn, userView);
   userProxyModel->setSourceModel(mainTable);
   userView->setModel(userProxyModel);
@@ -282,6 +283,7 @@ void ExpressionWidget::openNewProjectDispatched(const msg::Message&)
   
   assert(!tableViewAll);
   tableViewAll = new TableViewAll(tabWidget);
+  tableViewAll->setDragEnabled(true);
   
   assert(!mainTable);
   mainTable = new TableModel(*eManager, tableViewAll);

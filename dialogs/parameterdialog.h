@@ -29,6 +29,9 @@
 
 class QKeyEvent;
 class QButton;
+class QEnterEvent;
+class QDropEvent;
+class QLabel;
 
 namespace boost{namespace uuids{class uuid;}}
 
@@ -65,6 +68,8 @@ namespace dlg
     
   protected:
     virtual void keyPressEvent(QKeyEvent*) override;
+    virtual void dragEnterEvent(QDragEnterEvent *) override;
+    virtual void dropEvent(QDropEvent *) override;
 
   private:
     void buildGui();
@@ -74,11 +79,12 @@ namespace dlg
     ftr::Base *feature;
     EnterEdit *editLine;
     QPushButton *linkButton;
+    QLabel *linkLabel;
     MessageOutSignal messageOutSignal;
     double lastValue;
   private Q_SLOTS:
     void updateSlot();
-    void linkButtonToggledSlot(bool checkedState);
+    void linkButtonClickedSlot(bool checkedState);
   };
 }
 

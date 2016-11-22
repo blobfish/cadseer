@@ -23,6 +23,8 @@
 #include <boost/uuid/string_generator.hpp>
 
 #include <QtCore/QTextStream>
+#include <QtCore/QStringList>
+#include <QtCore/QMimeData>
 
 #include <expressions/expressiongraph.h>
 #include <expressions/expressionmanager.h>
@@ -93,9 +95,17 @@ QVariant TableModel::headerData(int section, Qt::Orientation orientation, int ro
 
 Qt::ItemFlags TableModel::flags(const QModelIndex& index) const
 {
-  if (index.column() == 2)
+  static std::vector<Qt::ItemFlags> flagVector
+  {
+    Qt::ItemFlags(Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled),
+    Qt::ItemFlags(Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsEnabled),
+    Qt::ItemFlags(Qt::NoItemFlags)
+    
+  };
+  
+  if (!index.isValid())
     return Qt::NoItemFlags;
-  return Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsEnabled;
+  return flagVector.at(index.column());
 }
 
 bool TableModel::setData(const QModelIndex& index, const QVariant& value, int)
@@ -166,6 +176,29 @@ bool TableModel::setData(const QModelIndex& index, const QVariant& value, int)
   lastFailedMessage.clear();
   lastFailedPosition = 0;
   return true;
+}
+
+QStringList TableModel::mimeTypes() const
+{
+  QStringList types;
+  types << "text/plain";
+  return types;
+}
+
+QMimeData* TableModel::mimeData(const QModelIndexList& indexes) const
+{
+  QMimeData *mimeData = new QMimeData();
+  std::ostringstream stream;
+  for (QModelIndexList::const_iterator it = indexes.constBegin(); it != indexes.constEnd(); ++it)
+  {
+    stream
+      << "ExpressionId;"
+      << this->data(this->index(it->row(), 0), Qt::UserRole).toString().toStdString()
+      << std::endl;
+  }
+  
+  mimeData->setText(QString::fromStdString(stream.str()));
+  return mimeData;
 }
 
 std::vector<Group> TableModel::getGroups()
