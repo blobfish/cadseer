@@ -79,6 +79,9 @@
     <file>resources/images/debugExpressionGraph.svg</file>
     <file>resources/images/loadExpressionExamples.svg</file>
     <file>resources/images/viewExpressionExamples.svg</file>
+    <file>resources/images/trafficRed.svg</file>
+    <file>resources/images/trafficYellow.svg</file>
+    <file>resources/images/trafficGreen.svg</file>
     <file>preferences/preferences.xml</file>
     <file>preferences/preferencesXML.xsd</file>
   </qresource>
