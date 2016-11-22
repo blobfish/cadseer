@@ -26,6 +26,10 @@
 #include <QtCore/QStringList>
 #include <QtCore/QMimeData>
 
+#include <osg/Geometry> //yuck!
+
+#include <message/dispatch.h>
+#include <message/observer.h>
 #include <expressions/expressiongraph.h>
 #include <expressions/expressionmanager.h>
 #include <expressions/stringtranslator.h>
@@ -451,6 +455,91 @@ void GroupProxyModel::importExpressions(std::istream &streamIn)
   TableModel *tableModel = dynamic_cast<TableModel *>(this->sourceModel());
   assert(tableModel);
   tableModel->importExpressions(streamIn, groupId);
+}
+
+SelectionProxyModel::SelectionProxyModel(expr::ExpressionManager &eManagerIn, QObject* parent):
+  BaseProxyModel(parent), eManager(eManagerIn)
+{
+  observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+  observer->name = "expr::SelectionProxyModel";
+  setupDispatcher();
+}
+
+SelectionProxyModel::~SelectionProxyModel(){}
+
+bool SelectionProxyModel::filterAcceptsRow(int source_row, const QModelIndex& source_parent) const
+{
+  using boost::uuids::uuid;
+  
+  boost::uuids::string_generator gen;
+  boost::uuids::uuid formulaId = gen(sourceModel()->data(sourceModel()->index(source_row, 0), Qt::UserRole).toString().toStdString());
+  
+  std::vector<uuid> featureIds;
+  for (const auto &container : containers)
+  {
+    if
+    (
+      (container.selectionType != slc::Type::Object) &&
+      (container.selectionType != slc::Type::Feature)
+    )
+      continue;
+    if (eManager.hasFormulaLink(container.featureId, formulaId))
+      return true;
+  }
+  
+  return false;
+}
+
+void SelectionProxyModel::setupDispatcher()
+{
+  msg::Mask mask;
+  
+  mask = msg::Response | msg::Post | msg::Selection | msg::Addition;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&SelectionProxyModel::selectionAdditionDispatched, this, boost::placeholders::_1)));
+  
+  mask = msg::Response | msg::Pre | msg::Selection | msg::Subtraction;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&SelectionProxyModel::selectionSubtractionDispatched, this, boost::placeholders::_1)));
+}
+
+void SelectionProxyModel::selectionAdditionDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
+  slc::Container aContainer;
+  aContainer.selectionType = sMessage.type;
+  aContainer.featureId = sMessage.featureId;
+  aContainer.featureType = sMessage.featureType;
+  aContainer.shapeId = sMessage.shapeId;
+  aContainer.pointLocation = sMessage.pointLocation;
+  containers.push_back(aContainer);
+  
+  this->invalidateFilter();
+  this->sort(0);
+}
+
+void SelectionProxyModel::selectionSubtractionDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
+  slc::Container aContainer;
+  aContainer.selectionType = sMessage.type;
+  aContainer.featureId = sMessage.featureId;
+  aContainer.featureType = sMessage.featureType;
+  aContainer.shapeId = sMessage.shapeId;
+  aContainer.pointLocation = sMessage.pointLocation;
+  
+  slc::Containers::iterator it = std::find(containers.begin(), containers.end(), aContainer);
+  assert(it != containers.end());
+  containers.erase(it);
+  
+  this->invalidateFilter();
+  this->sort(0);
 }
 
 AllProxyModel::AllProxyModel(QObject* parent): BaseProxyModel(parent)

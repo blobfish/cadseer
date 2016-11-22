@@ -75,7 +75,8 @@ struct FormulaLink
   struct ByFeatureId{};
   struct ByParameterName{}; 
   struct ByFormulaId{};
-  struct ByCKey{};
+  struct ByFormulaIdParameterName{};
+  struct ByFeatureIdFormulaId{};
   //@}
 };
 
@@ -93,12 +94,22 @@ typedef boost::multi_index_container
     >,
     BMI::ordered_unique
     <
-      BMI::tag<FormulaLink::ByCKey>,
+      BMI::tag<FormulaLink::ByFormulaIdParameterName>,
       BMI::composite_key
       <
         FormulaLink,
         BMI::member<FormulaLink, boost::uuids::uuid, &FormulaLink::featureId>,
         BMI::member<FormulaLink, std::string, &FormulaLink::parameterName>
+      >
+    >,
+    BMI::ordered_non_unique
+    <
+      BMI::tag<FormulaLink::ByFeatureIdFormulaId>,
+      BMI::composite_key
+      <
+        FormulaLink,
+        BMI::member<FormulaLink, boost::uuids::uuid, &FormulaLink::featureId>,
+        BMI::member<FormulaLink, boost::uuids::uuid, &FormulaLink::formulaId>
       >
     >,
     BMI::ordered_non_unique
@@ -202,6 +213,8 @@ public:
   void addFormulaLink(const boost::uuids::uuid &, ftr::Parameter *, const boost::uuids::uuid &);
   //! erase parameter link to formula.
   void removeFormulaLink(const boost::uuids::uuid &, ftr::Parameter *);
+  //! checks if a feature and formula are linked. first parameter is feature id. last is formula id. 
+  bool hasFormulaLink(const boost::uuids::uuid &, const boost::uuids::uuid &) const;
   //! checks for a formula link to feature id and to parameter.
   bool hasFormulaLink(const boost::uuids::uuid &, ftr::Parameter *) const;
   //! find formula id linked to feature id and to parameter. assert if not present
@@ -225,8 +238,7 @@ private:
   
   std::unique_ptr<msg::Observer> observer;
   void setupDispatcher();
-  void closeProjectDispatched(const msg::Message &);
-  void openNewProjectDispatched(const msg::Message &);
+  void featureRemovedDispatched(const msg::Message &);
 };
 
 }

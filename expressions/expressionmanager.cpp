@@ -314,25 +314,33 @@ void ExpressionManager::addFormulaLink(const uuid &featureIdIn, ftr::Parameter *
 
 void ExpressionManager::removeFormulaLink(const uuid &featureIdIn, ftr::Parameter *parameterIn)
 {
-  FormulaLinkContainerType::index<FormulaLink::ByCKey>::type::iterator it, it2, itEnd;
+  FormulaLinkContainerType::index<FormulaLink::ByFormulaIdParameterName>::type::iterator it, it2, itEnd;
   
-  boost::tie(it, itEnd) = formulaLinks.get<FormulaLink::ByCKey>().equal_range(boost::make_tuple(featureIdIn, parameterIn->getName()));
-  formulaLinks.get<FormulaLink::ByCKey>().erase(it, itEnd);
+  boost::tie(it, itEnd) = formulaLinks.get<FormulaLink::ByFormulaIdParameterName>().equal_range(boost::make_tuple(featureIdIn, parameterIn->getName()));
+  formulaLinks.get<FormulaLink::ByFormulaIdParameterName>().erase(it, itEnd);
   parameterIn->setConstant(true);
+}
+
+bool ExpressionManager::hasFormulaLink(const uuid &featureIdIn, const uuid &formulaIdIn) const
+{
+  FormulaLinkContainerType::index<FormulaLink::ByFeatureIdFormulaId>::type::iterator it, itEnd;
+  boost::tie(it, itEnd) = formulaLinks.get<FormulaLink::ByFeatureIdFormulaId>().equal_range(boost::make_tuple(featureIdIn, formulaIdIn));
+  
+  return it != itEnd;
 }
 
 bool ExpressionManager::hasFormulaLink(const uuid &featureIdIn, ftr::Parameter *parameterIn) const
 {
-  FormulaLinkContainerType::index<FormulaLink::ByCKey>::type::iterator it;
-  it = formulaLinks.get<FormulaLink::ByCKey>().find(boost::make_tuple(featureIdIn, parameterIn->getName()));
-  return it != formulaLinks.get<FormulaLink::ByCKey>().end();
+  FormulaLinkContainerType::index<FormulaLink::ByFormulaIdParameterName>::type::iterator it;
+  it = formulaLinks.get<FormulaLink::ByFormulaIdParameterName>().find(boost::make_tuple(featureIdIn, parameterIn->getName()));
+  return it != formulaLinks.get<FormulaLink::ByFormulaIdParameterName>().end();
 }
 
 uuid ExpressionManager::getFormulaLink(const uuid &featureIdIn, ftr::Parameter *parameterIn) const
 {
-  FormulaLinkContainerType::index<FormulaLink::ByCKey>::type::iterator it;
-  it = formulaLinks.get<FormulaLink::ByCKey>().find(boost::make_tuple(featureIdIn, parameterIn->getName()));
-  assert(it != formulaLinks.get<FormulaLink::ByCKey>().end());
+  FormulaLinkContainerType::index<FormulaLink::ByFormulaIdParameterName>::type::iterator it;
+  it = formulaLinks.get<FormulaLink::ByFormulaIdParameterName>().find(boost::make_tuple(featureIdIn, parameterIn->getName()));
+  assert(it != formulaLinks.get<FormulaLink::ByFormulaIdParameterName>().end());
   return it->formulaId;
 }
 
@@ -362,5 +370,24 @@ void ExpressionManager::dumpLinks(std::ostream& stream)
 
 void ExpressionManager::setupDispatcher()
 {
-  //not using yet.
+  msg::Mask mask;
+  
+  mask = msg::Response | msg::Pre | msg::RemoveFeature;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ExpressionManager::featureRemovedDispatched, this, _1)));
 }
+
+void ExpressionManager::featureRemovedDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  prj::Message message = boost::get<prj::Message>(messageIn.payload);
+  uuid featureId = message.feature->getId();
+  
+  FormulaLinkContainerType::index<FormulaLink::ByFeatureId>::type::iterator it, itEnd;
+  
+  boost::tie(it, itEnd) = formulaLinks.get<FormulaLink::ByFeatureId>().equal_range(featureId);
+  formulaLinks.get<FormulaLink::ByFeatureId>().erase(it, itEnd);
+}
+

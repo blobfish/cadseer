@@ -29,6 +29,10 @@
 #include <QtCore/QAbstractTableModel>
 #include <QtGui/QSortFilterProxyModel>
 
+#include <selection/container.h>
+
+namespace msg{class Message; class Observer;}
+
 namespace expr{
   class ExpressionManager;
   class Group;
@@ -106,7 +110,6 @@ class GroupProxyModel : public BaseProxyModel
   Q_OBJECT
 public:
   explicit GroupProxyModel(expr::ExpressionManager &eManagerIn, boost::uuids::uuid groupIdIn, QObject *parent = 0);
-  virtual bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const;
   //! Add a new formula to the source model and add it to the group.
   QModelIndex addDefaultRow();
   //! Remove the expressions from the group.
@@ -119,6 +122,10 @@ public:
   void removeGroup();
   //! Import the expressions from the file and add to the user group.
   void importExpressions(std::istream &streamIn);
+  
+protected:
+  virtual bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const override;
+  
 public Q_SLOTS:
   /*! @brief invalidate the filter and sort.
    * 
@@ -137,6 +144,30 @@ private:
   boost::uuids::uuid groupId;
 };
 
+/* this one is a little different in that we are NOT letting it get of sync.
+ * I don't like this but I don't want to an observer to both model and view.
+ */
+//! @brief Proxy model for selection expressions view.
+class SelectionProxyModel : public BaseProxyModel
+{
+  Q_OBJECT
+public:
+  explicit SelectionProxyModel(expr::ExpressionManager &, QObject *parent = 0);
+  virtual ~SelectionProxyModel();
+  
+protected:
+  virtual bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const override;
+  
+private:
+  //! Reference to manager
+  expr::ExpressionManager &eManager;
+  std::unique_ptr<msg::Observer> observer;
+  void setupDispatcher();
+  slc::Containers containers;
+  void selectionAdditionDispatched(const msg::Message&);
+  void selectionSubtractionDispatched(const msg::Message&);
+};
+
 //! @brief Proxy model for all expressions view.
 class AllProxyModel : public BaseProxyModel
 {
@@ -144,12 +175,7 @@ class AllProxyModel : public BaseProxyModel
 public:
   explicit AllProxyModel(QObject *parent = 0);
   /*! @brief invalidate sort.
-   * 
-   * Changes through in any one tab can modify the underlying data to have an effect on the other tabs.
-   * We allow the hidden tabs to fall out of sync with the underlying model. So for a 
-   * synchronized interface, we call this function in response to the view being shown to reflect
-   * any changes made from other tabs. Now this could all be avoided by using the proxies dynamicSortFilter
-   * setting. But then we loose control of when the sort happens and user chases records around the view.
+   * Same reason as @see GroupProxyModel.
    */
   void refresh();
 };

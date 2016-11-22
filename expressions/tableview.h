@@ -104,6 +104,13 @@ private:
   QAction *removeGroupAction;
 };
 
+//! @brief view for selection context expressions.
+class TableViewSelection : public QTableView
+{
+public:
+  explicit TableViewSelection(QWidget *parent = 0);
+};
+
 //! @brief Delegate for editing the expression in the table.
 class ExpressionDelegate : public QStyledItemDelegate
 {

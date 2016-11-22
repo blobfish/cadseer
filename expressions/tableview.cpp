@@ -433,6 +433,11 @@ void TableViewGroup::buildActions()
   connect(removeGroupAction, SIGNAL(triggered()), this, SLOT(removeGroupSlot()));
 }
 
+TableViewSelection::TableViewSelection(QWidget* parent): QTableView(parent)
+{
+  this->verticalHeader()->setVisible(false);
+}
+
 ExpressionDelegate::ExpressionDelegate(QObject *parent): QStyledItemDelegate(parent)
 {
 

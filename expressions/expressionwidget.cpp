@@ -67,7 +67,7 @@ void ExpressionWidget::setupGui()
   
   toolbar = new QToolBar(this);
   toolbar->addAction(QIcon(":/resources/images/debugExpressionGraph.svg"), tr("Write Graph"), this, SLOT(writeOutGraphSlot()));
-  toolbar->addAction(QIcon(":/resources/images/viewExpressionExamples.svg"), tr("Toggle View Examples"), this, SLOT(buildExamplesTabSlot()));
+  toolbar->addAction(QIcon(":/resources/images/viewExpressionExamples.svg"), tr("Toggle View Examples"), this, SLOT(goExamplesTabSlot()));
   toolbar->addAction(QIcon(":/resources/images/loadExpressionExamples.svg"), tr("Load Examples"), this, SLOT(fillInTestManagerSlot()));
   toolbar->addAction(tr("Dump Links"), this, SLOT(dumpLinksSlot()));
   
@@ -170,13 +170,12 @@ void ExpressionWidget::fillInTestManagerSlot()
 
 void ExpressionWidget::dumpLinksSlot()
 {
-  std::ostringstream stream;
-  stream << std::endl;
-  eManager->dumpLinks(stream);
-  stream << std::endl;
+  std::cout << std::endl << "expression links: " << std::endl;
+  eManager->dumpLinks(std::cout);
+  std::cout << std::endl;
 }
 
-void ExpressionWidget::buildExamplesTabSlot()
+void ExpressionWidget::goExamplesTabSlot()
 {
   static bool added = false;
   static QTextEdit *examplesTab = nullptr;
@@ -186,17 +185,20 @@ void ExpressionWidget::buildExamplesTabSlot()
     examplesTab->setReadOnly(true);
     examplesTab->setLineWrapMode(QTextEdit::NoWrap);
     examplesTab->setText(QString::fromStdString(buildExamplesString()));
+    examplesTab->setObjectName("examples");
   }
   
   if (!added)
   {
-    tabWidget->insertTab(1, examplesTab, tr("Examples"));
-    tabWidget->setCurrentIndex(1);
+    tabWidget->insertTab(2, examplesTab, tr("Examples"));
+    tabWidget->setCurrentIndex(2);
     added = true;
   }
   else
   {
-    tabWidget->removeTab(1);
+    int index = tabWidget->indexOf(examplesTab);
+    assert(!(index < 0));
+    tabWidget->removeTab(index);
     added = false;
   }
 }
@@ -292,13 +294,24 @@ void ExpressionWidget::openNewProjectDispatched(const msg::Message&)
   AllProxyModel *allModel = new AllProxyModel(tableViewAll);
   allModel->setSourceModel(mainTable);
   tableViewAll->setModel(allModel);
-  NameDelegate *nameDelegate = new NameDelegate(tableViewAll);
-  tableViewAll->setItemDelegateForColumn(0, nameDelegate);
-  ExpressionDelegate *delegate = new ExpressionDelegate(tableViewAll);
-  tableViewAll->setItemDelegateForColumn(1, delegate);
-  tabWidget->addTab(tableViewAll, "All");
+  NameDelegate *nameDelegate1 = new NameDelegate(tableViewAll);
+  tableViewAll->setItemDelegateForColumn(0, nameDelegate1);
+  ExpressionDelegate *expressionDelegate1 = new ExpressionDelegate(tableViewAll);
+  tableViewAll->setItemDelegateForColumn(1, expressionDelegate1);
+  tabWidget->addTab(tableViewAll, tr("All"));
   tableViewAll->horizontalHeader()->setResizeMode(1, QHeaderView::Stretch); //has to be done after the model is set.
   connect(tableViewAll, SIGNAL(addGroupSignal()), this, SLOT(addGroupSlot()));
+  
+  TableViewSelection *selectionView = new TableViewSelection(tableViewAll);
+  SelectionProxyModel *selectionModel = new SelectionProxyModel(*eManager, selectionView);
+  selectionModel->setSourceModel(mainTable);
+  selectionView->setModel(selectionModel);
+  selectionView->horizontalHeader()->setResizeMode(1, QHeaderView::Stretch); //has to be done after the model is set.
+  NameDelegate *nameDelegate2 = new NameDelegate(selectionView);
+  tableViewAll->setItemDelegateForColumn(0, nameDelegate2);
+  ExpressionDelegate *expressionDelegate2 = new ExpressionDelegate(selectionView);
+  tableViewAll->setItemDelegateForColumn(1, expressionDelegate2);
+  tabWidget->addTab(selectionView, tr("Selection"));
   
   for(std::vector<Group>::iterator it = eManager->userDefinedGroups.begin(); it != eManager->userDefinedGroups.end(); ++it)
     addGroupView(it->id, QString::fromStdString(it->name));

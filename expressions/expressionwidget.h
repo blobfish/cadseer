@@ -69,7 +69,7 @@ public Q_SLOTS:
   //! Temp for testing, dump list of links.
   void dumpLinksSlot();
   //! Show a tab demonstrating syntax
-  void buildExamplesTabSlot();
+  void goExamplesTabSlot();
 private:
   //! Build the GUI.
   void setupGui();
