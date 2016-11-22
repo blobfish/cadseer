@@ -70,20 +70,22 @@ namespace ftr
   class DatumPlaneGenre
   {
   public:
+    DatumPlaneGenre(){};
+    virtual ~DatumPlaneGenre(){};
     virtual DatumPlaneType getType() = 0;
     virtual osg::Matrixd solve(const UpdateMap&) = 0; //throw std::runtime;
     virtual lbr::IPGroup* getIPGroup(){return nullptr;}
     virtual void connect(Base *){}
     virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &) = 0;
     virtual void serialOut(prj::srl::SolverChoice &solverChoice) = 0;
-    double radius;
+    double radius = 1.0;
   };
   
   class DatumPlanePlanarOffset : public DatumPlaneGenre
   {
   public:
     DatumPlanePlanarOffset();
-    ~DatumPlanePlanarOffset();
+    virtual ~DatumPlanePlanarOffset() override;
     virtual DatumPlaneType getType() override {return DatumPlaneType::PlanarOffset;}
     virtual osg::Matrixd solve(const UpdateMap&) override;
     virtual lbr::IPGroup* getIPGroup() override;
@@ -102,7 +104,7 @@ namespace ftr
   {
   public:
     DatumPlanePlanarCenter();
-    ~DatumPlanePlanarCenter();
+    virtual ~DatumPlanePlanarCenter() override;
     virtual DatumPlaneType getType() override {return DatumPlaneType::PlanarCenter;}
     virtual osg::Matrixd solve(const UpdateMap&) override;
     virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &) override;
@@ -118,7 +120,7 @@ namespace ftr
   {
   public:
     DatumPlanePlanarParallelThroughEdge();
-    ~DatumPlanePlanarParallelThroughEdge();
+    virtual ~DatumPlanePlanarParallelThroughEdge() override;
     virtual DatumPlaneType getType() override {return DatumPlaneType::PlanarParallelThroughEdge;}
     virtual osg::Matrixd solve(const UpdateMap&) override;
     virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &) override;
