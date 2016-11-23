@@ -26,7 +26,6 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/depth_first_search.hpp>
 #include <boost/graph/breadth_first_search.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include <expressions/abstractnode.h>
 #include <expressions/expressionedgeproperty.h>
@@ -34,7 +33,7 @@
 namespace expr{
 
 //! @brief Used for graph definiton.
-typedef boost::shared_ptr<AbstractNode> VertexProperty;
+typedef std::unique_ptr<AbstractNode> VertexProperty;
 
 /*! @brief The graph definition for containment of all abstract node decendents.
  * 
@@ -183,34 +182,40 @@ public:
   
   //@{
   //! @brief Build typed nodes.
+  template<typename T> Vertex buildNode()
+  {
+    Vertex vertex = boost::add_vertex(graph);
+    graph[vertex] = std::move(std::unique_ptr<T>(new T()));
+    return vertex;
+  }
   Vertex buildConstantNode(const double &constantIn);
   Vertex buildFormulaNode(const std::string& stringIn);
-  Vertex buildAdditionNode();
-  Vertex buildSubractionNode();
-  Vertex buildMultiplicationNode();
-  Vertex buildDivisionNode();
-  Vertex buildParenthesesNode();
-  Vertex buildSinNode();
-  Vertex buildCosNode();
-  Vertex buildTanNode();
-  Vertex buildAsinNode();
-  Vertex buildAcosNode();
-  Vertex buildAtanNode();
-  Vertex buildAtan2Node();
-  Vertex buildPowNode();
-  Vertex buildAbsNode();
-  Vertex buildMinNode();
-  Vertex buildMaxNode();
-  Vertex buildFloorNode();
-  Vertex buildCeilNode();
-  Vertex buildRoundNode();
-  Vertex buildRadToDegNode();
-  Vertex buildDegToRadNode();
-  Vertex buildLogNode();
-  Vertex buildExpNode();
-  Vertex buildSqrtNode();
-  Vertex buildHypotNode();
-  Vertex buildConditionalNode();
+  Vertex buildAdditionNode(){return buildNode<AdditionNode>();}
+  Vertex buildSubractionNode(){return buildNode<SubtractionNode>();}
+  Vertex buildMultiplicationNode(){return buildNode<MultiplicationNode>();}
+  Vertex buildDivisionNode(){return buildNode<DivisionNode>();}
+  Vertex buildParenthesesNode(){return buildNode<ParenthesesNode>();}
+  Vertex buildSinNode(){return buildNode<SinNode>();}
+  Vertex buildCosNode(){return buildNode<CosNode>();}
+  Vertex buildTanNode(){return buildNode<TanNode>();}
+  Vertex buildAsinNode(){return buildNode<AsinNode>();}
+  Vertex buildAcosNode(){return buildNode<AcosNode>();}
+  Vertex buildAtanNode(){return buildNode<AtanNode>();}
+  Vertex buildAtan2Node(){return buildNode<Atan2Node>();}
+  Vertex buildPowNode(){return buildNode<PowNode>();}
+  Vertex buildAbsNode(){return buildNode<AbsNode>();}
+  Vertex buildMinNode(){return buildNode<MinNode>();}
+  Vertex buildMaxNode(){return buildNode<MaxNode>();}
+  Vertex buildFloorNode(){return buildNode<FloorNode>();}
+  Vertex buildCeilNode(){return buildNode<CeilNode>();}
+  Vertex buildRoundNode(){return buildNode<RoundNode>();}
+  Vertex buildRadToDegNode(){return buildNode<RadToDegNode>();}
+  Vertex buildDegToRadNode(){return buildNode<DegToRadNode>();}
+  Vertex buildLogNode(){return buildNode<LogNode>();}
+  Vertex buildExpNode(){return buildNode<ExpNode>();}
+  Vertex buildSqrtNode(){return buildNode<SqrtNode>();}
+  Vertex buildHypotNode(){return buildNode<HypotNode>();}
+  Vertex buildConditionalNode(){return buildNode<ConditionalNode>();}
   //@}
   
   //! @brief Build a graph edge.
