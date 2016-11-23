@@ -580,7 +580,7 @@ void DegToRadNode::calculate(const EdgePropertiesMap& propertyMap)
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
   double valueIn = propertyMap.at(EdgeProperty::None);
-  value = valueIn * M_PI / boost::math::constants::pi<double>();
+  value = valueIn * boost::math::constants::pi<double>() / 180.0;
   this->setClean();
 }
 

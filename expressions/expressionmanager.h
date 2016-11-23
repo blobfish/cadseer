@@ -23,7 +23,6 @@
 #include <memory>
 
 #include <boost/uuid/uuid.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/multi_index_container.hpp>
@@ -202,6 +201,14 @@ public:
   std::string getFormulaName(const boost::uuids::uuid &idIn) const;
   bool hasFormula(const std::string &nameIn) const;
   bool hasFormula(const boost::uuids::uuid &idIn) const;
+  double getFormulaValue(const boost::uuids::uuid &idIn) const;
+  void setFormulaName(const boost::uuids::uuid &idIn, const std::string &nameIn);
+  void cleanFormula(const boost::uuids::uuid &idIn);
+  bool hasCycle(const boost::uuids::uuid &idIn, std::string &nameOut);
+  void setFormulaDependentsDirty(const boost::uuids::uuid &idIn);
+  std::vector<boost::uuids::uuid> getDependentFormulaIds(const boost::uuids::uuid &parentIn);
+  std::vector<boost::uuids::uuid> getAllFormulaIdsSorted() const;
+  std::vector<boost::uuids::uuid> getAllFormulaIds() const;
   
   //@{
   //! Remove formula from both groups and graph.
@@ -232,7 +239,7 @@ public:
   
 private:
   //! Pointer to GraphWrapper.
-  boost::shared_ptr<GraphWrapper> graphPtr;
+  std::unique_ptr<GraphWrapper> graphPtr;
   //! Container for formula to properties links.
   FormulaLinkContainerType formulaLinks;
   

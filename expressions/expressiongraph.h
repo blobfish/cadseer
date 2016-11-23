@@ -75,8 +75,6 @@ class GraphWrapper
 public:
   //! @brief Default constructor.
   GraphWrapper();
-  //! @brief Copy constructor.
-  GraphWrapper(const GraphWrapper &graphWrapperIn);
   ~GraphWrapper();
   //! The actual boost graph object.
   Graph graph;

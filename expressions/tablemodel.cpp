@@ -19,6 +19,7 @@
 
 #include <assert.h>
 #include <fstream>
+#include <iostream>
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/uuid/string_generator.hpp>
 
@@ -30,7 +31,6 @@
 
 #include <message/dispatch.h>
 #include <message/observer.h>
-#include <expressions/expressiongraph.h>
 #include <expressions/expressionmanager.h>
 #include <expressions/stringtranslator.h>
 #include <expressions/tablemodel.h>
@@ -60,15 +60,14 @@ QVariant TableModel::data(const QModelIndex& index, int role) const
   {
     assert(eManager.allGroup.formulaIds.size() > static_cast<std::size_t>(index.row()));
     boost::uuids::uuid currentId = eManager.allGroup.formulaIds.at(index.row());
-    Vertex fVertex = eManager.getGraphWrapper().getFormulaVertex(currentId);
     if (index.column() == 0)
-      return QString::fromStdString(eManager.getGraphWrapper().getFormulaName(fVertex));
+      return QString::fromStdString(eManager.getFormulaName(currentId));
     if (index.column() == 1)
     {
-      return QString::fromStdString(sTranslator->buildStringRhs(fVertex));
+      return QString::fromStdString(sTranslator->buildStringRhs(currentId));
     }
     if (index.column() == 2)
-      return eManager.getGraphWrapper().getFormulaValue(fVertex);
+      return eManager.getFormulaValue(currentId);
   }
   
   if (role == Qt::UserRole)
@@ -115,31 +114,31 @@ Qt::ItemFlags TableModel::flags(const QModelIndex& index) const
 bool TableModel::setData(const QModelIndex& index, const QVariant& value, int)
 {
   boost::uuids::uuid fId = boost::uuids::string_generator()(this->data(index, Qt::UserRole).toString().toStdString());
-  assert(eManager.getGraphWrapper().hasFormula(fId));
+  assert(eManager.hasFormula(fId));
   if (index.column() == 0)
   {
     //rename formula.
-    std::string oldName = eManager.getGraphWrapper().getFormulaName(fId);
+    std::string oldName = eManager.getFormulaName(fId);
     std::string newName = value.toString().toStdString();
     if (oldName == newName)
       return true;
-    if (eManager.getGraphWrapper().hasFormula(newName))
+    if (eManager.hasFormula(newName))
     {
       lastFailedMessage = tr("Formula name already exists");
       return false;
     }
-    eManager.getGraphWrapper().setFormulaName(fId, newName);
+    eManager.setFormulaName(fId, newName);
   }
   if (index.column() == 1)
   {
-    std::string formulaName = eManager.getGraphWrapper().getFormulaName(fId);
+    std::string formulaName = eManager.getFormulaName(fId);
     //store current expression rhs to restore if needed.
     //not really liking the construction of the main LHS. Shouldn't need it.
     std::ostringstream oldStream;
-    oldStream << formulaName << "=" << sTranslator->buildStringRhs(eManager.getGraphWrapper().getFormulaVertex(fId));
+    oldStream << formulaName << "=" << sTranslator->buildStringRhs(fId);
     
     //reparse expression.
-    eManager.getGraphWrapper().cleanFormula(fId);
+    eManager.cleanFormula(fId);
     lastFailedText = value.toString();
     
     std::ostringstream stream;
@@ -148,7 +147,7 @@ bool TableModel::setData(const QModelIndex& index, const QVariant& value, int)
     {
       lastFailedMessage = tr("Parsing failed");
       //we are cacheing the failed position for now because the following call immediately over rights the value.
-      lastFailedPosition = sTranslator->failedPosition - formulaName.size() + 1;
+      lastFailedPosition = sTranslator->getFailedPosition() - formulaName.size() + 1;
       //when parsing fails, translator reverts any changes made during parse. So just add the original.
       if (sTranslator->parseString(oldStream.str()) == StringTranslator::ParseFailed)
       {
@@ -159,10 +158,10 @@ bool TableModel::setData(const QModelIndex& index, const QVariant& value, int)
       return false;
     }
     std::string cycleName;
-    if (eManager.getGraphWrapper().hasCycle(fId, cycleName))
+    if (eManager.hasCycle(fId, cycleName))
     {
       lastFailedMessage = tr("Cycle detected with ") + QString::fromStdString(cycleName);
-      eManager.getGraphWrapper().cleanFormula(fId);
+      eManager.cleanFormula(fId);
       if (sTranslator->parseString(oldStream.str()) == StringTranslator::ParseFailed)
       {
         std::cout << "couldn't restore formula, from cycle, in tableModel::setdata" << std::endl;
@@ -173,7 +172,7 @@ bool TableModel::setData(const QModelIndex& index, const QVariant& value, int)
       return false;
     }
     //why don't I have to tell the model to update the dependent formulas?
-    eManager.getGraphWrapper().setFormulaDependentsDirty(fId);
+    eManager.setFormulaDependentsDirty(fId);
     eManager.update();
   }
   lastFailedText.clear();
@@ -216,7 +215,7 @@ void TableModel::addFormulaToGroup(const QModelIndex& indexIn, const QString& gr
   boost::uuids::uuid groupId = gen(groupIdIn.toStdString());
   boost::uuids::uuid formulaId = gen(this->data(indexIn, Qt::UserRole).toString().toStdString());
   assert(eManager.hasUserGroup(groupId));
-  assert(eManager.getGraphWrapper().hasFormula(formulaId));
+  assert(eManager.hasFormula(formulaId));
   eManager.addFormulaToUserGroup(groupId, formulaId);
 }
 
@@ -228,7 +227,7 @@ void TableModel::addDefaultRow()
   {
     std::ostringstream stream;
     stream << "Default_" << nameIndex;
-    if (!eManager.getGraphWrapper().hasFormula(stream.str()))
+    if (!eManager.hasFormula(stream.str()))
     {
       stream << "=1.0";
       name = stream.str();
@@ -281,7 +280,7 @@ void TableModel::exportExpressions(QModelIndexList& indexesIn, std::ostream &str
   for (it = indexesIn.constBegin(); it != indexesIn.constEnd(); ++it)
   {
     boost::uuids::uuid currentId = gen(this->data(*it, Qt::UserRole).toString().toStdString());
-    std::vector<boost::uuids::uuid> tempIds = eManager.getGraphWrapper().getDependentFormulaIds(currentId);
+    std::vector<boost::uuids::uuid> tempIds = eManager.getDependentFormulaIds(currentId);
     std::copy(tempIds.begin(), tempIds.end(), std::back_inserter(dependentIds));
   }
   
@@ -291,13 +290,13 @@ void TableModel::exportExpressions(QModelIndexList& indexesIn, std::ostream &str
   //going to loop through all formula ids and see if they are present in the selected ids.
   //this allows us to write the formulas out in a dependent order, so the importing will build the formula
   //in the correct order.
-  std::vector<boost::uuids::uuid> allFormulaIds = eManager.getGraphWrapper().getAllFormulaIdsSorted();
+  std::vector<boost::uuids::uuid> allFormulaIds = eManager.getAllFormulaIdsSorted();
   std::vector<boost::uuids::uuid>::const_iterator fIt;
   for (fIt = allFormulaIds.begin(); fIt != allFormulaIds.end(); ++fIt)
   {
     if(selectedIds.find(*fIt) == selectedIds.end())
       continue;
-    streamIn << sTranslator->buildStringAll(eManager.getGraphWrapper().getFormulaVertex(*fIt)) << std::endl;
+    streamIn << sTranslator->buildStringAll(*fIt) << std::endl;
   }
 }
 
@@ -320,7 +319,7 @@ void TableModel::importExpressions(std::istream &streamIn, boost::uuids::uuid gr
     if (name.empty())
       continue;
     //don't import over an expression.
-    if (eManager.getGraphWrapper().hasFormula(name))
+    if (eManager.hasFormula(name))
       continue;
     filteredExpressions.push_back(lineBuffer);
   }
@@ -339,7 +338,7 @@ void TableModel::importExpressions(std::istream &streamIn, boost::uuids::uuid gr
       continue;
     if (!groupId.is_nil())
     {
-      boost::uuids::uuid fId = eManager.getGraphWrapper().getId(sTranslator->getFormulaNodeOut());
+      boost::uuids::uuid fId = sTranslator->getFormulaOutId();
       eManager.addFormulaToUserGroup(groupId, fId);
     }
     countAdded++;
@@ -467,7 +466,7 @@ SelectionProxyModel::SelectionProxyModel(expr::ExpressionManager &eManagerIn, QO
 
 SelectionProxyModel::~SelectionProxyModel(){}
 
-bool SelectionProxyModel::filterAcceptsRow(int source_row, const QModelIndex& source_parent) const
+bool SelectionProxyModel::filterAcceptsRow(int source_row, const QModelIndex&) const
 {
   using boost::uuids::uuid;
   

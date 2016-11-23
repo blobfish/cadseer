@@ -28,9 +28,10 @@
 #include <boost/uuid/string_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
+#include <expressions/expressionmanager.h>
+#include <expressions/stringtranslator.h>
 #include <application/application.h>
 #include <project/project.h>
-#include <expressions/expressionmanager.h>
 #include <application/mainwindow.h>
 #include <feature/base.h>
 #include <feature/parameter.h>
@@ -59,14 +60,13 @@ ParameterDialog::ParameterDialog(ftr::Parameter *parameterIn, const boost::uuids
   feature = static_cast<app::Application*>(qApp)->getProject()->findFeature(idIn);
   assert(feature);
   buildGui();
-  valueHasChanged();
-  constantHasChanged();
+  constantHasChanged(); //call valueHasChanged if needs to
   
   parameter->connectValue(boost::bind(&ParameterDialog::valueHasChanged, this));
   parameter->connectConstant(boost::bind(&ParameterDialog::constantHasChanged, this));
   
-  msg::dispatch().connectMessageOut(boost::bind(&ParameterDialog::messageInSlot, this, _1));
-  connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
+  msg::dispatch().connectMessageOut(boost::bind(&ParameterDialog::messageInSlot, this, boost::placeholders::_1));
+  connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), boost::placeholders::_1));
 }
 
 void ParameterDialog::buildGui()
@@ -78,9 +78,17 @@ void ParameterDialog::buildGui()
   QLabel *nameLabel = new QLabel(QString::fromUtf8(parameter->getName().c_str()), this);
   editLine = new EnterEdit(this);
   editLine->setAcceptDrops(false);
+  int iconHeight(editLine->height());
+  trafficRed = QPixmap(":/resources/images/trafficRed.svg").scaled(iconHeight, iconHeight, Qt::KeepAspectRatio);
+  trafficYellow = QPixmap(":/resources/images/trafficYellow.svg").scaled(iconHeight, iconHeight, Qt::KeepAspectRatio);
+  trafficGreen = QPixmap(":/resources/images/trafficGreen.svg").scaled(iconHeight, iconHeight, Qt::KeepAspectRatio);
+  trafficLabel = new QLabel(this);
+  trafficLabel->setPixmap(trafficGreen);
   QHBoxLayout *editLayout = new QHBoxLayout();
   editLayout->addWidget(nameLabel);
   editLayout->addWidget(editLine);
+  editLayout->addWidget(trafficLabel);
+  
   mainLayout->addLayout(editLayout);
   
   mainLayout->addSpacing(10);
@@ -91,13 +99,13 @@ void ParameterDialog::buildGui()
   linkButton->setCheckable(true);
   linkButton->setFocusPolicy(Qt::ClickFocus);
   linkLabel = new QLabel(this);
-  linkLabel->hide();
   buttonLayout->addWidget(linkButton);
   buttonLayout->addStretch();
   buttonLayout->addWidget(linkLabel);
   mainLayout->addLayout(buttonLayout);
   
   connect(editLine, SIGNAL(goUpdateSignal()), this, SLOT(updateSlot()));
+  connect(editLine, SIGNAL(textEdited(QString)), this, SLOT(textEditedSlot(QString)));
   connect(this, SIGNAL(accepted()), this, SLOT(updateSlot()));
   connect(linkButton, SIGNAL(clicked(bool)), this, SLOT(linkButtonClickedSlot(bool)));
 }
@@ -182,7 +190,10 @@ void ParameterDialog::valueHasChanged()
   lastValue = parameter->getValue();
   editLine->setText(QString::number(parameter->getValue(), 'f', 12));
   if (parameter->isConstant())
+  {
     editLine->selectAll();
+    linkLabel->setText(QString::number(parameter->getValue(), 'f', 4));
+  }
 }
 
 void ParameterDialog::constantHasChanged()
@@ -193,10 +204,8 @@ void ParameterDialog::constantHasChanged()
     linkButton->setIcon(QIcon(":resources/images/unlinkIcon.svg"));
     linkButton->setText(tr("unlinked"));
     linkButton->setDisabled(true);
-    linkLabel->hide();
     editLine->setEnabled(true);
     editLine->setFocus();
-    valueHasChanged();
   }
   else
   {
@@ -209,12 +218,12 @@ void ParameterDialog::constantHasChanged()
     assert(eManager.hasFormulaLink(feature->getId(), parameter));
     std::string formulaName = eManager.getFormulaName(eManager.getFormulaLink(feature->getId(), parameter));
     linkLabel->setText(QString::fromStdString(formulaName));
-    linkLabel->show();
     
     editLine->clearFocus();
     editLine->deselect();
     editLine->setDisabled(true);
   }
+  valueHasChanged();
 }
 
 void ParameterDialog::linkButtonClickedSlot(bool checkedState)
@@ -257,7 +266,49 @@ void ParameterDialog::updateSlot()
   }
   else
   {
-    editLine->setText(QString::number(lastValue, 'f', 12));
-    editLine->selectAll();
+    expr::ExpressionManager localManager;
+    expr::StringTranslator translator(localManager);
+    std::string formula("temp = ");
+    formula += editLine->text().toStdString();
+    if (translator.parseString(formula) == expr::StringTranslator::ParseSucceeded)
+    {
+      localManager.update();
+      double value = localManager.getFormulaValue(translator.getFormulaOutId());
+      parameter->setValue(value);
+      if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
+      {
+	msg::Message uMessage;
+	uMessage.mask = msg::Request | msg::Update;
+	messageOutSignal(uMessage);
+      }
+    }
+    else
+    {
+      std::cout << "fail position: " << translator.getFailedPosition() << std::endl;
+      editLine->setText(QString::number(lastValue, 'f', 12));
+      editLine->selectAll();
+    }
+  }
+}
+
+void ParameterDialog::textEditedSlot(const QString &textIn)
+{
+  trafficLabel->setPixmap(trafficYellow);
+  qApp->processEvents(); //need this or we never see yellow signal.
+  
+  expr::ExpressionManager localManager;
+  expr::StringTranslator translator(localManager);
+  std::string formula("temp = ");
+  formula += textIn.toStdString();
+  if (translator.parseString(formula) == expr::StringTranslator::ParseSucceeded)
+  {
+    localManager.update();
+    trafficLabel->setPixmap(trafficGreen);
+    double value = localManager.getFormulaValue(translator.getFormulaOutId());
+    linkLabel->setText(QString::number(value, 'f', 4));
+  }
+  else
+  {
+    trafficLabel->setPixmap(trafficRed);
   }
 }

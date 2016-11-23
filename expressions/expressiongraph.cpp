@@ -33,23 +33,6 @@ GraphWrapper::GraphWrapper()
 
 }
 
-GraphWrapper::GraphWrapper(const GraphWrapper &graphWrapperIn)
-{
-  //not using member function here because we are indexing the graph passed in, not the member graph.
-  VertexIndexMap vIndexMap;
-  boost::associative_property_map<VertexIndexMap> pMap(vIndexMap);
-  VertexIterator vIt, vItEnd;
-  int index = 0;
-  for (boost::tie(vIt, vItEnd) = boost::vertices(graphWrapperIn.graph); vIt != vItEnd; ++vIt)
-    boost::put(pMap, *vIt, index++);
-  
-  boost::copy_graph(graphWrapperIn.graph, graph, boost::vertex_index_map(pMap));
-  
-  //probably could use vertex copy function.
-  for (boost::tie(vIt, vItEnd) = boost::vertices(graph); vIt != vItEnd; ++vIt)
-    graph[*vIt] = boost::shared_ptr<AbstractNode>(graph[*vIt]->clone());
-}
-
 GraphWrapper::~GraphWrapper()
 {
 

@@ -82,9 +82,14 @@ namespace dlg
     QLabel *linkLabel;
     MessageOutSignal messageOutSignal;
     double lastValue;
+    QPixmap trafficRed;
+    QPixmap trafficYellow;
+    QPixmap trafficGreen;
+    QLabel *trafficLabel;
   private Q_SLOTS:
     void updateSlot();
     void linkButtonClickedSlot(bool checkedState);
+    void textEditedSlot(const QString &);
   };
 }
 

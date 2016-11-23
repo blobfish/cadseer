@@ -37,7 +37,6 @@
 #include <expressions/tablemodel.h>
 #include <expressions/tableview.h>
 #include <expressions/expressionmanager.h>
-#include <expressions/stringtranslator.h>
 #include <expressions/expressionwidget.h>
 #include <project/project.h>
 
@@ -139,15 +138,13 @@ void ExpressionWidget::addGroupView(const boost::uuids::uuid& idIn, const QStrin
 
 void ExpressionWidget::fillInTestManagerSlot()
 {
-  StringTranslator sTranslator(*eManager);
-
   std::string examplesString = buildExamplesString();
   std::istringstream inStream(examplesString.c_str());
   mainTable->importExpressions(inStream, boost::uuids::nil_generator()());
   
   eManager->update();
   
-  std::vector<boost::uuids::uuid> ids = eManager->getGraphWrapper().getAllFormulaIds();
+  std::vector<boost::uuids::uuid> ids = eManager->getAllFormulaIds();
   boost::uuids::uuid groupId;
   if (!eManager->hasUserGroup("Group 1") && ids.size() > 2)
   {

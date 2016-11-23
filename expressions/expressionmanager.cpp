@@ -65,8 +65,10 @@ void Group::removeFormula(const boost::uuids::uuid& fIdIn)
   formulaIds.erase(it);
 }
 
-ExpressionManager::ExpressionManager() : graphPtr(new GraphWrapper())
+ExpressionManager::ExpressionManager()
 {
+  graphPtr = std::move(std::unique_ptr<GraphWrapper>(new GraphWrapper()));
+  
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
   observer->name = "expr::ExpressionWidget";
   setupDispatcher();
@@ -249,6 +251,52 @@ bool ExpressionManager::hasFormula(const uuid& idIn) const
 bool ExpressionManager::hasFormula(const std::string& nameIn) const
 {
   return graphPtr->hasFormula(nameIn);
+}
+
+double ExpressionManager::getFormulaValue(const uuid& idIn) const
+{
+  assert(graphPtr->hasFormula(idIn));
+  return graphPtr->getFormulaValue(idIn);
+}
+
+void ExpressionManager::setFormulaName(const uuid& idIn, const std::string& nameIn)
+{
+  assert(graphPtr->hasFormula(idIn));
+  graphPtr->setFormulaName(idIn, nameIn);
+}
+
+void ExpressionManager::cleanFormula(const uuid& idIn)
+{
+  assert(graphPtr->hasFormula(idIn));
+  graphPtr->cleanFormula(idIn);
+}
+
+bool ExpressionManager::hasCycle(const uuid& idIn, std::string& nameOut)
+{
+  assert(graphPtr->hasFormula(idIn));
+  return graphPtr->hasCycle(idIn, nameOut);
+}
+
+void ExpressionManager::setFormulaDependentsDirty(const uuid& idIn)
+{
+  assert(graphPtr->hasFormula(idIn));
+  graphPtr->setFormulaDependentsDirty(idIn);
+}
+
+std::vector< uuid > ExpressionManager::getDependentFormulaIds(const uuid& parentIn)
+{
+  assert(graphPtr->hasFormula(parentIn));
+  return graphPtr->getDependentFormulaIds(parentIn);
+}
+
+std::vector< uuid > ExpressionManager::getAllFormulaIdsSorted() const
+{
+  return graphPtr->getAllFormulaIdsSorted();
+}
+
+std::vector< uuid > ExpressionManager::getAllFormulaIds() const
+{
+  return graphPtr->getAllFormulaIds();
 }
 
 std::string ExpressionManager::getUserGroupName(const boost::uuids::uuid& groupIdIn) const

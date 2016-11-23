@@ -96,6 +96,7 @@ SET(EXPRESSION_SOURCES
     expressions/expressionmanager.cpp
     expressions/expressionwidget.cpp
     expressions/stringtranslator.cpp
+    expressions/stringtranslatorstow.cpp
     expressions/tablemodel.cpp
     expressions/tableview.cpp
     )
