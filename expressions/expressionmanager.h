@@ -211,7 +211,7 @@ public:
   std::vector<boost::uuids::uuid> getAllFormulaIds() const;
   
   //@{
-  //! Remove formula from both groups and graph.
+  //! Remove formula from both groups and graph. DON'T call remove formula with a dirty graph. @see update
   void removeFormula(const boost::uuids::uuid &idIn);
   void removeFormula(const std::string &nameIn);
   //@}

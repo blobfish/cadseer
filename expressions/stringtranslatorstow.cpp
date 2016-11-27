@@ -494,15 +494,33 @@ boost::uuids::uuid StringTranslatorStow::getFormulaOutId() const
 
 void StringTranslatorStow::cleanFailedParse()
 {
+  /*
+   * note: we can NOT use GraphWrapper::cleanFormula here because cleanFormula
+   * assumes a valid, connected subgraph. A failed parse might leave unconnected vertices
+   * that cleanFormula will not visit.
+   */
+  
   for (std::vector<Edge>::iterator it = addedEdges.begin(); it != addedEdges.end(); ++it)
     boost::remove_edge(*it, graphWrapper.graph);
   
+  bool removedFormulaNode = false;
   for (std::vector<Vertex>::iterator it = addedVertices.begin(); it != addedVertices.end(); ++it)
   {
     if (graphWrapper.graph[*it]->getType() == NodeType::Formula)
+    {
       eManager.removeFormulaFromAllGroup(graphWrapper.getId(*it));
+      removedFormulaNode = true;
+    }
     boost::remove_vertex(*it, graphWrapper.graph);
   }
+  /*by setting this clean we can remove the formula later without a call to update.
+   * see GraphWrapper::removeFormula and it's use of 'getValue', which can assert.
+   * not totally sure of the implications of this on formula value. We should be OK,
+   * because any failed editing is reparsed with original string value, thus
+   * making formula value dirty and forcing a recalc.
+   */
+  if (!removedFormulaNode)
+    graphWrapper.graph[formulaNodeOut]->setClean();
 }
 
 void StringTranslatorStow::buildConstantNode(const double& valueIn)

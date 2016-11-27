@@ -47,6 +47,8 @@ namespace expr
       std::string buildStringRhs(const boost::uuids::uuid &) const;
       //! Get the id of the newly created or edit formula
       boost::uuids::uuid getFormulaOutId() const;
+      //! the underlying ExpressionManager.
+      ExpressionManager& eManager;
     private:
       std::unique_ptr<StringTranslatorStow> translatorStow;
   };

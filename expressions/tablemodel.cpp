@@ -127,6 +127,15 @@ bool TableModel::setData(const QModelIndex& index, const QVariant& value, int)
       lastFailedMessage = tr("Formula name already exists");
       return false;
     }
+    //we need to make sure the new name will pass the parser.
+    std::string testParse = newName + "=1";
+    if (sTranslator->parseString(testParse) != StringTranslator::ParseSucceeded)
+    {
+      lastFailedMessage = tr("Invalid characters in formula name");
+      return false;
+    }
+    eManager.update(); //needs to updated before we can call remove.
+    eManager.removeFormula(sTranslator->getFormulaOutId());
     eManager.setFormulaName(fId, newName);
   }
   if (index.column() == 1)
@@ -151,7 +160,7 @@ bool TableModel::setData(const QModelIndex& index, const QVariant& value, int)
       //when parsing fails, translator reverts any changes made during parse. So just add the original.
       if (sTranslator->parseString(oldStream.str()) == StringTranslator::ParseFailed)
       {
-        std::cout << "couldn't restore formula in tableModel::setdata" << std::endl;
+        std::cout << "couldn't restore formula in tableModel::setdata:    " << oldStream.str() << std::endl;
         assert(0);
       }
       eManager.update();
@@ -177,7 +186,7 @@ bool TableModel::setData(const QModelIndex& index, const QVariant& value, int)
   }
   lastFailedText.clear();
   lastFailedMessage.clear();
-  lastFailedPosition = 0;
+  lastFailedPosition = -1;
   return true;
 }
 
@@ -257,6 +266,7 @@ void TableModel::removeFormula(const QModelIndexList &indexesIn)
   std::sort(mappedRows.begin(), mappedRows.end());
   std::reverse(mappedRows.begin(), mappedRows.end());
   
+  eManager.update(); //ensure graph is up to date before calling remove formulas.
   for (std::vector<int>::const_iterator rowIt = mappedRows.begin(); rowIt != mappedRows.end(); ++rowIt)
   {
     boost::uuids::uuid currentId = boost::uuids::string_generator()
@@ -351,6 +361,11 @@ void TableModel::importExpressions(std::istream &streamIn, boost::uuids::uuid gr
    */
   this->beginInsertRows(QModelIndex(), currentSize, currentSize + countAdded - 1);
   this->endInsertRows();
+}
+
+StringTranslator* TableModel::getStringTranslator() const
+{
+  return sTranslator.get();
 }
 
 BaseProxyModel::BaseProxyModel(QObject* parent): QSortFilterProxyModel(parent)

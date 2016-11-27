@@ -168,18 +168,18 @@ void ParameterDialog::dropEvent(QDropEvent *event)
       expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
       if (!parameter->isConstant())
       {
-	//parameter is already linked.
-	assert(eManager.hasFormulaLink(feature->getId(), parameter));
-	eManager.removeFormulaLink(feature->getId(), parameter);
+        //parameter is already linked.
+        assert(eManager.hasFormulaLink(feature->getId(), parameter));
+        eManager.removeFormulaLink(feature->getId(), parameter);
       }
       
       assert(eManager.hasFormula(id));
       eManager.addFormulaLink(feature->getId(), parameter, id);
       if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
       {
-	msg::Message uMessage;
-	uMessage.mask = msg::Request | msg::Update;
-	messageOutSignal(uMessage);
+        msg::Message uMessage;
+        uMessage.mask = msg::Request | msg::Update;
+        messageOutSignal(uMessage);
       }
     }
   }
@@ -277,16 +277,18 @@ void ParameterDialog::updateSlot()
       parameter->setValue(value);
       if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
       {
-	msg::Message uMessage;
-	uMessage.mask = msg::Request | msg::Update;
-	messageOutSignal(uMessage);
+        msg::Message uMessage;
+        uMessage.mask = msg::Request | msg::Update;
+        messageOutSignal(uMessage);
       }
     }
     else
     {
-      std::cout << "fail position: " << translator.getFailedPosition() << std::endl;
+      std::cout << "fail position: " << translator.getFailedPosition() - 7 << std::endl;
       editLine->setText(QString::number(lastValue, 'f', 12));
       editLine->selectAll();
+      trafficLabel->setPixmap(trafficGreen);
+      linkLabel->setText(QString::number(lastValue, 'f', 4));
     }
   }
 }
@@ -310,5 +312,6 @@ void ParameterDialog::textEditedSlot(const QString &textIn)
   else
   {
     trafficLabel->setPixmap(trafficRed);
+    linkLabel->setText("?");
   }
 }

@@ -24,6 +24,7 @@
 #include <boost/uuid/nil_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
+#include <QCoreApplication>
 #include <QtGui/QLineEdit>
 #include <QtGui/QHeaderView>
 #include <QAction>
@@ -33,10 +34,15 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QDir>
+#include <QWidget>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QPainter>
 
 #include <expressions/tableview.h>
 #include <expressions/tablemodel.h>
 #include <expressions/expressionmanager.h>
+#include <expressions/stringtranslator.h>
 
 using namespace expr;
 
@@ -445,61 +451,38 @@ ExpressionDelegate::ExpressionDelegate(QObject *parent): QStyledItemDelegate(par
 
 QWidget* ExpressionDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&, const QModelIndex&) const
 {
-  LineEdit *lineEdit = new LineEdit(parent);
-  return lineEdit;
+  TrafficEdit *trafficEdit = new TrafficEdit(parent);
+  return trafficEdit;
 }
 
 void ExpressionDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
 {
-  LineEdit *lineEdit = dynamic_cast<LineEdit *>(editor);
+  TrafficEdit *tEdit = dynamic_cast<TrafficEdit *>(editor); assert(tEdit);
+  tEdit->trafficLabel->setPixmap(tEdit->trafficGreen); //expect current string is valid.
+  LineEdit *lineEdit = tEdit->lineEdit;
   assert(lineEdit);
   const QSortFilterProxyModel *proxyModel = dynamic_cast<const QSortFilterProxyModel *>(index.model());
   assert(proxyModel);
   const TableModel *myModel = dynamic_cast<const TableModel *>(proxyModel->sourceModel());
   assert(myModel);
-  if (myModel->lastFailedText.isEmpty())
-    lineEdit->setText(index.model()->data(index, Qt::EditRole).toString());
-  else
-  {
-    int position = myModel->lastFailedPosition;
-    lineEdit->setText(myModel->lastFailedText);
-    QMetaObject::invokeMethod(lineEdit, "setSelectionSlot", Qt::QueuedConnection,
-                              Q_ARG(int, position), Q_ARG(int, myModel->lastFailedText.size() - position));
-  }
   
-  /*Hack! I don't know what else to do.
-   * 
-   * inside ExpressionDelegate::setModelData:
-   * When the model setData fails, it (the model) caches the failing text(expression)
-   * and the position of the failure and the model is returned to it's previous state.
-   * We then invoke another edit.
-   * 
-   * inside ExpressionDelegate::setEditorData (here):
-   * if the model has failing text we apply it to the edit box. This is so the user
-   * doesn't loose a long expression because of a simple typo.
-   * 
-   * The problem arises that we can't clear this failing text when the user rejects the editing (esc key).
-   * So then the editor keeps getting filled with the last failing text. Even in other rows.
-   * 
-   * I can't cache anything inside the delegate because all the overrides are constant.
-   * Caching the data in model is only working because here we cast away the model constantness.
-   */
-  
-  TableModel *hackModel = const_cast<TableModel *>(myModel);
-  assert(hackModel);
-  hackModel->lastFailedMessage.clear();
-  hackModel->lastFailedPosition = 0;
-  hackModel->lastFailedText.clear();
+  lineEdit->sTranslator = myModel->getStringTranslator();
+  lineEdit->setText(index.model()->data(index, Qt::EditRole).toString());
 }
 
 void ExpressionDelegate::updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex&) const
 {
+  //this is called before setEditorData.
   editor->setGeometry(option.rect);
+  TrafficEdit *tEdit = static_cast<TrafficEdit*>(editor);
+  tEdit->iconHeight = option.rect.height();
+  tEdit->updatePixmaps();
 }
 
 void ExpressionDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
 {
-  QLineEdit *lineEdit = static_cast<QLineEdit *>(editor);
+  LineEdit *lineEdit = dynamic_cast<TrafficEdit *>(editor)->lineEdit;
+  lineEdit->removeTempFormula(); //temp formula might be invalid and we should be done with it.
   if (!model->setData(index, lineEdit->text(), Qt::EditRole))
   {
     //view must be used as parent when constructing the delegate.
@@ -530,10 +513,108 @@ void NameDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, cons
 
 LineEdit::LineEdit(QWidget* parent): QLineEdit(parent)
 {
+  connect (this, SIGNAL(textEdited(const QString&)), this, SLOT(parseStringSlot(const QString&)));
+}
 
+LineEdit::~LineEdit()
+{
+  removeTempFormula();
+}
+
+void LineEdit::removeTempFormula()
+{
+  if (sTranslator->eManager.hasFormula(testFormulaName))
+    sTranslator->eManager.removeFormula(testFormulaName);
 }
 
 void LineEdit::setSelectionSlot(const int& start, const int& length)
 {
   this->setSelection(start, length);
+}
+
+void LineEdit::parseStringSlot(const QString &textIn)
+{
+  Q_EMIT parseWorkingSignal();
+  qApp->processEvents(); //need this or we never see yellow signal.
+  
+  ExpressionManager &eManager = sTranslator->eManager;
+  if (eManager.hasFormula(testFormulaName))
+    eManager.cleanFormula(eManager.getFormulaId(testFormulaName));
+  
+  std::ostringstream stream;
+  stream << testFormulaName << "=" << textIn.toStdString();
+  if (sTranslator->parseString(stream.str()) != StringTranslator::ParseSucceeded)
+  {
+    int position = sTranslator->getFailedPosition() - testFormulaName.size() - 1;
+    this->setToolTip(textIn.left( position) + "?");
+    Q_EMIT parseFailedSignal();
+  }
+  else
+  {
+    sTranslator->eManager.update();
+    this->setToolTip(QString::number(sTranslator->eManager.getFormulaValue(sTranslator->getFormulaOutId())));
+    Q_EMIT parseSucceededSignal();
+  }
+  
+  QPoint point(0.0, -1.5 * (this->frameGeometry().height()));
+  QHelpEvent *toolTipEvent = new QHelpEvent(QEvent::ToolTip, point, this->mapToGlobal(point));
+  qApp->postEvent(this, toolTipEvent);
+}
+
+TrafficEdit::TrafficEdit(QWidget* parent): QWidget(parent, Qt::Widget | Qt::FramelessWindowHint)
+{
+  this->setContentsMargins(0, 0, 0, 0);
+  QHBoxLayout *layout = new QHBoxLayout();
+  layout->setSpacing(0);
+  layout->setContentsMargins(0, 0, 0, 0);
+  
+  lineEdit = new LineEdit(this);
+  layout->addWidget(lineEdit);
+  
+  trafficLabel = new QLabel(this);
+  layout->addWidget(trafficLabel);
+  
+  this->setLayout(layout);
+  this->setFocusProxy(lineEdit);
+  
+  connect (lineEdit, SIGNAL(parseFailedSignal()),  this, SLOT(setTrafficRedSlot()));
+  connect(lineEdit, SIGNAL(parseWorkingSignal()), this, SLOT(setTrafficYellowSlot()));
+  connect(lineEdit, SIGNAL(parseSucceededSignal()), this, SLOT(setTrafficGreenSlot()));
+}
+
+void TrafficEdit::updatePixmaps()
+{
+  assert(iconHeight > 0);
+  QPixmap temp(iconHeight, iconHeight);
+  temp.fill(QPalette::Window);
+  trafficRed = buildPixmap(":/resources/images/trafficRed.svg");
+  trafficYellow = buildPixmap(":/resources/images/trafficYellow.svg");
+  trafficGreen = buildPixmap(":/resources/images/trafficGreen.svg");
+}
+
+QPixmap TrafficEdit::buildPixmap(const QString &name)
+{
+  QPixmap temp = QPixmap(name).scaled(iconHeight, iconHeight, Qt::KeepAspectRatio);
+  QPixmap out(iconHeight, iconHeight);
+  QPainter painter(&out);
+  painter.fillRect(out.rect(), this->palette().color(QPalette::Window));
+  painter.drawPixmap(out.rect(), temp, temp.rect());
+  painter.end();
+  
+  return out;
+}
+
+void TrafficEdit::setTrafficRedSlot()
+{
+  trafficLabel->setPixmap(trafficRed);
+}
+
+void TrafficEdit::setTrafficYellowSlot()
+{
+  trafficLabel->setPixmap(trafficYellow);
+}
+
+void TrafficEdit::setTrafficGreenSlot()
+{
+  trafficLabel->setPixmap(trafficGreen);
 }

@@ -78,11 +78,14 @@ public:
     //! Add a new row to the model.
     void addDefaultRow();
     
+    //! Need to get the string translator to line edit widget.
+    StringTranslator* getStringTranslator() const;
+    
 private:
   //! Manager containing expressions and groups.
   expr::ExpressionManager &eManager;
   //! Translator to interface with the manager.
-  const boost::shared_ptr<StringTranslator> sTranslator;
+  boost::shared_ptr<StringTranslator> sTranslator;
 };
 
 //! ProxyModel for behaviour common to both AllProxy and GroupProxy
