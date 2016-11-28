@@ -40,7 +40,7 @@ typedef std::unique_ptr<AbstractNode> VertexProperty;
  * This is the data structure at the heart of the expression evaluations.
  * @see VertexProperty @see EdgeProperty::EdgePropertyType
  */
-typedef boost::adjacency_list<boost::setS, boost::listS, boost::bidirectionalS, VertexProperty, EdgeProperty::EdgePropertyType> Graph;
+typedef boost::adjacency_list<boost::multisetS, boost::listS, boost::bidirectionalS, VertexProperty, EdgeProperty::EdgePropertyType> Graph;
 typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
 typedef boost::graph_traits<Graph>::edge_descriptor Edge;
 typedef boost::graph_traits<Graph>::vertex_iterator VertexIterator;

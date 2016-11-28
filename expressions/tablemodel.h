@@ -86,6 +86,12 @@ private:
   expr::ExpressionManager &eManager;
   //! Translator to interface with the manager.
   boost::shared_ptr<StringTranslator> sTranslator;
+  //! tableview calls into ::data every paint event. Way too many! cache rhs strings for speed.
+  typedef std::map<boost::uuids::uuid, std::string> IdToRhsMap;
+  mutable IdToRhsMap idToRhsMap;
+  void buildOrModifyMapEntry(const boost::uuids::uuid &, const std::string&) const;
+  std::string getRhs(const boost::uuids::uuid&) const;
+  void removeRhs(const boost::uuids::uuid&) const;
 };
 
 //! ProxyModel for behaviour common to both AllProxy and GroupProxy

@@ -25,9 +25,11 @@
 
 #include <expressions/abstractnode.h>
 
+static thread_local boost::uuids::random_generator gen;
+
 using namespace expr;
 
-AbstractNode::AbstractNode() : dirtyTest(true), value(1.0), id(boost::uuids::random_generator()())
+AbstractNode::AbstractNode() : dirtyTest(true), value(1.0), id(gen())
 {
 
 }

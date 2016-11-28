@@ -64,7 +64,9 @@ QVariant TableModel::data(const QModelIndex& index, int role) const
       return QString::fromStdString(eManager.getFormulaName(currentId));
     if (index.column() == 1)
     {
-      return QString::fromStdString(sTranslator->buildStringRhs(currentId));
+      if (idToRhsMap.count(currentId) == 0)
+        buildOrModifyMapEntry(currentId, sTranslator->buildStringRhs(currentId));
+      return QString::fromStdString(getRhs(currentId));
     }
     if (index.column() == 2)
       return eManager.getFormulaValue(currentId);
@@ -180,13 +182,14 @@ bool TableModel::setData(const QModelIndex& index, const QVariant& value, int)
       eManager.update();
       return false;
     }
-    //why don't I have to tell the model to update the dependent formulas?
     eManager.setFormulaDependentsDirty(fId);
     eManager.update();
   }
   lastFailedText.clear();
   lastFailedMessage.clear();
   lastFailedPosition = -1;
+  removeRhs(fId);
+  Q_EMIT dataChanged(index, index);
   return true;
 }
 
@@ -366,6 +369,28 @@ void TableModel::importExpressions(std::istream &streamIn, boost::uuids::uuid gr
 StringTranslator* TableModel::getStringTranslator() const
 {
   return sTranslator.get();
+}
+
+void TableModel::buildOrModifyMapEntry(const boost::uuids::uuid &idIn, const std::string &rhsIn) const
+{
+  IdToRhsMap::iterator it;
+  bool dummy;
+  std::tie(it, dummy) = idToRhsMap.insert(std::make_pair(idIn, rhsIn));
+  it->second = rhsIn;
+}
+
+std::string TableModel::getRhs(const boost::uuids::uuid &idIn) const
+{
+  IdToRhsMap::iterator it = idToRhsMap.find(idIn);
+  assert(it != idToRhsMap.end());
+  return it->second;
+}
+
+void TableModel::removeRhs(const boost::uuids::uuid &idIn) const
+{
+  IdToRhsMap::iterator it = idToRhsMap.find(idIn);
+  assert(it != idToRhsMap.end());
+  idToRhsMap.erase(it);
 }
 
 BaseProxyModel::BaseProxyModel(QObject* parent): QSortFilterProxyModel(parent)
