@@ -157,7 +157,8 @@ std::vector< boost::uuids::uuid > GraphWrapper::getAllFormulaIds() const
   {
     if (graph[*it]->getType() != NodeType::Formula)
       continue;
-    out.push_back(graph[*it]->getId());
+    FormulaNode *fNode = static_cast<FormulaNode*>(graph[*it].get());
+    out.push_back(fNode->getId());
   }
   return out;
 }
@@ -180,7 +181,10 @@ std::vector< boost::uuids::uuid > GraphWrapper::getAllFormulaIdsSorted()
   for (std::vector<Vertex>::iterator it = vertices.begin(); it != vertices.end(); ++it)
   {
     if(graph[*it]->getType() == NodeType::Formula)
-      out.push_back(graph[*it]->getId());
+    {
+      FormulaNode *fNode = static_cast<FormulaNode*>(graph[*it].get());
+      out.push_back(fNode->getId());
+    }
   }
   
   return out;
@@ -208,7 +212,8 @@ bool GraphWrapper::hasFormula(const boost::uuids::uuid& idIn) const
   {
     if (graph[*it]->getType() != NodeType::Formula)
       continue;
-    if (graph[*it]->getId() == idIn)
+    FormulaNode *fNode = static_cast<FormulaNode*>(graph[*it].get());
+    if (fNode->getId() == idIn)
       return true;
   }
   return false;
@@ -222,21 +227,24 @@ Vertex GraphWrapper::getFormulaVertex(const boost::uuids::uuid& idIn) const
   {
     if (graph[*it]->getType() != NodeType::Formula)
       continue;
-    if (graph[*it]->getId() == idIn)
+    FormulaNode *fNode = static_cast<FormulaNode*>(graph[*it].get());
+    if (fNode->getId() == idIn)
       return *it;
   }
   assert(0); //has no formual of id.
 }
 
-boost::uuids::uuid GraphWrapper::getId(const Vertex &vertexIn) const
+boost::uuids::uuid GraphWrapper::getFormulaId(const Vertex &vertexIn) const
 {
-  return graph[vertexIn]->getId();
+  assert(graph[vertexIn]->getType() == NodeType::Formula);
+  FormulaNode *fNode = static_cast<FormulaNode*>(graph[vertexIn].get());
+  return fNode->getId();
 }
 
 boost::uuids::uuid GraphWrapper::getFormulaId(const std::string& nameIn) const
 {
   assert(hasFormula(nameIn));
-  return getId(getFormulaVertex(nameIn));
+  return getFormulaId(getFormulaVertex(nameIn));
 }
 
 std::string GraphWrapper::getFormulaName(const Vertex &vIn) const
@@ -399,7 +407,7 @@ std::vector< boost::uuids::uuid > GraphWrapper::getDependentFormulaIds(const boo
   std::vector<boost::uuids::uuid> out;
   std::vector<Vertex>::const_iterator it;
   for (it = depedentVertices.begin(); it != depedentVertices.end(); ++it)
-    out.push_back(getId(*it));
+    out.push_back(getFormulaId(*it));
   
   return out;
 }

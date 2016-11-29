@@ -109,7 +109,7 @@ public:
   //@}
   
   /*! @brief Get id from vertex. */
-  boost::uuids::uuid getId(const Vertex &vertexIn) const;
+  boost::uuids::uuid getFormulaId(const Vertex &vertexIn) const;
   /*! @brief Get formula id from name. */
   boost::uuids::uuid getFormulaId(const std::string &nameIn) const;
 

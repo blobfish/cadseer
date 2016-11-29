@@ -466,7 +466,7 @@ int StringTranslatorStow::parseString(const std::string &formula)
 boost::uuids::uuid StringTranslatorStow::getFormulaOutId() const
 {
   assert(formulaNodeOut != Graph::null_vertex());
-  return graphWrapper.getId(formulaNodeOut);
+  return graphWrapper.getFormulaId(formulaNodeOut);
 }
 
 void StringTranslatorStow::cleanFailedParse()
@@ -485,7 +485,7 @@ void StringTranslatorStow::cleanFailedParse()
   {
     if (graphWrapper.graph[*it]->getType() == NodeType::Formula)
     {
-      eManager.removeFormulaFromAllGroup(graphWrapper.getId(*it));
+      eManager.removeFormulaFromAllGroup(graphWrapper.getFormulaId(*it));
       removedFormulaNode = true;
     }
     boost::remove_vertex(*it, graphWrapper.graph);
@@ -527,7 +527,7 @@ void StringTranslatorStow::buildFormulaNode(const std::string& stringIn, bool &c
   else
   {
     fVertex = graphWrapper.buildFormulaNode(stringIn);
-    eManager.addFormulaToAllGroup(graphWrapper.getId(fVertex));
+    eManager.addFormulaToAllGroup(graphWrapper.getFormulaId(fVertex));
     addedVertices.push_back(fVertex);
   }
   

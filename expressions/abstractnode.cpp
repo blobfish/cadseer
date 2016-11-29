@@ -29,7 +29,7 @@ static thread_local boost::uuids::random_generator gen;
 
 using namespace expr;
 
-AbstractNode::AbstractNode() : dirtyTest(true), value(1.0), id(gen())
+AbstractNode::AbstractNode() : dirtyTest(true), value(1.0)
 {
 
 }
@@ -40,26 +40,12 @@ double AbstractNode::getValue()
   return value;
 }
 
-void AbstractNode::copy(const AbstractNode* source)
-{
-  this->dirtyTest = source->dirtyTest;
-  this->value = source->value;
-  this->id = source->id;
-}
-
 ConstantNode::ConstantNode() : AbstractNode()
 {
 
 }
 
-AbstractNode* ConstantNode::clone()
-{
-  ConstantNode *out = new ConstantNode();
-  out->copy(this);
-  return out;
-}
-
-FormulaNode::FormulaNode() : AbstractNode()
+FormulaNode::FormulaNode() : AbstractNode(), name("no name"), id(gen())
 {
 
 }
@@ -70,14 +56,6 @@ void FormulaNode::calculate(const EdgePropertiesMap &propertyMap)
   assert(propertyMap.count(EdgeProperty::None) == 1);
   value = propertyMap.at(EdgeProperty::None);
   this->setClean();
-}
-
-AbstractNode* FormulaNode::clone()
-{
-  FormulaNode *out = new FormulaNode();
-  out->copy(this);
-  out->name = this->name;
-  return out;
 }
 
 AdditionNode::AdditionNode() : AbstractNode()
@@ -94,13 +72,6 @@ void AdditionNode::calculate(const EdgePropertiesMap& propertyMap)
   this->setClean();
 }
 
-AbstractNode* AdditionNode::clone()
-{
-  AdditionNode *out = new AdditionNode();
-  out->copy(this);
-  return out;
-}
-
 SubtractionNode::SubtractionNode() : AbstractNode()
 {
 
@@ -113,13 +84,6 @@ void SubtractionNode::calculate(const EdgePropertiesMap& propertyMap)
   assert(propertyMap.count(EdgeProperty::Rhs) == 1);
   value = propertyMap.at(EdgeProperty::Lhs) - propertyMap.at(EdgeProperty::Rhs);
   this->setClean();
-}
-
-AbstractNode* SubtractionNode::clone()
-{
-  SubtractionNode *out = new SubtractionNode();
-  out->copy(this);
-  return out;
 }
 
 MultiplicationNode::MultiplicationNode() : AbstractNode()
@@ -136,13 +100,6 @@ void MultiplicationNode::calculate(const EdgePropertiesMap& propertyMap)
   this->setClean();
 }
 
-AbstractNode* MultiplicationNode::clone()
-{
-  MultiplicationNode *out = new MultiplicationNode();
-  out->copy(this);
-  return out;
-}
-
 DivisionNode::DivisionNode() : AbstractNode()
 {
 
@@ -157,13 +114,6 @@ void DivisionNode::calculate(const EdgePropertiesMap& propertyMap)
   this->setClean();
 }
 
-AbstractNode* DivisionNode::clone()
-{
-  DivisionNode *out = new DivisionNode();
-  out->copy(this);
-  return out;
-}
-
 ParenthesesNode::ParenthesesNode() : AbstractNode()
 {
 
@@ -175,13 +125,6 @@ void ParenthesesNode::calculate(const EdgePropertiesMap& propertyMap)
   assert(propertyMap.count(EdgeProperty::None) == 1);
   value = propertyMap.at(EdgeProperty::None);
   this->setClean();
-}
-
-AbstractNode* ParenthesesNode::clone()
-{
-  ParenthesesNode *out = new ParenthesesNode();
-  out->copy(this);
-  return out;
 }
 
 SinNode::SinNode() : AbstractNode()
@@ -198,13 +141,6 @@ void SinNode::calculate(const EdgePropertiesMap& propertyMap)
   this->setClean();
 }
 
-AbstractNode* SinNode::clone()
-{
-  SinNode *out = new SinNode();
-  out->copy(this);
-  return out;
-}
-
 CosNode::CosNode() : AbstractNode()
 {
 
@@ -217,13 +153,6 @@ void CosNode::calculate(const EdgePropertiesMap& propertyMap)
   double childValue = propertyMap.at(EdgeProperty::None);
   value = std::cos(childValue);
   this->setClean();
-}
-
-AbstractNode* CosNode::clone()
-{
-  CosNode *out = new CosNode();
-  out->copy(this);
-  return out;
 }
 
 TanNode::TanNode() : AbstractNode()
@@ -240,13 +169,6 @@ void TanNode::calculate(const EdgePropertiesMap& propertyMap)
   this->setClean();
 }
 
-AbstractNode* TanNode::clone()
-{
-  TanNode *out = new TanNode();
-  out->copy(this);
-  return out;
-}
-
 AsinNode::AsinNode() : AbstractNode()
 {
 
@@ -259,13 +181,6 @@ void AsinNode::calculate(const EdgePropertiesMap& propertyMap)
   double childValue = propertyMap.at(EdgeProperty::None);
   value = std::asin(childValue);
   this->setClean();
-}
-
-AbstractNode* AsinNode::clone()
-{
-  AsinNode *out = new AsinNode();
-  out->copy(this);
-  return out;
 }
 
 AcosNode::AcosNode() : AbstractNode()
@@ -282,13 +197,6 @@ void AcosNode::calculate(const EdgePropertiesMap& propertyMap)
   this->setClean();
 }
 
-AbstractNode* AcosNode::clone()
-{
-  AcosNode *out = new AcosNode();
-  out->copy(this);
-  return out;
-}
-
 AtanNode::AtanNode() : AbstractNode()
 {
 
@@ -301,13 +209,6 @@ void AtanNode::calculate(const EdgePropertiesMap& propertyMap)
   double childValue = propertyMap.at(EdgeProperty::None);
   value = std::atan(childValue);
   this->setClean();
-}
-
-AbstractNode* AtanNode::clone()
-{
-  AtanNode *out = new AtanNode();
-  out->copy(this);
-  return out;
 }
 
 Atan2Node::Atan2Node() : AbstractNode()
@@ -327,13 +228,6 @@ void Atan2Node::calculate(const EdgePropertiesMap& propertyMap)
   this->setClean();
 }
 
-AbstractNode* Atan2Node::clone()
-{
-  Atan2Node *out = new Atan2Node();
-  out->copy(this);
-  return out;
-}
-
 PowNode::PowNode()
 {
 
@@ -350,13 +244,6 @@ void PowNode::calculate(const EdgePropertiesMap& propertyMap)
   this->setClean();
 }
 
-AbstractNode* PowNode::clone()
-{
-  PowNode *out = new PowNode();
-  out->copy(this);
-  return out;
-}
-
 AbsNode::AbsNode() : AbstractNode()
 {
 
@@ -369,13 +256,6 @@ void AbsNode::calculate(const EdgePropertiesMap& propertyMap)
   double valueIn = propertyMap.at(EdgeProperty::None);
   value = std::fabs(valueIn);
   this->setClean();
-}
-
-AbstractNode* AbsNode::clone()
-{
-  AbsNode *out = new AbsNode();
-  out->copy(this);
-  return out;
 }
 
 MinNode::MinNode() : AbstractNode()
@@ -394,13 +274,6 @@ void MinNode::calculate(const EdgePropertiesMap& propertyMap)
   this->setClean();
 }
 
-AbstractNode* MinNode::clone()
-{
-  MinNode *out = new MinNode();
-  out->copy(this);
-  return out;
-}
-
 MaxNode::MaxNode() : AbstractNode()
 {
 
@@ -415,13 +288,6 @@ void MaxNode::calculate(const EdgePropertiesMap& propertyMap)
   double p2 = propertyMap.at(EdgeProperty::Parameter2);
   value = std::max(p1, p2);
   this->setClean();
-}
-
-AbstractNode* MaxNode::clone()
-{
-  MaxNode *out = new MaxNode();
-  out->copy(this);
-  return out;
 }
 
 FloorNode::FloorNode()
@@ -457,13 +323,6 @@ void FloorNode::calculate(const EdgePropertiesMap& propertyMap)
   this->setClean();
 }
 
-AbstractNode* FloorNode::clone()
-{
-  FloorNode *out = new FloorNode();
-  out->copy(this);
-  return out;
-}
-
 CeilNode::CeilNode()
 {
 
@@ -496,13 +355,6 @@ void CeilNode::calculate(const EdgePropertiesMap& propertyMap)
 
   value = p2 * static_cast<double>(factor);
   this->setClean();
-}
-
-AbstractNode* CeilNode::clone()
-{
-  CeilNode *out = new CeilNode();
-  out->copy(this);
-  return out;
 }
 
 RoundNode::RoundNode()
@@ -544,13 +396,6 @@ void RoundNode::calculate(const EdgePropertiesMap& propertyMap)
   this->setClean();
 }
 
-AbstractNode* RoundNode::clone()
-{
-  RoundNode *out = new RoundNode();
-  out->copy(this);
-  return out;
-}
-
 RadToDegNode::RadToDegNode() : AbstractNode()
 {
 
@@ -563,13 +408,6 @@ void RadToDegNode::calculate(const EdgePropertiesMap& propertyMap)
   double valueIn = propertyMap.at(EdgeProperty::None);
   value = valueIn * 180 / boost::math::constants::pi<double>();
   this->setClean();
-}
-
-AbstractNode* RadToDegNode::clone()
-{
-  RadToDegNode *out = new RadToDegNode();
-  out->copy(this);
-  return out;
 }
 
 DegToRadNode::DegToRadNode() : AbstractNode()
@@ -586,13 +424,6 @@ void DegToRadNode::calculate(const EdgePropertiesMap& propertyMap)
   this->setClean();
 }
 
-AbstractNode* DegToRadNode::clone()
-{
-  DegToRadNode *out = new DegToRadNode();
-  out->copy(this);
-  return out;
-}
-
 LogNode::LogNode() : AbstractNode()
 {
 
@@ -605,13 +436,6 @@ void LogNode::calculate(const EdgePropertiesMap& propertyMap)
   double valueIn = propertyMap.at(EdgeProperty::None);
   value = std::log(valueIn);
   this->setClean();
-}
-
-AbstractNode* LogNode::clone()
-{
-  LogNode *out = new LogNode();
-  out->copy(this);
-  return out;
 }
 
 ExpNode::ExpNode() : AbstractNode()
@@ -628,13 +452,6 @@ void ExpNode::calculate(const EdgePropertiesMap& propertyMap)
   this->setClean();
 }
 
-AbstractNode* ExpNode::clone()
-{
-  ExpNode *out = new ExpNode();
-  out->copy(this);
-  return out;
-}
-
 SqrtNode::SqrtNode() : AbstractNode()
 {
   
@@ -647,13 +464,6 @@ void SqrtNode::calculate(const EdgePropertiesMap& propertyMap)
   double valueIn = propertyMap.at(EdgeProperty::None);
   value = std::sqrt(valueIn);
   this->setClean();
-}
-
-AbstractNode* SqrtNode::clone()
-{
-  SqrtNode *out = new SqrtNode();
-  out->copy(this);
-  return out;
 }
 
 HypotNode::HypotNode() : AbstractNode()
@@ -670,13 +480,6 @@ void HypotNode::calculate(const EdgePropertiesMap& propertyMap)
   double p2 = propertyMap.at(EdgeProperty::Parameter2);
   value = hypot(p1, p2);
   this->setClean();
-}
-
-AbstractNode* HypotNode::clone()
-{
-  HypotNode *out = new HypotNode();
-  out->copy(this);
-  return out;
 }
 
 ConditionalNode::ConditionalNode() : AbstractNode(), type(ConditionalNode::None)
@@ -742,12 +545,3 @@ void ConditionalNode::calculate(const EdgePropertiesMap& propertyMap)
     assert(0); //unrecognized operator.
   this->setClean();
 }
-
-AbstractNode* ConditionalNode::clone()
-{
-  ConditionalNode *out = new ConditionalNode();
-  out->copy(this);
-  out->type = this->type;
-  return out;
-}
-

@@ -85,8 +85,6 @@ public:
   //@}
   //! Returns the value. @see value
   double getValue();
-  //! Returns the id. @see id
-  boost::uuids::uuid getId(){return id;}
   //! get this nodes type. @see NodeType::Type
   virtual NodeType::Type getType() = 0;
   //! get this nodes types name.
@@ -98,21 +96,12 @@ public:
    * This separates the graph definition from the nodes. @see EdgePropertiesMap
    */
   virtual void calculate(const EdgePropertiesMap &propertyMap) = 0;
-  //! Copy this node. Dynamically allocated, receiver to manage deletion.
-  virtual AbstractNode* clone() = 0;
   
-// protected:
-  /*! @brief Copies abstract data.
-   * 
-   * Used in a clone operation and called by derived classes clone function. Wanted clone function to be pure virtual. 
-   */
-  void copy(const AbstractNode *source);
+protected:
   //! Signifies whether the node needs to be calculated.
   bool dirtyTest;
   //! Value of this node. @see calculate
   double value;
-  //! Unique identifier.
-  boost::uuids::uuid id;
 };
 
 /*! @brief Constant number. No parameters. */
@@ -124,7 +113,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::Constant;}
   virtual std::string className() {return "Constant";}
   virtual void calculate(const EdgePropertiesMap &propertyMap) {setClean();}
-  virtual AbstractNode* clone();
   
   //! Set the value of this constant node.
   void setValue(const double &valueIn){value = valueIn;}
@@ -142,9 +130,15 @@ public:
   virtual NodeType::Type getType() {return NodeType::Formula;}
   virtual std::string className() {return "Formula";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
+  
+  //! Returns the id. @see id
+  boost::uuids::uuid getId(){return id;}
+  
   //! Name of the formula
   std::string name;
+protected:
+  //! Unique identifier.
+  boost::uuids::uuid id;
 };
 
 /*! @brief Addition. 2 parameters. */
@@ -156,7 +150,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::Addition;}
   virtual std::string className() {return "Addition";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
 };
 
 /*! @brief Subtraction. 2 parameters. */
@@ -168,7 +161,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::Subtraction;}
   virtual std::string className() {return "Subtraction";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
 };
 
 /*! @brief Multiplication. 2 parameters. */
@@ -180,7 +172,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::Multiplication;}
   virtual std::string className() {return "Multiplication";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
 };
 
 /*! @brief Division.  2 parameters.*/
@@ -192,7 +183,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::Division;}
   virtual std::string className() {return "Division";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
 };
 
 /*! @brief Parenthesis. 1 parameter. */
@@ -204,7 +194,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::Parentheses;}
   virtual std::string className() {return "Parentheses";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
 };
 
 /*! @brief Sin. 1 parameter. */
@@ -216,7 +205,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::Sin;}
   virtual std::string className() {return "Sin";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
 };
 
 /*! @brief Cosine. 1 parameter. */
@@ -228,7 +216,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::Cos;}
   virtual std::string className() {return "Cos";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
 };
 
 /*! @brief Tangent. 1 parameter. */
@@ -240,7 +227,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::Tan;}
   virtual std::string className() {return "Tan";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
 };
 
 /*! @brief Arc Sin. 1 parameter. */
@@ -252,7 +238,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::Asin;}
   virtual std::string className() {return "Asin";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
 };
 
 /*! @brief Arc Cosine. 1 parameter.*/
@@ -264,7 +249,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::Acos;}
   virtual std::string className() {return "Acos";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
 };
 
 /*! @brief Arc Tangent. 1 parameter. */
@@ -276,7 +260,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::Atan;}
   virtual std::string className() {return "Atan";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
 };
 
 /*! @brief Arc Tangent function with 2 parameters.
@@ -291,7 +274,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::Atan2;}
   virtual std::string className() {return "Atan2";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
 };
 
 /*! @brief Power. 2 parameters with one base and one exponent. */
@@ -303,7 +285,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::Pow;}
   virtual std::string className() {return "Pow";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
 };
 
 /*! @brief Absolute Value. 1 parameter*/
@@ -315,7 +296,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::Abs;}
   virtual std::string className() {return "Abs";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
 };
 
 /*! @brief Minimum Value. 2 parameters */
@@ -327,7 +307,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::Min;}
   virtual std::string className() {return "Min";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
 };
 
 /*! @brief Maximum Value. 2 parameters */
@@ -339,7 +318,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::Max;}
   virtual std::string className() {return "Max";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
 };
 
 /*! @brief Round Down. 2 parameters */
@@ -351,7 +329,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::Floor;}
   virtual std::string className() {return "Floor";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
 };
 
 /*! @brief Round Up. 2 parameters */
@@ -363,7 +340,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::Ceil;}
   virtual std::string className() {return "Ceil";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
 };
 
 /*! @brief Round. 2 parameters */
@@ -375,7 +351,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::Round;}
   virtual std::string className() {return "Round";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
 };
 
 /*! @brief Convert radians to degrees. 1 parameter */
@@ -387,7 +362,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::RadToDeg;}
   virtual std::string className() {return "RadToDeg";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
 };
 
 /*! @brief Convert degrees to radians. 1 parameter */
@@ -399,7 +373,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::DegToRad;}
   virtual std::string className() {return "DegToRad";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
 };
 
 /*! @brief Logarithm. 1 parameter */
@@ -411,7 +384,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::Log;}
   virtual std::string className() {return "Log";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
 };
 
 /*! @brief Exponent. 1 parameter */
@@ -423,7 +395,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::Exp;}
   virtual std::string className() {return "Exp";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
 };
 
 /*! @brief Square root. 1 parameter */
@@ -435,7 +406,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::Sqrt;}
   virtual std::string className() {return "Sqrt";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
 };
 
 /*! @brief Hypotenuse. 2 parameters */
@@ -447,7 +417,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::Hypot;}
   virtual std::string className() {return "Hypot";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
 };
 
 /*! @brief If, Then, Else. 4 parameters */
@@ -460,7 +429,6 @@ public:
   virtual NodeType::Type getType() {return NodeType::Conditional;}
   virtual std::string className() {return "Conditional";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual AbstractNode* clone();
   Type type;
 };
 
