@@ -25,9 +25,11 @@
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/graph/depth_first_search.hpp>
+#include <boost/graph/filtered_graph.hpp>
 
 #include <expressions/grammer.h>
 #include <expressions/stringtranslatorstow.h>
+#include <tools/graphtools.h>
 
 using namespace expr;
 
@@ -39,7 +41,7 @@ using namespace expr;
   class FormulaVisitor : public boost::default_dfs_visitor
   {
   public:
-      FormulaVisitor(std::list<std::string> &stringIn) : expression(stringIn), currentPosition(expression.begin()), finished(false)
+      FormulaVisitor(std::list<std::string> &stringIn) : expression(stringIn), currentPosition(expression.begin())
       {
 	typeMap.insert(std::make_pair(expr::NodeType::Addition, " + "));
 	typeMap.insert(std::make_pair(expr::NodeType::Subtraction, " - "));
@@ -58,9 +60,6 @@ using namespace expr;
       template<typename FindVertex, typename FindGraph>
       void discover_vertex(FindVertex vertex, FindGraph &graph)
       {
-	if (finished)
-	  return;
-	
 	if (graph[vertex]->getType() == expr::NodeType::Formula)
 	{
 	  expr::FormulaNode *fNode = dynamic_cast<expr::FormulaNode *>(graph[vertex].get());
@@ -68,27 +67,16 @@ using namespace expr;
 	  {
 	    //found root formula.
 	    currentPosition = expression.insert(currentPosition, fNode->name + " = ");
-	    currentPosition++;
-	    StackEntry temp;
-	    temp.push_back(currentPosition);
-	    itStack.push(temp);
 	  }
 	  else
-	  {
-	    if (subFormulaVertices.empty())
-	    {
-	      //we want the first formula name but no more.
-	      currentPosition = expression.insert(currentPosition, fNode->name);
-	      currentPosition++;
-	      StackEntry temp;
-	      temp.push_back(currentPosition);
-	      itStack.push(temp);
-	    }
-	    subFormulaVertices.push(vertex);
-	  }
+      {
+        currentPosition = expression.insert(currentPosition, fNode->name);
+      }
+      currentPosition++;
+      StackEntry temp;
+      temp.push_back(currentPosition);
+      itStack.push(temp);
 	}
-	else if (!subFormulaVertices.empty())
-	  return;
 	else if (typeMap.count(graph[vertex]->getType()) > 0)
 	{
 	  currentPosition = expression.insert(currentPosition, typeMap.at(graph[vertex]->getType()));
@@ -366,8 +354,6 @@ using namespace expr;
       template<typename FindEdge, typename FindGraph>
       void examine_edge(FindEdge edge, FindGraph &graph)
       {
-	if (finished || !subFormulaVertices.empty())
-	  return;
 	if (graph[edge] == expr::EdgeProperty::Lhs || graph[edge] == expr::EdgeProperty::Parameter1 ||
 	  graph[edge] == expr::EdgeProperty::None)
 	{
@@ -387,18 +373,19 @@ using namespace expr;
 	}
       }
       
-      template<typename FindVertex, typename FindGraph>
-      void finish_vertex(FindVertex vertex, FindGraph &graph)
+      template <typename EdgeT, typename GraphT>
+      void forward_or_cross_edge(EdgeT edge, GraphT &graph)
       {
-	if (finished)
-	  return;
-	if (vertex == startVertex)
-	  finished = true;
-	if ((graph[vertex]->getType() == expr::NodeType::Formula) && (!subFormulaVertices.empty()))
-	  subFormulaVertices.pop();
-	if (!subFormulaVertices.empty())
-	  return;
-	
+        // only formula vertices should be target of a forward edge.
+        assert(graph[boost::target(edge, graph)]->getType() == NodeType::Formula);
+        FormulaNode *fNode = static_cast<FormulaNode*>(graph[boost::target(edge, graph)].get());
+        currentPosition = expression.insert(currentPosition, fNode->name);
+        currentPosition++;
+      }
+      
+      template<typename FindVertex, typename FindGraph>
+      void finish_vertex(FindVertex, FindGraph &)
+      {
 	itStack.pop();
 	if (!itStack.empty())
 	  currentPosition = itStack.top().front();
@@ -425,18 +412,8 @@ using namespace expr;
     typedef std::vector<std::list<std::string>::iterator> StackEntry;
     //!Stack of positions(iterators) mirroring the current vertex visitation path.
     std::stack<StackEntry> itStack;
-    //!Keeps track when we cross into sub formula vertices, so we can ignore them.
-    std::stack<expr::Vertex> subFormulaVertices;
     //!The first vertex visited.
     expr::Vertex startVertex;
-    
-    /*! @brief Signals that the visitation is finished.
-    * 
-    * With a dfs search all vertices will be visited. It only starts with a starting vertex
-    * and is not constrained to it's tree. So we keep track of when the #startVertex is
-    * finished so we can ignore all subsequent calls to #discover_vertex.
-    */
-    bool finished;
   };
   
   
@@ -955,19 +932,86 @@ std::string StringTranslatorStow::buildStringAll(const boost::uuids::uuid &idIn)
   return stream.str();
 }
 
+/*! used in buildStringCommon to 'clean' extranous graph vertices
+ * for building of string representation. After ran through dfs search,
+ * verticesOut should only contain relevant vertices for passed in
+ * start vertex and any 'sub formula' vertices. sub formula vertices
+ * will be gone.
+ */
+template<typename VertexT>
+class DepthLimitVisitor : public boost::default_dfs_visitor
+{
+public:
+  DepthLimitVisitor(std::vector<VertexT> &verticesOutIn) :
+    verticesOut(verticesOutIn) {}
+  
+  template<typename GraphT>
+  void discover_vertex(VertexT vertex, GraphT &graph)
+  {
+    if (graph[vertex]->getType() == NodeType::Formula)
+    {
+      //we grab up to 2 formula vertices. the original and 1 child deep.
+      formulaStack.push(vertex);
+      if (formulaStack.size() < 3)
+        verticesOut.push_back(vertex);
+    }
+    else if (formulaStack.size() == 1) //grab all 'non formula' vertices that are 1st generation children.
+      verticesOut.push_back(vertex);
+  }
+  
+  template <typename EdgeT, typename GraphT>
+  void forward_or_cross_edge(EdgeT edge, GraphT &graph)
+  {
+    // only formula vetices should be target of a forward edge.
+    assert(graph[boost::target(edge, graph)]->getType() == NodeType::Formula);
+    if (formulaStack.size() == 1)
+      verticesOut.push_back(boost::target(edge, graph));
+  }
+  
+  template<typename GraphT>
+  void finish_vertex(VertexT vertex, GraphT &graph)
+  {
+    if (graph[vertex]->getType() == NodeType::Formula)
+      formulaStack.pop();
+  }
+  
+  std::vector<VertexT> &verticesOut;
+  std::stack<VertexT> formulaStack;
+};
+
+
 std::list< std::string > StringTranslatorStow::buildStringCommon(const Vertex& vertexIn) const
 {
-  VertexIndexMap vIndexMap;
-  boost::associative_property_map<VertexIndexMap> pMap(vIndexMap);
-  VertexIterator vIt, vItEnd;
-  int index = 0;
-  for (boost::tie(vIt, vItEnd) = boost::vertices(graphWrapper.graph); vIt != vItEnd; ++vIt)
-    boost::put(pMap, *vIt, index++);
+  graphWrapper.indexVerticesAndEdges();
+  
+  /* was initially trying to do it all with one 1 dfs and 1 visitor. this was becoming really
+   * hard to reason. So I am taking a more divided(slower) approach.
+   * filter to only connected vertices by using a bfs and a collection visitor.
+   * filter out and any 'sub-formula' nodes using a dfs and collection visitor.
+   * use existing formula visitor to build string
+   */
+  
+  std::vector<Vertex> limitVertices;
+  gu::BFSLimitVisitor<Vertex>limitVisitor(limitVertices);
+  boost::breadth_first_search(graphWrapper.graph, vertexIn, visitor(limitVisitor));
+  
+  gu::SubsetFilter<Graph> filter(graphWrapper.graph, limitVertices);
+  typedef boost::filtered_graph<Graph, boost::keep_all, gu::SubsetFilter<Graph> > FilteredGraph;
+  typedef boost::graph_traits<FilteredGraph>::vertex_descriptor FilteredVertex;
+  FilteredGraph filteredGraph(graphWrapper.graph, boost::keep_all(), filter);
+  
+  std::vector<FilteredVertex> depthVertices;
+  DepthLimitVisitor<FilteredVertex> depthVisitor(depthVertices);
+  boost::depth_first_search(filteredGraph, boost::visitor(depthVisitor).root_vertex(vertexIn));
+  
+  gu::SubsetFilter<FilteredGraph> filterDepth(filteredGraph, depthVertices);
+  typedef boost::filtered_graph<FilteredGraph, boost::keep_all, gu::SubsetFilter<FilteredGraph> > DepthFilteredGraph;
+  DepthFilteredGraph depthFilteredGraph(filteredGraph, boost::keep_all(), filterDepth);
   
   std::list<std::string> expression;
   
   FormulaVisitor visitor(expression);
-  boost::depth_first_search(graphWrapper.graph, boost::visitor(visitor).root_vertex(vertexIn).vertex_index_map(pMap));
+  boost::depth_first_search(depthFilteredGraph, boost::visitor(visitor).root_vertex(vertexIn));
   
   return expression;
 }

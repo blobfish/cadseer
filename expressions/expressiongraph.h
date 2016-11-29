@@ -35,22 +35,22 @@ namespace expr{
 //! @brief Used for graph definiton.
 typedef std::unique_ptr<AbstractNode> VertexProperty;
 
+typedef boost::property<boost::vertex_index_t, std::size_t, VertexProperty> vertex_prop;
+typedef boost::property<boost::edge_index_t, std::size_t, EdgeProperty::EdgePropertyType> edge_prop;
+
 /*! @brief The graph definition for containment of all abstract node decendents.
  * 
  * This is the data structure at the heart of the expression evaluations.
  * @see VertexProperty @see EdgeProperty::EdgePropertyType
  */
-typedef boost::adjacency_list<boost::multisetS, boost::listS, boost::bidirectionalS, VertexProperty, EdgeProperty::EdgePropertyType> Graph;
+typedef boost::adjacency_list<boost::multisetS, boost::listS, boost::bidirectionalS, vertex_prop, edge_prop> Graph;
 typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
 typedef boost::graph_traits<Graph>::edge_descriptor Edge;
+typedef boost::graph_traits<Graph>::edge_iterator EdgeIterator;
 typedef boost::graph_traits<Graph>::vertex_iterator VertexIterator;
 typedef boost::graph_traits<Graph>::in_edge_iterator InEdgeIterator;
 typedef boost::graph_traits<Graph>::out_edge_iterator OutEdgeIterator;
 typedef boost::graph_traits<Graph>::adjacency_iterator VertexAdjacencyIterator;
-/*! @brief Storing of indexes for vertices. Needed by boost::listS for vertex container*/
-typedef std::map<Vertex, std::size_t> VertexIndexMap;
-/*! @brief Adaptor for VertexIndexMap*/
-typedef boost::associative_property_map<VertexIndexMap> VertexPropertyMap;
 
 /*! @brief Container for the boost graph.
  * 
@@ -82,16 +82,16 @@ public:
   void writeOutGraph(const std::string &pathName);
   //! Dependency sort and recompute update nodes.
   void update();
+  
+  /*! @brief index the vertices for algorithms
+   */
+  void indexVerticesAndEdges();
+  
   /*! @brief Construct EdgePropertiesMap from the graph.
    * 
    * Passed into each nodes calculate override.
    */
   EdgePropertiesMap buildEdgePropertiesMap(const Vertex &source) const;
-  /*! @brief Construct VertexPropertyMap from the graph.
-   * 
-   * Used for boost algorithms and visitors. This is needed because we are using listS for graph definition instead of vecS
-   */ 
-  VertexPropertyMap buildVertexPropertyMap(VertexIndexMap &mapIn) const;
   
   //@{
   //! Testing if a formula exists.
@@ -162,7 +162,7 @@ public:
    * exporting the formulas. Thus upon import the creation order will ensure
    * that dependent formulas will exist.
    */
-  std::vector<boost::uuids::uuid> getAllFormulaIdsSorted() const;
+  std::vector<boost::uuids::uuid> getAllFormulaIdsSorted();
   
   /*! @brief Get a vector of dependent ids.
    * 

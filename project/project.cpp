@@ -48,6 +48,7 @@
 #include <project/featureload.h>
 #include <project/serial/xsdcxxoutput/project.h>
 #include <project/project.h>
+#include <tools/graphtools.h>
 
 using namespace prj;
 using namespace prg;
@@ -989,40 +990,6 @@ class ShapeTrackVisitorDown : public boost::default_dfs_visitor
     std::stack<std::vector<boost::uuids::uuid> >&idsStack;
 };
 
-//! Combined with a BFS to accumulate related vertices
-template <typename VertexTypeIn>
-class BFSLimitVisitor : public boost::default_bfs_visitor
-{
-public:
-  BFSLimitVisitor(std::vector<VertexTypeIn> &verticesIn): vertices(verticesIn) {}
-  template <typename GraphTypeIn>
-  void discover_vertex(VertexTypeIn vertexIn, const GraphTypeIn &) const
-  {
-    vertices.push_back(vertexIn);
-  }
-private:
-  std::vector<VertexTypeIn> &vertices;
-};
-
-template <typename GraphTypeIn>
-struct SubsetFilter {
-  typedef typename boost::graph_traits<GraphTypeIn>::vertex_descriptor VertexTypeIn;
-  SubsetFilter() : graph(nullptr), vertices(nullptr){ }
-  SubsetFilter(const GraphTypeIn &graphIn, std::vector<VertexTypeIn> &verticesIn) :
-    graph(&graphIn), vertices(&verticesIn){ }
-  template <typename VertexType>
-  bool operator()(const VertexType& vertexIn) const
-  {
-    if(!graph)
-      return false;
-    if (std::find(vertices->begin(), vertices->end(), vertexIn) == vertices->end())
-      return false;
-    return true;
-  }
-  const GraphTypeIn *graph;
-  const std::vector<VertexTypeIn> *vertices;
-};
-
 void Project::shapeTrackUp(const uuid& featureIdIn, const uuid& shapeId)
 {
   IdVertexMap::const_iterator it = map.find(featureIdIn);
@@ -1038,11 +1005,11 @@ void Project::shapeTrackUp(const uuid& featureIdIn, const uuid& shapeId)
   GraphReversed rGraph = boost::make_reverse_graph(projectGraph);
   
   std::vector<VertexReversed> limitVertices;
-  BFSLimitVisitor<VertexReversed>limitVisitor(limitVertices);
+  gu::BFSLimitVisitor<VertexReversed>limitVisitor(limitVertices);
   boost::breadth_first_search(rGraph, startVertex, visitor(limitVisitor));
   
-  SubsetFilter<GraphReversed> filter(rGraph, limitVertices);
-  typedef boost::filtered_graph<GraphReversed, boost::keep_all, SubsetFilter<GraphReversed> > FilteredGraph;
+  gu::SubsetFilter<GraphReversed> filter(rGraph, limitVertices);
+  typedef boost::filtered_graph<GraphReversed, boost::keep_all, gu::SubsetFilter<GraphReversed> > FilteredGraph;
   typedef boost::graph_traits<FilteredGraph>::vertex_descriptor FilteredVertex;
   FilteredGraph filteredGraph(rGraph, boost::keep_all(), filter);
   
@@ -1063,16 +1030,15 @@ void Project::shapeTrackDown(const uuid& featureIdIn, const uuid& shapeId)
   assert(projectGraph[startVertex].feature->getSeerShape().hasShapeIdRecord(shapeId));
   
   std::vector<Vertex> limitVertices;
-  BFSLimitVisitor<Vertex>limitVisitor(limitVertices);
+  gu::BFSLimitVisitor<Vertex>limitVisitor(limitVertices);
   boost::breadth_first_search(projectGraph, startVertex, visitor(limitVisitor));
   
-  SubsetFilter<Graph> filter(projectGraph, limitVertices);
-  typedef boost::filtered_graph<Graph, boost::keep_all, SubsetFilter<Graph> > FilteredGraph;
+  gu::SubsetFilter<Graph> filter(projectGraph, limitVertices);
+  typedef boost::filtered_graph<Graph, boost::keep_all, gu::SubsetFilter<Graph> > FilteredGraph;
   typedef boost::graph_traits<FilteredGraph>::vertex_descriptor FilteredVertex;
   FilteredGraph filteredGraph(projectGraph, boost::keep_all(), filter);
   
   std::stack<std::vector<boost::uuids::uuid> >idsStack;
   ShapeTrackVisitorDown<FilteredVertex> shapeVisitor(startVertex, shapeId, idsStack);
   boost::depth_first_search(filteredGraph, visitor(shapeVisitor).root_vertex(startVertex));
-
 }

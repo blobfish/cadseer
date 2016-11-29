@@ -38,24 +38,43 @@ GraphWrapper::~GraphWrapper()
 
 }
 
+void GraphWrapper::indexVerticesAndEdges()
+{
+  //index vertices.
+  VertexIterator it, itEnd;
+  std::size_t index = 0;
+  for(boost::tie(it, itEnd) = boost::vertices(graph); it != itEnd; ++it)
+  {
+    boost::put(boost::vertex_index, graph, *it, index);
+    index++;
+  }
+  
+  //index edges.
+  EdgeIterator eit, eitEnd;
+  index = 0;
+  for(boost::tie(eit, eitEnd) = boost::edges(graph); eit != eitEnd; ++eit)
+  {
+    boost::put(boost::edge_index, graph, *eit, index);
+    index++;
+  }
+}
+
 void GraphWrapper::writeOutGraph(const std::string& pathName)
 {
-  VertexIndexMap vIndexMap;
-  boost::associative_property_map<VertexIndexMap> pMap = buildVertexPropertyMap(vIndexMap);
+  indexVerticesAndEdges();
   std::ofstream file(pathName.c_str());
   boost::write_graphviz(file, graph, Vertex_writer<Graph>(graph),
-                        Edge_writer<Graph>(graph), boost::default_writer(), pMap);
+                        Edge_writer<Graph>(graph), boost::default_writer());
 }
 
 void GraphWrapper::update()
 {
-  VertexIndexMap vIndexMap;
-  boost::associative_property_map<VertexIndexMap> pMap = buildVertexPropertyMap(vIndexMap);
+  indexVerticesAndEdges();
   
   std::vector<Vertex> vertices;
   try
   {
-    boost::topological_sort(graph, std::back_inserter(vertices), boost::vertex_index_map(pMap));
+    boost::topological_sort(graph, std::back_inserter(vertices));
   }
   catch(const boost::not_a_dag &)
   {
@@ -84,16 +103,6 @@ EdgePropertiesMap GraphWrapper::buildEdgePropertiesMap(const Vertex& source) con
     out.insert(std::make_pair(graph[*it], graph[target]->getValue()));
   }
   return out;
-}
-
-VertexPropertyMap GraphWrapper::buildVertexPropertyMap(VertexIndexMap &mapIn) const
-{
-  boost::associative_property_map<VertexIndexMap> pMap(mapIn);
-  VertexIterator vIt, vItEnd;
-  int index = 0;
-  for (boost::tie(vIt, vItEnd) = boost::vertices(graph); vIt != vItEnd; ++vIt)
-    boost::put(pMap, *vIt, index++);
-  return pMap;
 }
 
 bool GraphWrapper::hasFormula(const std::string& nameIn) const
@@ -153,15 +162,14 @@ std::vector< boost::uuids::uuid > GraphWrapper::getAllFormulaIds() const
   return out;
 }
 
-std::vector< boost::uuids::uuid > GraphWrapper::getAllFormulaIdsSorted() const
+std::vector< boost::uuids::uuid > GraphWrapper::getAllFormulaIdsSorted()
 {
-  VertexIndexMap vIndexMap;
-  boost::associative_property_map<VertexIndexMap> pMap = buildVertexPropertyMap(vIndexMap);
+  indexVerticesAndEdges();
   
   std::vector<Vertex> vertices;
   try
   {
-    boost::topological_sort(graph, std::back_inserter(vertices), boost::vertex_index_map(pMap));
+    boost::topological_sort(graph, std::back_inserter(vertices));
   }
   catch(const boost::not_a_dag &)
   {
@@ -292,13 +300,12 @@ void GraphWrapper::cleanFormula(const boost::uuids::uuid& idIn)
 
 void GraphWrapper::cleanFormula(const Vertex& vertexIn)
 {
-  VertexIndexMap vIndexMap;
-  boost::associative_property_map<VertexIndexMap> pMap = buildVertexPropertyMap(vIndexMap);
+  indexVerticesAndEdges();
   
   std::vector<Vertex> vertices;
   std::vector<Edge> edges;
   FormulaCleanVisitor visitor(vertices, edges);
-  boost::depth_first_search(graph, boost::visitor(visitor).root_vertex(vertexIn).vertex_index_map(pMap));
+  boost::depth_first_search(graph, boost::visitor(visitor).root_vertex(vertexIn));
   
   for (std::vector<Edge>::iterator it = edges.begin(); it != edges.end(); ++it)
     boost::remove_edge(*it, graph);
@@ -336,15 +343,14 @@ void GraphWrapper::removeFormula(const Vertex& vertexIn)
 
 bool GraphWrapper::hasCycle(const boost::uuids::uuid &idIn, std::string &nameOut)
 {
-  VertexIndexMap vIndexMap;
-  boost::associative_property_map<VertexIndexMap> pMap = buildVertexPropertyMap(vIndexMap);
+  indexVerticesAndEdges();
   
   bool out = false;
   assert(hasFormula(idIn));
   Vertex baseVertex = getFormulaVertex(idIn);
   Vertex branchVertex = Graph::null_vertex();
   CycleVisitor visitor(out, baseVertex, branchVertex);
-  boost::depth_first_search(graph, boost::visitor(visitor).root_vertex(baseVertex).vertex_index_map(pMap));
+  boost::depth_first_search(graph, boost::visitor(visitor).root_vertex(baseVertex));
   if (out)
   {
     assert(branchVertex != Graph::null_vertex());
@@ -357,11 +363,10 @@ void GraphWrapper::setFormulaDependentsDirty(const Vertex& vertexIn)
 {
   assert(graph[vertexIn]->getType() == NodeType::Formula);
   
-  VertexIndexMap vIndexMap;
-  boost::associative_property_map<VertexIndexMap> pMap = buildVertexPropertyMap(vIndexMap);
+  indexVerticesAndEdges();
   
   DependentDirtyVisitor visitor;
-  boost::breadth_first_search(boost::make_reverse_graph(graph), vertexIn, boost::visitor(visitor).vertex_index_map(pMap));
+  boost::breadth_first_search(boost::make_reverse_graph(graph), vertexIn, boost::visitor(visitor));
 }
 
 void GraphWrapper::setFormulaDependentsDirty(const boost::uuids::uuid& idIn)
@@ -385,12 +390,11 @@ std::vector< boost::uuids::uuid > GraphWrapper::getDependentFormulaIds(const boo
   assert(hasFormula(parentIn));
   Vertex root = getFormulaVertex(parentIn);
   
-  VertexIndexMap vIndexMap;
-  boost::associative_property_map<VertexIndexMap> pMap = buildVertexPropertyMap(vIndexMap);
+  indexVerticesAndEdges();
   
   std::vector<Vertex> depedentVertices;
   DependentFormulaCollectionVisitor visitor(depedentVertices);
-  boost::breadth_first_search(graph, root, boost::visitor(visitor).vertex_index_map(pMap));
+  boost::breadth_first_search(graph, root, boost::visitor(visitor));
   
   std::vector<boost::uuids::uuid> out;
   std::vector<Vertex>::const_iterator it;
