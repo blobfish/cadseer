@@ -140,6 +140,9 @@ public:
   //! Cycle the graph and recalculate dirty nodes.
   void update();
   
+  //! requests the project to update. called from qt objects when done editing.
+  void requestProjectUpdate();
+  
   //! return a reference to the GraphWrapper 
   GraphWrapper& getGraphWrapper();
   
@@ -198,6 +201,7 @@ public:
   boost::uuids::uuid getUserGroupId(const std::string &groupNameIn) const;
   
   boost::uuids::uuid getFormulaId(const std::string &nameIn) const;
+  void setFormulaId(const boost::uuids::uuid &oldIdIn, const boost::uuids::uuid &newIdIn);
   std::string getFormulaName(const boost::uuids::uuid &idIn) const;
   bool hasFormula(const std::string &nameIn) const;
   bool hasFormula(const boost::uuids::uuid &idIn) const;
@@ -230,6 +234,8 @@ public:
   void dispatchValues();
   //! Write a list of links to stream.
   void dumpLinks(std::ostream &stream);
+  //! get all the links. created for serialize.
+  const FormulaLinkContainerType& getLinkContainer() const{return formulaLinks;}
   
   //! Contains an id to all existing formulas.
   Group allGroup;

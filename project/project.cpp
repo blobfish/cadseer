@@ -40,6 +40,7 @@
 #include <feature/seershape.h>
 #include <feature/inert.h>
 #include <expressions/expressionmanager.h>
+#include <expressions/stringtranslator.h> //for serialize.
 #include <project/message.h>
 #include <message/message.h>
 #include <message/dispatch.h>
@@ -76,6 +77,8 @@ void Project::updateModel()
   msg::Message preMessage;
   preMessage.mask = msg::Response | msg::Pre | msg::UpdateModel;
   observer->messageOutSignal(preMessage);
+  
+  expressionManager->update();
   
   //something here to check preferences about writing this out.
   QString fileName = static_cast<app::Application *>(qApp)->getApplicationDirectory().path();
@@ -503,9 +506,6 @@ void Project::setupDispatcher()
   mask = msg::Request | msg::SaveProject;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::saveProjectRequestDispatched, this, _1)));
   
-  mask = msg::Request | msg::GitMessage;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::gitMessageRequestDispatched, this, _1)));
-  
   mask = msg::Request | msg::CheckShapeIds;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::checkShapeIdsDispatched, this, _1)));
 }
@@ -582,12 +582,6 @@ void Project::saveProjectRequestDispatched(const msg::Message&)
   msg::dispatch().dumpString(debug.str());
   
   save();
-}
-
-void Project::gitMessageRequestDispatched(const msg::Message &messageIn)
-{
-  Message pMessage = boost::get<prj::Message>(messageIn.payload);
-  gitManager->appendGitMessage(pMessage.gitMessage);
 }
 
 void Project::checkShapeIdsDispatched(const msg::Message&)
@@ -771,9 +765,26 @@ void Project::serialWrite()
     connections.connection().push_back(prj::srl::Connection(to_string(s->getId()), to_string(t->getId()), inputTypeString));
   }
   
+  expr::StringTranslator sTranslator(*expressionManager);
+  prj::srl::Expressions expressions;
+  std::vector<uuid> formulaIds = expressionManager->getAllFormulaIdsSorted();
+  for (const auto& fId : formulaIds)
+  {
+    std::string eString = sTranslator.buildStringAll(fId);
+    prj::srl::Expression expression(to_string(fId), eString);
+    expressions.array().push_back(expression);
+  }
+  
+  prj::srl::ExpressionLinks eLinks;
+  for (const auto& link : expressionManager->getLinkContainer())
+  {
+    prj::srl::ExpressionLink sLink(to_string(link.featureId), link.parameterName, to_string(link.formulaId));
+    eLinks.array().push_back(sLink);
+  }
+  
   prj::srl::AppVersion version(0, 0, 0);
   std::string projectPath = saveDirectory + QDir::separator().toLatin1() + "project.prjt";
-  srl::Project p(version, 0, features, connections);
+  srl::Project p(version, 0, features, connections, expressions, eLinks);
   xml_schema::NamespaceInfomap infoMap;
   std::ofstream stream(projectPath.c_str());
   srl::project(stream, p, infoMap);
@@ -801,6 +812,7 @@ void Project::initializeNew()
 void Project::open()
 {
   isLoading = true;
+  observer->messageOutSignal(msg::Message(msg::Request | msg::GitMessage | msg::Freeze));
   
   std::string projectPath = saveDirectory + QDir::separator().toLatin1() + "project.prjt";
   std::string shapePath = saveDirectory + QDir::separator().toLatin1() + "project.brep";
@@ -832,6 +844,26 @@ void Project::open()
       connect(source, target, inputType);
     }
     
+    boost::uuids::string_generator gen;
+    expr::StringTranslator sTranslator(*expressionManager);
+    for (const auto &sExpression : project->expressions().array())
+    {
+      if (sTranslator.parseString(sExpression.stringForm()) != expr::StringTranslator::ParseSucceeded)
+      {
+        std::cout << "failed expression parse on load:   " << sExpression.stringForm() << std::endl;
+        continue;
+      }
+      expressionManager->setFormulaId(sTranslator.getFormulaOutId(), gen(sExpression.id()));
+    }
+    
+    expressionManager->update(); //addFormulaLink requires that everything be up to date.
+    for (const auto &sLink : project->expressionLinks().array())
+    {
+      ftr::Base *feature = findFeature(gen(sLink.featureId()));
+      ftr::Parameter *parameter = feature->getParameter(sLink.parameterName());
+      expressionManager->addFormulaLink(gen(sLink.featureId()), parameter, gen(sLink.expressionId()));
+    }
+    
     updateModel();
     updateVisual();
     
@@ -859,6 +891,7 @@ void Project::open()
     std::cerr << e << std::endl;
   }
   
+  observer->messageOutSignal(msg::Message(msg::Request | msg::GitMessage | msg::Thaw));
   isLoading = false;
 }
 

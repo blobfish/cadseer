@@ -325,3 +325,13 @@ QString Base::buildFilePathName(const QDir &dIn) const
     
   return out;
 }
+
+bool Base::hasParameter(const std::string &nameIn)
+{
+  return (pMap.count(nameIn) > 0);
+}
+
+Parameter* Base::getParameter(const std::string &nameIn)
+{
+  return pMap.at(nameIn);
+}

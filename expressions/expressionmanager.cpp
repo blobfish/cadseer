@@ -91,6 +91,10 @@ void ExpressionManager::update()
 {
   graphPtr->update();
   dispatchValues();
+}
+
+void ExpressionManager::requestProjectUpdate()
+{
   if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
   {
     msg::Message uMessage;
@@ -235,6 +239,18 @@ boost::uuids::uuid ExpressionManager::getFormulaId(const std::string& nameIn) co
 {
   assert(graphPtr->hasFormula(nameIn));
   return (graphPtr->getFormulaId(nameIn));
+}
+
+void ExpressionManager::setFormulaId(const boost::uuids::uuid &oldIdIn, const boost::uuids::uuid &newIdIn)
+{
+  assert(graphPtr->hasFormula(oldIdIn));
+  
+  //remove oldId from the all group and add new id.
+  assert (allGroup.containsFormula(oldIdIn));
+  allGroup.removeFormula(oldIdIn);
+  allGroup.formulaIds.push_back(newIdIn);
+  
+  graphPtr->setFormulaId(oldIdIn, newIdIn);
 }
 
 std::string ExpressionManager::getFormulaName(const boost::uuids::uuid& idIn) const

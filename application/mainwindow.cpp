@@ -28,7 +28,6 @@
 #include <dagview/dagmodel.h>
 #include <dagview/dagview.h>
 #include <expressions/expressionwidget.h>
-#include <expressions/expressionmanager.h>
 #include <application/application.h>
 #include <application/splitterdecorated.h>
 #include <viewer/viewerwidget.h>

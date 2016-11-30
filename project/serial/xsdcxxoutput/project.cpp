@@ -346,6 +346,208 @@ namespace prj
     }
 
 
+    // Expression
+    // 
+
+    const Expression::IdType& Expression::
+    id () const
+    {
+      return this->id_.get ();
+    }
+
+    Expression::IdType& Expression::
+    id ()
+    {
+      return this->id_.get ();
+    }
+
+    void Expression::
+    id (const IdType& x)
+    {
+      this->id_.set (x);
+    }
+
+    void Expression::
+    id (::std::unique_ptr< IdType > x)
+    {
+      this->id_.set (std::move (x));
+    }
+
+    const Expression::IdType& Expression::
+    id_default_value ()
+    {
+      return id_default_value_;
+    }
+
+    const Expression::StringFormType& Expression::
+    stringForm () const
+    {
+      return this->stringForm_.get ();
+    }
+
+    Expression::StringFormType& Expression::
+    stringForm ()
+    {
+      return this->stringForm_.get ();
+    }
+
+    void Expression::
+    stringForm (const StringFormType& x)
+    {
+      this->stringForm_.set (x);
+    }
+
+    void Expression::
+    stringForm (::std::unique_ptr< StringFormType > x)
+    {
+      this->stringForm_.set (std::move (x));
+    }
+
+    const Expression::StringFormType& Expression::
+    stringForm_default_value ()
+    {
+      return stringForm_default_value_;
+    }
+
+
+    // Expressions
+    // 
+
+    const Expressions::ArraySequence& Expressions::
+    array () const
+    {
+      return this->array_;
+    }
+
+    Expressions::ArraySequence& Expressions::
+    array ()
+    {
+      return this->array_;
+    }
+
+    void Expressions::
+    array (const ArraySequence& s)
+    {
+      this->array_ = s;
+    }
+
+
+    // ExpressionLink
+    // 
+
+    const ExpressionLink::FeatureIdType& ExpressionLink::
+    featureId () const
+    {
+      return this->featureId_.get ();
+    }
+
+    ExpressionLink::FeatureIdType& ExpressionLink::
+    featureId ()
+    {
+      return this->featureId_.get ();
+    }
+
+    void ExpressionLink::
+    featureId (const FeatureIdType& x)
+    {
+      this->featureId_.set (x);
+    }
+
+    void ExpressionLink::
+    featureId (::std::unique_ptr< FeatureIdType > x)
+    {
+      this->featureId_.set (std::move (x));
+    }
+
+    const ExpressionLink::FeatureIdType& ExpressionLink::
+    featureId_default_value ()
+    {
+      return featureId_default_value_;
+    }
+
+    const ExpressionLink::ParameterNameType& ExpressionLink::
+    parameterName () const
+    {
+      return this->parameterName_.get ();
+    }
+
+    ExpressionLink::ParameterNameType& ExpressionLink::
+    parameterName ()
+    {
+      return this->parameterName_.get ();
+    }
+
+    void ExpressionLink::
+    parameterName (const ParameterNameType& x)
+    {
+      this->parameterName_.set (x);
+    }
+
+    void ExpressionLink::
+    parameterName (::std::unique_ptr< ParameterNameType > x)
+    {
+      this->parameterName_.set (std::move (x));
+    }
+
+    const ExpressionLink::ParameterNameType& ExpressionLink::
+    parameterName_default_value ()
+    {
+      return parameterName_default_value_;
+    }
+
+    const ExpressionLink::ExpressionIdType& ExpressionLink::
+    expressionId () const
+    {
+      return this->expressionId_.get ();
+    }
+
+    ExpressionLink::ExpressionIdType& ExpressionLink::
+    expressionId ()
+    {
+      return this->expressionId_.get ();
+    }
+
+    void ExpressionLink::
+    expressionId (const ExpressionIdType& x)
+    {
+      this->expressionId_.set (x);
+    }
+
+    void ExpressionLink::
+    expressionId (::std::unique_ptr< ExpressionIdType > x)
+    {
+      this->expressionId_.set (std::move (x));
+    }
+
+    const ExpressionLink::ExpressionIdType& ExpressionLink::
+    expressionId_default_value ()
+    {
+      return expressionId_default_value_;
+    }
+
+
+    // ExpressionLinks
+    // 
+
+    const ExpressionLinks::ArraySequence& ExpressionLinks::
+    array () const
+    {
+      return this->array_;
+    }
+
+    ExpressionLinks::ArraySequence& ExpressionLinks::
+    array ()
+    {
+      return this->array_;
+    }
+
+    void ExpressionLinks::
+    array (const ArraySequence& s)
+    {
+      this->array_ = s;
+    }
+
+
     // Project
     // 
 
@@ -443,6 +645,54 @@ namespace prj
     connections (::std::unique_ptr< ConnectionsType > x)
     {
       this->connections_.set (std::move (x));
+    }
+
+    const Project::ExpressionsType& Project::
+    expressions () const
+    {
+      return this->expressions_.get ();
+    }
+
+    Project::ExpressionsType& Project::
+    expressions ()
+    {
+      return this->expressions_.get ();
+    }
+
+    void Project::
+    expressions (const ExpressionsType& x)
+    {
+      this->expressions_.set (x);
+    }
+
+    void Project::
+    expressions (::std::unique_ptr< ExpressionsType > x)
+    {
+      this->expressions_.set (std::move (x));
+    }
+
+    const Project::ExpressionLinksType& Project::
+    expressionLinks () const
+    {
+      return this->expressionLinks_.get ();
+    }
+
+    Project::ExpressionLinksType& Project::
+    expressionLinks ()
+    {
+      return this->expressionLinks_.get ();
+    }
+
+    void Project::
+    expressionLinks (const ExpressionLinksType& x)
+    {
+      this->expressionLinks_.set (x);
+    }
+
+    void Project::
+    expressionLinks (::std::unique_ptr< ExpressionLinksType > x)
+    {
+      this->expressionLinks_.set (std::move (x));
     }
   }
 }
@@ -1052,6 +1302,447 @@ namespace prj
     {
     }
 
+    // Expression
+    //
+
+    const Expression::IdType Expression::id_default_value_ (
+      "00000000-0000-0000-0000-000000000000");
+
+    const Expression::StringFormType Expression::stringForm_default_value_ (
+      "name=1");
+
+    Expression::
+    Expression (const IdType& id,
+                const StringFormType& stringForm)
+    : ::xml_schema::Type (),
+      id_ (id, this),
+      stringForm_ (stringForm, this)
+    {
+    }
+
+    Expression::
+    Expression (const Expression& x,
+                ::xml_schema::Flags f,
+                ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      id_ (x.id_, f, this),
+      stringForm_ (x.stringForm_, f, this)
+    {
+    }
+
+    Expression::
+    Expression (const ::xercesc::DOMElement& e,
+                ::xml_schema::Flags f,
+                ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      id_ (this),
+      stringForm_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void Expression::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // id
+        //
+        if (n.name () == "id" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< IdType > r (
+            IdTraits::create (i, f, this));
+
+          if (!id_.present ())
+          {
+            this->id_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // stringForm
+        //
+        if (n.name () == "stringForm" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< StringFormType > r (
+            StringFormTraits::create (i, f, this));
+
+          if (!stringForm_.present ())
+          {
+            this->stringForm_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        break;
+      }
+
+      if (!id_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "id",
+          "");
+      }
+
+      if (!stringForm_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "stringForm",
+          "");
+      }
+    }
+
+    Expression* Expression::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class Expression (*this, f, c);
+    }
+
+    Expression& Expression::
+    operator= (const Expression& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->id_ = x.id_;
+        this->stringForm_ = x.stringForm_;
+      }
+
+      return *this;
+    }
+
+    Expression::
+    ~Expression ()
+    {
+    }
+
+    // Expressions
+    //
+
+    Expressions::
+    Expressions ()
+    : ::xml_schema::Type (),
+      array_ (this)
+    {
+    }
+
+    Expressions::
+    Expressions (const Expressions& x,
+                 ::xml_schema::Flags f,
+                 ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      array_ (x.array_, f, this)
+    {
+    }
+
+    Expressions::
+    Expressions (const ::xercesc::DOMElement& e,
+                 ::xml_schema::Flags f,
+                 ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      array_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void Expressions::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // array
+        //
+        if (n.name () == "array" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< ArrayType > r (
+            ArrayTraits::create (i, f, this));
+
+          this->array_.push_back (::std::move (r));
+          continue;
+        }
+
+        break;
+      }
+    }
+
+    Expressions* Expressions::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class Expressions (*this, f, c);
+    }
+
+    Expressions& Expressions::
+    operator= (const Expressions& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->array_ = x.array_;
+      }
+
+      return *this;
+    }
+
+    Expressions::
+    ~Expressions ()
+    {
+    }
+
+    // ExpressionLink
+    //
+
+    const ExpressionLink::FeatureIdType ExpressionLink::featureId_default_value_ (
+      "00000000-0000-0000-0000-000000000000");
+
+    const ExpressionLink::ParameterNameType ExpressionLink::parameterName_default_value_ (
+      "");
+
+    const ExpressionLink::ExpressionIdType ExpressionLink::expressionId_default_value_ (
+      "00000000-0000-0000-0000-000000000000");
+
+    ExpressionLink::
+    ExpressionLink (const FeatureIdType& featureId,
+                    const ParameterNameType& parameterName,
+                    const ExpressionIdType& expressionId)
+    : ::xml_schema::Type (),
+      featureId_ (featureId, this),
+      parameterName_ (parameterName, this),
+      expressionId_ (expressionId, this)
+    {
+    }
+
+    ExpressionLink::
+    ExpressionLink (const ExpressionLink& x,
+                    ::xml_schema::Flags f,
+                    ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      featureId_ (x.featureId_, f, this),
+      parameterName_ (x.parameterName_, f, this),
+      expressionId_ (x.expressionId_, f, this)
+    {
+    }
+
+    ExpressionLink::
+    ExpressionLink (const ::xercesc::DOMElement& e,
+                    ::xml_schema::Flags f,
+                    ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      featureId_ (this),
+      parameterName_ (this),
+      expressionId_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void ExpressionLink::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // featureId
+        //
+        if (n.name () == "featureId" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< FeatureIdType > r (
+            FeatureIdTraits::create (i, f, this));
+
+          if (!featureId_.present ())
+          {
+            this->featureId_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // parameterName
+        //
+        if (n.name () == "parameterName" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< ParameterNameType > r (
+            ParameterNameTraits::create (i, f, this));
+
+          if (!parameterName_.present ())
+          {
+            this->parameterName_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // expressionId
+        //
+        if (n.name () == "expressionId" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< ExpressionIdType > r (
+            ExpressionIdTraits::create (i, f, this));
+
+          if (!expressionId_.present ())
+          {
+            this->expressionId_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        break;
+      }
+
+      if (!featureId_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "featureId",
+          "");
+      }
+
+      if (!parameterName_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "parameterName",
+          "");
+      }
+
+      if (!expressionId_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "expressionId",
+          "");
+      }
+    }
+
+    ExpressionLink* ExpressionLink::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class ExpressionLink (*this, f, c);
+    }
+
+    ExpressionLink& ExpressionLink::
+    operator= (const ExpressionLink& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->featureId_ = x.featureId_;
+        this->parameterName_ = x.parameterName_;
+        this->expressionId_ = x.expressionId_;
+      }
+
+      return *this;
+    }
+
+    ExpressionLink::
+    ~ExpressionLink ()
+    {
+    }
+
+    // ExpressionLinks
+    //
+
+    ExpressionLinks::
+    ExpressionLinks ()
+    : ::xml_schema::Type (),
+      array_ (this)
+    {
+    }
+
+    ExpressionLinks::
+    ExpressionLinks (const ExpressionLinks& x,
+                     ::xml_schema::Flags f,
+                     ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      array_ (x.array_, f, this)
+    {
+    }
+
+    ExpressionLinks::
+    ExpressionLinks (const ::xercesc::DOMElement& e,
+                     ::xml_schema::Flags f,
+                     ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      array_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void ExpressionLinks::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // array
+        //
+        if (n.name () == "array" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< ArrayType > r (
+            ArrayTraits::create (i, f, this));
+
+          this->array_.push_back (::std::move (r));
+          continue;
+        }
+
+        break;
+      }
+    }
+
+    ExpressionLinks* ExpressionLinks::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class ExpressionLinks (*this, f, c);
+    }
+
+    ExpressionLinks& ExpressionLinks::
+    operator= (const ExpressionLinks& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->array_ = x.array_;
+      }
+
+      return *this;
+    }
+
+    ExpressionLinks::
+    ~ExpressionLinks ()
+    {
+    }
+
     // Project
     //
 
@@ -1059,12 +1750,16 @@ namespace prj
     Project (const AppVersionType& appVersion,
              const FileVersionType& fileVersion,
              const FeaturesType& features,
-             const ConnectionsType& connections)
+             const ConnectionsType& connections,
+             const ExpressionsType& expressions,
+             const ExpressionLinksType& expressionLinks)
     : ::xml_schema::Type (),
       appVersion_ (appVersion, this),
       fileVersion_ (fileVersion, this),
       features_ (features, this),
-      connections_ (connections, this)
+      connections_ (connections, this),
+      expressions_ (expressions, this),
+      expressionLinks_ (expressionLinks, this)
     {
     }
 
@@ -1072,12 +1767,16 @@ namespace prj
     Project (::std::unique_ptr< AppVersionType > appVersion,
              const FileVersionType& fileVersion,
              ::std::unique_ptr< FeaturesType > features,
-             ::std::unique_ptr< ConnectionsType > connections)
+             ::std::unique_ptr< ConnectionsType > connections,
+             ::std::unique_ptr< ExpressionsType > expressions,
+             ::std::unique_ptr< ExpressionLinksType > expressionLinks)
     : ::xml_schema::Type (),
       appVersion_ (std::move (appVersion), this),
       fileVersion_ (fileVersion, this),
       features_ (std::move (features), this),
-      connections_ (std::move (connections), this)
+      connections_ (std::move (connections), this),
+      expressions_ (std::move (expressions), this),
+      expressionLinks_ (std::move (expressionLinks), this)
     {
     }
 
@@ -1089,7 +1788,9 @@ namespace prj
       appVersion_ (x.appVersion_, f, this),
       fileVersion_ (x.fileVersion_, f, this),
       features_ (x.features_, f, this),
-      connections_ (x.connections_, f, this)
+      connections_ (x.connections_, f, this),
+      expressions_ (x.expressions_, f, this),
+      expressionLinks_ (x.expressionLinks_, f, this)
     {
     }
 
@@ -1101,7 +1802,9 @@ namespace prj
       appVersion_ (this),
       fileVersion_ (this),
       features_ (this),
-      connections_ (this)
+      connections_ (this),
+      expressions_ (this),
+      expressionLinks_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -1173,6 +1876,34 @@ namespace prj
           }
         }
 
+        // expressions
+        //
+        if (n.name () == "expressions" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< ExpressionsType > r (
+            ExpressionsTraits::create (i, f, this));
+
+          if (!expressions_.present ())
+          {
+            this->expressions_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // expressionLinks
+        //
+        if (n.name () == "expressionLinks" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< ExpressionLinksType > r (
+            ExpressionLinksTraits::create (i, f, this));
+
+          if (!expressionLinks_.present ())
+          {
+            this->expressionLinks_.set (::std::move (r));
+            continue;
+          }
+        }
+
         break;
       }
 
@@ -1203,6 +1934,20 @@ namespace prj
           "connections",
           "");
       }
+
+      if (!expressions_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "expressions",
+          "");
+      }
+
+      if (!expressionLinks_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "expressionLinks",
+          "");
+      }
     }
 
     Project* Project::
@@ -1222,6 +1967,8 @@ namespace prj
         this->fileVersion_ = x.fileVersion_;
         this->features_ = x.features_;
         this->connections_ = x.connections_;
+        this->expressions_ = x.expressions_;
+        this->expressionLinks_ = x.expressionLinks_;
       }
 
       return *this;
@@ -1676,6 +2423,113 @@ namespace prj
     }
 
     void
+    operator<< (::xercesc::DOMElement& e, const Expression& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // id
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "id",
+            e));
+
+        s << i.id ();
+      }
+
+      // stringForm
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "stringForm",
+            e));
+
+        s << i.stringForm ();
+      }
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const Expressions& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // array
+      //
+      for (Expressions::ArrayConstIterator
+           b (i.array ().begin ()), n (i.array ().end ());
+           b != n; ++b)
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "array",
+            e));
+
+        s << *b;
+      }
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const ExpressionLink& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // featureId
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "featureId",
+            e));
+
+        s << i.featureId ();
+      }
+
+      // parameterName
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "parameterName",
+            e));
+
+        s << i.parameterName ();
+      }
+
+      // expressionId
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "expressionId",
+            e));
+
+        s << i.expressionId ();
+      }
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const ExpressionLinks& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // array
+      //
+      for (ExpressionLinks::ArrayConstIterator
+           b (i.array ().begin ()), n (i.array ().end ());
+           b != n; ++b)
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "array",
+            e));
+
+        s << *b;
+      }
+    }
+
+    void
     operator<< (::xercesc::DOMElement& e, const Project& i)
     {
       e << static_cast< const ::xml_schema::Type& > (i);
@@ -1722,6 +2576,28 @@ namespace prj
             e));
 
         s << i.connections ();
+      }
+
+      // expressions
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "expressions",
+            e));
+
+        s << i.expressions ();
+      }
+
+      // expressionLinks
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "expressionLinks",
+            e));
+
+        s << i.expressionLinks ();
       }
     }
 

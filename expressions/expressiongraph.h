@@ -140,7 +140,8 @@ public:
   
   //! @brief Set the formula name with the id
   void setFormulaName(const boost::uuids::uuid &idIn, const std::string &nameIn);
-  
+  //! @brief Set the formula id. first is old id. second is new id. SERIALIZE ONLY!
+  void setFormulaId(const boost::uuids::uuid &oldIdIn, const boost::uuids::uuid &newIdIn);
   //@{
   //! @brief Get the formula value.
   double getFormulaValue(const Vertex &vIn) const;

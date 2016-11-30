@@ -133,6 +133,8 @@ public:
   
   //! Returns the id. @see id
   boost::uuids::uuid getId(){return id;}
+  //! Set the id of the formula. SERIALIZE IN ONLY?
+  void setId(const boost::uuids::uuid &idIn){id = idIn;}
   
   //! Name of the formula
   std::string name;

@@ -148,6 +148,15 @@ void GraphWrapper::setFormulaName(const boost::uuids::uuid &idIn, const std::str
   fNode->name = nameIn;
 }
 
+void GraphWrapper::setFormulaId(const boost::uuids::uuid &oldIdIn, const boost::uuids::uuid &newIdIn)
+{
+  assert(hasFormula(oldIdIn));
+  Vertex fVertex = getFormulaVertex(oldIdIn);
+  FormulaNode *fNode = dynamic_cast<FormulaNode *>(graph[fVertex].get());
+  assert(fNode);
+  fNode->setId(newIdIn);
+}
+
 std::vector< boost::uuids::uuid > GraphWrapper::getAllFormulaIds() const
 {
   std::vector<boost::uuids::uuid> out;

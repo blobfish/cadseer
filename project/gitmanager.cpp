@@ -29,7 +29,9 @@
 
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
-#include "gitmanager.h"
+#include <message/dispatch.h>
+#include <message/observer.h>
+#include <project/gitmanager.h>
 
 using namespace prj;
 using namespace git2;
@@ -81,6 +83,9 @@ inline std::ostream& operator<<(std::ostream &streamIn, const StatusList &listIn
 
 GitManager::GitManager()
 {
+  observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+  observer->name = "prj::GitManager";
+  setupDispatcher();
 
 }
 
@@ -249,10 +254,20 @@ void GitManager::update()
 
 void GitManager::appendGitMessage(const std::string& message)
 {
-  std::ostringstream stream;
-  stream << commitMessage << std::endl << message;
+  if (gitMessagesFrozen)
+    return;
   
-  commitMessage = stream.str();
+  if (commitMessage.empty())
+  {
+    commitMessage = message;
+  }
+  else
+  {
+    //for some reason std::endl wasn't putting new line in commit message.
+    std::ostringstream stream;
+    stream << commitMessage << "\n" << message;
+    commitMessage = stream.str();
+  }
 }
 
 void GitManager::createBranch(const std::string& nameIn)
@@ -261,3 +276,32 @@ void GitManager::createBranch(const std::string& nameIn)
   git2::Branch b = repo.createBranch(nameIn, c, true);
 }
 
+void GitManager::setupDispatcher()
+{
+  msg::Mask mask;
+  
+  mask = msg::Request | msg::GitMessage;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&GitManager::gitMessageRequestDispatched, this, _1)));
+  
+  mask = msg::Request | msg::GitMessage | msg::Freeze;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&GitManager::gitMessageFreezeDispatched, this, _1)));
+  
+  mask = msg::Request | msg::GitMessage | msg::Thaw;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&GitManager::gitMessageThawDispatched, this, _1)));
+}
+
+void GitManager::gitMessageRequestDispatched(const msg::Message &messageIn)
+{
+  Message pMessage = boost::get<prj::Message>(messageIn.payload);
+  appendGitMessage(pMessage.gitMessage);
+}
+
+void GitManager::gitMessageFreezeDispatched(const msg::Message &)
+{
+  freezeGitMessages();
+}
+
+void GitManager::gitMessageThawDispatched(const msg::Message &)
+{
+  thawGitMessages();
+}

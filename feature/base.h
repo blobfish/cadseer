@@ -100,6 +100,8 @@ public:
   osg::MatrixTransform* getMainTransform() const {return mainTransform.get();}
   bool hasSeerShape() const {return static_cast<bool>(seerShape);}
   const SeerShape& getSeerShape() const {assert(seerShape); return *seerShape;}
+  bool hasParameter(const std::string &nameIn);
+  Parameter* getParameter(const std::string &nameIn);
   
   virtual void serialWrite(const QDir &); //!< override in leaf classes only.
   std::string getFileName() const; //!< used by git.

@@ -20,7 +20,11 @@
 #ifndef PRJ_GITMANAGER_H
 #define PRJ_GITMANAGER_H
 
+#include <memory>
+
 #include <project/libgit2pp/src/repository.hpp>
+
+namespace msg{class Message; class Observer;}
 
 namespace prj
 {
@@ -34,12 +38,37 @@ namespace prj
     void update();
     void save();
     void appendGitMessage(const std::string &message);
+    void freezeGitMessages(){gitMessagesFrozen = true;}
+    void thawGitMessages(){gitMessagesFrozen = false;}
+    bool areGitMessagesFrozen(){return gitMessagesFrozen;}
     
   private:
     bool updateIndex(); //false means nothing has changed.
     void createBranch(const std::string &nameIn); //!< create a branch with name from current HEAD.
     git2::Repository repo;
     std::string commitMessage;
+    bool gitMessagesFrozen = false;
+    std::unique_ptr<msg::Observer> observer;
+    void setupDispatcher();
+    void gitMessageRequestDispatched(const msg::Message &);
+    void gitMessageFreezeDispatched(const msg::Message &);
+    void gitMessageThawDispatched(const msg::Message &);
+  };
+  
+  class GitMessageFreezer
+  {
+  public:
+    GitMessageFreezer(GitManager &gManagerIn) : gManager(gManagerIn)
+    {
+      gManager.freezeGitMessages();
+    }
+    
+    ~GitMessageFreezer()
+    {
+      gManager.thawGitMessages();
+    }
+  private:
+    GitManager &gManager;
   };
 }
 

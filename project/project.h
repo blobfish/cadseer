@@ -96,7 +96,6 @@ private:
     void updateModelDispatched(const msg::Message &);
     void updateVisualDispatched(const msg::Message &);
     void saveProjectRequestDispatched(const msg::Message &);
-    void gitMessageRequestDispatched(const msg::Message &);
     void checkShapeIdsDispatched(const msg::Message &);
 };
 }

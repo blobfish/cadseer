@@ -77,6 +77,10 @@ namespace prj
     class Connection;
     class Connections;
     class AppVersion;
+    class Expression;
+    class Expressions;
+    class ExpressionLink;
+    class ExpressionLinks;
     class Project;
   }
 }
@@ -1275,6 +1279,856 @@ namespace prj
     };
 
     /**
+     * @brief Class corresponding to the %Expression schema type.
+     *
+     * @nosubgrouping
+     */
+    class Expression: public ::xml_schema::Type
+    {
+      public:
+      /**
+       * @name id
+       *
+       * @brief Accessor and modifier functions for the %id
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::xml_schema::String IdType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< IdType, char > IdTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const IdType&
+      id () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      IdType&
+      id ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      id (const IdType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      id (::std::unique_ptr< IdType > p);
+
+      /**
+       * @brief Return the default value for the element.
+       *
+       * @return A read-only (constant) reference to the element's
+       * default value.
+       */
+      static const IdType&
+      id_default_value ();
+
+      //@}
+
+      /**
+       * @name stringForm
+       *
+       * @brief Accessor and modifier functions for the %stringForm
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::xml_schema::String StringFormType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< StringFormType, char > StringFormTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const StringFormType&
+      stringForm () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      StringFormType&
+      stringForm ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      stringForm (const StringFormType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      stringForm (::std::unique_ptr< StringFormType > p);
+
+      /**
+       * @brief Return the default value for the element.
+       *
+       * @return A read-only (constant) reference to the element's
+       * default value.
+       */
+      static const StringFormType&
+      stringForm_default_value ();
+
+      //@}
+
+      /**
+       * @name Constructors
+       */
+      //@{
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes.
+       */
+      Expression (const IdType&,
+                  const StringFormType&);
+
+      /**
+       * @brief Create an instance from a DOM element.
+       *
+       * @param e A DOM element to extract the data from.
+       * @param f Flags to create the new instance with.
+       * @param c A pointer to the object that will contain the new
+       * instance.
+       */
+      Expression (const ::xercesc::DOMElement& e,
+                  ::xml_schema::Flags f = 0,
+                  ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy constructor.
+       *
+       * @param x An instance to make a copy of.
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      Expression (const Expression& x,
+                  ::xml_schema::Flags f = 0,
+                  ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy the instance polymorphically.
+       *
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       * @return A pointer to the dynamically allocated copy.
+       *
+       * This function ensures that the dynamic type of the instance is
+       * used for copying and should be used for polymorphic object
+       * models instead of the copy constructor.
+       */
+      virtual Expression*
+      _clone (::xml_schema::Flags f = 0,
+              ::xml_schema::Container* c = 0) const;
+
+      /**
+       * @brief Copy assignment operator.
+       *
+       * @param x An instance to make a copy of.
+       * @return A reference to itself.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      Expression&
+      operator= (const Expression& x);
+
+      //@}
+
+      /**
+       * @brief Destructor.
+       */
+      virtual 
+      ~Expression ();
+
+      // Implementation.
+      //
+
+      //@cond
+
+      protected:
+      void
+      parse (::xsd::cxx::xml::dom::parser< char >&,
+             ::xml_schema::Flags);
+
+      protected:
+      ::xsd::cxx::tree::one< IdType > id_;
+      static const IdType id_default_value_;
+      ::xsd::cxx::tree::one< StringFormType > stringForm_;
+      static const StringFormType stringForm_default_value_;
+
+      //@endcond
+    };
+
+    /**
+     * @brief Class corresponding to the %Expressions schema type.
+     *
+     * @nosubgrouping
+     */
+    class Expressions: public ::xml_schema::Type
+    {
+      public:
+      /**
+       * @name array
+       *
+       * @brief Accessor and modifier functions for the %array
+       * sequence element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::Expression ArrayType;
+
+      /**
+       * @brief Element sequence container type.
+       */
+      typedef ::xsd::cxx::tree::sequence< ArrayType > ArraySequence;
+
+      /**
+       * @brief Element iterator type.
+       */
+      typedef ArraySequence::iterator ArrayIterator;
+
+      /**
+       * @brief Element constant iterator type.
+       */
+      typedef ArraySequence::const_iterator ArrayConstIterator;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< ArrayType, char > ArrayTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element
+       * sequence.
+       *
+       * @return A constant reference to the sequence container.
+       */
+      const ArraySequence&
+      array () const;
+
+      /**
+       * @brief Return a read-write reference to the element sequence.
+       *
+       * @return A reference to the sequence container.
+       */
+      ArraySequence&
+      array ();
+
+      /**
+       * @brief Copy elements from a given sequence.
+       *
+       * @param s A sequence to copy elements from.
+       *
+       * For each element in @a s this function makes a copy and adds it 
+       * to the sequence. Note that this operation completely changes the 
+       * sequence and all old elements will be lost.
+       */
+      void
+      array (const ArraySequence& s);
+
+      //@}
+
+      /**
+       * @name Constructors
+       */
+      //@{
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes.
+       */
+      Expressions ();
+
+      /**
+       * @brief Create an instance from a DOM element.
+       *
+       * @param e A DOM element to extract the data from.
+       * @param f Flags to create the new instance with.
+       * @param c A pointer to the object that will contain the new
+       * instance.
+       */
+      Expressions (const ::xercesc::DOMElement& e,
+                   ::xml_schema::Flags f = 0,
+                   ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy constructor.
+       *
+       * @param x An instance to make a copy of.
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      Expressions (const Expressions& x,
+                   ::xml_schema::Flags f = 0,
+                   ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy the instance polymorphically.
+       *
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       * @return A pointer to the dynamically allocated copy.
+       *
+       * This function ensures that the dynamic type of the instance is
+       * used for copying and should be used for polymorphic object
+       * models instead of the copy constructor.
+       */
+      virtual Expressions*
+      _clone (::xml_schema::Flags f = 0,
+              ::xml_schema::Container* c = 0) const;
+
+      /**
+       * @brief Copy assignment operator.
+       *
+       * @param x An instance to make a copy of.
+       * @return A reference to itself.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      Expressions&
+      operator= (const Expressions& x);
+
+      //@}
+
+      /**
+       * @brief Destructor.
+       */
+      virtual 
+      ~Expressions ();
+
+      // Implementation.
+      //
+
+      //@cond
+
+      protected:
+      void
+      parse (::xsd::cxx::xml::dom::parser< char >&,
+             ::xml_schema::Flags);
+
+      protected:
+      ArraySequence array_;
+
+      //@endcond
+    };
+
+    /**
+     * @brief Class corresponding to the %ExpressionLink schema type.
+     *
+     * @nosubgrouping
+     */
+    class ExpressionLink: public ::xml_schema::Type
+    {
+      public:
+      /**
+       * @name featureId
+       *
+       * @brief Accessor and modifier functions for the %featureId
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::xml_schema::String FeatureIdType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< FeatureIdType, char > FeatureIdTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const FeatureIdType&
+      featureId () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      FeatureIdType&
+      featureId ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      featureId (const FeatureIdType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      featureId (::std::unique_ptr< FeatureIdType > p);
+
+      /**
+       * @brief Return the default value for the element.
+       *
+       * @return A read-only (constant) reference to the element's
+       * default value.
+       */
+      static const FeatureIdType&
+      featureId_default_value ();
+
+      //@}
+
+      /**
+       * @name parameterName
+       *
+       * @brief Accessor and modifier functions for the %parameterName
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::xml_schema::String ParameterNameType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< ParameterNameType, char > ParameterNameTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const ParameterNameType&
+      parameterName () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      ParameterNameType&
+      parameterName ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      parameterName (const ParameterNameType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      parameterName (::std::unique_ptr< ParameterNameType > p);
+
+      /**
+       * @brief Return the default value for the element.
+       *
+       * @return A read-only (constant) reference to the element's
+       * default value.
+       */
+      static const ParameterNameType&
+      parameterName_default_value ();
+
+      //@}
+
+      /**
+       * @name expressionId
+       *
+       * @brief Accessor and modifier functions for the %expressionId
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::xml_schema::String ExpressionIdType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< ExpressionIdType, char > ExpressionIdTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const ExpressionIdType&
+      expressionId () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      ExpressionIdType&
+      expressionId ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      expressionId (const ExpressionIdType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      expressionId (::std::unique_ptr< ExpressionIdType > p);
+
+      /**
+       * @brief Return the default value for the element.
+       *
+       * @return A read-only (constant) reference to the element's
+       * default value.
+       */
+      static const ExpressionIdType&
+      expressionId_default_value ();
+
+      //@}
+
+      /**
+       * @name Constructors
+       */
+      //@{
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes.
+       */
+      ExpressionLink (const FeatureIdType&,
+                      const ParameterNameType&,
+                      const ExpressionIdType&);
+
+      /**
+       * @brief Create an instance from a DOM element.
+       *
+       * @param e A DOM element to extract the data from.
+       * @param f Flags to create the new instance with.
+       * @param c A pointer to the object that will contain the new
+       * instance.
+       */
+      ExpressionLink (const ::xercesc::DOMElement& e,
+                      ::xml_schema::Flags f = 0,
+                      ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy constructor.
+       *
+       * @param x An instance to make a copy of.
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      ExpressionLink (const ExpressionLink& x,
+                      ::xml_schema::Flags f = 0,
+                      ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy the instance polymorphically.
+       *
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       * @return A pointer to the dynamically allocated copy.
+       *
+       * This function ensures that the dynamic type of the instance is
+       * used for copying and should be used for polymorphic object
+       * models instead of the copy constructor.
+       */
+      virtual ExpressionLink*
+      _clone (::xml_schema::Flags f = 0,
+              ::xml_schema::Container* c = 0) const;
+
+      /**
+       * @brief Copy assignment operator.
+       *
+       * @param x An instance to make a copy of.
+       * @return A reference to itself.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      ExpressionLink&
+      operator= (const ExpressionLink& x);
+
+      //@}
+
+      /**
+       * @brief Destructor.
+       */
+      virtual 
+      ~ExpressionLink ();
+
+      // Implementation.
+      //
+
+      //@cond
+
+      protected:
+      void
+      parse (::xsd::cxx::xml::dom::parser< char >&,
+             ::xml_schema::Flags);
+
+      protected:
+      ::xsd::cxx::tree::one< FeatureIdType > featureId_;
+      static const FeatureIdType featureId_default_value_;
+      ::xsd::cxx::tree::one< ParameterNameType > parameterName_;
+      static const ParameterNameType parameterName_default_value_;
+      ::xsd::cxx::tree::one< ExpressionIdType > expressionId_;
+      static const ExpressionIdType expressionId_default_value_;
+
+      //@endcond
+    };
+
+    /**
+     * @brief Class corresponding to the %ExpressionLinks schema type.
+     *
+     * @nosubgrouping
+     */
+    class ExpressionLinks: public ::xml_schema::Type
+    {
+      public:
+      /**
+       * @name array
+       *
+       * @brief Accessor and modifier functions for the %array
+       * sequence element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::ExpressionLink ArrayType;
+
+      /**
+       * @brief Element sequence container type.
+       */
+      typedef ::xsd::cxx::tree::sequence< ArrayType > ArraySequence;
+
+      /**
+       * @brief Element iterator type.
+       */
+      typedef ArraySequence::iterator ArrayIterator;
+
+      /**
+       * @brief Element constant iterator type.
+       */
+      typedef ArraySequence::const_iterator ArrayConstIterator;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< ArrayType, char > ArrayTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element
+       * sequence.
+       *
+       * @return A constant reference to the sequence container.
+       */
+      const ArraySequence&
+      array () const;
+
+      /**
+       * @brief Return a read-write reference to the element sequence.
+       *
+       * @return A reference to the sequence container.
+       */
+      ArraySequence&
+      array ();
+
+      /**
+       * @brief Copy elements from a given sequence.
+       *
+       * @param s A sequence to copy elements from.
+       *
+       * For each element in @a s this function makes a copy and adds it 
+       * to the sequence. Note that this operation completely changes the 
+       * sequence and all old elements will be lost.
+       */
+      void
+      array (const ArraySequence& s);
+
+      //@}
+
+      /**
+       * @name Constructors
+       */
+      //@{
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes.
+       */
+      ExpressionLinks ();
+
+      /**
+       * @brief Create an instance from a DOM element.
+       *
+       * @param e A DOM element to extract the data from.
+       * @param f Flags to create the new instance with.
+       * @param c A pointer to the object that will contain the new
+       * instance.
+       */
+      ExpressionLinks (const ::xercesc::DOMElement& e,
+                       ::xml_schema::Flags f = 0,
+                       ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy constructor.
+       *
+       * @param x An instance to make a copy of.
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      ExpressionLinks (const ExpressionLinks& x,
+                       ::xml_schema::Flags f = 0,
+                       ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy the instance polymorphically.
+       *
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       * @return A pointer to the dynamically allocated copy.
+       *
+       * This function ensures that the dynamic type of the instance is
+       * used for copying and should be used for polymorphic object
+       * models instead of the copy constructor.
+       */
+      virtual ExpressionLinks*
+      _clone (::xml_schema::Flags f = 0,
+              ::xml_schema::Container* c = 0) const;
+
+      /**
+       * @brief Copy assignment operator.
+       *
+       * @param x An instance to make a copy of.
+       * @return A reference to itself.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      ExpressionLinks&
+      operator= (const ExpressionLinks& x);
+
+      //@}
+
+      /**
+       * @brief Destructor.
+       */
+      virtual 
+      ~ExpressionLinks ();
+
+      // Implementation.
+      //
+
+      //@cond
+
+      protected:
+      void
+      parse (::xsd::cxx::xml::dom::parser< char >&,
+             ::xml_schema::Flags);
+
+      protected:
+      ArraySequence array_;
+
+      //@endcond
+    };
+
+    /**
      * @brief Class corresponding to the %Project schema type.
      *
      * @nosubgrouping
@@ -1512,6 +2366,122 @@ namespace prj
       //@}
 
       /**
+       * @name expressions
+       *
+       * @brief Accessor and modifier functions for the %expressions
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::Expressions ExpressionsType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< ExpressionsType, char > ExpressionsTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const ExpressionsType&
+      expressions () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      ExpressionsType&
+      expressions ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      expressions (const ExpressionsType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      expressions (::std::unique_ptr< ExpressionsType > p);
+
+      //@}
+
+      /**
+       * @name expressionLinks
+       *
+       * @brief Accessor and modifier functions for the %expressionLinks
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::ExpressionLinks ExpressionLinksType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< ExpressionLinksType, char > ExpressionLinksTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const ExpressionLinksType&
+      expressionLinks () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      ExpressionLinksType&
+      expressionLinks ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      expressionLinks (const ExpressionLinksType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      expressionLinks (::std::unique_ptr< ExpressionLinksType > p);
+
+      //@}
+
+      /**
        * @name Constructors
        */
       //@{
@@ -1523,7 +2493,9 @@ namespace prj
       Project (const AppVersionType&,
                const FileVersionType&,
                const FeaturesType&,
-               const ConnectionsType&);
+               const ConnectionsType&,
+               const ExpressionsType&,
+               const ExpressionLinksType&);
 
       /**
        * @brief Create an instance from the ultimate base and
@@ -1536,7 +2508,9 @@ namespace prj
       Project (::std::unique_ptr< AppVersionType >,
                const FileVersionType&,
                ::std::unique_ptr< FeaturesType >,
-               ::std::unique_ptr< ConnectionsType >);
+               ::std::unique_ptr< ConnectionsType >,
+               ::std::unique_ptr< ExpressionsType >,
+               ::std::unique_ptr< ExpressionLinksType >);
 
       /**
        * @brief Create an instance from a DOM element.
@@ -1612,6 +2586,8 @@ namespace prj
       ::xsd::cxx::tree::one< FileVersionType > fileVersion_;
       ::xsd::cxx::tree::one< FeaturesType > features_;
       ::xsd::cxx::tree::one< ConnectionsType > connections_;
+      ::xsd::cxx::tree::one< ExpressionsType > expressions_;
+      ::xsd::cxx::tree::one< ExpressionLinksType > expressionLinks_;
 
       //@endcond
     };
@@ -1909,6 +2885,18 @@ namespace prj
 
     void
     operator<< (::xercesc::DOMElement&, const AppVersion&);
+
+    void
+    operator<< (::xercesc::DOMElement&, const Expression&);
+
+    void
+    operator<< (::xercesc::DOMElement&, const Expressions&);
+
+    void
+    operator<< (::xercesc::DOMElement&, const ExpressionLink&);
+
+    void
+    operator<< (::xercesc::DOMElement&, const ExpressionLinks&);
 
     void
     operator<< (::xercesc::DOMElement&, const Project&);

@@ -190,6 +190,7 @@ bool TableModel::setData(const QModelIndex& index, const QVariant& value, int)
   lastFailedPosition = -1;
   removeRhs(fId);
   Q_EMIT dataChanged(index, index);
+  eManager.requestProjectUpdate(); //only if preferences allow.
   return true;
 }
 
