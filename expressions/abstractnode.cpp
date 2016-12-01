@@ -20,12 +20,10 @@
 #include <assert.h>
 #include <cmath>
 
-#include <boost/uuid/uuid_generators.hpp>
 #include <boost/math/constants/constants.hpp>
 
+#include <tools/idtools.h>
 #include <expressions/abstractnode.h>
-
-static thread_local boost::uuids::random_generator gen;
 
 using namespace expr;
 
@@ -45,7 +43,7 @@ ConstantNode::ConstantNode() : AbstractNode()
 
 }
 
-FormulaNode::FormulaNode() : AbstractNode(), name("no name"), id(gen())
+FormulaNode::FormulaNode() : AbstractNode(), name("no name"), id(gu::createRandomId())
 {
 
 }

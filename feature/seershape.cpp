@@ -22,7 +22,6 @@
 
 #include <boost/graph/iteration_macros.hpp>
 #include <boost/graph/graphviz.hpp>
-#include <boost/uuid/string_generator.hpp>
 
 #include <gp_Circ.hxx>
 #include <gp_Elips.hxx>
@@ -40,18 +39,17 @@
 
 #include <osg/Vec3d>
 
+#include <tools/idtools.h>
 #include <project/serial/xsdcxxoutput/featurebase.h>
 #include <feature/seershape.h>
 
 using namespace ftr;
 
 using boost::uuids::uuid;
-using boost::uuids::to_string;
-using boost::uuids::nil_generator;
 
 std::ostream& ftr::operator<<(std::ostream& os, const ShapeIdRecord& record)
 {
-  os << to_string(record.id) << "      " << 
+  os << gu::idToString(record.id) << "      " << 
     ShapeIdKeyHash()(record.shape) << "      " <<
     record.graphVertex << "      " <<
     shapeStrings.at(record.shape.ShapeType()) << std::endl;
@@ -71,7 +69,7 @@ std::ostream& ftr::operator<<(std::ostream& os, const ShapeIdContainer& containe
 
 ostream& ftr::operator<<(ostream& os, const EvolveRecord& record)
 {
-  os << boost::uuids::to_string(record.inId) << "      " << boost::uuids::to_string(record.outId) << std::endl;
+  os << gu::idToString(record.inId) << "      " << gu::idToString(record.outId) << std::endl;
   return os;
 }
 
@@ -88,7 +86,7 @@ ostream& ftr::operator<<(ostream& os, const EvolveContainer& container)
 
 ostream& ftr::operator<<(ostream& os, const FeatureTagRecord& record)
 {
-  os << boost::uuids::to_string(record.id) << "      " << record.tag << std::endl;
+  os << gu::idToString(record.id) << "      " << record.tag << std::endl;
   return os;
 }
 
@@ -105,7 +103,7 @@ ostream& ftr::operator<<(ostream& os, const FeatureTagContainer& container)
 
 void SeerShape::setOCCTShape(const TopoDS_Shape& shapeIn)
 {
-  rootShapeId = nil_generator()();
+  rootShapeId = gu::createNilId();
   shapeIdContainer.get<ShapeIdRecord::ById>().clear();
   graph = Graph();
   rGraph = graph;
@@ -145,7 +143,7 @@ void SeerShape::setOCCTShape(const TopoDS_Shape& shapeIn)
     shapeIdContainer.insert(record);
   }
   //root compound shape needs an id even though it maybe temp.
-  rootShapeId = idGenerator();
+  rootShapeId = gu::createRandomId();
   updateShapeIdRecord(workShape, rootShapeId);
   rGraph = graph; //now graph and rGraph are equal, edgeless graphs.
   
@@ -334,7 +332,7 @@ gu::ShapeVector SeerShape::getAllNilShapes() const
   gu::ShapeVector out;
   typedef ShapeIdContainer::index<ShapeIdRecord::ById>::type List;
   const List &list = shapeIdContainer.get<ShapeIdRecord::ById>();
-  auto rangeItPair = list.equal_range(boost::uuids::nil_generator()());
+  auto rangeItPair = list.equal_range(gu::createNilId());
   for (; rangeItPair.first != rangeItPair.second; ++rangeItPair.first)
     out.push_back(rangeItPair.first->shape);
   
@@ -514,7 +512,7 @@ uuid SeerShape::useGetWire
 	return findShapeIdRecord(*wireIt).id;
     }
   }
-  return boost::uuids::nil_generator()();
+  return gu::createNilId();
 }
 
 uuid SeerShape::useGetClosestWire(const uuid& faceIn, const osg::Vec3d& pointIn) const
@@ -527,7 +525,7 @@ uuid SeerShape::useGetClosestWire(const uuid& faceIn, const osg::Vec3d& pointIn)
   Vertex faceVertex = faceInRecord.graphVertex;
   assert(faceInRecord.shape.ShapeType() == TopAbs_FACE);
   VertexAdjacencyIterator it, itEnd;
-  uuid wireOut = nil_generator()();
+  uuid wireOut = gu::createNilId();
   double distance = std::numeric_limits<double>::max();
   for (boost::tie(it, itEnd) = boost::adjacent_vertices(faceVertex, graph); it != itEnd; ++it)
   {
@@ -706,12 +704,12 @@ void SeerShape::shapeMatch(const SeerShape &source)
   {
     if (!hasShapeIdRecord(record.shape))
       continue;
-    uuid freshId = nil_generator()();
+    uuid freshId = gu::createNilId();
     if (hasEvolveRecordIn(record.id))
       freshId = evolve(record.id).front(); //multiple returns?
     else
     {
-      freshId = idGenerator();
+      freshId = gu::createRandomId();
       insertEvolve(record.id, freshId);
     }
     updateShapeIdRecord(record.shape, freshId);
@@ -765,12 +763,12 @@ void SeerShape::uniqueTypeMatch(const SeerShape &source)
     )
       continue;
       
-    uuid freshId = nil_generator()();
+    uuid freshId = gu::createNilId();
     if (hasEvolveRecordIn(sourceRecord.id))
       freshId = evolve(sourceRecord.id).front(); //multiple returns?
     else
     {
-      freshId = idGenerator();
+      freshId = gu::createRandomId();
       insertEvolve(sourceRecord.id, freshId);
     }
     updateShapeIdRecord(targetRecord.shape, freshId);
@@ -809,7 +807,7 @@ void SeerShape::outerWireMatch(const SeerShape &source)
       freshId = evolve(sourceWireId).front(); //multiple returns?
     else
     {
-      freshId = idGenerator();
+      freshId = gu::createRandomId();
       insertEvolve(sourceWireId, freshId);
     }
     updateShapeIdRecord(thisOuterWire, freshId);
@@ -841,12 +839,12 @@ void SeerShape::modifiedMatch
       if(!hasShapeIdRecord(it.Value()))
 	continue;
       
-      uuid freshId = nil_generator()();
+      uuid freshId = gu::createNilId();
       if (hasEvolveRecordIn(sourceRecord.id))
 	freshId = evolve(sourceRecord.id).front(); //multiple returns?
       else
       {
-	freshId = idGenerator();
+	freshId = gu::createRandomId();
 	insertEvolve(sourceRecord.id, freshId);
       }
       updateShapeIdRecord(it.Value(), freshId);
@@ -859,7 +857,7 @@ void SeerShape::derivedMatch()
   typedef ShapeIdContainer::index<ShapeIdRecord::ById>::type List;
   List &list = shapeIdContainer.get<ShapeIdRecord::ById>();
   gu::ShapeVector nilShapes;
-  auto rangeItPair = list.equal_range(boost::uuids::nil_generator()());
+  auto rangeItPair = list.equal_range(gu::createNilId());
   for (; rangeItPair.first != rangeItPair.second; ++rangeItPair.first)
     nilShapes.push_back(rangeItPair.first->shape);
   
@@ -887,14 +885,14 @@ void SeerShape::derivedMatch()
       }
       if (bail)
 	continue;
-      uuid id = nil_generator()();
+      uuid id = gu::createNilId();
       ftr::DerivedContainer::iterator derivedIt = derivedContainer.find(set);
       if (derivedIt == derivedContainer.end())
       {
-	id = idGenerator();
+	id = gu::createRandomId();
 	ftr::DerivedContainer::value_type newEntry(set, id);
 	derivedContainer.insert(newEntry);
-	insertEvolve(nil_generator()(), id);
+    insertEvolve(gu::createNilId(), id);
       }
       else
       {
@@ -914,9 +912,9 @@ void SeerShape::dumpNils(const std::string &headerIn)
   
   typedef ShapeIdContainer::index<ShapeIdRecord::ById>::type List;
   const List &list = shapeIdContainer.get<ShapeIdRecord::ById>();
-  auto rangeItPair = list.equal_range(boost::uuids::nil_generator()());
+  auto rangeItPair = list.equal_range(gu::createNilId());
   for (; rangeItPair.first != rangeItPair.second; ++rangeItPair.first)
-   stream << boost::uuids::to_string(rangeItPair.first->id) << "    "
+    stream << gu::idToString(rangeItPair.first->id) << "    "
     << rangeItPair.first->shape << std::endl;
   
   
@@ -939,7 +937,7 @@ void SeerShape::dumpDuplicates(const std::string &headerIn)
     if (count > 1)
     {
       processed.insert(record.id);
-      stream << record.id << "    " << count << "    " << record.shape << std::endl;
+      stream << gu::idToString(record.id) << "    " << count << "    " << record.shape << std::endl;
     }
   }
   if (!stream.str().empty())
@@ -952,15 +950,15 @@ void SeerShape::ensureNoNils()
   
   typedef ShapeIdContainer::index<ShapeIdRecord::ById>::type List;
   List &list = shapeIdContainer.get<ShapeIdRecord::ById>();
-  auto rangeItPair = list.equal_range(boost::uuids::nil_generator()());
+  auto rangeItPair = list.equal_range(gu::createNilId());
   for (; rangeItPair.first != rangeItPair.second; ++rangeItPair.first)
     nilShapes.push_back(rangeItPair.first->shape);
   
   for (const auto &shape : nilShapes)
   {
-    auto freshId = idGenerator();
+    auto freshId = gu::createRandomId();
     updateShapeIdRecord(shape, freshId);
-    insertEvolve(nil_generator()(), freshId);
+    insertEvolve(gu::createNilId(), freshId);
   }
 }
 
@@ -979,9 +977,9 @@ void SeerShape::ensureNoDuplicates()
   }
   for (const auto &shape : shapes)
   {
-    auto freshId = idGenerator();
+    auto freshId = gu::createRandomId();
     updateShapeIdRecord(shape, freshId);
-    insertEvolve(nil_generator()(), freshId);
+    insertEvolve(gu::createNilId(), freshId);
   }
 }
 
@@ -992,7 +990,7 @@ void SeerShape::faceEdgeMatch(const SeerShape &source)
   gu::ShapeVector nilEdges;
   typedef ShapeIdContainer::index<ShapeIdRecord::ById>::type List;
   List &list = shapeIdContainer.get<ShapeIdRecord::ById>();
-  auto rangeItPair = list.equal_range(boost::uuids::nil_generator()());
+  auto rangeItPair = list.equal_range(gu::createNilId());
   for (; rangeItPair.first != rangeItPair.second; ++rangeItPair.first)
   {
     if (rangeItPair.first->shape.ShapeType() != TopAbs_EDGE)
@@ -1037,12 +1035,12 @@ void SeerShape::faceEdgeMatch(const SeerShape &source)
 
     if (commonEdges.size() == 1)
     {
-      uuid freshId = nil_generator()();
+      uuid freshId = gu::createNilId();
       if (hasEvolveRecordIn(commonEdges.front()))
 	freshId = evolve(commonEdges.front()).front(); //multiple returns?
       else
       {
-	freshId = idGenerator();
+	freshId = gu::createRandomId();
 	insertEvolve(commonEdges.front(), freshId);
       }
       updateShapeIdRecord(nilEdge, freshId);
@@ -1057,7 +1055,7 @@ void SeerShape::edgeVertexMatch(const SeerShape &source)
   gu::ShapeVector nilVertices;
   typedef ShapeIdContainer::index<ShapeIdRecord::ById>::type List;
   List &list = shapeIdContainer.get<ShapeIdRecord::ById>();
-  auto rangeItPair = list.equal_range(boost::uuids::nil_generator()());
+  auto rangeItPair = list.equal_range(gu::createNilId());
   for (; rangeItPair.first != rangeItPair.second; ++rangeItPair.first)
   {
     if (rangeItPair.first->shape.ShapeType() != TopAbs_VERTEX)
@@ -1111,12 +1109,12 @@ void SeerShape::edgeVertexMatch(const SeerShape &source)
     
     if (intersectedVertices.size() == 1)
     {
-      uuid freshId = nil_generator()();
+      uuid freshId = gu::createNilId();
       if (hasEvolveRecordIn(intersectedVertices.front()))
 	freshId = evolve(intersectedVertices.front()).front(); //multiple returns?
       else
       {
-	freshId = idGenerator();
+	freshId = gu::createRandomId();
 	insertEvolve(intersectedVertices.front(), freshId);
       }
       updateShapeIdRecord(nilVertex, freshId);
@@ -1153,8 +1151,6 @@ void SeerShape::dumpFeatureTagContainer(std::ostream &streamIn) const
 
 prj::srl::SeerShape SeerShape::serialOut()
 {
-  using boost::uuids::to_string;
-  
   prj::srl::ShapeIdContainer shapeIdContainerOut;
   if (!rootShapeId.is_nil())
   {
@@ -1170,7 +1166,7 @@ prj::srl::SeerShape SeerShape::serialOut()
 	  
 	prj::srl::ShapeIdRecord rRecord
 	(
-	  boost::uuids::to_string(findShapeIdRecord(shapeMap(index)).id),
+      gu::idToString(findShapeIdRecord(shapeMap(index)).id),
 	  index
 	);
 	shapeIdContainerOut.shapeIdRecord().push_back(rRecord);
@@ -1185,8 +1181,8 @@ prj::srl::SeerShape SeerShape::serialOut()
   {
     prj::srl::EvolveRecord eRecord
     (
-      boost::uuids::to_string(it->inId),
-      boost::uuids::to_string(it->outId)
+      gu::idToString(it->inId),
+      gu::idToString(it->outId)
     );
     eContainerOut.evolveRecord().push_back(eRecord);
   }
@@ -1198,7 +1194,7 @@ prj::srl::SeerShape SeerShape::serialOut()
   {
     prj::srl::FeatureTagRecord fRecord
     (
-      boost::uuids::to_string(it->id),
+      gu::idToString(it->id),
       it->tag
     );
     fContainerOut.featureTagRecord().push_back(fRecord);
@@ -1209,8 +1205,8 @@ prj::srl::SeerShape SeerShape::serialOut()
   {
     prj::srl::IdSet setIn;
     for (ftr::IdSet::const_iterator sIt = dIt->first.begin(); sIt != dIt->first.end(); ++sIt)
-      setIn.id().push_back(to_string(*sIt));
-    prj::srl::DerivedRecord::IdType mId(to_string(dIt->second));
+      setIn.id().push_back(gu::idToString(*sIt));
+    prj::srl::DerivedRecord::IdType mId(gu::idToString(dIt->second));
     prj::srl::DerivedRecord record
     (
       setIn,
@@ -1222,7 +1218,7 @@ prj::srl::SeerShape SeerShape::serialOut()
   
   return prj::srl::SeerShape
   (
-    boost::uuids::to_string(rootShapeId),
+    gu::idToString(rootShapeId),
     shapeIdContainerOut,
     eContainerOut,
     fContainerOut,
@@ -1234,7 +1230,6 @@ void SeerShape::serialIn(const prj::srl::SeerShape &sSeerShapeIn)
 {
   //note: shape has already been set through setOCCTShape, so shapeIdContainer has been populated and don't clear.
   //setOCCTShape assigns an id for the root, so that is valid.
-  boost::uuids::string_generator sg;
   
   //fill in shape vector
   TopTools_IndexedMapOfShape shapeMap;
@@ -1242,16 +1237,16 @@ void SeerShape::serialIn(const prj::srl::SeerShape &sSeerShapeIn)
   for (const prj::srl::ShapeIdRecord &sRRecord : sSeerShapeIn.shapeIdContainer().shapeIdRecord())
   {
     ShapeIdRecord record;
-    record.id = sg(sRRecord.id());
-    updateShapeIdRecord(shapeMap(sRRecord.shapeOffset()), sg(sRRecord.id()));
+    record.id = gu::stringToId(sRRecord.id());
+    updateShapeIdRecord(shapeMap(sRRecord.shapeOffset()), gu::stringToId(sRRecord.id()));
   }
   
   evolveContainer.get<EvolveRecord::ByInId>().clear();
   for (const prj::srl::EvolveRecord &sERecord : sSeerShapeIn.evolveContainer().evolveRecord())
   {
     EvolveRecord record;
-    record.inId = sg(sERecord.idIn());
-    record.outId = sg(sERecord.idOut());
+    record.inId = gu::stringToId(sERecord.idIn());
+    record.outId = gu::stringToId(sERecord.idOut());
     evolveContainer.insert(record);
   }
   
@@ -1259,7 +1254,7 @@ void SeerShape::serialIn(const prj::srl::SeerShape &sSeerShapeIn)
   for (const prj::srl::FeatureTagRecord &sFRecord : sSeerShapeIn.featureTagContainer().featureTagRecord())
   {
     FeatureTagRecord record;
-    record.id = sg(sFRecord.id());
+    record.id = gu::stringToId(sFRecord.id());
     record.tag = sFRecord.tag();
     featureTagContainer.insert(record);
   }
@@ -1269,10 +1264,10 @@ void SeerShape::serialIn(const prj::srl::SeerShape &sSeerShapeIn)
   {
     ftr::IdSet setIn;
     for (const auto &idSet : sDRecord.idSet().id())
-      setIn.insert(sg(idSet));
-    boost::uuids::uuid mId = sg(sDRecord.id());
+      setIn.insert(gu::stringToId(idSet));
+    boost::uuids::uuid mId = gu::stringToId(sDRecord.id());
     derivedContainer.insert(std::make_pair(setIn, mId));
   }
   
-  rootShapeId = sg(sSeerShapeIn.rootShapeId());
+  rootShapeId = gu::stringToId(sSeerShapeIn.rootShapeId());
 }

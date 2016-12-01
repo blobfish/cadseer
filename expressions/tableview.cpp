@@ -21,9 +21,6 @@
 #include <assert.h>
 #include <fstream>
 
-#include <boost/uuid/nil_generator.hpp>
-#include <boost/uuid/uuid_io.hpp>
-
 #include <QCoreApplication>
 #include <QtGui/QLineEdit>
 #include <QtGui/QHeaderView>
@@ -39,6 +36,7 @@
 #include <QLabel>
 #include <QPainter>
 
+#include <tools/idtools.h>
 #include <expressions/tableview.h>
 #include <expressions/tablemodel.h>
 #include <expressions/expressionmanager.h>
@@ -147,7 +145,7 @@ void TableViewAll::importFormulaSlot()
   if (!fileStream.is_open())
     return;
   
-  myModel->importExpressions(fileStream, boost::uuids::nil_generator()());
+  myModel->importExpressions(fileStream, gu::createNilId());
 }
 
 void TableViewAll::showEvent(QShowEvent* event)
@@ -175,7 +173,7 @@ void TableViewAll::contextMenuEvent(QContextMenuEvent* event)
   for (std::vector<Group>::iterator it = groups.begin(); it != groups.end(); ++it)
   {
     QAction *currentAction = groupMenu->addAction(QString::fromStdString(it->name));
-    currentAction->setData(QVariant(QString::fromStdString(boost::uuids::to_string(it->id))));
+    currentAction->setData(QVariant(QString::fromStdString(gu::idToString(it->id))));
     connect(currentAction, SIGNAL(triggered()), this, SLOT(addToGroupSlot()));
   }
     

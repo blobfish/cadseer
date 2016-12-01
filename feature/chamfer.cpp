@@ -17,8 +17,6 @@
  *
  */
 
-#include <boost/uuid/string_generator.hpp>
-
 #include <BRepFilletAPI_MakeChamfer.hxx>
 #include <TopExp.hxx>
 #include <TopoDS_Edge.hxx>
@@ -33,6 +31,7 @@
 #include <Geom_Curve.hxx>
 
 #include <globalutilities.h>
+#include <tools/idtools.h>
 #include <project/serial/xsdcxxoutput/featurechamfer.h>
 #include <feature/seershape.h>
 #include <feature/shapecheck.h>
@@ -139,12 +138,12 @@ void Chamfer::updateModel(const UpdateMap &mapIn)
       {
 	if (!targetSeerShape.hasShapeIdRecord(pick.edgeId))
 	{
-	  std::cout << "edge id of: " << boost::uuids::to_string(pick.edgeId) << " not found in chamfer" << std::endl;
+	  std::cout << "edge id of: " << gu::idToString(pick.edgeId) << " not found in chamfer" << std::endl;
 	  continue;
 	}
 	if (!targetSeerShape.hasShapeIdRecord(pick.faceId))
 	{
-	  std::cout << "face id of: " << boost::uuids::to_string(pick.faceId) << " not found in chamfer" << std::endl;
+      std::cout << "face id of: " << gu::idToString(pick.faceId) << " not found in chamfer" << std::endl;
 	  continue;
 	}
 	TopoDS_Edge edge = TopoDS::Edge(targetSeerShape.findShapeIdRecord(pick.edgeId).shape);
@@ -212,7 +211,7 @@ void Chamfer::generatedMatch(BRepFilletAPI_MakeChamfer &chamferMakerIn, const Se
     
     std::map<uuid, uuid>::iterator mapItFace;
     bool dummy;
-    std::tie(mapItFace, dummy) = shapeMap.insert(std::make_pair(cId, idGenerator()));
+    std::tie(mapItFace, dummy) = shapeMap.insert(std::make_pair(cId, gu::createRandomId()));
     if (!seerShape->hasEvolveRecordIn(mapItFace->first))
       seerShape->insertEvolve(mapItFace->first, mapItFace->second);
     seerShape->updateShapeIdRecord(chamferFace, mapItFace->second);
@@ -220,7 +219,7 @@ void Chamfer::generatedMatch(BRepFilletAPI_MakeChamfer &chamferMakerIn, const Se
     //now look for outerwire for newly generated face.
     //we use the generated face id to map to outer wire.
     std::map<uuid, uuid>::iterator mapItWire;
-    std::tie(mapItWire, dummy) = shapeMap.insert(std::make_pair(mapItFace->second, idGenerator()));
+    std::tie(mapItWire, dummy) = shapeMap.insert(std::make_pair(mapItFace->second, gu::createRandomId()));
     if (!seerShape->hasEvolveRecordIn(mapItWire->first))
       seerShape->insertEvolve(mapItWire->first, mapItWire->second);
     
@@ -232,15 +231,13 @@ void Chamfer::generatedMatch(BRepFilletAPI_MakeChamfer &chamferMakerIn, const Se
 
 void Chamfer::serialWrite(const QDir &dIn)
 {
-  using boost::uuids::to_string;
-  
   prj::srl::FeatureChamfer::ShapeMapType shapeMapOut;
   for (const auto &p : shapeMap)
   {
     prj::srl::EvolveRecord eRecord
     (
-      to_string(p.first),
-      to_string(p.second)
+      gu::idToString(p.first),
+      gu::idToString(p.second)
     );
     shapeMapOut.evolveRecord().push_back(eRecord);
   }
@@ -253,10 +250,10 @@ void Chamfer::serialWrite(const QDir &dIn)
     {
       prj::srl::ChamferPick cPickOut
       (
-	to_string(cPick.edgeId),
+        gu::idToString(cPick.edgeId),
         cPick.u,
         cPick.v,
-        to_string(cPick.faceId)
+       gu::idToString(cPick.faceId)
       );
       cPicksOut.array().push_back(cPickOut);
     }
@@ -282,16 +279,14 @@ void Chamfer::serialWrite(const QDir &dIn)
 
 void Chamfer::serialRead(const prj::srl::FeatureChamfer &sChamferIn)
 {
-  boost::uuids::string_generator gen;
-  
   Base::serialIn(sChamferIn.featureBase());
   
   shapeMap.clear();
   for (const prj::srl::EvolveRecord &sERecord : sChamferIn.shapeMap().evolveRecord())
   {
     std::pair<uuid, uuid> record;
-    record.first = gen(sERecord.idIn());
-    record.second = gen(sERecord.idOut());
+    record.first = gu::stringToId(sERecord.idIn());
+    record.second = gu::stringToId(sERecord.idOut());
     shapeMap.insert(record);
   }
   
@@ -301,10 +296,10 @@ void Chamfer::serialRead(const prj::srl::FeatureChamfer &sChamferIn)
     for (const auto &cPickIn : symChamferIn.chamferPicks().array())
     {
       ChamferPick pick;
-      pick.edgeId = gen(cPickIn.edgeId());
+      pick.edgeId = gu::stringToId(cPickIn.edgeId());
       pick.u = cPickIn.u();
       pick.v = cPickIn.v();
-      pick.faceId = gen(cPickIn.faceId());
+      pick.faceId = gu::stringToId(cPickIn.faceId());
       symChamfer.picks.push_back(pick);
     }
     symChamfer.distance = buildSymParameter();

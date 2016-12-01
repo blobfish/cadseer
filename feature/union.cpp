@@ -22,8 +22,6 @@
 
 #include <QDir>
 
-#include <boost/uuid/random_generator.hpp>
-
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <TopExp.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>

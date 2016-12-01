@@ -28,8 +28,7 @@
 #include <QTextEdit>
 #include <QTextStream>
 
-#include <boost/uuid/nil_generator.hpp>
-
+#include <tools/idtools.h>
 #include <application/application.h>
 #include <application/splitterdecorated.h>
 #include <message/dispatch.h>
@@ -140,7 +139,7 @@ void ExpressionWidget::fillInTestManagerSlot()
 {
   std::string examplesString = buildExamplesString();
   std::istringstream inStream(examplesString.c_str());
-  mainTable->importExpressions(inStream, boost::uuids::nil_generator()());
+  mainTable->importExpressions(inStream, gu::createNilId());
   
   eManager->update();
   

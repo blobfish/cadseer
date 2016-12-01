@@ -17,10 +17,9 @@
  *
  */
 
-#include <boost/uuid/random_generator.hpp>
-
 #include <BRepPrimAPI_MakeSphere.hxx>
 
+#include <tools/idtools.h>
 #include <library/ipgroup.h>
 #include <project/serial/xsdcxxoutput/featuresphere.h>
 #include <feature/seershape.h>
@@ -134,7 +133,7 @@ void Sphere::initializeMaps()
   std::vector<uuid> tempIds; //save ids for later.
   for (unsigned int index = 0; index < 8; ++index)
   {
-    uuid tempId = idGenerator();
+    uuid tempId = gu::createRandomId();
     tempIds.push_back(tempId);
     
     EvolveRecord evolveRecord;

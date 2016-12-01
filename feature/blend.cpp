@@ -19,9 +19,6 @@
 
 #include <assert.h>
 
-#include <boost/uuid/random_generator.hpp>
-#include <boost/uuid/string_generator.hpp>
-
 #include <TopoDS.hxx>
 #include <TopoDS_Vertex.hxx>
 #include <TopoDS_Edge.hxx>
@@ -40,6 +37,7 @@
 #include <Geom_Curve.hxx>
 
 #include <globalutilities.h>
+#include <tools/idtools.h>
 #include <project/serial/xsdcxxoutput/featureblend.h>
 #include <feature/shapecheck.h>
 #include <feature/seershape.h>
@@ -177,7 +175,7 @@ void Blend::updateModel(const UpdateMap& mapIn)
       {
 	if (!targetSeerShape.hasShapeIdRecord(pick.id))
 	{
-	  std::cout << "Blend: can't find target edge id. Skipping id: " << boost::uuids::to_string(pick.id) << std::endl;
+      std::cout << "Blend: can't find target edge id. Skipping id: " << gu::idToString(pick.id) << std::endl;
 	  continue;
 	}
 	TopoDS_Shape tempShape = targetSeerShape.getOCCTShape(pick.id);
@@ -197,7 +195,7 @@ void Blend::updateModel(const UpdateMap& mapIn)
     {
       if (!targetSeerShape.hasShapeIdRecord(vBlend.pick.id))
       {
-	std::cout << "Blend: can't find target edge id. Skipping id: " << boost::uuids::to_string(vBlend.pick.id) << std::endl;
+        std::cout << "Blend: can't find target edge id. Skipping id: " << gu::idToString(vBlend.pick.id) << std::endl;
 	continue;
       }
       TopoDS_Shape tempShape = targetSeerShape.getOCCTShape(vBlend.pick.id);
@@ -274,7 +272,7 @@ void Blend::generatedMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const SeerSha
     
     std::map<uuid, uuid>::iterator mapItFace;
     bool dummy;
-    std::tie(mapItFace, dummy) = shapeMap.insert(std::make_pair(cId, idGenerator()));
+    std::tie(mapItFace, dummy) = shapeMap.insert(std::make_pair(cId, gu::createRandomId()));
     if (!seerShape->hasEvolveRecordIn(mapItFace->first))
       seerShape->insertEvolve(mapItFace->first, mapItFace->second);
     seerShape->updateShapeIdRecord(blendFace, mapItFace->second); //have the id for the face, update the result map.
@@ -282,7 +280,7 @@ void Blend::generatedMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const SeerSha
     //now look for outerwire for newly generated face.
     //we use the generated face id to map to outer wire.
     std::map<uuid, uuid>::iterator mapItWire;
-    std::tie(mapItWire, dummy) = shapeMap.insert(std::make_pair(mapItFace->second, idGenerator()));
+    std::tie(mapItWire, dummy) = shapeMap.insert(std::make_pair(mapItFace->second, gu::createRandomId()));
     if (!seerShape->hasEvolveRecordIn(mapItWire->first))
       seerShape->insertEvolve(mapItWire->first, mapItWire->second);
     
@@ -310,7 +308,7 @@ void Blend::ensureNoFaceNils()
     if (!seerShape->findShapeIdRecord(shape).id.is_nil())
       continue;
     
-    seerShape->updateShapeIdRecord(shape, idGenerator());
+    seerShape->updateShapeIdRecord(shape, gu::createRandomId());
   }
 }
 
@@ -347,15 +345,13 @@ void Blend::dumpInfo(BRepFilletAPI_MakeFillet &blendMakerIn, const SeerShape &ta
 
 void Blend::serialWrite(const QDir &dIn)
 {
-  using boost::uuids::to_string;
-  
   prj::srl::FeatureBlend::ShapeMapType shapeMapOut;
   for (const auto &p : shapeMap)
   {
     prj::srl::EvolveRecord eRecord
     (
-      to_string(p.first),
-      to_string(p.second)
+      gu::idToString(p.first),
+      gu::idToString(p.second)
     );
     shapeMapOut.evolveRecord().push_back(eRecord);
   }
@@ -368,7 +364,7 @@ void Blend::serialWrite(const QDir &dIn)
     {
       prj::srl::BlendPick bPickOut
       (
-	to_string(bPick.id),
+        gu::idToString(bPick.id),
         bPick.u,
         bPick.v
       );
@@ -387,7 +383,7 @@ void Blend::serialWrite(const QDir &dIn)
   {
     prj::srl::BlendPick bPickOut
     (
-      to_string(vBlend.pick.id),
+      gu::idToString(vBlend.pick.id),
       vBlend.pick.u,
       vBlend.pick.v
     );
@@ -397,7 +393,7 @@ void Blend::serialWrite(const QDir &dIn)
     {
       prj::srl::VariableEntry vEntryOut
       (
-	to_string(vEntry.id),
+        gu::idToString(vEntry.id),
         vEntry.position->serialOut(),
         vEntry.radius->serialOut()
       );
@@ -426,16 +422,14 @@ void Blend::serialWrite(const QDir &dIn)
 
 void Blend::serialRead(const prj::srl::FeatureBlend& sBlendIn)
 {
-  boost::uuids::string_generator gen;
-  
   Base::serialIn(sBlendIn.featureBase());
   
   shapeMap.clear();
   for (const prj::srl::EvolveRecord &sERecord : sBlendIn.shapeMap().evolveRecord())
   {
     std::pair<uuid, uuid> record;
-    record.first = gen(sERecord.idIn());
-    record.second = gen(sERecord.idOut());
+    record.first = gu::stringToId(sERecord.idIn());
+    record.second = gu::stringToId(sERecord.idOut());
     shapeMap.insert(record);
   }
   
@@ -445,7 +439,7 @@ void Blend::serialRead(const prj::srl::FeatureBlend& sBlendIn)
     for (const auto &bPickIn : simpleBlendIn.blendPicks().array())
     {
       BlendPick pick;
-      pick.id = gen(bPickIn.id());
+      pick.id = gu::stringToId(bPickIn.id());
       pick.u = bPickIn.u();
       pick.v = bPickIn.v();
       simpleBlend.picks.push_back(pick);
@@ -458,13 +452,13 @@ void Blend::serialRead(const prj::srl::FeatureBlend& sBlendIn)
   for (const auto &variableBlendIn : sBlendIn.variableBlends().array())
   {
     VariableBlend vBlend;
-    vBlend.pick.id = gen(variableBlendIn.blendPick().id());
+    vBlend.pick.id = gu::stringToId(variableBlendIn.blendPick().id());
     vBlend.pick.u = variableBlendIn.blendPick().u();
     vBlend.pick.v = variableBlendIn.blendPick().v();
     for (const auto &entryIn : variableBlendIn.variableEntries().array())
     {
       VariableEntry entry;
-      entry.id = gen(entryIn.id());
+      entry.id = gu::stringToId(entryIn.id());
       entry.position = buildPositionParameter();
       entry.position->serialIn(entryIn.position());
       entry.radius = buildRadiusParameter();

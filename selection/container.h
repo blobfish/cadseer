@@ -20,12 +20,10 @@
 #ifndef SLC_CONTAINER_H
 #define SLC_CONTAINER_H
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/nil_generator.hpp>
-
 #include <osg/ref_ptr>
 #include <osg/Vec3d>
 
+#include <tools/idtools.h>
 #include <feature/types.h>
 #include <selection/definitions.h>
 
@@ -43,8 +41,8 @@ namespace slc
       ~Container();
       Type selectionType = Type::None;
       ftr::Type featureType = ftr::Type::Base;
-      boost::uuids::uuid featureId = boost::uuids::nil_generator()();
-      boost::uuids::uuid shapeId = boost::uuids::nil_generator()();
+      boost::uuids::uuid featureId = gu::createNilId();
+      boost::uuids::uuid shapeId = gu::createNilId();
       std::vector<boost::uuids::uuid> selectionIds; //!< objects to color. i.e. faces for a solid
       osg::ref_ptr<osg::Geometry> pointGeometry;
       osg::Vec3d pointLocation;

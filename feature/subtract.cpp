@@ -17,8 +17,6 @@
  *
  */
 
-#include <boost/uuid/random_generator.hpp>
-
 #include <BRepAlgoAPI_Cut.hxx>
 #include <TopExp.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>

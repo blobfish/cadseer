@@ -17,9 +17,7 @@
  *
  */
 
-#include <boost/uuid/string_generator.hpp>
-#include <boost/uuid/uuid_io.hpp>
-
+#include <tools/idtools.h>
 #include <project/serial/xsdcxxoutput/featurebooleanbase.h>
 #include "booleanbase.h"
 
@@ -32,8 +30,6 @@ BooleanBase::BooleanBase(): Base()
 
 prj::srl::FeatureBooleanBase BooleanBase::serialOut()
 {
-  using boost::uuids::to_string;
-  
   prj::srl::FeatureBase fBase = Base::serialOut();
   
   prj::srl::IntersectionEdges edgesOut;
@@ -41,8 +37,8 @@ prj::srl::FeatureBooleanBase BooleanBase::serialOut()
   {
     prj::srl::IntersectionEdge::FaceIdsType faceIds;
     for (const auto fId : edge.faces)
-      faceIds.id().push_back(to_string(fId));
-    edgesOut.intersectionEdges().push_back(prj::srl::IntersectionEdge(faceIds, to_string(edge.resultEdge)));
+      faceIds.id().push_back(gu::idToString(fId));
+    edgesOut.intersectionEdges().push_back(prj::srl::IntersectionEdge(faceIds, gu::idToString(edge.resultEdge)));
   }
 
   prj::srl::SplitFaces facesOut;
@@ -50,11 +46,11 @@ prj::srl::FeatureBooleanBase BooleanBase::serialOut()
   {
     prj::srl::SplitFace::IntersectionEdgeIdsType edgeIds;
     for (const auto eId : splitFace.edges)
-      edgeIds.id().push_back(to_string(eId));
+      edgeIds.id().push_back(gu::idToString(eId));
     facesOut.splitFaces().push_back
     (
-      prj::srl::SplitFace(to_string(splitFace.sourceFace),
-	edgeIds, to_string(splitFace.resultFace), to_string(splitFace.resultWire))
+      prj::srl::SplitFace(gu::idToString(splitFace.sourceFace),
+                          edgeIds, gu::idToString(splitFace.resultFace), gu::idToString(splitFace.resultWire))
     );
   }
   
@@ -64,8 +60,6 @@ prj::srl::FeatureBooleanBase BooleanBase::serialOut()
 
 void BooleanBase::serialIn(const prj::srl::FeatureBooleanBase& sBooleanBaseIn)
 {
-  boost::uuids::string_generator sg;
-  
   Base::serialIn(sBooleanBaseIn.featureBase());
   
   iMapWrapper.intersectionEdges.clear();
@@ -73,8 +67,8 @@ void BooleanBase::serialIn(const prj::srl::FeatureBooleanBase& sBooleanBaseIn)
   {
     IntersectionEdge edgeIn;
     for (const auto &idIn : sIEdge.faceIds().id())
-      edgeIn.faces.insert(sg(idIn));
-    edgeIn.resultEdge = sg(sIEdge.edgeId());
+      edgeIn.faces.insert(gu::stringToId(idIn));
+    edgeIn.resultEdge = gu::stringToId(sIEdge.edgeId());
     iMapWrapper.intersectionEdges.insert(edgeIn);
   }
   
@@ -82,11 +76,11 @@ void BooleanBase::serialIn(const prj::srl::FeatureBooleanBase& sBooleanBaseIn)
   for (const auto &sSFace : sBooleanBaseIn.iMapWrapper().splitFaces().splitFaces())
   {
     SplitFace faceIn;
-    faceIn.sourceFace = sg(sSFace.sourceFaceId());
+    faceIn.sourceFace = gu::stringToId(sSFace.sourceFaceId());
     for (const auto &idIn : sSFace.intersectionEdgeIds().id())
-      faceIn.edges.insert(sg(idIn));
-    faceIn.resultFace = sg(sSFace.resultFaceId());
-    faceIn.resultWire = sg(sSFace.resultWireId());
+      faceIn.edges.insert(gu::stringToId(idIn));
+    faceIn.resultFace = gu::stringToId(sSFace.resultFaceId());
+    faceIn.resultWire = gu::stringToId(sSFace.resultWireId());
     iMapWrapper.splitFaces.push_back(faceIn);
   }
 }

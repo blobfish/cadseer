@@ -1,6 +1,6 @@
 /*
  * CadSeer. Parametric Solid Modeling.
- * Copyright (C) 2015  Thomas S. Anderson blobfish.at.gmx.com
+ * Copyright (C) 2016  Thomas S. Anderson blobfish.at.gmx.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,12 +17,19 @@
  *
  */
 
-#include <tools/idtools.h>
-#include <project/message.h>
+#ifndef IDTOOLS_H
+#define IDTOOLS_H
 
-prj::Message::Message()
+#include <string>
+
+#include <boost/uuid/uuid.hpp>
+
+namespace gu
 {
-  featureId = gu::createNilId();
-  featureId2 = gu::createNilId();
-  inputType = ftr::InputTypes::none;
+  boost::uuids::uuid createRandomId();
+  boost::uuids::uuid createNilId();
+  std::string idToString(const boost::uuids::uuid &idIn);
+  boost::uuids::uuid stringToId(const std::string &stringIn);
 }
+
+#endif // IDTOOLS_H

@@ -22,8 +22,6 @@
 #include <cmath>
 #include <limits>
 
-#include <boost/uuid/uuid_io.hpp>
-
 #include <gp_Trsf.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Ax2.hxx>
@@ -33,6 +31,7 @@
 
 #include <nodemaskdefs.h>
 #include <globalutilities.h>
+#include <tools/idtools.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <preferences/preferencesXML.h>
@@ -112,7 +111,7 @@ bool DCallBack::receive(const osgManipulator::MotionCommand &commandIn)
       //add git message.
       std::ostringstream gitStream;
       gitStream << QObject::tr("Reposition feature: ").toStdString() << csysBase->getName().toStdString() <<
-	" id: " << boost::uuids::to_string(csysBase->getId());
+	" id: " << gu::idToString(csysBase->getId());
       msg::Message gitMessage;
       gitMessage.mask = msg::Request | msg::GitMessage;
       prj::Message pMessage;
@@ -149,7 +148,7 @@ CSysBase::CSysBase() : Base(), system()
   dragger->setHandleEvents(false);
   dragger->setupDefaultGeometry();
   dragger->linkToMatrix(mainTransform.get());
-  dragger->setUserValue(gu::idAttributeTitle, boost::uuids::to_string(id));
+  dragger->setUserValue(gu::idAttributeTitle, gu::idToString(id));
   
   callBack = new DCallBack(dragger.get(), this);
   dragger->addDraggerCallback(callBack.get());
@@ -200,7 +199,7 @@ prj::srl::FeatureCSysBase CSysBase::serialOut()
 void CSysBase::serialIn(const prj::srl::FeatureCSysBase& sCSysBaseIn)
 {
   Base::serialIn(sCSysBaseIn.featureBase());
-  dragger->setUserValue(gu::idAttributeTitle, boost::uuids::to_string(id));
+  dragger->setUserValue(gu::idAttributeTitle, gu::idToString(id));
   
   const prj::srl::CSys &s = sCSysBaseIn.csys();
   osg::Matrixd m;

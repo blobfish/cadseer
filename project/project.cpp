@@ -24,8 +24,6 @@
 #include <boost/graph/topological_sort.hpp>
 #include <boost/graph/filtered_graph.hpp>
 #include <boost/graph/depth_first_search.hpp>
-#include <boost/uuid/string_generator.hpp>
-#include <boost/uuid/uuid_io.hpp>
 
 #include <BRep_Builder.hxx>
 #include <BRepTools.hxx>
@@ -36,6 +34,7 @@
 
 #include <application/application.h>
 #include <globalutilities.h>
+#include <tools/idtools.h>
 #include <feature/base.h>
 #include <feature/seershape.h>
 #include <feature/inert.h>
@@ -623,10 +622,10 @@ void Project::checkShapeIdsDispatched(const msg::Message&)
   {
     if (entry.second.size() < 2)
       continue;
-    std::cout << std::endl << "shape id of: " << boost::to_string(entry.first) << "    is in feature id of:";
+    std::cout << std::endl << "shape id of: " << gu::idToString(entry.first) << "    is in feature id of:";
     for (const auto &it : entry.second)
     {
-      std::cout << " " << boost::to_string(it);
+      std::cout << " " << gu::idToString(it);
     }
   }
 }
@@ -722,8 +721,6 @@ void Project::setSaveDirectory(const std::string& directoryIn)
 
 void Project::serialWrite()
 {
-  using boost::uuids::to_string;
-  
   //we accumulate all feature occt shapes into 1 master compound and write
   //that to disk. We do this in an effort for occt to keep it's implicit
   //sharing between saves and opens.
@@ -743,7 +740,7 @@ void Project::serialWrite()
     if (shapeOut.IsNull())
       shapeOut = BRepBuilderAPI_MakeVertex(gp_Pnt(0.0, 0.0, 0.0)).Vertex();
     
-    features.feature().push_back(prj::srl::Feature(to_string(f->getId()), f->getTypeString(), offset));
+    features.feature().push_back(prj::srl::Feature(gu::idToString(f->getId()), f->getTypeString(), offset));
     
     //add to master compound
     builder.Add(compound, shapeOut);
@@ -762,7 +759,7 @@ void Project::serialWrite()
     std::string inputTypeString = ftr::getInputTypeString(projectGraph[currentEdge].inputType);
     ftr::Base *s = projectGraph[boost::source(currentEdge, projectGraph)].feature.get();
     ftr::Base *t = projectGraph[boost::target(currentEdge, projectGraph)].feature.get();
-    connections.connection().push_back(prj::srl::Connection(to_string(s->getId()), to_string(t->getId()), inputTypeString));
+    connections.connection().push_back(prj::srl::Connection(gu::idToString(s->getId()), gu::idToString(t->getId()), inputTypeString));
   }
   
   expr::StringTranslator sTranslator(*expressionManager);
@@ -771,14 +768,14 @@ void Project::serialWrite()
   for (const auto& fId : formulaIds)
   {
     std::string eString = sTranslator.buildStringAll(fId);
-    prj::srl::Expression expression(to_string(fId), eString);
+    prj::srl::Expression expression(gu::idToString(fId), eString);
     expressions.array().push_back(expression);
   }
   
   prj::srl::ExpressionLinks eLinks;
   for (const auto& link : expressionManager->getLinkContainer())
   {
-    prj::srl::ExpressionLink sLink(to_string(link.featureId), link.parameterName, to_string(link.formulaId));
+    prj::srl::ExpressionLink sLink(gu::idToString(link.featureId), link.parameterName, gu::idToString(link.formulaId));
     eLinks.array().push_back(sLink);
   }
   
@@ -838,13 +835,12 @@ void Project::open()
     
     for (const auto &fConnection : project->connections().connection())
     {
-      uuid source = boost::uuids::string_generator()(fConnection.sourceId());
-      uuid target = boost::uuids::string_generator()(fConnection.targetId());
+      uuid source = gu::stringToId(fConnection.sourceId());
+      uuid target = gu::stringToId(fConnection.targetId());
       ftr::InputTypes inputType = ftr::getInputFromString(fConnection.inputType());
       connect(source, target, inputType);
     }
     
-    boost::uuids::string_generator gen;
     expr::StringTranslator sTranslator(*expressionManager);
     for (const auto &sExpression : project->expressions().array())
     {
@@ -853,15 +849,16 @@ void Project::open()
         std::cout << "failed expression parse on load:   " << sExpression.stringForm() << std::endl;
         continue;
       }
-      expressionManager->setFormulaId(sTranslator.getFormulaOutId(), gen(sExpression.id()));
+      expressionManager->setFormulaId(sTranslator.getFormulaOutId(), gu::stringToId(sExpression.id()));
     }
     
     expressionManager->update(); //addFormulaLink requires that everything be up to date.
     for (const auto &sLink : project->expressionLinks().array())
     {
-      ftr::Base *feature = findFeature(gen(sLink.featureId()));
+      ftr::Base *feature = findFeature(gu::stringToId(sLink.featureId()));
       ftr::Parameter *parameter = feature->getParameter(sLink.parameterName());
-      expressionManager->addFormulaLink(gen(sLink.featureId()), parameter, gen(sLink.expressionId()));
+      expressionManager->addFormulaLink(gu::stringToId(sLink.featureId()), parameter,
+                                        gu::stringToId(sLink.expressionId()));
     }
     
     updateModel();
@@ -916,7 +913,7 @@ class ShapeTrackVisitorUp : public boost::default_dfs_visitor
     {
       std::cout
 	<< "feature: " << std::setw(15) << std::left << graph[vertexIn].feature->getName().toStdString()
-	<< "    feature id: " << boost::to_string(graph[vertexIn].feature->getId()) << std::endl;
+    << "    feature id: " << gu::idToString(graph[vertexIn].feature->getId()) << std::endl;
       if (!graph[vertexIn].feature->hasSeerShape())
       {
 	std::cout << " BREAK: no seer shape" << std::endl;
@@ -929,7 +926,7 @@ class ShapeTrackVisitorUp : public boost::default_dfs_visitor
       const std::vector<boost::uuids::uuid> &currentIds = idsStack.top();
       for (const auto &currentId : currentIds)
       {
-	std::cout << "    shape id out: " << boost::to_string(currentId);
+        std::cout << "    shape id out: " << gu::idToString(currentId);
 	if (!shape.hasEvolveRecordOut(currentId))
 	{
 	  std::cout << "    BREAK: no evolve record out" << std::endl;
@@ -939,7 +936,7 @@ class ShapeTrackVisitorUp : public boost::default_dfs_visitor
 	auto ids = shape.devolve(currentId);
 	for (const auto &id : ids)
 	{
-	  std::cout << id << " ";
+	  std::cout << gu::idToString(id) << " ";
 	  freshIds.push_back(id);
 	}
 	std::cout << std::endl;
@@ -976,7 +973,7 @@ class ShapeTrackVisitorDown : public boost::default_dfs_visitor
     {
       std::cout
 	<< "feature: " << std::setw(15) << std::left << graph[vertexIn].feature->getName().toStdString()
-	<< "    feature id: " << boost::to_string(graph[vertexIn].feature->getId()) << std::endl;
+    << "    feature id: " << gu::idToString(graph[vertexIn].feature->getId()) << std::endl;
 	
       if (vertexIn == startVertex) //note constructor pushes to idstack so we are in sync with finish vertex.
 	return;
@@ -993,7 +990,7 @@ class ShapeTrackVisitorDown : public boost::default_dfs_visitor
       const std::vector<boost::uuids::uuid> &currentIds = idsStack.top();
       for (const auto &currentId : currentIds)
       {
-	std::cout << "    shape id in: " << boost::to_string(currentId);
+        std::cout << "    shape id in: " << gu::idToString(currentId);
 	if (!shape.hasEvolveRecordIn(currentId))
 	{
 	  std::cout << "    BREAK: no evolve record in" << std::endl;
@@ -1003,7 +1000,7 @@ class ShapeTrackVisitorDown : public boost::default_dfs_visitor
 	auto ids = shape.evolve(currentId);
 	for (const auto &id : ids)
 	{
-	  std::cout << id << " ";
+	  std::cout << gu::idToString(id) << " ";
 	  freshIds.push_back(id);
 	}
 	std::cout << std::endl;

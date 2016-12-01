@@ -18,6 +18,7 @@
  */
 
 #include <globalutilities.h>
+#include <tools/idtools.h>
 #include <library/lineardimension.h>
 #include <library/ipgroup.h>
 #include <project/serial/xsdcxxoutput/featurecone.h>
@@ -247,7 +248,7 @@ void Cone::initializeMaps()
   std::vector<uuid> tempIds; //save ids for later.
   for (unsigned int index = 0; index < 14; ++index)
   {
-    uuid tempId = idGenerator();
+    uuid tempId = gu::createRandomId();
     tempIds.push_back(tempId);
     
     EvolveRecord evolveRecord;

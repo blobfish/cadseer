@@ -20,8 +20,6 @@
 #include <iostream>
 #include <assert.h>
 
-#include <boost/uuid/string_generator.hpp>
-
 #include <osg/Geometry>
 #include <osg/View>
 #include <osgViewer/View>

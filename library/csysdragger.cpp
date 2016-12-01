@@ -23,13 +23,11 @@
 #include <cmath>
 #include <limits>
 
-#include <boost/uuid/nil_generator.hpp>
-#include <boost/uuid/uuid_io.hpp>
-
 #include <osgManipulator/Constraint>
 #include <osgUtil/SmoothingVisitor>
 
 #include <globalutilities.h>
+#include <tools/idtools.h>
 #include <nodemaskdefs.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
@@ -45,7 +43,7 @@ using namespace lbr;
 CSysDragger::CSysDragger()
 {
   this->setNodeMask(NodeMaskDef::csys);
-  setUserValue(gu::idAttributeTitle, boost::uuids::to_string(boost::uuids::nil_generator()()));
+  setUserValue(gu::idAttributeTitle, gu::idToString(gu::createNilId()));
   
   autoTransform = new osg::AutoTransform();
   autoTransform->setAutoScaleToScreen(true);

@@ -33,6 +33,7 @@
 #include <BRepTools.hxx>
 
 #include <globalutilities.h>
+#include <tools/idtools.h>
 #include <feature/base.h>
 #include <feature/seershape.h>
 #include <feature/intersectionmapping.h>
@@ -40,8 +41,6 @@
 
 using namespace ftr;
 using boost::uuids::uuid;
-
-static boost::uuids::basic_random_generator<boost::mt19937> idGenerator;
 
 BooleanIdMapper::BooleanIdMapper
 (
@@ -94,9 +93,6 @@ void BooleanIdMapper::goIntersectionEdges()
 {
   const BOPDS_DS &bopDS = *(builder.PDS());
   const BOPCol_DataMapOfShapeShape &origins = builder.Origins();
-  boost::uuids::nil_generator ng;
-  using boost::uuids::to_string;
-  using boost::uuids::uuid;
   
   std::set<IntersectionEdge> cIEdges; //current intersection edges.
   for (int index = 0; index < bopDS.NbShapes(); ++index)
@@ -119,7 +115,7 @@ void BooleanIdMapper::goIntersectionEdges()
       if (!origins.IsBound(cShape))
 	continue;
       
-      uuid sourceFaceId = ng();
+      uuid sourceFaceId = gu::createNilId();
       if (inputTarget.hasShapeIdRecord(origins(cShape)))
 	sourceFaceId = inputTarget.findShapeIdRecord(origins(cShape)).id;
       for(const auto &tool : inputTools)
@@ -153,9 +149,9 @@ void BooleanIdMapper::goIntersectionEdges()
     }
     else
     {
-      tempIntersection.resultEdge = idGenerator();
+      tempIntersection.resultEdge = gu::createRandomId();
       iMapWrapper.intersectionEdges.insert(tempIntersection);
-      seerShapeOut->insertEvolve(boost::uuids::nil_generator()(), tempIntersection.resultEdge);
+      seerShapeOut->insertEvolve(gu::createNilId(), tempIntersection.resultEdge);
     }
     seerShapeOut->updateShapeIdRecord(shape, tempIntersection.resultEdge);
     iEdgeCache.insert(tempIntersection.resultEdge);
@@ -192,7 +188,7 @@ void BooleanIdMapper::goSingleSplits()
       continue;
     
     //assign face id.
-    uuid faceId = boost::uuids::nil_generator()();
+    uuid faceId = gu::createNilId();
     if (inputTarget.hasShapeIdRecord(key))
       faceId = inputTarget.findShapeIdRecord(key).id;
     else
@@ -234,7 +230,7 @@ void BooleanIdMapper::goSplitFaces()
       continue;
     //now we should have proved out current shape is a split.
     
-    uuid originId = boost::uuids::nil_generator()();
+    uuid originId = gu::createNilId();
     if (inputTarget.hasShapeIdRecord(origin))
       originId = inputTarget.findShapeIdRecord(origin).id;
     else
@@ -266,8 +262,8 @@ void BooleanIdMapper::goSplitFaces()
     SplitFace splitFace;
     splitFace.sourceFace = originId;
     splitFace.edges = faceIEdges;
-    splitFace.resultFace = idGenerator();
-    splitFace.resultWire = idGenerator();
+    splitFace.resultFace = gu::createRandomId();
+    splitFace.resultWire = gu::createRandomId();
     
     bool results;
     SplitFace splitFaceOut;

@@ -23,11 +23,7 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/nil_generator.hpp>
-#include <boost/uuid/string_generator.hpp>
-#include <boost/uuid/uuid_io.hpp>
-
+#include <tools/idtools.h>
 #include <expressions/expressionmanager.h>
 #include <expressions/stringtranslator.h>
 #include <application/application.h>
@@ -132,12 +128,12 @@ void ParameterDialog::keyPressEvent(QKeyEvent *eventIn)
 
 static boost::uuids::uuid getId(const QString &stringIn)
 {
-  boost::uuids::uuid idOut = boost::uuids::nil_generator()();
+  boost::uuids::uuid idOut = gu::createNilId();
   if (stringIn.startsWith("ExpressionId;"))
   {
     QStringList split = stringIn.split(";");
     if (split.size() == 2)
-      idOut = boost::uuids::string_generator()(split.at(1).toStdString());
+      idOut = gu::stringToId(split.at(1).toStdString());
   }
   return idOut;
 }

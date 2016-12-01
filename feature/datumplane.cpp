@@ -19,8 +19,6 @@
 
 #include <limits>
 
-#include <boost/uuid/string_generator.hpp>
-
 #include <QDir>
 
 #include <BRepAdaptor_Surface.hxx>
@@ -215,7 +213,7 @@ void DatumPlanePlanarOffset::serialOut(prj::srl::SolverChoice& solverChoice)
 {
   prj::srl::DatumPlanePlanarOffset srlOffset
   (
-    boost::uuids::to_string(faceId),
+    gu::idToString(faceId),
     offset->serialOut()
   );
   
@@ -402,8 +400,8 @@ void DatumPlanePlanarCenter::serialOut(prj::srl::SolverChoice& solverChoice)
 {
   prj::srl::DatumPlanePlanarCenter srlCenter
   (
-    boost::uuids::to_string(faceId1),
-    boost::uuids::to_string(faceId2)
+    gu::idToString(faceId1),
+   gu::idToString(faceId2)
   );
   
   solverChoice.center() = srlCenter;
@@ -657,8 +655,8 @@ void DatumPlanePlanarParallelThroughEdge::serialOut(prj::srl::SolverChoice& solv
 {
   prj::srl::DatumPlanePlanarParallelThroughEdge srlParallel
   (
-    boost::uuids::to_string(faceId),
-    boost::uuids::to_string(edgeId)
+    gu::idToString(faceId),
+    gu::idToString(edgeId)
   );
   
   solverChoice.parallelThroughEdge() = srlParallel;
@@ -749,28 +747,26 @@ void DatumPlane::serialWrite(const QDir &dIn)
 
 void DatumPlane::serialRead(const prj::srl::FeatureDatumPlane &datumPlaneIn)
 {
-  boost::uuids::string_generator gen;
-  
   Base::serialIn(datumPlaneIn.featureBase());
   if (datumPlaneIn.solverChoice().offset().present())
   {
     std::shared_ptr<DatumPlanePlanarOffset> offsetSolver(new DatumPlanePlanarOffset);
-    offsetSolver->faceId = gen(datumPlaneIn.solverChoice().offset().get().faceId());
+    offsetSolver->faceId = gu::stringToId(datumPlaneIn.solverChoice().offset().get().faceId());
     offsetSolver->offset->serialIn(datumPlaneIn.solverChoice().offset().get().offset());
     setSolver(offsetSolver);
   }
   else if(datumPlaneIn.solverChoice().center().present())
   {
     std::shared_ptr<DatumPlanePlanarCenter> centerSolver(new DatumPlanePlanarCenter);
-    centerSolver->faceId1 = gen(datumPlaneIn.solverChoice().center().get().faceId1());
-    centerSolver->faceId2 = gen(datumPlaneIn.solverChoice().center().get().faceId2());
+    centerSolver->faceId1 = gu::stringToId(datumPlaneIn.solverChoice().center().get().faceId1());
+    centerSolver->faceId2 = gu::stringToId(datumPlaneIn.solverChoice().center().get().faceId2());
     setSolver(centerSolver);
   }
   else if(datumPlaneIn.solverChoice().parallelThroughEdge().present())
   {
     std::shared_ptr<DatumPlanePlanarParallelThroughEdge> parallelSolver(new DatumPlanePlanarParallelThroughEdge);
-    parallelSolver->faceId = gen(datumPlaneIn.solverChoice().parallelThroughEdge().get().faceId());
-    parallelSolver->edgeId = gen(datumPlaneIn.solverChoice().parallelThroughEdge().get().edgeId());
+    parallelSolver->faceId = gu::stringToId(datumPlaneIn.solverChoice().parallelThroughEdge().get().faceId());
+    parallelSolver->edgeId = gu::stringToId(datumPlaneIn.solverChoice().parallelThroughEdge().get().edgeId());
     setSolver(parallelSolver);
   }
 }

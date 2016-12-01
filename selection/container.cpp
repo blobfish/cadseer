@@ -17,7 +17,7 @@
  *
  */
 
-#include <boost/uuid/uuid_io.hpp>
+#include <algorithm>
 
 #include <osg/Geometry>
 #include <osg/io_utils>
@@ -36,8 +36,8 @@ std::ostream& slc::operator<<(std::ostream& os, const Container& container)
 {
   os << 
     "type is: " << getNameOfType(container.selectionType) << 
-    "      featureid is: " << boost::uuids::to_string(container.featureId) <<
-    "      shape id is: " << boost::uuids::to_string(container.shapeId) << std::endl <<
+    "      featureid is: " << gu::idToString(container.featureId) <<
+    "      shape id is: " << gu::idToString(container.shapeId) << std::endl <<
     "      point location: " << container.pointLocation << std::endl;
   return os;
 }

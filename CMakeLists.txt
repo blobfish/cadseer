@@ -111,7 +111,11 @@ SET(SELECTION_SOURCES
     selection/interpreter.cpp
     selection/visitors.cpp
     )
-
+    
+    SET(TOOLS_SOURCES
+    tools/idtools.cpp
+    )
+    
 SET(DIALOG_SOURCES
     dialogs/boxdialog.cpp
     dialogs/parameterdialog.cpp
@@ -205,6 +209,7 @@ SET(CADSEER_SOURCES
     ${FEATURE_SOURCES}
     ${EXPRESSION_SOURCES}
     ${SELECTION_SOURCES}
+    ${TOOLS_SOURCES}
     ${DIALOG_SOURCES}
     ${PREFERENCE_SOURCES}
     ${PROJECT_SOURCES}

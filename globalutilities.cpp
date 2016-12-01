@@ -21,9 +21,6 @@
 #include <assert.h>
 #include <vector>
 
-#include <boost/uuid/uuid_io.hpp>
-#include <boost/uuid/string_generator.hpp>
-
 #include <TopoDS_Shape.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Vertex.hxx>
@@ -35,6 +32,7 @@
 #include <osg/Geometry>
 #include <osg/ValueObject>
 
+#include <tools/idtools.h>
 #include <globalutilities.h>
 
 int gu::getShapeHash(const TopoDS_Shape &shape)
@@ -55,7 +53,7 @@ boost::uuids::uuid gu::getId(const osg::Node *node)
   std::string stringId;
   if (!node->getUserValue(gu::idAttributeTitle, stringId))
       assert(0);
-  return boost::uuids::string_generator()(stringId);
+  return gu::stringToId(stringId);
 }
 
 std::string gu::getShapeTypeString(const TopoDS_Shape &shapeIn)

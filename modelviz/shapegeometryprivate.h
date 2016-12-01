@@ -20,16 +20,14 @@
 #ifndef MDV_SHAPEGEOMETRYPRIVATE_H
 #define MDV_SHAPEGEOMETRYPRIVATE_H
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/nil_generator.hpp>
-#include <boost/uuid/uuid_io.hpp>
-
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/composite_key.hpp>
 
 #include <osg/BoundingSphere>
+
+#include <tools/idtools.h>
 
 namespace mdv
 {
@@ -38,7 +36,7 @@ namespace mdv
   //! @brief struct for map record
   struct IdPSetRecord
   {
-    boost::uuids::uuid id = boost::uuids::nil_generator()();
+    boost::uuids::uuid id = gu::createNilId();
     std::size_t primitiveSetIndex = 0; //!< primitiveset index.
     osg::BoundingSphere bSphere; //!< only used for edges. faces use kdtree
     
@@ -50,7 +48,7 @@ namespace mdv
   };
   std::ostream& operator<<(std::ostream& os, const IdPSetRecord& record)
   {
-    os << boost::uuids::to_string(record.id) << "      " << record.primitiveSetIndex << std::endl;
+    os << gu::idToString(record.id) << "      " << record.primitiveSetIndex << std::endl;
     return os;
   }
   

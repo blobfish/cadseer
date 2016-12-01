@@ -19,8 +19,6 @@
 
 #include <QDir>
 
-#include <boost/uuid/string_generator.hpp>
-
 #include <BRep_Builder.hxx>
 #include <TopoDS_Compound.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
@@ -29,6 +27,7 @@
 
 #include <osg/KdTree>
 
+#include <tools/idtools.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <nodemaskdefs.h>
@@ -45,7 +44,7 @@ std::size_t Base::nextConstructionIndex = 0;
 
 Base::Base()
 {
-  id = idGenerator();
+  id = gu::createRandomId();
   constructionIndex = nextConstructionIndex;
   nextConstructionIndex++;
   
@@ -54,7 +53,7 @@ Base::Base()
   mainSwitch = new osg::Switch();
   mainSwitch->setName("feature");
   mainSwitch->setNodeMask(NodeMaskDef::object);
-  mainSwitch->setUserValue(gu::idAttributeTitle, boost::uuids::to_string(id));
+  mainSwitch->setUserValue(gu::idAttributeTitle, gu::idToString(id));
   
   mainTransform = new osg::MatrixTransform();
   mainTransform->setMatrix(osg::Matrixd::identity());
@@ -69,7 +68,7 @@ Base::Base()
   overlaySwitch = new osg::Switch();
   overlaySwitch->setNodeMask(NodeMaskDef::overlaySwitch);
   overlaySwitch->setName("overlay");
-  overlaySwitch->setUserValue(gu::idAttributeTitle, boost::uuids::to_string(id));
+  overlaySwitch->setUserValue(gu::idAttributeTitle, gu::idToString(id));
   
   state.set(ftr::StateOffset::ModelDirty, true);
   state.set(ftr::StateOffset::VisualDirty, true);
@@ -277,24 +276,21 @@ void Base::serialWrite(const QDir&)
 
 prj::srl::FeatureBase Base::serialOut()
 {
-  using boost::uuids::to_string;
-  
   return prj::srl::FeatureBase
   (
     name.toStdString(),
-    boost::uuids::to_string(id),
+    gu::idToString(id),
     seerShape->serialOut()
   ); 
 }
 
 void Base::serialIn(const prj::srl::FeatureBase& sBaseIn)
 {
-  boost::uuids::string_generator sg;
-//   
   name = QString::fromStdString(sBaseIn.name());
-  id = sg(sBaseIn.id());
-  mainSwitch->setUserValue(gu::idAttributeTitle, boost::uuids::to_string(id));
-  overlaySwitch->setUserValue(gu::idAttributeTitle, boost::uuids::to_string(id));
+  id = gu::stringToId(sBaseIn.id());
+  //didn't investigate why, but was getting exception when  using sBaseIn.id() in next 2 calls.
+  mainSwitch->setUserValue(gu::idAttributeTitle, gu::idToString(id));
+  overlaySwitch->setUserValue(gu::idAttributeTitle, gu::idToString(id));
   
   seerShape->serialIn(sBaseIn.seerShape());
 }
@@ -314,7 +310,7 @@ void Base::setShape(const TopoDS_Shape &in)
 
 std::string Base::getFileName() const
 {
-  return boost::uuids::to_string(id) + ".fetr";
+  return gu::idToString(id) + ".fetr";
 }
 
 QString Base::buildFilePathName(const QDir &dIn) const

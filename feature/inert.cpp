@@ -19,8 +19,6 @@
 
 #include <QDir>
 
-#include <boost/uuid/random_generator.hpp>
-
 #include <TopExp.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <gp_Ax3.hxx>

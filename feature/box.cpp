@@ -21,9 +21,8 @@
 #include <string>
 #include <map>
 
-#include <boost/uuid/random_generator.hpp>
-
 #include <globalutilities.h>
+#include <tools/idtools.h>
 #include <library/ipgroup.h>
 #include <feature/boxbuilder.h>
 #include <feature/seershape.h>
@@ -275,7 +274,7 @@ void Box::initializeMaps()
   std::vector<uuid> tempIds; //save ids for later.
   for (unsigned int index = 0; index < 35; ++index)
   {
-    uuid tempId = idGenerator();
+    uuid tempId = gu::createRandomId();
     tempIds.push_back(tempId);
     
     EvolveRecord evolveRecord;

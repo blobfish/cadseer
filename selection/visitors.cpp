@@ -19,12 +19,11 @@
 
 #include <cassert>
 
-#include <boost/uuid/string_generator.hpp>
-
 #include <osg/Switch>
 #include <osg/ValueObject>
 
 #include <globalutilities.h>
+#include <tools/idtools.h>
 #include <modelviz/shapegeometry.h>
 #include <selection/visitors.h>
 
@@ -42,7 +41,7 @@ void MainSwitchVisitor::apply(osg::Switch& switchIn)
   std::string userValue;
   if (switchIn.getUserValue(gu::idAttributeTitle, userValue))
   {
-    boost::uuids::uuid switchId = boost::uuids::string_generator()(userValue);
+    boost::uuids::uuid switchId = gu::stringToId(userValue);
     if (switchId == id)
     {
       out = &switchIn;

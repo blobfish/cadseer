@@ -20,11 +20,6 @@
 #ifndef FTR_SEERSHAPE_H
 #define FTR_SEERSHAPE_H
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_io.hpp>
-#include <boost/uuid/nil_generator.hpp>
-#include <boost/uuid/random_generator.hpp>
-
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/ordered_index.hpp>
@@ -37,6 +32,7 @@
 #include <TopoDS_Shape.hxx>
 
 #include <globalutilities.h>
+#include <tools/idtools.h>
 
 namespace osg{class Vec3d;}
 
@@ -82,7 +78,7 @@ namespace ftr
     TopoDS_Shape shape;
     
     ShapeIdRecord() :
-      id(boost::uuids::nil_generator()()),
+      id(gu::createNilId()),
       graphVertex(boost::graph_traits<Graph>::null_vertex()),
       shape(TopoDS_Shape())
       {}
@@ -147,7 +143,7 @@ namespace ftr
   {
     boost::uuids::uuid inId;
     boost::uuids::uuid outId;
-    EvolveRecord() : inId(boost::uuids::nil_generator()()), outId(boost::uuids::nil_generator()()) {}
+    EvolveRecord() : inId(gu::createNilId()), outId(gu::createNilId()) {}
     EvolveRecord(const boost::uuids::uuid &inIdIn, const boost::uuids::uuid &outIdIn):
       inId(inIdIn), outId(outIdIn){}
     
@@ -187,7 +183,7 @@ namespace ftr
     boost::uuids::uuid id;
     std::string tag;
     
-    FeatureTagRecord() : id(boost::uuids::nil_generator()()), tag() {}
+    FeatureTagRecord() : id(gu::createNilId()), tag() {}
     
     //@{
     //! used as tags.
@@ -383,8 +379,6 @@ namespace ftr
     Graph graph;
     Graph rGraph; //reversed graph.
     
-    boost::uuids::basic_random_generator<boost::mt19937> idGenerator;
-    
     void updateGraphs();
   };
   
@@ -416,7 +410,7 @@ namespace ftr
       out << 
 	"[label=\"" <<
 	shapeStrings.at(static_cast<int>(seerShape.findShapeIdRecord(v).shape.ShapeType())) << "\\n" <<
-	seerShape.findShapeIdRecord(v).id <<
+	gu::idToString(seerShape.findShapeIdRecord(v).id) <<
 	"\"]";
     }
   private:

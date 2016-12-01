@@ -28,6 +28,7 @@
 #include <boost/graph/breadth_first_search.hpp>
 #include <boost/graph/graphviz.hpp>
 
+#include <tools/idtools.h>
 #include <feature/inputtypes.h>
 #include <feature/base.h>
 
@@ -87,7 +88,7 @@ namespace prg
         out << 
 	  "[label=\"" <<
 	  graphVW[vertexW].feature->getName().toAscii().data() << "\\n" <<
-	  graphVW[vertexW].feature->getId() << "\\n" <<
+	  gu::idToString(graphVW[vertexW].feature->getId()) << "\\n" <<
 	  "Descriptor: " << ftr::getDescriptorString(graphVW[vertexW].feature->getDescriptor()) << 
 	  "\"]";
       }

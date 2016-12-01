@@ -30,6 +30,7 @@
 #include <TopoDS_Face.hxx>
 #include <TopoDS.hxx>
 
+#include <tools/idtools.h>
 #include <message/dispatch.h>
 #include <message/message.h>
 #include <message/observer.h>
@@ -778,7 +779,7 @@ void Factory::debugDumpDispatched(const msg::Message&)
       continue;
     const ftr::SeerShape &seerShape = feature->getSeerShape();
     std::cout << std::endl;
-    std::cout << "feature name: " << feature->getName().toStdString() << "    feature id: " << boost::to_string(feature->getId()) << std::endl;
+    std::cout << "feature name: " << feature->getName().toStdString() << "    feature id: " << gu::idToString(feature->getId()) << std::endl;
     std::cout << "shape id container:" << std::endl; seerShape.dumpShapeIdContainer(std::cout); std::cout << std::endl;
     std::cout << "shape evolve container:" << std::endl; seerShape.dumpEvolveContainer(std::cout); std::cout << std::endl;
     std::cout << "feature tag container:" << std::endl; seerShape.dumpFeatureTagContainer(std::cout); std::cout << std::endl;

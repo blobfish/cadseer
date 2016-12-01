@@ -19,21 +19,18 @@
 
 #include <algorithm>
 
-#include <boost/uuid/nil_generator.hpp>
-#include <boost/uuid/uuid_io.hpp>
-
 #include <TopExp.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 
+#include <tools/idtools.h>
 #include "intersectionmapping.h"
 
 using namespace ftr;
 
 IntersectionEdge::IntersectionEdge()
 {
-  boost::uuids::nil_generator ng;
-  resultEdge = ng();
+  resultEdge = gu::createNilId();
 }
 
 bool IntersectionEdge::operator<(const IntersectionEdge &rhs) const
@@ -56,31 +53,29 @@ std::ostream & ftr::operator<<(std::ostream &stream, const IntersectionEdge &iEd
 {
   stream << "faces: " << std::endl;
   for (const auto &faceId : iEdgeIn.faces)
-    std::cout << "    " << boost::uuids::to_string(faceId) << std::endl;
-  std::cout << "result edge: " << boost::uuids::to_string(iEdgeIn.resultEdge) << std::endl;
+    std::cout << "    " << gu::idToString(faceId) << std::endl;
+  std::cout << "result edge: " << gu::idToString(iEdgeIn.resultEdge) << std::endl;
     
   return stream;
 }
 
 std::ostream & ftr::operator<<(std::ostream &stream, const SplitFace &splitIn)
 {
-  stream << "source face: " << boost::uuids::to_string(splitIn.sourceFace) << std::endl
+  stream << "source face: " << gu::idToString(splitIn.sourceFace) << std::endl
   << "edges:" << std::endl;
   for (const auto &entry : splitIn.edges)
-    stream << "    " << boost::uuids::to_string(entry) << std::endl;
-  stream << "result face: " << boost::uuids::to_string(splitIn.resultFace) << std::endl
-    << "result wire: " << boost::uuids::to_string(splitIn.resultWire) << std::endl;
+    stream << "    " << gu::idToString(entry) << std::endl;
+  stream << "result face: " << gu::idToString(splitIn.resultFace) << std::endl
+  << "result wire: " << gu::idToString(splitIn.resultWire) << std::endl;
   
   return stream;
 }
 
 SplitFace::SplitFace()
 {
-  boost::uuids::nil_generator ng;
-  
-  sourceFace = ng();
-  resultFace = ng();
-  resultWire = ng();
+  sourceFace = gu::createNilId();
+  resultFace = gu::createNilId();
+  resultWire = gu::createNilId();
 }
 
 bool SplitFace::matchStrong(const SplitFace &other) const

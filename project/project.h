@@ -23,6 +23,8 @@
 #include <map>
 #include <memory>
 
+#include <boost/uuid/uuid.hpp>
+
 #include <project/projectgraph.h>
 
 class TopoDS_Shape;

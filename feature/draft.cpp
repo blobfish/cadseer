@@ -19,8 +19,6 @@
 
 #include <cassert>
 
-#include <boost/uuid/string_generator.hpp>
-
 #include <gp_Pln.hxx>
 #include <BRepOffsetAPI_DraftAngle.hxx>
 #include <TopoDS.hxx>
@@ -33,6 +31,7 @@
 #include <Geom_Surface.hxx>
 
 #include <globalutilities.h>
+#include <tools/idtools.h>
 #include <feature/shapecheck.h>
 #include <library/plabel.h>
 #include <project/serial/xsdcxxoutput/featuredraft.h>
@@ -109,7 +108,7 @@ void Draft::updateModel(const UpdateMap& mapIn)
     {
       if (!targetSeerShape.hasShapeIdRecord(p.faceId))
       {
-	std::cout << boost::uuids::to_string(id) << " Draft missing: " << boost::uuids::to_string(p.faceId) << std::endl;
+        std::cout << gu::idToString(id) << " Draft missing: " << gu::idToString(p.faceId) << std::endl;
 	continue;
       }
       const TopoDS_Face &face = TopoDS::Face(targetSeerShape.findShapeIdRecord(p.faceId).shape);
@@ -182,7 +181,7 @@ void Draft::generatedMatch(BRepOffsetAPI_DraftAngle &dMaker, const SeerShape &ta
       freshId = seerShape->evolve(cId).front();
     else
     {
-      freshId = idGenerator();
+      freshId = gu::createRandomId();
       seerShape->insertEvolve(cId, freshId);
     }
     
@@ -192,14 +191,12 @@ void Draft::generatedMatch(BRepOffsetAPI_DraftAngle &dMaker, const SeerShape &ta
 
 void Draft::serialWrite(const QDir &dIn)
 {
-  using boost::uuids::to_string;
-  
   prj::srl::DraftPicks targetPicksOut;
   for (const auto &targetPick : targetPicks)
   {
     prj::srl::DraftPick targetPickOut
     (
-      to_string(targetPick.faceId),
+      gu::idToString(targetPick.faceId),
       targetPick.u,
       targetPick.v
     );
@@ -208,7 +205,7 @@ void Draft::serialWrite(const QDir &dIn)
   
   prj::srl::DraftPick neutralPickOut
   (
-    to_string(neutralPick.faceId),
+    gu::idToString(neutralPick.faceId),
     neutralPick.u,
     neutralPick.v
   );
@@ -228,20 +225,18 @@ void Draft::serialWrite(const QDir &dIn)
 
 void Draft::serialRead(const prj::srl::FeatureDraft &sDraftIn)
 {
-  boost::uuids::string_generator gen;
-  
   Base::serialIn(sDraftIn.featureBase());
   
   for (const auto &targetPickIn : sDraftIn.targetPicks().array())
   {
     DraftPick pick;
-    pick.faceId = gen(targetPickIn.faceId());
+    pick.faceId = gu::stringToId(targetPickIn.faceId());
     pick.u = targetPickIn.u();
     pick.v = targetPickIn.v();
     targetPicks.push_back(pick);
   }
   
-  neutralPick.faceId = gen(sDraftIn.neutralPick().faceId());
+  neutralPick.faceId = gu::stringToId(sDraftIn.neutralPick().faceId());
   neutralPick.u = sDraftIn.neutralPick().u();
   neutralPick.v = sDraftIn.neutralPick().v();
   

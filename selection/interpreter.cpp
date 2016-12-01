@@ -19,6 +19,7 @@
 
 #include <cassert>
 
+#include <tools/idtools.h>
 #include <nodemaskdefs.h>
 #include <globalutilities.h>
 #include <feature/base.h>
@@ -28,8 +29,8 @@
 #include <selection/interpreter.h>
 
 using namespace slc;
+
 using boost::uuids::uuid;
-using boost::uuids::nil_generator;
 
 //We need to make the containers a set so we don't put multiple items in.
 
@@ -248,7 +249,7 @@ void Interpreter::go()
 	if (!object.is_nil())
 	{
 	  container.selectionType = Type::Object;
-	  container.shapeId = nil_generator()();
+	  container.shapeId = gu::createNilId();
 	  if (!has(containersOut, container)) //don't run again
 	  {
 	    container.selectionIds = shapeGeometry->seerShape->useGetChildrenOfType(object, TopAbs_FACE);

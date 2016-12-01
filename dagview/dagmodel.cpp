@@ -19,8 +19,6 @@
 
 #include <iostream>
 
-#include <boost/uuid/nil_generator.hpp>
-
 #include <QString>
 #include <QTextStream>
 #include <QGraphicsTextItem>
@@ -39,6 +37,7 @@
 
 #include <application/application.h>
 #include <globalutilities.h>
+#include <tools/idtools.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <dagview/dagcontrolleddfs.h>
@@ -950,7 +949,7 @@ void Model::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     sMessage.type = slc::Type::Object;
     sMessage.featureId = record.featureId;
     sMessage.featureType = record.feature.lock()->getType();
-    sMessage.shapeId = boost::uuids::nil_generator()();
+    sMessage.shapeId = gu::createNilId();
     message.payload = sMessage;
     observer->messageOutSignal(message);
   };
@@ -965,7 +964,7 @@ void Model::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     sMessage.type = slc::Type::Object;
     sMessage.featureId = record.featureId;
     sMessage.featureType = record.feature.lock()->getType();
-    sMessage.shapeId = boost::uuids::nil_generator()();
+    sMessage.shapeId = gu::createNilId();
     message.payload = sMessage;
     observer->messageOutSignal(message);
   };
@@ -993,7 +992,7 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
     sMessage.type = slc::Type::Object;
     sMessage.featureId = featureIdIn;
     sMessage.featureType = findRecord(graphLink, featureIdIn).feature.lock()->getType();
-    sMessage.shapeId = boost::uuids::nil_generator()();
+    sMessage.shapeId = gu::createNilId();
     message.payload = sMessage;
     observer->messageOutSignal(message);
   };

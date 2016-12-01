@@ -23,8 +23,6 @@
 #include <iomanip>
 
 #include <boost/graph/topological_sort.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
 #include <boost/graph/adj_list_serialize.hpp>
 
 #include <application/application.h>
@@ -35,6 +33,7 @@
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 
+#include <tools/idtools.h>
 #include <expressions/expressionedgeproperty.h>
 #include <expressions/expressiongraph.h>
 #include <expressions/expressionmanager.h>
@@ -45,7 +44,7 @@
 using namespace expr;
 using namespace boost::uuids;
 
-Group::Group() : id(boost::uuids::random_generator()()), name("default")
+Group::Group() : id(gu::createRandomId()), name("default")
 {
 
 }
@@ -416,9 +415,9 @@ void ExpressionManager::dumpLinks(std::ostream& stream)
   FormulaLinkContainerType::const_iterator it;
   for (it = formulaLinks.begin(); it != formulaLinks.end(); ++it)
   {
-    stream << "feature id: " << boost::uuids::to_string(it->featureId)
+    stream << "feature id: " << gu::idToString(it->featureId)
       << "    parameter name: " << std::left << std::setw(20) << it->parameterName
-      << "    formula id: " << boost::uuids::to_string(it->formulaId) << std::endl;
+      << "    formula id: " << gu::idToString(it->formulaId) << std::endl;
   }
 }
 

@@ -19,15 +19,14 @@
 
 #include <algorithm>
 
-#include <boost/uuid/nil_generator.hpp>
-
+#include <tools/idtools.h>
 #include <selection/message.h>
 
 slc::Message::Message()
 {
   type = slc::Type::None;
-  featureId = boost::uuids::nil_generator()();
-  shapeId = boost::uuids::nil_generator()();
+  featureId = gu::createNilId();
+  shapeId = gu::createNilId();
 }
 
 bool slc::has(const slc::Messages& messagesIn, const slc::Message& messageIn)

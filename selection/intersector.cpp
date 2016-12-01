@@ -20,8 +20,6 @@
 #include <iostream>
 #include <assert.h>
 
-#include <boost/uuid/uuid.hpp>
-
 #include <osg/Geometry>
 #include <osg/PrimitiveSet>
 

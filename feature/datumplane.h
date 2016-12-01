@@ -20,10 +20,9 @@
 #ifndef FTR_DATUMPLANE_H
 #define FTR_DATUMPLANE_H
 
-#include <boost/uuid/nil_generator.hpp>
-
 #include <osg/ref_ptr>
 
+#include <tools/idtools.h>
 #include <selection/container.h>
 #include <feature/base.h>
 
@@ -93,7 +92,7 @@ namespace ftr
     virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &) override;
     virtual void serialOut(prj::srl::SolverChoice &solverChoice) override;
     
-    boost::uuids::uuid faceId = boost::uuids::nil_uuid();
+    boost::uuids::uuid faceId = gu::createNilId();
     std::shared_ptr<Parameter> offset;
     osg::ref_ptr<lbr::IPGroup> offsetIP;
     
@@ -110,8 +109,8 @@ namespace ftr
     virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &) override;
     virtual void serialOut(prj::srl::SolverChoice &solverChoice) override;
     
-    boost::uuids::uuid faceId1 = boost::uuids::nil_uuid();
-    boost::uuids::uuid faceId2 = boost::uuids::nil_uuid();
+    boost::uuids::uuid faceId1 = gu::createNilId();
+    boost::uuids::uuid faceId2 = gu::createNilId();
     
     static bool canDoTypes(const slc::Containers &);
   };
@@ -126,8 +125,8 @@ namespace ftr
     virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &) override;
     virtual void serialOut(prj::srl::SolverChoice &solverChoice) override;
     
-    boost::uuids::uuid faceId = boost::uuids::nil_uuid();
-    boost::uuids::uuid edgeId = boost::uuids::nil_uuid();
+    boost::uuids::uuid faceId = gu::createNilId();
+    boost::uuids::uuid edgeId = gu::createNilId();
     
     static bool canDoTypes(const slc::Containers &);
   };
