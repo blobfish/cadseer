@@ -93,16 +93,6 @@ void ExpressionManager::update()
   dispatchValues();
 }
 
-void ExpressionManager::requestProjectUpdate()
-{
-  if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
-  {
-    msg::Message uMessage;
-    uMessage.mask = msg::Request | msg::Update;
-    observer->messageOutSignal(uMessage);
-  }
-}
-
 void ExpressionManager::writeOutGraph(const std::string& pathName)
 {
   graphPtr->writeOutGraph(pathName);

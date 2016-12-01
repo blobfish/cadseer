@@ -49,6 +49,7 @@ class TableModel : public QAbstractTableModel
   Q_OBJECT
 public:
     explicit TableModel(expr::ExpressionManager &eManagerIn, QObject* parent = 0);
+    virtual ~TableModel() override;
     virtual int rowCount(const QModelIndex& parent = QModelIndex()) const;
     virtual int columnCount(const QModelIndex& parent = QModelIndex()) const;
     virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
@@ -86,6 +87,8 @@ private:
   expr::ExpressionManager &eManager;
   //! Translator to interface with the manager.
   boost::shared_ptr<StringTranslator> sTranslator;
+  //! Observer into message system
+  std::unique_ptr<msg::Observer> observer;
   //! tableview calls into ::data every paint event. Way too many! cache rhs strings for speed.
   typedef std::map<boost::uuids::uuid, std::string> IdToRhsMap;
   mutable IdToRhsMap idToRhsMap;

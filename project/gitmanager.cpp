@@ -264,8 +264,9 @@ void GitManager::appendGitMessage(const std::string& message)
   else
   {
     //for some reason std::endl wasn't putting new line in commit message.
+    //extra spaces make the merge --squash(file/save) message look good.
     std::ostringstream stream;
-    stream << commitMessage << "\n" << message;
+    stream << commitMessage << "\n    " << message;
     commitMessage = stream.str();
   }
 }
@@ -304,4 +305,26 @@ void GitManager::gitMessageFreezeDispatched(const msg::Message &)
 void GitManager::gitMessageThawDispatched(const msg::Message &)
 {
   thawGitMessages();
+}
+
+GitMessageFreezer::GitMessageFreezer()
+{
+  observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+  observer->name = "prj::GitMessageFreezer";
+  freeze();
+}
+
+GitMessageFreezer::~GitMessageFreezer()
+{
+  thaw();
+}
+
+void GitMessageFreezer::freeze()
+{
+  observer->messageOutSignal(msg::Message(msg::Request | msg::GitMessage | msg::Freeze));
+}
+
+void GitMessageFreezer::thaw()
+{
+  observer->messageOutSignal(msg::Message(msg::Request | msg::GitMessage | msg::Thaw));
 }

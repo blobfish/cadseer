@@ -58,17 +58,12 @@ namespace prj
   class GitMessageFreezer
   {
   public:
-    GitMessageFreezer(GitManager &gManagerIn) : gManager(gManagerIn)
-    {
-      gManager.freezeGitMessages();
-    }
-    
-    ~GitMessageFreezer()
-    {
-      gManager.thawGitMessages();
-    }
+    GitMessageFreezer();
+    ~GitMessageFreezer();
+    void freeze();
+    void thaw();
   private:
-    GitManager &gManager;
+    std::unique_ptr<msg::Observer> observer;
   };
 }
 

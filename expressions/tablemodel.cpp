@@ -41,8 +41,11 @@ TableModel::TableModel(ExpressionManager &eManagerIn, QObject* parent):
   QAbstractTableModel(parent), lastFailedPosition(-1), lastFailedText(""), lastFailedMessage(""),
   eManager(eManagerIn), sTranslator(new StringTranslator(eManager))
 {
-
+  observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+  observer->name = "expr::TableModel";
 }
+
+TableModel::~TableModel(){}
 
 int TableModel::columnCount(const QModelIndex&) const
 {
@@ -139,6 +142,13 @@ bool TableModel::setData(const QModelIndex& index, const QVariant& value, int)
     eManager.update(); //needs to updated before we can call remove.
     eManager.removeFormula(sTranslator->getFormulaOutId());
     eManager.setFormulaName(fId, newName);
+    
+    //add git message.
+    msg::Message gitMessage(msg::Request | msg::GitMessage);
+    std::ostringstream gitStream; gitStream << "Rename expression: " << oldName << ", to: " << newName;
+    prj::Message pMessage; pMessage.gitMessage = gitStream.str();
+    gitMessage.payload = pMessage;
+    observer->messageOutSignal(gitMessage);
   }
   if (index.column() == 1)
   {
@@ -184,13 +194,25 @@ bool TableModel::setData(const QModelIndex& index, const QVariant& value, int)
     }
     eManager.setFormulaDependentsDirty(fId);
     eManager.update();
+    
+    //add git message.
+    msg::Message gitMessage(msg::Request | msg::GitMessage);
+    std::ostringstream gitStream; gitStream << "Edit expression: " << stream.str();
+    prj::Message pMessage; pMessage.gitMessage = gitStream.str();
+    gitMessage.payload = pMessage;
+    observer->messageOutSignal(gitMessage);
+    
   }
   lastFailedText.clear();
   lastFailedMessage.clear();
   lastFailedPosition = -1;
   removeRhs(fId);
   Q_EMIT dataChanged(index, index);
-  eManager.requestProjectUpdate(); //only if preferences allow.
+  
+  msg::Message updateMessage;
+  updateMessage.mask = msg::Request | msg::Update;
+  observer->messageOutSignal(updateMessage);
+  
   return true;
 }
 
@@ -235,24 +257,33 @@ void TableModel::addFormulaToGroup(const QModelIndex& indexIn, const QString& gr
 void TableModel::addDefaultRow()
 {
   std::string name;
+  std::string expression;
   
   for (int nameIndex = 0; nameIndex < 100000; ++nameIndex) //more than 100000? something is wrong!
   {
     std::ostringstream stream;
     stream << "Default_" << nameIndex;
+    name = stream.str();
     if (!eManager.hasFormula(stream.str()))
     {
       stream << "=1.0";
-      name = stream.str();
+      expression = stream.str();
       break;
     }
   }
-  assert(!name.empty());
+  assert(!expression.empty());
   
   this->beginInsertRows(QModelIndex(), eManager.allGroup.formulaIds.size(), eManager.allGroup.formulaIds.size());
-  sTranslator->parseString(name);
+  sTranslator->parseString(expression);
   eManager.update();
   this->endInsertRows();
+  
+  //add git message.
+  msg::Message gitMessage(msg::Request | msg::GitMessage);
+  std::ostringstream gitStream;  gitStream << "Adding expression: " << name;
+  prj::Message pMessage;  pMessage.gitMessage = gitStream.str();
+  gitMessage.payload = pMessage;
+  observer->messageOutSignal(gitMessage);
 }
 
 void TableModel::removeFormula(const QModelIndexList &indexesIn)
@@ -271,14 +302,28 @@ void TableModel::removeFormula(const QModelIndexList &indexesIn)
   std::reverse(mappedRows.begin(), mappedRows.end());
   
   eManager.update(); //ensure graph is up to date before calling remove formulas.
+  boost::uuids::string_generator gen;
+  //instead of trying to track down any dependent formulas we will just invalidate the model
+  beginResetModel();
   for (std::vector<int>::const_iterator rowIt = mappedRows.begin(); rowIt != mappedRows.end(); ++rowIt)
   {
-    boost::uuids::uuid currentId = boost::uuids::string_generator()
-      (this->data(indexMap.value(*rowIt), Qt::UserRole).toString().toStdString());
-    this->beginRemoveRows(QModelIndex(), indexMap.value(*rowIt).row(), indexMap.value(*rowIt).row());
+    boost::uuids::uuid currentId = gen(this->data(indexMap.value(*rowIt), Qt::UserRole).toString().toStdString());
+    
+    //add git message. Doing all this in loop because formatting is specific and it's handled in gitManager.
+    msg::Message gitMessage(msg::Request | msg::GitMessage);
+    std::ostringstream gitStream; gitStream << "Remove expression: " << eManager.getFormulaName(currentId);
+    prj::Message pMessage; pMessage.gitMessage = gitStream.str();
+    gitMessage.payload = pMessage;
+    observer->messageOutSignal(gitMessage);
+    
     eManager.removeFormula(currentId);
-    this->endRemoveRows();
   }
+  idToRhsMap.clear();
+  endResetModel();
+  
+  msg::Message updateMessage;
+  updateMessage.mask = msg::Request | msg::Update;
+  observer->messageOutSignal(updateMessage);
 }
 
 void TableModel::exportExpressions(QModelIndexList& indexesIn, std::ostream &streamIn) const

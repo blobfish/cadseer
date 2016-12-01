@@ -140,9 +140,6 @@ public:
   //! Cycle the graph and recalculate dirty nodes.
   void update();
   
-  //! requests the project to update. called from qt objects when done editing.
-  void requestProjectUpdate();
-  
   //! return a reference to the GraphWrapper 
   GraphWrapper& getGraphWrapper();
   
