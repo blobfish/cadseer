@@ -38,370 +38,370 @@ using namespace expr;
   * Traverses child vertices of a formulaNode. Will visit dependent formulaNodes,
   * but not their children. This is used to build a string representation of the formulaNode.
   * */
-  class FormulaVisitor : public boost::default_dfs_visitor
-  {
-  public:
-      FormulaVisitor(std::list<std::string> &stringIn) : expression(stringIn), currentPosition(expression.begin())
-      {
-	typeMap.insert(std::make_pair(expr::NodeType::Addition, " + "));
-	typeMap.insert(std::make_pair(expr::NodeType::Subtraction, " - "));
-	typeMap.insert(std::make_pair(expr::NodeType::Multiplication, " * "));
-	typeMap.insert(std::make_pair(expr::NodeType::Division, " / "));
-      }
+class FormulaVisitor : public boost::default_dfs_visitor
+{
+public:
+    FormulaVisitor(std::list<std::string> &stringIn) : expression(stringIn), currentPosition(expression.begin())
+    {
+        typeMap.insert(std::make_pair(expr::NodeType::Addition, " + "));
+        typeMap.insert(std::make_pair(expr::NodeType::Subtraction, " - "));
+        typeMap.insert(std::make_pair(expr::NodeType::Multiplication, " * "));
+        typeMap.insert(std::make_pair(expr::NodeType::Division, " / "));
+    }
       
-      template<typename FindVertex, typename FindGraph>
-      void start_vertex(FindVertex vertex, FindGraph &)
-      {
-	startVertex = vertex;
-      }
+    template<typename FindVertex, typename FindGraph>
+    void start_vertex(FindVertex vertex, FindGraph &)
+    {
+        startVertex = vertex;
+    }
       
       //watchout for storing iterator == end();
       
-      template<typename FindVertex, typename FindGraph>
-      void discover_vertex(FindVertex vertex, FindGraph &graph)
-      {
-	if (graph[vertex]->getType() == expr::NodeType::Formula)
-	{
-	  expr::FormulaNode *fNode = dynamic_cast<expr::FormulaNode *>(graph[vertex].get());
-	  if (startVertex == vertex)
-	  {
-	    //found root formula.
-	    currentPosition = expression.insert(currentPosition, fNode->name + " = ");
-	  }
-	  else
-      {
-        currentPosition = expression.insert(currentPosition, fNode->name);
-      }
-      currentPosition++;
-      StackEntry temp;
-      temp.push_back(currentPosition);
-      itStack.push(temp);
-	}
-	else if (typeMap.count(graph[vertex]->getType()) > 0)
-	{
-	  currentPosition = expression.insert(currentPosition, typeMap.at(graph[vertex]->getType()));
-	  StackEntry temp;
-	  temp.push_back(currentPosition);
-	  currentPosition++;
-	  temp.push_back(currentPosition);
-	  itStack.push(temp);
-	}
-	else if (graph[vertex]->getType() == expr::NodeType::Parentheses)
-	{
-	  currentPosition = expression.insert(currentPosition, "(");
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ")");
-	  StackEntry temp;
-	  temp.push_back(currentPosition);
-	  itStack.push(temp);
-	}
-	else if (graph[vertex]->getType() == expr::NodeType::Constant)
-	{
-	  std::ostringstream stream;
-	  stream << graph[vertex]->getValue();
-	  currentPosition = expression.insert(currentPosition, stream.str());
-	  StackEntry temp;
-	  temp.push_back(currentPosition);
-	  itStack.push(temp);
-	}
-	else if (graph[vertex]->getType() == expr::NodeType::Sin)
-	{
-	  currentPosition = expression.insert(currentPosition, "sin(");
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ")");
-	  StackEntry temp;
-	  temp.push_back(currentPosition);
-	  itStack.push(temp);
-	}
-	else if (graph[vertex]->getType() == expr::NodeType::Cos)
-	{
-	  currentPosition = expression.insert(currentPosition, "cos(");
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ")");
-	  StackEntry temp;
-	  temp.push_back(currentPosition);
-	  itStack.push(temp);
-	}
-	else if (graph[vertex]->getType() == expr::NodeType::Tan)
-	{
-	  currentPosition = expression.insert(currentPosition, "tan(");
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ")");
-	  StackEntry temp;
-	  temp.push_back(currentPosition);
-	  itStack.push(temp);
-	}
-	else if (graph[vertex]->getType() == expr::NodeType::Asin)
-	{
-	  currentPosition = expression.insert(currentPosition, "asin(");
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ")");
-	  StackEntry temp;
-	  temp.push_back(currentPosition);
-	  itStack.push(temp);
-	}
-	else if (graph[vertex]->getType() == expr::NodeType::Acos)
-	{
-	  currentPosition = expression.insert(currentPosition, "acos(");
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ")");
-	  StackEntry temp;
-	  temp.push_back(currentPosition);
-	  itStack.push(temp);
-	}
-	else if (graph[vertex]->getType() == expr::NodeType::Atan)
-	{
-	  currentPosition = expression.insert(currentPosition, "atan(");
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ")");
-	  StackEntry temp;
-	  temp.push_back(currentPosition);
-	  itStack.push(temp);
-	}
-	else if (graph[vertex]->getType() == expr::NodeType::Pow)
-	{
-	  currentPosition = expression.insert(currentPosition, "pow(");
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ", ");
-	  StackEntry temp;
-	  temp.push_back(currentPosition);
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ")");
-	  temp.push_back(currentPosition);
-	  itStack.push(temp);
-	}
-	else if (graph[vertex]->getType() == expr::NodeType::Atan2)
-	{
-	  currentPosition = expression.insert(currentPosition, "atan2(");
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ", ");
-	  StackEntry temp;
-	  temp.push_back(currentPosition);
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ")");
-	  temp.push_back(currentPosition);
-	  itStack.push(temp);
-	}
-	else if (graph[vertex]->getType() == expr::NodeType::Abs)
-	{
-	  currentPosition = expression.insert(currentPosition, "abs(");
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ")");
-	  StackEntry temp;
-	  temp.push_back(currentPosition);
-	  itStack.push(temp);
-	}
-	else if (graph[vertex]->getType() == expr::NodeType::Min)
-	{
-	  currentPosition = expression.insert(currentPosition, "min(");
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ", ");
-	  StackEntry temp;
-	  temp.push_back(currentPosition);
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ")");
-	  temp.push_back(currentPosition);
-	  itStack.push(temp);
-	}
-	else if (graph[vertex]->getType() == expr::NodeType::Max)
-	{
-	  currentPosition = expression.insert(currentPosition, "max(");
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ", ");
-	  StackEntry temp;
-	  temp.push_back(currentPosition);
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ")");
-	  temp.push_back(currentPosition);
-	  itStack.push(temp);
-	}
-	else if (graph[vertex]->getType() == expr::NodeType::Floor)
-	{
-	  currentPosition = expression.insert(currentPosition, "floor(");
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ", ");
-	  StackEntry temp;
-	  temp.push_back(currentPosition);
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ")");
-	  temp.push_back(currentPosition);
-	  itStack.push(temp);
-	}
-	else if (graph[vertex]->getType() == expr::NodeType::Ceil)
-	{
-	  currentPosition = expression.insert(currentPosition, "ceil(");
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ", ");
-	  StackEntry temp;
-	  temp.push_back(currentPosition);
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ")");
-	  temp.push_back(currentPosition);
-	  itStack.push(temp);
-	}
-	else if (graph[vertex]->getType() == expr::NodeType::Round)
-	{
-	  currentPosition = expression.insert(currentPosition, "round(");
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ", ");
-	  StackEntry temp;
-	  temp.push_back(currentPosition);
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ")");
-	  temp.push_back(currentPosition);
-	  itStack.push(temp);
-	}
-	else if (graph[vertex]->getType() == expr::NodeType::RadToDeg)
-	{
-	  currentPosition = expression.insert(currentPosition, "radtodeg(");
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ")");
-	  StackEntry temp;
-	  temp.push_back(currentPosition);
-	  itStack.push(temp);
-	}
-	else if (graph[vertex]->getType() == expr::NodeType::DegToRad)
-	{
-	  currentPosition = expression.insert(currentPosition, "degtorad(");
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ")");
-	  StackEntry temp;
-	  temp.push_back(currentPosition);
-	  itStack.push(temp);
-	}
-	else if (graph[vertex]->getType() == expr::NodeType::Log)
-	{
-	  currentPosition = expression.insert(currentPosition, "log(");
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ")");
-	  StackEntry temp;
-	  temp.push_back(currentPosition);
-	  itStack.push(temp);
-	}
-	else if (graph[vertex]->getType() == expr::NodeType::Exp)
-	{
-	  currentPosition = expression.insert(currentPosition, "exp(");
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ")");
-	  StackEntry temp;
-	  temp.push_back(currentPosition);
-	  itStack.push(temp);
-	}
-	else if (graph[vertex]->getType() == expr::NodeType::Sqrt)
-	{
-	  currentPosition = expression.insert(currentPosition, "sqrt(");
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ")");
-	  StackEntry temp;
-	  temp.push_back(currentPosition);
-	  itStack.push(temp);
-	}
-	else if (graph[vertex]->getType() == expr::NodeType::Hypot)
-	{
-	  currentPosition = expression.insert(currentPosition, "hypot(");
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ", ");
-	  StackEntry temp;
-	  temp.push_back(currentPosition);
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ")");
-	  temp.push_back(currentPosition);
-	  itStack.push(temp);
-	}
-	else if (graph[vertex]->getType() == expr::NodeType::Conditional)
-	{
-	  currentPosition = expression.insert(currentPosition, "if(");
-	  currentPosition++;
-	  StackEntry temp;
-	  
-	  expr::ConditionalNode *node = dynamic_cast<expr::ConditionalNode*>(graph[vertex].get());
-	  assert(node);
-	  if (node->type == expr::ConditionalNode::GreaterThan)
-	    currentPosition = expression.insert(currentPosition, " > ");
-	  else if (node->type == expr::ConditionalNode::LessThan)
-	    currentPosition = expression.insert(currentPosition, " < ");
-	  else if (node->type == expr::ConditionalNode::GreaterThanEqual)
-	    currentPosition = expression.insert(currentPosition, " >= ");
-	  else if (node->type == expr::ConditionalNode::LessThanEqual)
-	    currentPosition = expression.insert(currentPosition, " <= ");
-	  else if(node->type == expr::ConditionalNode::Equal)
-	    currentPosition = expression.insert(currentPosition, " == ");
-	  else if (node->type == expr::ConditionalNode::NotEqual)
-	    currentPosition = expression.insert(currentPosition, " != ");
-	  
-	  temp.push_back(currentPosition); //lhs position.
-	  currentPosition++;
-	  
-	  currentPosition = expression.insert(currentPosition, ")");
-	  temp.push_back(currentPosition); //rhs position.
-	  currentPosition++;
-	  
-	  currentPosition = expression.insert(currentPosition, " then(");
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ")");
-	  temp.push_back(currentPosition); //then position.
-	  currentPosition++;
-	  
-	  currentPosition = expression.insert(currentPosition, " else(");
-	  currentPosition++;
-	  currentPosition = expression.insert(currentPosition, ")");
-	  temp.push_back(currentPosition); //else position.
-	  
-	  itStack.push(temp);
-	}
-      }
+    template<typename FindVertex, typename FindGraph>
+    void discover_vertex(FindVertex vertex, FindGraph &graph)
+    {
+        if (graph[vertex]->getType() == expr::NodeType::Formula)
+        {
+            expr::FormulaNode *fNode = dynamic_cast<expr::FormulaNode *>(graph[vertex].get());
+            if (startVertex == vertex)
+            {
+                //found root formula.
+                currentPosition = expression.insert(currentPosition, fNode->name + " = ");
+            }
+            else
+            {
+                currentPosition = expression.insert(currentPosition, fNode->name);
+            }
+            currentPosition++;
+            StackEntry temp;
+            temp.push_back(currentPosition);
+            itStack.push(temp);
+        }
+        else if (typeMap.count(graph[vertex]->getType()) > 0)
+        {
+            currentPosition = expression.insert(currentPosition, typeMap.at(graph[vertex]->getType()));
+            StackEntry temp;
+            temp.push_back(currentPosition);
+            currentPosition++;
+            temp.push_back(currentPosition);
+            itStack.push(temp);
+        }
+        else if (graph[vertex]->getType() == expr::NodeType::Parentheses)
+        {
+            currentPosition = expression.insert(currentPosition, "(");
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ")");
+            StackEntry temp;
+            temp.push_back(currentPosition);
+            itStack.push(temp);
+        }
+        else if (graph[vertex]->getType() == expr::NodeType::Constant)
+        {
+            std::ostringstream stream;
+            stream << graph[vertex]->getValue();
+            currentPosition = expression.insert(currentPosition, stream.str());
+            StackEntry temp;
+            temp.push_back(currentPosition);
+            itStack.push(temp);
+        }
+        else if (graph[vertex]->getType() == expr::NodeType::Sin)
+        {
+            currentPosition = expression.insert(currentPosition, "sin(");
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ")");
+            StackEntry temp;
+            temp.push_back(currentPosition);
+            itStack.push(temp);
+        }
+        else if (graph[vertex]->getType() == expr::NodeType::Cos)
+        {
+            currentPosition = expression.insert(currentPosition, "cos(");
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ")");
+            StackEntry temp;
+            temp.push_back(currentPosition);
+            itStack.push(temp);
+        }
+        else if (graph[vertex]->getType() == expr::NodeType::Tan)
+        {
+            currentPosition = expression.insert(currentPosition, "tan(");
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ")");
+            StackEntry temp;
+            temp.push_back(currentPosition);
+            itStack.push(temp);
+        }
+        else if (graph[vertex]->getType() == expr::NodeType::Asin)
+        {
+            currentPosition = expression.insert(currentPosition, "asin(");
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ")");
+            StackEntry temp;
+            temp.push_back(currentPosition);
+            itStack.push(temp);
+        }
+        else if (graph[vertex]->getType() == expr::NodeType::Acos)
+        {
+            currentPosition = expression.insert(currentPosition, "acos(");
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ")");
+            StackEntry temp;
+            temp.push_back(currentPosition);
+            itStack.push(temp);
+        }
+        else if (graph[vertex]->getType() == expr::NodeType::Atan)
+        {
+            currentPosition = expression.insert(currentPosition, "atan(");
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ")");
+            StackEntry temp;
+            temp.push_back(currentPosition);
+            itStack.push(temp);
+        }
+        else if (graph[vertex]->getType() == expr::NodeType::Pow)
+        {
+            currentPosition = expression.insert(currentPosition, "pow(");
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ", ");
+            StackEntry temp;
+            temp.push_back(currentPosition);
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ")");
+            temp.push_back(currentPosition);
+            itStack.push(temp);
+        }
+        else if (graph[vertex]->getType() == expr::NodeType::Atan2)
+        {
+            currentPosition = expression.insert(currentPosition, "atan2(");
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ", ");
+            StackEntry temp;
+            temp.push_back(currentPosition);
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ")");
+            temp.push_back(currentPosition);
+            itStack.push(temp);
+        }
+        else if (graph[vertex]->getType() == expr::NodeType::Abs)
+        {
+            currentPosition = expression.insert(currentPosition, "abs(");
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ")");
+            StackEntry temp;
+            temp.push_back(currentPosition);
+            itStack.push(temp);
+        }
+        else if (graph[vertex]->getType() == expr::NodeType::Min)
+        {
+            currentPosition = expression.insert(currentPosition, "min(");
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ", ");
+            StackEntry temp;
+            temp.push_back(currentPosition);
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ")");
+            temp.push_back(currentPosition);
+            itStack.push(temp);
+        }
+        else if (graph[vertex]->getType() == expr::NodeType::Max)
+        {
+            currentPosition = expression.insert(currentPosition, "max(");
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ", ");
+            StackEntry temp;
+            temp.push_back(currentPosition);
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ")");
+            temp.push_back(currentPosition);
+            itStack.push(temp);
+        }
+        else if (graph[vertex]->getType() == expr::NodeType::Floor)
+        {
+            currentPosition = expression.insert(currentPosition, "floor(");
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ", ");
+            StackEntry temp;
+            temp.push_back(currentPosition);
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ")");
+            temp.push_back(currentPosition);
+            itStack.push(temp);
+        }
+        else if (graph[vertex]->getType() == expr::NodeType::Ceil)
+        {
+            currentPosition = expression.insert(currentPosition, "ceil(");
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ", ");
+            StackEntry temp;
+            temp.push_back(currentPosition);
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ")");
+            temp.push_back(currentPosition);
+            itStack.push(temp);
+        }
+        else if (graph[vertex]->getType() == expr::NodeType::Round)
+        {
+            currentPosition = expression.insert(currentPosition, "round(");
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ", ");
+            StackEntry temp;
+            temp.push_back(currentPosition);
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ")");
+            temp.push_back(currentPosition);
+            itStack.push(temp);
+        }
+        else if (graph[vertex]->getType() == expr::NodeType::RadToDeg)
+        {
+            currentPosition = expression.insert(currentPosition, "radtodeg(");
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ")");
+            StackEntry temp;
+            temp.push_back(currentPosition);
+            itStack.push(temp);
+        }
+        else if (graph[vertex]->getType() == expr::NodeType::DegToRad)
+        {
+            currentPosition = expression.insert(currentPosition, "degtorad(");
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ")");
+            StackEntry temp;
+            temp.push_back(currentPosition);
+            itStack.push(temp);
+        }
+        else if (graph[vertex]->getType() == expr::NodeType::Log)
+        {
+            currentPosition = expression.insert(currentPosition, "log(");
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ")");
+            StackEntry temp;
+            temp.push_back(currentPosition);
+            itStack.push(temp);
+        }
+        else if (graph[vertex]->getType() == expr::NodeType::Exp)
+        {
+            currentPosition = expression.insert(currentPosition, "exp(");
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ")");
+            StackEntry temp;
+            temp.push_back(currentPosition);
+            itStack.push(temp);
+        }
+        else if (graph[vertex]->getType() == expr::NodeType::Sqrt)
+        {
+            currentPosition = expression.insert(currentPosition, "sqrt(");
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ")");
+            StackEntry temp;
+            temp.push_back(currentPosition);
+            itStack.push(temp);
+        }
+        else if (graph[vertex]->getType() == expr::NodeType::Hypot)
+        {
+            currentPosition = expression.insert(currentPosition, "hypot(");
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ", ");
+            StackEntry temp;
+            temp.push_back(currentPosition);
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ")");
+            temp.push_back(currentPosition);
+            itStack.push(temp);
+        }
+        else if (graph[vertex]->getType() == expr::NodeType::Conditional)
+        {
+            currentPosition = expression.insert(currentPosition, "if(");
+            currentPosition++;
+            StackEntry temp;
+
+            expr::ConditionalNode *node = dynamic_cast<expr::ConditionalNode*>(graph[vertex].get());
+            assert(node);
+            if (node->type == expr::ConditionalNode::GreaterThan)
+                currentPosition = expression.insert(currentPosition, " > ");
+            else if (node->type == expr::ConditionalNode::LessThan)
+                currentPosition = expression.insert(currentPosition, " < ");
+            else if (node->type == expr::ConditionalNode::GreaterThanEqual)
+                currentPosition = expression.insert(currentPosition, " >= ");
+            else if (node->type == expr::ConditionalNode::LessThanEqual)
+                currentPosition = expression.insert(currentPosition, " <= ");
+            else if(node->type == expr::ConditionalNode::Equal)
+                currentPosition = expression.insert(currentPosition, " == ");
+            else if (node->type == expr::ConditionalNode::NotEqual)
+                currentPosition = expression.insert(currentPosition, " != ");
+
+            temp.push_back(currentPosition); //lhs position.
+            currentPosition++;
+
+            currentPosition = expression.insert(currentPosition, ")");
+            temp.push_back(currentPosition); //rhs position.
+            currentPosition++;
+
+            currentPosition = expression.insert(currentPosition, " then(");
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ")");
+            temp.push_back(currentPosition); //then position.
+            currentPosition++;
+
+            currentPosition = expression.insert(currentPosition, " else(");
+            currentPosition++;
+            currentPosition = expression.insert(currentPosition, ")");
+            temp.push_back(currentPosition); //else position.
+
+            itStack.push(temp);
+        }
+    }
+        
+    template<typename FindEdge, typename FindGraph>
+    void examine_edge(FindEdge edge, FindGraph &graph)
+    {
+        if (graph[edge] == expr::EdgeProperty::Lhs || graph[edge] == expr::EdgeProperty::Parameter1 ||
+            graph[edge] == expr::EdgeProperty::None)
+        {
+            currentPosition = itStack.top().at(0);
+        }
+        else if(graph[edge] == expr::EdgeProperty::Rhs || graph[edge] == expr::EdgeProperty::Parameter2)
+        {
+            currentPosition = itStack.top().at(1);
+        }
+        else if(graph[edge] == expr::EdgeProperty::Then)
+        {
+            currentPosition = itStack.top().at(2);
+        }
+        else if(graph[edge] == expr::EdgeProperty::Else)
+        {
+            currentPosition = itStack.top().at(3);
+        }
+    }
       
-      template<typename FindEdge, typename FindGraph>
-      void examine_edge(FindEdge edge, FindGraph &graph)
-      {
-	if (graph[edge] == expr::EdgeProperty::Lhs || graph[edge] == expr::EdgeProperty::Parameter1 ||
-	  graph[edge] == expr::EdgeProperty::None)
-	{
-	  currentPosition = itStack.top().at(0);
-	}
-	else if(graph[edge] == expr::EdgeProperty::Rhs || graph[edge] == expr::EdgeProperty::Parameter2)
-	{
-	  currentPosition = itStack.top().at(1);
-	}
-	else if(graph[edge] == expr::EdgeProperty::Then)
-	{
-	  currentPosition = itStack.top().at(2);
-	}
-	else if(graph[edge] == expr::EdgeProperty::Else)
-	{
-	  currentPosition = itStack.top().at(3);
-	}
-      }
-      
-      template <typename EdgeT, typename GraphT>
-      void forward_or_cross_edge(EdgeT edge, GraphT &graph)
-      {
+    template <typename EdgeT, typename GraphT>
+    void forward_or_cross_edge(EdgeT edge, GraphT &graph)
+    {
         // only formula vertices should be target of a forward edge.
         assert(graph[boost::target(edge, graph)]->getType() == NodeType::Formula);
         FormulaNode *fNode = static_cast<FormulaNode*>(graph[boost::target(edge, graph)].get());
         currentPosition = expression.insert(currentPosition, fNode->name);
         currentPosition++;
-      }
+    }
       
-      template<typename FindVertex, typename FindGraph>
-      void finish_vertex(FindVertex, FindGraph &)
-      {
-	itStack.pop();
-	if (!itStack.empty())
-	  currentPosition = itStack.top().front();
-      }
+    template<typename FindVertex, typename FindGraph>
+    void finish_vertex(FindVertex, FindGraph &)
+    {
+        itStack.pop();
+        if (!itStack.empty())
+        currentPosition = itStack.top().front();
+    }
       
-      //!This is the final result for output.
-      std::list<std::string> &expression;
+    //!This is the final result for output.
+    std::list<std::string> &expression;
       
-  private:
+private:
     //!Type for mapping.
     typedef boost::unordered_map<expr::NodeType::Type, std::string> TypeMap;
     //!Map between operators and string chars. '+' '-' '*' '/'. This might go away.
     TypeMap typeMap;
     //!Current position for insertion into #expression.
     std::list<std::string>::iterator currentPosition;
-    
+
     /*! @brief Type for entries into stack.
     * 
     * Each node may have multiple positions for string insertion. For example
@@ -414,11 +414,8 @@ using namespace expr;
     std::stack<StackEntry> itStack;
     //!The first vertex visited.
     expr::Vertex startVertex;
-  };
+};
   
-  
-
-
 StringTranslatorStow::StringTranslatorStow(ExpressionManager &eManagerIn) : failedPosition(-1), eManager(eManagerIn),
   graphWrapper(eManager.getGraphWrapper())
 {

@@ -137,7 +137,7 @@ namespace dag
     void operator()(std::ostream& out, const EdgeW& edgeW) const
     {
       out << 
-	"[label=\"" <<
+        "[label=\"" <<
         getInputTypeString(graphEW[edgeW].inputType) <<
         "\"]";
     }
@@ -153,7 +153,7 @@ namespace dag
     void operator()(std::ostream& out, const VertexW& vertexW) const
     {
       out <<
-	"[label=\"" <<
+        "[label=\"" <<
         graphVW[vertexW].textRaw->toPlainText().toAscii().data() << "\\n" <<
         gu::idToString(graphVW[vertexW].feature.lock()->getId()) <<
         "\"]";

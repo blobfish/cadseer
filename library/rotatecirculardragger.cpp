@@ -214,89 +214,86 @@ bool RotateCircularDragger::handle(const PointerInfo& pointer, const osgGA::GUIE
     {
         // Pick start.
         case (osgGA::GUIEventAdapter::PUSH):
+        {
+            // Get the LocalToWorld matrix for this node and set it for the projector.
+            osg::NodePath nodePathToRoot;
+            computeNodePathToRoot(*this,nodePathToRoot);
+            osg::Matrix localToWorld = osg::computeLocalToWorld(nodePathToRoot);
+            _projector->setLocalToWorld(localToWorld);
+
+            _startLocalToWorld = _projector->getLocalToWorld();
+            _startWorldToLocal = _projector->getWorldToLocal();
+
+            osg::Vec3d projectedPoint;
+            dragStarted = false;
+            if (_projector->project(pointer, projectedPoint))
             {
-                // Get the LocalToWorld matrix for this node and set it for the projector.
-                osg::NodePath nodePathToRoot;
-                computeNodePathToRoot(*this,nodePathToRoot);
-                osg::Matrix localToWorld = osg::computeLocalToWorld(nodePathToRoot);
-                _projector->setLocalToWorld(localToWorld);
-
-                _startLocalToWorld = _projector->getLocalToWorld();
-                _startWorldToLocal = _projector->getWorldToLocal();
-
-                osg::Vec3d projectedPoint;
-		dragStarted = false;
-                if (_projector->project(pointer, projectedPoint))
-                {
-                    // Generate the motion command.
-                    osg::ref_ptr<Rotate3DCommand> cmd = new Rotate3DCommand();
-                    cmd->setStage(MotionCommand::START);
-                    cmd->setLocalToWorldAndWorldToLocal(_startLocalToWorld,_startWorldToLocal);
-
-                    // Dispatch command.
-                    dispatch(*cmd);
-
-                    // Set color to pick color.
-                    setMaterialColor(_pickColor,*this);
-
-                    startPoint = projectedPoint;
-		    
-                    aa.requestRedraw();
-		    dragStarted = true;
-                }
-                return true;
-            }
-
-        // Pick move.
-        case (osgGA::GUIEventAdapter::DRAG):
-            {
-	      if (!dragStarted)
-		return false;
-	      
-                // Get the LocalToWorld matrix for this node and set it for the projector.
-                _projector->setLocalToWorld(_startLocalToWorld);
-
-                osg::Vec3d projectedPoint;
-                if (_projector->project(pointer, projectedPoint))
-                {
-                    osg::Quat rotation;
-		    rotation.makeRotate(startPoint, projectedPoint);
-
-                    // Generate the motion command.
-                    osg::ref_ptr<Rotate3DCommand> cmd = new Rotate3DCommand();
-                    cmd->setStage(MotionCommand::MOVE);
-                    cmd->setLocalToWorldAndWorldToLocal(_startLocalToWorld,_startWorldToLocal);
-                    cmd->setRotation(rotation);
-
-                    // Dispatch command.
-                    dispatch(*cmd);
-
-                    aa.requestRedraw();
-                }
-                return true;
-            }
-
-        // Pick finish.
-        case (osgGA::GUIEventAdapter::RELEASE):
-            {
-	      if (!dragStarted)
-		return false;
-	      
+                // Generate the motion command.
                 osg::ref_ptr<Rotate3DCommand> cmd = new Rotate3DCommand();
-
-                cmd->setStage(MotionCommand::FINISH);
+                cmd->setStage(MotionCommand::START);
                 cmd->setLocalToWorldAndWorldToLocal(_startLocalToWorld,_startWorldToLocal);
 
                 // Dispatch command.
                 dispatch(*cmd);
 
-                // Reset color.
-                setMaterialColor(_color,*this);
+                // Set color to pick color.
+                setMaterialColor(_pickColor,*this);
+
+                startPoint = projectedPoint;
+                aa.requestRedraw();
+                dragStarted = true;
+            }
+            return true;
+        }
+
+        // Pick move.
+        case (osgGA::GUIEventAdapter::DRAG):
+        {
+            if (!dragStarted)
+                return false;
+            // Get the LocalToWorld matrix for this node and set it for the projector.
+            _projector->setLocalToWorld(_startLocalToWorld);
+
+            osg::Vec3d projectedPoint;
+            if (_projector->project(pointer, projectedPoint))
+            {
+                osg::Quat rotation;
+                rotation.makeRotate(startPoint, projectedPoint);
+
+                // Generate the motion command.
+                osg::ref_ptr<Rotate3DCommand> cmd = new Rotate3DCommand();
+                cmd->setStage(MotionCommand::MOVE);
+                cmd->setLocalToWorldAndWorldToLocal(_startLocalToWorld,_startWorldToLocal);
+                cmd->setRotation(rotation);
+
+                // Dispatch command.
+                dispatch(*cmd);
 
                 aa.requestRedraw();
-
-                return true;
             }
+            return true;
+        }
+
+        // Pick finish.
+        case (osgGA::GUIEventAdapter::RELEASE):
+        {
+            if (!dragStarted)
+                return false;
+            osg::ref_ptr<Rotate3DCommand> cmd = new Rotate3DCommand();
+
+            cmd->setStage(MotionCommand::FINISH);
+            cmd->setLocalToWorldAndWorldToLocal(_startLocalToWorld,_startWorldToLocal);
+
+            // Dispatch command.
+            dispatch(*cmd);
+
+            // Reset color.
+            setMaterialColor(_color,*this);
+
+            aa.requestRedraw();
+
+            return true;
+        }
         default:
             return false;
     }

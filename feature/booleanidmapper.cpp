@@ -113,21 +113,21 @@ void BooleanIdMapper::goIntersectionEdges()
     for (const auto &cShape : parentShapes)
     {
       if (!origins.IsBound(cShape))
-	continue;
+        continue;
       
       uuid sourceFaceId = gu::createNilId();
       if (inputTarget.hasShapeIdRecord(origins(cShape)))
-	sourceFaceId = inputTarget.findShapeIdRecord(origins(cShape)).id;
+        sourceFaceId = inputTarget.findShapeIdRecord(origins(cShape)).id;
       for(const auto &tool : inputTools)
       {
-	if (tool->hasShapeIdRecord(origins(cShape)))
-	{
-	  sourceFaceId = tool->findShapeIdRecord(origins(cShape)).id;
-	  break;
-	}
+        if (tool->hasShapeIdRecord(origins(cShape)))
+        {
+        sourceFaceId = tool->findShapeIdRecord(origins(cShape)).id;
+        break;
+        }
       }
       if (sourceFaceId.is_nil())
-	continue;
+        continue;
       
       tempIntersection.faces.insert(sourceFaceId);
     }
@@ -180,8 +180,8 @@ void BooleanIdMapper::goSingleSplits()
     {
       if (seerShapeOut->hasShapeIdRecord(shapeListIt.Value()))
       {
-	count++;
-	value = shapeListIt.Value();
+        count++;
+        value = shapeListIt.Value();
       }
     }
     if (count != 1)
@@ -195,11 +195,11 @@ void BooleanIdMapper::goSingleSplits()
     {
       for(const auto &tool : inputTools)
       {
-	if (tool->hasShapeIdRecord(key))
-	{
-	  faceId = tool->findShapeIdRecord(key).id;
-	  break;
-	}
+        if (tool->hasShapeIdRecord(key))
+        {
+        faceId = tool->findShapeIdRecord(key).id;
+        break;
+        }
       }
     }
     
@@ -237,11 +237,11 @@ void BooleanIdMapper::goSplitFaces()
     {
       for(const auto &tool : inputTools)
       {
-	if (tool->hasShapeIdRecord(origin))
-	{
-	  originId = tool->findShapeIdRecord(origin).id;
-	  break;
-	}
+        if (tool->hasShapeIdRecord(origin))
+        {
+        originId = tool->findShapeIdRecord(origin).id;
+        break;
+        }
       }
     }
     assert(!originId.is_nil()); //no origin id in input containers.
@@ -295,15 +295,15 @@ void BooleanIdMapper::goSplitFaces()
     {
       if (!seerShapeOut->hasShapeIdRecord(match.resultFace))
       {
-	seerShapeOut->updateShapeIdRecord(sFace.second, match.resultFace);
-	
-	assert(!seerShapeOut->hasShapeIdRecord(match.resultWire));
-	TopoDS_Shape outerWire = BRepTools::OuterWire(TopoDS::Face(sFace.second));
-	assert(!outerWire.IsNull());
-	assert(seerShapeOut->hasShapeIdRecord(outerWire));
-	seerShapeOut->updateShapeIdRecord(outerWire, match.resultWire);
-	foundMatch = true;
-	break;
+        seerShapeOut->updateShapeIdRecord(sFace.second, match.resultFace);
+        
+        assert(!seerShapeOut->hasShapeIdRecord(match.resultWire));
+        TopoDS_Shape outerWire = BRepTools::OuterWire(TopoDS::Face(sFace.second));
+        assert(!outerWire.IsNull());
+        assert(seerShapeOut->hasShapeIdRecord(outerWire));
+        seerShapeOut->updateShapeIdRecord(outerWire, match.resultWire);
+        foundMatch = true;
+        break;
       }
     }
     if (foundMatch)

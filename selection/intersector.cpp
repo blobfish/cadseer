@@ -136,20 +136,20 @@ void Intersector::intersect(osgUtil::IntersectionVisitor &iv, osg::Drawable *dra
       //this is an index for the triangle(I believe) NOT the PrimitiveSET.
       for (const auto &current : getIntersections())
       {
-	//apparently LineSegmentIntersector::intersect doesn't limit itself
-	//to the passed in drawable?
-	if (current.nodePath.back() != currentGeometry)
-	  continue;
-	if (sGeometry)
-	{
-	  assert(!current.indexList.empty());
-	  std::size_t pSetIndex = sGeometry->getPSetFromVertex(current.indexList.front());
-	  Intersection temp = current;
-	  temp.primitiveIndex = pSetIndex;
-	  insertMyIntersection(temp);
-	}
-	else
-	  insertMyIntersection(current);
+        //apparently LineSegmentIntersector::intersect doesn't limit itself
+        //to the passed in drawable?
+        if (current.nodePath.back() != currentGeometry)
+            continue;
+        if (sGeometry)
+        {
+            assert(!current.indexList.empty());
+            std::size_t pSetIndex = sGeometry->getPSetFromVertex(current.indexList.front());
+            Intersection temp = current;
+            temp.primitiveIndex = pSetIndex;
+            insertMyIntersection(temp);
+        }
+        else
+            insertMyIntersection(current);
       }
     }
     else
@@ -163,15 +163,15 @@ void Intersector::intersect(osgUtil::IntersectionVisitor &iv, osg::Drawable *dra
       segmentSphere = buildBoundingSphere(localStart, localEnd);
       for (setIt = setList.begin(); setIt != setList.end(); ++setIt)
       {
-          hitBase.primitiveIndex = std::distance(setList.cbegin(), setIt);
-  //         if ((*setIt)->getMode() == GL_POINTS)
-  //             goPoints(*setIt, hitBase);
-          if ((*setIt)->getMode() == GL_LINE_STRIP)
-	  {
-	    if (!segmentSphere.intersects(sGeometry->getBSphereFromPSet(std::distance(setList.begin(), setIt))))
-	      continue;
-	    goEdges(*setIt, hitBase);
-	  }
+        hitBase.primitiveIndex = std::distance(setList.cbegin(), setIt);
+//         if ((*setIt)->getMode() == GL_POINTS)
+//             goPoints(*setIt, hitBase);
+        if ((*setIt)->getMode() == GL_LINE_STRIP)
+        {
+            if (!segmentSphere.intersects(sGeometry->getBSphereFromPSet(std::distance(setList.begin(), setIt))))
+            continue;
+            goEdges(*setIt, hitBase);
+        }
       }
     }
 }
@@ -224,14 +224,14 @@ void Intersector::goEdges(const osg::ref_ptr<osg::PrimitiveSet> primitive, const
         Vec3d lineStart = currentVertices->at((*drawElements)[index]);
         Vec3d lineEnd =  currentVertices->at((*drawElements)[index + 1]);
         Vec3d segmentVector = lineEnd - lineStart;
-	
+
         Vec3d intersectionVector = localEnd - localStart;
         Vec3d tempIntersectVector = intersectionVector + (localEnd - lineStart);
-	
-	//try some bounding sphere stuff to speed up.
-	osg::BoundingSphere primitiveSphere = buildBoundingSphere(lineStart, lineEnd);
-	if (!segmentSphere.intersects(primitiveSphere))
-	  continue;
+
+        //try some bounding sphere stuff to speed up.
+        osg::BoundingSphere primitiveSphere = buildBoundingSphere(lineStart, lineEnd);
+        if (!segmentSphere.intersects(primitiveSphere))
+            continue;
 
         Vec3d testPoint;
         double segmentDot = segmentVector * tempIntersectVector;

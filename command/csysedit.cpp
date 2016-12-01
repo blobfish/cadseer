@@ -110,40 +110,40 @@ void CSysEdit::analyzeSelections()
     {
       if (messages.at(0).type == slc::Type::Edge) //add face later
       {
-	ftr::CSysBase *feature = dynamic_cast<ftr::CSysBase*>(project->findFeature(messages.at(0).featureId));
-	assert(feature);
-	const ftr::SeerShape &seerShape = feature->getSeerShape();
-	
-	osg::Vec3d direction = gu::gleanVector(seerShape.getOCCTShape(messages.at(0).shapeId), messages.at(0).pointLocation);
-	if (direction.isNaN())
-	  return;
-	
-	updateToVector(direction);
-	
-	sendDone();
-	return;
+        ftr::CSysBase *feature = dynamic_cast<ftr::CSysBase*>(project->findFeature(messages.at(0).featureId));
+        assert(feature);
+        const ftr::SeerShape &seerShape = feature->getSeerShape();
+        
+        osg::Vec3d direction = gu::gleanVector(seerShape.getOCCTShape(messages.at(0).shapeId), messages.at(0).pointLocation);
+        if (direction.isNaN())
+        return;
+        
+        updateToVector(direction);
+        
+        sendDone();
+        return;
       }
     }
     else if ((messages.size() == 2))
     {
       if
       (
-	(slc::isPointType(messages.at(0).type)) &&
-	(slc::isPointType(messages.at(1).type))
+        (slc::isPointType(messages.at(0).type)) &&
+        (slc::isPointType(messages.at(1).type))
       )
       {
-	//osg vec3d are filled will values from occ geometry so should be accurate.
-	
-	//head to tail pick.
-	osg::Vec3d toVector = messages.at(0).pointLocation - messages.at(1).pointLocation;
-	if (toVector.isNaN())
-	  return;
-	toVector.normalize();
-	
-	updateToVector(toVector);
-	
-	sendDone();
-	return;
+        //osg vec3d are filled will values from occ geometry so should be accurate.
+        
+        //head to tail pick.
+        osg::Vec3d toVector = messages.at(0).pointLocation - messages.at(1).pointLocation;
+        if (toVector.isNaN())
+        return;
+        toVector.normalize();
+        
+        updateToVector(toVector);
+        
+        sendDone();
+        return;
       }
     }
   }

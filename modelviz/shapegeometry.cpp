@@ -164,9 +164,9 @@ void ShapeGeometryBuilder::go(double deflection, double angle)
 
     processed.Add(copiedShape);
     if (copiedShape.ShapeType() == TopAbs_FACE)
-	faceConstruct(TopoDS::Face(copiedShape));
+        faceConstruct(TopoDS::Face(copiedShape));
     if (copiedShape.ShapeType() == TopAbs_EDGE)
-	edgeConstruct(TopoDS::Edge(copiedShape));
+        edgeConstruct(TopoDS::Edge(copiedShape));
     recursiveConstruct(copiedShape);
     success = true;
   }
@@ -174,12 +174,12 @@ void ShapeGeometryBuilder::go(double deflection, double angle)
   {
     Handle(Standard_Failure) error = Standard_Failure::Caught();
     std::cout << "OCC Error: failure building model vizualization. Message: " <<
-		  error->GetMessageString() << std::endl;
+        error->GetMessageString() << std::endl;
   }
   catch(const std::exception &error)
   {
     std::cout << "Internal Error: failure building model vizualization. Message: " <<
-		  error.what() << std::endl;
+        error.what() << std::endl;
   }
   catch(...)
   {
@@ -286,14 +286,14 @@ void ShapeGeometryBuilder::recursiveConstruct(const TopoDS_Shape &shapeIn)
     {
       if (currentType == TopAbs_FACE)
       {
-	faceConstruct(TopoDS::Face(currentShape));
-	recursiveConstruct(currentShape);
-	continue;
+        faceConstruct(TopoDS::Face(currentShape));
+        recursiveConstruct(currentShape);
+        continue;
       }
       if (currentType == TopAbs_EDGE)
       {
-	edgeConstruct(TopoDS::Edge(currentShape));
-	recursiveConstruct(currentShape); // for obsolete vertices?
+        edgeConstruct(TopoDS::Edge(currentShape));
+        recursiveConstruct(currentShape); // for obsolete vertices?
       }
     }
     catch(const std::exception &error)
@@ -343,7 +343,7 @@ void ShapeGeometryBuilder::faceConstruct(const TopoDS_Face &faceIn)
 
   const Poly_Array1OfTriangle& triangles = triangulation->Triangles();
   osg::ref_ptr<osg::DrawElementsUInt> indices = new osg::DrawElementsUInt
-	  (GL_TRIANGLES, triangulation->NbTriangles() * 3);
+    (GL_TRIANGLES, triangulation->NbTriangles() * 3);
 
   for (int index(triangles.Lower()); index < triangles.Upper() + 1; ++index)
   {
@@ -389,7 +389,7 @@ void ShapeGeometryBuilder::faceConstruct(const TopoDS_Face &faceIn)
     osg::Vec3 axisTwo(pointThree - pointOne);
     osg::Vec3 currentNormal(axisOne ^ axisTwo);
     if (currentNormal.isNaN())
-	continue;
+        continue;
     currentNormal.normalize();
 
     osg::Vec3 tempNormal;
@@ -452,14 +452,14 @@ void ShapeGeometryBuilder::edgeConstruct(const TopoDS_Edge &edgeIn)
   osg::Vec3Array *vertices = dynamic_cast<osg::Vec3Array *>(edgeGeometry->getVertexArray());
   osg::Vec4Array *colors = dynamic_cast<osg::Vec4Array *>(edgeGeometry->getColorArray());
   osg::ref_ptr<osg::DrawElementsUInt> indices = new osg::DrawElementsUInt
-	  (GL_LINE_STRIP, indexes.Length());
+    (GL_LINE_STRIP, indexes.Length());
   osg::BoundingSphere bSphere;
   
   for (int index(indexes.Lower()); index < indexes.Upper() + 1; ++index)
   {
     gp_Pnt point = nodes(indexes(index));
     if(!identity)
-	point.Transform(transformation);
+        point.Transform(transformation);
     vertices->push_back(osg::Vec3(point.X(), point.Y(), point.Z()));
     colors->push_back(edgeGeometry->getColor());
     (*indices)[index - 1] = vertices->size() - 1;

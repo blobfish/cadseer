@@ -76,15 +76,15 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
     
     if (eventAdapter.getModKeyMask() & osgGA::GUIEventAdapter::MODKEY_LEFT_CTRL)
     {
-	if (dragStarted)
-	{
-	  clearStatus();
-	  GestureAllSwitchesOffVisitor visitor;
-	  gestureCamera->accept(visitor);
-	  dragStarted = false;
-	  gestureSwitch->setAllChildrenOff();
-	}
-	return false;
+        if (dragStarted)
+        {
+        clearStatus();
+        GestureAllSwitchesOffVisitor visitor;
+        gestureCamera->accept(visitor);
+        dragStarted = false;
+        gestureSwitch->setAllChildrenOff();
+        }
+        return false;
     }
   
     if (!gestureSwitch.valid())
@@ -102,8 +102,7 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
 
         if (eventAdapter.getEventType() == osgGA::GUIEventAdapter::RELEASE)
         {
-	    clearStatus();
-	  
+            clearStatus();
             rightButtonDown = false;
             if (!dragStarted)
                 return false;
@@ -111,16 +110,16 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
             gestureSwitch->setAllChildrenOff();
             if (currentNode->getNodeMask() & NodeMaskDef::gestureCommand)
             {
-	      std::string msgMaskString;
-	      if (currentNode->getUserValue(attributeMask, msgMaskString))
-	      {
-		msg::Mask msgMask(msgMaskString);
-		msg::Message messageOut;
-		messageOut.mask = msgMask;
-		observer->messageOutSignal(messageOut);
-	      }
-	      else
-		assert(0); //gesture node doesn't have msgMask attribute;
+                std::string msgMaskString;
+                if (currentNode->getUserValue(attributeMask, msgMaskString))
+                {
+                    msg::Mask msgMask(msgMaskString);
+                    msg::Message messageOut;
+                    messageOut.mask = msgMask;
+                    observer->messageOutSignal(messageOut);
+                }
+                else
+                    assert(0); //gesture node doesn't have msgMask attribute;
             }
         }
     }
@@ -168,17 +167,17 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
             {
                 osg::MatrixTransform *parentNode = currentNode;
                 currentNode = node;
-		
-		std::string statusString;
-		if (currentNode->getUserValue(attributeStatus, statusString))
-		{
-		  msg::Message messageOut;
-		  messageOut.mask = msg::Request | msg::StatusText;
-		  vwr::Message vMessageOut;
-		  vMessageOut.text = statusString;
-		  messageOut.payload = vMessageOut;
-		  observer->messageOutSignal(messageOut);
-		}
+
+                std::string statusString;
+                if (currentNode->getUserValue(attributeStatus, statusString))
+                {
+                msg::Message messageOut;
+                messageOut.mask = msg::Request | msg::StatusText;
+                vwr::Message vMessageOut;
+                vMessageOut.text = statusString;
+                messageOut.payload = vMessageOut;
+                observer->messageOutSignal(messageOut);
+                }
 
                 osg::Switch *geometrySwitch = dynamic_cast<osg::Switch*>(parentNode->getChild(parentNode->getNumChildren() - 1));
                 assert(geometrySwitch);
@@ -253,7 +252,7 @@ void GestureHandler::spraySubNodes(osg::Vec3 cursorLocation)
         assert(pointArray);
         (*pointArray)[1] = locations.at(index) * -1.0;
         geometry->dirtyDisplayList();
-	geometry->dirtyBound();
+        geometry->dirtyBound();
     }
 }
 

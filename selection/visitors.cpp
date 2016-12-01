@@ -85,11 +85,11 @@ void HighlightVisitor::apply(osg::Geometry& geometryIn)
     if (base)
     {
       if (operation == Operation::PreHighlight)
-	base->setToPreHighlight();
+        base->setToPreHighlight();
       else if(operation == Operation::Highlight)
-	base->setToHighlight();
+        base->setToHighlight();
       else //has to equal restore.
-	base->setToColor();
+        base->setToColor();
     }
   }
   else
@@ -100,17 +100,17 @@ void HighlightVisitor::apply(osg::Geometry& geometryIn)
     if (operation == Operation::PreHighlight)
     {
       for (const auto &id : ids)
-	sGeometry->setToPreHighlight(id);
+        sGeometry->setToPreHighlight(id);
     }
     else if(operation == Operation::Highlight)
     {
       for (const auto &id : ids)
-	sGeometry->setToHighlight(id);
+        sGeometry->setToHighlight(id);
     }
     else //has to equal restore.
     {
       for (const auto &id : ids)
-	sGeometry->setToColor(id);
+        sGeometry->setToColor(id);
     }
   }
   

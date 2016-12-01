@@ -93,8 +93,6 @@ osg::Geode* gsn::buildIconGeode(const char *resourceName)
     newFile.close();
   }
   
-  
-  
   osg::ref_ptr<osg::Image> image = osgDB::readImageFile(resourceFileName.toStdString());
   assert(image.valid());
   

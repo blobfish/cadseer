@@ -132,7 +132,7 @@ void SeerShape::setOCCTShape(const TopoDS_Shape& shapeIn)
     {
       const TopoDS_Edge &edge = TopoDS::Edge(freshShapeMap(index));
       if (BRep_Tool::Degenerated(edge))
-	continue;
+        continue;
     }
     
     ShapeIdRecord record;
@@ -164,15 +164,15 @@ void SeerShape::updateGraphs()
     {
       const TopoDS_Shape &currentShape = it.Value();
       if (!(hasShapeIdRecord(currentShape)))
-	continue; //topods_iterator doesn't ignore orientation like mapShapes does. probably seam edge.
-	
+        continue; //topods_iterator doesn't ignore orientation like mapShapes does. probably seam edge.
+
       //add edge to previous graph vertex if stack is not empty.
       if (!shapeStack.empty())
       {
-	Vertex pVertex = findShapeIdRecord(shapeStack.top()).graphVertex;
-	Vertex cVertex = findShapeIdRecord(currentShape).graphVertex;
-	boost::add_edge(pVertex, cVertex, graph);
-	boost::add_edge(cVertex, pVertex, rGraph);
+        Vertex pVertex = findShapeIdRecord(shapeStack.top()).graphVertex;
+        Vertex cVertex = findShapeIdRecord(currentShape).graphVertex;
+        boost::add_edge(pVertex, cVertex, graph);
+        boost::add_edge(cVertex, pVertex, rGraph);
       }
       shapeStack.push(currentShape);
       recursion(currentShape);
@@ -402,7 +402,6 @@ void SeerShape::insertFeatureTag(const FeatureTagRecord &recordIn)
 {
   featureTagContainer.insert(recordIn);
 }
-
 
 const TopoDS_Shape& SeerShape::getRootOCCTShape() const
 {
@@ -837,15 +836,15 @@ void SeerShape::modifiedMatch
       //are not in the target container. Booleans operations have
       //this situation. In short, no assert on shape not present.
       if(!hasShapeIdRecord(it.Value()))
-	continue;
+        continue;
       
       uuid freshId = gu::createNilId();
       if (hasEvolveRecordIn(sourceRecord.id))
-	freshId = evolve(sourceRecord.id).front(); //multiple returns?
+        freshId = evolve(sourceRecord.id).front(); //multiple returns?
       else
       {
-	freshId = gu::createRandomId();
-	insertEvolve(sourceRecord.id, freshId);
+        freshId = gu::createRandomId();
+        insertEvolve(sourceRecord.id, freshId);
       }
       updateShapeIdRecord(it.Value(), freshId);
     }
@@ -866,37 +865,37 @@ void SeerShape::derivedMatch()
     for (const auto &shape : nilShapes)
     {
       if (shape.ShapeType() != shapeType)
-	continue;
+        continue;
       
       bool bail = false;
       ftr::IdSet set;
       gu::ShapeVector parents = useGetParentsOfType(shape, parentType);
       for (const auto &parent : parents)
       {
-	assert(hasShapeIdRecord(parent));
-	boost::uuids::uuid id = findShapeIdRecord(parent).id;
-	if (id.is_nil())
-	{
-	  std::cout << "empty parent Id in: " << __PRETTY_FUNCTION__ << std::endl;
-	  bail = true;
-	  break;
-	}
-	set.insert(id);
+        assert(hasShapeIdRecord(parent));
+        boost::uuids::uuid id = findShapeIdRecord(parent).id;
+        if (id.is_nil())
+        {
+            std::cout << "empty parent Id in: " << __PRETTY_FUNCTION__ << std::endl;
+            bail = true;
+            break;
+        }
+        set.insert(id);
       }
       if (bail)
-	continue;
+        continue;
       uuid id = gu::createNilId();
       ftr::DerivedContainer::iterator derivedIt = derivedContainer.find(set);
       if (derivedIt == derivedContainer.end())
       {
-	id = gu::createRandomId();
-	ftr::DerivedContainer::value_type newEntry(set, id);
-	derivedContainer.insert(newEntry);
-    insertEvolve(gu::createNilId(), id);
+        id = gu::createRandomId();
+        ftr::DerivedContainer::value_type newEntry(set, id);
+        derivedContainer.insert(newEntry);
+        insertEvolve(gu::createNilId(), id);
       }
       else
       {
-	id = derivedIt->second;
+        id = derivedIt->second;
       }
       updateShapeIdRecord(shape, id);
     }
@@ -1037,11 +1036,11 @@ void SeerShape::faceEdgeMatch(const SeerShape &source)
     {
       uuid freshId = gu::createNilId();
       if (hasEvolveRecordIn(commonEdges.front()))
-	freshId = evolve(commonEdges.front()).front(); //multiple returns?
+        freshId = evolve(commonEdges.front()).front(); //multiple returns?
       else
       {
-	freshId = gu::createRandomId();
-	insertEvolve(commonEdges.front(), freshId);
+        freshId = gu::createRandomId();
+        insertEvolve(commonEdges.front(), freshId);
       }
       updateShapeIdRecord(nilEdge, freshId);
     }
@@ -1077,13 +1076,13 @@ void SeerShape::edgeVertexMatch(const SeerShape &source)
     {
       if (parentEdgeId.is_nil())
       {
-	nilDetected = true;
-	break;
+        nilDetected = true;
+        break;
       }
       if (!source.hasShapeIdRecord(parentEdgeId))
       {
-	missingInSource = true;
-	break;
+        missingInSource = true;
+        break;
       }
       
       std::vector<uuid> tempVertexIds = source.useGetChildrenOfType(parentEdgeId, TopAbs_VERTEX);
@@ -1100,9 +1099,9 @@ void SeerShape::edgeVertexMatch(const SeerShape &source)
       std::vector<uuid> temp;
       std::set_intersection
       (
-	sourceGroup.begin(), sourceGroup.end(),
-	intersectedVertices.begin(), intersectedVertices.end(), 
-	std::back_inserter(temp)
+        sourceGroup.begin(), sourceGroup.end(),
+        intersectedVertices.begin(), intersectedVertices.end(), 
+        std::back_inserter(temp)
       );
       intersectedVertices = temp;
     }
@@ -1111,11 +1110,11 @@ void SeerShape::edgeVertexMatch(const SeerShape &source)
     {
       uuid freshId = gu::createNilId();
       if (hasEvolveRecordIn(intersectedVertices.front()))
-	freshId = evolve(intersectedVertices.front()).front(); //multiple returns?
+        freshId = evolve(intersectedVertices.front()).front(); //multiple returns?
       else
       {
-	freshId = gu::createRandomId();
-	insertEvolve(intersectedVertices.front(), freshId);
+        freshId = gu::createRandomId();
+        insertEvolve(intersectedVertices.front(), freshId);
       }
       updateShapeIdRecord(nilVertex, freshId);
     }
@@ -1161,15 +1160,15 @@ prj::srl::SeerShape SeerShape::serialOut()
       TopExp::MapShapes(shape, shapeMap);
       for (std::size_t index = 1; index <= static_cast<std::size_t>(shapeMap.Extent()); ++index)
       {
-	if (!hasShapeIdRecord(shapeMap(index)))
-	  continue; //things like degenerated edges exist in shape but not in result.
-	  
-	prj::srl::ShapeIdRecord rRecord
-	(
-      gu::idToString(findShapeIdRecord(shapeMap(index)).id),
-	  index
-	);
-	shapeIdContainerOut.shapeIdRecord().push_back(rRecord);
+        if (!hasShapeIdRecord(shapeMap(index)))
+            continue; //things like degenerated edges exist in shape but not in result.
+        
+        prj::srl::ShapeIdRecord rRecord
+        (
+            gu::idToString(findShapeIdRecord(shapeMap(index)).id),
+            index
+        );
+        shapeIdContainerOut.shapeIdRecord().push_back(rRecord);
       }
     }
   }

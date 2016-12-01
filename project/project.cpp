@@ -285,8 +285,8 @@ void Project::removeFeature(const uuid& idIn)
     {
       if (projectGraph[current.second].inputType == ftr::InputTypes::target)
       {
-	targetParent = current.first;
-	break;
+        targetParent = current.first;
+        break;
       }
     }
     assert(targetParent != boost::graph_traits<Graph>::null_vertex());
@@ -430,14 +430,14 @@ void Project::updateLeafStatus()
       bool allCreate = true;
       for (; vItNested != vItEndNested; ++vItNested)
       {
-	if (filteredGraph[*vItNested].feature->getDescriptor() != ftr::Descriptor::Create)
-	{
-	  allCreate = false;
-	  break;
-	}
+        if (filteredGraph[*vItNested].feature->getDescriptor() != ftr::Descriptor::Create)
+        {
+        allCreate = false;
+        break;
+        }
       }
       if (allCreate)
-	filteredGraph[*vIt].feature->setLeaf();
+        filteredGraph[*vIt].feature->setLeaf();
     }
   }
 }
@@ -605,13 +605,13 @@ void Project::checkShapeIdsDispatched(const msg::Message&)
       IdMap::iterator it = idMap.find(id);
       if (it == idMap.end())
       {
-	std::vector<uuid> freshFeatureIds;
-	freshFeatureIds.push_back(feature->getId());
-	idMap.insert(std::make_pair(id, freshFeatureIds));
+        std::vector<uuid> freshFeatureIds;
+        freshFeatureIds.push_back(feature->getId());
+        idMap.insert(std::make_pair(id, freshFeatureIds));
       }
       else
       {
-	it->second.push_back(id);
+        it->second.push_back(id);
       }
     }
   }
@@ -830,7 +830,7 @@ void Project::open()
     {
       std::shared_ptr<ftr::Base> featurePtr = fLoader.load(feature.id(), feature.type(), feature.shapeOffset());
       if (featurePtr)
-	addFeature(featurePtr);
+        addFeature(featurePtr);
     }
     
     for (const auto &fConnection : project->connections().connection())
@@ -870,8 +870,8 @@ void Project::open()
       ftr::Base *f = projectGraph[currentVertex].feature.get();
       if (f->isNonLeaf())
       {
-	f->hide3D();
-	f->hideOverlay();
+        f->hide3D();
+        f->hideOverlay();
       }
     }
   }
@@ -912,14 +912,14 @@ class ShapeTrackVisitorUp : public boost::default_dfs_visitor
     void discover_vertex(VertexT vertexIn, const GraphT & graph) const
     {
       std::cout
-	<< "feature: " << std::setw(15) << std::left << graph[vertexIn].feature->getName().toStdString()
-    << "    feature id: " << gu::idToString(graph[vertexIn].feature->getId()) << std::endl;
+        << "feature: " << std::setw(15) << std::left << graph[vertexIn].feature->getName().toStdString()
+        << "    feature id: " << gu::idToString(graph[vertexIn].feature->getId()) << std::endl;
       if (!graph[vertexIn].feature->hasSeerShape())
       {
-	std::cout << " BREAK: no seer shape" << std::endl;
-	std::vector<boost::uuids::uuid> junkIds;
-	idsStack.push(junkIds);
-	return;
+        std::cout << " BREAK: no seer shape" << std::endl;
+        std::vector<boost::uuids::uuid> junkIds;
+        idsStack.push(junkIds);
+        return;
       }
       const ftr::SeerShape &shape = graph[vertexIn].feature->getSeerShape();
       std::vector<boost::uuids::uuid> freshIds;
@@ -927,19 +927,19 @@ class ShapeTrackVisitorUp : public boost::default_dfs_visitor
       for (const auto &currentId : currentIds)
       {
         std::cout << "    shape id out: " << gu::idToString(currentId);
-	if (!shape.hasEvolveRecordOut(currentId))
-	{
-	  std::cout << "    BREAK: no evolve record out" << std::endl;
-	  continue;
-	}
-	std::cout <<  "    ids in: ";
-	auto ids = shape.devolve(currentId);
-	for (const auto &id : ids)
-	{
-	  std::cout << gu::idToString(id) << " ";
-	  freshIds.push_back(id);
-	}
-	std::cout << std::endl;
+        if (!shape.hasEvolveRecordOut(currentId))
+        {
+            std::cout << "    BREAK: no evolve record out" << std::endl;
+            continue;
+        }
+        std::cout <<  "    ids in: ";
+        auto ids = shape.devolve(currentId);
+        for (const auto &id : ids)
+        {
+            std::cout << gu::idToString(id) << " ";
+            freshIds.push_back(id);
+        }
+        std::cout << std::endl;
       }
       idsStack.push(freshIds);
     }
@@ -972,18 +972,17 @@ class ShapeTrackVisitorDown : public boost::default_dfs_visitor
     void discover_vertex(VertexT vertexIn, const GraphT & graph) const
     {
       std::cout
-	<< "feature: " << std::setw(15) << std::left << graph[vertexIn].feature->getName().toStdString()
-    << "    feature id: " << gu::idToString(graph[vertexIn].feature->getId()) << std::endl;
-	
+        << "feature: " << std::setw(15) << std::left << graph[vertexIn].feature->getName().toStdString()
+        << "    feature id: " << gu::idToString(graph[vertexIn].feature->getId()) << std::endl;
       if (vertexIn == startVertex) //note constructor pushes to idstack so we are in sync with finish vertex.
-	return;
-	
+        return;
+
       if (!graph[vertexIn].feature->hasSeerShape())
       {
-	std::cout << " BREAK: no seer shape" << std::endl;
-	std::vector<boost::uuids::uuid> junkIds;
-	idsStack.push(junkIds);
-	return;
+        std::cout << " BREAK: no seer shape" << std::endl;
+        std::vector<boost::uuids::uuid> junkIds;
+        idsStack.push(junkIds);
+        return;
       }
       const ftr::SeerShape &shape = graph[vertexIn].feature->getSeerShape();
       std::vector<boost::uuids::uuid> freshIds;
@@ -991,19 +990,19 @@ class ShapeTrackVisitorDown : public boost::default_dfs_visitor
       for (const auto &currentId : currentIds)
       {
         std::cout << "    shape id in: " << gu::idToString(currentId);
-	if (!shape.hasEvolveRecordIn(currentId))
-	{
-	  std::cout << "    BREAK: no evolve record in" << std::endl;
-	  continue;
-	}
-	std::cout <<  "    ids out: ";
-	auto ids = shape.evolve(currentId);
-	for (const auto &id : ids)
-	{
-	  std::cout << gu::idToString(id) << " ";
-	  freshIds.push_back(id);
-	}
-	std::cout << std::endl;
+        if (!shape.hasEvolveRecordIn(currentId))
+        {
+            std::cout << "    BREAK: no evolve record in" << std::endl;
+            continue;
+        }
+        std::cout <<  "    ids out: ";
+        auto ids = shape.evolve(currentId);
+        for (const auto &id : ids)
+        {
+            std::cout << gu::idToString(id) << " ";
+            freshIds.push_back(id);
+        }
+        std::cout << std::endl;
       }
       idsStack.push(freshIds);
     }

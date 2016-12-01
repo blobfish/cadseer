@@ -92,24 +92,24 @@ bool OverlayHandler::handle
     {
       for (auto n: i.nodePath)
       {
-	if
-	(
-	  (!dynamic_cast<osgManipulator::Translate1DDragger *>(n)) &&
-	  (!dynamic_cast<lbr::RotateCircularDragger *>(n))
-	)
-	  continue;
-	
-	this->dragger = dynamic_cast<osgManipulator::Dragger *>(n);
-	if (this->dragger)
-	{
-	  pointer.addIntersection(i.nodePath, i.getLocalIntersectPoint());
-	  pointer.setCamera(camera);
-	  pointer.setMousePosition(eventAdapter.getX(), eventAdapter.getY());
-	  
-	  path = i.nodePath;
-	  
-	  return;
-	}
+        if
+        (
+            (!dynamic_cast<osgManipulator::Translate1DDragger *>(n)) &&
+            (!dynamic_cast<lbr::RotateCircularDragger *>(n))
+        )
+            continue;
+
+        this->dragger = dynamic_cast<osgManipulator::Dragger *>(n);
+        if (this->dragger)
+        {
+            pointer.addIntersection(i.nodePath, i.getLocalIntersectPoint());
+            pointer.setCamera(camera);
+            pointer.setMousePosition(eventAdapter.getX(), eventAdapter.getY());
+            
+            path = i.nodePath;
+        
+            return;
+        }
       }
     }
   };
@@ -120,15 +120,15 @@ bool OverlayHandler::handle
     {
       for (auto n: i.nodePath)
       {
-	if
-	(
-	  (n->getName() == "LinkIcon") ||
-	  (n->getName() == "UnlinkIcon")
-	)
-	{
-	  path = i.nodePath;
-	  return;
-	}
+        if
+        (
+            (n->getName() == "LinkIcon") ||
+            (n->getName() == "UnlinkIcon")
+        )
+        {
+            path = i.nodePath;
+            return;
+        }
       }
     }
   };
@@ -139,12 +139,12 @@ bool OverlayHandler::handle
     {
       for (auto n: i.nodePath)
       {
-	dimension = dynamic_cast<lbr::IPGroup *>(n);
-	if(dimension)
-	{
-	  path = i.nodePath;
-	  return;
-	}
+        dimension = dynamic_cast<lbr::IPGroup *>(n);
+        if(dimension)
+        {
+            path = i.nodePath;
+            return;
+        }
       }
     }
   };
@@ -157,15 +157,15 @@ bool OverlayHandler::handle
       bool foundDragger = false;
       for (auto n: i.nodePath)
       {
-	if (dynamic_cast<lbr::CSysDragger *>(n))
-	  foundDragger = true;
-	if (n->getName() == "origin")
-	  foundOrigin = true;
-	if (foundDragger && foundOrigin)
-	{
-	  path = i.nodePath;
-	  return;
-	}
+        if (dynamic_cast<lbr::CSysDragger *>(n))
+            foundDragger = true;
+        if (n->getName() == "origin")
+            foundOrigin = true;
+        if (foundDragger && foundOrigin)
+        {
+            path = i.nodePath;
+            return;
+        }
       }
     }
   };
@@ -176,12 +176,12 @@ bool OverlayHandler::handle
     {
       for (const auto &n : i.nodePath)
       {
-	pLabel = dynamic_cast<lbr::PLabel *>(n);
-	if (pLabel)
-	{
-	  path = i.nodePath;
-	  return;
-	}
+        pLabel = dynamic_cast<lbr::PLabel *>(n);
+        if (pLabel)
+        {
+            path = i.nodePath;
+            return;
+        }
       }
     }
   };
@@ -225,8 +225,8 @@ bool OverlayHandler::handle
     {
       if (dragger->handle(pointer, eventAdapter, actionAdapter))
       {
-	dragger->setDraggerActive(true);
-	out = true;
+        dragger->setDraggerActive(true);
+        out = true;
       }
     }
     else //no dragger
@@ -235,25 +235,25 @@ bool OverlayHandler::handle
       findIcon(intersections);
       if (!path.empty())
       {
-	std::string nodeName;
-	lbr::CSysDragger *csysDragger = nullptr;
-	for (auto it = path.rbegin(); it != path.rend(); ++it)
-	{
-	  if (nodeName.empty())
-	    nodeName = (*it)->getName();
-	  if (!csysDragger)
-	    csysDragger = dynamic_cast<lbr::CSysDragger*>(*it);
-	}
-	
-	if (!nodeName.empty() && csysDragger)
-	{
-	  if (nodeName == "LinkIcon")
-	    csysDragger->setUnlink();
-	  if (nodeName == "UnlinkIcon")
-	    csysDragger->setLink();
-	  shouldRedraw = true;
-	  path.clear(); //don't need to save path for icon.
-	}
+        std::string nodeName;
+        lbr::CSysDragger *csysDragger = nullptr;
+        for (auto it = path.rbegin(); it != path.rend(); ++it)
+        {
+            if (nodeName.empty())
+                nodeName = (*it)->getName();
+            if (!csysDragger)
+                csysDragger = dynamic_cast<lbr::CSysDragger*>(*it);
+        }
+        
+        if (!nodeName.empty() && csysDragger)
+        {
+            if (nodeName == "LinkIcon")
+                csysDragger->setUnlink();
+            if (nodeName == "UnlinkIcon")
+                csysDragger->setLink();
+            shouldRedraw = true;
+            path.clear(); //don't need to save path for icon.
+        }
       }
     }
   }
@@ -286,24 +286,24 @@ bool OverlayHandler::handle
       
       if (!isDrag)
       {
-	osgManipulator::Translate1DDragger *tDragger = dynamic_cast<osgManipulator::Translate1DDragger*>(dragger);
-	if (tDragger)
-	{
-	  //look for csysdragger.
-	  ParentMaskVisitor visitor(NodeMaskDef::csys);
-	  dragger->accept(visitor);
-	  if (visitor.out)
-	  {
-	    lbr::CSysDragger *csysDragger = dynamic_cast<lbr::CSysDragger*>(visitor.out);
-	    assert(csysDragger); //might not assert, just test and continue if ok.
-	    
-	    std::shared_ptr<cmd::CSysEdit> csysEdit(new cmd::CSysEdit());
-	    csysEdit->csysDragger = csysDragger;
-	    csysEdit->translateDragger = tDragger;
-	    csysEdit->type = cmd::CSysEdit::Type::Vector;
-	    cmd::manager().addCommand(csysEdit);
-	  }
-	}
+        osgManipulator::Translate1DDragger *tDragger = dynamic_cast<osgManipulator::Translate1DDragger*>(dragger);
+        if (tDragger)
+        {
+            //look for csysdragger.
+            ParentMaskVisitor visitor(NodeMaskDef::csys);
+            dragger->accept(visitor);
+            if (visitor.out)
+            {
+                lbr::CSysDragger *csysDragger = dynamic_cast<lbr::CSysDragger*>(visitor.out);
+                assert(csysDragger); //might not assert, just test and continue if ok.
+                
+                std::shared_ptr<cmd::CSysEdit> csysEdit(new cmd::CSysEdit());
+                csysEdit->csysDragger = csysDragger;
+                csysEdit->translateDragger = tDragger;
+                csysEdit->type = cmd::CSysEdit::Type::Vector;
+                cmd::manager().addCommand(csysEdit);
+            }
+        }
       }
       
       isDrag = false;
@@ -317,45 +317,45 @@ bool OverlayHandler::handle
       findDimension(intersections);
       if (dimension)
       {
-	ParentMaskVisitor visitor(NodeMaskDef::overlaySwitch);
-	dimension->accept(visitor);
-	assert(visitor.out);
-	
-	dlg::ParameterDialog *dialog = new dlg::ParameterDialog(dimension->getParameter(), gu::getId(visitor.out));
-	dialog->show();
-	dimension.release();
+        ParentMaskVisitor visitor(NodeMaskDef::overlaySwitch);
+        dimension->accept(visitor);
+        assert(visitor.out);
+        
+        dlg::ParameterDialog *dialog = new dlg::ParameterDialog(dimension->getParameter(), gu::getId(visitor.out));
+        dialog->show();
+        dimension.release();
       }
       else
       {
-	findCSysOrigin(intersections);
-	if (!path.empty())
-	{
-	  assert(path.back()->getName() == "origin");
-	  ParentMaskVisitor visitor(NodeMaskDef::csys);
-	  path.back()->accept(visitor);
-	  assert(visitor.out);
-	  lbr::CSysDragger *lDragger = dynamic_cast<lbr::CSysDragger*>(visitor.out);
-	  assert(lDragger);
-	  
-	  std::shared_ptr<cmd::CSysEdit> csysEdit(new cmd::CSysEdit());
-	  csysEdit->csysDragger = lDragger;
-	  csysEdit->type = cmd::CSysEdit::Type::Origin;
-	  cmd::manager().addCommand(csysEdit);
-	}
-	else
-	{
-	  findPLabel(intersections);
-	  if (pLabel)
-	  {
-	    ParentMaskVisitor visitor(NodeMaskDef::overlaySwitch);
-	    pLabel->accept(visitor);
-	    assert(visitor.out);
-	    
-	    dlg::ParameterDialog *dialog = new dlg::ParameterDialog(pLabel->getParameter(), gu::getId(visitor.out));
-	    dialog->show();
-	    pLabel.release();
-	  }
-	}
+        findCSysOrigin(intersections);
+        if (!path.empty())
+        {
+            assert(path.back()->getName() == "origin");
+            ParentMaskVisitor visitor(NodeMaskDef::csys);
+            path.back()->accept(visitor);
+            assert(visitor.out);
+            lbr::CSysDragger *lDragger = dynamic_cast<lbr::CSysDragger*>(visitor.out);
+            assert(lDragger);
+            
+            std::shared_ptr<cmd::CSysEdit> csysEdit(new cmd::CSysEdit());
+            csysEdit->csysDragger = lDragger;
+            csysEdit->type = cmd::CSysEdit::Type::Origin;
+            cmd::manager().addCommand(csysEdit);
+        }
+        else
+        {
+            findPLabel(intersections);
+            if (pLabel)
+            {
+                ParentMaskVisitor visitor(NodeMaskDef::overlaySwitch);
+                pLabel->accept(visitor);
+                assert(visitor.out);
+                
+                dlg::ParameterDialog *dialog = new dlg::ParameterDialog(pLabel->getParameter(), gu::getId(visitor.out));
+                dialog->show();
+                pLabel.release();
+            }
+        }
       }
     }
     path.clear();

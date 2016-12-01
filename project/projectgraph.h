@@ -71,8 +71,8 @@ namespace prg
       void operator()(std::ostream& out, const EdgeW& edgeW) const
       {
         out << "[label=\"" <<
-	  ftr::getInputTypeString(graphEW[edgeW].inputType) <<
-	  "\"]";
+            ftr::getInputTypeString(graphEW[edgeW].inputType) <<
+            "\"]";
       }
     private:
       const GraphEW &graphEW;
@@ -86,11 +86,11 @@ namespace prg
       void operator()(std::ostream& out, const VertexW& vertexW) const
       {
         out << 
-	  "[label=\"" <<
-	  graphVW[vertexW].feature->getName().toAscii().data() << "\\n" <<
-	  gu::idToString(graphVW[vertexW].feature->getId()) << "\\n" <<
-	  "Descriptor: " << ftr::getDescriptorString(graphVW[vertexW].feature->getDescriptor()) << 
-	  "\"]";
+            "[label=\"" <<
+            graphVW[vertexW].feature->getName().toAscii().data() << "\\n" <<
+            gu::idToString(graphVW[vertexW].feature->getId()) << "\\n" <<
+            "Descriptor: " << ftr::getDescriptorString(graphVW[vertexW].feature->getDescriptor()) << 
+            "\"]";
       }
     private:
       const GraphVW &graphVW;
@@ -155,9 +155,9 @@ namespace prg
       template <typename VertexType>
       bool operator()(const VertexType& vertexIn) const
       {
-	if(!graph)
-	  return false;
-	return (*graph)[vertexIn].feature->isActive();
+        if(!graph)
+        return false;
+        return (*graph)[vertexIn].feature->isActive();
       }
       const GraphTypeIn *graph;
     };

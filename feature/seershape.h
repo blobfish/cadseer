@@ -406,12 +406,13 @@ namespace ftr
     Node_writer(const GraphTypeIn &graphIn, const SeerShape &seerShapeIn):
       graph(graphIn), seerShape(seerShapeIn){}
     template <class NodeW>
-    void operator()(std::ostream& out, const NodeW& v) const {
-      out << 
-	"[label=\"" <<
-	shapeStrings.at(static_cast<int>(seerShape.findShapeIdRecord(v).shape.ShapeType())) << "\\n" <<
-	gu::idToString(seerShape.findShapeIdRecord(v).id) <<
-	"\"]";
+    void operator()(std::ostream& out, const NodeW& v) const
+    {
+        out << 
+            "[label=\"" <<
+            shapeStrings.at(static_cast<int>(seerShape.findShapeIdRecord(v).shape.ShapeType())) << "\\n" <<
+            gu::idToString(seerShape.findShapeIdRecord(v).id) <<
+            "\"]";
     }
   private:
     const GraphTypeIn &graph;

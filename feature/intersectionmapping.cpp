@@ -88,8 +88,7 @@ std::size_t SplitFace::matchWeak(const SplitFace &other) const
   //match is true if share at least one intersection edge.
   std::set<boost::uuids::uuid> idIntersection;
   std::set_intersection(other.edges.begin(), other.edges.end(),
-			  edges.begin(), edges.end(),
-			  std::inserter(idIntersection, idIntersection.begin()));
+    edges.begin(), edges.end(),  std::inserter(idIntersection, idIntersection.begin()));
   
   return idIntersection.size();
 }

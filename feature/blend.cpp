@@ -173,21 +173,21 @@ void Blend::updateModel(const UpdateMap& mapIn)
       bool labelDone = false; //set label position to first pick.
       for (const auto &pick : simpleBlend.picks)
       {
-	if (!targetSeerShape.hasShapeIdRecord(pick.id))
-	{
-      std::cout << "Blend: can't find target edge id. Skipping id: " << gu::idToString(pick.id) << std::endl;
-	  continue;
-	}
-	TopoDS_Shape tempShape = targetSeerShape.getOCCTShape(pick.id);
-	assert(!tempShape.IsNull());
-	assert(tempShape.ShapeType() == TopAbs_EDGE);
-	blendMaker.Add(simpleBlend.radius->getValue(), TopoDS::Edge(tempShape));
-	//update location of parameter label.
-	if (!labelDone)
-	{
-	  labelDone = true;
-	  simpleBlend.label->setMatrix(osg::Matrixd::translate(calculateUPoint(TopoDS::Edge(tempShape), pick.u)));
-	}
+        if (!targetSeerShape.hasShapeIdRecord(pick.id))
+        {
+        std::cout << "Blend: can't find target edge id. Skipping id: " << gu::idToString(pick.id) << std::endl;
+        continue;
+        }
+        TopoDS_Shape tempShape = targetSeerShape.getOCCTShape(pick.id);
+        assert(!tempShape.IsNull());
+        assert(tempShape.ShapeType() == TopAbs_EDGE);
+        blendMaker.Add(simpleBlend.radius->getValue(), TopoDS::Edge(tempShape));
+        //update location of parameter label.
+        if (!labelDone)
+        {
+        labelDone = true;
+        simpleBlend.label->setMatrix(osg::Matrixd::translate(calculateUPoint(TopoDS::Edge(tempShape), pick.u)));
+        }
       }
     }
     std::size_t vBlendIndex = 1;
@@ -204,10 +204,10 @@ void Blend::updateModel(const UpdateMap& mapIn)
       blendMaker.Add(TopoDS::Edge(tempShape));
       for (const auto &e : vBlend.entries)
       {
-	const TopoDS_Shape &blendShape = targetSeerShape.getOCCTShape(e.id);
-	if (blendShape.ShapeType() == TopAbs_VERTEX)
-	  blendMaker.SetRadius(e.radius->getValue(), vBlendIndex, TopoDS::Vertex(blendShape));
-	//TODO deal with edges.
+        const TopoDS_Shape &blendShape = targetSeerShape.getOCCTShape(e.id);
+        if (blendShape.ShapeType() == TopAbs_VERTEX)
+        blendMaker.SetRadius(e.radius->getValue(), vBlendIndex, TopoDS::Vertex(blendShape));
+        //TODO deal with edges.
       }
       vBlendIndex++;
     }

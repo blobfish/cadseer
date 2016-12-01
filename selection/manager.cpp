@@ -98,20 +98,20 @@ void Manager::triggeredVertices(bool vertexStateIn)
     if (vertexStateIn)
     {
         selectionMask |= slc::PointsSelectable;
-	selectionMask |= slc::EndPointsEnabled;
-	selectionMask |= slc::MidPointsEnabled;
-	selectionMask |= slc::CenterPointsEnabled;
-	selectionMask |= slc::QuadrantPointsEnabled;
-	selectionMask |= slc::NearestPointsEnabled;
+        selectionMask |= slc::EndPointsEnabled;
+        selectionMask |= slc::MidPointsEnabled;
+        selectionMask |= slc::CenterPointsEnabled;
+        selectionMask |= slc::QuadrantPointsEnabled;
+        selectionMask |= slc::NearestPointsEnabled;
     }
     else
     {
         selectionMask &= ~slc::PointsSelectable;
-	selectionMask &= ~slc::EndPointsEnabled;
-	selectionMask &= ~slc::MidPointsEnabled;
-	selectionMask &= ~slc::CenterPointsEnabled;
-	selectionMask &= ~slc::QuadrantPointsEnabled;
-	selectionMask &= ~slc::NearestPointsEnabled;
+        selectionMask &= ~slc::EndPointsEnabled;
+        selectionMask &= ~slc::MidPointsEnabled;
+        selectionMask &= ~slc::CenterPointsEnabled;
+        selectionMask &= ~slc::QuadrantPointsEnabled;
+        selectionMask &= ~slc::NearestPointsEnabled;
     }
     updateToolbar();
     sendState();

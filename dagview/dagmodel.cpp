@@ -342,12 +342,12 @@ void Model::stateChangedSlot(const boost::uuids::uuid &featureIdIn, std::size_t 
     if (currentChangedState)
     {
       if (graph[vertex].visibleIconRaw->scene())
-	removeItem(graph[vertex].visibleIconRaw);
+        removeItem(graph[vertex].visibleIconRaw);
     }
     else
     {
       if (!graph[vertex].visibleIconRaw->scene())
-	addItem(graph[vertex].visibleIconRaw);
+        addItem(graph[vertex].visibleIconRaw);
     }
   }
 //   std::cout <<
@@ -681,10 +681,6 @@ void Model::projectUpdatedDispatched(const msg::Message &)
   float maxTextLength = 0;
   std::size_t currentRow = 0;
   
-  
-  
-  
-  
   for (auto currentIt = sorted.begin(); currentIt != sorted.end(); ++currentIt)
   {
     Vertex currentVertex = *currentIt;
@@ -704,16 +700,16 @@ void Model::projectUpdatedDispatched(const msg::Message &)
       std::tie(currentEdge, results) = boost::edge(currentVertex, *parentIt, rGraph);
       assert(results);
       if (rGraph[currentEdge].inputType == ftr::InputTypes::target)
-	targetMask |= rGraph[*parentIt].columnMask; //should only be 1 target parent.
+        targetMask |= rGraph[*parentIt].columnMask; //should only be 1 target parent.
       
       auto parentSortedIndex = rGraph[*parentIt].sortedIndex;
       auto tempParentIt = sorted.begin() + parentSortedIndex;
       tempParentIt++;
       while (tempParentIt != currentIt)
       {
-	Vertex parentVertex = *tempParentIt;
-	spreadMask |= rGraph[parentVertex].columnMask;
-	tempParentIt++;
+        Vertex parentVertex = *tempParentIt;
+        spreadMask |= rGraph[parentVertex].columnMask;
+        tempParentIt++;
       }
     }
     assert(targetMask.count() < 2); //just a little sanity check.
@@ -725,22 +721,17 @@ void Model::projectUpdatedDispatched(const msg::Message &)
       //find first usable column
       for (std::size_t nextColumn = 0; nextColumn < ColumnMask().size(); nextColumn++)
       {
-	if (!spreadMask.test(nextColumn))
-	{
-	  currentColumn = nextColumn;
-	  break;
-	}
+        if (!spreadMask.test(nextColumn))
+        {
+        currentColumn = nextColumn;
+        break;
+        }
       }
     }
     
     maxColumn = std::max(currentColumn, maxColumn);
     ColumnMask freshMask;
     freshMask.set(currentColumn);
-    
-
-    
-    
-
     
     graph[currentVertex].columnMask = freshMask;
     graph[currentVertex].row = currentRow;
@@ -1052,11 +1043,11 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
     {
       if((event->modifiers() & Qt::ShiftModifier) && lastPickValid)
       {
-	goShiftSelect();
+        goShiftSelect();
       }
       else
       {
-	toggleSelect(rect);
+        toggleSelect(rect);
       }
     }
   }

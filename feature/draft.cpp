@@ -109,19 +109,19 @@ void Draft::updateModel(const UpdateMap& mapIn)
       if (!targetSeerShape.hasShapeIdRecord(p.faceId))
       {
         std::cout << gu::idToString(id) << " Draft missing: " << gu::idToString(p.faceId) << std::endl;
-	continue;
+        continue;
       }
       const TopoDS_Face &face = TopoDS::Face(targetSeerShape.findShapeIdRecord(p.faceId).shape);
       dMaker.Add(face, direction, localAngle, plane);
       if (!dMaker.AddDone())
       {
-	std::cout << "Add face to draft failed. Removing" << std::endl;
-	dMaker.Remove(face);
+        std::cout << "Add face to draft failed. Removing" << std::endl;
+        dMaker.Remove(face);
       }
       if (!labelDone)
       {
-	labelDone = true;
-	label->setMatrix(osg::Matrixd::translate(calculateUVPoint(face, p.u, p.v)));
+        labelDone = true;
+        label->setMatrix(osg::Matrixd::translate(calculateUVPoint(face, p.u, p.v)));
       }
     }
     dMaker.Build();

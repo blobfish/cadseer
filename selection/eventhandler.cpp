@@ -114,8 +114,8 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
     {
       if (eventAdapter.getKey() == osgGA::GUIEventAdapter::KEY_Escape)
       {
-	observer->messageOutSignal(msg::Request | msg::Command | msg::Cancel);
-	return true;
+        observer->messageOutSignal(msg::Request | msg::Command | msg::Cancel);
+        return true;
       }
     }
   
@@ -134,44 +134,43 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
         osgUtil::IntersectionVisitor iv(picker.get());
         iv.setTraversalMask(nodeMask);
         view->getCamera()->accept(iv);
-	
+
         if (picker->containsIntersections())
         {
-           currentIntersections = picker->getMyIntersections();
-	   Interpreter interpreter(currentIntersections, selectionMask);
+            currentIntersections = picker->getMyIntersections();
+            Interpreter interpreter(currentIntersections, selectionMask);
 
-           slc::Container newContainer;
-	   //loop to get first non selected geometry.
-	   for (const auto& container : interpreter.containersOut)
-	   {
-	     if(alreadySelected(container))
-	      continue;
-	     newContainer = container;
-	     break;
-	   }
-	   
-	   if (newContainer == lastPrehighlight)
-	   {
-	     //update the point location though.
-	     lastPrehighlight.pointLocation = newContainer.pointLocation;
-	     return false;
-	   }
-	   
+            slc::Container newContainer;
+            //loop to get first non selected geometry.
+            for (const auto& container : interpreter.containersOut)
+            {
+                if(alreadySelected(container))
+                    continue;
+                newContainer = container;
+                break;
+            }
+
+            if (newContainer == lastPrehighlight)
+            {
+                //update the point location though.
+                lastPrehighlight.pointLocation = newContainer.pointLocation;
+                return false;
+            }
+
            clearPrehighlight();
-	   
-	   if (newContainer.selectionType == slc::Type::None)
-	      return false;
+
+            if (newContainer.selectionType == slc::Type::None)
+                return false;
            
-	   //this is here so we make sure we get through all selection
-	   //conditions before we construct point geometry.
-           if (isPointType(newContainer.selectionType))
-	   {
-	     ref_ptr<Geometry> pointGeometry(buildTempPoint(newContainer.pointLocation));
-	     newContainer.pointGeometry = pointGeometry.get();
-	     viewerRoot->addChild(pointGeometry.get());
-	   }
-	   
-	   setPrehighlight(newContainer);
+            //this is here so we make sure we get through all selection
+            //conditions before we construct point geometry.
+            if (isPointType(newContainer.selectionType))
+            {
+                ref_ptr<Geometry> pointGeometry(buildTempPoint(newContainer.pointLocation));
+                newContainer.pointGeometry = pointGeometry.get();
+                viewerRoot->addChild(pointGeometry.get());
+            }
+            setPrehighlight(newContainer);
         }
         else
             clearPrehighlight();
@@ -182,40 +181,39 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
     {
         if(lastPrehighlight.selectionType != slc::Type::None)
         {
-	  //prehighlight gets 'moved' into selections so can't call
-	  //clear prehighlight, but we still clear the prehighlight
-	  //selections we need to make observers aware of this 'hidden' change.
-	    msg::Message clearMessage;
-	    clearMessage.mask = msg::Response | msg::Pre | msg::Preselection | msg::Subtraction;
-	    clearMessage.payload = containerToMessage(lastPrehighlight);
-	    observer->messageOutSignal(clearMessage);
-	    
-	    if (slc::isPointType(lastPrehighlight.selectionType))
-	    {
-	      assert(lastPrehighlight.pointGeometry.valid());
-	      osg::Vec4Array *colors = dynamic_cast<osg::Vec4Array*>(lastPrehighlight.pointGeometry->getColorArray());
-	      assert(colors);
-	      (*colors)[0] = osg::Vec4(1.0, 1.0, 1.0, 1.0);
-	      colors->dirty();
-	      lastPrehighlight.pointGeometry->dirtyDisplayList();
-	    }
-	    else
-	      selectionOperation(lastPrehighlight.featureId, lastPrehighlight.selectionIds,
-				HighlightVisitor::Operation::Highlight);
-	    
+            //prehighlight gets 'moved' into selections so can't call
+            //clear prehighlight, but we still clear the prehighlight
+            //selections we need to make observers aware of this 'hidden' change.
+            msg::Message clearMessage;
+            clearMessage.mask = msg::Response | msg::Pre | msg::Preselection | msg::Subtraction;
+            clearMessage.payload = containerToMessage(lastPrehighlight);
+            observer->messageOutSignal(clearMessage);
+            
+            if (slc::isPointType(lastPrehighlight.selectionType))
+            {
+                assert(lastPrehighlight.pointGeometry.valid());
+                osg::Vec4Array *colors = dynamic_cast<osg::Vec4Array*>(lastPrehighlight.pointGeometry->getColorArray());
+                assert(colors);
+                (*colors)[0] = osg::Vec4(1.0, 1.0, 1.0, 1.0);
+                colors->dirty();
+                lastPrehighlight.pointGeometry->dirtyDisplayList();
+            }
+            else
+                selectionOperation(lastPrehighlight.featureId, lastPrehighlight.selectionIds,
+                    HighlightVisitor::Operation::Highlight);
+            
             add(selectionContainers, lastPrehighlight);
-	    
-	    msg::Message addMessage;
-	    addMessage.mask = msg::Response | msg::Post | msg::Selection | msg::Addition;
-	    addMessage.payload = containerToMessage(lastPrehighlight);
-	    observer->messageOutSignal(addMessage);
-	    
+            
+            msg::Message addMessage;
+            addMessage.mask = msg::Response | msg::Post | msg::Selection | msg::Addition;
+            addMessage.payload = containerToMessage(lastPrehighlight);
+            observer->messageOutSignal(addMessage);
+            
             lastPrehighlight = Container();
         }
         //not clearing the selection anymore on a empty pick.
 //         else
 //             clearSelections();
-
     }
     
     if (eventAdapter.getButton() == osgGA::GUIEventAdapter::MIDDLE_MOUSE_BUTTON &&
@@ -245,19 +243,19 @@ void EventHandler::clearSelections()
     Containers::reverse_iterator it;
     for (it = selectionContainers.rbegin(); it != selectionContainers.rend(); ++it)
     {
-	msg::Message removeMessage;
-	removeMessage.mask = msg::Response | msg::Pre | msg::Selection | msg::Subtraction;
-	removeMessage.payload = containerToMessage(*it);
-	observer->messageOutSignal(removeMessage);
-      
-	if (slc::isPointType(it->selectionType))
-	{
-	  assert(it->pointGeometry.valid());
-	  osg::Group *parent = it->pointGeometry->getParent(0)->asGroup();
-	  parent->removeChild(it->pointGeometry);
-	}
+        msg::Message removeMessage;
+        removeMessage.mask = msg::Response | msg::Pre | msg::Selection | msg::Subtraction;
+        removeMessage.payload = containerToMessage(*it);
+        observer->messageOutSignal(removeMessage);
+        
+        if (slc::isPointType(it->selectionType))
+        {
+            assert(it->pointGeometry.valid());
+            osg::Group *parent = it->pointGeometry->getParent(0)->asGroup();
+            parent->removeChild(it->pointGeometry);
+        }
         else
-	  selectionOperation(it->featureId, it->selectionIds, HighlightVisitor::Operation::Restore);
+            selectionOperation(it->featureId, it->selectionIds, HighlightVisitor::Operation::Restore);
     }
     selectionContainers.clear();
 }
@@ -316,7 +314,7 @@ void EventHandler::clearPrehighlight()
       //when the prehighlight gets cleared and the color restored the selection is lost. for now lets just re select
       //everything and do something different if we have performance problems.
       for (const auto &current : selectionContainers)
-	selectionOperation(current.featureId, current.selectionIds, HighlightVisitor::Operation::Highlight);
+        selectionOperation(current.featureId, current.selectionIds, HighlightVisitor::Operation::Highlight);
     }
     
     lastPrehighlight = Container();

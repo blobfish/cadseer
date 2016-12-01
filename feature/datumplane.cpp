@@ -276,17 +276,17 @@ osg::Matrixd DatumPlanePlanarCenter::solve(const UpdateMap &mapIn)
     else
     {
       if (!it.first->second->hasSeerShape())
-	throw std::runtime_error("DatumPlanePlanarCenter: null seer shape1");
+        throw std::runtime_error("DatumPlanePlanarCenter: null seer shape1");
       const SeerShape &shape1 = it.first->second->getSeerShape();
       TopoDS_Shape face1;
       if (shape1.hasShapeIdRecord(faceId1))
-	face1 = shape1.getOCCTShape(faceId1);
+        face1 = shape1.getOCCTShape(faceId1);
       else if (shape1.hasShapeIdRecord(faceId2))
-	face1 = shape1.getOCCTShape(faceId2);
+        face1 = shape1.getOCCTShape(faceId2);
       if (face1.IsNull())
-	throw std::runtime_error("DatumPlanePlanarCenter: input has neither face id");
+        throw std::runtime_error("DatumPlanePlanarCenter: input has neither face id");
       if (face1.ShapeType() != TopAbs_FACE)
-	throw std::runtime_error("DatumPlanePlanarCenter: shape is not of type face");
+        throw std::runtime_error("DatumPlanePlanarCenter: shape is not of type face");
       face1System = getFaceSystem(face1);
       radius1 = std::sqrt(getBoundingBox(face1).SquareExtent()) / 2.0;
     }
@@ -304,17 +304,17 @@ osg::Matrixd DatumPlanePlanarCenter::solve(const UpdateMap &mapIn)
     else
     {
       if (!it.first->second->hasSeerShape())
-	throw std::runtime_error("DatumPlanePlanarCenter: null seer shape2");
+        throw std::runtime_error("DatumPlanePlanarCenter: null seer shape2");
       const SeerShape &shape2 = it.first->second->getSeerShape();
       TopoDS_Shape face2;
       if (shape2.hasShapeIdRecord(faceId1))
-	face2 = shape2.getOCCTShape(faceId1);
+        face2 = shape2.getOCCTShape(faceId1);
       else if (shape2.hasShapeIdRecord(faceId2))
-	face2 = shape2.getOCCTShape(faceId2);
+        face2 = shape2.getOCCTShape(faceId2);
       if (face2.IsNull())
-	throw std::runtime_error("DatumPlanePlanarCenter: no face2 is null");
+        throw std::runtime_error("DatumPlanePlanarCenter: no face2 is null");
       if (face2.ShapeType() != TopAbs_FACE)
-	throw std::runtime_error("DatumPlanePlanarCenter: face2 is not of type face");
+        throw std::runtime_error("DatumPlanePlanarCenter: face2 is not of type face");
       face2System = getFaceSystem(face2);
       radius2 = std::sqrt(getBoundingBox(face2).SquareExtent()) / 2.0;
     }
@@ -501,17 +501,17 @@ osg::Matrixd DatumPlanePlanarParallelThroughEdge::solve(const UpdateMap &mapIn)
       const SeerShape &shape = it.first->second->getSeerShape();
       if (shape.hasShapeIdRecord(faceId))
       {
-	const TopoDS_Shape &face = shape.getOCCTShape(faceId); assert(!face.IsNull());
-	outSystem = getFaceSystem(face);
-	tempRadius = std::sqrt(getBoundingBox(face).SquareExtent()) / 2.0;
-	foundPlane = true;
+        const TopoDS_Shape &face = shape.getOCCTShape(faceId); assert(!face.IsNull());
+        outSystem = getFaceSystem(face);
+        tempRadius = std::sqrt(getBoundingBox(face).SquareExtent()) / 2.0;
+        foundPlane = true;
       }
       if (shape.hasShapeIdRecord(edgeId))
       {
-	const TopoDS_Shape &edge = shape.getOCCTShape(edgeId); assert(!edge.IsNull());
-	direction = getEdgeVector(edge);
-	origin = getOrigin(edge);
-	foundEdge = true;
+        const TopoDS_Shape &edge = shape.getOCCTShape(edgeId); assert(!edge.IsNull());
+        direction = getEdgeVector(edge);
+        origin = getOrigin(edge);
+        foundEdge = true;
       }
     }
     
@@ -529,21 +529,21 @@ osg::Matrixd DatumPlanePlanarParallelThroughEdge::solve(const UpdateMap &mapIn)
     else
     {
       if (!it.first->second->hasSeerShape())
-	throw std::runtime_error("DatumPlanarParallelThroughEdge: no seer shape");
+        throw std::runtime_error("DatumPlanarParallelThroughEdge: no seer shape");
       const SeerShape &shape = it.first->second->getSeerShape();
       if (shape.hasShapeIdRecord(faceId))
       {
-	const TopoDS_Shape &face = shape.getOCCTShape(faceId); assert(!face.IsNull());
-	outSystem = getFaceSystem(face);
-	tempRadius = std::sqrt(getBoundingBox(face).SquareExtent()) / 2.0;
-	foundPlane = true;
+        const TopoDS_Shape &face = shape.getOCCTShape(faceId); assert(!face.IsNull());
+        outSystem = getFaceSystem(face);
+        tempRadius = std::sqrt(getBoundingBox(face).SquareExtent()) / 2.0;
+        foundPlane = true;
       }
       if (shape.hasShapeIdRecord(edgeId))
       {
-	const TopoDS_Shape &edge = shape.getOCCTShape(edgeId); assert(!edge.IsNull());
-	direction = getEdgeVector(edge);
-	origin = getOrigin(edge);
-	foundEdge = true;
+        const TopoDS_Shape &edge = shape.getOCCTShape(edgeId); assert(!edge.IsNull());
+        direction = getEdgeVector(edge);
+        origin = getOrigin(edge);
+        foundEdge = true;
       }
     }
     

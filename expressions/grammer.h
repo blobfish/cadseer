@@ -54,64 +54,64 @@ namespace expr
       using boost::spirit::qi::char_;
       using boost::spirit::qi::lit;
       
-      expression = formulaName [boost::phoenix::bind(&StringTranslatorStow::buildFormulaNode, &translator, boost::spirit::_1, _pass)] >>
-		'=' >> rhs [boost::phoenix::bind(&StringTranslatorStow::finish, &translator)];
-      rhs = term >>
-	    *((char_('+') [boost::phoenix::bind(&StringTranslatorStow::buildAdditionNode, &translator)] >>
-	    term [boost::phoenix::bind(&StringTranslatorStow::makeCurrentRHS, &translator)]) |
-	    (char_('-') [boost::phoenix::bind(&StringTranslatorStow::buildSubractionNode, &translator)] >>
-	    term [boost::phoenix::bind(&StringTranslatorStow::makeCurrentRHS, &translator)]));
-      item = double_ [boost::phoenix::bind(&StringTranslatorStow::buildConstantNode, &translator, boost::spirit::_1)] |
-		      linkName [boost::phoenix::bind(&StringTranslatorStow::buildLinkNode, &translator, boost::spirit::_1, _pass)];
-      function1 = (lit("sin(") [boost::phoenix::bind(&StringTranslatorStow::buildSinNode, &translator)] |
-		lit("cos(") [boost::phoenix::bind(&StringTranslatorStow::buildCosNode, &translator)] |
-		lit("tan(") [boost::phoenix::bind(&StringTranslatorStow::buildTanNode, &translator)] |
-		lit("asin(") [boost::phoenix::bind(&StringTranslatorStow::buildAsinNode, &translator)] |
-		lit("acos(") [boost::phoenix::bind(&StringTranslatorStow::buildAcosNode, &translator)] |
-		lit("atan(") [boost::phoenix::bind(&StringTranslatorStow::buildAtanNode, &translator)] |
-		lit("radtodeg(") [boost::phoenix::bind(&StringTranslatorStow::buildRadToDegNode, &translator)] |
-		lit("degtorad(") [boost::phoenix::bind(&StringTranslatorStow::buildDegToRadNode, &translator)] |
-		lit("log(") [boost::phoenix::bind(&StringTranslatorStow::buildLogNode, &translator)] |
-		lit("exp(") [boost::phoenix::bind(&StringTranslatorStow::buildExpNode, &translator)] |
-		lit("sqrt(") [boost::phoenix::bind(&StringTranslatorStow::buildSqrtNode, &translator)] |
-		lit("abs(") [boost::phoenix::bind(&StringTranslatorStow::buildAbsNode, &translator)]) >> rhs >>
-		char_(')') [boost::phoenix::bind(&StringTranslatorStow::finishFunction1, &translator)];
-      function2 = (lit("pow(") [boost::phoenix::bind(&StringTranslatorStow::buildPowNode, &translator)] |
-		  lit("atan2(") [boost::phoenix::bind(&StringTranslatorStow::buildAtan2Node, &translator)] |
-		  lit("min(") [boost::phoenix::bind(&StringTranslatorStow::buildMinNode, &translator)] |
-		  lit("max(") [boost::phoenix::bind(&StringTranslatorStow::buildMaxNode, &translator)] |
-		  lit("floor(") [boost::phoenix::bind(&StringTranslatorStow::buildFloorNode, &translator)] |
-		  lit("ceil(") [boost::phoenix::bind(&StringTranslatorStow::buildCeilNode, &translator)] |
-		  lit("round(") [boost::phoenix::bind(&StringTranslatorStow::buildRoundNode, &translator)] | 
-		  lit("hypot(") [boost::phoenix::bind(&StringTranslatorStow::buildHypotNode, &translator)]) >> rhs >>
-		  char_(',') [boost::phoenix::bind(&StringTranslatorStow::setParameter1, &translator)] >> rhs >>
-		  char_(')') [boost::phoenix::bind(&StringTranslatorStow::setParameter2, &translator)];
-      //when one parser is a subset of another (i.e. '>' and '>=') put the larger first, so it fails before trying the smaller.
-      conditionalOperator = lit(">=") [boost::phoenix::bind(&StringTranslatorStow::setConditionGreaterThanEqual, &translator)] |
-			    lit("<=") [boost::phoenix::bind(&StringTranslatorStow::setConditionLessThanEqual, &translator)] |
-			    lit(">") [boost::phoenix::bind(&StringTranslatorStow::setConditionGreaterThan, &translator)] |
-			    lit("<") [boost::phoenix::bind(&StringTranslatorStow::setConditionLessThan, &translator)] |
-			    lit("==") [boost::phoenix::bind(&StringTranslatorStow::setConditionEqual, &translator)] |
-			    lit("!=") [boost::phoenix::bind(&StringTranslatorStow::setConditionNotEqual, &translator)];
-      condition = rhs [boost::phoenix::bind(&StringTranslatorStow::setConditionLhs, &translator)] >> conditionalOperator >>
-		  rhs [boost::phoenix::bind(&StringTranslatorStow::setConditionRhs, &translator)];
-      ifCondition = lit("if(") [boost::phoenix::bind(&StringTranslatorStow::buildConditionalNode, &translator)] >>
-		    condition >> lit(")") >>
-		    lit("then(") >> rhs [boost::phoenix::bind(&StringTranslatorStow::setConditionThen, &translator)] >> char_(')') >>
-		    lit("else(") >> rhs [boost::phoenix::bind(&StringTranslatorStow::setConditionElse, &translator)] >> char_(')');
-      keyword = lit("sin(") | lit("cos(") | lit("tan(") | lit("asin(") | lit("acos(") | lit("atan(") | lit("pow(") |
-		lit("atan2(") | lit("abs(") | lit("min(") | lit("max(") | lit("floor(") | lit("ceil(") | lit("round(") |
-		lit("radtodeg(") | lit("degtorad(") | lit("log(") | lit("exp(") | lit("sqrt(") | lit("hypot(") | lit("if(");
-      linkName = (alpha >> *(alnum | char_('_'))) - keyword;
-      formulaName = (alpha >> *(alnum | char_('_'))) - keyword;
-      factor = item | function1 | function2 | ifCondition |
-		      char_('(') [boost::phoenix::bind(&StringTranslatorStow::startParenthesesNode, &translator)] >> rhs >>
-		      char_ (')') [boost::phoenix::bind(&StringTranslatorStow::finishParenthesesNode, &translator)];
-      term = factor >>
-		    *((char_('*') [boost::phoenix::bind(&StringTranslatorStow::buildMultiplicationNode, &translator)] >>
-		    factor [boost::phoenix::bind(&StringTranslatorStow::makeCurrentRHS, &translator)]) |
-		    (char_('/') [boost::phoenix::bind(&StringTranslatorStow::buildDivisionNode, &translator)] >>
-		    factor [boost::phoenix::bind(&StringTranslatorStow::makeCurrentRHS, &translator)]));
+    expression = formulaName [boost::phoenix::bind(&StringTranslatorStow::buildFormulaNode, &translator, boost::spirit::_1, _pass)] >>
+        '=' >> rhs [boost::phoenix::bind(&StringTranslatorStow::finish, &translator)];
+    rhs = term >>
+        *((char_('+') [boost::phoenix::bind(&StringTranslatorStow::buildAdditionNode, &translator)] >>
+        term [boost::phoenix::bind(&StringTranslatorStow::makeCurrentRHS, &translator)]) |
+        (char_('-') [boost::phoenix::bind(&StringTranslatorStow::buildSubractionNode, &translator)] >>
+        term [boost::phoenix::bind(&StringTranslatorStow::makeCurrentRHS, &translator)]));
+    item = double_ [boost::phoenix::bind(&StringTranslatorStow::buildConstantNode, &translator, boost::spirit::_1)] |
+        linkName [boost::phoenix::bind(&StringTranslatorStow::buildLinkNode, &translator, boost::spirit::_1, _pass)];
+    function1 = (lit("sin(") [boost::phoenix::bind(&StringTranslatorStow::buildSinNode, &translator)] |
+        lit("cos(") [boost::phoenix::bind(&StringTranslatorStow::buildCosNode, &translator)] |
+        lit("tan(") [boost::phoenix::bind(&StringTranslatorStow::buildTanNode, &translator)] |
+        lit("asin(") [boost::phoenix::bind(&StringTranslatorStow::buildAsinNode, &translator)] |
+        lit("acos(") [boost::phoenix::bind(&StringTranslatorStow::buildAcosNode, &translator)] |
+        lit("atan(") [boost::phoenix::bind(&StringTranslatorStow::buildAtanNode, &translator)] |
+        lit("radtodeg(") [boost::phoenix::bind(&StringTranslatorStow::buildRadToDegNode, &translator)] |
+        lit("degtorad(") [boost::phoenix::bind(&StringTranslatorStow::buildDegToRadNode, &translator)] |
+        lit("log(") [boost::phoenix::bind(&StringTranslatorStow::buildLogNode, &translator)] |
+        lit("exp(") [boost::phoenix::bind(&StringTranslatorStow::buildExpNode, &translator)] |
+        lit("sqrt(") [boost::phoenix::bind(&StringTranslatorStow::buildSqrtNode, &translator)] |
+        lit("abs(") [boost::phoenix::bind(&StringTranslatorStow::buildAbsNode, &translator)]) >> rhs >>
+        char_(')') [boost::phoenix::bind(&StringTranslatorStow::finishFunction1, &translator)];
+    function2 = (lit("pow(") [boost::phoenix::bind(&StringTranslatorStow::buildPowNode, &translator)] |
+        lit("atan2(") [boost::phoenix::bind(&StringTranslatorStow::buildAtan2Node, &translator)] |
+        lit("min(") [boost::phoenix::bind(&StringTranslatorStow::buildMinNode, &translator)] |
+        lit("max(") [boost::phoenix::bind(&StringTranslatorStow::buildMaxNode, &translator)] |
+        lit("floor(") [boost::phoenix::bind(&StringTranslatorStow::buildFloorNode, &translator)] |
+        lit("ceil(") [boost::phoenix::bind(&StringTranslatorStow::buildCeilNode, &translator)] |
+        lit("round(") [boost::phoenix::bind(&StringTranslatorStow::buildRoundNode, &translator)] | 
+        lit("hypot(") [boost::phoenix::bind(&StringTranslatorStow::buildHypotNode, &translator)]) >> rhs >>
+        char_(',') [boost::phoenix::bind(&StringTranslatorStow::setParameter1, &translator)] >> rhs >>
+        char_(')') [boost::phoenix::bind(&StringTranslatorStow::setParameter2, &translator)];
+    //when one parser is a subset of another (i.e. '>' and '>=') put the larger first, so it fails before trying the smaller.
+    conditionalOperator = lit(">=") [boost::phoenix::bind(&StringTranslatorStow::setConditionGreaterThanEqual, &translator)] |
+        lit("<=") [boost::phoenix::bind(&StringTranslatorStow::setConditionLessThanEqual, &translator)] |
+        lit(">") [boost::phoenix::bind(&StringTranslatorStow::setConditionGreaterThan, &translator)] |
+        lit("<") [boost::phoenix::bind(&StringTranslatorStow::setConditionLessThan, &translator)] |
+        lit("==") [boost::phoenix::bind(&StringTranslatorStow::setConditionEqual, &translator)] |
+        lit("!=") [boost::phoenix::bind(&StringTranslatorStow::setConditionNotEqual, &translator)];
+    condition = rhs [boost::phoenix::bind(&StringTranslatorStow::setConditionLhs, &translator)] >> conditionalOperator >>
+        rhs [boost::phoenix::bind(&StringTranslatorStow::setConditionRhs, &translator)];
+    ifCondition = lit("if(") [boost::phoenix::bind(&StringTranslatorStow::buildConditionalNode, &translator)] >>
+        condition >> lit(")") >>
+        lit("then(") >> rhs [boost::phoenix::bind(&StringTranslatorStow::setConditionThen, &translator)] >> char_(')') >>
+        lit("else(") >> rhs [boost::phoenix::bind(&StringTranslatorStow::setConditionElse, &translator)] >> char_(')');
+    keyword = lit("sin(") | lit("cos(") | lit("tan(") | lit("asin(") | lit("acos(") | lit("atan(") | lit("pow(") |
+        lit("atan2(") | lit("abs(") | lit("min(") | lit("max(") | lit("floor(") | lit("ceil(") | lit("round(") |
+        lit("radtodeg(") | lit("degtorad(") | lit("log(") | lit("exp(") | lit("sqrt(") | lit("hypot(") | lit("if(");
+    linkName = (alpha >> *(alnum | char_('_'))) - keyword;
+    formulaName = (alpha >> *(alnum | char_('_'))) - keyword;
+    factor = item | function1 | function2 | ifCondition |
+        char_('(') [boost::phoenix::bind(&StringTranslatorStow::startParenthesesNode, &translator)] >> rhs >>
+        char_ (')') [boost::phoenix::bind(&StringTranslatorStow::finishParenthesesNode, &translator)];
+    term = factor >>
+        *((char_('*') [boost::phoenix::bind(&StringTranslatorStow::buildMultiplicationNode, &translator)] >>
+        factor [boost::phoenix::bind(&StringTranslatorStow::makeCurrentRHS, &translator)]) |
+        (char_('/') [boost::phoenix::bind(&StringTranslatorStow::buildDivisionNode, &translator)] >>
+        factor [boost::phoenix::bind(&StringTranslatorStow::makeCurrentRHS, &translator)]));
       
       BOOST_SPIRIT_DEBUG_NODE(expression);
       BOOST_SPIRIT_DEBUG_NODE(rhs);

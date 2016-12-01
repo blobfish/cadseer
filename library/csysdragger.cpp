@@ -362,10 +362,10 @@ bool CSysCallBack::receive(const osgManipulator::MotionCommand &commandIn)
       osg::Vec3d tVec = tCommand->getTranslation() * tCommand->getLocalToWorld();
       double diff = (tVec-originStart).length();
       if (std::fabs(diff - lastTranslation) < std::numeric_limits<double>::epsilon())
-	return out;
+        return out;
       lastTranslation = diff;
       stream << QObject::tr("Translation Increment: ").toUtf8().data() << std::setprecision(3) << std::fixed <<
-	prf::manager().rootPtr->dragger().linearIncrement() << std::endl <<
+        prf::manager().rootPtr->dragger().linearIncrement() << std::endl <<
         QObject::tr("Translation: ").toUtf8().data() << std::setprecision(3) << std::fixed << diff;
     }
     if (rCommand)
@@ -373,11 +373,11 @@ bool CSysCallBack::receive(const osgManipulator::MotionCommand &commandIn)
       double w = rCommand->getRotation().asVec4().w();
       int angle = static_cast<int>(std::round(osg::RadiansToDegrees(2.0 * std::acos(w))));
       if (angle == lastRotation)
-	return out;
+        return out;
       lastRotation = angle;
       stream << QObject::tr("Rotation Increment: ").toUtf8().data() << 
-	static_cast<int>(prf::manager().rootPtr->dragger().angularIncrement()) <<
-	std::endl << QObject::tr("Rotation: ").toUtf8().data() << angle;
+        static_cast<int>(prf::manager().rootPtr->dragger().angularIncrement()) <<
+        std::endl << QObject::tr("Rotation: ").toUtf8().data() << angle;
     }
   }
   

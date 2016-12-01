@@ -36,8 +36,8 @@ namespace slc
     OverlayHandler(vwr::OverlayCamera *cameraIn);
   protected:
     virtual bool handle(const osgGA::GUIEventAdapter& eventAdapter,
-		      osgGA::GUIActionAdapter& actionAdapter, osg::Object *object,
-		      osg::NodeVisitor *nodeVistor) override;
+        osgGA::GUIActionAdapter& actionAdapter, osg::Object *object,
+        osg::NodeVisitor *nodeVistor) override;
     osg::ref_ptr<vwr::OverlayCamera> camera;
     osgManipulator::Dragger *dragger = nullptr;
     osgManipulator::PointerInfo pointer;

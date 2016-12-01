@@ -136,25 +136,25 @@ void Chamfer::updateModel(const UpdateMap &mapIn)
       bool labelDone = false; //set label position to first pick.
       for (const auto &pick : chamfer.picks)
       {
-	if (!targetSeerShape.hasShapeIdRecord(pick.edgeId))
-	{
-	  std::cout << "edge id of: " << gu::idToString(pick.edgeId) << " not found in chamfer" << std::endl;
-	  continue;
-	}
-	if (!targetSeerShape.hasShapeIdRecord(pick.faceId))
-	{
-      std::cout << "face id of: " << gu::idToString(pick.faceId) << " not found in chamfer" << std::endl;
-	  continue;
-	}
-	TopoDS_Edge edge = TopoDS::Edge(targetSeerShape.findShapeIdRecord(pick.edgeId).shape);
-	TopoDS_Face face = TopoDS::Face(targetSeerShape.findShapeIdRecord(pick.faceId).shape);
-	chamferMaker.Add(chamfer.distance->getValue(), edge, face);
-	//update location of parameter label.
-	if (!labelDone)
-	{
-	  labelDone = true;
-	  chamfer.label->setMatrix(osg::Matrixd::translate(calculateUPoint(TopoDS::Edge(edge), pick.u)));
-	}
+        if (!targetSeerShape.hasShapeIdRecord(pick.edgeId))
+        {
+        std::cout << "edge id of: " << gu::idToString(pick.edgeId) << " not found in chamfer" << std::endl;
+        continue;
+        }
+        if (!targetSeerShape.hasShapeIdRecord(pick.faceId))
+        {
+        std::cout << "face id of: " << gu::idToString(pick.faceId) << " not found in chamfer" << std::endl;
+        continue;
+        }
+        TopoDS_Edge edge = TopoDS::Edge(targetSeerShape.findShapeIdRecord(pick.edgeId).shape);
+        TopoDS_Face face = TopoDS::Face(targetSeerShape.findShapeIdRecord(pick.faceId).shape);
+        chamferMaker.Add(chamfer.distance->getValue(), edge, face);
+        //update location of parameter label.
+        if (!labelDone)
+        {
+        labelDone = true;
+        chamfer.label->setMatrix(osg::Matrixd::translate(calculateUPoint(TopoDS::Edge(edge), pick.u)));
+        }
       }
     }
     chamferMaker.Build();
