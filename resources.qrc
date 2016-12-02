@@ -14,6 +14,7 @@
     <file>resources/images/viewFit.svg</file>
     <file>resources/images/viewFill.svg</file>
     <file>resources/images/viewLine.svg</file>
+    <file>resources/images/viewInfo.svg</file>
     <file>resources/images/selectFeatures.svg</file>
     <file>resources/images/selectObjects.svg</file>
     <file>resources/images/selectShells.svg</file>
@@ -72,6 +73,7 @@
     <file>resources/images/debugDump.svg</file>
     <file>resources/images/debugShapeTrackUp.svg</file>
     <file>resources/images/debugShapeTrackDown.svg</file>
+    <file>resources/images/debugShapeGraph.svg</file>
     <file>resources/images/featureToSystem.svg</file>
     <file>resources/images/systemToFeature.svg</file>
     <file>resources/images/editDraggerToFeature.svg</file>
