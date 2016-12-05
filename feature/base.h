@@ -43,6 +43,7 @@
 #include <feature/parameter.h>
 
 class QDir;
+class QTextStream;
 namespace prj{namespace srl{class FeatureBase;}}
 
 namespace ftr
@@ -91,6 +92,8 @@ public:
   virtual const std::string& getTypeString() const = 0;
   virtual const QIcon& getIcon() const = 0;
   virtual Descriptor getDescriptor() const = 0;
+  virtual QTextStream& getInfo(QTextStream &) const;
+  QTextStream&  getShapeInfo(QTextStream &, const boost::uuids::uuid&) const;
   boost::uuids::uuid getId() const {return id;}
   const TopoDS_Shape& getShape() const;
   void setShape(const TopoDS_Shape &in); //!< only used for serialize in!

@@ -20,6 +20,7 @@
 #include <limits>
 
 #include <QDir>
+#include <QTextStream>
 
 #include <BRepAdaptor_Surface.hxx>
 #include <TopoDS.hxx>
@@ -33,6 +34,7 @@
 #include <osg/Geometry>
 #include <osg/MatrixTransform>
 
+#include <tools/infotools.h>
 #include <globalutilities.h>
 #include <nodemaskdefs.h>
 #include <library/ipgroup.h>
@@ -688,8 +690,12 @@ DatumPlane::~DatumPlane()
 void DatumPlane::setSolver(std::shared_ptr<DatumPlaneGenre> solverIn)
 {
   solver = solverIn;
-  if (solver->getIPGroup())
-    overlaySwitch->addChild(solver->getIPGroup());
+  lbr::IPGroup *g = solver->getIPGroup();
+  if (g)
+  {
+    overlaySwitch->addChild(g);
+    pMap.insert(std::make_pair(g->getParameter()->getName(), g->getParameter()));
+  }
   solver->connect(this);
 }
 
@@ -792,4 +798,14 @@ std::vector<std::shared_ptr<DatumPlaneGenre> > DatumPlane::solversFromSelection(
     out.push_back(std::shared_ptr<DatumPlanePlanarParallelThroughEdge>(new DatumPlanePlanarParallelThroughEdge()));
   
   return out;
+}
+
+QTextStream& DatumPlane::getInfo(QTextStream &streamIn) const 
+{
+    Inherited::getInfo(streamIn);
+    
+    streamIn << "Solver type is: " << getDatumPlaneTypeString(solver->getType()) << endl;
+    gu::osgMatrixOut(streamIn, transform->getMatrix());
+    
+    return streamIn;
 }

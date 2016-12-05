@@ -18,6 +18,7 @@
  */
 
 #include <QDir>
+#include <QTextStream>
 
 #include <BRep_Builder.hxx>
 #include <TopoDS_Compound.hxx>
@@ -34,6 +35,7 @@
 #include <modelviz/shapegeometry.h>
 #include <globalutilities.h>
 #include <feature/seershape.h>
+#include <feature/seershapeinfo.h>
 #include <project/serial/xsdcxxoutput/featurebase.h>
 #include <feature/base.h>
 
@@ -330,4 +332,45 @@ bool Base::hasParameter(const std::string &nameIn)
 Parameter* Base::getParameter(const std::string &nameIn)
 {
   return pMap.at(nameIn);
+}
+
+QTextStream& Base::getInfo(QTextStream &stream) const
+{
+    auto boolString = [](bool input)
+    {
+        QString out;
+        if (input)
+            out  = "True";
+        else
+            out = "False";
+        return out;
+    };
+    
+    stream << "Feature name: " << name << "        id: " << QString::fromStdString(gu::idToString(id)) << endl
+        << "Feature type: " << QString::fromStdString(getTypeString()) << endl
+        << "Model is clean: " << boolString(isModelClean()) << endl
+        << "Visual is clean: " << boolString(isVisualClean()) << endl
+        << "Update was successful: " << boolString(isSuccess()) << endl
+        << "Feature is active: " << boolString(isActive()) << endl
+        << "Feture is leaf: " << boolString(isLeaf()) << endl;
+        
+    stream << endl << "Parameters:" << endl;
+    for (const auto &p : pMap)
+    {
+        stream
+            << "    Parameter name: " << QString::fromStdString(p.second->getName())
+            << "    Value: " << QString::number(p.second->getValue(), 'f', 12)
+            << "    Is linked: " << boolString(!(p.second->isConstant())) << endl;
+    }
+    
+    return stream;
+}
+
+QTextStream&  Base::getShapeInfo(QTextStream &streamIn, const boost::uuids::uuid &idIn) const
+{
+    assert(hasSeerShape());
+    SeerShapeInfo shapeInfo(*seerShape);
+    shapeInfo.getShapeInfo(streamIn, idIn);
+    
+    return streamIn;
 }

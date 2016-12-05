@@ -145,6 +145,7 @@ namespace ftr
     virtual Descriptor getDescriptor() const override {return Descriptor::Create;}
     virtual void serialWrite(const QDir&) override;
     void serialRead(const prj::srl::FeatureDatumPlane &);
+    virtual QTextStream& getInfo(QTextStream &) const override;
     
     void setSolver(std::shared_ptr<DatumPlaneGenre> solverIn);
     osg::Matrixd getSystem() const {return transform->getMatrix();}
@@ -153,6 +154,7 @@ namespace ftr
     static std::vector<std::shared_ptr<DatumPlaneGenre> > solversFromSelection(const slc::Containers &);
     
   private:
+    typedef Base Inherited;
     static QIcon icon;
     osg::ref_ptr<mdv::DatumPlane> display;
     osg::ref_ptr<osg::MatrixTransform> transform;

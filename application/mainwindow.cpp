@@ -24,7 +24,6 @@
 #include <QHBoxLayout>
 #include <QDir>
 
-#include <message/dispatch.h>
 #include <dagview/dagmodel.h>
 #include <dagview/dagview.h>
 #include <expressions/expressionwidget.h>
@@ -38,6 +37,7 @@
 #include <application/incrementwidget.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
+#include <application/infowindow.h>
 #include <ui_mainwindow.h>
 #include <application/mainwindow.h>
 
@@ -112,6 +112,11 @@ MainWindow::MainWindow(QWidget *parent) :
     incrementWidget->lineEdit2->setCursorPosition(0);
     connect(incrementWidget->lineEdit1, SIGNAL(editingFinished()), this, SLOT(incrementChangedSlot()));
     connect(incrementWidget->lineEdit2, SIGNAL(editingFinished()), this, SLOT(incrementChangedSlot()));
+    
+    //build the info window.
+    infoDialog = new InfoDialog(this);
+    infoDialog->restoreSettings();
+    infoDialog->hide();
 
     observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
     observer->name = "app::MainWindow";
@@ -184,6 +189,9 @@ void MainWindow::setupDispatcher()
   
   mask = msg::Response | msg::Preferences;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&MainWindow::preferencesChanged, this, _1)));
+  
+  mask = msg::Response | msg::ViewInfo;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&MainWindow::viewInfoDispatched, this, _1)));
 }
 
 void MainWindow::preferencesChanged(const msg::Message&)
@@ -192,4 +200,9 @@ void MainWindow::preferencesChanged(const msg::Message&)
   incrementWidget->lineEdit2->setText(QString::number(prf::manager().rootPtr->dragger().angularIncrement(), 'f', 12));
   incrementWidget->lineEdit1->setCursorPosition(0);
   incrementWidget->lineEdit2->setCursorPosition(0);
+}
+
+void MainWindow::viewInfoDispatched(const msg::Message&)
+{
+    infoDialog->show();
 }

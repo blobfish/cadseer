@@ -87,6 +87,7 @@ SET(FEATURE_SOURCES
     feature/intersectionmapping.cpp
     feature/shapecheck.cpp
     feature/seershape.cpp
+    feature/seershapeinfo.cpp
     feature/datumplane.cpp
     )
     
@@ -112,8 +113,9 @@ SET(SELECTION_SOURCES
     selection/visitors.cpp
     )
     
-    SET(TOOLS_SOURCES
+SET(TOOLS_SOURCES
     tools/idtools.cpp
+    tools/infotools.cpp
     )
     
 SET(DIALOG_SOURCES
@@ -158,6 +160,7 @@ SET(APPLICATION_SOURCES
     application/message.cpp
     application/incrementwidget.cpp
     application/splitterdecorated.cpp
+    application/infowindow.cpp
     )
     
 SET(COMMAND_SOURCES
@@ -225,6 +228,7 @@ SET(CADSEER_MOC_HDRS
     dagview/dagmodel.h
     application/application.h
     application/splitterdecorated.h
+    application/infowindow.h
     selection/manager.h
     dialogs/boxdialog.h
     preferences/dialog.h

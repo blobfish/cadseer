@@ -42,6 +42,7 @@ class TopoDS_Shape;
 namespace app
 {
 class IncrementWidgetAction;
+class InfoDialog;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -61,10 +62,12 @@ private:
     expr::ExpressionWidget *expressionWidget;
     slc::Manager *selectionManager;
     IncrementWidgetAction *incrementWidget;
+    InfoDialog*infoDialog;
     
     std::unique_ptr<msg::Observer> observer;
     void setupDispatcher();
     void preferencesChanged(const msg::Message&);
+    void viewInfoDispatched(const msg::Message&);
     
 private Q_SLOTS:
     void incrementChangedSlot();

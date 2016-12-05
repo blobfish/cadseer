@@ -48,6 +48,7 @@ namespace ftr
     virtual const QIcon& getIcon() const override {static QIcon junk; return junk;}
     virtual Descriptor getDescriptor() const override {return Descriptor::None;}
     virtual void updateModel(const UpdateMap&) override;
+    virtual QTextStream& getInfo(QTextStream &) const override;
     void setSystem(const gp_Ax2 &systemIn);
     void setSystem(const osg::Matrixd &systemIn);
     void updateDragger(); //!< dragger to match feature system.
@@ -55,6 +56,8 @@ namespace ftr
     lbr::CSysDragger& getDragger() {return *dragger;}
 
   protected:
+    typedef Base Inherited;
+      
     prj::srl::FeatureCSysBase serialOut(); //!<convert this into serializable object.
     void serialIn(const prj::srl::FeatureCSysBase &sCSysBaseIn); //intialize this from serial object.
     

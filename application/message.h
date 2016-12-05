@@ -21,6 +21,8 @@
 #ifndef APP_MESSAGE_H
 #define APP_MESSAGE_H
 
+#include <QString>
+
 #include <feature/types.h>
 
 namespace app
@@ -28,7 +30,7 @@ namespace app
   struct Message
   {
     Message();
-    ftr::Type type; //!< for factory dispatch.
+    QString infoMessage;
   };
 }
 

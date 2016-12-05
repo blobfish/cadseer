@@ -23,5 +23,4 @@ using namespace app;
 
 Message::Message()
 {
-  type = ftr::Type::Base;
 }

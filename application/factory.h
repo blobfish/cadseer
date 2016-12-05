@@ -65,7 +65,9 @@ namespace app
     void closeProjectDispatched(const msg::Message&);
     void debugDumpDispatched(const msg::Message&);
     void debugShapeTrackUpDispatched(const msg::Message&);
+    void debugShapeGraphDispatched(const msg::Message&);
     void debugShapeTrackDownDispatched(const msg::Message&);
+    void viewInfoDispatched(const msg::Message&);
   };
 }
 

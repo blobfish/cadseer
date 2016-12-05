@@ -100,6 +100,8 @@ namespace msg
   static const Mask DebugShapeTrackDown(Mask().	set(61));//!< command
   static const Mask Freeze(Mask().	set(62));//!< git message
   static const Mask Thaw(Mask().	set(63));//!< git message
+  static const Mask ViewInfo(Mask().	set(64));//!< info command
+  static const Mask DebugShapeGraph(Mask().	set(65));//!< command
   
   typedef boost::variant<prj::Message, slc::Message, app::Message, vwr::Message> Payload;
   

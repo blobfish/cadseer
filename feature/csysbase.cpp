@@ -22,6 +22,8 @@
 #include <cmath>
 #include <limits>
 
+#include <QTextStream>
+
 #include <gp_Trsf.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Ax2.hxx>
@@ -32,6 +34,7 @@
 #include <nodemaskdefs.h>
 #include <globalutilities.h>
 #include <tools/idtools.h>
+#include <tools/infotools.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <preferences/preferencesXML.h>
@@ -210,4 +213,14 @@ void CSysBase::serialIn(const prj::srl::FeatureCSysBase& sCSysBaseIn)
 
   this->setSystem(m);
   updateDragger();
+}
+
+QTextStream& CSysBase::getInfo(QTextStream &streamIn) const
+{
+    Inherited::getInfo(streamIn);
+    
+    osg::Matrixd m = gu::toOsg(system);
+    gu::osgMatrixOut(streamIn, m);
+        
+    return streamIn;
 }

@@ -22,6 +22,7 @@
 #include <assert.h>
 
 #include <QFileDialog>
+#include <QTextStream>
 
 #include <boost/uuid/uuid.hpp>
 
@@ -138,6 +139,12 @@ void Factory::setupDispatcher()
   
   mask = msg::Request | msg::DebugShapeTrackDown;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::debugShapeTrackDownDispatched, this, _1)));
+  
+  mask = msg::Request | msg::DebugShapeGraph;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::debugShapeGraphDispatched, this, _1)));
+  
+  mask = msg::Request | msg::ViewInfo;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::viewInfoDispatched, this, _1)));
 }
 
 void Factory::triggerUpdate()
@@ -838,3 +845,88 @@ void Factory::debugShapeTrackDownDispatched(const msg::Message&)
   observer->messageOutSignal(clearSelectionMessage);
 }
 
+void Factory::debugShapeGraphDispatched(const msg::Message&)
+{
+    std::ostringstream debug;
+    debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+    msg::dispatch().dumpString(debug.str());
+    
+    assert(project);
+    if (containers.empty())
+        return;
+    
+    QString fileNameBase = static_cast<app::Application*>(qApp)->
+        getApplicationDirectory().absolutePath() + QDir::separator();
+    for (const auto &container : containers)
+    {
+        if (container.selectionType != slc::Type::Object)
+            continue;
+        ftr::Base *feature = project->findFeature(container.featureId);
+        if (!feature->hasSeerShape())
+            continue;
+        QString fileName = fileNameBase + QString::fromStdString(gu::idToString(feature->getId())) + ".dot";
+        const ftr::SeerShape &shape = feature->getSeerShape();
+        shape.dumpGraph(fileName.toStdString());
+    }
+    
+    msg::Message clearSelectionMessage;
+    clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
+    observer->messageOutSignal(clearSelectionMessage);
+}
+
+void Factory::viewInfoDispatched(const msg::Message &)
+{
+    //maybe if selection is empty we will dump out application information.
+    //or better yet project information or even better yet both. careful
+    //we might want to turn the window on and off keeping information as a 
+    //reference and we don't to fill the window with shit. we will be alright, 
+    //we will have a different facility for show and hiding the info window
+    //other than this command.
+    assert(project);
+    if (containers.empty())
+        return;
+    
+    QString infoMessage;
+    QTextStream stream(&infoMessage);
+    stream << endl;
+    for (const auto &container : containers)
+    {
+        stream <<  endl;
+        if
+        (
+            (container.selectionType == slc::Type::Object) ||
+            (container.selectionType == slc::Type::Feature)
+        )
+        {
+            ftr::Base *feature = project->findFeature(container.featureId);
+            feature->getInfo(stream);
+        }
+        else if
+        (
+            (container.selectionType == slc::Type::Solid) ||
+            (container.selectionType == slc::Type::Shell) ||
+            (container.selectionType == slc::Type::Face) ||
+            (container.selectionType == slc::Type::Wire) ||
+            (container.selectionType == slc::Type::Edge)
+        )
+        {
+            ftr::Base *feature = project->findFeature(container.featureId);
+            feature->getShapeInfo(stream, container.shapeId);
+        }
+        else
+        {
+            forcepoint(stream)
+                << qSetRealNumberPrecision(12)
+                << "Point location: ["
+                << container.pointLocation.x() << ", "
+                << container.pointLocation.y() << ", "
+                << container.pointLocation.z() << "]";
+        }
+    }
+    
+    msg::Message viewInfoMessage(msg::Response | msg::ViewInfo);
+    app::Message appMessage;
+    appMessage.infoMessage = infoMessage;
+    viewInfoMessage.payload = appMessage;
+    observer->messageOutSignal(viewInfoMessage);
+}

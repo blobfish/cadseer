@@ -334,6 +334,12 @@ void GestureHandler::constructMenu()
     viewLine->setUserValue(attributeMask, (msg::Request | msg::ViewLine).to_string());
     viewLine->setUserValue(attributeStatus, QObject::tr("View Lines Command").toStdString());
     viewBase->insertChild(viewBase->getNumChildren() - 2, viewLine);
+    
+    osg::MatrixTransform *viewInfo = gsn::buildCommandNode(":/resources/images/viewInfo.svg");
+    viewInfo->setMatrix(dummy);
+    viewInfo->setUserValue(attributeMask, (msg::Request | msg::ViewInfo).to_string());
+    viewInfo->setUserValue(attributeStatus, QObject::tr("View Info Command").toStdString());
+    viewBase->insertChild(viewBase->getNumChildren() - 2, viewInfo);
 
     //construction base
     osg::MatrixTransform *constructionBase;
@@ -588,6 +594,12 @@ void GestureHandler::constructMenu()
     debugShapeTrackDown->setUserValue(attributeMask, (msg::Request | msg::DebugShapeTrackDown).to_string());
     debugShapeTrackDown->setUserValue(attributeStatus, QObject::tr("Track Shape Down").toStdString());
     debugBase->insertChild(debugBase->getNumChildren() - 2, debugShapeTrackDown);
+    
+    osg::MatrixTransform *debugShapeGraph = gsn::buildCommandNode(":/resources/images/debugShapeGraph.svg");
+    debugShapeGraph->setMatrix(dummy);
+    debugShapeGraph->setUserValue(attributeMask, (msg::Request | msg::DebugShapeGraph).to_string());
+    debugShapeGraph->setUserValue(attributeStatus, QObject::tr("Write shape graph to application directory").toStdString());
+    debugBase->insertChild(debugBase->getNumChildren() - 2, debugShapeGraph);
 }
 
 std::vector<osg::Vec3> GestureHandler::buildNodeLocations(osg::Vec3 direction, int nodeCount)
