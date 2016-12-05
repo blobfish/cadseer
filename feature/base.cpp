@@ -278,12 +278,17 @@ void Base::serialWrite(const QDir&)
 
 prj::srl::FeatureBase Base::serialOut()
 {
-  return prj::srl::FeatureBase
+    
+  prj::srl::FeatureBase out
   (
     name.toStdString(),
-    gu::idToString(id),
-    seerShape->serialOut()
-  ); 
+    gu::idToString(id)
+  );
+  
+  if (hasSeerShape())
+      out.seerShape() = seerShape->serialOut();
+  
+  return out;
 }
 
 void Base::serialIn(const prj::srl::FeatureBase& sBaseIn)
@@ -294,20 +299,22 @@ void Base::serialIn(const prj::srl::FeatureBase& sBaseIn)
   mainSwitch->setUserValue(gu::idAttributeTitle, gu::idToString(id));
   overlaySwitch->setUserValue(gu::idAttributeTitle, gu::idToString(id));
   
-  seerShape->serialIn(sBaseIn.seerShape());
+  if (sBaseIn.seerShape().present())
+    seerShape->serialIn(sBaseIn.seerShape().get());
 }
 
 const TopoDS_Shape& Base::getShape() const
 {
   static TopoDS_Shape dummy;
-  if (seerShape->isNull())
+  if (!seerShape || seerShape->isNull())
     return dummy;
   return seerShape->getRootOCCTShape();
 }
 
 void Base::setShape(const TopoDS_Shape &in)
 {
-  seerShape->setOCCTShape(in);
+    assert(seerShape);
+    seerShape->setOCCTShape(in);
 }
 
 std::string Base::getFileName() const

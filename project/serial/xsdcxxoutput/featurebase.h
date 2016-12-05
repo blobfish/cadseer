@@ -2664,7 +2664,7 @@ namespace prj
        * @name seerShape
        *
        * @brief Accessor and modifier functions for the %seerShape
-       * required element.
+       * optional element.
        */
       //@{
 
@@ -2674,24 +2674,30 @@ namespace prj
       typedef ::prj::srl::SeerShape SeerShapeType;
 
       /**
+       * @brief Element optional container type.
+       */
+      typedef ::xsd::cxx::tree::optional< SeerShapeType > SeerShapeOptional;
+
+      /**
        * @brief Element traits type.
        */
       typedef ::xsd::cxx::tree::traits< SeerShapeType, char > SeerShapeTraits;
 
       /**
-       * @brief Return a read-only (constant) reference to the element.
+       * @brief Return a read-only (constant) reference to the element
+       * container.
        *
-       * @return A constant reference to the element.
+       * @return A constant reference to the optional container.
        */
-      const SeerShapeType&
+      const SeerShapeOptional&
       seerShape () const;
 
       /**
-       * @brief Return a read-write reference to the element.
+       * @brief Return a read-write reference to the element container.
        *
-       * @return A reference to the element.
+       * @return A reference to the optional container.
        */
-      SeerShapeType&
+      SeerShapeOptional&
       seerShape ();
 
       /**
@@ -2706,12 +2712,24 @@ namespace prj
       seerShape (const SeerShapeType& x);
 
       /**
+       * @brief Set the element value.
+       *
+       * @param x An optional container with the new value to set.
+       *
+       * If the value is present in @a x then this function makes a copy 
+       * of this value and sets it as the new value of the element.
+       * Otherwise the element container is set the 'not present' state.
+       */
+      void
+      seerShape (const SeerShapeOptional& x);
+
+      /**
        * @brief Set the element value without copying.
        *
        * @param p A new value to use.
        *
-       * This function will try to use the passed value directly
-       * instead of making a copy.
+       * This function will try to use the passed value directly instead
+       * of making a copy.
        */
       void
       seerShape (::std::unique_ptr< SeerShapeType > p);
@@ -2728,20 +2746,7 @@ namespace prj
        * initializers for required elements and attributes.
        */
       FeatureBase (const NameType&,
-                   const IdType&,
-                   const SeerShapeType&);
-
-      /**
-       * @brief Create an instance from the ultimate base and
-       * initializers for required elements and attributes
-       * (::std::unique_ptr version).
-       *
-       * This constructor will try to use the passed values directly
-       * instead of making copies.
-       */
-      FeatureBase (const NameType&,
-                   const IdType&,
-                   ::std::unique_ptr< SeerShapeType >);
+                   const IdType&);
 
       /**
        * @brief Create an instance from a DOM element.
@@ -2817,7 +2822,7 @@ namespace prj
       static const NameType name_default_value_;
       ::xsd::cxx::tree::one< IdType > id_;
       static const IdType id_default_value_;
-      ::xsd::cxx::tree::one< SeerShapeType > seerShape_;
+      SeerShapeOptional seerShape_;
 
       //@endcond
     };

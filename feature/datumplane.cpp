@@ -680,6 +680,8 @@ DatumPlane::DatumPlane() : Base()
   
   mainSwitch->addChild(transform.get());
   updateGeometry();
+  
+  seerShape.reset();
 }
 
 DatumPlane::~DatumPlane()

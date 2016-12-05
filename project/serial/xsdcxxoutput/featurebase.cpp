@@ -679,22 +679,28 @@ namespace prj
       return id_default_value_;
     }
 
-    const FeatureBase::SeerShapeType& FeatureBase::
+    const FeatureBase::SeerShapeOptional& FeatureBase::
     seerShape () const
     {
-      return this->seerShape_.get ();
+      return this->seerShape_;
     }
 
-    FeatureBase::SeerShapeType& FeatureBase::
+    FeatureBase::SeerShapeOptional& FeatureBase::
     seerShape ()
     {
-      return this->seerShape_.get ();
+      return this->seerShape_;
     }
 
     void FeatureBase::
     seerShape (const SeerShapeType& x)
     {
       this->seerShape_.set (x);
+    }
+
+    void FeatureBase::
+    seerShape (const SeerShapeOptional& x)
+    {
+      this->seerShape_ = x;
     }
 
     void FeatureBase::
@@ -1986,23 +1992,11 @@ namespace prj
 
     FeatureBase::
     FeatureBase (const NameType& name,
-                 const IdType& id,
-                 const SeerShapeType& seerShape)
+                 const IdType& id)
     : ::xml_schema::Type (),
       name_ (name, this),
       id_ (id, this),
-      seerShape_ (seerShape, this)
-    {
-    }
-
-    FeatureBase::
-    FeatureBase (const NameType& name,
-                 const IdType& id,
-                 ::std::unique_ptr< SeerShapeType > seerShape)
-    : ::xml_schema::Type (),
-      name_ (name, this),
-      id_ (id, this),
-      seerShape_ (std::move (seerShape), this)
+      seerShape_ (this)
     {
     }
 
@@ -2078,7 +2072,7 @@ namespace prj
           ::std::unique_ptr< SeerShapeType > r (
             SeerShapeTraits::create (i, f, this));
 
-          if (!seerShape_.present ())
+          if (!this->seerShape_)
           {
             this->seerShape_.set (::std::move (r));
             continue;
@@ -2099,13 +2093,6 @@ namespace prj
       {
         throw ::xsd::cxx::tree::expected_element< char > (
           "id",
-          "");
-      }
-
-      if (!seerShape_.present ())
-      {
-        throw ::xsd::cxx::tree::expected_element< char > (
-          "seerShape",
           "");
       }
     }
@@ -2498,13 +2485,14 @@ namespace prj
 
       // seerShape
       //
+      if (i.seerShape ())
       {
         ::xercesc::DOMElement& s (
           ::xsd::cxx::xml::dom::create_element (
             "seerShape",
             e));
 
-        s << i.seerShape ();
+        s << *i.seerShape ();
       }
     }
   }

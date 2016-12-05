@@ -233,13 +233,12 @@ std::shared_ptr< ftr::Base > FeatureLoad::loadDraft(const std::string &fileNameI
   return freshDraft;
 }
 
-std::shared_ptr< ftr::Base > FeatureLoad::loadDatumPlane(const std::string &fileNameIn, std::size_t shapeOffsetIn)
+std::shared_ptr< ftr::Base > FeatureLoad::loadDatumPlane(const std::string &fileNameIn, std::size_t)
 {
   auto sDatumPlane = srl::datumPlane(fileNameIn, ::xml_schema::Flags::dont_validate);
   assert(sDatumPlane);
   
   std::shared_ptr<ftr::DatumPlane> freshDatumPlane(new ftr::DatumPlane);
-  freshDatumPlane->setShape(shapeVector.at(shapeOffsetIn));
   freshDatumPlane->serialRead(*sDatumPlane);
   
   return freshDatumPlane;
