@@ -59,17 +59,17 @@ CSysDragger::CSysDragger()
   draggerSwitch = new Switch();
   matrixTransform->addChild(draggerSwitch);
   
-  xTranslate = new Translate1DDragger(osg::Vec3(0.0,0.0,0.0), osg::Vec3(0.0,0.0,1.0));
+  xTranslate = new Translate1DDragger(osg::Vec3d(0.0,0.0,0.0), osg::Vec3d(0.0,0.0,1.0));
   xTranslate->setName("xTranslate");
   draggerSwitch->addChild(xTranslate.get());
   addDragger(xTranslate.get());
 
-  yTranslate = new Translate1DDragger(osg::Vec3(0.0,0.0,0.0), osg::Vec3(0.0,0.0,1.0));
+  yTranslate = new Translate1DDragger(osg::Vec3d(0.0,0.0,0.0), osg::Vec3d(0.0,0.0,1.0));
   yTranslate->setName("yTranslate");
   draggerSwitch->addChild(yTranslate.get());
   addDragger(yTranslate.get());
 
-  zTranslate = new Translate1DDragger(osg::Vec3(0.0,0.0,0.0), osg::Vec3(0.0,0.0,1.0));
+  zTranslate = new Translate1DDragger(osg::Vec3d(0.0,0.0,0.0), osg::Vec3d(0.0,0.0,1.0));
   zTranslate->setName("zTranslate");
   draggerSwitch->addChild(zTranslate.get());
   addDragger(zTranslate.get());
@@ -95,12 +95,12 @@ CSysDragger::CSysDragger()
   iconSwitch = new osg::Switch();
   draggerSwitch->addChild(iconSwitch.get());
 
-  translateConstraint = new GridConstraint(*this, Vec3(0.0, 0.0, 0.0), Vec3(0.5, 0.5, 0.5));
+  translateConstraint = new GridConstraint(*this, Vec3d(0.0, 0.0, 0.0), Vec3d(0.5, 0.5, 0.5));
   xTranslate->addConstraint(translateConstraint.get());
   yTranslate->addConstraint(translateConstraint.get());
   zTranslate->addConstraint(translateConstraint.get());
   
-  rotateConstraint = new AngleConstraint(*this, Vec3(1.0, 0.0, 0.0), osg::DegreesToRadians(15.0));
+  rotateConstraint = new AngleConstraint(*this, Vec3d(1.0, 0.0, 0.0), osg::DegreesToRadians(15.0));
   xRotate->addConstraint(rotateConstraint.get());
   yRotate->addConstraint(rotateConstraint.get());
   zRotate->addConstraint(rotateConstraint.get());
@@ -188,11 +188,11 @@ void CSysDragger::setupDefaultTranslation()
 
   //Rotate axes to correct position.
   osg::Quat xRotation;
-  xRotation.makeRotate(osg::Vec3(0.0f, 0.0f, 1.0f), osg::Vec3(1.0f, 0.0f, 0.0f));
+  xRotation.makeRotate(osg::Vec3d(0.0f, 0.0f, 1.0f), osg::Vec3d(1.0f, 0.0f, 0.0f));
   xTranslate->setMatrix(osg::Matrix(xRotation));
 
   osg::Quat yRotation;
-  yRotation.makeRotate(osg::Vec3(0.0f, 0.0f, 1.0f), osg::Vec3(0.0f, 1.0f, 0.0f));
+  yRotation.makeRotate(osg::Vec3d(0.0f, 0.0f, 1.0f), osg::Vec3d(0.0f, 1.0f, 0.0f));
   yTranslate->setMatrix(osg::Matrix(yRotation));
 
   // Send different colors for each dragger.
@@ -225,7 +225,7 @@ void CSysDragger::setupIcons()
   setLink();
 }
 
-void CSysDragger::setScreenScale(float scaleIn)
+void CSysDragger::setScreenScale(double scaleIn)
 {
   if (screenScale == scaleIn)
     return;

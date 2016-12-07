@@ -82,7 +82,7 @@ bool DCallBack::receive(const osgManipulator::MotionCommand &commandIn)
     {
       osg::Vec3d tVec = tCommand->getTranslation() * tCommand->getLocalToWorld();
       double diff = (tVec-originStart).length();
-      if (std::fabs(diff - lastTranslation) < std::numeric_limits<double>::epsilon())
+      if (std::fabs(diff - lastTranslation) < std::numeric_limits<float>::epsilon())
         return out;
       lastTranslation = diff;
       stream << QObject::tr("Translation Increment: ").toUtf8().data() << std::setprecision(3) << std::fixed <<
@@ -145,7 +145,7 @@ CSysBase::CSysBase() : Base(), system()
 {
   dragger = new lbr::CSysDragger();
   overlaySwitch->addChild(dragger);
-  dragger->setScreenScale(75.0f);
+  dragger->setScreenScale(75.0);
   dragger->setRotationIncrement(prf::manager().rootPtr->dragger().angularIncrement());
   dragger->setTranslationIncrement(prf::manager().rootPtr->dragger().linearIncrement());
   dragger->setHandleEvents(false);

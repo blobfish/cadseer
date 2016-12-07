@@ -56,8 +56,8 @@ public:
   virtual const char* className() const {return "CSysDragger";}
 
   void setupDefaultGeometry();
-  void setScreenScale(float);
-  float getScreenScale(){return screenScale;}
+  void setScreenScale(double);
+  double getScreenScale(){return screenScale;}
   
   void setTranslationIncrement(double);
   void setRotationIncrement(double);
@@ -101,7 +101,7 @@ protected:
   osg::ref_ptr<RotateCircularDragger> yRotate;
   osg::ref_ptr<RotateCircularDragger> zRotate;
 
-  float screenScale;
+  double screenScale;
   std::vector<osg::ref_ptr<osg::MatrixTransform> > matrixLinks;
   bool matrixLinked = true;
 
