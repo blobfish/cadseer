@@ -80,7 +80,11 @@ SplitFace::SplitFace()
 
 bool SplitFace::matchStrong(const SplitFace &other) const
 {
-  return edges == other.edges;
+    return
+    (
+      (sourceFace == other.sourceFace) &&
+      (edges == other.edges)
+    );
 }
 
 std::size_t SplitFace::matchWeak(const SplitFace &other) const
