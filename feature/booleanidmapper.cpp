@@ -239,8 +239,8 @@ void BooleanIdMapper::goSplitFaces()
       {
         if (tool->hasShapeIdRecord(origin))
         {
-        originId = tool->findShapeIdRecord(origin).id;
-        break;
+            originId = tool->findShapeIdRecord(origin).id;
+            break;
         }
       }
     }
@@ -255,7 +255,7 @@ void BooleanIdMapper::goSplitFaces()
       assert(seerShapeOut->hasShapeIdRecord(edges(index)));
       uuid tempId = seerShapeOut->findShapeIdRecord(edges(index)).id;
       if (iEdgeCache.count(tempId) == 0)
-	continue;
+        continue;
       faceIEdges.insert(tempId);
     }
     
