@@ -42,6 +42,9 @@
     <file>resources/images/constructionSubtract.svg</file>
     <file>resources/images/constructionIntersect.svg</file>
     <file>resources/images/constructionDatumPlane.svg</file>
+    <file>resources/images/constructionMeasure.svg</file>
+    <file>resources/images/constructionMeasureClear.svg</file>
+    <file>resources/images/constructionLinearMeasure.svg</file>
     <file>resources/images/editBase.svg</file>
     <file>resources/images/editRemove.svg</file>
     <file>resources/images/editUpdate.svg</file>
