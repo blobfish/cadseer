@@ -17,24 +17,11 @@
  *
  */
 
-#ifndef VWR_MESSAGE_H
-#define VWR_MESSAGE_H
+#include <osg/Node>
 
-#include <string>
+#include <viewer/message.h>
 
-#include <osg/ref_ptr>
+using namespace vwr;
 
-namespace osg{class Node;}
-
-namespace vwr
-{
-  struct Message
-  {
-      Message();
-      ~Message();
-        std::string text = "Default Message";
-        osg::ref_ptr<osg::Node> node;
-  };
-}
-
-#endif // VWR_MESSAGE_H
+Message::Message(){}
+Message::~Message(){}

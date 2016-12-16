@@ -39,6 +39,7 @@
 #include <application/application.h>
 #include <application/mainwindow.h>
 #include <viewer/viewerwidget.h>
+#include <viewer/message.h>
 #include <preferences/dialog.h>
 #include <application/factory.h>
 #include <preferences/manager.h>
@@ -55,6 +56,7 @@
 #include <feature/chamfer.h>
 #include <feature/draft.h>
 #include <feature/datumplane.h>
+#include <library/lineardimension.h>
 
 using namespace app;
 using boost::uuids::uuid;
@@ -145,6 +147,9 @@ void Factory::setupDispatcher()
   
   mask = msg::Request | msg::ViewInfo;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::viewInfoDispatched, this, _1)));
+  
+  mask = msg::Request | msg::LinearMeasure;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::linearMeasureDispatched, this, _1)));
 }
 
 void Factory::triggerUpdate()
@@ -929,4 +934,104 @@ void Factory::viewInfoDispatched(const msg::Message &)
     appMessage.infoMessage = infoMessage;
     viewInfoMessage.payload = appMessage;
     observer->messageOutSignal(viewInfoMessage);
+}
+
+void Factory::linearMeasureDispatched(const msg::Message&)
+{
+    std::ostringstream debug;
+    debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+    msg::dispatch().dumpString(debug.str());
+    
+    assert(project);
+    if (containers.size() != 2)
+        return;
+    
+    osg::Vec3d point1(0.0, 0.0, 0.0);
+    osg::Vec3d point2(10.0, 10.0, 10.0);
+    
+    if
+    (
+        (slc::isPointType(containers.front().selectionType)) &&
+        (slc::isPointType(containers.back().selectionType))
+    )
+    {
+        //can't remember, do we need to get occt involved to precision location?
+        point1 = containers.front().pointLocation;
+        point2 = containers.back().pointLocation;
+    }
+    
+    //get the view matrix for orientation.
+    osg::Matrixd viewMatrix = static_cast<app::Application*>(qApp)->
+        getMainWindow()->getViewer()->getViewSystem();
+    osg::Vec3d yVector = point2 - point1; yVector.normalize();
+    osg::Vec3d zVectorView = gu::getZVector(viewMatrix); zVectorView.normalize();
+    osg::Vec3d xVector = zVectorView ^ yVector;
+    if (xVector.isNaN())
+    {
+        msg::Message message;
+        message.mask = msg::Request | msg::StatusText;
+        vwr::Message statusMessage;
+        statusMessage.text = QObject::tr("Can't make dimension with current view direction").toStdString();
+        message.payload = statusMessage;
+        observer->messageOutSignal(message);
+        return;
+    }
+    xVector.normalize();
+    //got to be an easier way!
+    osg::Vec3d zVector  = xVector ^ yVector;
+    zVector.normalize();
+    osg::Matrixd transform
+    (
+        xVector.x(), xVector.y(), xVector.z(), 0.0,
+        yVector.x(), yVector.y(), yVector.z(), 0.0,
+        zVector.x(), zVector.y(), zVector.z(), 0.0,
+        0.0, 0.0, 0.0, 1.0
+    );
+    
+    //probably should be somewhere else.
+    osg::ref_ptr<osg::AutoTransform> autoTransform = new osg::AutoTransform();
+    autoTransform->setPosition(point1);
+    autoTransform->setAutoRotateMode(osg::AutoTransform::ROTATE_TO_AXIS);
+    autoTransform->setAxis(yVector);
+    autoTransform->setNormal(-zVector);
+    
+    osg::ref_ptr<lbr::LinearDimension> dim = new lbr::LinearDimension();
+    dim->setMatrix(transform);
+    dim->setColor(osg::Vec4d(0.8, 0.0, 0.0, 1.0));
+    dim->setSpread((point2 - point1).length());
+    autoTransform->addChild(dim.get());
+    
+    msg::Message message(msg::Request | msg::AddOverlayGeometry);
+    vwr::Message vwrMessage;
+    vwrMessage.node = autoTransform;
+    message.payload = vwrMessage;
+    observer->messageOutSignal(message);
+    
+    QString infoMessage;
+    QTextStream stream(&infoMessage);
+    stream << endl;
+    forcepoint(stream)
+        << qSetRealNumberPrecision(12)
+        << "Point1 location: ["
+        << point1.x() << ", "
+        << point1.y() << ", "
+        << point1.z() << "]"
+        << endl
+        << "Point2 location: ["
+        << point2.x() << ", "
+        << point2.y() << ", "
+        << point2.z() << "]"
+        << endl
+        <<"Length: "
+        << (point2 - point1).length()
+        <<endl;
+        msg::Message viewInfoMessage(msg::Response | msg::ViewInfo);
+        app::Message appMessage;
+        appMessage.infoMessage = infoMessage;
+        viewInfoMessage.payload = appMessage;
+        observer->messageOutSignal(viewInfoMessage);
+    
+    msg::Message clearSelectionMessage;
+    clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
+    observer->messageOutSignal(clearSelectionMessage);
 }

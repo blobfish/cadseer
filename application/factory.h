@@ -68,6 +68,7 @@ namespace app
     void debugShapeGraphDispatched(const msg::Message&);
     void debugShapeTrackDownDispatched(const msg::Message&);
     void viewInfoDispatched(const msg::Message&);
+    void linearMeasureDispatched(const msg::Message&);
   };
 }
 

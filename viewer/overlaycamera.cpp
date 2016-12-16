@@ -36,6 +36,9 @@ OverlayCamera::OverlayCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera(
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
   observer->name = "vwr::OverlayCamera";
   
+  fleetingGeometry = new osg::Switch();
+  this->addChild(fleetingGeometry);
+  
   setNodeMask(NodeMaskDef::overlayCamera);
   setupDispatcher();
   setGraphicsContext(windowIn);
@@ -66,8 +69,14 @@ void OverlayCamera::setupDispatcher()
   mask = msg::Response | msg::Pre | msg::RemoveFeature;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::featureRemovedDispatched, this, _1)));
   
-  mask = msg::Response | msg::Pre | msg::CloseProject;;
+  mask = msg::Response | msg::Pre | msg::CloseProject;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::closeProjectDispatched, this, _1)));
+  
+  mask = msg::Request | msg::AddOverlayGeometry;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::addOverlayGeometryDispatched, this, _1)));
+  
+  mask = msg::Request | msg::ClearOverlayGeometry;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::clearOverlayGeometryDispatched, this, _1)));
 }
 
 void OverlayCamera::featureAddedDispatched(const msg::Message &messageIn)
@@ -92,6 +101,18 @@ void OverlayCamera::featureRemovedDispatched(const msg::Message &messageIn)
 
 void OverlayCamera::closeProjectDispatched(const msg::Message&)
 {
-  //this code assumes that the first child is the absolute csys switch.
-  removeChildren(1, getNumChildren() - 1);
+    //this code assumes that the first child is the absolute csys switch.
+    //also the fleeting switch.
+    removeChildren(2, getNumChildren() - 2);
+}
+
+void OverlayCamera::addOverlayGeometryDispatched(const msg::Message &message)
+{
+    vwr::Message vMessage = boost::get<vwr::Message>(message.payload);
+    fleetingGeometry->addChild(vMessage.node.get());
+}
+
+void OverlayCamera::clearOverlayGeometryDispatched(const msg::Message&)
+{
+    fleetingGeometry->removeChildren(0, fleetingGeometry->getNumChildren());
 }

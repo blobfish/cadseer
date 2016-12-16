@@ -24,7 +24,6 @@
 
 #include <osg/Camera>
 #include <osg/Switch>
-#include <osg/observer_ptr>
 
 namespace osgViewer{class GraphicsWindow;}
 
@@ -42,6 +41,10 @@ private:
   void featureAddedDispatched(const msg::Message &);
   void featureRemovedDispatched(const msg::Message &);
   void closeProjectDispatched(const msg::Message&);
+  void addOverlayGeometryDispatched(const msg::Message&);
+  void clearOverlayGeometryDispatched(const msg::Message&); //!< only fleeting, not features.
+  
+  osg::ref_ptr<osg::Switch> fleetingGeometry;
 };
 }
 

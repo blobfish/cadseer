@@ -84,7 +84,8 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
 //     Plotter::getReference().setBase(root);
     
     osgViewer::View* view = new osgViewer::View;
-    createMainCamera(view->getCamera());
+    mainCamera = view->getCamera();
+    createMainCamera(mainCamera);
 
     //background was covering scene. don't know if it was the upgrade to osg 3.2
     //or the switch to the open source ati driver. I am guessing the driver.
@@ -172,6 +173,11 @@ const osg::Matrixd& ViewerWidget::getCurrentSystem() const
 void ViewerWidget::setCurrentSystem(const osg::Matrixd &mIn)
 {
   currentSystem->setMatrix(mIn);
+}
+
+const osg::Matrixd& ViewerWidget::getViewSystem() const
+{
+    return mainCamera->getViewMatrix();
 }
 
 void ViewerWidget::update()

@@ -189,22 +189,26 @@ SET(LIBRARY_SOURCES
     library/ipgroup.cpp
     library/plabel.cpp
     )
-
-SET(CADSEER_SOURCES
-    main.cpp
+    
+SET(VIEWER_SOURCES
     viewer/viewerwidget.cpp
-    dagview/dagview.cpp
-    dagview/dagmodel.cpp
-    dagview/dagmodelgraph.cpp
-    dagview/dagrectitem.cpp
     viewer/spaceballmanipulator.cpp
     viewer/spaceballqevent.cpp
     viewer/gleventwidget.cpp
     viewer/spaceballosgevent.cpp
-    globalutilities.cpp
-    coordinatesystem.cpp
     viewer/textcamera.cpp
     viewer/overlaycamera.cpp
+    viewer/message.cpp
+)
+
+SET(CADSEER_SOURCES
+    main.cpp
+    dagview/dagview.cpp
+    dagview/dagmodel.cpp
+    dagview/dagmodelgraph.cpp
+    dagview/dagrectitem.cpp
+    globalutilities.cpp
+    coordinatesystem.cpp
     ${MODELVIZ_SOURCES}
     ${TESTING_SOURCES}
     ${GESTURE_SOURCES}
@@ -219,6 +223,7 @@ SET(CADSEER_SOURCES
     ${APPLICATION_SOURCES}
     ${LIBRARY_SOURCES}
     ${COMMAND_SOURCES}
+    ${VIEWER_SOURCES}
     )
 
 SET(CADSEER_MOC_HDRS

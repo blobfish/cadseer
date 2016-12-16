@@ -53,6 +53,7 @@ public:
     void clearSelections() const;
     const osg::Matrixd& getCurrentSystem() const;
     void setCurrentSystem(const osg::Matrixd &mIn);
+    const osg::Matrixd& getViewSystem() const;
 
 public Q_SLOTS:
     void setSelectionMask(const int &maskIn);
@@ -61,6 +62,7 @@ protected:
     void createMainCamera(osg::Camera *camera);
     osg::Camera* createBackgroundCamera();
     osg::Camera* createGestureCamera();
+    osg::Camera* mainCamera;
     QTimer _timer;
     osg::ref_ptr<osg::Group> root;
     osg::ref_ptr<osg::Switch> infoSwitch;
