@@ -43,14 +43,18 @@ namespace slc
   
   inline bool operator==(const Message& lhs, const Message& rhs)
   {
-    return
+    bool out =
     (
-      (lhs.type == rhs.type) &&
-      (lhs.featureId == rhs.featureId) &&
-      (lhs.shapeId == rhs.shapeId)
-      //we ignore point location.
-      //shouldn't need to test featureType if id's are the same
+        (lhs.type == rhs.type) &&
+        (lhs.featureId == rhs.featureId) &&
+        (lhs.shapeId == rhs.shapeId)
+        //shouldn't need to test featureType if id's are the same
     );
+    
+    if (slc::isPointType(lhs.type))
+        out = (out && (lhs.pointLocation == rhs.pointLocation));
+    
+    return out;
   }
   
   inline bool operator!=(const Message& lhs, const Message& rhs)

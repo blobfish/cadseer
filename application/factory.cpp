@@ -502,7 +502,7 @@ void Factory::newBlendDispatched(const msg::Message&)
     //simple radius test  
     simpleBlend.picks.push_back(pick);
     auto simpleRadius = ftr::Blend::buildRadiusParameter();
-    simpleRadius->setValue(2.0);
+    simpleRadius->setValue(1.0);
     simpleBlend.radius = simpleRadius;
     
     //variable blend radius test. really shouldn't be in loop.
@@ -959,6 +959,41 @@ void Factory::linearMeasureDispatched(const msg::Message&)
         point1 = containers.front().pointLocation;
         point2 = containers.back().pointLocation;
     }
+    else
+        return; //for now.
+        
+    msg::Message clearSelectionMessage;
+    clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
+    observer->messageOutSignal(clearSelectionMessage);
+        
+    double distance = (point2 - point1).length();
+    
+    QString infoMessage;
+    QTextStream stream(&infoMessage);
+    stream << endl;
+    forcepoint(stream)
+        << qSetRealNumberPrecision(12)
+        << "Point1 location: ["
+        << point1.x() << ", "
+        << point1.y() << ", "
+        << point1.z() << "]"
+        << endl
+        << "Point2 location: ["
+        << point2.x() << ", "
+        << point2.y() << ", "
+        << point2.z() << "]"
+        << endl
+        <<"Length: "
+        << distance
+        <<endl;
+    msg::Message viewInfoMessage(msg::Response | msg::ViewInfo);
+    app::Message appMessage;
+    appMessage.infoMessage = infoMessage;
+    viewInfoMessage.payload = appMessage;
+    observer->messageOutSignal(viewInfoMessage);
+    
+    if (distance < std::numeric_limits<float>::epsilon())
+        return;
     
     //get the view matrix for orientation.
     osg::Matrixd viewMatrix = static_cast<app::Application*>(qApp)->
@@ -1006,32 +1041,4 @@ void Factory::linearMeasureDispatched(const msg::Message&)
     vwrMessage.node = autoTransform;
     message.payload = vwrMessage;
     observer->messageOutSignal(message);
-    
-    QString infoMessage;
-    QTextStream stream(&infoMessage);
-    stream << endl;
-    forcepoint(stream)
-        << qSetRealNumberPrecision(12)
-        << "Point1 location: ["
-        << point1.x() << ", "
-        << point1.y() << ", "
-        << point1.z() << "]"
-        << endl
-        << "Point2 location: ["
-        << point2.x() << ", "
-        << point2.y() << ", "
-        << point2.z() << "]"
-        << endl
-        <<"Length: "
-        << (point2 - point1).length()
-        <<endl;
-        msg::Message viewInfoMessage(msg::Response | msg::ViewInfo);
-        app::Message appMessage;
-        appMessage.infoMessage = infoMessage;
-        viewInfoMessage.payload = appMessage;
-        observer->messageOutSignal(viewInfoMessage);
-    
-    msg::Message clearSelectionMessage;
-    clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-    observer->messageOutSignal(clearSelectionMessage);
 }

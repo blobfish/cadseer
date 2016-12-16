@@ -864,15 +864,13 @@ void Project::open()
     updateModel();
     updateVisual();
     
-    //hide all non-leaf feature geometry and overlay
+    //hide all non-leaf feature geometry and hide all overlay
     BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
     {
-      ftr::Base *f = projectGraph[currentVertex].feature.get();
-      if (f->isNonLeaf())
-      {
-        f->hide3D();
+        ftr::Base *f = projectGraph[currentVertex].feature.get();
+        if (f->isNonLeaf())
+            f->hide3D();
         f->hideOverlay();
-      }
     }
   }
   catch (const xsd::cxx::xml::invalid_utf16_string&)

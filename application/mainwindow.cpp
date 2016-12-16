@@ -93,11 +93,19 @@ MainWindow::MainWindow(QWidget *parent) :
       ~slc::FacesSelectable &
       ~slc::WiresSelectable &
       ~slc::EdgesSelectable &
+      ~slc::PointsSelectable &
+      ~slc::EndPointsSelectable &
+      ~slc::EndPointsEnabled &
       ~slc::MidPointsSelectable &
+      ~slc::MidPointsEnabled &
       ~slc::CenterPointsSelectable &
+      ~slc::CenterPointsEnabled &
       ~slc::QuadrantPointsSelectable &
+      ~slc::QuadrantPointsEnabled &
       ~slc::NearestPointsSelectable &
-      ~slc::ScreenPointsSelectable
+      ~slc::NearestPointsEnabled &
+      ~slc::ScreenPointsSelectable &
+      ~slc::ScreenPointsEnabled
     );
     
     //add increment widgets to toolbar.
