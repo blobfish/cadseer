@@ -143,7 +143,7 @@ bool TableModel::setData(const QModelIndex& index, const QVariant& value, int)
     eManager.setFormulaName(fId, newName);
     
     //add git message.
-    msg::Message gitMessage(msg::Request | msg::GitMessage);
+    msg::Message gitMessage(msg::Request | msg::Git | msg::Text);
     std::ostringstream gitStream; gitStream << "Rename expression: " << oldName << ", to: " << newName;
     prj::Message pMessage; pMessage.gitMessage = gitStream.str();
     gitMessage.payload = pMessage;
@@ -195,7 +195,7 @@ bool TableModel::setData(const QModelIndex& index, const QVariant& value, int)
     eManager.update();
     
     //add git message.
-    msg::Message gitMessage(msg::Request | msg::GitMessage);
+    msg::Message gitMessage(msg::Request | msg::Git | msg::Text);
     std::ostringstream gitStream; gitStream << "Edit expression: " << stream.str();
     prj::Message pMessage; pMessage.gitMessage = gitStream.str();
     gitMessage.payload = pMessage;
@@ -277,7 +277,7 @@ void TableModel::addDefaultRow()
   this->endInsertRows();
   
   //add git message.
-  msg::Message gitMessage(msg::Request | msg::GitMessage);
+  msg::Message gitMessage(msg::Request | msg::Git | msg::Text);
   std::ostringstream gitStream;  gitStream << "Adding expression: " << name;
   prj::Message pMessage;  pMessage.gitMessage = gitStream.str();
   gitMessage.payload = pMessage;
@@ -307,7 +307,7 @@ void TableModel::removeFormula(const QModelIndexList &indexesIn)
     boost::uuids::uuid currentId = gu::stringToId(this->data(indexMap.value(*rowIt), Qt::UserRole).toString().toStdString());
     
     //add git message. Doing all this in loop because formatting is specific and it's handled in gitManager.
-    msg::Message gitMessage(msg::Request | msg::GitMessage);
+    msg::Message gitMessage(msg::Request | msg::Git | msg::Text);
     std::ostringstream gitStream; gitStream << "Remove expression: " << eManager.getFormulaName(currentId);
     prj::Message pMessage; pMessage.gitMessage = gitStream.str();
     gitMessage.payload = pMessage;
@@ -572,10 +572,10 @@ void SelectionProxyModel::setupDispatcher()
 {
   msg::Mask mask;
   
-  mask = msg::Response | msg::Post | msg::Selection | msg::Addition;
+  mask = msg::Response | msg::Post | msg::Selection | msg::Add;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&SelectionProxyModel::selectionAdditionDispatched, this, boost::placeholders::_1)));
   
-  mask = msg::Response | msg::Pre | msg::Selection | msg::Subtraction;
+  mask = msg::Response | msg::Pre | msg::Selection | msg::Remove;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&SelectionProxyModel::selectionSubtractionDispatched, this, boost::placeholders::_1)));
 }
 

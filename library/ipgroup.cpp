@@ -257,7 +257,7 @@ bool IPGroup::processMotion(const osgManipulator::MotionCommand &commandIn)
     gitStream << QObject::tr("Parameter ").toStdString() << parameter->getName() <<
       QObject::tr(" changed to: ").toStdString() << parameter->getValue();
     msg::Message gitMessage;
-    gitMessage.mask = msg::Request | msg::GitMessage;
+    gitMessage.mask = msg::Request | msg::Git | msg::Text;
     prj::Message pMessage;
     pMessage.gitMessage = gitStream.str();
     gitMessage.payload = pMessage;
@@ -272,7 +272,7 @@ bool IPGroup::processMotion(const osgManipulator::MotionCommand &commandIn)
   }
   
   msg::Message messageOut;
-  messageOut.mask = msg::Request | msg::StatusText;
+  messageOut.mask = msg::Request | msg::Status | msg::Text;
   vwr::Message vMessageOut;
   vMessageOut.text = stream.str();
   messageOut.payload = vMessageOut;

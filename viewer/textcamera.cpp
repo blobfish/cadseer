@@ -177,22 +177,22 @@ void TextCamera::setupDispatcher()
 {
   msg::Mask mask;
   
-  mask = msg::Response | msg::Post | msg::Preselection | msg::Addition;
+  mask = msg::Response | msg::Post | msg::Preselection | msg::Add;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&TextCamera::preselectionAdditionDispatched, this, _1)));
   
-  mask = msg::Response | msg::Pre | msg::Preselection | msg::Subtraction;
+  mask = msg::Response | msg::Pre | msg::Preselection | msg::Remove;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&TextCamera::preselectionSubtractionDispatched, this, _1)));
   
-  mask = msg::Response | msg::Post | msg::Selection | msg::Addition;
+  mask = msg::Response | msg::Post | msg::Selection | msg::Add;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&TextCamera::selectionAdditionDispatched, this, _1)));
   
-  mask = msg::Response | msg::Pre | msg::Selection | msg::Subtraction;
+  mask = msg::Response | msg::Pre | msg::Selection | msg::Remove;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&TextCamera::selectionSubtractionDispatched, this, _1)));
   
-  mask = msg::Request | msg::StatusText;
+  mask = msg::Request | msg::Status | msg::Text;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&TextCamera::statusTextDispatched, this, _1)));
   
-  mask = msg::Request | msg::CommandText;
+  mask = msg::Request | msg::Command | msg::Text;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&TextCamera::commandTextDispatched, this, _1)));
 }
 

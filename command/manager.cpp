@@ -135,7 +135,7 @@ void Manager::activateTop()
 void Manager::sendStatusMessage(const std::string& messageIn)
 {
   msg::Message statusMessage;
-  statusMessage.mask = msg::Request | msg::StatusText;
+  statusMessage.mask = msg::Request | msg::Status | msg::Text;
   vwr::Message statusVMessage;
   statusVMessage.text = messageIn;
   statusMessage.payload = statusVMessage;
@@ -145,7 +145,7 @@ void Manager::sendStatusMessage(const std::string& messageIn)
 void Manager::sendCommandMessage(const std::string& messageIn)
 {
   msg::Message statusMessage;
-  statusMessage.mask = msg::Request | msg::CommandText;
+  statusMessage.mask = msg::Request | msg::Command | msg::Text;
   vwr::Message statusVMessage;
   statusVMessage.text = messageIn;
   statusMessage.payload = statusVMessage;

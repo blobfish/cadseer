@@ -425,7 +425,7 @@ void ExpressionManager::setupDispatcher()
 {
   msg::Mask mask;
   
-  mask = msg::Response | msg::Pre | msg::RemoveFeature;
+  mask = msg::Response | msg::Pre | msg::Remove | msg::Feature;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ExpressionManager::featureRemovedDispatched, this, _1)));
 }
 

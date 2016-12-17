@@ -185,7 +185,7 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
             //clear prehighlight, but we still clear the prehighlight
             //selections we need to make observers aware of this 'hidden' change.
             msg::Message clearMessage;
-            clearMessage.mask = msg::Response | msg::Pre | msg::Preselection | msg::Subtraction;
+            clearMessage.mask = msg::Response | msg::Pre | msg::Preselection | msg::Remove;
             clearMessage.payload = containerToMessage(lastPrehighlight);
             observer->messageOutSignal(clearMessage);
             
@@ -205,7 +205,7 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
             add(selectionContainers, lastPrehighlight);
             
             msg::Message addMessage;
-            addMessage.mask = msg::Response | msg::Post | msg::Selection | msg::Addition;
+            addMessage.mask = msg::Response | msg::Post | msg::Selection | msg::Add;
             addMessage.payload = containerToMessage(lastPrehighlight);
             observer->messageOutSignal(addMessage);
             
@@ -244,7 +244,7 @@ void EventHandler::clearSelections()
     for (it = selectionContainers.rbegin(); it != selectionContainers.rend(); ++it)
     {
         msg::Message removeMessage;
-        removeMessage.mask = msg::Response | msg::Pre | msg::Selection | msg::Subtraction;
+        removeMessage.mask = msg::Response | msg::Pre | msg::Selection | msg::Remove;
         removeMessage.payload = containerToMessage(*it);
         observer->messageOutSignal(removeMessage);
         
@@ -286,7 +286,7 @@ void EventHandler::setPrehighlight(slc::Container &selected)
       selectionOperation(selected.featureId, selected.selectionIds, HighlightVisitor::Operation::PreHighlight);
     
     msg::Message addMessage;
-    addMessage.mask = msg::Response | msg::Post | msg::Preselection | msg::Addition;
+    addMessage.mask = msg::Response | msg::Post | msg::Preselection | msg::Add;
     addMessage.payload = containerToMessage(lastPrehighlight);
     observer->messageOutSignal(addMessage);
 }
@@ -297,7 +297,7 @@ void EventHandler::clearPrehighlight()
       return;
     
     msg::Message removeMessage;
-    removeMessage.mask = msg::Response | msg::Pre | msg::Preselection | msg::Subtraction;
+    removeMessage.mask = msg::Response | msg::Pre | msg::Preselection | msg::Remove;
     removeMessage.payload = containerToMessage(lastPrehighlight);
     observer->messageOutSignal(removeMessage);
     
@@ -324,16 +324,16 @@ void EventHandler::setupDispatcher()
 {
   msg::Mask mask;
   
-  mask = msg::Request | msg::Preselection | msg::Addition;
+  mask = msg::Request | msg::Preselection | msg::Add;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&EventHandler::requestPreselectionAdditionDispatched, this, _1)));
   
-  mask = msg::Request | msg::Preselection | msg::Subtraction;
+  mask = msg::Request | msg::Preselection | msg::Remove;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&EventHandler::requestPreselectionSubtractionDispatched, this, _1)));
   
-  mask = msg::Request | msg::Selection | msg::Addition;
+  mask = msg::Request | msg::Selection | msg::Add;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&EventHandler::requestSelectionAdditionDispatched, this, _1)));
   
-  mask = msg::Request | msg::Selection | msg::Subtraction;
+  mask = msg::Request | msg::Selection | msg::Remove;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&EventHandler::requestSelectionSubtractionDispatched, this, _1)));
 
   mask = msg::Request | msg::Selection | msg::Clear;

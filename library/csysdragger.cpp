@@ -391,7 +391,7 @@ bool CSysCallBack::receive(const osgManipulator::MotionCommand &commandIn)
   
 
   msg::Message messageOut;
-  messageOut.mask = msg::Request | msg::StatusText;
+  messageOut.mask = msg::Request | msg::Status | msg::Text;
   vwr::Message vMessageOut;
   vMessageOut.text = stream.str();
   messageOut.payload = vMessageOut;

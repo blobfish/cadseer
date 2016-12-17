@@ -394,31 +394,31 @@ void Model::setupDispatcher()
 {
   msg::Mask mask;
   
-  mask = msg::Response | msg::Post | msg::AddFeature;
+  mask = msg::Response | msg::Post | msg::Add | msg::Feature;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::featureAddedDispatched, this, _1)));
   
-  mask = msg::Response | msg::Pre | msg::RemoveFeature;
+  mask = msg::Response | msg::Pre | msg::Remove | msg::Feature;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::featureRemovedDispatched, this, _1)));
   
-  mask = msg::Response | msg::Post | msg::AddConnection;
+  mask = msg::Response | msg::Post | msg::Add | msg::Connection;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::connectionAddedDispatched, this, _1)));
   
-  mask = msg::Response | msg::Pre | msg::RemoveConnection;
+  mask = msg::Response | msg::Pre | msg::Remove | msg::Connection;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::connectionRemovedDispatched, this, _1)));
   
   mask = msg::Response | msg::Post | msg::UpdateModel;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::projectUpdatedDispatched, this, _1)));
   
-  mask = msg::Response | msg::Post | msg::Preselection | msg::Addition;
+  mask = msg::Response | msg::Post | msg::Preselection | msg::Add;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::preselectionAdditionDispatched, this, _1)));
   
-  mask = msg::Response | msg::Pre | msg::Preselection | msg::Subtraction;
+  mask = msg::Response | msg::Pre | msg::Preselection | msg::Remove;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::preselectionSubtractionDispatched, this, _1)));
   
-  mask = msg::Response | msg::Post | msg::Selection | msg::Addition;
+  mask = msg::Response | msg::Post | msg::Selection | msg::Add;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::selectionAdditionDispatched, this, _1)));
   
-  mask = msg::Response | msg::Pre | msg::Selection | msg::Subtraction;
+  mask = msg::Response | msg::Pre | msg::Selection | msg::Remove;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::selectionSubtractionDispatched, this, _1)));
   
   mask = msg::Response | msg::Pre | msg::CloseProject;;
@@ -935,7 +935,7 @@ void Model::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     const VertexProperty& record = findRecord(graphLink, currentPrehighlight);
     
     msg::Message message;
-    message.mask = msg::Request | msg::Preselection | msg::Subtraction;
+    message.mask = msg::Request | msg::Preselection | msg::Remove;
     slc::Message sMessage;
     sMessage.type = slc::Type::Object;
     sMessage.featureId = record.featureId;
@@ -950,7 +950,7 @@ void Model::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     const VertexProperty& record = findRecord(graphLink, rectIn);
     
     msg::Message message;
-    message.mask = msg::Request | msg::Preselection | msg::Addition;
+    message.mask = msg::Request | msg::Preselection | msg::Add;
     slc::Message sMessage;
     sMessage.type = slc::Type::Object;
     sMessage.featureId = record.featureId;
@@ -976,7 +976,7 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
   auto select = [this](const uuid &featureIdIn, msg::Mask actionIn)
   {
-    assert((actionIn == msg::Addition) || (actionIn == msg::Subtraction));
+    assert((actionIn == msg::Add) || (actionIn == msg::Remove));
     msg::Message message;
     message.mask = msg::Request | msg::Selection | actionIn;
     slc::Message sMessage;
@@ -1005,16 +1005,16 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
       RectItem *rect = dynamic_cast<RectItem *>(*currentItem);
       if (!rect || rect->isSelected())
 	continue;
-      select(getFeatureIdFromRect(rect), msg::Addition);
+      select(getFeatureIdFromRect(rect), msg::Add);
     }
   };
   
   auto toggleSelect = [this, select, getFeatureIdFromRect](RectItem *rectIn)
   {
     if (rectIn->isSelected())
-      select(getFeatureIdFromRect(rectIn), msg::Subtraction);
+      select(getFeatureIdFromRect(rectIn), msg::Remove);
     else
-      select(getFeatureIdFromRect(rectIn), msg::Addition);
+      select(getFeatureIdFromRect(rectIn), msg::Add);
   };
 //   
 //   if (proxy)
@@ -1104,7 +1104,7 @@ void Model::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     if (!rect->isSelected())
     {
       msg::Message message;
-      message.mask = msg::Request | msg::Selection | msg::Addition;
+      message.mask = msg::Request | msg::Selection | msg::Add;
       slc::Message sMessage;
       sMessage.type = slc::Type::Object;
       sMessage.featureId = record.featureId;

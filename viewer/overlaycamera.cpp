@@ -63,19 +63,19 @@ void OverlayCamera::setupDispatcher()
 {
   msg::Mask mask;
 
-  mask = msg::Response | msg::Post | msg::AddFeature;
+  mask = msg::Response | msg::Post | msg::Add | msg::Feature;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::featureAddedDispatched, this, _1)));
   
-  mask = msg::Response | msg::Pre | msg::RemoveFeature;
+  mask = msg::Response | msg::Pre | msg::Remove | msg::Feature;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::featureRemovedDispatched, this, _1)));
   
   mask = msg::Response | msg::Pre | msg::CloseProject;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::closeProjectDispatched, this, _1)));
   
-  mask = msg::Request | msg::AddOverlayGeometry;
+  mask = msg::Request | msg::Add | msg::OverlayGeometry;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::addOverlayGeometryDispatched, this, _1)));
   
-  mask = msg::Request | msg::ClearOverlayGeometry;
+  mask = msg::Request | msg::Clear | msg::OverlayGeometry;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::clearOverlayGeometryDispatched, this, _1)));
 }
 

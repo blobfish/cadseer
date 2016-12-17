@@ -68,10 +68,10 @@ void CSysEdit::setupDispatcher()
 {
   msg::Mask mask;
   
-  mask = msg::Response | msg::Post | msg::Selection | msg::Addition;
+  mask = msg::Response | msg::Post | msg::Selection | msg::Add;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&CSysEdit::selectionAdditionDispatched, this, _1)));
   
-  mask = msg::Response | msg::Pre | msg::Selection | msg::Subtraction;
+  mask = msg::Response | msg::Pre | msg::Selection | msg::Remove;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&CSysEdit::selectionSubtractionDispatched, this, _1)));
 }
 
@@ -262,7 +262,7 @@ void CSysEdit::activate()
   
   boost::signals2::shared_connection_block block(observer->connection);
   msg::Message messageOut;
-  messageOut.mask = msg::Request | msg::Selection | msg::Addition;
+  messageOut.mask = msg::Request | msg::Selection | msg::Add;
   for (const auto &sMessage : messages)
   {
     messageOut.payload = sMessage;

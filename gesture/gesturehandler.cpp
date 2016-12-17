@@ -67,7 +67,7 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
     {
       //clear any status message
       msg::Message statusClear;
-      statusClear.mask = msg::Request | msg::StatusText;
+      statusClear.mask = msg::Request | msg::Status | msg::Text;
       vwr::Message vMessageOut;
       vMessageOut.text = std::string();
       statusClear.payload = vMessageOut;
@@ -172,7 +172,7 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
                 if (currentNode->getUserValue(attributeStatus, statusString))
                 {
                 msg::Message messageOut;
-                messageOut.mask = msg::Request | msg::StatusText;
+                messageOut.mask = msg::Request | msg::Status | msg::Text;
                 vwr::Message vMessageOut;
                 vMessageOut.text = statusString;
                 messageOut.payload = vMessageOut;
@@ -444,7 +444,7 @@ void GestureHandler::constructMenu()
     
     osg::MatrixTransform *constructMeasureClear = gsn::buildCommandNode(":/resources/images/constructionMeasureClear.svg");
     constructMeasureClear->setMatrix(dummy);
-    constructMeasureClear->setUserValue(attributeMask, (msg::Request | msg::ClearOverlayGeometry).to_string());
+    constructMeasureClear->setUserValue(attributeMask, (msg::Request | msg::Clear | msg::OverlayGeometry).to_string());
     constructMeasureClear->setUserValue(attributeStatus, QObject::tr("Clear Measure Command").toStdString());
     constructionMeasure->insertChild(constructionMeasure->getNumChildren() - 2, constructMeasureClear);
     
@@ -671,7 +671,7 @@ void GestureHandler::startDrag(const osgGA::GUIEventAdapter& eventAdapter)
 {
     //send status
     msg::Message messageOut;
-    messageOut.mask = msg::Request | msg::StatusText;
+    messageOut.mask = msg::Request | msg::Status | msg::Text;
     vwr::Message vMessageOut;
     vMessageOut.text = QObject::tr("Start Menu").toStdString();
     messageOut.payload = vMessageOut;

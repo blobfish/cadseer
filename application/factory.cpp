@@ -82,10 +82,10 @@ void Factory::setupDispatcher()
   mask = msg::Response | msg::Pre | msg::CloseProject;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::closeProjectDispatched, this, _1)));
   
-  mask = msg::Response | msg::Post | msg::Selection | msg::Addition;
+  mask = msg::Response | msg::Post | msg::Selection | msg::Add;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::selectionAdditionDispatched, this, _1)));
   
-  mask = msg::Response | msg::Pre | msg::Selection | msg::Subtraction;
+  mask = msg::Response | msg::Pre | msg::Selection | msg::Remove;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::selectionSubtractionDispatched, this, _1)));
   
   mask = msg::Request | msg::Construct | msg::Box;
@@ -321,7 +321,7 @@ void Factory::newUnionDispatched(const msg::Message&)
   if (containers.size() < 2)
   {
     msg::Message wrongTypeMessage;
-    wrongTypeMessage.mask = msg::Request | msg::StatusText;
+    wrongTypeMessage.mask = msg::Request | msg::Status | msg::Text;
     vwr::Message statusMessage;
     statusMessage.text = QObject::tr("Wrong selection count for operation").toStdString();
     wrongTypeMessage.payload = statusMessage;
@@ -337,7 +337,7 @@ void Factory::newUnionDispatched(const msg::Message&)
     if (selection.selectionType != slc::Type::Object)
     {
       msg::Message wrongTypeMessage;
-      wrongTypeMessage.mask = msg::Request | msg::StatusText;
+      wrongTypeMessage.mask = msg::Request | msg::Status | msg::Text;
       vwr::Message statusMessage;
       statusMessage.text = QObject::tr("Wrong selection type for operation").toStdString();
       wrongTypeMessage.payload = statusMessage;
@@ -374,7 +374,7 @@ void Factory::newSubtractDispatched(const msg::Message&)
   if (containers.size() < 2)
   {
     msg::Message wrongTypeMessage;
-    wrongTypeMessage.mask = msg::Request | msg::StatusText;
+    wrongTypeMessage.mask = msg::Request | msg::Status | msg::Text;
     vwr::Message statusMessage;
     statusMessage.text = QObject::tr("Wrong selection count for operation").toStdString();
     wrongTypeMessage.payload = statusMessage;
@@ -390,7 +390,7 @@ void Factory::newSubtractDispatched(const msg::Message&)
     if (selection.selectionType != slc::Type::Object)
     {
       msg::Message wrongTypeMessage;
-      wrongTypeMessage.mask = msg::Request | msg::StatusText;
+      wrongTypeMessage.mask = msg::Request | msg::Status | msg::Text;
       vwr::Message statusMessage;
       statusMessage.text = QObject::tr("Wrong selection type for operation").toStdString();
       wrongTypeMessage.payload = statusMessage;
@@ -426,7 +426,7 @@ void Factory::newIntersectDispatched(const msg::Message&)
   if (containers.size() < 2)
   {
     msg::Message wrongTypeMessage;
-    wrongTypeMessage.mask = msg::Request | msg::StatusText;
+    wrongTypeMessage.mask = msg::Request | msg::Status | msg::Text;
     vwr::Message statusMessage;
     statusMessage.text = QObject::tr("Wrong selection count for operation").toStdString();
     wrongTypeMessage.payload = statusMessage;
@@ -442,7 +442,7 @@ void Factory::newIntersectDispatched(const msg::Message&)
     if (selection.selectionType != slc::Type::Object)
     {
       msg::Message wrongTypeMessage;
-      wrongTypeMessage.mask = msg::Request | msg::StatusText;
+      wrongTypeMessage.mask = msg::Request | msg::Status | msg::Text;
       vwr::Message statusMessage;
       statusMessage.text = QObject::tr("Wrong selection type for operation").toStdString();
       wrongTypeMessage.payload = statusMessage;
@@ -759,7 +759,7 @@ void Factory::removeDispatched(const msg::Message&)
     if (current.selectionType != slc::Type::Object)
       continue;
     msg::Message removeMessage;
-    removeMessage.mask = msg::Request  | msg::RemoveFeature;
+    removeMessage.mask = msg::Request  | msg::Remove | msg::Feature;
     prj::Message payload;
     payload.featureId = current.featureId;
     removeMessage.payload = payload;
@@ -1004,7 +1004,7 @@ void Factory::linearMeasureDispatched(const msg::Message&)
     if (xVector.isNaN())
     {
         msg::Message message;
-        message.mask = msg::Request | msg::StatusText;
+        message.mask = msg::Request | msg::Status | msg::Text;
         vwr::Message statusMessage;
         statusMessage.text = QObject::tr("Can't make dimension with current view direction").toStdString();
         message.payload = statusMessage;
@@ -1036,7 +1036,7 @@ void Factory::linearMeasureDispatched(const msg::Message&)
     dim->setSpread((point2 - point1).length());
     autoTransform->addChild(dim.get());
     
-    msg::Message message(msg::Request | msg::AddOverlayGeometry);
+    msg::Message message(msg::Request | msg::Add | msg::OverlayGeometry);
     vwr::Message vwrMessage;
     vwrMessage.node = autoTransform;
     message.payload = vwrMessage;

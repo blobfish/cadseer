@@ -235,7 +235,7 @@ void ParameterDialog::linkButtonClickedSlot(bool checkedState)
 
 void ParameterDialog::messageInSlot(const msg::Message &messageIn)
 {
-  if (messageIn.mask == (msg::Response | msg::Pre | msg::RemoveFeature))
+  if (messageIn.mask == (msg::Response | msg::Pre | msg::Remove | msg::Feature))
   {
     prj::Message pMessage = boost::get<prj::Message>(messageIn.payload);
     if(pMessage.feature->getId() == feature->getId())

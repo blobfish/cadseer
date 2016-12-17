@@ -388,10 +388,10 @@ void ViewerWidget::setupDispatcher()
 {
   msg::Mask mask;
   
-  mask = msg::Response | msg::Post | msg::AddFeature;
+  mask = msg::Response | msg::Post | msg::Add | msg::Feature;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::featureAddedDispatched, this, _1)));
   
-  mask = msg::Response | msg::Pre | msg::RemoveFeature;
+  mask = msg::Response | msg::Pre | msg::Remove | msg::Feature;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::featureRemovedDispatched, this, _1)));
   
   mask = msg::Response | msg::Post | msg::UpdateVisual;

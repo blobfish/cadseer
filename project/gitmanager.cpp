@@ -281,13 +281,13 @@ void GitManager::setupDispatcher()
 {
   msg::Mask mask;
   
-  mask = msg::Request | msg::GitMessage;
+  mask = msg::Request | msg::Git | msg::Text;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&GitManager::gitMessageRequestDispatched, this, _1)));
   
-  mask = msg::Request | msg::GitMessage | msg::Freeze;
+  mask = msg::Request | msg::Git | msg::Freeze;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&GitManager::gitMessageFreezeDispatched, this, _1)));
   
-  mask = msg::Request | msg::GitMessage | msg::Thaw;
+  mask = msg::Request | msg::Git | msg::Thaw;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&GitManager::gitMessageThawDispatched, this, _1)));
 }
 
@@ -321,10 +321,10 @@ GitMessageFreezer::~GitMessageFreezer()
 
 void GitMessageFreezer::freeze()
 {
-  observer->messageOutSignal(msg::Message(msg::Request | msg::GitMessage | msg::Freeze));
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Git | msg::Freeze));
 }
 
 void GitMessageFreezer::thaw()
 {
-  observer->messageOutSignal(msg::Message(msg::Request | msg::GitMessage | msg::Thaw));
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Git | msg::Thaw));
 }

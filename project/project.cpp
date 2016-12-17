@@ -258,7 +258,7 @@ void Project::addFeature(std::shared_ptr<ftr::Base> feature)
   }
   
   msg::Message postMessage;
-  postMessage.mask = msg::Response | msg::Post | msg::AddFeature;
+  postMessage.mask = msg::Response | msg::Post | msg::Add | msg::Feature;
   prj::Message pMessage;
   pMessage.feature = feature;
   postMessage.payload = pMessage;
@@ -297,7 +297,7 @@ void Project::removeFeature(const uuid& idIn)
   for (const auto &current : parents)
   {
     msg::Message preMessage;
-    preMessage.mask = msg::Response | msg::Pre | msg::RemoveConnection;
+    preMessage.mask = msg::Response | msg::Pre | msg::Remove | msg::Connection;
     prj::Message pMessage;
     pMessage.featureId = projectGraph[current.first].feature->getId();
     pMessage.featureId2 = idIn;
@@ -309,7 +309,7 @@ void Project::removeFeature(const uuid& idIn)
   for (const auto &current : children)
   {
     msg::Message preMessage;
-    preMessage.mask = msg::Response | msg::Pre | msg::RemoveConnection;
+    preMessage.mask = msg::Response | msg::Pre | msg::Remove | msg::Connection;
     prj::Message pMessage;
     pMessage.featureId = idIn;
     pMessage.featureId2 = projectGraph[current.first].feature->getId();
@@ -319,7 +319,7 @@ void Project::removeFeature(const uuid& idIn)
   }
   
   msg::Message preMessage;
-  preMessage.mask = msg::Response | msg::Pre | msg::RemoveFeature;
+  preMessage.mask = msg::Response | msg::Pre | msg::Remove | msg::Feature;
   prj::Message pMessage;
   pMessage.feature = feature;
   preMessage.payload = pMessage;
@@ -450,7 +450,7 @@ void Project::connect(const boost::uuids::uuid& parentIn, const boost::uuids::uu
   projectGraph[edge].inputType = type;
   
   msg::Message postMessage;
-  postMessage.mask = msg::Response | msg::Post | msg::AddConnection;
+  postMessage.mask = msg::Response | msg::Post | msg::Add | msg::Connection;
   prj::Message pMessage;
   pMessage.featureId = parentIn;
   pMessage.featureId2 = childIn; 
@@ -487,7 +487,7 @@ void Project::setupDispatcher()
   mask = msg::Request | msg::SetCurrentLeaf;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::setCurrentLeafDispatched, this, _1)));
   
-  mask = msg::Request | msg::RemoveFeature;
+  mask = msg::Request | msg::Remove | msg::Feature;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::removeFeatureDispatched, this, _1)));
   
   mask = msg::Request | msg::Update;
@@ -655,7 +655,7 @@ Edge Project::connect(Vertex parentIn, Vertex childIn, ftr::InputTypes type)
   Edge edge = connectVertices(parentIn, childIn, type);
   
   msg::Message postMessage;
-  postMessage.mask = msg::Response | msg::Post | msg::AddConnection;
+  postMessage.mask = msg::Response | msg::Post | msg::Add | msg::Connection;
   prj::Message pMessage;
   pMessage.featureId = projectGraph[parentIn].feature->getId();
   pMessage.featureId2 = projectGraph[childIn].feature->getId(); 
@@ -809,7 +809,7 @@ void Project::initializeNew()
 void Project::open()
 {
   isLoading = true;
-  observer->messageOutSignal(msg::Message(msg::Request | msg::GitMessage | msg::Freeze));
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Git | msg::Freeze));
   
   std::string projectPath = saveDirectory + QDir::separator().toLatin1() + "project.prjt";
   std::string shapePath = saveDirectory + QDir::separator().toLatin1() + "project.brep";
@@ -886,7 +886,7 @@ void Project::open()
     std::cerr << e << std::endl;
   }
   
-  observer->messageOutSignal(msg::Message(msg::Request | msg::GitMessage | msg::Thaw));
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Git | msg::Thaw));
   isLoading = false;
 }
 
