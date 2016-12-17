@@ -22,6 +22,7 @@
 #include <BRepAdaptor_Surface.hxx>
 #include <BRepAdaptor_Curve.hxx>
 #include <TopoDS.hxx>
+#include <BRep_Tool.hxx>
 
 #include <osg/Matrixd>
 
@@ -52,6 +53,7 @@ SeerShapeInfo::SeerShapeInfo(const SeerShape &shapeIn) : seerShape(shapeIn)
     functionMapper->functionMap.insert(std::make_pair(TopAbs_FACE, std::bind(&SeerShapeInfo::faceInfo, this, std::placeholders::_1, std::placeholders::_2)));
     functionMapper->functionMap.insert(std::make_pair(TopAbs_WIRE, std::bind(&SeerShapeInfo::wireInfo, this, std::placeholders::_1, std::placeholders::_2)));
     functionMapper->functionMap.insert(std::make_pair(TopAbs_EDGE, std::bind(&SeerShapeInfo::edgeInfo, this, std::placeholders::_1, std::placeholders::_2)));
+    functionMapper->functionMap.insert(std::make_pair(TopAbs_VERTEX, std::bind(&SeerShapeInfo::vertexInfo, this, std::placeholders::_1, std::placeholders::_2)));
     
     //points handled at factory.
 }
@@ -65,8 +67,6 @@ QTextStream& SeerShapeInfo::getShapeInfo(QTextStream &streamIn, const boost::uui
     
     functionMapper->functionMap.at(shape.ShapeType())(streamIn, shape);
     //common to all shapes.
-    std::ostringstream locationStream;
-    shape.Location().ShallowDump(locationStream);
     streamIn << "orientation: " << ((shape.Orientation() == TopAbs_FORWARD) ? ("Forward") : ("Reversed")) << endl
         << "hash code: " << ShapeIdKeyHash()(shape) << endl;
     
@@ -99,8 +99,9 @@ void SeerShapeInfo::faceInfo(QTextStream &streamIn, const TopoDS_Shape &shapeIn)
     assert(shapeIn.ShapeType() == TopAbs_FACE);
     BRepAdaptor_Surface surfaceAdaptor(TopoDS::Face(shapeIn));
     
-    streamIn << "Shape type: face" << endl
-        << "Surface type: " << gu::surfaceTypeStrings.at(surfaceAdaptor.GetType()) << endl;
+    streamIn << qSetRealNumberPrecision(12) << fixed << "Shape type: face" << endl
+        << "Surface type: " << gu::surfaceTypeStrings.at(surfaceAdaptor.GetType()) << endl
+        << "Tolerance: " << BRep_Tool::Tolerance(TopoDS::Face(shapeIn)) << endl;
 }
 
 void SeerShapeInfo::wireInfo(QTextStream &streamIn, const TopoDS_Shape&)
@@ -113,6 +114,19 @@ void SeerShapeInfo::edgeInfo(QTextStream &streamIn, const TopoDS_Shape &shapeIn)
     assert(shapeIn.ShapeType() == TopAbs_EDGE);
     BRepAdaptor_Curve curveAdaptor(TopoDS::Edge(shapeIn));
     
-    streamIn << "Shape type: edge" << endl
-        << "Curve type: " << gu::curveTypeStrings.at(curveAdaptor.GetType()) << endl;
+    streamIn << qSetRealNumberPrecision(12) << fixed << "Shape type: edge" << endl
+        << "Curve type: " << gu::curveTypeStrings.at(curveAdaptor.GetType()) << endl
+        << "Tolerance: " << BRep_Tool::Tolerance(TopoDS::Edge(shapeIn)) << endl;
+}
+
+void SeerShapeInfo::vertexInfo(QTextStream &streamIn, const TopoDS_Shape &shapeIn)
+{
+    assert(shapeIn.ShapeType() == TopAbs_VERTEX);
+    gp_Pnt vPoint = BRep_Tool::Pnt(TopoDS::Vertex(shapeIn));
+    forcepoint(streamIn) << qSetRealNumberPrecision(12) << fixed << "Shape type: vertex" << endl
+      << "location: ["
+      << vPoint.X() << ", "
+      << vPoint.Y() << ", "
+      << vPoint.Z() << "]" << endl
+      << "Tolerance: " << BRep_Tool::Tolerance(TopoDS::Vertex(shapeIn)) << endl;
 }

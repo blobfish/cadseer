@@ -245,6 +245,22 @@ void ParameterDialog::messageInSlot(const msg::Message &messageIn)
 
 void ParameterDialog::updateSlot()
 {
+  //add git message.
+  auto sendGitMessage = [this](std::ostringstream &stream)
+  {
+    msg::Message gitMessage;
+    gitMessage.mask = msg::Request | msg::Git | msg::Text;
+    prj::Message pMessage;
+    pMessage.gitMessage = stream.str();
+    gitMessage.payload = pMessage;
+    messageOutSignal(gitMessage);
+  };
+  
+  std::ostringstream gitStream;
+  gitStream
+    << QObject::tr("Feature: ").toStdString() << feature->getName().toStdString()
+    << QObject::tr("    Parameter ").toStdString() << parameter->getName();
+    
   double temp = editLine->text().toDouble();
   if
   (
@@ -255,6 +271,9 @@ void ParameterDialog::updateSlot()
     parameter->setValue(temp);
     if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
     {
+      gitStream  << QObject::tr("    changed to: ").toStdString() << parameter->getValue();
+      sendGitMessage(gitStream);
+      
       msg::Message uMessage;
       uMessage.mask = msg::Request | msg::Update;
       messageOutSignal(uMessage);
@@ -273,6 +292,9 @@ void ParameterDialog::updateSlot()
       parameter->setValue(value);
       if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
       {
+        gitStream  << QObject::tr("    changed to: ").toStdString() << parameter->getValue();
+        sendGitMessage(gitStream);
+        
         msg::Message uMessage;
         uMessage.mask = msg::Request | msg::Update;
         messageOutSignal(uMessage);

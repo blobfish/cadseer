@@ -138,7 +138,7 @@ TextCamera::TextCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
   selectionLabel->setCharacterSize(qApp->font().pointSizeF()); //this is 9.0 here.
   selectionLabel->setPosition(pos);
   selectionLabel->setAlignment(osgText::TextBase::RIGHT_TOP);
-  selectionLabel->setText("testing text\n and yet even multiline");
+  selectionLabel->setText("Selection: ");
   infoSwitch->addChild(selectionLabel.get());
   
   statusLabel = new osgText::Text();

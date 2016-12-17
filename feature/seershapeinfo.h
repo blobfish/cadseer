@@ -49,6 +49,7 @@ namespace ftr
             void faceInfo(QTextStream&, const TopoDS_Shape&);
             void wireInfo(QTextStream&, const TopoDS_Shape&);
             void edgeInfo(QTextStream&, const TopoDS_Shape&);
+            void vertexInfo(QTextStream&, const TopoDS_Shape&);
     };
 }
 

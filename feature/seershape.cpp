@@ -692,6 +692,26 @@ std::vector< osg::Vec3d > SeerShape::useGetNearestPoint(const uuid &shapeIn, con
   return out;
 }
 
+uuid SeerShape::useGetStartVertex(const uuid &edgeIdIn) const
+{
+  assert(hasShapeIdRecord(edgeIdIn));
+  const TopoDS_Shape& edgeShape = getOCCTShape(edgeIdIn);
+  assert(edgeShape.ShapeType() == TopAbs_EDGE);
+  TopoDS_Vertex v = TopExp::FirstVertex(TopoDS::Edge(edgeShape), Standard_True);
+  assert(hasShapeIdRecord(v));
+  return findShapeIdRecord(v).id;
+}
+
+uuid SeerShape::useGetEndVertex(const uuid &edgeIdIn) const
+{
+  assert(hasShapeIdRecord(edgeIdIn));
+  const TopoDS_Shape& edgeShape = getOCCTShape(edgeIdIn);
+  assert(edgeShape.ShapeType() == TopAbs_EDGE);
+  TopoDS_Vertex v = TopExp::LastVertex(TopoDS::Edge(edgeShape), Standard_True);
+  assert(hasShapeIdRecord(v));
+  return findShapeIdRecord(v).id;
+}
+
 void SeerShape::shapeMatch(const SeerShape &source)
 {
   typedef ShapeIdContainer::index<ShapeIdRecord::ByShape>::type List;

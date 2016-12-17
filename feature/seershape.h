@@ -297,6 +297,8 @@ namespace ftr
     std::vector<osg::Vec3d> useGetCenterPoint(const BID::uuid &) const;
     std::vector<osg::Vec3d> useGetQuadrantPoints(const BID::uuid &) const;
     std::vector<osg::Vec3d> useGetNearestPoint(const BID::uuid &, const osg::Vec3d&) const;
+    BID::uuid useGetStartVertex(const BID::uuid &) const;
+    BID::uuid useGetEndVertex(const BID::uuid &) const;
     //@}
     
     //@{

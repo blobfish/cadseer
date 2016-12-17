@@ -144,6 +144,9 @@ void Blend::addSimpleBlend(const SimpleBlend &simpleBlendIn)
     simpleBlends.back().label = new lbr::PLabel(simpleBlends.back().radius.get());
   simpleBlends.back().label->valueHasChanged();
   overlaySwitch->addChild(simpleBlends.back().label.get());
+  
+  //multiple blends? pmap might need to be a multi map
+  pMap.insert(std::make_pair(simpleBlends.back().radius->getName(), simpleBlends.back().radius.get()));
 }
 
 void Blend::addVariableBlend(const VariableBlend &variableBlendIn)
@@ -154,6 +157,8 @@ void Blend::addVariableBlend(const VariableBlend &variableBlendIn)
     if (e.position)
       e.position->connectValue(boost::bind(&Blend::setModelDirty, this));
     e.radius->connectValue(boost::bind(&Blend::setModelDirty, this));
+    //multiple blends? pmap might need to be a multi map
+    //pMap.insert(std::make_pair(simpleBlends.back().radius->getName(), simpleBlends.back().radius.get()));
   }
 }
 

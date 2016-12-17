@@ -29,6 +29,7 @@
 #include <BRepTools.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
+#include <TopoDS_Vertex.hxx>
 #include <TopoDS.hxx>
 
 #include <tools/idtools.h>
@@ -896,6 +897,7 @@ void Factory::viewInfoDispatched(const msg::Message &)
     stream << endl;
     for (const auto &container : containers)
     {
+        ftr::Base *feature = project->findFeature(container.featureId);
         stream <<  endl;
         if
         (
@@ -903,7 +905,6 @@ void Factory::viewInfoDispatched(const msg::Message &)
             (container.selectionType == slc::Type::Feature)
         )
         {
-            ftr::Base *feature = project->findFeature(container.featureId);
             feature->getInfo(stream);
         }
         else if
@@ -915,17 +916,38 @@ void Factory::viewInfoDispatched(const msg::Message &)
             (container.selectionType == slc::Type::Edge)
         )
         {
-            ftr::Base *feature = project->findFeature(container.featureId);
             feature->getShapeInfo(stream, container.shapeId);
         }
-        else
+        else if (container.selectionType == slc::Type::StartPoint)
         {
+            const ftr::SeerShape &s = feature->getSeerShape();
+            feature->getShapeInfo(stream, s.useGetStartVertex(container.shapeId));
             forcepoint(stream)
                 << qSetRealNumberPrecision(12)
                 << "Point location: ["
                 << container.pointLocation.x() << ", "
                 << container.pointLocation.y() << ", "
                 << container.pointLocation.z() << "]";
+        }
+        else if (container.selectionType == slc::Type::EndPoint)
+        {
+          const ftr::SeerShape &s = feature->getSeerShape();
+          feature->getShapeInfo(stream, s.useGetEndVertex(container.shapeId));
+          forcepoint(stream)
+            << qSetRealNumberPrecision(12)
+            << "Point location: ["
+            << container.pointLocation.x() << ", "
+            << container.pointLocation.y() << ", "
+            << container.pointLocation.z() << "]";
+        }
+        else //all other points.
+        {
+          forcepoint(stream)
+            << qSetRealNumberPrecision(12)
+            << "Point location: ["
+            << container.pointLocation.x() << ", "
+            << container.pointLocation.y() << ", "
+            << container.pointLocation.z() << "]";
         }
     }
     
