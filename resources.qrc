@@ -87,6 +87,8 @@
     <file>resources/images/trafficRed.svg</file>
     <file>resources/images/trafficYellow.svg</file>
     <file>resources/images/trafficGreen.svg</file>
+    <file>resources/images/inspectBase.svg</file>
+    <file>resources/images/inspectCheckGeometry.svg</file>
     <file>preferences/preferences.xml</file>
     <file>preferences/preferencesXML.xsd</file>
   </qresource>
