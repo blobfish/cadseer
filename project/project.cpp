@@ -73,9 +73,7 @@ Project::~Project()
 
 void Project::updateModel()
 {
-  msg::Message preMessage;
-  preMessage.mask = msg::Response | msg::Pre | msg::UpdateModel;
-  observer->messageOutSignal(preMessage);
+  observer->messageOutSignal(msg::Message(msg::Response | msg::Pre | msg::UpdateModel));
   
   expressionManager->update();
   
@@ -138,22 +136,16 @@ void Project::updateModel()
   
   updateLeafStatus();
   
-  msg::Message postMessage;
-  postMessage.mask = msg::Response | msg::Post | msg::UpdateModel;
-  observer->messageOutSignal(postMessage);
+  observer->messageOutSignal(msg::Message(msg::Response | msg::Post | msg::UpdateModel));
 }
 
 void Project::updateVisual()
 {
   //if we have selection and then destroy the geometry when the
   //the visual updates, things get out of sync. so clear the selection.
-  msg::Message clearSelectionMessage;
-  clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  observer->messageOutSignal(clearSelectionMessage);
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
   
-  msg::Message preMessage;
-  preMessage.mask = msg::Response | msg::Pre | msg::UpdateVisual;
-  observer->messageOutSignal(preMessage);
+  observer->messageOutSignal(msg::Message(msg::Response | msg::Pre | msg::UpdateVisual));
   
   Path sorted;
   try
@@ -181,9 +173,7 @@ void Project::updateVisual()
       feature->updateVisual();
   }
   
-  msg::Message postMessage;
-  postMessage.mask = msg::Response | msg::Post | msg::UpdateVisual;
-  observer->messageOutSignal(postMessage);
+  observer->messageOutSignal(msg::Message(msg::Response | msg::Post | msg::UpdateVisual));
 }
 
 void Project::writeGraphViz(const std::string& fileName)
@@ -257,8 +247,7 @@ void Project::addFeature(std::shared_ptr<ftr::Base> feature)
     gitManager->appendGitMessage(gitMessage.str());
   }
   
-  msg::Message postMessage;
-  postMessage.mask = msg::Response | msg::Post | msg::Add | msg::Feature;
+  msg::Message postMessage(msg::Response | msg::Post | msg::Add | msg::Feature);
   prj::Message pMessage;
   pMessage.feature = feature;
   postMessage.payload = pMessage;
@@ -296,8 +285,7 @@ void Project::removeFeature(const uuid& idIn)
   
   for (const auto &current : parents)
   {
-    msg::Message preMessage;
-    preMessage.mask = msg::Response | msg::Pre | msg::Remove | msg::Connection;
+    msg::Message preMessage(msg::Response | msg::Pre | msg::Remove | msg::Connection);
     prj::Message pMessage;
     pMessage.featureId = projectGraph[current.first].feature->getId();
     pMessage.featureId2 = idIn;
@@ -308,8 +296,7 @@ void Project::removeFeature(const uuid& idIn)
   
   for (const auto &current : children)
   {
-    msg::Message preMessage;
-    preMessage.mask = msg::Response | msg::Pre | msg::Remove | msg::Connection;
+    msg::Message preMessage(msg::Response | msg::Pre | msg::Remove | msg::Connection);
     prj::Message pMessage;
     pMessage.featureId = idIn;
     pMessage.featureId2 = projectGraph[current.first].feature->getId();
@@ -318,8 +305,7 @@ void Project::removeFeature(const uuid& idIn)
     observer->messageOutSignal(preMessage);
   }
   
-  msg::Message preMessage;
-  preMessage.mask = msg::Response | msg::Pre | msg::Remove | msg::Feature;
+  msg::Message preMessage(msg::Response | msg::Pre | msg::Remove | msg::Feature);
   prj::Message pMessage;
   pMessage.feature = feature;
   preMessage.payload = pMessage;
@@ -350,9 +336,7 @@ void Project::setFeatureActive(const uuid& idIn)
   //sometimes the visual of a feature is dirty and doesn't get updated 
   //until we try to show it. However it might be selected meaning that
   //we will destroy the old geometry that is highlighted. So clear the seleciton.
-  msg::Message clearSelectionMessage;
-  clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  observer->messageOutSignal(clearSelectionMessage);
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
   
   //the visitor will be setting features to an inactive state which
   //triggers the signal and we would end up back into this->stateChangedSlot.
@@ -449,8 +433,7 @@ void Project::connect(const boost::uuids::uuid& parentIn, const boost::uuids::uu
   Edge edge = connectVertices(parent, child, type);
   projectGraph[edge].inputType = type;
   
-  msg::Message postMessage;
-  postMessage.mask = msg::Response | msg::Post | msg::Add | msg::Connection;
+  msg::Message postMessage(msg::Response | msg::Post | msg::Add | msg::Connection);
   prj::Message pMessage;
   pMessage.featureId = parentIn;
   pMessage.featureId2 = childIn; 
@@ -654,8 +637,7 @@ Edge Project::connect(Vertex parentIn, Vertex childIn, ftr::InputTypes type)
 {
   Edge edge = connectVertices(parentIn, childIn, type);
   
-  msg::Message postMessage;
-  postMessage.mask = msg::Response | msg::Post | msg::Add | msg::Connection;
+  msg::Message postMessage(msg::Response | msg::Post | msg::Add | msg::Connection);
   prj::Message pMessage;
   pMessage.featureId = projectGraph[parentIn].feature->getId();
   pMessage.featureId2 = projectGraph[childIn].feature->getId(); 
@@ -789,15 +771,11 @@ void Project::serialWrite()
 
 void Project::save()
 {
-  msg::Message preMessage;
-  preMessage.mask = msg::Response | msg::Pre | msg::SaveProject;
-  observer->messageOutSignal(preMessage);
+  observer->messageOutSignal(msg::Message(msg::Response | msg::Pre | msg::SaveProject));
   
   gitManager->save();
   
-  msg::Message postMessage;
-  postMessage.mask = msg::Response | msg::Post | msg::SaveProject;
-  observer->messageOutSignal(postMessage);
+  observer->messageOutSignal(msg::Message(msg::Response | msg::Post | msg::SaveProject));
 }
 
 void Project::initializeNew()

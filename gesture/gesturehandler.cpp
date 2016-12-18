@@ -66,12 +66,7 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
     auto clearStatus = [&]()
     {
       //clear any status message
-      msg::Message statusClear;
-      statusClear.mask = msg::Request | msg::Status | msg::Text;
-      vwr::Message vMessageOut;
-      vMessageOut.text = std::string();
-      statusClear.payload = vMessageOut;
-      observer->messageOutSignal(statusClear);
+      observer->messageOutSignal(msg::buildStatusMessage(""));
     };
     
     if (eventAdapter.getModKeyMask() & osgGA::GUIEventAdapter::MODKEY_LEFT_CTRL)
@@ -171,12 +166,7 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
                 std::string statusString;
                 if (currentNode->getUserValue(attributeStatus, statusString))
                 {
-                msg::Message messageOut;
-                messageOut.mask = msg::Request | msg::Status | msg::Text;
-                vwr::Message vMessageOut;
-                vMessageOut.text = statusString;
-                messageOut.payload = vMessageOut;
-                observer->messageOutSignal(messageOut);
+                  observer->messageOutSignal(msg::buildStatusMessage(statusString));
                 }
 
                 osg::Switch *geometrySwitch = dynamic_cast<osg::Switch*>(parentNode->getChild(parentNode->getNumChildren() - 1));
@@ -670,12 +660,7 @@ double GestureHandler::calculateSprayRadius(int nodeCount)
 void GestureHandler::startDrag(const osgGA::GUIEventAdapter& eventAdapter)
 {
     //send status
-    msg::Message messageOut;
-    messageOut.mask = msg::Request | msg::Status | msg::Text;
-    vwr::Message vMessageOut;
-    vMessageOut.text = QObject::tr("Start Menu").toStdString();
-    messageOut.payload = vMessageOut;
-    observer->messageOutSignal(messageOut);
+    observer->messageOutSignal(msg::buildStatusMessage(QObject::tr("Start Menu").toStdString()));
   
     gestureSwitch->setAllChildrenOn();
     osg::Switch *startSwitch = dynamic_cast<osg::Switch *>(startNode->getChild(startNode->getNumChildren() - 1));

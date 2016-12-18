@@ -114,7 +114,7 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
     {
       if (eventAdapter.getKey() == osgGA::GUIEventAdapter::KEY_Escape)
       {
-        observer->messageOutSignal(msg::Request | msg::Command | msg::Cancel);
+        observer->messageOutSignal(msg::Message(msg::Request | msg::Command | msg::Cancel));
         return true;
       }
     }
@@ -184,8 +184,7 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
             //prehighlight gets 'moved' into selections so can't call
             //clear prehighlight, but we still clear the prehighlight
             //selections we need to make observers aware of this 'hidden' change.
-            msg::Message clearMessage;
-            clearMessage.mask = msg::Response | msg::Pre | msg::Preselection | msg::Remove;
+            msg::Message clearMessage(msg::Response | msg::Pre | msg::Preselection | msg::Remove);
             clearMessage.payload = containerToMessage(lastPrehighlight);
             observer->messageOutSignal(clearMessage);
             
@@ -204,8 +203,7 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
             
             add(selectionContainers, lastPrehighlight);
             
-            msg::Message addMessage;
-            addMessage.mask = msg::Response | msg::Post | msg::Selection | msg::Add;
+            msg::Message addMessage(msg::Response | msg::Post | msg::Selection | msg::Add);
             addMessage.payload = containerToMessage(lastPrehighlight);
             observer->messageOutSignal(addMessage);
             
@@ -243,8 +241,7 @@ void EventHandler::clearSelections()
     Containers::reverse_iterator it;
     for (it = selectionContainers.rbegin(); it != selectionContainers.rend(); ++it)
     {
-        msg::Message removeMessage;
-        removeMessage.mask = msg::Response | msg::Pre | msg::Selection | msg::Remove;
+        msg::Message removeMessage(msg::Response | msg::Pre | msg::Selection | msg::Remove);
         removeMessage.payload = containerToMessage(*it);
         observer->messageOutSignal(removeMessage);
         
@@ -285,8 +282,7 @@ void EventHandler::setPrehighlight(slc::Container &selected)
     else
       selectionOperation(selected.featureId, selected.selectionIds, HighlightVisitor::Operation::PreHighlight);
     
-    msg::Message addMessage;
-    addMessage.mask = msg::Response | msg::Post | msg::Preselection | msg::Add;
+    msg::Message addMessage(msg::Response | msg::Post | msg::Preselection | msg::Add);
     addMessage.payload = containerToMessage(lastPrehighlight);
     observer->messageOutSignal(addMessage);
 }
@@ -296,8 +292,7 @@ void EventHandler::clearPrehighlight()
     if (lastPrehighlight.selectionType == Type::None)
       return;
     
-    msg::Message removeMessage;
-    removeMessage.mask = msg::Response | msg::Pre | msg::Preselection | msg::Remove;
+    msg::Message removeMessage(msg::Response | msg::Pre | msg::Preselection | msg::Remove);
     removeMessage.payload = containerToMessage(lastPrehighlight);
     observer->messageOutSignal(removeMessage);
     
@@ -507,7 +502,6 @@ Container EventHandler::messageToContainer(const Message &messageIn)
   assert(!messageIn.featureId.is_nil());
   const ftr::Base *feature = dynamic_cast<app::Application *>(qApp)->getProject()->findFeature(messageIn.featureId);
   assert(feature);
-  const ftr::SeerShape &seerShape = feature->getSeerShape();
   
   slc::Container container;
   container.selectionType = messageIn.type;
@@ -516,8 +510,9 @@ Container EventHandler::messageToContainer(const Message &messageIn)
   container.shapeId = messageIn.shapeId;
   container.pointLocation = messageIn.pointLocation;
   
-  if (!seerShape.isNull())
+  if (feature->hasSeerShape())
   {
+    const ftr::SeerShape &seerShape = feature->getSeerShape();
     if
     (
       (messageIn.type == slc::Type::Object) ||

@@ -934,8 +934,7 @@ void Model::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
       return;
     const VertexProperty& record = findRecord(graphLink, currentPrehighlight);
     
-    msg::Message message;
-    message.mask = msg::Request | msg::Preselection | msg::Remove;
+    msg::Message message(msg::Request | msg::Preselection | msg::Remove);
     slc::Message sMessage;
     sMessage.type = slc::Type::Object;
     sMessage.featureId = record.featureId;
@@ -949,8 +948,7 @@ void Model::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
   {
     const VertexProperty& record = findRecord(graphLink, rectIn);
     
-    msg::Message message;
-    message.mask = msg::Request | msg::Preselection | msg::Add;
+    msg::Message message(msg::Request | msg::Preselection | msg::Add);
     slc::Message sMessage;
     sMessage.type = slc::Type::Object;
     sMessage.featureId = record.featureId;
@@ -977,8 +975,7 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
   auto select = [this](const uuid &featureIdIn, msg::Mask actionIn)
   {
     assert((actionIn == msg::Add) || (actionIn == msg::Remove));
-    msg::Message message;
-    message.mask = msg::Request | msg::Selection | actionIn;
+    msg::Message message(msg::Request | msg::Selection | actionIn);
     slc::Message sMessage;
     sMessage.type = slc::Type::Object;
     sMessage.featureId = featureIdIn;
@@ -1054,8 +1051,7 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
   
   if (event->button() == Qt::MiddleButton)
   {
-    msg::Message message;
-    message.mask = msg::Request | msg::Selection | msg::Clear;
+    msg::Message message(msg::Request | msg::Selection | msg::Clear);
     slc::Message sMessage;
     message.payload = sMessage;
     observer->messageOutSignal(message);
@@ -1103,8 +1099,7 @@ void Model::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     const VertexProperty &record = findRecord(graphLink, rect);
     if (!rect->isSelected())
     {
-      msg::Message message;
-      message.mask = msg::Request | msg::Selection | msg::Add;
+      msg::Message message(msg::Request | msg::Selection | msg::Add);
       slc::Message sMessage;
       sMessage.type = slc::Type::Object;
       sMessage.featureId = record.featureId;
@@ -1175,8 +1170,7 @@ void Model::setCurrentLeafSlot()
   //temp for testing
   prj::Message prjMessageOut;
   prjMessageOut.featureId = graph[currentSelections.front()].featureId;
-  msg::Message messageOut;
-  messageOut.mask = msg::Request | msg::SetCurrentLeaf;
+  msg::Message messageOut(msg::Request | msg::SetCurrentLeaf);
   messageOut.payload = prjMessageOut;
   observer->messageOutSignal(messageOut);
 }
@@ -1191,8 +1185,7 @@ void Model::toggleOverlaySlot()
 {
   auto currentSelections = getAllSelected();
   
-  msg::Message message;
-  message.mask = msg::Request | msg::Selection | msg::Clear;
+  msg::Message message(msg::Request | msg::Selection | msg::Clear);
   observer->messageOutSignal(message);
   
   for (auto v : currentSelections)

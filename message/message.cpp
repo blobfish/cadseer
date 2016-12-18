@@ -17,6 +17,31 @@
  *
  */
 
-#include "message.h"
+#include <osg/Node>
+
+#include <message/message.h>
 
 using namespace msg;
+
+
+msg::Message msg::buildGitMessage(const std::string &messageIn)
+{
+  msg::Message out;
+  out.mask = msg::Request | msg::Git | msg::Text;
+  prj::Message pMessage;
+  pMessage.gitMessage = messageIn;
+  out.payload = pMessage;
+  
+  return out;
+}
+
+msg::Message msg::buildStatusMessage(const std::string &messageIn)
+{
+  msg::Message out;
+  out.mask = msg::Request | msg::Status | msg::Text;
+  vwr::Message statusMessage;
+  statusMessage.text = messageIn;
+  out.payload = statusMessage;
+  
+  return out;
+}

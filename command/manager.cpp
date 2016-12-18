@@ -104,13 +104,11 @@ void Manager::doneSlot()
     stack.pop();
   }
   clearSelection();
-  sendStatusMessage("");
+  observer->messageOutSignal(msg::buildStatusMessage(""));
   
   if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
   {
-    msg::Message uMessage;
-    uMessage.mask = msg::Request | msg::Update;
-    observer->messageOutSignal(uMessage);
+    observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
   }
   
   if (!stack.empty())
@@ -121,7 +119,7 @@ void Manager::doneSlot()
 
 void Manager::activateTop()
 {
-  sendStatusMessage(stack.top()->getStatusMessage());
+  observer->messageOutSignal(msg::buildStatusMessage(stack.top()->getStatusMessage()));
   
   std::ostringstream stream;
   stream << 
@@ -132,20 +130,9 @@ void Manager::activateTop()
   stack.top()->activate();
 }
 
-void Manager::sendStatusMessage(const std::string& messageIn)
-{
-  msg::Message statusMessage;
-  statusMessage.mask = msg::Request | msg::Status | msg::Text;
-  vwr::Message statusVMessage;
-  statusVMessage.text = messageIn;
-  statusMessage.payload = statusVMessage;
-  observer->messageOutSignal(statusMessage);
-}
-
 void Manager::sendCommandMessage(const std::string& messageIn)
 {
-  msg::Message statusMessage;
-  statusMessage.mask = msg::Request | msg::Command | msg::Text;
+  msg::Message statusMessage(msg::Request | msg::Command | msg::Text);
   vwr::Message statusVMessage;
   statusVMessage.text = messageIn;
   statusMessage.payload = statusVMessage;
@@ -154,9 +141,7 @@ void Manager::sendCommandMessage(const std::string& messageIn)
 
 void Manager::clearSelection()
 {
-  msg::Message clearMessage;
-  clearMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  observer->messageOutSignal(clearMessage);
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
 }
 
 void Manager::featureToSystemDispatched(const msg::Message&)

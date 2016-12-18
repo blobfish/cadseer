@@ -143,11 +143,9 @@ bool TableModel::setData(const QModelIndex& index, const QVariant& value, int)
     eManager.setFormulaName(fId, newName);
     
     //add git message.
-    msg::Message gitMessage(msg::Request | msg::Git | msg::Text);
-    std::ostringstream gitStream; gitStream << "Rename expression: " << oldName << ", to: " << newName;
-    prj::Message pMessage; pMessage.gitMessage = gitStream.str();
-    gitMessage.payload = pMessage;
-    observer->messageOutSignal(gitMessage);
+    std::ostringstream gitStream;
+    gitStream << "Rename expression: " << oldName << ", to: " << newName;
+    observer->messageOutSignal(msg::buildGitMessage(gitStream.str()));
   }
   if (index.column() == 1)
   {
@@ -195,11 +193,9 @@ bool TableModel::setData(const QModelIndex& index, const QVariant& value, int)
     eManager.update();
     
     //add git message.
-    msg::Message gitMessage(msg::Request | msg::Git | msg::Text);
-    std::ostringstream gitStream; gitStream << "Edit expression: " << stream.str();
-    prj::Message pMessage; pMessage.gitMessage = gitStream.str();
-    gitMessage.payload = pMessage;
-    observer->messageOutSignal(gitMessage);
+    std::ostringstream gitStream;
+    gitStream << "Edit expression: " << stream.str();
+    observer->messageOutSignal(msg::buildGitMessage(gitStream.str()));
     
   }
   lastFailedText.clear();
@@ -208,9 +204,7 @@ bool TableModel::setData(const QModelIndex& index, const QVariant& value, int)
   removeRhs(fId);
   Q_EMIT dataChanged(index, index);
   
-  msg::Message updateMessage;
-  updateMessage.mask = msg::Request | msg::Update;
-  observer->messageOutSignal(updateMessage);
+  observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
   
   return true;
 }
@@ -277,11 +271,9 @@ void TableModel::addDefaultRow()
   this->endInsertRows();
   
   //add git message.
-  msg::Message gitMessage(msg::Request | msg::Git | msg::Text);
-  std::ostringstream gitStream;  gitStream << "Adding expression: " << name;
-  prj::Message pMessage;  pMessage.gitMessage = gitStream.str();
-  gitMessage.payload = pMessage;
-  observer->messageOutSignal(gitMessage);
+  std::ostringstream gitStream;
+  gitStream << "Adding expression: " << name;
+  observer->messageOutSignal(msg::buildGitMessage(gitStream.str()));
 }
 
 void TableModel::removeFormula(const QModelIndexList &indexesIn)
@@ -307,20 +299,16 @@ void TableModel::removeFormula(const QModelIndexList &indexesIn)
     boost::uuids::uuid currentId = gu::stringToId(this->data(indexMap.value(*rowIt), Qt::UserRole).toString().toStdString());
     
     //add git message. Doing all this in loop because formatting is specific and it's handled in gitManager.
-    msg::Message gitMessage(msg::Request | msg::Git | msg::Text);
-    std::ostringstream gitStream; gitStream << "Remove expression: " << eManager.getFormulaName(currentId);
-    prj::Message pMessage; pMessage.gitMessage = gitStream.str();
-    gitMessage.payload = pMessage;
-    observer->messageOutSignal(gitMessage);
+    std::ostringstream gitStream;
+    gitStream << "Remove expression: " << eManager.getFormulaName(currentId);
+    observer->messageOutSignal(msg::buildGitMessage(gitStream.str()));
     
     eManager.removeFormula(currentId);
   }
   idToRhsMap.clear();
   endResetModel();
   
-  msg::Message updateMessage;
-  updateMessage.mask = msg::Request | msg::Update;
-  observer->messageOutSignal(updateMessage);
+  observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
 }
 
 void TableModel::exportExpressions(QModelIndexList& indexesIn, std::ostream &streamIn) const

@@ -261,8 +261,7 @@ void CSysEdit::activate()
     csysDragger->highlightOrigin();
   
   boost::signals2::shared_connection_block block(observer->connection);
-  msg::Message messageOut;
-  messageOut.mask = msg::Request | msg::Selection | msg::Add;
+  msg::Message messageOut(msg::Message(msg::Request | msg::Selection | msg::Add));
   for (const auto &sMessage : messages)
   {
     messageOut.payload = sMessage;

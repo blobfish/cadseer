@@ -51,8 +51,6 @@ Base::~Base()
 
 void Base::sendDone()
 {
-  msg::Message doneMessage;
-  doneMessage.mask = msg::Request | msg::Command | msg::Done;
-  observer->messageOutSignal(doneMessage);
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Command | msg::Done));
 }
 

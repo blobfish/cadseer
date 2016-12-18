@@ -114,6 +114,13 @@ namespace msg
 
     typedef std::function< void (const Message&) > MessageHandler;
     typedef std::unordered_map<Mask, MessageHandler> MessageDispatcher;
+    
+    
+    //@{
+    //! Some convenient functions for common messages
+    msg::Message buildGitMessage(const std::string &);
+    msg::Message buildStatusMessage(const std::string &);
+    //@}
 }
 
 

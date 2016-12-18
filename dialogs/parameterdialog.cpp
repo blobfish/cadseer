@@ -173,9 +173,7 @@ void ParameterDialog::dropEvent(QDropEvent *event)
       eManager.addFormulaLink(feature->getId(), parameter, id);
       if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
       {
-        msg::Message uMessage;
-        uMessage.mask = msg::Request | msg::Update;
-        messageOutSignal(uMessage);
+        messageOutSignal(msg::Mask(msg::Request | msg::Update));
       }
     }
   }
@@ -245,17 +243,6 @@ void ParameterDialog::messageInSlot(const msg::Message &messageIn)
 
 void ParameterDialog::updateSlot()
 {
-  //add git message.
-  auto sendGitMessage = [this](std::ostringstream &stream)
-  {
-    msg::Message gitMessage;
-    gitMessage.mask = msg::Request | msg::Git | msg::Text;
-    prj::Message pMessage;
-    pMessage.gitMessage = stream.str();
-    gitMessage.payload = pMessage;
-    messageOutSignal(gitMessage);
-  };
-  
   std::ostringstream gitStream;
   gitStream
     << QObject::tr("Feature: ").toStdString() << feature->getName().toStdString()
@@ -272,11 +259,9 @@ void ParameterDialog::updateSlot()
     if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
     {
       gitStream  << QObject::tr("    changed to: ").toStdString() << parameter->getValue();
-      sendGitMessage(gitStream);
+      messageOutSignal(msg::buildGitMessage(gitStream.str()));
       
-      msg::Message uMessage;
-      uMessage.mask = msg::Request | msg::Update;
-      messageOutSignal(uMessage);
+      messageOutSignal(msg::Mask(msg::Request | msg::Update));
     }
   }
   else
@@ -293,11 +278,9 @@ void ParameterDialog::updateSlot()
       if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
       {
         gitStream  << QObject::tr("    changed to: ").toStdString() << parameter->getValue();
-        sendGitMessage(gitStream);
+        messageOutSignal(msg::buildGitMessage(gitStream.str()));
         
-        msg::Message uMessage;
-        uMessage.mask = msg::Request | msg::Update;
-        messageOutSignal(uMessage);
+        messageOutSignal(msg::Mask(msg::Request | msg::Update));
       }
     }
     else

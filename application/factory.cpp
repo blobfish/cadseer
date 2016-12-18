@@ -153,13 +153,6 @@ void Factory::setupDispatcher()
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::linearMeasureDispatched, this, _1)));
 }
 
-void Factory::triggerUpdate()
-{
-  msg::Message updateMessage;
-  updateMessage.mask = msg::Request | msg::Update;
-  observer->messageOutSignal(updateMessage);
-}
-
 void Factory::newProjectDispatched(const msg::Message& /*messageIn*/)
 {
   std::ostringstream debug;
@@ -244,7 +237,7 @@ void Factory::newBoxDispatched(const msg::Message &)
   boxPtr->setParameters(20.0, 10.0, 2.0);
   project->addFeature(boxPtr);
   
-  triggerUpdate();
+  observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
 }
 
 void Factory::newCylinderDispatched(const msg::Message &)
@@ -266,7 +259,7 @@ void Factory::newCylinderDispatched(const msg::Message &)
   cylinder->updateDragger();
   project->addFeature(cylinder);
   
-  triggerUpdate();
+  observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
 }
 
 void Factory::newSphereDispatched(const msg::Message&)
@@ -287,7 +280,7 @@ void Factory::newSphereDispatched(const msg::Message&)
   sphere->updateDragger();
   project->addFeature(sphere);
   
-  triggerUpdate();
+  observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
 }
 
 void Factory::newConeDispatched(const msg::Message&)
@@ -310,7 +303,7 @@ void Factory::newConeDispatched(const msg::Message&)
   cone->updateDragger();
   project->addFeature(cone);
   
-  triggerUpdate();
+  observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
 }
 
 void Factory::newUnionDispatched(const msg::Message&)
@@ -321,12 +314,8 @@ void Factory::newUnionDispatched(const msg::Message&)
   
   if (containers.size() < 2)
   {
-    msg::Message wrongTypeMessage;
-    wrongTypeMessage.mask = msg::Request | msg::Status | msg::Text;
-    vwr::Message statusMessage;
-    statusMessage.text = QObject::tr("Wrong selection count for operation").toStdString();
-    wrongTypeMessage.payload = statusMessage;
-    observer->messageOutSignal(wrongTypeMessage);
+    observer->messageOutSignal(msg::buildStatusMessage(
+      QObject::tr("Wrong selection count for operation").toStdString()));
     return;
   }
   
@@ -337,12 +326,8 @@ void Factory::newUnionDispatched(const msg::Message&)
     featureIds.push_back(selection.featureId);
     if (selection.selectionType != slc::Type::Object)
     {
-      msg::Message wrongTypeMessage;
-      wrongTypeMessage.mask = msg::Request | msg::Status | msg::Text;
-      vwr::Message statusMessage;
-      statusMessage.text = QObject::tr("Wrong selection type for operation").toStdString();
-      wrongTypeMessage.payload = statusMessage;
-      observer->messageOutSignal(wrongTypeMessage);
+      observer->messageOutSignal(msg::buildStatusMessage(
+        QObject::tr("Wrong selection type for operation").toStdString()));
       return;
     }
   }
@@ -359,11 +344,8 @@ void Factory::newUnionDispatched(const msg::Message&)
   for (auto it = featureIds.begin() + 1; it != featureIds.end(); ++it)
     project->connect(*it, onion->getId(), ftr::InputTypes::tool);
   
-  msg::Message clearSelectionMessage;
-  clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  observer->messageOutSignal(clearSelectionMessage);
-  
-  triggerUpdate();
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
 }
 
 void Factory::newSubtractDispatched(const msg::Message&)
@@ -374,12 +356,8 @@ void Factory::newSubtractDispatched(const msg::Message&)
   
   if (containers.size() < 2)
   {
-    msg::Message wrongTypeMessage;
-    wrongTypeMessage.mask = msg::Request | msg::Status | msg::Text;
-    vwr::Message statusMessage;
-    statusMessage.text = QObject::tr("Wrong selection count for operation").toStdString();
-    wrongTypeMessage.payload = statusMessage;
-    observer->messageOutSignal(wrongTypeMessage);
+    observer->messageOutSignal(msg::buildStatusMessage(
+      QObject::tr("Wrong selection count for operation").toStdString()));
     return;
   }
   
@@ -390,12 +368,8 @@ void Factory::newSubtractDispatched(const msg::Message&)
     featureIds.push_back(selection.featureId);
     if (selection.selectionType != slc::Type::Object)
     {
-      msg::Message wrongTypeMessage;
-      wrongTypeMessage.mask = msg::Request | msg::Status | msg::Text;
-      vwr::Message statusMessage;
-      statusMessage.text = QObject::tr("Wrong selection type for operation").toStdString();
-      wrongTypeMessage.payload = statusMessage;
-      observer->messageOutSignal(wrongTypeMessage);
+      observer->messageOutSignal(msg::buildStatusMessage(
+        QObject::tr("Wrong selection type for operation").toStdString()));
       return;
     }
   }
@@ -411,11 +385,8 @@ void Factory::newSubtractDispatched(const msg::Message&)
   for (auto it = featureIds.begin() + 1; it != featureIds.end(); ++it)
     project->connect(*it, subtract->getId(), ftr::InputTypes::tool);
   
-  msg::Message clearSelectionMessage;
-  clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  observer->messageOutSignal(clearSelectionMessage);
-  
-  triggerUpdate();
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
 }
 
 void Factory::newIntersectDispatched(const msg::Message&)
@@ -426,12 +397,8 @@ void Factory::newIntersectDispatched(const msg::Message&)
   
   if (containers.size() < 2)
   {
-    msg::Message wrongTypeMessage;
-    wrongTypeMessage.mask = msg::Request | msg::Status | msg::Text;
-    vwr::Message statusMessage;
-    statusMessage.text = QObject::tr("Wrong selection count for operation").toStdString();
-    wrongTypeMessage.payload = statusMessage;
-    observer->messageOutSignal(wrongTypeMessage);
+    observer->messageOutSignal(msg::buildStatusMessage(
+      QObject::tr("Wrong selection count for operation").toStdString()));
     return;
   }
   
@@ -442,12 +409,8 @@ void Factory::newIntersectDispatched(const msg::Message&)
     featureIds.push_back(selection.featureId);
     if (selection.selectionType != slc::Type::Object)
     {
-      msg::Message wrongTypeMessage;
-      wrongTypeMessage.mask = msg::Request | msg::Status | msg::Text;
-      vwr::Message statusMessage;
-      statusMessage.text = QObject::tr("Wrong selection type for operation").toStdString();
-      wrongTypeMessage.payload = statusMessage;
-      observer->messageOutSignal(wrongTypeMessage);
+      observer->messageOutSignal(msg::buildStatusMessage(
+        QObject::tr("Wrong selection type for operation").toStdString()));
       return;
     }
   }
@@ -463,11 +426,8 @@ void Factory::newIntersectDispatched(const msg::Message&)
   for (auto it = featureIds.begin() + 1; it != featureIds.end(); ++it)
     project->connect(*it, intersect->getId(), ftr::InputTypes::tool);
   
-  msg::Message clearSelectionMessage;
-  clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  observer->messageOutSignal(clearSelectionMessage);
-  
-  triggerUpdate();
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
 }
 
 void Factory::newBlendDispatched(const msg::Message&)
@@ -525,11 +485,8 @@ void Factory::newBlendDispatched(const msg::Message&)
   ftr::Base *targetFeature = project->findFeature(targetFeatureId);
   targetFeature->hide3D();
   
-  msg::Message clearSelectionMessage;
-  clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  observer->messageOutSignal(clearSelectionMessage);
-  
-  triggerUpdate();
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
 }
 
 void Factory::newChamferDispatched(const msg::Message&)
@@ -572,11 +529,8 @@ void Factory::newChamferDispatched(const msg::Message&)
   ftr::Base *targetFeature = project->findFeature(targetFeatureId);
   targetFeature->hide3D();
   
-  msg::Message clearSelectionMessage;
-  clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  observer->messageOutSignal(clearSelectionMessage);
-  
-  triggerUpdate();
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
 }
 
 void Factory::newDraftDispatched(const msg::Message&)
@@ -623,11 +577,8 @@ void Factory::newDraftDispatched(const msg::Message&)
   ftr::Base *targetFeature = project->findFeature(targetFeatureId);
   targetFeature->hide3D();
   
-  msg::Message clearSelectionMessage;
-  clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  observer->messageOutSignal(clearSelectionMessage);
-  
-  triggerUpdate();
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
 }
 
 void Factory::newDatumPlaneDispatched(const msg::Message&)
@@ -656,11 +607,8 @@ void Factory::newDatumPlaneDispatched(const msg::Message&)
   for (const auto &connection : connections)
     project->connect(connection.parentId, dPlane->getId(), connection.inputType);
 
-  msg::Message clearSelectionMessage;
-  clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  observer->messageOutSignal(clearSelectionMessage);
-  
-  triggerUpdate();
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
 }
 
 void Factory::importOCCDispatched(const msg::Message&)
@@ -680,7 +628,7 @@ void Factory::importOCCDispatched(const msg::Message&)
   assert(project);
   project->readOCC(fileName.toStdString());
   
-  triggerUpdate();
+  observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
 }
 
 void Factory::exportOCCDispatched(const msg::Message&)
@@ -712,9 +660,7 @@ void Factory::exportOCCDispatched(const msg::Message&)
   assert(project);
     
   BRepTools::Write(project->findFeature(containers.at(0).featureId)->getShape(), fileName.toStdString().c_str());
-  msg::Message clearSelectionMessage;
-  clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  observer->messageOutSignal(clearSelectionMessage);
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
 }
 
 void Factory::preferencesDispatched(const msg::Message&)
@@ -751,9 +697,7 @@ void Factory::removeDispatched(const msg::Message&)
   //so cache a copy to work with first.
   slc::Containers selection = containers;
   
-  msg::Message clearSelectionMessage;
-  clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  observer->messageOutSignal(clearSelectionMessage);
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
   
   for (const auto &current : selection)
   {
@@ -767,7 +711,7 @@ void Factory::removeDispatched(const msg::Message&)
     observer->messageOutSignal(removeMessage);
   }
   
-  triggerUpdate();
+  observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
 }
 
 void Factory::debugDumpDispatched(const msg::Message&)
@@ -798,9 +742,7 @@ void Factory::debugDumpDispatched(const msg::Message&)
     std::cout << "feature tag container:" << std::endl; seerShape.dumpFeatureTagContainer(std::cout); std::cout << std::endl;
   }
   
-  msg::Message clearSelectionMessage;
-  clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  observer->messageOutSignal(clearSelectionMessage);
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
 }
 
 void Factory::debugShapeTrackUpDispatched(const msg::Message&)
@@ -822,9 +764,7 @@ void Factory::debugShapeTrackUpDispatched(const msg::Message&)
     project->shapeTrackUp(container.featureId, container.shapeId);
   }
   
-  msg::Message clearSelectionMessage;
-  clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  observer->messageOutSignal(clearSelectionMessage);
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
 }
 
 void Factory::debugShapeTrackDownDispatched(const msg::Message&)
@@ -846,9 +786,7 @@ void Factory::debugShapeTrackDownDispatched(const msg::Message&)
     project->shapeTrackDown(container.featureId, container.shapeId);
   }
   
-  msg::Message clearSelectionMessage;
-  clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-  observer->messageOutSignal(clearSelectionMessage);
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
 }
 
 void Factory::debugShapeGraphDispatched(const msg::Message&)
@@ -875,9 +813,7 @@ void Factory::debugShapeGraphDispatched(const msg::Message&)
         shape.dumpGraph(fileName.toStdString());
     }
     
-    msg::Message clearSelectionMessage;
-    clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-    observer->messageOutSignal(clearSelectionMessage);
+    observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
 }
 
 void Factory::viewInfoDispatched(const msg::Message &)
@@ -983,11 +919,9 @@ void Factory::linearMeasureDispatched(const msg::Message&)
     }
     else
         return; //for now.
-        
-    msg::Message clearSelectionMessage;
-    clearSelectionMessage.mask = msg::Request | msg::Selection | msg::Clear;
-    observer->messageOutSignal(clearSelectionMessage);
-        
+    
+    observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+    
     double distance = (point2 - point1).length();
     
     QString infoMessage;
@@ -1025,12 +959,8 @@ void Factory::linearMeasureDispatched(const msg::Message&)
     osg::Vec3d xVector = zVectorView ^ yVector;
     if (xVector.isNaN())
     {
-        msg::Message message;
-        message.mask = msg::Request | msg::Status | msg::Text;
-        vwr::Message statusMessage;
-        statusMessage.text = QObject::tr("Can't make dimension with current view direction").toStdString();
-        message.payload = statusMessage;
-        observer->messageOutSignal(message);
+        observer->messageOutSignal(msg::buildStatusMessage(
+          QObject::tr("Can't make dimension with current view direction").toStdString()));
         return;
     }
     xVector.normalize();
