@@ -38,6 +38,7 @@ public:
     void startCommand(const unsigned int &stateIn); //uses stack for restoration of selection state
     void endCommand(); //uses stack for restoration of selection state
     void setState(const unsigned int &stateIn); //DOESN'T use stack for restoration of selection state
+    unsigned int getState(){return selectionMask;}
 
     //thought about a couple of different ways. I don't want a thousand connect statements all over the place.
     QAction *actionSelectObjects;

@@ -54,6 +54,7 @@ namespace cmd
     void systemToFeatureDispatched(const msg::Message &);
     void featureToDraggerDispatched(const msg::Message &);
     void draggerToFeatureDispatched(const msg::Message &);
+    void checkGeometryDispatched(const msg::Message&);
   };
   
   Manager& manager();

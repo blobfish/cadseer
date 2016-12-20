@@ -609,6 +609,19 @@ void GestureHandler::constructMenu()
     debugShapeGraph->setUserValue(attributeMask, (msg::Request | msg::DebugShapeGraph).to_string());
     debugShapeGraph->setUserValue(attributeStatus, QObject::tr("Write shape graph to application directory").toStdString());
     debugBase->insertChild(debugBase->getNumChildren() - 2, debugShapeGraph);
+    
+    //inpect base
+    osg::MatrixTransform *inspectBase;
+    inspectBase = gsn::buildMenuNode(":/resources/images/inspectBase.svg");
+    inspectBase->setMatrix(dummy);
+    inspectBase->setUserValue(attributeStatus, QObject::tr("Inspect Menu").toStdString());
+    startNode->insertChild(startNode->getNumChildren() - 2, inspectBase);
+    
+    osg::MatrixTransform *inspectCheckGeometry = gsn::buildCommandNode(":/resources/images/inspectCheckGeometry.svg");
+    inspectCheckGeometry->setMatrix(dummy);
+    inspectCheckGeometry->setUserValue(attributeMask, (msg::Request | msg::CheckGeometry).to_string());
+    inspectCheckGeometry->setUserValue(attributeStatus, QObject::tr("Check Geometry For Errors").toStdString());
+    inspectBase->insertChild(inspectBase->getNumChildren() - 2, inspectCheckGeometry);
 }
 
 std::vector<osg::Vec3> GestureHandler::buildNodeLocations(osg::Vec3 direction, int nodeCount)

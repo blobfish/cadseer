@@ -25,6 +25,7 @@
 #include <command/systemtofeature.h>
 #include <command/featuretodragger.h>
 #include <command/draggertofeature.h>
+#include <command/checkgeometry.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <preferences/preferencesXML.h>
@@ -68,6 +69,9 @@ void Manager::setupDispatcher()
   
   mask = msg::Request | msg::DraggerToFeature;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::draggerToFeatureDispatched, this, _1)));
+  
+  mask = msg::Request | msg::CheckGeometry;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::checkGeometryDispatched, this, _1)));
 }
 
 void Manager::cancelCommandDispatched(const msg::Message &)
@@ -166,4 +170,10 @@ void Manager::featureToDraggerDispatched(const msg::Message&)
 {
   std::shared_ptr<cmd::FeatureToDragger> featureToDragger(new cmd::FeatureToDragger());
   cmd::manager().addCommand(featureToDragger);
+}
+
+void Manager::checkGeometryDispatched(const msg::Message&)
+{
+  std::shared_ptr<CheckGeometry> checkGeometry(new CheckGeometry());
+  cmd::manager().addCommand(checkGeometry);
 }

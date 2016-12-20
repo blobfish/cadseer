@@ -121,6 +121,7 @@ SET(TOOLS_SOURCES
 SET(DIALOG_SOURCES
     dialogs/boxdialog.cpp
     dialogs/parameterdialog.cpp
+    dialogs/checkgeometry.cpp
     )
     
 SET(PREFERENCE_SOURCES
@@ -171,6 +172,7 @@ SET(COMMAND_SOURCES
     command/systemtofeature.cpp
     command/featuretodragger.cpp
     command/draggertofeature.cpp
+    command/checkgeometry.cpp
     )
     
 SET(LIBRARY_SOURCES
@@ -236,6 +238,7 @@ SET(CADSEER_MOC_HDRS
     application/infowindow.h
     selection/manager.h
     dialogs/boxdialog.h
+    dialogs/checkgeometry.h
     preferences/dialog.h
     dialogs/parameterdialog.h
     project/projectdialog.h

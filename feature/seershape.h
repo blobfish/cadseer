@@ -50,7 +50,7 @@ static const std::vector<std::string> shapeStrings
      "Wire",
      "Edge",
      "Vertex",
-     "Shape",
+     "Shape"
  });
 
 namespace ftr

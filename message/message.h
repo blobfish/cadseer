@@ -101,6 +101,7 @@ namespace msg
     static const Mask ViewInfo(Mask().set(                      63));//!< command
     static const Mask DebugShapeGraph(Mask().set(               64));//!< command
     static const Mask LinearMeasure(Mask().set(                 65));//!< command
+    static const Mask CheckGeometry(Mask().set(                 66));//!< command
   
     typedef boost::variant<prj::Message, slc::Message, app::Message, vwr::Message> Payload;
   
