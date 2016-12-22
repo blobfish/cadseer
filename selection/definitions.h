@@ -23,6 +23,8 @@
 #include <vector>
 #include <string>
 
+#include <TopAbs_ShapeEnum.hxx>
+
 namespace slc
 {
   static const std::size_t None = 0;
@@ -250,6 +252,9 @@ namespace slc
       (typeIn == Type::NearestPoint)
     );
   }
+  
+  Type convert(TopAbs_ShapeEnum);
+  TopAbs_ShapeEnum convert(Type);
 }
 
 #endif // SELECTIONSTATE_H

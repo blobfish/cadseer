@@ -67,7 +67,7 @@ SphereBuilder::operator osg::Geometry* () const
   {
     currentPoint = templatePoints.at(index1);
     allPoints.push_back(currentPoint);
-    for (std::size_t index2 = 0; index2 < (isoLines - 1); ++index2) //first and last NOT duplicate
+    for (std::size_t index2 = 0; index2 < (isoLines - 1); ++index2) //first and last NOT a duplicate
     {
       currentPoint = rotation * currentPoint;
       allPoints.push_back(currentPoint);
@@ -95,6 +95,10 @@ SphereBuilder::operator osg::Geometry* () const
   out->addPrimitiveSet(fan1.get());
   
   //top
+  //something is not right with the output sphere. this top
+  //segment renders different in different polygon modes.
+  //can't find the problem. I have manually created 2 triangles
+  //instead of the following, but it rendered the same.
   osg::ref_ptr<osg::DrawElementsUInt> fan2 = new osg::DrawElementsUInt
     (osg::PrimitiveSet::TRIANGLE_FAN, isoLines + 2);
   indicesIndex = 0;
@@ -107,31 +111,28 @@ SphereBuilder::operator osg::Geometry* () const
   out->addPrimitiveSet(fan2.get());
   
   //center
-  //this is able to all live in one element index because there is a duplicate vertex
-  //the last vertex index of a 'row/revolution' is the same as the first vertex index
-  //of the next row. These create degenerate triangles the graphics drivers will
-  //just skip.
-  osg::ref_ptr<osg::DrawElementsUInt> quads = new osg::DrawElementsUInt
-    (osg::PrimitiveSet::QUAD_STRIP, (isoLines - 3) * (isoLines + 1) * 2);
+  //the +1 skips the first isoline, which is degenerate to vertex.
   std::size_t stride = isoLines;
-  indicesIndex = 0;
   for (std::size_t outerIndex = 0; outerIndex < (isoLines - 3); ++outerIndex)
   {
+    indicesIndex = 0;
+    osg::ref_ptr<osg::DrawElementsUInt> tris = new osg::DrawElementsUInt
+      (osg::PrimitiveSet::TRIANGLE_STRIP, (isoLines + 1) * 2);
     for (std::size_t innerIndex = 0; innerIndex < isoLines; ++innerIndex)
     {
-      (*quads)[indicesIndex] = outerIndex * stride + innerIndex + 1;
+      (*tris)[indicesIndex] = outerIndex * stride + innerIndex + 1;
       indicesIndex++;
       
-      (*quads)[indicesIndex] = outerIndex * stride + stride + innerIndex + 1;
+      (*tris)[indicesIndex] = outerIndex * stride + stride + innerIndex + 1;
       indicesIndex++;
     }
-    (*quads)[indicesIndex] = outerIndex * stride + 1;
+    (*tris)[indicesIndex] = outerIndex * stride + 1;
     indicesIndex++;
     
-    (*quads)[indicesIndex] = outerIndex * stride + stride + 1;
+    (*tris)[indicesIndex] = outerIndex * stride + stride + 1;
     indicesIndex++;
+    out->addPrimitiveSet(tris.get());
   }
-  out->addPrimitiveSet(quads.get());
   
   osgUtil::SmoothingVisitor::smooth(*out);
   

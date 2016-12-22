@@ -21,15 +21,30 @@
 #include <QTabWidget>
 #include <QTreeWidget>
 #include <QCloseEvent>
+#include <QSettings>
+#include <QHeaderView>
+#include <QHideEvent>
 
 #include <BRepCheck_Analyzer.hxx>
 #include <TopExp_Explorer.hxx>
+#include <BRepBndLib.hxx>
+#include <Bnd_Box.hxx>
 
+#include <osg/Group>
+#include <osg/PositionAttitudeTransform>
+#include <osg/Geometry>
+#include <osg/BlendFunc>
+#include <osg/PolygonMode>
+#include <osg/ShadeModel>
+
+#include <application/application.h>
 #include <feature/base.h>
 #include <feature/seershape.h>
 #include <message/message.h>
 #include <message/observer.h>
 #include <tools/idtools.h>
+#include <library/spherebuilder.h>
+#include <dialogs/widgetgeometry.h>
 #include <dialogs/checkgeometry.h>
 
 using namespace dlg;
@@ -99,10 +114,33 @@ BasicCheckPage::BasicCheckPage(const ftr::Base &featureIn, QWidget *parent) :
   buildGui();
   assert(feature.hasSeerShape());
   go();
+  treeWidget->expandAll();
+  
+  QSettings &settings = static_cast<app::Application*>(qApp)->getUserSettings();
+  settings.beginGroup("CheckGeometry");
+  settings.beginGroup("BasicPage");
+  treeWidget->header()->restoreState(settings.value("header").toByteArray());
+  settings.endGroup();
+  settings.endGroup();
+  
+  connect(treeWidget, SIGNAL(itemSelectionChanged()), this, SLOT(selectionChangedSlot()));
 }
 
 BasicCheckPage::~BasicCheckPage()
 {
+  QSettings &settings = static_cast<app::Application*>(qApp)->getUserSettings();
+  settings.beginGroup("CheckGeometry");
+  settings.beginGroup("BasicPage");
+  settings.setValue("header", treeWidget->header()->saveState());
+  settings.endGroup();
+  settings.endGroup();
+  
+  if (boundingSphere.valid()) //remove current boundingSphere.
+  {
+    assert(boundingSphere->getParents().size() == 1);
+    osg::Group *parent = boundingSphere->getParent(0);
+    parent->removeChild(boundingSphere.get()); //this should make boundingSphere invalid.
+  }
 }
 
 void BasicCheckPage::buildGui()
@@ -121,6 +159,12 @@ void BasicCheckPage::buildGui()
       tr("Error")
     }
   );
+}
+
+void BasicCheckPage::hideEvent(QHideEvent *event)
+{
+  treeWidget->clearSelection();
+  QWidget::hideEvent(event);
 }
 
 void BasicCheckPage::go()
@@ -232,6 +276,90 @@ void BasicCheckPage::checkSub(const BRepCheck_Analyzer &shapeCheck, const TopoDS
   }
 }
 
+void BasicCheckPage::selectionChangedSlot()
+{
+  //right now we are building and destroy each bounding sphere upon
+  //selection change. might want to cache.
+  
+  //remove previous bounding sphere and clear selection.
+  if (boundingSphere.valid()) //remove current boundingSphere.
+  {
+    assert(boundingSphere->getParents().size() == 1);
+    osg::Group *parent = boundingSphere->getParent(0);
+    parent->removeChild(boundingSphere.get()); //this should make boundingSphere invalid.
+  }
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  
+  //get the fresh id.
+  QList<QTreeWidgetItem*> freshSelections = treeWidget->selectedItems();
+  if (freshSelections.empty())
+    return;
+  uuid id = gu::stringToId(freshSelections.at(0)->data(0, Qt::DisplayRole).toString().toStdString());
+  assert(!id.is_nil());
+  assert(feature.getSeerShape().hasShapeIdRecord(id));
+  
+  //select the geometry.
+  msg::Message message(msg::Request | msg::Selection | msg::Add);
+  slc::Message sMessage;
+  sMessage.type = slc::convert(feature.getSeerShape().getOCCTShape(id).ShapeType());
+  sMessage.featureId = feature.getId();
+  sMessage.featureType = feature.getType();
+  sMessage.shapeId = id;
+  message.payload = sMessage;
+  observer->messageOutSignal(message);
+  
+  osg::BoundingSphered bSphere = calculateBoundingSphere(id);
+  if (!bSphere.valid())
+  {
+    observer->messageOutSignal(msg::buildStatusMessage("Unable to calculate bounding sphere"));
+    return;
+  }
+  
+  osg::ref_ptr<osg::PositionAttitudeTransform> transform = new osg::PositionAttitudeTransform();
+  boundingSphere = transform;
+  transform->setPosition(bSphere.center());
+  lbr::SphereBuilder builder;
+  builder.setRadius(bSphere.radius());
+  builder.setDeviation(0.25);
+  osg::Geometry *geometry = builder;
+  osg::Vec4Array *color = new osg::Vec4Array();
+  color->push_back(osg::Vec4(1.0, 1.0, 0.0, 0.2));
+  geometry->setColorArray(color);
+  geometry->setColorBinding(osg::Geometry::BIND_OVERALL);
+  geometry->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+  osg::BlendFunc* bf = new osg::BlendFunc(osg::BlendFunc::SRC_ALPHA, osg::BlendFunc::ONE_MINUS_SRC_ALPHA); 
+  geometry->getOrCreateStateSet()->setAttributeAndModes(bf);
+  osg::PolygonMode *pm = new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
+  geometry->getOrCreateStateSet()->setAttribute(pm);
+  transform->addChild(geometry);
+  if (feature.getOverlaySwitch()->addChild(transform))
+    feature.getOverlaySwitch()->setValue(feature.getOverlaySwitch()->getNumChildren() - 1, true);
+}
+
+osg::BoundingSphered BasicCheckPage::calculateBoundingSphere(const boost::uuids::uuid &idIn)
+{
+  osg::BoundingSphered out;
+  
+  const ftr::SeerShape &seerShape = feature.getSeerShape();
+  assert(seerShape.hasShapeIdRecord(idIn));
+  const TopoDS_Shape& shape = seerShape.getOCCTShape(idIn);
+  
+  Bnd_Box bBox;
+  BRepBndLib::Add(shape, bBox);
+  if (bBox.IsVoid())
+    return out;
+  
+  osg::Vec3d point1 = gu::toOsg(bBox.CornerMin());
+  osg::Vec3d point2 = gu::toOsg(bBox.CornerMax());
+  osg::Vec3d diagonalVec = point2 - point1;
+  out.radius() = diagonalVec.length() / 2.0;
+  diagonalVec.normalize();
+  diagonalVec *= out.radius();
+  out.center() = point1 + diagonalVec;
+  
+  return out;
+}
+
 BOPCheckPage::BOPCheckPage(const ftr::Base &featureIn, QWidget *parent) :
   QWidget(parent), feature(featureIn)
 {
@@ -270,6 +398,9 @@ CheckGeometry::CheckGeometry(const ftr::Base &featureIn, QWidget *parent) :
   observer->name = "dlg::CheckGeometry";
   
   buildGui();
+  
+  WidgetGeometry *filter = new WidgetGeometry(this, "dlg::CheckGeometry");
+  this->installEventFilter(filter);
 }
 
 CheckGeometry::~CheckGeometry(){}

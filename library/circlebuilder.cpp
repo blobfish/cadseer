@@ -23,7 +23,6 @@
 #include <osg/Vec3d>
 #include <osg/Quat>
 #include <osg/Geometry>
-#include <osg/Point>
 
 #include "circlebuilder.h"
 
@@ -98,8 +97,7 @@ CircleBuilder::operator osg::Geometry* () const
   osg::Vec3Array *array = new osg::Vec3Array();
   std::copy(allPoints.begin(), allPoints.end(), std::back_inserter(*array));
   out->setVertexArray(array);
-  out->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::POINTS, 0, array->size()));
-  out->getOrCreateStateSet()->setAttribute(new osg::Point(5.0));
+  out->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINE_LOOP, 0, array->size()));
   
   return out.release();
 }

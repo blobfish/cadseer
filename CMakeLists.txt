@@ -111,6 +111,7 @@ SET(SELECTION_SOURCES
     selection/overlayhandler.cpp
     selection/interpreter.cpp
     selection/visitors.cpp
+    selection/definitions.cpp
     )
     
 SET(TOOLS_SOURCES
@@ -122,6 +123,7 @@ SET(DIALOG_SOURCES
     dialogs/boxdialog.cpp
     dialogs/parameterdialog.cpp
     dialogs/checkgeometry.cpp
+    dialogs/widgetgeometry.cpp
     )
     
 SET(PREFERENCE_SOURCES
@@ -239,6 +241,7 @@ SET(CADSEER_MOC_HDRS
     selection/manager.h
     dialogs/boxdialog.h
     dialogs/checkgeometry.h
+    dialogs/widgetgeometry.h
     preferences/dialog.h
     dialogs/parameterdialog.h
     project/projectdialog.h

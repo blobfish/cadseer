@@ -30,13 +30,19 @@
 
 #include <TopAbs_ShapeEnum.hxx>
 
+#include <osg/observer_ptr>
+#include <osg/BoundingSphere>
+
 class QTabWidget;
 class QTreeWidget;
 class QTreeWidgetItem;
 class QCloseEvent;
+class QHideEvent;
 
 class BRepCheck_Analyzer;
 class TopoDS_Shape;
+
+namespace osg{class PositionAttitudeTransform;}
 
 namespace ftr{class Base;}
 namespace msg{class Message; class Observer;}
@@ -49,18 +55,24 @@ namespace dlg
   public:
     BasicCheckPage(const ftr::Base&, QWidget*);
     virtual ~BasicCheckPage() override;
+  protected:
+    virtual void hideEvent(QHideEvent *) override;
   private:
     const ftr::Base &feature;
     std::unique_ptr<msg::Observer> observer;
     QTreeWidget *treeWidget = nullptr;
     std::stack<QTreeWidgetItem*> itemStack; //!< used during shape iteration.
     std::set<boost::uuids::uuid> checkedIds;
+    osg::observer_ptr<osg::PositionAttitudeTransform> boundingSphere;
     
     void buildGui();
     void go();
     void recursiveCheck(const BRepCheck_Analyzer &, const TopoDS_Shape &);
     void checkSub(const BRepCheck_Analyzer &shapeCheck, const TopoDS_Shape &shape,
                                             TopAbs_ShapeEnum subType);
+    osg::BoundingSphered calculateBoundingSphere(const boost::uuids::uuid &);
+  private Q_SLOTS:
+    void selectionChangedSlot();
   };
   
   class BOPCheckPage : public QWidget
