@@ -20,15 +20,20 @@
 #include <QVBoxLayout>
 #include <QTabWidget>
 #include <QTreeWidget>
+#include <QTableWidget>
 #include <QCloseEvent>
 #include <QSettings>
 #include <QHeaderView>
 #include <QHideEvent>
+#include <QTextEdit>
 
 #include <BRepCheck_Analyzer.hxx>
 #include <TopExp_Explorer.hxx>
+#include <BRep_Tool.hxx>
+#include <TopoDS.hxx>
 #include <BRepBndLib.hxx>
 #include <Bnd_Box.hxx>
+#include <BRepTools_ShapeSet.hxx>
 
 #include <osg/Group>
 #include <osg/PositionAttitudeTransform>
@@ -105,6 +110,74 @@ QString checkStatusToString(int index)
   return names.at(index);
 }
 
+static osg::BoundingSphered calculateBoundingSphere(const TopoDS_Shape& shape)
+{
+  osg::BoundingSphered out;
+  
+  Bnd_Box bBox;
+  BRepBndLib::Add(shape, bBox);
+  if (bBox.IsVoid())
+    return out;
+  
+  osg::Vec3d point1 = gu::toOsg(bBox.CornerMin());
+  osg::Vec3d point2 = gu::toOsg(bBox.CornerMax());
+  osg::Vec3d diagonalVec = point2 - point1;
+  out.radius() = diagonalVec.length() / 2.0;
+  diagonalVec.normalize();
+  diagonalVec *= out.radius();
+  out.center() = point1 + diagonalVec;
+  
+  return out;
+}
+
+static osg::PositionAttitudeTransform* buildBoundingSphere(const osg::BoundingSphered &bSphere)
+{
+  osg::ref_ptr<osg::PositionAttitudeTransform> transform = new osg::PositionAttitudeTransform();
+  transform->setPosition(bSphere.center());
+  lbr::SphereBuilder builder;
+  builder.setRadius(bSphere.radius());
+  builder.setDeviation(0.25);
+  osg::Geometry *geometry = builder;
+  osg::Vec4Array *color = new osg::Vec4Array();
+  color->push_back(osg::Vec4(1.0, 1.0, 0.0, 0.2));
+  geometry->setColorArray(color);
+  geometry->setColorBinding(osg::Geometry::BIND_OVERALL);
+  geometry->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+  osg::BlendFunc* bf = new osg::BlendFunc(osg::BlendFunc::SRC_ALPHA, osg::BlendFunc::ONE_MINUS_SRC_ALPHA); 
+  geometry->getOrCreateStateSet()->setAttributeAndModes(bf);
+  osg::PolygonMode *pm = new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
+  geometry->getOrCreateStateSet()->setAttribute(pm);
+  transform->addChild(geometry);
+  
+  return transform.release();
+}
+
+bool convertVertexSelection
+(
+  const ftr::SeerShape& seerShapeIn,
+  slc::Message &mInOut
+)
+{
+  const TopoDS_Vertex vertex = TopoDS::Vertex(seerShapeIn.getOCCTShape(mInOut.shapeId));
+  std::vector<uuid> parentEdges = seerShapeIn.useGetParentsOfType(mInOut.shapeId, TopAbs_EDGE);
+  for (const auto &edge : parentEdges)
+  {
+    if (seerShapeIn.useGetStartVertex(edge) == mInOut.shapeId)
+    {
+      mInOut.shapeId = edge;
+      mInOut.type = slc::Type::StartPoint;
+      return true;
+    }
+    else if (seerShapeIn.useGetEndVertex(edge) == mInOut.shapeId)
+    {
+      mInOut.shapeId = edge;
+      mInOut.type = slc::Type::EndPoint;
+      return true;
+    }
+  }
+  return false;
+}
+
 BasicCheckPage::BasicCheckPage(const ftr::Base &featureIn, QWidget *parent) :
   QWidget(parent), feature(featureIn)
 {
@@ -113,8 +186,6 @@ BasicCheckPage::BasicCheckPage(const ftr::Base &featureIn, QWidget *parent) :
   
   buildGui();
   assert(feature.hasSeerShape());
-  go();
-  treeWidget->expandAll();
   
   QSettings &settings = static_cast<app::Application*>(qApp)->getUserSettings();
   settings.beginGroup("CheckGeometry");
@@ -182,11 +253,18 @@ void BasicCheckPage::go()
   itemStack.push(rootItem);
   
   if (shapeCheck.IsValid())
+  {
     rootItem->setData(2, Qt::DisplayRole, tr("Valid"));
+    Q_EMIT(basicCheckPassed());
+  }
   else
+  {
     rootItem->setData(2, Qt::DisplayRole, tr("Invalid"));
+    Q_EMIT(basicCheckFailed());
+  }
   
   recursiveCheck(shapeCheck, shape);
+  treeWidget->expandAll();
 }
 
 void BasicCheckPage::recursiveCheck(const BRepCheck_Analyzer &shapeCheck, const TopoDS_Shape &shape)
@@ -196,35 +274,43 @@ void BasicCheckPage::recursiveCheck(const BRepCheck_Analyzer &shapeCheck, const 
   {
     uuid shapeId = seerShape.findShapeIdRecord(shape).id;
 
-    BRepCheck_ListIteratorOfListOfStatus listIt;
     if
     (
       (!shapeCheck.Result(shape).IsNull()) &&
       (checkedIds.count(shapeId) == 0)
     )
     {
+      
+      BRepCheck_ListIteratorOfListOfStatus listIt;
       listIt.Initialize(shapeCheck.Result(shape)->Status());
-      if (listIt.Value() != BRepCheck_NoError)
+      QTreeWidgetItem *entry = new QTreeWidgetItem(itemStack.top());
+      entry->setData(0, Qt::DisplayRole, QString::fromStdString(gu::idToString(shapeId)));
+      entry->setData(1, Qt::DisplayRole, QString::fromStdString(shapeStrings.at(shape.ShapeType())));
+      entry->setData(2, Qt::DisplayRole, checkStatusToString(listIt.Value()));
+      itemStack.push(entry);
+  
+      if (shape.ShapeType() == TopAbs_SOLID)
+        checkSub(shapeCheck, shape, TopAbs_SHELL);
+      if (shape.ShapeType() == TopAbs_EDGE)
+        checkSub(shapeCheck, shape, TopAbs_VERTEX);
+      if (shape.ShapeType() == TopAbs_FACE)
       {
-        QTreeWidgetItem *entry = new QTreeWidgetItem(itemStack.top());
-        entry->setData(0, Qt::DisplayRole, QString::fromStdString(gu::idToString(shapeId)));
-        entry->setData(1, Qt::DisplayRole, QString::fromStdString(shapeStrings.at(shape.ShapeType())));
-        entry->setData(2, Qt::DisplayRole, checkStatusToString(listIt.Value()));
-  //       dispatchError(entry, listIt.Value());
-        itemStack.push(entry);
-    
-        if (shape.ShapeType() == TopAbs_SOLID)
-          checkSub(shapeCheck, shape, TopAbs_SHELL);
-        if (shape.ShapeType() == TopAbs_EDGE)
-          checkSub(shapeCheck, shape, TopAbs_VERTEX);
-        if (shape.ShapeType() == TopAbs_FACE)
-        {
-          checkSub(shapeCheck, shape, TopAbs_WIRE);
-          checkSub(shapeCheck, shape, TopAbs_EDGE);
-          checkSub(shapeCheck, shape, TopAbs_VERTEX);
-        }
-        itemStack.pop();
+        checkSub(shapeCheck, shape, TopAbs_WIRE);
+        checkSub(shapeCheck, shape, TopAbs_EDGE);
+        checkSub(shapeCheck, shape, TopAbs_VERTEX);
       }
+      
+      if
+      (
+        (itemStack.top()->childCount() == 0) &&
+        (listIt.Value() == BRepCheck_NoError)
+      )
+      {
+        itemStack.top()->parent()->removeChild(itemStack.top());
+        delete itemStack.top();
+      }
+      
+      itemStack.pop();
     }
     //this happens to excess so no warning out. I believe this is the whole
     //orientation thing. we use TopExp::mapOfShapes in seer shape but this uses a TopoDS_Iterator.
@@ -290,74 +376,57 @@ void BasicCheckPage::selectionChangedSlot()
   }
   observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
   
+  const ftr::SeerShape &seerShape = feature.getSeerShape();
+  
   //get the fresh id.
   QList<QTreeWidgetItem*> freshSelections = treeWidget->selectedItems();
   if (freshSelections.empty())
     return;
   uuid id = gu::stringToId(freshSelections.at(0)->data(0, Qt::DisplayRole).toString().toStdString());
   assert(!id.is_nil());
-  assert(feature.getSeerShape().hasShapeIdRecord(id));
+  assert(seerShape.hasShapeIdRecord(id));
   
-  //select the geometry.
-  msg::Message message(msg::Request | msg::Selection | msg::Add);
   slc::Message sMessage;
-  sMessage.type = slc::convert(feature.getSeerShape().getOCCTShape(id).ShapeType());
+  sMessage.type = slc::convert(seerShape.getOCCTShape(id).ShapeType());
   sMessage.featureId = feature.getId();
   sMessage.featureType = feature.getType();
   sMessage.shapeId = id;
+  
+  osg::BoundingSphered bSphere;
+  //if vertex convert to selection point and 'cheat' bounding sphere.
+  if (seerShape.getOCCTShape(id).ShapeType() == TopAbs_VERTEX)
+  {
+    if (!convertVertexSelection(seerShape, sMessage)) //converts vertex id to edge id
+    {
+      std::cout << "vertex to selection failed: BasicCheckPage::selectionChangedSlot" << std::endl;
+      return;
+    }
+    //just make bounding sphere a percentage of whole shape. what if whole shape is vertex?
+    osg::Vec3d vertexPosition = gu::toOsg(BRep_Tool::Pnt(TopoDS::Vertex(seerShape.getOCCTShape(id))));
+    bSphere = calculateBoundingSphere(seerShape.getRootOCCTShape());
+    bSphere.radius() *= .1; //10 percent.
+    bSphere.center() = vertexPosition;
+    sMessage.pointLocation = vertexPosition;
+  }
+  else
+  {
+    bSphere = calculateBoundingSphere(seerShape.getOCCTShape(id));
+  }
+  
+  //select the geometry.
+  msg::Message message(msg::Request | msg::Selection | msg::Add);
   message.payload = sMessage;
   observer->messageOutSignal(message);
   
-  osg::BoundingSphered bSphere = calculateBoundingSphere(id);
   if (!bSphere.valid())
   {
     observer->messageOutSignal(msg::buildStatusMessage("Unable to calculate bounding sphere"));
     return;
   }
   
-  osg::ref_ptr<osg::PositionAttitudeTransform> transform = new osg::PositionAttitudeTransform();
-  boundingSphere = transform;
-  transform->setPosition(bSphere.center());
-  lbr::SphereBuilder builder;
-  builder.setRadius(bSphere.radius());
-  builder.setDeviation(0.25);
-  osg::Geometry *geometry = builder;
-  osg::Vec4Array *color = new osg::Vec4Array();
-  color->push_back(osg::Vec4(1.0, 1.0, 0.0, 0.2));
-  geometry->setColorArray(color);
-  geometry->setColorBinding(osg::Geometry::BIND_OVERALL);
-  geometry->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-  osg::BlendFunc* bf = new osg::BlendFunc(osg::BlendFunc::SRC_ALPHA, osg::BlendFunc::ONE_MINUS_SRC_ALPHA); 
-  geometry->getOrCreateStateSet()->setAttributeAndModes(bf);
-  osg::PolygonMode *pm = new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
-  geometry->getOrCreateStateSet()->setAttribute(pm);
-  transform->addChild(geometry);
-  if (feature.getOverlaySwitch()->addChild(transform))
+  boundingSphere = buildBoundingSphere(bSphere);
+  if (feature.getOverlaySwitch()->addChild(boundingSphere.get()))
     feature.getOverlaySwitch()->setValue(feature.getOverlaySwitch()->getNumChildren() - 1, true);
-}
-
-osg::BoundingSphered BasicCheckPage::calculateBoundingSphere(const boost::uuids::uuid &idIn)
-{
-  osg::BoundingSphered out;
-  
-  const ftr::SeerShape &seerShape = feature.getSeerShape();
-  assert(seerShape.hasShapeIdRecord(idIn));
-  const TopoDS_Shape& shape = seerShape.getOCCTShape(idIn);
-  
-  Bnd_Box bBox;
-  BRepBndLib::Add(shape, bBox);
-  if (bBox.IsVoid())
-    return out;
-  
-  osg::Vec3d point1 = gu::toOsg(bBox.CornerMin());
-  osg::Vec3d point2 = gu::toOsg(bBox.CornerMax());
-  osg::Vec3d diagonalVec = point2 - point1;
-  out.radius() = diagonalVec.length() / 2.0;
-  diagonalVec.normalize();
-  diagonalVec *= out.radius();
-  out.center() = point1 + diagonalVec;
-  
-  return out;
 }
 
 BOPCheckPage::BOPCheckPage(const ftr::Base &featureIn, QWidget *parent) :
@@ -369,14 +438,191 @@ void BOPCheckPage::buildGui()
 {
 }
 
+void BOPCheckPage::basicCheckFailedSlot()
+{
+  basicCheck = -1;
+}
+
+void BOPCheckPage::basicCheckPassedSlot()
+{
+  basicCheck = 1;
+}
+
 ToleranceCheckPage::ToleranceCheckPage(const ftr::Base &featureIn, QWidget *parent) :
   QWidget(parent), feature(featureIn)
 {
+  observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+  observer->name = "dlg::ToleranceCheckPage";
+  
   buildGui();
+  
+  QSettings &settings = static_cast<app::Application*>(qApp)->getUserSettings();
+  settings.beginGroup("CheckGeometry");
+  settings.beginGroup("TolerancePage");
+  tableWidget->horizontalHeader()->restoreState(settings.value("header").toByteArray());
+  settings.endGroup();
+  settings.endGroup();
+  
+  connect(tableWidget, SIGNAL(itemSelectionChanged()), this, SLOT(selectionChangedSlot()));
+}
+
+ToleranceCheckPage::~ToleranceCheckPage()
+{
+  QSettings &settings = static_cast<app::Application*>(qApp)->getUserSettings();
+  settings.beginGroup("CheckGeometry");
+  settings.beginGroup("TolerancePage");
+  settings.setValue("header", tableWidget->horizontalHeader()->saveState());
+  settings.endGroup();
+  settings.endGroup();
+  
+  if (boundingSphere.valid()) //remove current boundingSphere.
+  {
+    assert(boundingSphere->getParents().size() == 1);
+    osg::Group *parent = boundingSphere->getParent(0);
+    parent->removeChild(boundingSphere.get()); //this should make boundingSphere invalid.
+  }
 }
 
 void ToleranceCheckPage::buildGui()
 {
+  tableWidget = new QTableWidget(this);
+  QVBoxLayout *layout = new QVBoxLayout();
+  layout->addWidget(tableWidget);
+  this->setLayout(layout);
+  
+  tableWidget->setColumnCount(3);
+  tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+  tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
+  tableWidget->setHorizontalHeaderLabels
+  (
+    QStringList
+    {
+      tr("Id"),
+      tr("Type"),
+      tr("Tolerance")
+    }
+  );
+}
+
+void ToleranceCheckPage::hideEvent(QHideEvent *event)
+{
+  tableWidget->clearSelection();
+  QWidget::hideEvent(event);
+}
+
+void ToleranceCheckPage::go()
+{
+  tableWidget->clearContents();
+  tableWidget->setSortingEnabled(false);
+  
+  const ftr::SeerShape& seerShape = feature.getSeerShape();
+  std::vector<uuid> ids = seerShape.getAllShapeIds();
+  
+  //tablewidget has to have row size set before adding items. we are only adding
+  //face edges and vertices, so we need to filter down ids so we can set the
+  //row count before filling in values.
+  std::vector<uuid> filteredIds;
+  for (const auto &id : ids)
+  {
+    TopAbs_ShapeEnum shapeType = seerShape.getOCCTShape(id).ShapeType();
+    if
+    (
+      (shapeType == TopAbs_FACE) ||
+      (shapeType == TopAbs_EDGE) ||
+      (shapeType == TopAbs_VERTEX)
+    )
+      filteredIds.push_back(id);
+  }
+  
+  tableWidget->setRowCount(filteredIds.size());
+  int row = 0;
+  for (const auto &id : filteredIds)
+  {
+    TopAbs_ShapeEnum shapeType = seerShape.getOCCTShape(id).ShapeType();
+    double tolerance = 0.0;
+    if (shapeType == TopAbs_FACE)
+      tolerance = BRep_Tool::Tolerance(TopoDS::Face(seerShape.getOCCTShape(id)));
+    else if (shapeType == TopAbs_EDGE)
+      tolerance = BRep_Tool::Tolerance(TopoDS::Edge(seerShape.getOCCTShape(id)));
+    else if (shapeType == TopAbs_VERTEX)
+      tolerance = BRep_Tool::Tolerance(TopoDS::Vertex(seerShape.getOCCTShape(id)));
+    else
+      continue;
+    
+    tableWidget->setItem(row, 0, new QTableWidgetItem
+      (QString::fromStdString(gu::idToString(id))));
+    tableWidget->setItem(row, 1, new QTableWidgetItem
+      (QString::fromStdString(shapeStrings.at(seerShape.getOCCTShape(id).ShapeType()))));
+    tableWidget->setItem(row, 2, new QTableWidgetItem
+      (QString::number(tolerance, 'f', 7))); //sorting doesn't work with sci notation.
+    row++;
+  }
+  
+  tableWidget->setSortingEnabled(true);
+  tableWidget->sortItems(2, Qt::DescendingOrder);
+}
+
+void ToleranceCheckPage::selectionChangedSlot()
+{
+  if (boundingSphere.valid()) //remove current boundingSphere.
+  {
+    assert(boundingSphere->getParents().size() == 1);
+    osg::Group *parent = boundingSphere->getParent(0);
+    parent->removeChild(boundingSphere.get()); //this should make boundingSphere invalid.
+  }
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  
+  const ftr::SeerShape &seerShape = feature.getSeerShape();
+  
+  //get the fresh id.
+  QList<QTableWidgetItem*> freshSelections = tableWidget->selectedItems();
+  if (freshSelections.empty())
+    return;
+  uuid id = gu::stringToId(freshSelections.at(0)->data(Qt::DisplayRole).toString().toStdString());
+  assert(!id.is_nil());
+  assert(seerShape.hasShapeIdRecord(id));
+  
+  slc::Message sMessage;
+  sMessage.type = slc::convert(seerShape.getOCCTShape(id).ShapeType());
+  sMessage.featureId = feature.getId();
+  sMessage.featureType = feature.getType();
+  sMessage.shapeId = id;
+  
+  osg::BoundingSphered bSphere;
+  //if vertex convert to selection point and 'cheat' bounding sphere.
+  if (seerShape.getOCCTShape(id).ShapeType() == TopAbs_VERTEX)
+  {
+    if (!convertVertexSelection(seerShape, sMessage)) //converts vertex id to edge id
+    {
+      std::cout << "vertex to selection failed: ToleranceCheckPage::selectionChangedSlot" << std::endl;
+      return;
+    }
+    //just make bounding sphere a percentage of whole shape. what if whole shape is vertex?
+    osg::Vec3d vertexPosition = gu::toOsg(BRep_Tool::Pnt(TopoDS::Vertex(seerShape.getOCCTShape(id))));
+    bSphere = calculateBoundingSphere(seerShape.getRootOCCTShape());
+    bSphere.radius() *= .1; //10 percent.
+    bSphere.center() = vertexPosition;
+    sMessage.pointLocation = vertexPosition;
+  }
+  else
+  {
+    bSphere = calculateBoundingSphere(seerShape.getOCCTShape(id));
+  }
+  
+  //select the geometry.
+  msg::Message message(msg::Request | msg::Selection | msg::Add);
+  message.payload = sMessage;
+  observer->messageOutSignal(message);
+  
+  if (!bSphere.valid())
+  {
+    observer->messageOutSignal(msg::buildStatusMessage("Unable to calculate bounding sphere"));
+    return;
+  }
+  
+  boundingSphere = buildBoundingSphere(bSphere);
+  if (feature.getOverlaySwitch()->addChild(boundingSphere.get()))
+    feature.getOverlaySwitch()->setValue(feature.getOverlaySwitch()->getNumChildren() - 1, true);
 }
 
 ShapesPage::ShapesPage(const ftr::Base &featureIn, QWidget *parent) :
@@ -387,6 +633,21 @@ ShapesPage::ShapesPage(const ftr::Base &featureIn, QWidget *parent) :
 
 void ShapesPage::buildGui()
 {
+  textEdit = new QTextEdit(this);
+  textEdit->setReadOnly(true);
+  QVBoxLayout *layout = new QVBoxLayout();
+  layout->addWidget(textEdit);
+  this->setLayout(layout);
+}
+
+void ShapesPage::go()
+{
+  std::ostringstream stream;
+  BRepTools_ShapeSet set;
+  set.Add(feature.getSeerShape().getRootOCCTShape());
+  set.DumpExtent(stream);
+  
+  textEdit->setText(QString::fromStdString(stream.str()));
 }
 
 CheckGeometry::CheckGeometry(const ftr::Base &featureIn, QWidget *parent) :
@@ -423,10 +684,19 @@ void CheckGeometry::buildGui()
   
   bopCheckPage = new BOPCheckPage(feature, this);
   tabWidget->addTab(bopCheckPage, tr("Boolean"));
+  connect(basicCheckPage, SIGNAL(basicCheckPassed()), bopCheckPage, SLOT(basicCheckPassedSlot()));
+  connect(basicCheckPage, SIGNAL(basicCheckFailed()), bopCheckPage, SLOT(basicCheckFailedSlot()));
   
   toleranceCheckPage = new ToleranceCheckPage(feature, this);
   tabWidget->addTab(toleranceCheckPage, tr("Tolerance"));
   
   shapesPage = new ShapesPage(feature, this);
   tabWidget->addTab(shapesPage, tr("Shapes"));
+}
+
+void CheckGeometry::go()
+{
+  basicCheckPage->go();
+  toleranceCheckPage->go();
+  shapesPage->go();
 }

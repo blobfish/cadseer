@@ -86,6 +86,7 @@ void CheckGeometry::go()
       QString freshTitle = dialog->windowTitle() + " --" + feature->getName() + "--";
       dialog->setWindowTitle(freshTitle);
       hasRan = true;
+      dialog->go();
       return;
     }
   }

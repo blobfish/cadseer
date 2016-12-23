@@ -36,8 +36,10 @@
 class QTabWidget;
 class QTreeWidget;
 class QTreeWidgetItem;
+class QTableWidget;
 class QCloseEvent;
 class QHideEvent;
+class QTextEdit;
 
 class BRepCheck_Analyzer;
 class TopoDS_Shape;
@@ -55,6 +57,7 @@ namespace dlg
   public:
     BasicCheckPage(const ftr::Base&, QWidget*);
     virtual ~BasicCheckPage() override;
+    void go();
   protected:
     virtual void hideEvent(QHideEvent *) override;
   private:
@@ -66,13 +69,14 @@ namespace dlg
     osg::observer_ptr<osg::PositionAttitudeTransform> boundingSphere;
     
     void buildGui();
-    void go();
     void recursiveCheck(const BRepCheck_Analyzer &, const TopoDS_Shape &);
     void checkSub(const BRepCheck_Analyzer &shapeCheck, const TopoDS_Shape &shape,
                                             TopAbs_ShapeEnum subType);
-    osg::BoundingSphered calculateBoundingSphere(const boost::uuids::uuid &);
   private Q_SLOTS:
     void selectionChangedSlot();
+  Q_SIGNALS:
+    void basicCheckPassed();
+    void basicCheckFailed();
   };
   
   class BOPCheckPage : public QWidget
@@ -80,9 +84,13 @@ namespace dlg
     Q_OBJECT
   public:
     BOPCheckPage(const ftr::Base&, QWidget*);
+  public Q_SLOTS:
+    void basicCheckFailedSlot();
+    void basicCheckPassedSlot();
   private:
     const ftr::Base &feature;
     void buildGui();
+    int basicCheck = 0; // -1 = fail, 0 = not set, 1 = passed.
   };
   
   class ToleranceCheckPage : public QWidget
@@ -90,9 +98,19 @@ namespace dlg
     Q_OBJECT
   public:
     ToleranceCheckPage(const ftr::Base&, QWidget*);
+    ~ToleranceCheckPage();
+    void go();
+  protected:
+    virtual void hideEvent(QHideEvent *) override;
   private:
     const ftr::Base &feature;
+    std::unique_ptr<msg::Observer> observer;
+    QTableWidget *tableWidget;
+    osg::observer_ptr<osg::PositionAttitudeTransform> boundingSphere;
     void buildGui();
+    
+  private Q_SLOTS:
+    void selectionChangedSlot();
   };
   
   class ShapesPage : public QWidget
@@ -100,8 +118,10 @@ namespace dlg
     Q_OBJECT
   public:
     ShapesPage(const ftr::Base&, QWidget*);
+    void go();
   private:
     const ftr::Base &feature;
+    QTextEdit *textEdit;
     void buildGui();
   };
   
@@ -111,6 +131,7 @@ namespace dlg
   public:
     CheckGeometry(const ftr::Base&, QWidget*);
     ~CheckGeometry();
+    void go();
   protected:
     virtual void closeEvent (QCloseEvent*) override;
   private:
