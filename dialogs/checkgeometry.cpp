@@ -18,6 +18,7 @@
  */
 
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QTabWidget>
 #include <QTreeWidget>
 #include <QTableWidget>
@@ -26,21 +27,24 @@
 #include <QHeaderView>
 #include <QHideEvent>
 #include <QTextEdit>
+#include <QLabel>
+#include <QPushButton>
 
 #include <BRepCheck_Analyzer.hxx>
+#include <BOPAlgo_ArgumentAnalyzer.hxx>
 #include <TopExp_Explorer.hxx>
 #include <BRep_Tool.hxx>
 #include <TopoDS.hxx>
 #include <BRepBndLib.hxx>
 #include <Bnd_Box.hxx>
 #include <BRepTools_ShapeSet.hxx>
+#include <BRepBuilderAPI_Copy.hxx>
 
 #include <osg/Group>
 #include <osg/PositionAttitudeTransform>
 #include <osg/Geometry>
 #include <osg/BlendFunc>
 #include <osg/PolygonMode>
-#include <osg/ShadeModel>
 
 #include <application/application.h>
 #include <feature/base.h>
@@ -57,7 +61,7 @@ using boost::uuids::uuid;
 
 QString checkStatusToString(int index)
 {
-  static QStringList names = 
+  static const QStringList names = 
   {
     "No Error",                           //    BRepCheck_NoError
     "Invalid Point On Curve",             //    BRepCheck_InvalidPointOnCurve
@@ -108,6 +112,27 @@ QString checkStatusToString(int index)
     return message;
   }
   return names.at(index);
+}
+
+QString BOPCheckStatusToString(BOPAlgo_CheckStatus status)
+{
+  static const QStringList results =
+  {
+    QObject::tr("BOPAlgo CheckUnknown"),                //BOPAlgo_CheckUnknown
+    QObject::tr("BOPAlgo BadType"),                     //BOPAlgo_BadType
+    QObject::tr("BOPAlgo SelfIntersect"),               //BOPAlgo_SelfIntersect
+    QObject::tr("BOPAlgo TooSmallEdge"),                //BOPAlgo_TooSmallEdge
+    QObject::tr("BOPAlgo NonRecoverableFace"),          //BOPAlgo_NonRecoverableFace
+    QObject::tr("BOPAlgo IncompatibilityOfVertex"),     //BOPAlgo_IncompatibilityOfVertex
+    QObject::tr("BOPAlgo IncompatibilityOfEdge"),       //BOPAlgo_IncompatibilityOfEdge
+    QObject::tr("BOPAlgo IncompatibilityOfFace"),       //BOPAlgo_IncompatibilityOfFace
+    QObject::tr("BOPAlgo OperationAborted"),            //BOPAlgo_OperationAborted
+    QObject::tr("BOPAlgo GeomAbs_C0"),                  //BOPAlgo_GeomAbs_C0
+    QObject::tr("BOPAlgo InvalidCurveOnSurface"),       //BOPAlgo_InvalidCurveOnSurface
+    QObject::tr("BOPAlgo NotValid")                     //BOPAlgo_NotValid
+  };
+  
+  return results.at(static_cast<std::size_t>(status));
 }
 
 static osg::BoundingSphered calculateBoundingSphere(const TopoDS_Shape& shape)
@@ -256,13 +281,11 @@ void BasicCheckPage::go()
   {
     rootItem->setData(2, Qt::DisplayRole, tr("Valid"));
     Q_EMIT(basicCheckPassed());
-  }
-  else
-  {
-    rootItem->setData(2, Qt::DisplayRole, tr("Invalid"));
-    Q_EMIT(basicCheckFailed());
+    return;
   }
   
+  rootItem->setData(2, Qt::DisplayRole, tr("Invalid"));
+  Q_EMIT(basicCheckFailed());
   recursiveCheck(shapeCheck, shape);
   treeWidget->expandAll();
 }
@@ -434,18 +457,210 @@ BOPCheckPage::BOPCheckPage(const ftr::Base &featureIn, QWidget *parent) :
 {
 }
 
-void BOPCheckPage::buildGui()
+BOPCheckPage::~BOPCheckPage()
 {
+  if (tableWidget)
+  {
+    QSettings &settings = static_cast<app::Application*>(qApp)->getUserSettings();
+    settings.beginGroup("CheckGeometry");
+    settings.beginGroup("BOPPage");
+    settings.setValue("header", tableWidget->horizontalHeader()->saveState());
+    settings.endGroup();
+    settings.endGroup();
+  }
+  
+  if (boundingSphere.valid()) //remove current boundingSphere.
+  {
+    assert(boundingSphere->getParents().size() == 1);
+    osg::Group *parent = boundingSphere->getParent(0);
+    parent->removeChild(boundingSphere.get()); //this should make boundingSphere invalid.
+  }
 }
 
 void BOPCheckPage::basicCheckFailedSlot()
 {
-  basicCheck = -1;
+  QLabel *label = new QLabel(this);
+  label->setText(tr("BOP check unavailble when basic check failed"));
+  QHBoxLayout *hLayout = new QHBoxLayout();
+  hLayout->addStretch();
+  hLayout->addWidget(label);
+  hLayout->addStretch();
+  QVBoxLayout *vLayout = new QVBoxLayout();
+  vLayout->addLayout(hLayout);
+  this->setLayout(vLayout);
 }
 
 void BOPCheckPage::basicCheckPassedSlot()
 {
-  basicCheck = 1;
+  QPushButton *goButton = new QPushButton(tr("Launch BOP check"), this);
+  QHBoxLayout *hLayout = new QHBoxLayout();
+  hLayout->addStretch();
+  hLayout->addWidget(goButton);
+  hLayout->addStretch();
+  QVBoxLayout *vLayout = new QVBoxLayout();
+  vLayout->addLayout(hLayout);
+  this->setLayout(vLayout);
+  connect(goButton, SIGNAL(clicked()), goButton, SLOT(hide()));
+  connect(goButton, SIGNAL(clicked()), this, SLOT(goSlot()));
+}
+
+void BOPCheckPage::goSlot()
+{
+  delete (this->layout());
+  tableWidget = new QTableWidget(this);
+  tableWidget->setColumnCount(3);
+  tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+  tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
+  tableWidget->setHorizontalHeaderLabels
+  (
+    QStringList
+    {
+      tr("Id"),
+      tr("Type"),
+      tr("Error")
+    }
+  );
+  QVBoxLayout *vLayout = new QVBoxLayout();
+  vLayout->addWidget(tableWidget);
+  this->setLayout(vLayout);
+  
+  QSettings &settings = static_cast<app::Application*>(qApp)->getUserSettings();
+  settings.beginGroup("CheckGeometry");
+  settings.beginGroup("BOPPage");
+  tableWidget->horizontalHeader()->restoreState(settings.value("header").toByteArray());
+  settings.endGroup();
+  settings.endGroup();
+  
+  //I don't why we need to make a copy, but it doesn't work without it.
+  //BRepAlgoAPI_Check also makes a copy of the shape.
+  ftr::SeerShape workCopy = feature.getSeerShape().createWorkCopy();
+  BOPAlgo_ArgumentAnalyzer BOPCheck;
+  //   BOPCheck.StopOnFirstFaulty() = true; //this doesn't run any faster but gives us less results.
+  BOPCheck.SetParallelMode(true); //this doesn't help for speed right now(occt 6.9.1).
+  BOPCheck.SetShape1(workCopy.getRootOCCTShape());
+  BOPCheck.ArgumentTypeMode() = true;
+  BOPCheck.SelfInterMode() = true;
+  BOPCheck.SmallEdgeMode() = true;
+  BOPCheck.RebuildFaceMode() = true;
+  BOPCheck.ContinuityMode() = true;
+  BOPCheck.TangentMode() = true;
+  BOPCheck.MergeVertexMode() = true;
+  BOPCheck.CurveOnSurfaceMode() = true;
+  BOPCheck.MergeEdgeMode() = true;
+  
+  QApplication::setOverrideCursor(Qt::WaitCursor);
+  QApplication::processEvents(); //so wait cursor shows.
+  //probably need try catch here.
+  BOPCheck.Perform();
+  QApplication::restoreOverrideCursor();
+  
+  const BOPAlgo_ListOfCheckResult &BOPResults = BOPCheck.GetCheckResult();
+  std::vector<QTableWidgetItem> items;
+  for (const auto &result : BOPResults)
+  {
+    for (const auto &resultShape : result.GetFaultyShapes1())
+    {
+      uuid resultId = workCopy.findShapeIdRecord(resultShape).id;
+      std::vector<uuid> sourceIds = workCopy.devolve(resultId);
+      assert(sourceIds.size() == 1);
+      uuid sourceId = sourceIds.front();
+      items.push_back(QTableWidgetItem(QString::fromStdString(gu::idToString(sourceId))));
+      items.push_back(QTableWidgetItem(QString::fromStdString
+        (shapeStrings.at(feature.getSeerShape().getOCCTShape(sourceId).ShapeType()))));
+      items.push_back(QTableWidgetItem(BOPCheckStatusToString(result.GetCheckStatus())));
+    }
+  }
+  
+  assert((items.size() % 3) == 0);
+  tableWidget->setRowCount(items.size() / 3 + 1);
+  
+  QString overallStatus;
+  if (!BOPCheck.HasFaulty())
+    overallStatus = tr("Valid");
+  else
+    overallStatus = tr("Invalid");
+  tableWidget->setItem(0, 0, new QTableWidgetItem
+    (QString::fromStdString(gu::idToString(feature.getSeerShape().getRootShapeId()))));
+  tableWidget->setItem(0, 1, new QTableWidgetItem
+    (QString::fromStdString(shapeStrings.at(feature.getSeerShape().getRootOCCTShape().ShapeType()))));
+  tableWidget->setItem(0, 2, new QTableWidgetItem(overallStatus));
+  
+  auto it = items.begin();
+  for (std::size_t row = 0; row < (items.size() / 3); ++row)
+  {
+    for (std::size_t column = 0; column < 3; ++column)
+    {
+      tableWidget->setItem(row + 1, column, new QTableWidgetItem(*it));
+      it++;
+    }
+  }
+  
+  observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+  observer->name = "dlg::BOPCheckPage";
+  connect(tableWidget, SIGNAL(itemSelectionChanged()), this, SLOT(selectionChangedSlot()));
+}
+
+void BOPCheckPage::selectionChangedSlot()
+{
+  if (boundingSphere.valid()) //remove current boundingSphere.
+  {
+    assert(boundingSphere->getParents().size() == 1);
+    osg::Group *parent = boundingSphere->getParent(0);
+    parent->removeChild(boundingSphere.get()); //this should make boundingSphere invalid.
+  }
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  
+  const ftr::SeerShape &seerShape = feature.getSeerShape();
+  
+  //get the fresh id.
+  QList<QTableWidgetItem*> freshSelections = tableWidget->selectedItems();
+  if (freshSelections.empty())
+    return;
+  uuid id = gu::stringToId(freshSelections.at(0)->data(Qt::DisplayRole).toString().toStdString());
+  assert(!id.is_nil());
+  assert(seerShape.hasShapeIdRecord(id));
+  
+  slc::Message sMessage;
+  sMessage.type = slc::convert(seerShape.getOCCTShape(id).ShapeType());
+  sMessage.featureId = feature.getId();
+  sMessage.featureType = feature.getType();
+  sMessage.shapeId = id;
+  
+  osg::BoundingSphered bSphere;
+  //if vertex convert to selection point and 'cheat' bounding sphere.
+  if (seerShape.getOCCTShape(id).ShapeType() == TopAbs_VERTEX)
+  {
+    if (!convertVertexSelection(seerShape, sMessage)) //converts vertex id to edge id
+    {
+      std::cout << "vertex to selection failed: ToleranceCheckPage::selectionChangedSlot" << std::endl;
+      return;
+    }
+    //just make bounding sphere a percentage of whole shape. what if whole shape is vertex?
+    osg::Vec3d vertexPosition = gu::toOsg(BRep_Tool::Pnt(TopoDS::Vertex(seerShape.getOCCTShape(id))));
+    bSphere = calculateBoundingSphere(seerShape.getRootOCCTShape());
+    bSphere.radius() *= .1; //10 percent.
+    bSphere.center() = vertexPosition;
+    sMessage.pointLocation = vertexPosition;
+  }
+  else
+  {
+    bSphere = calculateBoundingSphere(seerShape.getOCCTShape(id));
+  }
+  
+  //select the geometry.
+  msg::Message message(msg::Request | msg::Selection | msg::Add);
+  message.payload = sMessage;
+  observer->messageOutSignal(message);
+  
+  if (!bSphere.valid())
+  {
+    observer->messageOutSignal(msg::buildStatusMessage("Unable to calculate bounding sphere"));
+    return;
+  }
+  
+  boundingSphere = buildBoundingSphere(bSphere);
+  if (feature.getOverlaySwitch()->addChild(boundingSphere.get()))
+    feature.getOverlaySwitch()->setValue(feature.getOverlaySwitch()->getNumChildren() - 1, true);
 }
 
 ToleranceCheckPage::ToleranceCheckPage(const ftr::Base &featureIn, QWidget *parent) :
@@ -696,6 +911,8 @@ void CheckGeometry::buildGui()
 
 void CheckGeometry::go()
 {
+  //we don't call go for bop page because it is so slow.
+  //we make the user launch it.
   basicCheckPage->go();
   toleranceCheckPage->go();
   shapesPage->go();

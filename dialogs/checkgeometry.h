@@ -31,7 +31,6 @@
 #include <TopAbs_ShapeEnum.hxx>
 
 #include <osg/observer_ptr>
-#include <osg/BoundingSphere>
 
 class QTabWidget;
 class QTreeWidget;
@@ -84,13 +83,19 @@ namespace dlg
     Q_OBJECT
   public:
     BOPCheckPage(const ftr::Base&, QWidget*);
+    virtual ~BOPCheckPage() override;
   public Q_SLOTS:
     void basicCheckFailedSlot();
     void basicCheckPassedSlot();
+    void goSlot();
   private:
     const ftr::Base &feature;
-    void buildGui();
-    int basicCheck = 0; // -1 = fail, 0 = not set, 1 = passed.
+    QTableWidget *tableWidget = nullptr;
+    std::unique_ptr<msg::Observer> observer;
+    osg::observer_ptr<osg::PositionAttitudeTransform> boundingSphere;
+    
+  private Q_SLOTS:
+    void selectionChangedSlot();
   };
   
   class ToleranceCheckPage : public QWidget
@@ -98,7 +103,7 @@ namespace dlg
     Q_OBJECT
   public:
     ToleranceCheckPage(const ftr::Base&, QWidget*);
-    ~ToleranceCheckPage();
+    virtual ~ToleranceCheckPage() override;
     void go();
   protected:
     virtual void hideEvent(QHideEvent *) override;
@@ -130,7 +135,7 @@ namespace dlg
     Q_OBJECT
   public:
     CheckGeometry(const ftr::Base&, QWidget*);
-    ~CheckGeometry();
+    virtual ~CheckGeometry() override;
     void go();
   protected:
     virtual void closeEvent (QCloseEvent*) override;

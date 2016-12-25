@@ -372,6 +372,23 @@ namespace ftr
     prj::srl::SeerShape serialOut(); //!<convert this into serializable object.
     void serialIn(const prj::srl::SeerShape &); //intialize this from serial object.
     
+    /*! @brief Create a copy to work on.
+     * 
+     * calls BRepBuilderAPI_Copy to copy the Root OCCT shape
+     * of this. Returned shape will have valid:
+     * shapeIdContainer
+     * evolveContainer
+     * graph
+     * all other data and related functions may not work.
+     * 
+     * this is useful, because sometimes occt algorithms
+     * need a copy in order to function properly. This
+     * creates an object that we can pass to those functions
+     * and still map shapes back to the original through the
+     * evolve container.
+     */
+    SeerShape createWorkCopy() const;
+    
   private:
     BID::uuid rootShapeId;
     ShapeIdContainer shapeIdContainer;

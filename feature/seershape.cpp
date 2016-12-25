@@ -36,6 +36,7 @@
 #include <BRepTools.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
+#include <BRepBuilderAPI_Copy.hxx>
 
 #include <osg/Vec3d>
 
@@ -1289,4 +1290,27 @@ void SeerShape::serialIn(const prj::srl::SeerShape &sSeerShapeIn)
   }
   
   rootShapeId = gu::stringToId(sSeerShapeIn.rootShapeId());
+}
+
+SeerShape SeerShape::createWorkCopy() const
+{
+  SeerShape target;
+  
+  BRepBuilderAPI_Copy copier;
+  copier.Perform(getRootOCCTShape());
+  target.setOCCTShape(copier.Shape());
+  target.ensureNoNils(); //give all shapes a new id.
+  //ensureNoNils fills in the evolve container also. we have to clear it.
+  target.evolveContainer.get<EvolveRecord::ByInId>().clear();
+  
+  for (const auto &sourceId : getAllShapeIds())
+  {
+    const TopoDS_Shape &sourceShape = findShapeIdRecord(sourceId).shape;
+    TopoDS_Shape targetShape = copier.ModifiedShape(sourceShape);
+    assert(target.hasShapeIdRecord(targetShape));
+    uuid targetId = target.findShapeIdRecord(targetShape).id;
+    target.insertEvolve(sourceId, targetId);
+  }
+  
+  return target;
 }
