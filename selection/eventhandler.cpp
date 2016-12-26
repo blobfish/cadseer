@@ -205,9 +205,8 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
             
             msg::Message addMessage(msg::Response | msg::Post | msg::Selection | msg::Add);
             addMessage.payload = containerToMessage(lastPrehighlight);
+            lastPrehighlight = Container(); //set to null before signal in case we end up in 'this' again.
             observer->messageOutSignal(addMessage);
-            
-            lastPrehighlight = Container();
         }
         //not clearing the selection anymore on a empty pick.
 //         else
