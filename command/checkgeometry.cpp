@@ -87,6 +87,8 @@ void CheckGeometry::go()
       dialog->setWindowTitle(freshTitle);
       hasRan = true;
       dialog->go();
+      selectionManager->setState(static_cast<unsigned int>(~slc::All));
+      observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
       return;
     }
   }

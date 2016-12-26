@@ -24,13 +24,17 @@
 #include <stack>
 #include <set>
 
+#ifndef Q_MOC_RUN
+#include <boost/signals2.hpp>
 #include <boost/uuid/uuid.hpp>
+#endif
 
 #include <QDialog>
 
 #include <TopAbs_ShapeEnum.hxx>
 
 #include <osg/observer_ptr>
+#include <osg/BoundingSphere>
 
 class QTabWidget;
 class QTreeWidget;
@@ -45,12 +49,26 @@ class TopoDS_Shape;
 
 namespace osg{class PositionAttitudeTransform;}
 
-namespace ftr{class Base;}
+namespace ftr{class Base; class SeerShape;}
 namespace msg{class Message; class Observer;}
 
 namespace dlg
 {
-  class BasicCheckPage : public QWidget
+  class CheckPageBase : public QWidget
+  {
+    Q_OBJECT
+  public:
+    CheckPageBase(const ftr::Base&, QWidget*);
+    virtual ~CheckPageBase() override;
+  protected:
+    std::unique_ptr<msg::Observer> observer;
+    const ftr::Base &feature;
+    const ftr::SeerShape &seerShape;
+    osg::observer_ptr<osg::PositionAttitudeTransform> boundingSphere;
+    osg::BoundingSphered minBoundingSphere;
+  };
+  
+  class BasicCheckPage : public CheckPageBase
   {
     Q_OBJECT
   public:
@@ -60,12 +78,9 @@ namespace dlg
   protected:
     virtual void hideEvent(QHideEvent *) override;
   private:
-    const ftr::Base &feature;
-    std::unique_ptr<msg::Observer> observer;
     QTreeWidget *treeWidget = nullptr;
     std::stack<QTreeWidgetItem*> itemStack; //!< used during shape iteration.
     std::set<boost::uuids::uuid> checkedIds;
-    osg::observer_ptr<osg::PositionAttitudeTransform> boundingSphere;
     
     void buildGui();
     void recursiveCheck(const BRepCheck_Analyzer &, const TopoDS_Shape &);
@@ -78,7 +93,7 @@ namespace dlg
     void basicCheckFailed();
   };
   
-  class BOPCheckPage : public QWidget
+  class BOPCheckPage : public CheckPageBase
   {
     Q_OBJECT
   public:
@@ -88,17 +103,16 @@ namespace dlg
     void basicCheckFailedSlot();
     void basicCheckPassedSlot();
     void goSlot();
+  protected:
+    virtual void hideEvent(QHideEvent *) override;
   private:
-    const ftr::Base &feature;
     QTableWidget *tableWidget = nullptr;
-    std::unique_ptr<msg::Observer> observer;
-    osg::observer_ptr<osg::PositionAttitudeTransform> boundingSphere;
     
   private Q_SLOTS:
     void selectionChangedSlot();
   };
   
-  class ToleranceCheckPage : public QWidget
+  class ToleranceCheckPage : public CheckPageBase
   {
     Q_OBJECT
   public:
@@ -108,28 +122,29 @@ namespace dlg
   protected:
     virtual void hideEvent(QHideEvent *) override;
   private:
-    const ftr::Base &feature;
-    std::unique_ptr<msg::Observer> observer;
     QTableWidget *tableWidget;
-    osg::observer_ptr<osg::PositionAttitudeTransform> boundingSphere;
     void buildGui();
     
   private Q_SLOTS:
     void selectionChangedSlot();
   };
   
-  class ShapesPage : public QWidget
+  class ShapesPage : public CheckPageBase
   {
     Q_OBJECT
   public:
     ShapesPage(const ftr::Base&, QWidget*);
     void go();
   private:
-    const ftr::Base &feature;
     QTextEdit *textEdit;
     void buildGui();
   };
   
+  /*! @brief dialog for displaying corrupt occt geometry.
+   * 
+   * class assumes that the feature passed in does have
+   * a valid SeerShape.
+   */
   class CheckGeometry : public QDialog
   {
     Q_OBJECT
@@ -147,7 +162,11 @@ namespace dlg
     ToleranceCheckPage *toleranceCheckPage;
     ShapesPage *shapesPage;
     std::unique_ptr<msg::Observer> observer;
+    void setupDispatcher();
     void buildGui();
+    boost::signals2::connection connection;
+    void featureStateChangedSlot(const boost::uuids::uuid&, std::size_t);
+    void featureRemovedDispatched(const msg::Message &);
   };
 }
 

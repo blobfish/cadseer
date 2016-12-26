@@ -51,6 +51,7 @@
 #include <feature/seershape.h>
 #include <message/message.h>
 #include <message/observer.h>
+#include <message/dispatch.h>
 #include <tools/idtools.h>
 #include <library/spherebuilder.h>
 #include <dialogs/widgetgeometry.h>
@@ -132,7 +133,7 @@ QString BOPCheckStatusToString(BOPAlgo_CheckStatus status)
     QObject::tr("BOPAlgo NotValid")                     //BOPAlgo_NotValid
   };
   
-  return results.at(static_cast<std::size_t>(status));
+  return results.at(static_cast<int>(status));
 }
 
 static osg::BoundingSphered calculateBoundingSphere(const TopoDS_Shape& shape)
@@ -203,14 +204,31 @@ bool convertVertexSelection
   return false;
 }
 
-BasicCheckPage::BasicCheckPage(const ftr::Base &featureIn, QWidget *parent) :
-  QWidget(parent), feature(featureIn)
+CheckPageBase::CheckPageBase(const ftr::Base &featureIn, QWidget *parent):
+  QWidget(parent), feature(featureIn), seerShape(featureIn.getSeerShape())
 {
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+  
+  minBoundingSphere = calculateBoundingSphere(seerShape.getRootOCCTShape());
+  minBoundingSphere.radius() *= .1; //10 percent.
+}
+
+CheckPageBase::~CheckPageBase()
+{
+  if (boundingSphere.valid()) //remove current boundingSphere.
+  {
+    assert(boundingSphere->getParents().size() == 1);
+    osg::Group *parent = boundingSphere->getParent(0);
+    parent->removeChild(boundingSphere.get()); //this should make boundingSphere invalid.
+  }
+}
+
+BasicCheckPage::BasicCheckPage(const ftr::Base &featureIn, QWidget *parent) :
+  CheckPageBase(featureIn, parent)
+{
   observer->name = "dlg::BasicCheckPage";
   
   buildGui();
-  assert(feature.hasSeerShape());
   
   QSettings &settings = static_cast<app::Application*>(qApp)->getUserSettings();
   settings.beginGroup("CheckGeometry");
@@ -230,13 +248,6 @@ BasicCheckPage::~BasicCheckPage()
   settings.setValue("header", treeWidget->header()->saveState());
   settings.endGroup();
   settings.endGroup();
-  
-  if (boundingSphere.valid()) //remove current boundingSphere.
-  {
-    assert(boundingSphere->getParents().size() == 1);
-    osg::Group *parent = boundingSphere->getParent(0);
-    parent->removeChild(boundingSphere.get()); //this should make boundingSphere invalid.
-  }
 }
 
 void BasicCheckPage::buildGui()
@@ -266,8 +277,8 @@ void BasicCheckPage::hideEvent(QHideEvent *event)
 void BasicCheckPage::go()
 {
   //these will have to adjusted for sub shape entry.
-  const TopoDS_Shape &shape = feature.getSeerShape().getRootOCCTShape();
-  uuid rootId = feature.getSeerShape().getRootShapeId();
+  const TopoDS_Shape &shape = seerShape.getRootOCCTShape();
+  uuid rootId = seerShape.getRootShapeId();
   
   //probably need try catch here.
   BRepCheck_Analyzer shapeCheck(shape);
@@ -292,7 +303,6 @@ void BasicCheckPage::go()
 
 void BasicCheckPage::recursiveCheck(const BRepCheck_Analyzer &shapeCheck, const TopoDS_Shape &shape)
 {
-  const ftr::SeerShape &seerShape = feature.getSeerShape();
   if (seerShape.hasShapeIdRecord(shape))
   {
     uuid shapeId = seerShape.findShapeIdRecord(shape).id;
@@ -309,7 +319,7 @@ void BasicCheckPage::recursiveCheck(const BRepCheck_Analyzer &shapeCheck, const 
       QTreeWidgetItem *entry = new QTreeWidgetItem(itemStack.top());
       entry->setData(0, Qt::DisplayRole, QString::fromStdString(gu::idToString(shapeId)));
       entry->setData(1, Qt::DisplayRole, QString::fromStdString(shapeStrings.at(shape.ShapeType())));
-      entry->setData(2, Qt::DisplayRole, checkStatusToString(listIt.Value()));
+      entry->setData(2, Qt::DisplayRole, checkStatusToString(static_cast<int>(listIt.Value())));
       itemStack.push(entry);
   
       if (shape.ShapeType() == TopAbs_SOLID)
@@ -356,7 +366,6 @@ void BasicCheckPage::checkSub(const BRepCheck_Analyzer &shapeCheck, const TopoDS
   {
     const TopoDS_Shape& sub = exp.Current();
     
-    const ftr::SeerShape &seerShape = feature.getSeerShape();
     if (!seerShape.hasShapeIdRecord(sub))
     {
       std::cout << "Warning: no shapeIdRecord in BasicCheckPage::checkSub" << std::endl;
@@ -377,7 +386,7 @@ void BasicCheckPage::checkSub(const BRepCheck_Analyzer &shapeCheck, const TopoDS
           QTreeWidgetItem *entry = new QTreeWidgetItem(itemStack.top());
           entry->setData(0, Qt::DisplayRole, QString::fromStdString(gu::idToString(subId)));
           entry->setData(1, Qt::DisplayRole, QString::fromStdString(shapeStrings.at(sub.ShapeType())));
-          entry->setData(2, Qt::DisplayRole, checkStatusToString(itl.Value()));
+          entry->setData(2, Qt::DisplayRole, checkStatusToString(static_cast<int>(itl.Value())));
 //           dispatchError(entry, itl.Value());
         }
       }
@@ -398,8 +407,6 @@ void BasicCheckPage::selectionChangedSlot()
     parent->removeChild(boundingSphere.get()); //this should make boundingSphere invalid.
   }
   observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
-  
-  const ftr::SeerShape &seerShape = feature.getSeerShape();
   
   //get the fresh id.
   QList<QTreeWidgetItem*> freshSelections = treeWidget->selectedItems();
@@ -426,14 +433,14 @@ void BasicCheckPage::selectionChangedSlot()
     }
     //just make bounding sphere a percentage of whole shape. what if whole shape is vertex?
     osg::Vec3d vertexPosition = gu::toOsg(BRep_Tool::Pnt(TopoDS::Vertex(seerShape.getOCCTShape(id))));
-    bSphere = calculateBoundingSphere(seerShape.getRootOCCTShape());
-    bSphere.radius() *= .1; //10 percent.
+    bSphere = minBoundingSphere;
     bSphere.center() = vertexPosition;
     sMessage.pointLocation = vertexPosition;
   }
   else
   {
     bSphere = calculateBoundingSphere(seerShape.getOCCTShape(id));
+    bSphere.radius() = std::max(bSphere.radius(), minBoundingSphere.radius());
   }
   
   //select the geometry.
@@ -453,8 +460,9 @@ void BasicCheckPage::selectionChangedSlot()
 }
 
 BOPCheckPage::BOPCheckPage(const ftr::Base &featureIn, QWidget *parent) :
-  QWidget(parent), feature(featureIn)
+  CheckPageBase(featureIn, parent)
 {
+  observer->name = "dlg::BOPCheckPage";
 }
 
 BOPCheckPage::~BOPCheckPage()
@@ -467,13 +475,6 @@ BOPCheckPage::~BOPCheckPage()
     settings.setValue("header", tableWidget->horizontalHeader()->saveState());
     settings.endGroup();
     settings.endGroup();
-  }
-  
-  if (boundingSphere.valid()) //remove current boundingSphere.
-  {
-    assert(boundingSphere->getParents().size() == 1);
-    osg::Group *parent = boundingSphere->getParent(0);
-    parent->removeChild(boundingSphere.get()); //this should make boundingSphere invalid.
   }
 }
 
@@ -504,8 +505,18 @@ void BOPCheckPage::basicCheckPassedSlot()
   connect(goButton, SIGNAL(clicked()), this, SLOT(goSlot()));
 }
 
+void BOPCheckPage::hideEvent(QHideEvent *event)
+{
+  if (tableWidget)
+    tableWidget->clearSelection();
+  QWidget::hideEvent(event);
+}
+
 void BOPCheckPage::goSlot()
 {
+  //todo launch bopalgo check in another process.
+  
+  
   delete (this->layout());
   tableWidget = new QTableWidget(this);
   tableWidget->setColumnCount(3);
@@ -533,7 +544,7 @@ void BOPCheckPage::goSlot()
   
   //I don't why we need to make a copy, but it doesn't work without it.
   //BRepAlgoAPI_Check also makes a copy of the shape.
-  ftr::SeerShape workCopy = feature.getSeerShape().createWorkCopy();
+  ftr::SeerShape workCopy = seerShape.createWorkCopy();
   BOPAlgo_ArgumentAnalyzer BOPCheck;
   //   BOPCheck.StopOnFirstFaulty() = true; //this doesn't run any faster but gives us less results.
   BOPCheck.SetParallelMode(true); //this doesn't help for speed right now(occt 6.9.1).
@@ -566,7 +577,7 @@ void BOPCheckPage::goSlot()
       uuid sourceId = sourceIds.front();
       items.push_back(QTableWidgetItem(QString::fromStdString(gu::idToString(sourceId))));
       items.push_back(QTableWidgetItem(QString::fromStdString
-        (shapeStrings.at(feature.getSeerShape().getOCCTShape(sourceId).ShapeType()))));
+        (shapeStrings.at(seerShape.getOCCTShape(sourceId).ShapeType()))));
       items.push_back(QTableWidgetItem(BOPCheckStatusToString(result.GetCheckStatus())));
     }
   }
@@ -580,9 +591,9 @@ void BOPCheckPage::goSlot()
   else
     overallStatus = tr("Invalid");
   tableWidget->setItem(0, 0, new QTableWidgetItem
-    (QString::fromStdString(gu::idToString(feature.getSeerShape().getRootShapeId()))));
+    (QString::fromStdString(gu::idToString(seerShape.getRootShapeId()))));
   tableWidget->setItem(0, 1, new QTableWidgetItem
-    (QString::fromStdString(shapeStrings.at(feature.getSeerShape().getRootOCCTShape().ShapeType()))));
+    (QString::fromStdString(shapeStrings.at(seerShape.getRootOCCTShape().ShapeType()))));
   tableWidget->setItem(0, 2, new QTableWidgetItem(overallStatus));
   
   auto it = items.begin();
@@ -610,8 +621,6 @@ void BOPCheckPage::selectionChangedSlot()
   }
   observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
   
-  const ftr::SeerShape &seerShape = feature.getSeerShape();
-  
   //get the fresh id.
   QList<QTableWidgetItem*> freshSelections = tableWidget->selectedItems();
   if (freshSelections.empty())
@@ -637,14 +646,14 @@ void BOPCheckPage::selectionChangedSlot()
     }
     //just make bounding sphere a percentage of whole shape. what if whole shape is vertex?
     osg::Vec3d vertexPosition = gu::toOsg(BRep_Tool::Pnt(TopoDS::Vertex(seerShape.getOCCTShape(id))));
-    bSphere = calculateBoundingSphere(seerShape.getRootOCCTShape());
-    bSphere.radius() *= .1; //10 percent.
+    bSphere = minBoundingSphere;
     bSphere.center() = vertexPosition;
     sMessage.pointLocation = vertexPosition;
   }
   else
   {
     bSphere = calculateBoundingSphere(seerShape.getOCCTShape(id));
+    bSphere.radius() = std::max(bSphere.radius(), minBoundingSphere.radius());
   }
   
   //select the geometry.
@@ -664,9 +673,8 @@ void BOPCheckPage::selectionChangedSlot()
 }
 
 ToleranceCheckPage::ToleranceCheckPage(const ftr::Base &featureIn, QWidget *parent) :
-  QWidget(parent), feature(featureIn)
+  CheckPageBase(featureIn, parent)
 {
-  observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
   observer->name = "dlg::ToleranceCheckPage";
   
   buildGui();
@@ -689,13 +697,6 @@ ToleranceCheckPage::~ToleranceCheckPage()
   settings.setValue("header", tableWidget->horizontalHeader()->saveState());
   settings.endGroup();
   settings.endGroup();
-  
-  if (boundingSphere.valid()) //remove current boundingSphere.
-  {
-    assert(boundingSphere->getParents().size() == 1);
-    osg::Group *parent = boundingSphere->getParent(0);
-    parent->removeChild(boundingSphere.get()); //this should make boundingSphere invalid.
-  }
 }
 
 void ToleranceCheckPage::buildGui()
@@ -730,7 +731,6 @@ void ToleranceCheckPage::go()
   tableWidget->clearContents();
   tableWidget->setSortingEnabled(false);
   
-  const ftr::SeerShape& seerShape = feature.getSeerShape();
   std::vector<uuid> ids = seerShape.getAllShapeIds();
   
   //tablewidget has to have row size set before adding items. we are only adding
@@ -787,8 +787,6 @@ void ToleranceCheckPage::selectionChangedSlot()
   }
   observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
   
-  const ftr::SeerShape &seerShape = feature.getSeerShape();
-  
   //get the fresh id.
   QList<QTableWidgetItem*> freshSelections = tableWidget->selectedItems();
   if (freshSelections.empty())
@@ -814,14 +812,14 @@ void ToleranceCheckPage::selectionChangedSlot()
     }
     //just make bounding sphere a percentage of whole shape. what if whole shape is vertex?
     osg::Vec3d vertexPosition = gu::toOsg(BRep_Tool::Pnt(TopoDS::Vertex(seerShape.getOCCTShape(id))));
-    bSphere = calculateBoundingSphere(seerShape.getRootOCCTShape());
-    bSphere.radius() *= .1; //10 percent.
+    bSphere = minBoundingSphere;
     bSphere.center() = vertexPosition;
     sMessage.pointLocation = vertexPosition;
   }
   else
   {
     bSphere = calculateBoundingSphere(seerShape.getOCCTShape(id));
+    bSphere.radius() = std::max(bSphere.radius(), minBoundingSphere.radius());
   }
   
   //select the geometry.
@@ -841,8 +839,9 @@ void ToleranceCheckPage::selectionChangedSlot()
 }
 
 ShapesPage::ShapesPage(const ftr::Base &featureIn, QWidget *parent) :
-  QWidget(parent), feature(featureIn)
+  CheckPageBase(featureIn, parent)
 {
+  observer->name = "dlg::ShapesPage"; //not using at this time.
   buildGui();
 }
 
@@ -859,7 +858,7 @@ void ShapesPage::go()
 {
   std::ostringstream stream;
   BRepTools_ShapeSet set;
-  set.Add(feature.getSeerShape().getRootOCCTShape());
+  set.Add(seerShape.getRootOCCTShape());
   set.DumpExtent(stream);
   
   textEdit->setText(QString::fromStdString(stream.str()));
@@ -872,11 +871,14 @@ CheckGeometry::CheckGeometry(const ftr::Base &featureIn, QWidget *parent) :
   
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
   observer->name = "dlg::CheckGeometry";
+  setupDispatcher();
   
   buildGui();
   
   WidgetGeometry *filter = new WidgetGeometry(this, "dlg::CheckGeometry");
   this->installEventFilter(filter);
+  
+  connection = feature.connectState(boost::bind(&CheckGeometry::featureStateChangedSlot, this, _1, _2));
 }
 
 CheckGeometry::~CheckGeometry(){}
@@ -884,6 +886,7 @@ CheckGeometry::~CheckGeometry(){}
 void CheckGeometry::closeEvent(QCloseEvent *e)
 {
   QDialog::closeEvent(e);
+  connection.disconnect();
   observer->messageOutSignal(msg::Mask(msg::Request | msg::Command | msg::Done));
 }
 
@@ -916,4 +919,34 @@ void CheckGeometry::go()
   basicCheckPage->go();
   toleranceCheckPage->go();
   shapesPage->go();
+}
+
+void CheckGeometry::featureStateChangedSlot(const uuid &featureIdIn, std::size_t freshState)
+{
+  if
+  (
+    (featureIdIn == feature.getId()) &&
+    (freshState == ftr::StateOffset::ModelDirty)
+  )
+    qApp->postEvent(this, new QCloseEvent());
+}
+
+void CheckGeometry::setupDispatcher()
+{
+  msg::Mask mask;
+  
+  mask = msg::Response | msg::Pre | msg::Remove | msg::Feature;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&CheckGeometry::featureRemovedDispatched, this, _1)));
+}
+
+void CheckGeometry::featureRemovedDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  prj::Message message = boost::get<prj::Message>(messageIn.payload);
+  
+  if (message.featureId == feature.getId())
+    qApp->postEvent(this, new QCloseEvent());
 }
