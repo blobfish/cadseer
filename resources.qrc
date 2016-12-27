@@ -14,7 +14,6 @@
     <file>resources/images/viewFit.svg</file>
     <file>resources/images/viewFill.svg</file>
     <file>resources/images/viewLine.svg</file>
-    <file>resources/images/viewInfo.svg</file>
     <file>resources/images/selectFeatures.svg</file>
     <file>resources/images/selectObjects.svg</file>
     <file>resources/images/selectShells.svg</file>
@@ -89,6 +88,7 @@
     <file>resources/images/trafficGreen.svg</file>
     <file>resources/images/inspectBase.svg</file>
     <file>resources/images/inspectCheckGeometry.svg</file>
+    <file>resources/images/inspectInfo.svg</file>
     <file>preferences/preferences.xml</file>
     <file>preferences/preferencesXML.xsd</file>
   </qresource>

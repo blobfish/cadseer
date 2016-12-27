@@ -325,12 +325,6 @@ void GestureHandler::constructMenu()
     viewLine->setUserValue(attributeStatus, QObject::tr("View Lines Command").toStdString());
     viewBase->insertChild(viewBase->getNumChildren() - 2, viewLine);
     
-    osg::MatrixTransform *viewInfo = gsn::buildCommandNode(":/resources/images/viewInfo.svg");
-    viewInfo->setMatrix(dummy);
-    viewInfo->setUserValue(attributeMask, (msg::Request | msg::ViewInfo).to_string());
-    viewInfo->setUserValue(attributeStatus, QObject::tr("View Info Command").toStdString());
-    viewBase->insertChild(viewBase->getNumChildren() - 2, viewInfo);
-
     //construction base
     osg::MatrixTransform *constructionBase;
     constructionBase = gsn::buildMenuNode(":/resources/images/constructionBase.svg");
@@ -616,6 +610,12 @@ void GestureHandler::constructMenu()
     inspectBase->setMatrix(dummy);
     inspectBase->setUserValue(attributeStatus, QObject::tr("Inspect Menu").toStdString());
     startNode->insertChild(startNode->getNumChildren() - 2, inspectBase);
+    
+    osg::MatrixTransform *inpsectInfo = gsn::buildCommandNode(":/resources/images/inspectInfo.svg");
+    inpsectInfo->setMatrix(dummy);
+    inpsectInfo->setUserValue(attributeMask, (msg::Request | msg::ViewInfo).to_string());
+    inpsectInfo->setUserValue(attributeStatus, QObject::tr("View Info Command").toStdString());
+    inspectBase->insertChild(inspectBase->getNumChildren() - 2, inpsectInfo);
     
     osg::MatrixTransform *inspectCheckGeometry = gsn::buildCommandNode(":/resources/images/inspectCheckGeometry.svg");
     inspectCheckGeometry->setMatrix(dummy);
