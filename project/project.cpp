@@ -583,6 +583,8 @@ void Project::checkShapeIdsDispatched(const msg::Message&)
   BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
   {
     const ftr::Base *feature = projectGraph[currentVertex].feature.get();
+    if (!feature->hasSeerShape())
+      continue;
     for (const auto &id : feature->getSeerShape().getAllShapeIds())
     {
       IdMap::iterator it = idMap.find(id);
@@ -601,16 +603,21 @@ void Project::checkShapeIdsDispatched(const msg::Message&)
   
   std::cout << std::endl << std::endl << "Check shape ids:";
   
+  bool foundDuplicate = false;
   for (const auto &entry : idMap)
   {
     if (entry.second.size() < 2)
       continue;
+    foundDuplicate = true;
     std::cout << std::endl << "shape id of: " << gu::idToString(entry.first) << "    is in feature id of:";
     for (const auto &it : entry.second)
     {
       std::cout << " " << gu::idToString(it);
     }
   }
+  
+  if (!foundDuplicate)
+    std::cout << std::endl << "No duplicate ids found. Test passed" << std::endl;
 }
 
 void Project::indexVerticesEdges()
