@@ -24,7 +24,7 @@
 //The default value is 0xffffffff (all bits set).
 //typedef unsigned int NodeMask; size of 32.
 
-namespace NodeMaskDef
+namespace mdv
 {
     static const unsigned int mainCamera =              1 << 0;
     static const unsigned int backGroundCamera =        1 << 1;

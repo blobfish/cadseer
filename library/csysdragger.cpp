@@ -42,7 +42,7 @@ using namespace lbr;
 
 CSysDragger::CSysDragger()
 {
-  this->setNodeMask(NodeMaskDef::csys);
+  this->setNodeMask(mdv::csys);
   setUserValue(gu::idAttributeTitle, gu::idToString(gu::createNilId()));
   
   autoTransform = new osg::AutoTransform();

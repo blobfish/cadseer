@@ -55,7 +55,7 @@ EventHandler::EventHandler(osg::Group *viewerRootIn) : osgGA::GUIEventHandler()
     
     preHighlightColor = Vec4(1.0, 1.0, 0.0, 1.0);
     selectionColor = Vec4(1.0, 1.0, 1.0, 1.0);
-    nodeMask = ~(NodeMaskDef::backGroundCamera | NodeMaskDef::gestureCamera | NodeMaskDef::csys | NodeMaskDef::point);
+    nodeMask = ~(mdv::backGroundCamera | mdv::gestureCamera | mdv::csys | mdv::point);
 }
 
 void EventHandler::setSelectionMask(const unsigned int &maskIn)
@@ -72,9 +72,9 @@ void EventHandler::setSelectionMask(const unsigned int &maskIn)
       canSelectObjects(selectionMask) |
       canSelectNearestPoints(selectionMask)
     )
-        nodeMask |= NodeMaskDef::face;
+        nodeMask |= mdv::face;
     else
-        nodeMask &= ~NodeMaskDef::face;
+        nodeMask &= ~mdv::face;
 
     if
     (
@@ -82,9 +82,9 @@ void EventHandler::setSelectionMask(const unsigned int &maskIn)
       canSelectWires(selectionMask) |
       canSelectPoints(selectionMask)
     )
-        nodeMask |= NodeMaskDef::edge;
+        nodeMask |= mdv::edge;
     else
-        nodeMask &= ~NodeMaskDef::edge;
+        nodeMask &= ~mdv::edge;
 
     //obsolete. we no longer generate vertices
 //     if ((Selection::pointsSelectable & selectionMask) == Selection::pointsSelectable)
@@ -461,7 +461,7 @@ void EventHandler::requestSelectionClearDispatched(const msg::Message &)
 Geometry* EventHandler::buildTempPoint(const Vec3d& pointIn)
 {
   osg::Geometry *geometry = new osg::Geometry();
-  geometry->setNodeMask(NodeMaskDef::point);
+  geometry->setNodeMask(mdv::point);
   geometry->setCullingActive(false);
   geometry->setDataVariance(osg::Object::DYNAMIC);
   osg::Vec3Array *vertices = new osg::Vec3Array();

@@ -39,14 +39,14 @@
 osg::MatrixTransform *gsn::buildMenuNode(const char *resourceName)
 {
     osg::ref_ptr<osg::MatrixTransform> mainNode = buildCommonNode(resourceName);
-    mainNode->setNodeMask(NodeMaskDef::gestureMenu);
+    mainNode->setNodeMask(mdv::gestureMenu);
     return mainNode.release();
 }
 
 osg::MatrixTransform* gsn::buildCommandNode(const char *resourceName)
 {
     osg::ref_ptr<osg::MatrixTransform> mainNode = buildCommonNode(resourceName);
-    mainNode->setNodeMask(NodeMaskDef::gestureCommand);
+    mainNode->setNodeMask(mdv::gestureCommand);
     return mainNode.release();
 }
 

@@ -54,7 +54,7 @@ Base::Base()
   
   mainSwitch = new osg::Switch();
   mainSwitch->setName("feature");
-  mainSwitch->setNodeMask(NodeMaskDef::object);
+  mainSwitch->setNodeMask(mdv::object);
   mainSwitch->setUserValue(gu::idAttributeTitle, gu::idToString(id));
   
   mainTransform = new osg::MatrixTransform();
@@ -63,12 +63,12 @@ Base::Base()
   
   lod = new osg::LOD();
   lod->setName("lod");
-  lod->setNodeMask(NodeMaskDef::lod);
+  lod->setNodeMask(mdv::lod);
   lod->setRangeMode(osg::LOD::PIXEL_SIZE_ON_SCREEN);
   mainTransform->addChild(lod.get());
   
   overlaySwitch = new osg::Switch();
-  overlaySwitch->setNodeMask(NodeMaskDef::overlaySwitch);
+  overlaySwitch->setNodeMask(mdv::overlaySwitch);
   overlaySwitch->setName("overlay");
   overlaySwitch->setUserValue(gu::idAttributeTitle, gu::idToString(id));
   

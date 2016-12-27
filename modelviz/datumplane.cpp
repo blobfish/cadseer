@@ -33,7 +33,7 @@ DatumPlane::DatumPlane() : Base()
   setDataVariance(osg::Object::DYNAMIC);
   setUseVertexBufferObjects(true);
   
-  setNodeMask(NodeMaskDef::datum);
+  setNodeMask(mdv::datum);
   setName("datumPlane");
   getOrCreateStateSet()->setAttribute(new osg::LineWidth(4.0f));
   getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);

@@ -290,7 +290,7 @@ bool OverlayHandler::handle
         if (tDragger)
         {
             //look for csysdragger.
-            ParentMaskVisitor visitor(NodeMaskDef::csys);
+            ParentMaskVisitor visitor(mdv::csys);
             dragger->accept(visitor);
             if (visitor.out)
             {
@@ -317,7 +317,7 @@ bool OverlayHandler::handle
       findDimension(intersections);
       if (dimension)
       {
-        ParentMaskVisitor visitor(NodeMaskDef::overlaySwitch);
+        ParentMaskVisitor visitor(mdv::overlaySwitch);
         dimension->accept(visitor);
         assert(visitor.out);
         
@@ -331,7 +331,7 @@ bool OverlayHandler::handle
         if (!path.empty())
         {
             assert(path.back()->getName() == "origin");
-            ParentMaskVisitor visitor(NodeMaskDef::csys);
+            ParentMaskVisitor visitor(mdv::csys);
             path.back()->accept(visitor);
             assert(visitor.out);
             lbr::CSysDragger *lDragger = dynamic_cast<lbr::CSysDragger*>(visitor.out);
@@ -347,7 +347,7 @@ bool OverlayHandler::handle
             findPLabel(intersections);
             if (pLabel)
             {
-                ParentMaskVisitor visitor(NodeMaskDef::overlaySwitch);
+                ParentMaskVisitor visitor(mdv::overlaySwitch);
                 pLabel->accept(visitor);
                 assert(visitor.out);
                 

@@ -38,7 +38,7 @@ osg::Node* csys::buildCoordinateSystemNode()
   base->setAutoScaleToScreen(true);
   osg::ref_ptr<osg::Switch> theSwitch = new osg::Switch();
   base->addChild(theSwitch);
-  base->setNodeMask(NodeMaskDef::csys);//temp
+  base->setNodeMask(mdv::csys);//temp
   osg::LightModel* lightModel = new osg::LightModel;
   lightModel->setTwoSided(true);
   base->getOrCreateStateSet()->setAttributeAndModes(lightModel, osg::StateAttribute::ON);

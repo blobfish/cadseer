@@ -37,7 +37,7 @@ using boost::uuids::uuid;
 //helper function
 static uuid getFeatureId(osg::Drawable &drawableIn) //can't be const, accept discards.
 {
-  ParentMaskVisitor visitor(NodeMaskDef::object);
+  ParentMaskVisitor visitor(mdv::object);
   drawableIn.accept(visitor);
   osg::Node *featureRoot = visitor.out;
   assert(featureRoot);
@@ -46,7 +46,7 @@ static uuid getFeatureId(osg::Drawable &drawableIn) //can't be const, accept dis
 
 static ftr::Type getFeatureType(osg::Drawable &drawableIn)
 {
-  ParentMaskVisitor visitor(NodeMaskDef::object);
+  ParentMaskVisitor visitor(mdv::object);
   drawableIn.accept(visitor);
   osg::Node *featureRoot = visitor.out;
   assert(featureRoot);
@@ -75,7 +75,7 @@ void Interpreter::go()
     mdv::ShapeGeometry *shapeGeometry = dynamic_cast<mdv::ShapeGeometry *>(intersection.drawable.get());
     if (!shapeGeometry)
     {
-      if (localNodeMask == NodeMaskDef::datum)
+      if (localNodeMask == mdv::datum)
       {
         if (canSelectFeatures(selectionMask))
         {
@@ -94,7 +94,7 @@ void Interpreter::go()
     }
     uuid selectedId = shapeGeometry->getId(intersection.primitiveIndex);
     
-    if (localNodeMask == NodeMaskDef::edge)
+    if (localNodeMask == mdv::edge)
     {
       if (canSelectPoints(selectionMask))
       {
@@ -194,7 +194,7 @@ void Interpreter::go()
         }
       }
     }
-    else if(localNodeMask == NodeMaskDef::face)
+    else if(localNodeMask == mdv::face)
     {
       if (canSelectWires(selectionMask))
       {

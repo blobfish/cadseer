@@ -194,7 +194,7 @@ void ShapeGeometryBuilder::initialize()
   if (shouldBuildFaces)
   {
     faceGeometry = new ShapeGeometry();
-    faceGeometry->setNodeMask(NodeMaskDef::face);
+    faceGeometry->setNodeMask(mdv::face);
     faceGeometry->setName("faces");
     faceGeometry->getOrCreateStateSet()->setAttribute(faceDepth.get());
     
@@ -223,7 +223,7 @@ void ShapeGeometryBuilder::initialize()
   if (shouldBuildEdges)
   {
     edgeGeometry = new ShapeGeometry();
-    edgeGeometry->setNodeMask(NodeMaskDef::edge);
+    edgeGeometry->setNodeMask(mdv::edge);
     edgeGeometry->setName("edges");
     edgeGeometry->getOrCreateStateSet()->setAttribute(edgeDepth.get());
     edgeGeometry->getOrCreateStateSet()->setAttribute(lineWidth.get());
@@ -246,7 +246,7 @@ void ShapeGeometryBuilder::initialize()
   {
     //not using vertices at time of writing, so has bugs.
     vertexGeometry = new ShapeGeometry();
-    vertexGeometry->setNodeMask(NodeMaskDef::vertex);
+    vertexGeometry->setNodeMask(mdv::vertex);
     vertexGeometry->setName("vertices");
     vertexGeometry->getOrCreateStateSet()->setAttribute(new osg::Point(5.0));
     vertexGeometry->setVertexArray(new osg::Vec3Array());

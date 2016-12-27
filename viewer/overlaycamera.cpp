@@ -39,7 +39,7 @@ OverlayCamera::OverlayCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera(
   fleetingGeometry = new osg::Switch();
   this->addChild(fleetingGeometry);
   
-  setNodeMask(NodeMaskDef::overlayCamera);
+  setNodeMask(mdv::overlayCamera);
   setupDispatcher();
   setGraphicsContext(windowIn);
   setClearMask(GL_DEPTH_BUFFER_BIT);

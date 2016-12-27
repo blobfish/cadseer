@@ -269,7 +269,7 @@ osg::Camera* ViewerWidget::createBackgroundCamera()
     bgCamera->setRenderOrder(osg::Camera::NESTED_RENDER, 0);
     bgCamera->setProjectionMatrix(osg::Matrix::ortho2D(0.0, 1.0, 0.0, 1.0));
     bgCamera->addChild(geode.get());
-    bgCamera->setNodeMask(NodeMaskDef::backGroundCamera);
+    bgCamera->setNodeMask(mdv::backGroundCamera);
 
     osg::StateSet* ss = bgCamera->getOrCreateStateSet();
     ss->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
@@ -288,7 +288,7 @@ osg::Camera* ViewerWidget::createGestureCamera()
     colorArray->push_back(osg::Vec4(0.0, 0.0, 0.0, 0.6));
     quad->setColorArray(colorArray);
     quad->setColorBinding(osg::Geometry::BIND_OVERALL);
-    quad->setNodeMask(NodeMaskDef::gestureCamera);
+    quad->setNodeMask(mdv::gestureCamera);
     quad->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);
     quad->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
 
@@ -301,7 +301,7 @@ osg::Camera* ViewerWidget::createGestureCamera()
     fadeCamera->setProjectionMatrix(osg::Matrix::ortho2D(0.0, 1000.0, 0.0, 1000.0));
     fadeCamera->setViewMatrix(osg::Matrix::identity());
     fadeCamera->setGraphicsContext(windowQt);
-    fadeCamera->setNodeMask(NodeMaskDef::gestureCamera);
+    fadeCamera->setNodeMask(mdv::gestureCamera);
     fadeCamera->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 
     osg::Switch *aSwitch = new osg::Switch();
@@ -480,7 +480,7 @@ void VisibleVisitor::apply(osg::Switch &aSwitch)
 {
     traverse(aSwitch);
 
-    if (aSwitch.getNodeMask() & NodeMaskDef::vertex)
+    if (aSwitch.getNodeMask() & mdv::vertex)
     {
         if (visibility)
             aSwitch.setAllChildrenOn();
