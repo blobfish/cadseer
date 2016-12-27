@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef NODEMASKDEFS_H
-#define NODEMASKDEFS_H
+#ifndef MDV_NODEMASKDEFS_H
+#define MDV_NODEMASKDEFS_H
 
 //from osg::Node documentation:
 //The default value is 0xffffffff (all bits set).
@@ -39,11 +39,11 @@ namespace mdv
     static const unsigned int object =                  1 << 9;
     static const unsigned int csys =                    1 << 10;
     static const unsigned int overlaySwitch =           1 << 11;
-    static const unsigned int datum =		        1 << 12;
+    static const unsigned int datum =                   1 << 12;
 
     static const unsigned int gestureMenu =             1 << 13;
     static const unsigned int gestureCommand =          1 << 14;
 }
 
 
-#endif // NODEMASKDEFS_H
+#endif // MDV_NODEMASKDEFS_H
