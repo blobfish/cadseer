@@ -20,7 +20,7 @@
 #include <cassert>
 
 #include <tools/idtools.h>
-#include <nodemaskdefs.h>
+#include <modelviz/nodemaskdefs.h>
 #include <globalutilities.h>
 #include <feature/base.h>
 #include <feature/seershape.h>

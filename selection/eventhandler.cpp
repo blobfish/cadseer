@@ -29,7 +29,7 @@
 #include <osg/Depth>
 
 #include <selection/eventhandler.h>
-#include <nodemaskdefs.h>
+#include <modelviz/nodemaskdefs.h>
 #include <selection/definitions.h>
 #include <selection/intersector.h>
 #include <globalutilities.h>

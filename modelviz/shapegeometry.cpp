@@ -35,7 +35,7 @@
 #include <feature/seershape.h>
 #include <modelviz/shapegeometryprivate.h>
 #include <modelviz/shapegeometry.h>
-#include <nodemaskdefs.h>
+#include <modelviz/nodemaskdefs.h>
 
 using namespace mdv;
 using namespace osg;

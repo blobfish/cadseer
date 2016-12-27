@@ -36,7 +36,7 @@
 
 #include <tools/infotools.h>
 #include <globalutilities.h>
-#include <nodemaskdefs.h>
+#include <modelviz/nodemaskdefs.h>
 #include <library/ipgroup.h>
 #include <modelviz/datumplane.h>
 #include <feature/seershape.h>

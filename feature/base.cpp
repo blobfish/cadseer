@@ -31,7 +31,7 @@
 #include <tools/idtools.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
-#include <nodemaskdefs.h>
+#include <modelviz/nodemaskdefs.h>
 #include <modelviz/shapegeometry.h>
 #include <globalutilities.h>
 #include <feature/seershape.h>

@@ -28,7 +28,7 @@
 
 #include <globalutilities.h>
 #include <tools/idtools.h>
-#include <nodemaskdefs.h>
+#include <modelviz/nodemaskdefs.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <preferences/preferencesXML.h>

@@ -31,7 +31,7 @@
 #include <osg/MatrixTransform>
 #include <osgManipulator/Command>
 
-#include <nodemaskdefs.h>
+#include <modelviz/nodemaskdefs.h>
 #include <globalutilities.h>
 #include <tools/idtools.h>
 #include <tools/infotools.h>

@@ -32,7 +32,7 @@
 
 #include <viewer/message.h>
 #include <gesture/gesturenode.h>
-#include <nodemaskdefs.h>
+#include <modelviz/nodemaskdefs.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <gesture/gesturehandler.h>

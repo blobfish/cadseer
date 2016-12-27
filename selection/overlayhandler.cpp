@@ -30,7 +30,7 @@
 #include <feature/parameter.h>
 #include <dialogs/parameterdialog.h>
 #include <selection/visitors.h>
-#include <nodemaskdefs.h>
+#include <modelviz/nodemaskdefs.h>
 #include <globalutilities.h>
 #include <command/manager.h>
 #include <command/csysedit.h>

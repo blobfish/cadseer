@@ -19,7 +19,7 @@
 
 #include <QAction>
 
-#include <nodemaskdefs.h>
+#include <modelviz/nodemaskdefs.h>
 #include <selection/definitions.h>
 #include <selection/manager.h>
 

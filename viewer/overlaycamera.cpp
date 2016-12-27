@@ -23,7 +23,7 @@
 
 #include <osgViewer/GraphicsWindow>
 
-#include <nodemaskdefs.h>
+#include <modelviz/nodemaskdefs.h>
 #include <feature/base.h>
 #include <message/dispatch.h>
 #include <message/observer.h>

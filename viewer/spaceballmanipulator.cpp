@@ -23,7 +23,7 @@
 
 #include <osg/ComputeBoundsVisitor>
 
-#include <nodemaskdefs.h>
+#include <modelviz/nodemaskdefs.h>
 #include <viewer/spaceballosgevent.h>
 #include <viewer/spaceballmanipulator.h>
 

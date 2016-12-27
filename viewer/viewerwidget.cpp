@@ -42,7 +42,7 @@
 #include <viewer/spaceballmanipulator.h>
 #include <viewer/viewerwidget.h>
 #include <viewer/gleventwidget.h>
-#include <nodemaskdefs.h>
+#include <modelviz/nodemaskdefs.h>
 #include <selection/definitions.h>
 #include <testing/plotter.h>
 #include <gesture/gesturehandler.h>

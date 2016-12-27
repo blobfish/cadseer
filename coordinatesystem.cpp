@@ -28,7 +28,7 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/BlendFunc>
 
-#include <nodemaskdefs.h>
+#include <modelviz/nodemaskdefs.h>
 #include <coordinatesystem.h>
 
 

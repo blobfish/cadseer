@@ -34,7 +34,7 @@
 #include <osg/BlendFunc>
 
 #include <gesture/gesturenode.h>
-#include <nodemaskdefs.h>
+#include <modelviz/nodemaskdefs.h>
 
 osg::MatrixTransform *gsn::buildMenuNode(const char *resourceName)
 {
