@@ -567,12 +567,31 @@ void GestureHandler::constructMenu()
     systemToFeature->setUserValue(attributeStatus, QObject::tr("Coordinate System To Feature Command").toStdString());
     systemBase->insertChild(systemBase->getNumChildren() - 2, systemToFeature);
     
+    //inpect base
+    osg::MatrixTransform *inspectBase;
+    inspectBase = gsn::buildMenuNode(":/resources/images/inspectBase.svg");
+    inspectBase->setMatrix(dummy);
+    inspectBase->setUserValue(attributeStatus, QObject::tr("Inspect Menu").toStdString());
+    startNode->insertChild(startNode->getNumChildren() - 2, inspectBase);
+    
+    osg::MatrixTransform *inpsectInfo = gsn::buildCommandNode(":/resources/images/inspectInfo.svg");
+    inpsectInfo->setMatrix(dummy);
+    inpsectInfo->setUserValue(attributeMask, (msg::Request | msg::ViewInfo).to_string());
+    inpsectInfo->setUserValue(attributeStatus, QObject::tr("View Info Command").toStdString());
+    inspectBase->insertChild(inspectBase->getNumChildren() - 2, inpsectInfo);
+    
+    osg::MatrixTransform *inspectCheckGeometry = gsn::buildCommandNode(":/resources/images/inspectCheckGeometry.svg");
+    inspectCheckGeometry->setMatrix(dummy);
+    inspectCheckGeometry->setUserValue(attributeMask, (msg::Request | msg::CheckGeometry).to_string());
+    inspectCheckGeometry->setUserValue(attributeStatus, QObject::tr("Check Geometry For Errors").toStdString());
+    inspectBase->insertChild(inspectBase->getNumChildren() - 2, inspectCheckGeometry);
+    
     //debug base
     osg::MatrixTransform *debugBase;
     debugBase = gsn::buildMenuNode(":/resources/images/debugBase.svg");
     debugBase->setMatrix(dummy);
     debugBase->setUserValue(attributeStatus, QObject::tr("Debug Menu").toStdString());
-    startNode->insertChild(startNode->getNumChildren() - 2, debugBase);
+    inspectBase->insertChild(inspectBase->getNumChildren() - 2, debugBase);
     
     osg::MatrixTransform *checkShapeIds = gsn::buildCommandNode(":/resources/images/debugCheckShapeIds.svg");
     checkShapeIds->setMatrix(dummy);
@@ -583,7 +602,7 @@ void GestureHandler::constructMenu()
     osg::MatrixTransform *debugDump = gsn::buildCommandNode(":/resources/images/debugDump.svg");
     debugDump->setMatrix(dummy);
     debugDump->setUserValue(attributeMask, (msg::Request | msg::DebugDump).to_string());
-    debugDump->setUserValue(attributeStatus, QObject::tr("Debug Dump").toStdString());
+    debugDump->setUserValue(attributeStatus, QObject::tr("Debug Feature Dump").toStdString());
     debugBase->insertChild(debugBase->getNumChildren() - 2, debugDump);
     
     osg::MatrixTransform *debugShapeTrackUp = gsn::buildCommandNode(":/resources/images/debugShapeTrackUp.svg");
@@ -603,25 +622,6 @@ void GestureHandler::constructMenu()
     debugShapeGraph->setUserValue(attributeMask, (msg::Request | msg::DebugShapeGraph).to_string());
     debugShapeGraph->setUserValue(attributeStatus, QObject::tr("Write shape graph to application directory").toStdString());
     debugBase->insertChild(debugBase->getNumChildren() - 2, debugShapeGraph);
-    
-    //inpect base
-    osg::MatrixTransform *inspectBase;
-    inspectBase = gsn::buildMenuNode(":/resources/images/inspectBase.svg");
-    inspectBase->setMatrix(dummy);
-    inspectBase->setUserValue(attributeStatus, QObject::tr("Inspect Menu").toStdString());
-    startNode->insertChild(startNode->getNumChildren() - 2, inspectBase);
-    
-    osg::MatrixTransform *inpsectInfo = gsn::buildCommandNode(":/resources/images/inspectInfo.svg");
-    inpsectInfo->setMatrix(dummy);
-    inpsectInfo->setUserValue(attributeMask, (msg::Request | msg::ViewInfo).to_string());
-    inpsectInfo->setUserValue(attributeStatus, QObject::tr("View Info Command").toStdString());
-    inspectBase->insertChild(inspectBase->getNumChildren() - 2, inpsectInfo);
-    
-    osg::MatrixTransform *inspectCheckGeometry = gsn::buildCommandNode(":/resources/images/inspectCheckGeometry.svg");
-    inspectCheckGeometry->setMatrix(dummy);
-    inspectCheckGeometry->setUserValue(attributeMask, (msg::Request | msg::CheckGeometry).to_string());
-    inspectCheckGeometry->setUserValue(attributeStatus, QObject::tr("Check Geometry For Errors").toStdString());
-    inspectBase->insertChild(inspectBase->getNumChildren() - 2, inspectCheckGeometry);
 }
 
 std::vector<osg::Vec3> GestureHandler::buildNodeLocations(osg::Vec3 direction, int nodeCount)
