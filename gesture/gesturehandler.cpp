@@ -419,25 +419,6 @@ void GestureHandler::constructMenu()
     constructDatumPlane->setUserValue(attributeStatus, QObject::tr("Datum Plane Command").toStdString());
     constructionBase->insertChild(constructionBase->getNumChildren() - 2, constructDatumPlane);
     
-    //construction measure base
-    osg::MatrixTransform *constructionMeasure;
-    constructionMeasure = gsn::buildMenuNode(":/resources/images/constructionMeasure.svg");
-    constructionMeasure->setMatrix(dummy);
-    constructionMeasure->setUserValue(attributeStatus, QObject::tr("Measure Menu").toStdString());
-    constructionBase->insertChild(constructionBase->getNumChildren() - 2, constructionMeasure);
-    
-    osg::MatrixTransform *constructMeasureClear = gsn::buildCommandNode(":/resources/images/constructionMeasureClear.svg");
-    constructMeasureClear->setMatrix(dummy);
-    constructMeasureClear->setUserValue(attributeMask, (msg::Request | msg::Clear | msg::OverlayGeometry).to_string());
-    constructMeasureClear->setUserValue(attributeStatus, QObject::tr("Clear Measure Command").toStdString());
-    constructionMeasure->insertChild(constructionMeasure->getNumChildren() - 2, constructMeasureClear);
-    
-    osg::MatrixTransform *constructLinearMeasure = gsn::buildCommandNode(":/resources/images/constructionLinearMeasure.svg");
-    constructLinearMeasure->setMatrix(dummy);
-    constructLinearMeasure->setUserValue(attributeMask, (msg::Request | msg::LinearMeasure).to_string());
-    constructLinearMeasure->setUserValue(attributeStatus, QObject::tr("LinearMeasure Command").toStdString());
-    constructionMeasure->insertChild(constructionMeasure->getNumChildren() - 2, constructLinearMeasure);
-    
     //edit base
     osg::MatrixTransform *editBase;
     editBase = gsn::buildMenuNode(":/resources/images/editBase.svg");
@@ -585,6 +566,25 @@ void GestureHandler::constructMenu()
     inspectCheckGeometry->setUserValue(attributeMask, (msg::Request | msg::CheckGeometry).to_string());
     inspectCheckGeometry->setUserValue(attributeStatus, QObject::tr("Check Geometry For Errors").toStdString());
     inspectBase->insertChild(inspectBase->getNumChildren() - 2, inspectCheckGeometry);
+    
+    //inspect measure base
+    osg::MatrixTransform *inspectMeasureBase;
+    inspectMeasureBase = gsn::buildMenuNode(":/resources/images/inspectMeasureBase.svg");
+    inspectMeasureBase->setMatrix(dummy);
+    inspectMeasureBase->setUserValue(attributeStatus, QObject::tr("Measure Menu").toStdString());
+    inspectBase->insertChild(inspectBase->getNumChildren() - 2, inspectMeasureBase);
+    
+    osg::MatrixTransform *inspectMeasureClear = gsn::buildCommandNode(":/resources/images/constructionMeasureClear.svg");
+    inspectMeasureClear->setMatrix(dummy);
+    inspectMeasureClear->setUserValue(attributeMask, (msg::Request | msg::Clear | msg::OverlayGeometry).to_string());
+    inspectMeasureClear->setUserValue(attributeStatus, QObject::tr("Clear Measure Command").toStdString());
+    inspectMeasureBase->insertChild(inspectMeasureBase->getNumChildren() - 2, inspectMeasureClear);
+    
+    osg::MatrixTransform *inspectLinearMeasure = gsn::buildCommandNode(":/resources/images/constructionLinearMeasure.svg");
+    inspectLinearMeasure->setMatrix(dummy);
+    inspectLinearMeasure->setUserValue(attributeMask, (msg::Request | msg::LinearMeasure).to_string());
+    inspectLinearMeasure->setUserValue(attributeStatus, QObject::tr("LinearMeasure Command").toStdString());
+    inspectMeasureBase->insertChild(inspectMeasureBase->getNumChildren() - 2, inspectLinearMeasure);
     
     //debug base
     osg::MatrixTransform *debugBase;
