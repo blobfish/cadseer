@@ -61,6 +61,7 @@
     <file>resources/images/dagViewLeaf.svg</file>
     <file>resources/images/dagViewRemove.svg</file>
     <file>resources/images/dagViewOverlay.svg</file>
+    <file>resources/images/dagViewIsolate.svg</file>
     <file>resources/images/cadSeer.svg</file>
     <file>resources/images/preferences.svg</file>
     <file>resources/images/linkIcon.svg</file>
