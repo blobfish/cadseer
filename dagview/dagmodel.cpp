@@ -1110,6 +1110,16 @@ void Model::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     
     QMenu contextMenu;
     
+    static QIcon overlayIcon(":/resources/images/dagViewOverlay.svg");
+    QAction* toggleOverlayAction = contextMenu.addAction(overlayIcon, tr("Toggle Overlay"));
+    connect(toggleOverlayAction, SIGNAL(triggered()), this, SLOT(toggleOverlaySlot()));
+    
+    static QIcon viewIsolateIcon(":/resources/images/dagViewIsolate.svg");
+    QAction* viewIsolateAction = contextMenu.addAction(viewIsolateIcon, tr("View Isolate"));
+    connect(viewIsolateAction, SIGNAL(triggered()), this, SLOT(viewIsolateSlot()));
+    
+    contextMenu.addSeparator();
+    
     if (getAllSelected().size() == 1)
     {
       static QIcon leafIcon(":/resources/images/dagViewLeaf.svg");
@@ -1121,9 +1131,6 @@ void Model::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     QAction* removeFeatureAction = contextMenu.addAction(removeIcon, tr("Remove Feature"));
     connect(removeFeatureAction, SIGNAL(triggered()), this, SLOT(removeFeatureSlot()));
     
-    static QIcon overlayIcon(":/resources/images/dagViewOverlay.svg");
-    QAction* toggleOverlayAction = contextMenu.addAction(overlayIcon, tr("Toggle Overlay"));
-    connect(toggleOverlayAction, SIGNAL(triggered()), this, SLOT(toggleOverlaySlot()));
     
     contextMenu.exec(event->screenPos());
 //     
@@ -1190,6 +1197,11 @@ void Model::toggleOverlaySlot()
   
   for (auto v : currentSelections)
     graph[v].feature.lock()->toggleOverlay();
+}
+
+void Model::viewIsolateSlot()
+{
+  observer->messageOutSignal(msg::Message(msg::Request | msg::ViewIsolate));
 }
 
 // void Model::onRenameSlot()

@@ -151,6 +151,9 @@ void Factory::setupDispatcher()
   
   mask = msg::Request | msg::LinearMeasure;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::linearMeasureDispatched, this, _1)));
+  
+  mask = msg::Request | msg::ViewIsolate;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::viewIsolateDispatched, this, _1)));
 }
 
 void Factory::newProjectDispatched(const msg::Message& /*messageIn*/)
@@ -993,4 +996,33 @@ void Factory::linearMeasureDispatched(const msg::Message&)
     vwrMessage.node = autoTransform;
     message.payload = vwrMessage;
     observer->messageOutSignal(message);
+}
+
+void Factory::viewIsolateDispatched(const msg::Message&)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  assert(project);
+  if (containers.empty())
+    return;
+  
+  std::set<uuid> selectedFeatures;
+  for (const auto &container: containers)
+    selectedFeatures.insert(container.featureId);
+  
+  for (const auto &id : project->getAllFeatureIds())
+  {
+    ftr::Base *feature = project->findFeature(id);
+    if (feature->isNonLeaf()) //ignore non-leaf features.
+      continue;
+    if (selectedFeatures.count(id) == 0)
+      feature->hide3D();
+    else
+      feature->show3D();
+  }
+  
+  observer->messageOutSignal(msg::Message(msg::Request | msg::ViewFit));
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
 }

@@ -76,6 +76,7 @@ namespace dag
     void setCurrentLeafSlot();
     void removeFeatureSlot();
     void toggleOverlaySlot();
+    void viewIsolateSlot();
 //     void updateSlot();
 //     void onRenameSlot();
 //     void renameAcceptedSlot();

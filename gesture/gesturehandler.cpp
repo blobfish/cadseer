@@ -325,6 +325,12 @@ void GestureHandler::constructMenu()
     viewLine->setUserValue(attributeStatus, QObject::tr("View Lines Command").toStdString());
     viewBase->insertChild(viewBase->getNumChildren() - 2, viewLine);
     
+    osg::MatrixTransform *viewIsolate = gsn::buildCommandNode(":/resources/images/viewIsolate.svg");
+    viewIsolate->setMatrix(dummy);
+    viewIsolate->setUserValue(attributeMask, (msg::Request | msg::ViewIsolate).to_string());
+    viewIsolate->setUserValue(attributeStatus, QObject::tr("View Only Selected").toStdString());
+    viewBase->insertChild(viewBase->getNumChildren() - 2, viewIsolate);
+    
     //construction base
     osg::MatrixTransform *constructionBase;
     constructionBase = gsn::buildMenuNode(":/resources/images/constructionBase.svg");

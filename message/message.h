@@ -102,7 +102,8 @@ namespace msg
     static const Mask DebugShapeGraph(Mask().set(               64));//!< command
     static const Mask LinearMeasure(Mask().set(                 65));//!< command
     static const Mask CheckGeometry(Mask().set(                 66));//!< command
-    static const Mask SetMask(Mask().set(                       67));//!< selection mask
+    static const Mask SetMask(Mask().set(                       67));//!< selection mask. move up someday.
+    static const Mask ViewIsolate(Mask().set(                   68));//!< command. move up someday.
   
     typedef boost::variant<prj::Message, slc::Message, app::Message, vwr::Message> Payload;
   

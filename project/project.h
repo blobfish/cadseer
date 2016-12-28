@@ -50,6 +50,7 @@ public:
     void updateVisual();
     void writeGraphViz(const std::string &fileName);
     void setAllVisualDirty();
+    std::vector<boost::uuids::uuid> getAllFeatureIds() const;
     
     void addFeature(std::shared_ptr<ftr::Base> feature);
     void removeFeature(const boost::uuids::uuid &idIn);

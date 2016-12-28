@@ -673,6 +673,17 @@ void Project::setAllVisualDirty()
   }
 }
 
+std::vector<boost::uuids::uuid> Project::getAllFeatureIds() const
+{
+  std::vector<uuid> out;
+  BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
+  {
+    out.push_back(projectGraph[currentVertex].feature->getId());
+  }
+  
+  return out;
+}
+
 Project::VertexEdgePairs Project::getParents(prg::Vertex vertexIn)
 {
   VertexEdgePairs out;
