@@ -83,30 +83,6 @@ MainWindow::MainWindow(QWidget *parent) :
     selectionManager = new slc::Manager(this);
     setupSelectionToolbar();
     connect(selectionManager, SIGNAL(setSelectionMask(int)), viewWidget, SLOT(setSelectionMask(int)));
-    selectionManager->setState
-    (
-      slc::All &
-      ~slc::ObjectsSelectable &
-      ~slc::FeaturesSelectable &
-      ~slc::SolidsSelectable &
-      ~slc::ShellsSelectable &
-      ~slc::FacesSelectable &
-      ~slc::WiresSelectable &
-      ~slc::EdgesSelectable &
-      ~slc::PointsSelectable &
-      ~slc::EndPointsSelectable &
-      ~slc::EndPointsEnabled &
-      ~slc::MidPointsSelectable &
-      ~slc::MidPointsEnabled &
-      ~slc::CenterPointsSelectable &
-      ~slc::CenterPointsEnabled &
-      ~slc::QuadrantPointsSelectable &
-      ~slc::QuadrantPointsEnabled &
-      ~slc::NearestPointsSelectable &
-      ~slc::NearestPointsEnabled &
-      ~slc::ScreenPointsSelectable &
-      ~slc::ScreenPointsEnabled
-    );
     
     //add increment widgets to toolbar.
     ui->toolBar->setContentsMargins(0, 0, 0, 0);
@@ -129,6 +105,8 @@ MainWindow::MainWindow(QWidget *parent) :
     observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
     observer->name = "app::MainWindow";
     setupDispatcher();
+    
+    observer->messageOutSignal(msg::buildSelectionMask(slc::AllEnabled));
 }
 
 MainWindow::~MainWindow()

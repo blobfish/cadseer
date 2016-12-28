@@ -57,6 +57,8 @@ namespace slc
   static const std::size_t ScreenPointsEnabled = 1 << 24;
   static const std::size_t ScreenPointsSelectable = 1 << 26;
   static const std::size_t All = 0xffffffffu;
+  static const std::size_t AllEnabled = ObjectsEnabled | FeaturesEnabled | SolidsEnabled
+    | ShellsEnabled | FacesEnabled | WiresEnabled | EdgesEnabled | PointsEnabled;
 
   enum class Type
   {

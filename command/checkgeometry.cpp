@@ -32,16 +32,12 @@ using namespace cmd;
 CheckGeometry::CheckGeometry() : Base()
 {
   setupDispatcher();
-  
-  unsigned int selectionState = slc::ObjectsEnabled | slc::ObjectsSelectable;
-  selectionManager->startCommand(selectionState);
 }
 
 CheckGeometry::~CheckGeometry()
 {
   if (dialog)
     dialog->deleteLater();
-  selectionManager->endCommand();
 }
 
 std::string CheckGeometry::getStatusMessage()
@@ -54,7 +50,10 @@ void CheckGeometry::activate()
   isActive = true;
   
   if (!hasRan)
+  {
+    observer->messageOutSignal(msg::buildSelectionMask(slc::ObjectsEnabled | slc::ObjectsSelectable));
     go();
+  }
 
   if (dialog)
     dialog->show();
@@ -87,7 +86,7 @@ void CheckGeometry::go()
       dialog->setWindowTitle(freshTitle);
       hasRan = true;
       dialog->go();
-      selectionManager->setState(static_cast<unsigned int>(~slc::All));
+      observer->messageOutSignal(msg::buildSelectionMask(~slc::All));
       observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
       return;
     }

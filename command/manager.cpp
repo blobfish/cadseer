@@ -28,6 +28,8 @@
 #include <command/checkgeometry.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
+#include <selection/message.h>
+#include <selection/definitions.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <viewer/message.h>
@@ -46,6 +48,8 @@ Manager::Manager()
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
   observer->name = "cmd::Manager";
   setupDispatcher();
+  
+  selectionMask = slc::AllEnabled;
 }
 
 void Manager::setupDispatcher()
@@ -57,6 +61,9 @@ void Manager::setupDispatcher()
   
   mask = msg::Request | msg::Command | msg::Done;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::doneCommandDispatched, this, _1)));
+  
+  mask = msg::Response | msg::Selection | msg::SetMask;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::selectionMaskDispatched, this, _1)));
   
   mask = msg::Request | msg::FeatureToSystem;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::featureToSystemDispatched, this, _1)));
@@ -118,7 +125,10 @@ void Manager::doneSlot()
   if (!stack.empty())
     activateTop();
   else
+  {
     sendCommandMessage("Active command count: 0");
+    observer->messageOutSignal(msg::buildSelectionMask(selectionMask));
+  }
 }
 
 void Manager::activateTop()
@@ -148,32 +158,41 @@ void Manager::clearSelection()
   observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
 }
 
+void Manager::selectionMaskDispatched(const msg::Message &messageIn)
+{
+  if (!stack.empty()) //only when no commands 
+    return;
+  
+  slc::Message sMsg = boost::get<slc::Message>(messageIn.payload);
+  selectionMask = sMsg.selectionMask;
+}
+
 void Manager::featureToSystemDispatched(const msg::Message&)
 {
   std::shared_ptr<cmd::FeatureToSystem> featureToSystem(new cmd::FeatureToSystem());
-  cmd::manager().addCommand(featureToSystem);
+  addCommand(featureToSystem);
 }
 
 void Manager::systemToFeatureDispatched(const msg::Message&)
 {
   std::shared_ptr<cmd::SystemToFeature> systemToFeature(new cmd::SystemToFeature());
-  cmd::manager().addCommand(systemToFeature);
+  addCommand(systemToFeature);
 }
 
 void Manager::draggerToFeatureDispatched(const msg::Message&)
 {
   std::shared_ptr<cmd::DraggerToFeature> draggerToFeature(new cmd::DraggerToFeature());
-  cmd::manager().addCommand(draggerToFeature);
+  addCommand(draggerToFeature);
 }
 
 void Manager::featureToDraggerDispatched(const msg::Message&)
 {
   std::shared_ptr<cmd::FeatureToDragger> featureToDragger(new cmd::FeatureToDragger());
-  cmd::manager().addCommand(featureToDragger);
+  addCommand(featureToDragger);
 }
 
 void Manager::checkGeometryDispatched(const msg::Message&)
 {
   std::shared_ptr<CheckGeometry> checkGeometry(new CheckGeometry());
-  cmd::manager().addCommand(checkGeometry);
+  addCommand(checkGeometry);
 }

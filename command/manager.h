@@ -38,12 +38,12 @@ namespace cmd
     void addCommand(BasePtr);
   private:
     std::unique_ptr<msg::Observer> observer;
+    unsigned int selectionMask;
     void cancelCommandDispatched(const msg::Message &);
     void doneCommandDispatched(const msg::Message &);
     void setupDispatcher();
     void doneSlot();
     void activateTop();
-    void sendStatusMessage(const std::string &messageIn);
     void sendCommandMessage(const std::string &messageIn);
     
     void clearSelection();
@@ -55,6 +55,7 @@ namespace cmd
     void featureToDraggerDispatched(const msg::Message &);
     void draggerToFeatureDispatched(const msg::Message &);
     void checkGeometryDispatched(const msg::Message&);
+    void selectionMaskDispatched(const msg::Message&);
   };
   
   Manager& manager();

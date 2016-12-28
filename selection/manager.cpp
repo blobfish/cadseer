@@ -17,18 +17,30 @@
  *
  */
 
+#include <sstream>
+
 #include <QAction>
+
+#include <osg/Node>
 
 #include <modelviz/nodemaskdefs.h>
 #include <selection/definitions.h>
+#include <message/dispatch.h>
+#include <message/observer.h>
+#include <selection/message.h>
 #include <selection/manager.h>
 
 using namespace slc;
 
 Manager::Manager(QObject *parent) :
-    QObject(parent), selectionMask(slc::None)
+  QObject(parent), selectionMask(slc::AllEnabled)
 {
+  observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+  observer->name = "slc::Manager";
+  setupDispatcher();
 }
+
+Manager::~Manager() {}
 
 void Manager::triggeredObjects(bool objectStateIn)
 {
@@ -36,7 +48,8 @@ void Manager::triggeredObjects(bool objectStateIn)
         selectionMask |= slc::ObjectsSelectable;
     else
         selectionMask &= ~slc::ObjectsSelectable;
-    sendState();
+    Q_EMIT setSelectionMask(selectionMask);
+    sendUpdatedMask();
 }
 
 void Manager::triggeredFeatures(bool featureStateIn)
@@ -45,7 +58,8 @@ void Manager::triggeredFeatures(bool featureStateIn)
         selectionMask |= slc::FeaturesSelectable;
     else
         selectionMask &= ~slc::FeaturesSelectable;
-    sendState();
+    Q_EMIT setSelectionMask(selectionMask);
+    sendUpdatedMask();
 }
 
 void Manager::triggeredSolids(bool solidStateIn)
@@ -54,7 +68,8 @@ void Manager::triggeredSolids(bool solidStateIn)
         selectionMask |= slc::SolidsSelectable;
     else
         selectionMask &= ~slc::SolidsSelectable;
-    sendState();
+    Q_EMIT setSelectionMask(selectionMask);
+    sendUpdatedMask();
 }
 
 void Manager::triggeredShells(bool shellStateIn)
@@ -63,7 +78,8 @@ void Manager::triggeredShells(bool shellStateIn)
         selectionMask |= slc::ShellsSelectable;
     else
         selectionMask &= ~slc::ShellsSelectable;
-    sendState();
+    Q_EMIT setSelectionMask(selectionMask);
+    sendUpdatedMask();
 }
 
 void Manager::triggeredFaces(bool faceStateIn)
@@ -72,7 +88,8 @@ void Manager::triggeredFaces(bool faceStateIn)
         selectionMask |= slc::FacesSelectable;
     else
         selectionMask &= ~slc::FacesSelectable;
-    sendState();
+    Q_EMIT setSelectionMask(selectionMask);
+    sendUpdatedMask();
 }
 
 void Manager::triggeredWires(bool wireStateIn)
@@ -81,7 +98,8 @@ void Manager::triggeredWires(bool wireStateIn)
         selectionMask |= slc::WiresSelectable;
     else
         selectionMask &= ~slc::WiresSelectable;
-    sendState();
+    Q_EMIT setSelectionMask(selectionMask);
+    sendUpdatedMask();
 }
 
 void Manager::triggeredEdges(bool edgeStateIn)
@@ -90,7 +108,8 @@ void Manager::triggeredEdges(bool edgeStateIn)
         selectionMask |= slc::EdgesSelectable;
     else
         selectionMask &= ~slc::EdgesSelectable;
-    sendState();
+    Q_EMIT setSelectionMask(selectionMask);
+    sendUpdatedMask();
 }
 
 void Manager::triggeredVertices(bool vertexStateIn)
@@ -114,7 +133,8 @@ void Manager::triggeredVertices(bool vertexStateIn)
         selectionMask &= ~slc::NearestPointsEnabled;
     }
     updateToolbar();
-    sendState();
+    Q_EMIT setSelectionMask(selectionMask);
+    sendUpdatedMask();
 }
 
 void Manager::triggeredEndPoints(bool endPointStateIn)
@@ -123,7 +143,8 @@ void Manager::triggeredEndPoints(bool endPointStateIn)
     selectionMask |= slc::EndPointsSelectable;
   else
     selectionMask &= ~slc::EndPointsSelectable;
-  sendState();
+  Q_EMIT setSelectionMask(selectionMask);
+  sendUpdatedMask();
 }
 
 void Manager::triggeredMidPoints(bool midPointStateIn)
@@ -132,7 +153,8 @@ void Manager::triggeredMidPoints(bool midPointStateIn)
     selectionMask |= slc::MidPointsSelectable;
   else
     selectionMask &= ~slc::MidPointsSelectable;
-  sendState();
+  Q_EMIT setSelectionMask(selectionMask);
+  sendUpdatedMask();
 }
 
 void Manager::triggeredCenterPoints(bool centerPointStateIn)
@@ -141,8 +163,8 @@ void Manager::triggeredCenterPoints(bool centerPointStateIn)
     selectionMask |= slc::CenterPointsSelectable;
   else
     selectionMask &= ~slc::CenterPointsSelectable;
-  sendState();
-
+  Q_EMIT setSelectionMask(selectionMask);
+  sendUpdatedMask();
 }
 
 void Manager::triggeredQuadrantPoints(bool quadrantPointStateIn)
@@ -151,8 +173,8 @@ void Manager::triggeredQuadrantPoints(bool quadrantPointStateIn)
     selectionMask |= slc::QuadrantPointsSelectable;
   else
     selectionMask &= ~slc::QuadrantPointsSelectable;
-  sendState();
-
+  Q_EMIT setSelectionMask(selectionMask);
+  sendUpdatedMask();
 }
 
 void Manager::triggeredNearestPoints(bool nearestPointStateIn)
@@ -161,7 +183,8 @@ void Manager::triggeredNearestPoints(bool nearestPointStateIn)
     selectionMask |= slc::NearestPointsSelectable;
   else
     selectionMask &= ~slc::NearestPointsSelectable;
-  sendState();
+  Q_EMIT setSelectionMask(selectionMask);
+  sendUpdatedMask();
 }
 
 void Manager::triggeredScreenPoints(bool screenPointStateIn)
@@ -170,57 +193,24 @@ void Manager::triggeredScreenPoints(bool screenPointStateIn)
     selectionMask |= slc::ScreenPointsSelectable;
   else
     selectionMask &= ~slc::ScreenPointsSelectable;
-  sendState();
-}
-
-
-void Manager::sendState()
-{
-//    int out = 0xffffffff;
-//    out &= ~NodeMask::noSelect;
-//    if ((selectionMask & Selection::facesSelectable) != Selection::facesSelectable)
-//        out &= ~NodeMask::face;
-//    if ((selectionMask & Selection::edgesSelectable) != Selection::edgesSelectable)
-//        out &= ~NodeMask::edge;
-//    if ((selectionMask & Selection::verticesSelectable) != Selection::verticesSelectable)
-//        out &= ~NodeMask::vertex;
-//    emit setSelection(out);
-
-    Q_EMIT setSelectionMask(selectionMask);
-}
-
-void Manager::popState()
-{
-    if (stateStack.size() < 1)
-        return;
-    selectionMask = stateStack.pop();
-    updateToolbar();
-    sendState();
-}
-
-void Manager::pushState()
-{
-    stateStack.push(selectionMask);
-}
-
-void Manager::startCommand(const unsigned int &stateIn)
-{
-    pushState();
-    selectionMask = stateIn;
-    updateToolbar();
-    sendState();
-}
-
-void Manager::endCommand()
-{
-    popState();
+  Q_EMIT setSelectionMask(selectionMask);
+  sendUpdatedMask();
 }
 
 void Manager::setState(const unsigned int &stateIn)
 {
     selectionMask = stateIn;
     updateToolbar();
-    sendState();
+    Q_EMIT setSelectionMask(selectionMask);
+    sendUpdatedMask();
+}
+void Manager::sendUpdatedMask()
+{
+  slc::Message out;
+  out.selectionMask = selectionMask;
+  msg::Message mOut(msg::Response | msg::Selection | msg::SetMask);
+  mOut.payload = out;
+  observer->messageOutSignal(mOut);
 }
 
 void Manager::updateToolbar()
@@ -253,4 +243,23 @@ void Manager::updateToolbar()
     actionSelectNearestPoints->setChecked(slc::NearestPointsSelectable & selectionMask);
     actionSelectScreenPoints->setEnabled(slc::ScreenPointsEnabled & selectionMask);
     actionSelectScreenPoints->setChecked(slc::ScreenPointsSelectable & selectionMask);
+}
+
+void Manager::setupDispatcher()
+{
+  msg::Mask mask;
+  
+  mask = msg::Request | msg::Selection | msg::SetMask;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::requestSelectionMaskDispatched, this, _1)));
+}
+
+void Manager::requestSelectionMaskDispatched(const msg::Message &messageIn)
+{
+  
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  slc::Message message = boost::get<slc::Message>(messageIn.payload);
+  setState(message.selectionMask);
 }

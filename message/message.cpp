@@ -45,3 +45,13 @@ msg::Message msg::buildStatusMessage(const std::string &messageIn)
   
   return out;
 }
+
+msg::Message msg::buildSelectionMask(unsigned int maskIn)
+{
+  slc::Message sMsg;
+  sMsg.selectionMask = maskIn;
+  msg::Message mMsg(msg::Request | msg::Selection | msg::SetMask);
+  mMsg.payload = sMsg;
+  
+  return mMsg;
+}

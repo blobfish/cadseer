@@ -25,8 +25,10 @@
 slc::Message::Message()
 {
   type = slc::Type::None;
+  featureType = ftr::Type::Base; //like empty
   featureId = gu::createNilId();
   shapeId = gu::createNilId();
+  selectionMask = 0;
 }
 
 bool slc::has(const slc::Messages& messagesIn, const slc::Message& messageIn)

@@ -20,12 +20,15 @@
 #ifndef SELECTIONMANAGER_H
 #define SELECTIONMANAGER_H
 
+#include <memory>
+
 #include <QObject>
-#include <QStack>
 
 #include <selection/definitions.h>
 
 class QAction;
+
+namespace msg{class Message; class Observer;}
 
 namespace slc
 {
@@ -34,10 +37,7 @@ class Manager : public QObject
     Q_OBJECT
 public:
     explicit Manager(QObject *parent = 0);
-    void sendState();
-    void startCommand(const unsigned int &stateIn); //uses stack for restoration of selection state
-    void endCommand(); //uses stack for restoration of selection state
-    void setState(const unsigned int &stateIn); //DOESN'T use stack for restoration of selection state
+    ~Manager();
     unsigned int getState(){return selectionMask;}
 
     //thought about a couple of different ways. I don't want a thousand connect statements all over the place.
@@ -76,12 +76,13 @@ public Q_SLOTS:
     void triggeredScreenPoints(bool screenPointStateIn);
 
 private:
-    void popState();
-    void pushState();
+    void setState(const unsigned int &stateIn);
     void updateToolbar();
-
     unsigned int selectionMask;
-    QStack<unsigned int> stateStack;
+    void sendUpdatedMask();
+    std::unique_ptr<msg::Observer> observer;
+    void setupDispatcher();
+    void requestSelectionMaskDispatched(const msg::Message &);
 };
 }
 

@@ -39,6 +39,7 @@ namespace slc
     boost::uuids::uuid featureId;
     boost::uuids::uuid shapeId;
     osg::Vec3d pointLocation;
+    unsigned int selectionMask;
   };
   
   inline bool operator==(const Message& lhs, const Message& rhs)
@@ -49,6 +50,7 @@ namespace slc
         (lhs.featureId == rhs.featureId) &&
         (lhs.shapeId == rhs.shapeId)
         //shouldn't need to test featureType if id's are the same
+        //selection mask is meaningless for equality test.
     );
     
     if (slc::isPointType(lhs.type))
