@@ -36,6 +36,8 @@ InfoWindow::InfoWindow(QWidget* parent) : QTextEdit(parent)
     observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
     observer->name = "app::MainWindow";
     setupDispatcher();
+    
+    this->setWordWrapMode(QTextOption::NoWrap);
 }
 
 InfoWindow::~InfoWindow()

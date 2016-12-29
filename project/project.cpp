@@ -894,8 +894,9 @@ template < typename VertexT>
 class ShapeTrackVisitorUp : public boost::default_dfs_visitor
 {
   public:
-    ShapeTrackVisitorUp(VertexT &startVertexIn, const boost::uuids::uuid &shapeId, std::stack<std::vector<boost::uuids::uuid> >&idsStackIn) :
-      startVertex(startVertexIn), idsStack(idsStackIn)
+    ShapeTrackVisitorUp(VertexT &startVertexIn, const boost::uuids::uuid &shapeId,
+                        std::stack<std::vector<boost::uuids::uuid> >&idsStackIn, std::ostringstream &streamIn) :
+      startVertex(startVertexIn), idsStack(idsStackIn), stream(streamIn)
     {
       std::vector<boost::uuids::uuid> temp;
       temp.push_back(shapeId);
@@ -905,12 +906,12 @@ class ShapeTrackVisitorUp : public boost::default_dfs_visitor
     template <typename GraphT >
     void discover_vertex(VertexT vertexIn, const GraphT & graph) const
     {
-      std::cout
+      stream
         << "feature: " << std::setw(15) << std::left << graph[vertexIn].feature->getName().toStdString()
         << "    feature id: " << gu::idToString(graph[vertexIn].feature->getId()) << std::endl;
       if (!graph[vertexIn].feature->hasSeerShape())
       {
-        std::cout << " BREAK: no seer shape" << std::endl;
+        stream << " BREAK: no seer shape" << std::endl;
         std::vector<boost::uuids::uuid> junkIds;
         idsStack.push(junkIds);
         return;
@@ -920,20 +921,20 @@ class ShapeTrackVisitorUp : public boost::default_dfs_visitor
       const std::vector<boost::uuids::uuid> &currentIds = idsStack.top();
       for (const auto &currentId : currentIds)
       {
-        std::cout << "    shape id out: " << gu::idToString(currentId);
+        stream << "    shape id out: " << gu::idToString(currentId);
         if (!shape.hasEvolveRecordOut(currentId))
         {
-            std::cout << "    BREAK: no evolve record out" << std::endl;
+            stream << "    BREAK: no evolve record out" << std::endl;
             continue;
         }
-        std::cout <<  "    ids in: ";
+        stream <<  "    ids in: ";
         auto ids = shape.devolve(currentId);
         for (const auto &id : ids)
         {
-            std::cout << gu::idToString(id) << " ";
+            stream << gu::idToString(id) << " ";
             freshIds.push_back(id);
         }
-        std::cout << std::endl;
+        stream << std::endl;
       }
       idsStack.push(freshIds);
     }
@@ -948,14 +949,16 @@ class ShapeTrackVisitorUp : public boost::default_dfs_visitor
     
     VertexT &startVertex;
     std::stack<std::vector<boost::uuids::uuid> >&idsStack;
+    std::ostringstream &stream;
 };
 
 template < typename VertexT>
 class ShapeTrackVisitorDown : public boost::default_dfs_visitor
 {
   public:
-    ShapeTrackVisitorDown(VertexT &startVertexIn, const boost::uuids::uuid &shapeId, std::stack<std::vector<boost::uuids::uuid> >&idsStackIn) :
-      startVertex(startVertexIn), idsStack(idsStackIn)
+    ShapeTrackVisitorDown(VertexT &startVertexIn, const boost::uuids::uuid &shapeId,
+                          std::stack<std::vector<boost::uuids::uuid> >&idsStackIn, std::ostringstream &streamIn) :
+      startVertex(startVertexIn), idsStack(idsStackIn), stream(streamIn)
     {
       std::vector<boost::uuids::uuid> temp;
       temp.push_back(shapeId);
@@ -965,7 +968,7 @@ class ShapeTrackVisitorDown : public boost::default_dfs_visitor
     template <typename GraphT >
     void discover_vertex(VertexT vertexIn, const GraphT & graph) const
     {
-      std::cout
+      stream
         << "feature: " << std::setw(15) << std::left << graph[vertexIn].feature->getName().toStdString()
         << "    feature id: " << gu::idToString(graph[vertexIn].feature->getId()) << std::endl;
       if (vertexIn == startVertex) //note constructor pushes to idstack so we are in sync with finish vertex.
@@ -973,7 +976,7 @@ class ShapeTrackVisitorDown : public boost::default_dfs_visitor
 
       if (!graph[vertexIn].feature->hasSeerShape())
       {
-        std::cout << " BREAK: no seer shape" << std::endl;
+        stream << " BREAK: no seer shape" << std::endl;
         std::vector<boost::uuids::uuid> junkIds;
         idsStack.push(junkIds);
         return;
@@ -983,20 +986,20 @@ class ShapeTrackVisitorDown : public boost::default_dfs_visitor
       const std::vector<boost::uuids::uuid> &currentIds = idsStack.top();
       for (const auto &currentId : currentIds)
       {
-        std::cout << "    shape id in: " << gu::idToString(currentId);
+        stream << "    shape id in: " << gu::idToString(currentId);
         if (!shape.hasEvolveRecordIn(currentId))
         {
-            std::cout << "    BREAK: no evolve record in" << std::endl;
+            stream << "    BREAK: no evolve record in" << std::endl;
             continue;
         }
-        std::cout <<  "    ids out: ";
+        stream <<  "    ids out: ";
         auto ids = shape.evolve(currentId);
         for (const auto &id : ids)
         {
-            std::cout << gu::idToString(id) << " ";
+            stream << gu::idToString(id) << " ";
             freshIds.push_back(id);
         }
-        std::cout << std::endl;
+        stream << std::endl;
       }
       idsStack.push(freshIds);
     }
@@ -1011,6 +1014,7 @@ class ShapeTrackVisitorDown : public boost::default_dfs_visitor
     
     VertexT &startVertex;
     std::stack<std::vector<boost::uuids::uuid> >&idsStack;
+    std::ostringstream &stream;
 };
 
 void Project::shapeTrackUp(const uuid& featureIdIn, const uuid& shapeId)
@@ -1036,9 +1040,17 @@ void Project::shapeTrackUp(const uuid& featureIdIn, const uuid& shapeId)
   typedef boost::graph_traits<FilteredGraph>::vertex_descriptor FilteredVertex;
   FilteredGraph filteredGraph(rGraph, boost::keep_all(), filter);
   
+  std::ostringstream stream;
+  stream << "Track shape up:" << std::endl;
   std::stack<std::vector<boost::uuids::uuid> >idsStack;
-  ShapeTrackVisitorUp<FilteredVertex> shapeVisitor(startVertex, shapeId, idsStack);
+  ShapeTrackVisitorUp<FilteredVertex> shapeVisitor(startVertex, shapeId, idsStack, stream);
   boost::depth_first_search(filteredGraph, visitor(shapeVisitor).root_vertex(startVertex));
+  
+  msg::Message viewInfoMessage(msg::Response | msg::ViewInfo);
+  app::Message appMessage;
+  appMessage.infoMessage = QString::fromStdString(stream.str());
+  viewInfoMessage.payload = appMessage;
+  observer->messageOutSignal(viewInfoMessage);
 }
 
 void Project::shapeTrackDown(const uuid& featureIdIn, const uuid& shapeId)
@@ -1061,7 +1073,15 @@ void Project::shapeTrackDown(const uuid& featureIdIn, const uuid& shapeId)
   typedef boost::graph_traits<FilteredGraph>::vertex_descriptor FilteredVertex;
   FilteredGraph filteredGraph(projectGraph, boost::keep_all(), filter);
   
+  std::ostringstream stream;
+  stream << "Track shape down:" << std::endl;
   std::stack<std::vector<boost::uuids::uuid> >idsStack;
-  ShapeTrackVisitorDown<FilteredVertex> shapeVisitor(startVertex, shapeId, idsStack);
+  ShapeTrackVisitorDown<FilteredVertex> shapeVisitor(startVertex, shapeId, idsStack, stream);
   boost::depth_first_search(filteredGraph, visitor(shapeVisitor).root_vertex(startVertex));
+  
+  msg::Message viewInfoMessage(msg::Response | msg::ViewInfo);
+  app::Message appMessage;
+  appMessage.infoMessage = QString::fromStdString(stream.str());
+  viewInfoMessage.payload = appMessage;
+  observer->messageOutSignal(viewInfoMessage);
 }

@@ -758,8 +758,6 @@ void Factory::debugShapeTrackUpDispatched(const msg::Message&)
   if (containers.empty())
     return;
   
-  std::cout << std::endl << "track shape up" << std::endl;
-  
   for (const auto &container : containers)
   {
     if (container.featureId.is_nil() || container.shapeId.is_nil())
@@ -779,8 +777,6 @@ void Factory::debugShapeTrackDownDispatched(const msg::Message&)
   assert(project);
   if (containers.empty())
     return;
-  
-  std::cout << std::endl << "track shape down" << std::endl;
   
   for (const auto &container : containers)
   {
