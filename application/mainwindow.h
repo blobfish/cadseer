@@ -26,6 +26,8 @@
 
 #include <osg/Node>
 
+class QCloseEvent;
+
 namespace vwr{class ViewerWidget;}
 namespace slc{class Manager;}
 namespace msg{class Message; class Observer;}
@@ -52,6 +54,9 @@ public:
     ~MainWindow();
     vwr::ViewerWidget* getViewer(){return viewWidget;}
     slc::Manager* getSelectionManager(){return selectionManager;}
+    
+protected:
+  virtual void closeEvent (QCloseEvent*) override;
 
 private:
     void setupSelectionToolbar();

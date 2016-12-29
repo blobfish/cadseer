@@ -42,6 +42,7 @@ namespace cmd
     slc::Mask selectionMask;
     void cancelCommandDispatched(const msg::Message &);
     void doneCommandDispatched(const msg::Message &);
+    void clearCommandDispatched(const msg::Message &);
     void setupDispatcher();
     void doneSlot();
     void activateTop();

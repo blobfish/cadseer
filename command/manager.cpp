@@ -59,6 +59,9 @@ void Manager::setupDispatcher()
   mask = msg::Request | msg::Command | msg::Cancel;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::cancelCommandDispatched, this, _1)));
   
+  mask = msg::Request | msg::Command | msg::Clear;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::cancelCommandDispatched, this, _1)));
+  
   mask = msg::Request | msg::Command | msg::Done;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::doneCommandDispatched, this, _1)));
   
@@ -92,6 +95,12 @@ void Manager::doneCommandDispatched(const msg::Message&)
 {
   //same as above for now, but might be different in the future.
   doneSlot();
+}
+
+void Manager::clearCommandDispatched(const msg::Message &)
+{
+  while(!stack.empty())
+    doneSlot();
 }
 
 void Manager::addCommand(BasePtr pointerIn)

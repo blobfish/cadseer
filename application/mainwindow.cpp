@@ -23,6 +23,7 @@
 
 #include <QHBoxLayout>
 #include <QDir>
+#include <QCloseEvent>
 
 #include <dagview/dagmodel.h>
 #include <dagview/dagview.h>
@@ -111,6 +112,12 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::closeEvent (QCloseEvent *event)
+{
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Command | msg::Clear));
+  QMainWindow::closeEvent(event);
 }
 
 void MainWindow::setupSelectionToolbar()
