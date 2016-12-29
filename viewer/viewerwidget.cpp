@@ -312,16 +312,6 @@ osg::Camera* ViewerWidget::createGestureCamera()
     return fadeCamera;
 }
 
-void ViewerWidget::setSelectionMask(const int &maskIn)
-{
-    //turn points on or off.
-
-//     VisibleVisitor visitor((Selection::verticesSelectable & maskIn) == Selection::verticesSelectable);
-//     root->accept(visitor);
-// 
-    selectionHandler->setSelectionMask(maskIn);
-}
-
 void ViewerWidget::viewTopDispatched(const msg::Message&)
 {
     spaceballManipulator->setView(osg::Vec3d(0.0, 0.0, -1.0), osg::Vec3d(0.0, 1.0, 0.0));

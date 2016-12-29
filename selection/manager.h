@@ -38,7 +38,7 @@ class Manager : public QObject
 public:
     explicit Manager(QObject *parent = 0);
     ~Manager();
-    unsigned int getState(){return selectionMask;}
+    Mask getState(){return selectionMask;}
 
     //thought about a couple of different ways. I don't want a thousand connect statements all over the place.
     QAction *actionSelectObjects;
@@ -55,9 +55,6 @@ public:
     QAction *actionSelectQuadrantPoints;
     QAction *actionSelectNearestPoints;
     QAction *actionSelectScreenPoints;
-    
-Q_SIGNALS:
-    void setSelectionMask(const int &mask);
     
 public Q_SLOTS:
     void triggeredObjects(bool objectStateIn);
@@ -76,9 +73,9 @@ public Q_SLOTS:
     void triggeredScreenPoints(bool screenPointStateIn);
 
 private:
-    void setState(const unsigned int &stateIn);
+    void setState(Mask);
     void updateToolbar();
-    unsigned int selectionMask;
+    Mask selectionMask;
     void sendUpdatedMask();
     std::unique_ptr<msg::Observer> observer;
     void setupDispatcher();

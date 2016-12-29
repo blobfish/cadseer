@@ -46,7 +46,7 @@ msg::Message msg::buildStatusMessage(const std::string &messageIn)
   return out;
 }
 
-msg::Message msg::buildSelectionMask(unsigned int maskIn)
+msg::Message msg::buildSelectionMask(slc::Mask maskIn)
 {
   slc::Message sMsg;
   sMsg.selectionMask = maskIn;

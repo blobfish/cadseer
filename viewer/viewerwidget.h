@@ -55,9 +55,6 @@ public:
     void setCurrentSystem(const osg::Matrixd &mIn);
     const osg::Matrixd& getViewSystem() const;
 
-public Q_SLOTS:
-    void setSelectionMask(const int &maskIn);
-
 protected:
     void createMainCamera(osg::Camera *camera);
     osg::Camera* createBackgroundCamera();

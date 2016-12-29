@@ -39,12 +39,12 @@ namespace slc
   class Interpreter
   {
   public:
-    Interpreter(const osgUtil::LineSegmentIntersector::Intersections &intersectionsIn, std::size_t selectionMaskIn);
+    Interpreter(const osgUtil::LineSegmentIntersector::Intersections &, Mask);
     Containers containersOut;
   private:
     void go();
     const osgUtil::LineSegmentIntersector::Intersections &intersections;
-    std::size_t selectionMask;
+    Mask selectionMask;
   };
 }
 #endif // INTERPRETER_H

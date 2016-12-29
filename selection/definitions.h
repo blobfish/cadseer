@@ -22,43 +22,45 @@
 
 #include <vector>
 #include <string>
+#include <bitset>
 
 #include <TopAbs_ShapeEnum.hxx>
 
 namespace slc
 {
-  static const std::size_t None = 0;
-  static const std::size_t ObjectsEnabled = 1;
-  static const std::size_t ObjectsSelectable = 1 << 1;
-  static const std::size_t FeaturesEnabled = 1 << 2;
-  static const std::size_t FeaturesSelectable = 1 << 3;
-  static const std::size_t SolidsEnabled = 1 << 4;
-  static const std::size_t SolidsSelectable = 1 << 5;
-  static const std::size_t ShellsEnabled = 1 << 6;
-  static const std::size_t ShellsSelectable = 1 << 7;
-  static const std::size_t FacesEnabled = 1 << 8;
-  static const std::size_t FacesSelectable = 1 << 9;
-  static const std::size_t WiresEnabled = 1 << 10;
-  static const std::size_t WiresSelectable = 1 << 11;
-  static const std::size_t EdgesEnabled = 1 << 12;
-  static const std::size_t EdgesSelectable = 1 << 13;
-  static const std::size_t PointsEnabled = 1 << 14;
-  static const std::size_t PointsSelectable = 1 << 15;
-  static const std::size_t EndPointsEnabled = 1 << 16;
-  static const std::size_t EndPointsSelectable = 1 << 17;
-  static const std::size_t MidPointsEnabled = 1 << 18;
-  static const std::size_t MidPointsSelectable = 1 << 19;
-  static const std::size_t CenterPointsEnabled = 1 << 20;
-  static const std::size_t CenterPointsSelectable = 1 << 21;
-  static const std::size_t QuadrantPointsEnabled = 1 << 22;
-  static const std::size_t QuadrantPointsSelectable = 1 << 23;
-  static const std::size_t NearestPointsEnabled = 1 << 24;
-  static const std::size_t NearestPointsSelectable = 1 << 25;
-  static const std::size_t ScreenPointsEnabled = 1 << 24;
-  static const std::size_t ScreenPointsSelectable = 1 << 26;
-  static const std::size_t All = 0xffffffffu;
-  static const std::size_t AllEnabled = ObjectsEnabled | FeaturesEnabled | SolidsEnabled
-    | ShellsEnabled | FacesEnabled | WiresEnabled | EdgesEnabled | PointsEnabled;
+  typedef std::bitset<32> Mask;
+  static const Mask None; //default constructs all zeros.
+  static const Mask ObjectsEnabled(Mask().set(                       1));
+  static const Mask ObjectsSelectable(Mask().set(                    2));
+  static const Mask FeaturesEnabled(Mask().set(                      3));
+  static const Mask FeaturesSelectable(Mask().set(                   4));
+  static const Mask SolidsEnabled(Mask().set(                        5));
+  static const Mask SolidsSelectable(Mask().set(                     6));
+  static const Mask ShellsEnabled(Mask().set(                        7));
+  static const Mask ShellsSelectable(Mask().set(                     8));
+  static const Mask FacesEnabled(Mask().set(                         9));
+  static const Mask FacesSelectable(Mask().set(                     10));
+  static const Mask WiresEnabled(Mask().set(                        11));
+  static const Mask WiresSelectable(Mask().set(                     12));
+  static const Mask EdgesEnabled(Mask().set(                        13));
+  static const Mask EdgesSelectable(Mask().set(                     14));
+  static const Mask PointsEnabled(Mask().set(                       15));
+  static const Mask PointsSelectable(Mask().set(                    16));
+  static const Mask EndPointsEnabled(Mask().set(                    17));
+  static const Mask EndPointsSelectable(Mask().set(                 18));
+  static const Mask MidPointsEnabled(Mask().set(                    19));
+  static const Mask MidPointsSelectable(Mask().set(                 20));
+  static const Mask CenterPointsEnabled(Mask().set(                 21));
+  static const Mask CenterPointsSelectable(Mask().set(              22));
+  static const Mask QuadrantPointsEnabled(Mask().set(               23));
+  static const Mask QuadrantPointsSelectable(Mask().set(            24));
+  static const Mask NearestPointsEnabled(Mask().set(                25));
+  static const Mask NearestPointsSelectable(Mask().set(             26));
+  static const Mask ScreenPointsEnabled(Mask().set(                 27));
+  static const Mask ScreenPointsSelectable(Mask().set(              28));
+  static const Mask All(Mask().set(                                   )); //set with no parameters sets all bits
+  static const Mask AllEnabled(ObjectsEnabled | FeaturesEnabled | SolidsEnabled
+    | ShellsEnabled | FacesEnabled | WiresEnabled | EdgesEnabled | PointsEnabled);
 
   enum class Type
   {
@@ -101,136 +103,78 @@ namespace slc
       return names.at(static_cast<std::size_t>(theType));
   }
   
-  inline bool canSelectObjects(const std::size_t maskIn)
+  inline bool canSelectObjects(Mask maskIn)
   {
-    return
-    (
-      (maskIn & ObjectsEnabled) &&
-      (maskIn & ObjectsSelectable)
-    );
+    return (maskIn & (ObjectsEnabled | ObjectsSelectable)).count() == 2;
   }
   
-  inline bool canSelectFeatures(const std::size_t maskIn)
+  inline bool canSelectFeatures(Mask maskIn)
   {
-    return
-    (
-      (maskIn & FeaturesEnabled) &&
-      (maskIn & FeaturesSelectable)
-    );
+    return (maskIn & (FeaturesEnabled | FeaturesSelectable)).count() == 2;
   }
   
-  inline bool canSelectSolids(const std::size_t maskIn)
+  inline bool canSelectSolids(Mask maskIn)
   {
-    return
-    (
-      (maskIn & SolidsEnabled) &&
-      (maskIn & SolidsSelectable)
-    );
+    return (maskIn & (SolidsEnabled | SolidsSelectable)).count() == 2;
   }
   
-  inline bool canSelectShells(const std::size_t maskIn)
+  inline bool canSelectShells(Mask maskIn)
   {
-    return
-    (
-      (maskIn & ShellsEnabled) &&
-      (maskIn & ShellsSelectable)
-    );
+    return (maskIn & (ShellsEnabled | ShellsSelectable)).count() == 2;
   }
   
-  inline bool canSelectFaces(const std::size_t maskIn)
+  inline bool canSelectFaces(Mask maskIn)
   {
-    return
-    (
-      (maskIn & FacesEnabled) &&
-      (maskIn & FacesSelectable)
-    );
+    return (maskIn & (FacesEnabled | FacesSelectable)).count() == 2;
   }
   
-  inline bool canSelectWires(const std::size_t maskIn)
+  inline bool canSelectWires(Mask maskIn)
   {
-    return
-    (
-      (maskIn & WiresEnabled) &&
-      (maskIn & WiresSelectable)
-    );
+    return (maskIn & (WiresEnabled | WiresSelectable)).count() == 2;
   }
   
-  inline bool canSelectEdges(const std::size_t maskIn)
+  inline bool canSelectEdges(Mask maskIn)
   {
-    return
-    (
-      (maskIn & EdgesEnabled) &&
-      (maskIn & EdgesSelectable)
-    );
+    return (maskIn & (EdgesEnabled | EdgesSelectable)).count() == 2;
   }
   
-  inline bool canSelectEndPoints(const std::size_t maskIn)
+  inline bool canSelectEndPoints(Mask maskIn)
   {
-    return
-    (
-      (maskIn & EndPointsEnabled) &&
-      (maskIn & EndPointsSelectable) &&
-      (maskIn & PointsEnabled) &&
-      (maskIn & PointsSelectable)
-    );
+    Mask temp = EndPointsEnabled | EndPointsSelectable | PointsEnabled | PointsSelectable;
+    return (maskIn & temp).count() == 4;
   }
   
-  inline bool canSelectMidPoints(const std::size_t maskIn)
+  inline bool canSelectMidPoints(Mask maskIn)
   {
-    return
-    (
-      (maskIn & MidPointsEnabled) &&
-      (maskIn & MidPointsSelectable) &&
-      (maskIn & PointsEnabled) &&
-      (maskIn & PointsSelectable)
-    );
+    Mask temp = MidPointsEnabled | MidPointsSelectable | PointsEnabled | PointsSelectable;
+    return (maskIn & temp).count() == 4;
   }
   
-  inline bool canSelectCenterPoints(const std::size_t maskIn)
+  inline bool canSelectCenterPoints(Mask maskIn)
   {
-    return
-    (
-      (maskIn & CenterPointsEnabled) &&
-      (maskIn & CenterPointsSelectable) &&
-      (maskIn & PointsEnabled) &&
-      (maskIn & PointsSelectable)
-    );
+    Mask temp = CenterPointsEnabled | CenterPointsSelectable | PointsEnabled | PointsSelectable;
+    return (maskIn & temp).count() == 4;
   }
   
-  inline bool canSelectQuadrantPoints(const std::size_t maskIn)
+  inline bool canSelectQuadrantPoints(Mask maskIn)
   {
-    return
-    (
-      (maskIn & QuadrantPointsEnabled) &&
-      (maskIn & QuadrantPointsSelectable) &&
-      (maskIn & PointsEnabled) &&
-      (maskIn & PointsSelectable)
-    );
+    Mask temp = QuadrantPointsEnabled | QuadrantPointsSelectable | PointsEnabled | PointsSelectable;
+    return (maskIn & temp).count() == 4;
   }
   
-  inline bool canSelectNearestPoints(const std::size_t maskIn)
+  inline bool canSelectNearestPoints(Mask maskIn)
   {
-    return
-    (
-      (maskIn & NearestPointsEnabled) &&
-      (maskIn & NearestPointsSelectable) &&
-      (maskIn & PointsEnabled) &&
-      (maskIn & PointsSelectable)
-    );
+    Mask temp = NearestPointsEnabled | NearestPointsSelectable | PointsEnabled | PointsSelectable;
+    return (maskIn & temp).count() == 4;
   }
   
-  inline bool canSelectScreenPoints(const std::size_t maskIn)
+  inline bool canSelectScreenPoints(Mask maskIn)
   {
-    return
-    (
-      (maskIn & ScreenPointsEnabled) &&
-      (maskIn & ScreenPointsSelectable) &&
-      (maskIn & PointsEnabled) &&
-      (maskIn & PointsSelectable)
-    );
+    Mask temp = ScreenPointsEnabled | ScreenPointsSelectable | PointsEnabled | PointsSelectable;
+    return (maskIn & temp).count() == 4;
   }
   
-  inline bool canSelectPoints(const std::size_t maskIn)
+  inline bool canSelectPoints(Mask maskIn)
   {
     return
     (

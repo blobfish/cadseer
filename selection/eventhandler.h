@@ -41,12 +41,12 @@ public:
     EventHandler(osg::Group* viewerRootIn);
     const Containers& getSelections() const {return selectionContainers;}
     void clearSelections();
-    void setSelectionMask(const unsigned int &maskIn);
 
 protected:
     virtual bool handle(const osgGA::GUIEventAdapter& eventAdapter,
                         osgGA::GUIActionAdapter& actionAdapter, osg::Object *object,
                         osg::NodeVisitor *nodeVistor);
+    void setSelectionMask(Mask);
     void setPrehighlight(Container &selected);
     void clearPrehighlight();
     bool alreadySelected(const Container &testContainer);
@@ -58,7 +58,7 @@ protected:
     osg::Geometry* buildTempPoint(const osg::Vec3d &pointIn);
 
     unsigned int nodeMask;
-    unsigned int selectionMask;
+    Mask selectionMask;
 
     osgUtil::LineSegmentIntersector::Intersections currentIntersections;
     
@@ -71,6 +71,7 @@ protected:
     void requestSelectionAdditionDispatched(const msg::Message &);
     void requestSelectionSubtractionDispatched(const msg::Message &);
     void requestSelectionClearDispatched(const msg::Message &);
+    void selectionMaskDispatched(const msg::Message&);
     
     slc::Container messageToContainer(const slc::Message &);
     slc::Message containerToMessage(const slc::Container &);

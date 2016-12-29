@@ -123,7 +123,7 @@ namespace msg
     //! Some convenient functions for common messages
     msg::Message buildGitMessage(const std::string &);
     msg::Message buildStatusMessage(const std::string &);
-    msg::Message buildSelectionMask(unsigned int);
+    msg::Message buildSelectionMask(slc::Mask);
     //@}
 }
 

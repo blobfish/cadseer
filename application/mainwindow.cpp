@@ -82,7 +82,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     selectionManager = new slc::Manager(this);
     setupSelectionToolbar();
-    connect(selectionManager, SIGNAL(setSelectionMask(int)), viewWidget, SLOT(setSelectionMask(int)));
     
     //add increment widgets to toolbar.
     ui->toolBar->setContentsMargins(0, 0, 0, 0);

@@ -60,7 +60,7 @@ EventHandler::EventHandler(osg::Group *viewerRootIn) : osgGA::GUIEventHandler()
     setSelectionMask(slc::AllEnabled);
 }
 
-void EventHandler::setSelectionMask(const unsigned int &maskIn)
+void EventHandler::setSelectionMask(Mask maskIn)
 {
     selectionMask = maskIn;
 
@@ -334,6 +334,9 @@ void EventHandler::setupDispatcher()
 
   mask = msg::Request | msg::Selection | msg::Clear;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&EventHandler::requestSelectionClearDispatched, this, _1)));
+  
+  mask = msg::Response | msg::Selection | msg::SetMask;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&EventHandler::selectionMaskDispatched, this, _1)));
 }
 
 void EventHandler::selectionOperation
@@ -458,6 +461,12 @@ void EventHandler::requestSelectionClearDispatched(const msg::Message &)
   
   clearPrehighlight();
   clearSelections();
+}
+
+void EventHandler::selectionMaskDispatched(const msg::Message &messageIn)
+{
+  slc::Message sMsg = boost::get<slc::Message>(messageIn.payload);
+  setSelectionMask(sMsg.selectionMask);
 }
 
 Geometry* EventHandler::buildTempPoint(const Vec3d& pointIn)

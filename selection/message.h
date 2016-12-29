@@ -39,7 +39,7 @@ namespace slc
     boost::uuids::uuid featureId;
     boost::uuids::uuid shapeId;
     osg::Vec3d pointLocation;
-    unsigned int selectionMask;
+    Mask selectionMask;
   };
   
   inline bool operator==(const Message& lhs, const Message& rhs)

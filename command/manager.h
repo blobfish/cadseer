@@ -24,6 +24,7 @@
 #include <stack>
 #include <memory>
 
+#include <selection/definitions.h>
 #include <command/base.h>
 
 namespace msg{class Message; class Observer;}
@@ -38,7 +39,7 @@ namespace cmd
     void addCommand(BasePtr);
   private:
     std::unique_ptr<msg::Observer> observer;
-    unsigned int selectionMask;
+    slc::Mask selectionMask;
     void cancelCommandDispatched(const msg::Message &);
     void doneCommandDispatched(const msg::Message &);
     void setupDispatcher();

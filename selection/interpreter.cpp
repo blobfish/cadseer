@@ -56,8 +56,11 @@ static ftr::Type getFeatureType(osg::Drawable &drawableIn)
   return static_cast<ftr::Type>(featureTypeInteger);
 }
 
-Interpreter::Interpreter(const osgUtil::LineSegmentIntersector::Intersections& intersectionsIn, std::size_t selectionMaskIn) :
-  intersections(intersectionsIn), selectionMask(selectionMaskIn)
+Interpreter::Interpreter
+(
+  const osgUtil::LineSegmentIntersector::Intersections& intersectionsIn,
+  Mask selectionMaskIn
+) : intersections(intersectionsIn), selectionMask(selectionMaskIn)
 {
   go();
 }
