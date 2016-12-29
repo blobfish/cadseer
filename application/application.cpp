@@ -30,6 +30,7 @@
 #include <application/application.h>
 #include <application/mainwindow.h>
 #include <viewer/spaceballqevent.h>
+#include <viewer/viewerwidget.h>
 #include <project/gitmanager.h> //needed for unique_ptr destructor call.
 #include <project/project.h>
 #include <preferences/preferencesXML.h>
@@ -152,7 +153,28 @@ bool Application::notify(QObject* receiver, QEvent* e)
 {
   try
   {
-    return QApplication::notify(receiver, e);
+    bool outDefault = QApplication::notify(receiver, e);
+    if (e->type() == spb::MotionEvent::Type)
+    {
+      spb::MotionEvent *motionEvent = dynamic_cast<spb::MotionEvent*>(e);
+      if
+      (
+        (!motionEvent) ||
+        (motionEvent->isHandled())
+      )
+        return true;
+        
+      //make a new event and post to parent.
+      spb::MotionEvent *newEvent = new spb::MotionEvent(*motionEvent);
+      QObject *theParent = receiver->parent();
+      if (!theParent || theParent == mainWindow.get())
+        postEvent(mainWindow->getViewer()->getGraphicsWidget(), newEvent);
+      else
+        postEvent(theParent, newEvent);
+      return true;
+    }
+    else
+      return outDefault;
   }
   catch(...)
   {
@@ -160,7 +182,6 @@ bool Application::notify(QObject* receiver, QEvent* e)
   }
   return false;
 }
-
 
 void Application::initializeSpaceball()
 {

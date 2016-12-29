@@ -35,7 +35,7 @@ bool GLEventWidget::event(QEvent* event)
 {
     if (event->type() == spb::MotionEvent::Type)
     {
-//        std::cout << "inside event widget" << std::endl;
+        static_cast<spb::MotionEvent*>(event)->setHandled(true);
         osg::ref_ptr<osgGA::GUIEventAdapter> osgEvent = _gw->getEventQueue()->createEvent();
         osgEvent->setEventType(osgGA::GUIEventAdapter::USER);
         osgEvent->setUserData(convertEvent(event).get());

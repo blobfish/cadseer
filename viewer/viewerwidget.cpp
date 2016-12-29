@@ -154,6 +154,11 @@ ViewerWidget::~ViewerWidget() //for forward declarations.
 
 }
 
+QWidget* ViewerWidget::getGraphicsWidget()
+{
+  return windowQt->getGLWidget();
+}
+
 slc::EventHandler* ViewerWidget::getSelectionEventHandler()
 {
   return selectionHandler.get();

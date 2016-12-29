@@ -54,6 +54,8 @@ public:
     const osg::Matrixd& getCurrentSystem() const;
     void setCurrentSystem(const osg::Matrixd &mIn);
     const osg::Matrixd& getViewSystem() const;
+    
+    QWidget* getGraphicsWidget(); //!< needed to forward spaceball events.
 
 protected:
     void createMainCamera(osg::Camera *camera);
