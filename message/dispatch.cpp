@@ -33,6 +33,11 @@ void Dispatch::dumpString(const std::string& /*stringIn*/)
 //   std::cout << stringIn;
 }
 
+void Dispatch::dumpConnectionCount()
+{
+  std::cout << messageOutSignal.num_slots() << std::endl;
+}
+
 Dispatch& msg::dispatch()
 {
   static Dispatch localDispatcher;

@@ -45,6 +45,7 @@ namespace msg
     
     void messageInSlot(const Message&);
     void dumpString(const std::string &); //!< choke point for message debug output.
+    void dumpConnectionCount();
   private:
     MessageOutSignal messageOutSignal;
   };
