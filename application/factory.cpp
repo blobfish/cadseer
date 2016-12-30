@@ -886,7 +886,7 @@ void Factory::viewInfoDispatched(const msg::Message &)
         }
     }
     
-    msg::Message viewInfoMessage(msg::Response | msg::ViewInfo);
+    msg::Message viewInfoMessage(msg::Request | msg::Info | msg::Text);
     app::Message appMessage;
     appMessage.infoMessage = infoMessage;
     viewInfoMessage.payload = appMessage;
@@ -941,7 +941,7 @@ void Factory::linearMeasureDispatched(const msg::Message&)
         <<"Length: "
         << distance
         <<endl;
-    msg::Message viewInfoMessage(msg::Response | msg::ViewInfo);
+    msg::Message viewInfoMessage(msg::Request | msg::Info | msg::Text);
     app::Message appMessage;
     appMessage.infoMessage = infoMessage;
     viewInfoMessage.payload = appMessage;

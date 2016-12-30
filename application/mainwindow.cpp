@@ -182,8 +182,8 @@ void MainWindow::setupDispatcher()
   mask = msg::Response | msg::Preferences;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&MainWindow::preferencesChanged, this, _1)));
   
-  mask = msg::Response | msg::ViewInfo;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&MainWindow::viewInfoDispatched, this, _1)));
+  mask = msg::Request | msg::Info | msg::Text;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&MainWindow::infoTextDispatched, this, _1)));
 }
 
 void MainWindow::preferencesChanged(const msg::Message&)
@@ -194,7 +194,7 @@ void MainWindow::preferencesChanged(const msg::Message&)
   incrementWidget->lineEdit2->setCursorPosition(0);
 }
 
-void MainWindow::viewInfoDispatched(const msg::Message&)
+void MainWindow::infoTextDispatched(const msg::Message&)
 {
     infoDialog->show();
 }

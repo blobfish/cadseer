@@ -43,7 +43,7 @@ namespace app
     private:
         std::unique_ptr<msg::Observer> observer;
         void setupDispatcher();
-        void viewInfoDispatched(const msg::Message&);
+        void infoTextDispatched(const msg::Message&);
     };
     
     class InfoDialog : public QDialog

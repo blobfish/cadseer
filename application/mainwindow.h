@@ -72,7 +72,7 @@ private:
     std::unique_ptr<msg::Observer> observer;
     void setupDispatcher();
     void preferencesChanged(const msg::Message&);
-    void viewInfoDispatched(const msg::Message&);
+    void infoTextDispatched(const msg::Message&);
     
 private Q_SLOTS:
     void incrementChangedSlot();

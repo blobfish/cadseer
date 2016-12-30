@@ -1046,7 +1046,7 @@ void Project::shapeTrackUp(const uuid& featureIdIn, const uuid& shapeId)
   ShapeTrackVisitorUp<FilteredVertex> shapeVisitor(startVertex, shapeId, idsStack, stream);
   boost::depth_first_search(filteredGraph, visitor(shapeVisitor).root_vertex(startVertex));
   
-  msg::Message viewInfoMessage(msg::Response | msg::ViewInfo);
+  msg::Message viewInfoMessage(msg::Request | msg::Info | msg::Text);
   app::Message appMessage;
   appMessage.infoMessage = QString::fromStdString(stream.str());
   viewInfoMessage.payload = appMessage;
@@ -1079,7 +1079,7 @@ void Project::shapeTrackDown(const uuid& featureIdIn, const uuid& shapeId)
   ShapeTrackVisitorDown<FilteredVertex> shapeVisitor(startVertex, shapeId, idsStack, stream);
   boost::depth_first_search(filteredGraph, visitor(shapeVisitor).root_vertex(startVertex));
   
-  msg::Message viewInfoMessage(msg::Response | msg::ViewInfo);
+  msg::Message viewInfoMessage(msg::Request | msg::Info | msg::Text);
   app::Message appMessage;
   appMessage.infoMessage = QString::fromStdString(stream.str());
   viewInfoMessage.payload = appMessage;

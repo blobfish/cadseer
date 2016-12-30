@@ -48,11 +48,11 @@ void InfoWindow::setupDispatcher()
 {
     msg::Mask mask;
     
-    mask = msg::Response | msg::ViewInfo;
-    observer->dispatcher.insert(std::make_pair(mask, boost::bind(&InfoWindow::viewInfoDispatched, this, _1)));
+    mask = msg::Request | msg::Info | msg::Text;
+    observer->dispatcher.insert(std::make_pair(mask, boost::bind(&InfoWindow::infoTextDispatched, this, _1)));
 }
 
-void InfoWindow::viewInfoDispatched(const msg::Message &messageIn)
+void InfoWindow::infoTextDispatched(const msg::Message &messageIn)
 {
     app::Message message = boost::get<app::Message>(messageIn.payload);
     append(message.infoMessage);
