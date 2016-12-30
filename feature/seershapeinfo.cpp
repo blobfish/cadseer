@@ -68,7 +68,8 @@ QTextStream& SeerShapeInfo::getShapeInfo(QTextStream &streamIn, const boost::uui
     functionMapper->functionMap.at(shape.ShapeType())(streamIn, shape);
     //common to all shapes.
     streamIn << "orientation: " << ((shape.Orientation() == TopAbs_FORWARD) ? ("Forward") : ("Reversed")) << endl
-        << "hash code: " << ShapeIdKeyHash()(shape) << endl;
+        << "hash code: " << ShapeIdKeyHash()(shape) << endl
+        << "shape id: " << QString::fromStdString(gu::idToString(idIn)) << endl;
     
     return streamIn;
 }
