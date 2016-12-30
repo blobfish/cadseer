@@ -70,6 +70,8 @@ namespace app
     void viewInfoDispatched(const msg::Message&);
     void linearMeasureDispatched(const msg::Message&);
     void viewIsolateDispatched(const msg::Message&);
+    
+    void debugInquiryDispatched(const msg::Message&); //testing
   };
 }
 

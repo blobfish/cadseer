@@ -628,6 +628,12 @@ void GestureHandler::constructMenu()
     debugShapeGraph->setUserValue(attributeMask, (msg::Request | msg::DebugShapeGraph).to_string());
     debugShapeGraph->setUserValue(attributeStatus, QObject::tr("Write shape graph to application directory").toStdString());
     debugBase->insertChild(debugBase->getNumChildren() - 2, debugShapeGraph);
+    
+    osg::MatrixTransform *debugInquiry = gsn::buildCommandNode(":/resources/images/debugInquiry.svg");
+    debugInquiry->setMatrix(dummy);
+    debugInquiry->setUserValue(attributeMask, (msg::Request | msg::DebugInquiry).to_string());
+    debugInquiry->setUserValue(attributeStatus, QObject::tr("Inquiry. A testing facility").toStdString());
+    debugBase->insertChild(debugBase->getNumChildren() - 2, debugInquiry);
 }
 
 std::vector<osg::Vec3> GestureHandler::buildNodeLocations(osg::Vec3 direction, int nodeCount)

@@ -154,6 +154,9 @@ void Factory::setupDispatcher()
   
   mask = msg::Request | msg::ViewIsolate;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::viewIsolateDispatched, this, _1)));
+  
+  mask = msg::Request | msg::DebugInquiry;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::debugInquiryDispatched, this, _1)));
 }
 
 void Factory::newProjectDispatched(const msg::Message& /*messageIn*/)
@@ -1021,4 +1024,13 @@ void Factory::viewIsolateDispatched(const msg::Message&)
   
   observer->messageOutSignal(msg::Message(msg::Request | msg::ViewFit));
   observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+}
+
+
+
+
+
+void Factory::debugInquiryDispatched(const msg::Message&)
+{
+  std::cout << __PRETTY_FUNCTION__ << std::endl;
 }
