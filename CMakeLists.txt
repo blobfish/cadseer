@@ -9,7 +9,7 @@ set(QT_USE_QTOPENGL TRUE)
 INCLUDE(${QT_USE_FILE})
 ADD_DEFINITIONS(${QT_DEFINITIONS})
 
-find_package(Boost REQUIRED COMPONENTS system graph)
+find_package(Boost REQUIRED COMPONENTS system graph timer)
 
 find_package(OpenCasCade REQUIRED)
 SET(OCE_LIBRARIES ${OCC_LIBRARIES})

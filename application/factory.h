@@ -71,7 +71,7 @@ namespace app
     void linearMeasureDispatched(const msg::Message&);
     void viewIsolateDispatched(const msg::Message&);
     
-    void debugInquiryDispatched(const msg::Message&); //testing
+    void messageStressTestDispatched(const msg::Message&); //testing
   };
 }
 

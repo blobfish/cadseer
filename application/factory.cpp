@@ -25,6 +25,7 @@
 #include <QTextStream>
 
 #include <boost/uuid/uuid.hpp>
+#include <boost/timer/timer.hpp>
 
 #include <BRepTools.hxx>
 #include <TopoDS_Edge.hxx>
@@ -155,8 +156,8 @@ void Factory::setupDispatcher()
   mask = msg::Request | msg::ViewIsolate;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::viewIsolateDispatched, this, _1)));
   
-  mask = msg::Request | msg::DebugInquiry;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::debugInquiryDispatched, this, _1)));
+//   mask = msg::Request | msg::DebugInquiry;
+//   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::messageStressTestDispatched, this, _1)));
 }
 
 void Factory::newProjectDispatched(const msg::Message& /*messageIn*/)
@@ -1026,11 +1027,65 @@ void Factory::viewIsolateDispatched(const msg::Message&)
   observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
 }
 
-
-
-
-
-void Factory::debugInquiryDispatched(const msg::Message&)
+//! a testing function to analyze run time cost of messages.
+void Factory::messageStressTestDispatched(const msg::Message&)
 {
-  std::cout << __PRETTY_FUNCTION__ << std::endl;
+//   msg::dispatch().dumpConnectionCount(); //has 30 at this time.
+  
+  std::cout << std::endl;
+  //test mask. shouldn't match any observer.
+  msg::Mask test = msg::Request | msg::Response | msg::Pre | msg::Post;
+  std::vector<std::unique_ptr<msg::Observer>> observers;
+  
+  {
+    std::cout << std::endl << "approx. 1000 observers" << std::endl;
+    for (std::size_t index = 0; index < 1000; ++index)
+      observers.push_back(std::unique_ptr<msg::Observer>(new msg::Observer()));
+    boost::timer::auto_cpu_timer t;
+    observer->messageOutSignal(msg::Message(test));
+  }
+  
+  {
+    std::cout << std::endl << "approx. 10000 observers" << std::endl;
+    for (std::size_t index = 0; index < 9000; ++index)
+      observers.push_back(std::unique_ptr<msg::Observer>(new msg::Observer()));
+    boost::timer::auto_cpu_timer t;
+    observer->messageOutSignal(msg::Message(test));
+  }
+  
+  {
+    std::cout << std::endl << "approx. 100000 observers" << std::endl;
+    for (std::size_t index = 0; index < 90000; ++index)
+      observers.push_back(std::unique_ptr<msg::Observer>(new msg::Observer()));
+    boost::timer::auto_cpu_timer t;
+    observer->messageOutSignal(msg::Message(test));
+  }
+  
+  {
+    std::cout << std::endl << "approx. 1000000 observers" << std::endl;
+    for (std::size_t index = 0; index < 900000; ++index)
+      observers.push_back(std::unique_ptr<msg::Observer>(new msg::Observer()));
+    boost::timer::auto_cpu_timer t;
+    observer->messageOutSignal(msg::Message(test));
+  }
+  
+  /*
+   * output:
+   
+   approx. 1000 observers
+   0 .000766s wall, 0.000000s user + 0.000000s system = 0.000000s CPU (n/a%)
+   
+   approx. 10000 observers
+   0.008040s wall, 0.010000s user + 0.000000s system = 0.010000s CPU (124.4%)
+   
+   approx. 100000 observers
+   0.072139s wall, 0.070000s user + 0.000000s system = 0.070000s CPU (97.0%)
+   
+   approx. 1000000 observers
+   0.758043s wall, 0.760000s user + 0.000000s system = 0.760000s CPU (100.3%)
+   
+   This looks linear. Keep in mind these test observers have no function dispatching.
+   This is OK, because the main reason behind this test is for individual feature
+   observers, which I don't expect to have any function dispatching.
+   */
 }
