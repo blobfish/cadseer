@@ -219,8 +219,6 @@ void Model::featureAddedDispatched(const msg::Message &messageIn)
   record.vertex = virginVertex;
   vertexIdContainer.insert(record);
   
-  graph[virginVertex].connection = message.feature->connectState(boost::bind(&Model::stateChangedSlot, this, _1, _2));
-  
   addVertexItemsToScene(virginVertex);
   
   this->invalidate(); //temp.
@@ -238,7 +236,6 @@ void Model::featureRemovedDispatched(const msg::Message &messageIn)
   eraseRecord(graphLink, message.feature->getId());
   eraseRecord(vertexIdContainer, message.feature->getId());
   removeVertexItemsFromScene(vertex);
-  graph[vertex].connection.disconnect();
   assert(boost::in_degree(vertex, graph) == 0);
   assert(boost::out_degree(vertex, graph) == 0);
   boost::remove_vertex(vertex, graph);
@@ -291,105 +288,6 @@ void Model::connectionRemovedDispatched(const msg::Message &messageIn)
   boost::remove_edge(edge, graph);
 }
 
-void Model::stateChangedSlot(const boost::uuids::uuid &featureIdIn, std::size_t stateOffsetChanged)
-{
-  Vertex vertex = findRecord(vertexIdContainer, featureIdIn).vertex;
-  assert(!graph[vertex].feature.expired());
-  std::shared_ptr<ftr::Base> feature = graph[vertex].feature.lock();
-  
-  auto updateStateIcon = [&]()
-  {
-    //from highest to lowest priority.
-    if (feature->isInactive())
-    {
-      graph[vertex].stateIconRaw->setPixmap(inactivePixmap);
-      return;
-    }
-    
-    if (feature->isModelDirty())
-    {
-      graph[vertex].stateIconRaw->setPixmap(pendingPixmap);
-      return;
-    }
-    
-    if (feature->isFailure())
-      graph[vertex].stateIconRaw->setPixmap(failPixmap);
-    else
-      graph[vertex].stateIconRaw->setPixmap(passPixmap);
-  };
-  
-  if
-  (
-    (stateOffsetChanged == ftr::StateOffset::ModelDirty) ||
-    (stateOffsetChanged == ftr::StateOffset::Failure) ||
-    (stateOffsetChanged == ftr::StateOffset::Inactive)
-  )
-    updateStateIcon();
-  
-  ftr::State featureState = feature->getState();
-  bool currentChangedState = featureState.test(stateOffsetChanged);
-  
-  if (stateOffsetChanged == ftr::StateOffset::Hidden3D)
-  {
-    if (currentChangedState)
-      graph[vertex].visibleIconRaw->setPixmap(visiblePixmapDisabled);
-    else
-      graph[vertex].visibleIconRaw->setPixmap(visiblePixmapEnabled);
-  }
-  
-  if (stateOffsetChanged == ftr::StateOffset::NonLeaf)
-  {
-    if (currentChangedState)
-    {
-      if (graph[vertex].visibleIconRaw->scene())
-        removeItem(graph[vertex].visibleIconRaw);
-    }
-    else
-    {
-      if (!graph[vertex].visibleIconRaw->scene())
-        addItem(graph[vertex].visibleIconRaw);
-    }
-  }
-//   std::cout <<
-//     "state changed. Feature id is: " << featureIdIn <<
-//     "      state offset is: " << ftr::StateOffset::toString(stateIn) <<
-//     "      state value is: " << ((currentState) ? "true" : "false") <<  std::endl;
-
-  //set tool tip to current state.
-  
-  QString ts = tr("True");
-  QString fs = tr("False");
-  QString toolTip;
-  QTextStream stream(&toolTip);
-  stream <<
-    "<table border=\"1\" cellpadding=\"6\">" << 
-      "<tr>" <<
-	"<td>" << tr("Model Dirty") << "</td><td>" << ((featureState.test(ftr::StateOffset::ModelDirty)) ? ts : fs) << "</td>" <<
-      "</tr><tr>" <<
-	"<td>" << tr("Visual Dirty") << "</td><td>" << ((featureState.test(ftr::StateOffset::VisualDirty)) ? ts : fs) << "</td>" <<
-      "</tr>" <<
-      "</tr><tr>" <<
-	"<td>" << tr("Hidden 3D") << "</td><td>" << ((featureState.test(ftr::StateOffset::Hidden3D)) ? ts : fs) << "</td>" <<
-      "</tr>" <<
-      "</tr><tr>" <<
-	"<td>" << tr("Hidden Overlay") << "</td><td>" << ((featureState.test(ftr::StateOffset::HiddenOverlay)) ? ts : fs) << "</td>" <<
-      "</tr>" <<
-      "</tr>" <<
-      "</tr><tr>" <<
-	"<td>" << tr("Failure") << "</td><td>" << ((featureState.test(ftr::StateOffset::Failure)) ? ts : fs) << "</td>" <<
-      "</tr>" <<
-      "</tr>" <<
-      "</tr><tr>" <<
-	"<td>" << tr("Inactive") << "</td><td>" << ((featureState.test(ftr::StateOffset::Inactive)) ? ts : fs) << "</td>" <<
-      "</tr>" <<
-      "</tr>" <<
-      "</tr><tr>" <<
-	"<td>" << tr("Non-Leaf") << "</td><td>" << ((featureState.test(ftr::StateOffset::NonLeaf)) ? ts : fs) << "</td>" <<
-      "</tr>" <<
-    "</table>";
-  graph[vertex].stateIconRaw->setToolTip(toolTip);
-}
-
 void Model::setupDispatcher()
 {
   msg::Mask mask;
@@ -423,6 +321,105 @@ void Model::setupDispatcher()
   
   mask = msg::Response | msg::Pre | msg::CloseProject;;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::closeProjectDispatched, this, _1)));
+  
+  mask = msg::Response | msg::Feature | msg::Status;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::featureStateChangedDispatched, this, _1)));
+}
+
+void Model::featureStateChangedDispatched(const msg::Message &messageIn)
+{
+  ftr::Message fMessage = boost::get<ftr::Message>(messageIn.payload);
+
+  Vertex vertex = findRecord(vertexIdContainer, fMessage.featureId).vertex;
+  assert(!graph[vertex].feature.expired());
+  std::shared_ptr<ftr::Base> feature = graph[vertex].feature.lock();
+  
+  auto updateStateIcon = [&]()
+  {
+    //from highest to lowest priority.
+    if (feature->isInactive())
+    {
+      graph[vertex].stateIconRaw->setPixmap(inactivePixmap);
+      return;
+    }
+    
+    if (feature->isModelDirty())
+    {
+      graph[vertex].stateIconRaw->setPixmap(pendingPixmap);
+      return;
+    }
+    
+    if (feature->isFailure())
+      graph[vertex].stateIconRaw->setPixmap(failPixmap);
+    else
+      graph[vertex].stateIconRaw->setPixmap(passPixmap);
+  };
+  
+  if
+  (
+    (fMessage.stateOffset == ftr::StateOffset::ModelDirty) ||
+    (fMessage.stateOffset == ftr::StateOffset::Failure) ||
+    (fMessage.stateOffset == ftr::StateOffset::Inactive)
+  )
+    updateStateIcon();
+  
+  ftr::State featureState = fMessage.state;
+  bool currentChangedState = fMessage.freshValue;
+  
+  if (fMessage.stateOffset == ftr::StateOffset::Hidden3D)
+  {
+    if (currentChangedState)
+      graph[vertex].visibleIconRaw->setPixmap(visiblePixmapDisabled);
+    else
+      graph[vertex].visibleIconRaw->setPixmap(visiblePixmapEnabled);
+  }
+  
+  if (fMessage.stateOffset == ftr::StateOffset::NonLeaf)
+  {
+    if (currentChangedState)
+    {
+      if (graph[vertex].visibleIconRaw->scene())
+        removeItem(graph[vertex].visibleIconRaw);
+    }
+    else
+    {
+      if (!graph[vertex].visibleIconRaw->scene())
+        addItem(graph[vertex].visibleIconRaw);
+    }
+  }
+  
+  //set tool tip to current state.
+  QString ts = tr("True");
+  QString fs = tr("False");
+  QString toolTip;
+  QTextStream stream(&toolTip);
+  stream <<
+  "<table border=\"1\" cellpadding=\"6\">" << 
+  "<tr>" <<
+  "<td>" << tr("Model Dirty") << "</td><td>" << ((featureState.test(ftr::StateOffset::ModelDirty)) ? ts : fs) << "</td>" <<
+  "</tr><tr>" <<
+  "<td>" << tr("Visual Dirty") << "</td><td>" << ((featureState.test(ftr::StateOffset::VisualDirty)) ? ts : fs) << "</td>" <<
+  "</tr>" <<
+  "</tr><tr>" <<
+  "<td>" << tr("Hidden 3D") << "</td><td>" << ((featureState.test(ftr::StateOffset::Hidden3D)) ? ts : fs) << "</td>" <<
+  "</tr>" <<
+  "</tr><tr>" <<
+  "<td>" << tr("Hidden Overlay") << "</td><td>" << ((featureState.test(ftr::StateOffset::HiddenOverlay)) ? ts : fs) << "</td>" <<
+  "</tr>" <<
+  "</tr>" <<
+  "</tr><tr>" <<
+  "<td>" << tr("Failure") << "</td><td>" << ((featureState.test(ftr::StateOffset::Failure)) ? ts : fs) << "</td>" <<
+  "</tr>" <<
+  "</tr>" <<
+  "</tr><tr>" <<
+  "<td>" << tr("Inactive") << "</td><td>" << ((featureState.test(ftr::StateOffset::Inactive)) ? ts : fs) << "</td>" <<
+  "</tr>" <<
+  "</tr>" <<
+  "</tr><tr>" <<
+  "<td>" << tr("Non-Leaf") << "</td><td>" << ((featureState.test(ftr::StateOffset::NonLeaf)) ? ts : fs) << "</td>" <<
+  "</tr>" <<
+  "</table>";
+  graph[vertex].stateIconRaw->setToolTip(toolTip);
 }
 
 void Model::preselectionAdditionDispatched(const msg::Message &messageIn)
@@ -503,7 +500,6 @@ void Model::closeProjectDispatched(const msg::Message&)
   std::vector<Vertex> vs;
   BGL_FORALL_VERTICES(currentVertex, graph, Graph)
   {
-    graph[currentVertex].connection.disconnect();
     boost::clear_vertex(currentVertex, graph);
     vs.push_back(currentVertex);
   }

@@ -30,6 +30,7 @@
 #include <selection/message.h>
 #include <application/message.h>
 #include <viewer/message.h>
+#include <feature/message.h>
 
 namespace msg
 {
@@ -107,7 +108,14 @@ namespace msg
     static const Mask Info(Mask().set(                          69));//!< window move up someday.
     static const Mask DebugInquiry(Mask().set(                  70));//!< command move up someday.
   
-    typedef boost::variant<prj::Message, slc::Message, app::Message, vwr::Message> Payload;
+    typedef boost::variant
+    <
+      prj::Message,
+      slc::Message,
+      app::Message,
+      vwr::Message,
+      ftr::Message
+    > Payload;
   
     struct Message
     {

@@ -39,7 +39,6 @@ namespace prg
     //boost graph will call destructor when expanding vector
     //so we need to keep from deleting when this happens.
     std::shared_ptr<ftr::Base> feature;
-    boost::signals2::connection connection;
   };
   /*! @brief needed to create an internal index for vertex. needed for listS.*/
   typedef boost::property<boost::vertex_index_t, std::size_t, VertexProperty> vertex_prop;

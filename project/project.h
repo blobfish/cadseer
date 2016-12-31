@@ -63,8 +63,6 @@ public:
     void open(); //!< call setSaveDirectory prior.
     void initializeNew(); //!< call setSaveDirectory prior.
     
-    void stateChangedSlot(const boost::uuids::uuid &featureIdIn, std::size_t stateIn); //!< received from each feature.
-    
     void shapeTrackUp(const boost::uuids::uuid &featureIdIn, const boost::uuids::uuid &shapeId);
     void shapeTrackDown(const boost::uuids::uuid &featureIdIn, const boost::uuids::uuid &shapeId);
     
@@ -100,6 +98,7 @@ private:
     void updateVisualDispatched(const msg::Message &);
     void saveProjectRequestDispatched(const msg::Message &);
     void checkShapeIdsDispatched(const msg::Message &);
+    void featureStateChangedDispatched(const msg::Message &);
 };
 }
 

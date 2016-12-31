@@ -33,6 +33,7 @@
 #include <feature/parameter.h>
 #include <message/message.h>
 #include <message/dispatch.h>
+#include <message/observer.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include "parameterdialog.h"
@@ -61,9 +62,12 @@ ParameterDialog::ParameterDialog(ftr::Parameter *parameterIn, const boost::uuids
   parameter->connectValue(boost::bind(&ParameterDialog::valueHasChanged, this));
   parameter->connectConstant(boost::bind(&ParameterDialog::constantHasChanged, this));
   
-  msg::dispatch().connectMessageOut(boost::bind(&ParameterDialog::messageInSlot, this, boost::placeholders::_1));
-  connectMessageOut(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), boost::placeholders::_1));
+  observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
+  observer->dispatcher.insert(std::make_pair(msg::Response | msg::Pre | msg::Remove | msg::Feature,
+    boost::bind(&ParameterDialog::featureRemovedDispatched, this, boost::placeholders::_1)));
 }
+
+ParameterDialog::~ParameterDialog(){}
 
 void ParameterDialog::buildGui()
 {
@@ -173,7 +177,7 @@ void ParameterDialog::dropEvent(QDropEvent *event)
       eManager.addFormulaLink(feature->getId(), parameter, id);
       if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
       {
-        messageOutSignal(msg::Mask(msg::Request | msg::Update));
+        observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
       }
     }
   }
@@ -231,7 +235,7 @@ void ParameterDialog::linkButtonClickedSlot(bool checkedState)
   }
 }
 
-void ParameterDialog::messageInSlot(const msg::Message &messageIn)
+void ParameterDialog::featureRemovedDispatched(const msg::Message &messageIn)
 {
   if (messageIn.mask == (msg::Response | msg::Pre | msg::Remove | msg::Feature))
   {
@@ -259,9 +263,9 @@ void ParameterDialog::updateSlot()
     if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
     {
       gitStream  << QObject::tr("    changed to: ").toStdString() << parameter->getValue();
-      messageOutSignal(msg::buildGitMessage(gitStream.str()));
+      observer->messageOutSignal(msg::buildGitMessage(gitStream.str()));
       
-      messageOutSignal(msg::Mask(msg::Request | msg::Update));
+      observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
     }
   }
   else
@@ -278,9 +282,9 @@ void ParameterDialog::updateSlot()
       if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
       {
         gitStream  << QObject::tr("    changed to: ").toStdString() << parameter->getValue();
-        messageOutSignal(msg::buildGitMessage(gitStream.str()));
+        observer->messageOutSignal(msg::buildGitMessage(gitStream.str()));
         
-        messageOutSignal(msg::Mask(msg::Request | msg::Update));
+        observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
       }
     }
     else

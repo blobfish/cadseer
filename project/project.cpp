@@ -98,12 +98,7 @@ void Project::updateModel()
   //the update of a feature will trigger a state change signal.
   //we don't want to handle that state change here in the project
   //so we block.
-  std::vector<boost::signals2::shared_connection_block> blockVector;
-  BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
-  {
-    boost::signals2::shared_connection_block currentBlock(projectGraph[currentVertex].connection);
-    blockVector.push_back(currentBlock);
-  }
+  boost::signals2::shared_connection_block block(observer->connection);
   
   //loop through and update each feature.
   for (auto it = sorted.rbegin(); it != sorted.rend(); ++it)
@@ -252,8 +247,6 @@ void Project::addFeature(std::shared_ptr<ftr::Base> feature)
   pMessage.feature = feature;
   postMessage.payload = pMessage;
   observer->messageOutSignal(postMessage);
-  
-  projectGraph[newVertex].connection = feature->connectState(boost::bind(&Project::stateChangedSlot, this, _1, _2));
 }
 
 void Project::removeFeature(const uuid& idIn)
@@ -262,7 +255,6 @@ void Project::removeFeature(const uuid& idIn)
   std::shared_ptr<ftr::Base> feature = projectGraph[vertex].feature;
   
   feature->setModelDirty(); //this will make all children dirty.
-  projectGraph[vertex].connection.disconnect();
   
   VertexEdgePairs parents = getParents(vertex);
   VertexEdgePairs children = getChildren(vertex);
@@ -341,12 +333,7 @@ void Project::setFeatureActive(const uuid& idIn)
   //the visitor will be setting features to an inactive state which
   //triggers the signal and we would end up back into this->stateChangedSlot.
   //so we block all the connections to avoid this.
-  std::vector<boost::signals2::shared_connection_block> blockVector;
-  BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
-  {
-    boost::signals2::shared_connection_block currentBlock(projectGraph[currentVertex].connection);
-    blockVector.push_back(currentBlock);
-  }
+  boost::signals2::shared_connection_block block(observer->connection);
   
   prg::Vertex vertex = findVertex(idIn);
   
@@ -442,27 +429,6 @@ void Project::connect(const boost::uuids::uuid& parentIn, const boost::uuids::uu
   observer->messageOutSignal(postMessage);
 }
 
-void Project::stateChangedSlot(const uuid& featureIdIn, std::size_t stateIn)
-{
-  if (stateIn != ftr::StateOffset::ModelDirty)
-    return;
-  indexVerticesEdges();
-  
-  //the visitor will be setting features to a dirty state which
-  //trigger the signal and we would end up back in this function recursively.
-  //so we block all the connections to avoid this recursion.
-  std::vector<boost::signals2::shared_connection_block> blockVector;
-  BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
-  {
-    boost::signals2::shared_connection_block currentBlock(projectGraph[currentVertex].connection);
-    blockVector.push_back(currentBlock);
-  }
-  
-  prg::Vertex vertex = findVertex(featureIdIn);
-  SetDirtyVisitor visitor;
-  boost::breadth_first_search(projectGraph, vertex, boost::visitor(visitor));
-}
-
 void Project::setupDispatcher()
 {
   msg::Mask mask;
@@ -490,6 +456,31 @@ void Project::setupDispatcher()
   
   mask = msg::Request | msg::CheckShapeIds;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::checkShapeIdsDispatched, this, _1)));
+  
+  mask = msg::Response | msg::Feature | msg::Status;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::featureStateChangedDispatched, this, _1)));
+}
+
+void Project::featureStateChangedDispatched(const msg::Message &messageIn)
+{
+  
+  ftr::Message fMessage = boost::get<ftr::Message>(messageIn.payload);
+  if
+  (
+    (fMessage.stateOffset != ftr::StateOffset::ModelDirty) ||
+    (fMessage.freshValue != true)
+  )
+    return;
+    
+  //this code blocks all incoming messages to the project while it
+  //executes. This prevents the cycles from setting a dependent dirty.
+  indexVerticesEdges();
+  
+  boost::signals2::shared_connection_block block(observer->connection);
+  
+  prg::Vertex vertex = findVertex(fMessage.featureId);
+  SetDirtyVisitor visitor;
+  boost::breadth_first_search(projectGraph, vertex, boost::visitor(visitor));
 }
 
 void Project::setCurrentLeafDispatched(const msg::Message &messageIn)

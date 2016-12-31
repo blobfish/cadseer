@@ -86,7 +86,6 @@ namespace dag
     
   private:
     void indexVerticesEdges();
-    void stateChangedSlot(const uuid& featureIdIn, std::size_t); //!< received from each feature.
     std::unique_ptr<msg::Observer> observer;
     void setupDispatcher();
     void featureAddedDispatched(const msg::Message &);
@@ -99,6 +98,7 @@ namespace dag
     void selectionAdditionDispatched(const msg::Message &);
     void selectionSubtractionDispatched(const msg::Message &);
     void closeProjectDispatched(const msg::Message&);
+    void featureStateChangedDispatched(const msg::Message &);
     
     Graph graph;
     GraphLinkContainer graphLink;

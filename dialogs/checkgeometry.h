@@ -25,7 +25,6 @@
 #include <set>
 
 #ifndef Q_MOC_RUN
-#include <boost/signals2.hpp>
 #include <boost/uuid/uuid.hpp>
 #endif
 
@@ -164,9 +163,8 @@ namespace dlg
     std::unique_ptr<msg::Observer> observer;
     void setupDispatcher();
     void buildGui();
-    boost::signals2::connection connection;
-    void featureStateChangedSlot(const boost::uuids::uuid&, std::size_t);
     void featureRemovedDispatched(const msg::Message &);
+    void featureStateChangedDispatched(const msg::Message &);
   };
 }
 

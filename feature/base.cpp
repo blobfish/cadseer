@@ -34,6 +34,8 @@
 #include <modelviz/nodemaskdefs.h>
 #include <modelviz/shapegeometry.h>
 #include <globalutilities.h>
+#include <message/message.h>
+#include <message/observer.h>
 #include <feature/seershape.h>
 #include <feature/seershapeinfo.h>
 #include <project/serial/xsdcxxoutput/featurebase.h>
@@ -81,6 +83,7 @@ Base::Base()
   state.set(ftr::StateOffset::NonLeaf, false);
   
   seerShape = std::shared_ptr<SeerShape>(new SeerShape());
+  observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
 }
 
 Base::~Base()
@@ -95,7 +98,11 @@ void Base::setModelDirty()
   if (isModelClean())
   {
     state.set(ftr::StateOffset::ModelDirty, true);
-    stateChangedSignal(id, ftr::StateOffset::ModelDirty);
+    
+    ftr::Message fMessage(id, state, StateOffset::ModelDirty, true);
+    msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
+    mMessage.payload = fMessage;
+    observer->messageOutSignal(mMessage);
   }
   setVisualDirty();
 }
@@ -105,7 +112,11 @@ void Base::setModelClean()
   if (isModelClean())
     return;
   state.set(ftr::StateOffset::ModelDirty, false);
-  stateChangedSignal(id, ftr::StateOffset::ModelDirty);
+  
+  ftr::Message fMessage(id, state, StateOffset::ModelDirty, false);
+  msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
+  mMessage.payload = fMessage;
+  observer->messageOutSignal(mMessage);
 }
 
 void Base::setVisualClean()
@@ -113,7 +124,11 @@ void Base::setVisualClean()
   if (isVisualClean())
     return;
   state.set(ftr::StateOffset::VisualDirty, false);
-  stateChangedSignal(id, ftr::StateOffset::VisualDirty);
+  
+  ftr::Message fMessage(id, state, StateOffset::VisualDirty, false);
+  msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
+  mMessage.payload = fMessage;
+  observer->messageOutSignal(mMessage);
 }
 
 void Base::setVisualDirty()
@@ -121,7 +136,11 @@ void Base::setVisualDirty()
   if(isVisualDirty())
     return;
   state.set(ftr::StateOffset::VisualDirty, true);
-  stateChangedSignal(id, ftr::StateOffset::VisualDirty);
+  
+  ftr::Message fMessage(id, state, StateOffset::VisualDirty, true);
+  msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
+  mMessage.payload = fMessage;
+  observer->messageOutSignal(mMessage);
 }
 
 
@@ -172,7 +191,11 @@ void Base::show3D()
 //   if (isVisibleOverlay())
 //     overlaySwitch->setAllChildrenOn();
   state.set(ftr::StateOffset::Hidden3D, false);
-  stateChangedSignal(id, ftr::StateOffset::Hidden3D);
+  
+  ftr::Message fMessage(id, state, StateOffset::Hidden3D, false);
+  msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
+  mMessage.payload = fMessage;
+  observer->messageOutSignal(mMessage);
 }
 
 void Base::hide3D()
@@ -184,7 +207,11 @@ void Base::hide3D()
 //   if (isVisibleOverlay())
 //     overlaySwitch->setAllChildrenOff();
   state.set(ftr::StateOffset::Hidden3D, true);
-  stateChangedSignal(id, ftr::StateOffset::Hidden3D);
+  
+  ftr::Message fMessage(id, state, StateOffset::Hidden3D, true);
+  msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
+  mMessage.payload = fMessage;
+  observer->messageOutSignal(mMessage);
 }
 
 void Base::toggle3D()
@@ -194,7 +221,6 @@ void Base::toggle3D()
     hide3D();
   else
     show3D();
-  stateChangedSignal(id, ftr::StateOffset::Hidden3D);
 }
 
 void Base::showOverlay()
@@ -203,7 +229,11 @@ void Base::showOverlay()
     return; //already on.
   overlaySwitch->setAllChildrenOn();
   state.set(ftr::StateOffset::HiddenOverlay, false);
-  stateChangedSignal(id, ftr::StateOffset::Hidden3D);
+  
+  ftr::Message fMessage(id, state, StateOffset::HiddenOverlay, false);
+  msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
+  mMessage.payload = fMessage;
+  observer->messageOutSignal(mMessage);
 }
 
 void Base::hideOverlay()
@@ -212,7 +242,11 @@ void Base::hideOverlay()
     return; //already off.
   overlaySwitch->setAllChildrenOff();
   state.set(ftr::StateOffset::HiddenOverlay, true);
-  stateChangedSignal(id, ftr::StateOffset::HiddenOverlay);
+  
+  ftr::Message fMessage(id, state, StateOffset::HiddenOverlay, true);
+  msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
+  mMessage.payload = fMessage;
+  observer->messageOutSignal(mMessage);
 }
 
 void Base::toggleOverlay()
@@ -228,7 +262,11 @@ void Base::setSuccess()
   if (isSuccess())
     return; //already success
   state.set(ftr::StateOffset::Failure, false);
-  stateChangedSignal(id, ftr::StateOffset::Failure);
+  
+  ftr::Message fMessage(id, state, StateOffset::Failure, false);
+  msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
+  mMessage.payload = fMessage;
+  observer->messageOutSignal(mMessage);
 }
 
 void Base::setFailure()
@@ -236,7 +274,11 @@ void Base::setFailure()
   if (isFailure())
     return; //already failure
   state.set(ftr::StateOffset::Failure, true);
-  stateChangedSignal(id, ftr::StateOffset::Failure);
+  
+  ftr::Message fMessage(id, state, StateOffset::Failure, true);
+  msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
+  mMessage.payload = fMessage;
+  observer->messageOutSignal(mMessage);
 }
 
 void Base::setActive()
@@ -244,7 +286,11 @@ void Base::setActive()
   if (isActive())
     return; //already active.
   state.set(ftr::StateOffset::Inactive, false);
-  stateChangedSignal(id, ftr::StateOffset::Inactive);
+  
+  ftr::Message fMessage(id, state, StateOffset::Inactive, false);
+  msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
+  mMessage.payload = fMessage;
+  observer->messageOutSignal(mMessage);
 }
 
 void Base::setInActive()
@@ -252,7 +298,11 @@ void Base::setInActive()
   if (isInactive())
     return; //already inactive.
   state.set(ftr::StateOffset::Inactive, true);
-  stateChangedSignal(id, ftr::StateOffset::Inactive);
+  
+  ftr::Message fMessage(id, state, StateOffset::Inactive, true);
+  msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
+  mMessage.payload = fMessage;
+  observer->messageOutSignal(mMessage);
 }
 
 void Base::setLeaf()
@@ -260,7 +310,11 @@ void Base::setLeaf()
   if (isLeaf())
     return; //already a leaf.
   state.set(ftr::StateOffset::NonLeaf, false);
-  stateChangedSignal(id, ftr::StateOffset::NonLeaf);
+  
+  ftr::Message fMessage(id, state, StateOffset::NonLeaf, false);
+  msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
+  mMessage.payload = fMessage;
+  observer->messageOutSignal(mMessage);
 }
 
 void Base::setNonLeaf()
@@ -268,7 +322,11 @@ void Base::setNonLeaf()
   if (isNonLeaf())
     return; //already nonLeaf.
   state.set(ftr::StateOffset::NonLeaf, true);
-  stateChangedSignal(id, ftr::StateOffset::NonLeaf);
+  
+  ftr::Message fMessage(id, state, StateOffset::NonLeaf, true);
+  msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
+  mMessage.payload = fMessage;
+  observer->messageOutSignal(mMessage);
 }
 
 void Base::serialWrite(const QDir&)

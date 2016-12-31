@@ -1,6 +1,6 @@
 /*
  * CadSeer. Parametric Solid Modeling.
- * Copyright (C) 2015  Thomas S. Anderson blobfish.at.gmx.com
+ * Copyright (C) 2016  Thomas S. Anderson blobfish.at.gmx.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,28 +17,23 @@
  *
  */
 
-#ifndef STATES_H
-#define STATES_H
+#include <tools/idtools.h>
+#include <feature/message.h>
 
-#include <bitset>
-#include <vector>
-#include <string>
-#include <assert.h>
+using namespace ftr;
 
-namespace ftr
-{
-  typedef std::bitset<32> State; //!< = unsigned long
-  
-  namespace StateOffset
-  {
-    static const unsigned long ModelDirty =       0;
-    static const unsigned long VisualDirty =      1;
-    static const unsigned long Hidden3D =         2;
-    static const unsigned long HiddenOverlay =    3;
-    static const unsigned long Failure =          4;
-    static const unsigned long Inactive =         5;
-    static const unsigned long NonLeaf =          6; //keeping consistently negative.
-  };
-}
+using boost::uuids::uuid;
 
-#endif // STATES_H
+Message::Message() :
+  featureId(gu::createNilId()),
+  state(0),
+  stateOffset(0),
+  freshValue(false)
+{}
+
+Message::Message(const uuid &idIn, State stateIn, unsigned long stateOffsetIn, bool freshValueIn) :
+  featureId(idIn),
+  state(stateIn),
+  stateOffset(stateOffsetIn),
+  freshValue(freshValueIn)
+{}

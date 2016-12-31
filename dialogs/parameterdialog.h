@@ -20,12 +20,10 @@
 #ifndef PARAMETERDIALOG_H
 #define PARAMETERDIALOG_H
 
+#include <memory>
+
 #include <QDialog>
 #include <QLineEdit>
-
-#ifndef Q_MOC_RUN
-#include <boost/signals2.hpp>
-#endif
 
 class QKeyEvent;
 class QButton;
@@ -36,7 +34,7 @@ class QLabel;
 namespace boost{namespace uuids{class uuid;}}
 
 namespace ftr{class Parameter; class Base;}
-namespace msg{class Message;}
+namespace msg{class Message; class Observer;}
 
 namespace dlg
 {
@@ -58,13 +56,8 @@ namespace dlg
     Q_OBJECT
   public:
     ParameterDialog(ftr::Parameter *parameterIn, const boost::uuids::uuid &idIn);
+    virtual ~ParameterDialog() override;
     ftr::Parameter *parameter = nullptr;
-    
-    typedef boost::signals2::signal<void (const msg::Message &)> MessageOutSignal;
-    boost::signals2::connection connectMessageOut(const MessageOutSignal::slot_type &subscriber)
-    {
-      return messageOutSignal.connect(subscriber);
-    }
     
   protected:
     virtual void keyPressEvent(QKeyEvent*) override;
@@ -75,12 +68,12 @@ namespace dlg
     void buildGui();
     void valueHasChanged();
     void constantHasChanged();
-    void messageInSlot(const msg::Message &);
+    std::unique_ptr<msg::Observer> observer;
+    void featureRemovedDispatched(const msg::Message &);
     ftr::Base *feature;
     EnterEdit *editLine;
     QPushButton *linkButton;
     QLabel *linkLabel;
-    MessageOutSignal messageOutSignal;
     double lastValue;
     QPixmap trafficRed;
     QPixmap trafficYellow;

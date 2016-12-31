@@ -89,6 +89,7 @@ SET(FEATURE_SOURCES
     feature/seershape.cpp
     feature/seershapeinfo.cpp
     feature/datumplane.cpp
+    feature/message.cpp
     )
     
 SET(EXPRESSION_SOURCES

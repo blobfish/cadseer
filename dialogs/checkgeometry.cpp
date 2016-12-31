@@ -877,8 +877,6 @@ CheckGeometry::CheckGeometry(const ftr::Base &featureIn, QWidget *parent) :
   
   WidgetGeometry *filter = new WidgetGeometry(this, "dlg::CheckGeometry");
   this->installEventFilter(filter);
-  
-  connection = feature.connectState(boost::bind(&CheckGeometry::featureStateChangedSlot, this, _1, _2));
 }
 
 CheckGeometry::~CheckGeometry(){}
@@ -886,7 +884,6 @@ CheckGeometry::~CheckGeometry(){}
 void CheckGeometry::closeEvent(QCloseEvent *e)
 {
   QDialog::closeEvent(e);
-  connection.disconnect();
   observer->messageOutSignal(msg::Mask(msg::Request | msg::Command | msg::Done));
 }
 
@@ -921,22 +918,17 @@ void CheckGeometry::go()
   shapesPage->go();
 }
 
-void CheckGeometry::featureStateChangedSlot(const uuid &featureIdIn, std::size_t freshState)
-{
-  if
-  (
-    (featureIdIn == feature.getId()) &&
-    (freshState == ftr::StateOffset::ModelDirty)
-  )
-    qApp->postEvent(this, new QCloseEvent());
-}
-
 void CheckGeometry::setupDispatcher()
 {
   msg::Mask mask;
   
   mask = msg::Response | msg::Pre | msg::Remove | msg::Feature;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&CheckGeometry::featureRemovedDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind
+    (&CheckGeometry::featureRemovedDispatched, this, _1)));
+
+  mask = msg::Response | msg::Feature | msg::Status;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind
+    (&CheckGeometry::featureStateChangedDispatched, this, _1)));
 }
 
 void CheckGeometry::featureRemovedDispatched(const msg::Message &messageIn)
@@ -949,4 +941,16 @@ void CheckGeometry::featureRemovedDispatched(const msg::Message &messageIn)
   
   if (message.featureId == feature.getId())
     qApp->postEvent(this, new QCloseEvent());
+}
+
+void CheckGeometry::featureStateChangedDispatched(const msg::Message &messageIn)
+{
+  ftr::Message fMessage = boost::get<ftr::Message>(messageIn.payload);
+  if
+  (
+    (fMessage.featureId == feature.getId()) &&
+    (fMessage.stateOffset == ftr::StateOffset::ModelDirty) &&
+    (fMessage.freshValue == true)
+  )
+  qApp->postEvent(this, new QCloseEvent());
 }

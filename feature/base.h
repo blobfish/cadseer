@@ -22,8 +22,8 @@
 #define FEATUREBASE_H
 
 #include <map>
+#include <memory>
 
-#include <boost/signals2.hpp>
 #include <boost/uuid/uuid.hpp>
 
 #include <QIcon>
@@ -44,7 +44,9 @@
 
 class QDir;
 class QTextStream;
+
 namespace prj{namespace srl{class FeatureBase;}}
+namespace msg{class Message; class Observer;}
 
 namespace ftr
 {
@@ -112,12 +114,6 @@ public:
   
   static std::size_t nextConstructionIndex;
   
-  typedef boost::signals2::signal<void (boost::uuids::uuid, std::size_t)> StateChangedSignal;
-  boost::signals2::connection connectState(const StateChangedSignal::slot_type &subscriber) const
-  {
-    return stateChangedSignal.connect(subscriber);
-  }
-  
 protected:
   void setModelClean(); //!< clean can only set through virtual update.
   void setVisualClean(); //!< clean can only set through virtual visual update.
@@ -130,8 +126,7 @@ protected:
   QString name;
   ParameterMap pMap;
   
-  //mutable allows us to connect to the signal through a const object. neat!
-  mutable StateChangedSignal stateChangedSignal;
+  std::unique_ptr<msg::Observer> observer;
   
   boost::uuids::uuid id;
   ftr::State state;
