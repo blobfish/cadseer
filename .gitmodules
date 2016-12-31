@@ -1,3 +1,3 @@
 [submodule "project/libgit2pp"]
 	path = project/libgit2pp
-	url = https://github.com/computernerd90/libgit2pp.git
+	url = https://gitlab.com/blobfish/libgit2pp.git
