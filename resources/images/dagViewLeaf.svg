@@ -29,39 +29,6 @@
          offset="1"
          style="stop-color:#66ba73;stop-opacity:1;" />
     </linearGradient>
-    <linearGradient
-       id="linearGradient5779">
-      <stop
-         style="stop-color:#00ff00;stop-opacity:1;"
-         offset="0"
-         id="stop5781" />
-      <stop
-         style="stop-color:#66ba73;stop-opacity:1;"
-         offset="1"
-         id="stop5783" />
-    </linearGradient>
-    <linearGradient
-       id="linearGradient5769">
-      <stop
-         style="stop-color:#000000;stop-opacity:1;"
-         offset="0"
-         id="stop5771" />
-      <stop
-         style="stop-color:#000000;stop-opacity:0;"
-         offset="1"
-         id="stop5773" />
-    </linearGradient>
-    <linearGradient
-       id="linearGradient5761">
-      <stop
-         style="stop-color:#00d36d;stop-opacity:1;"
-         offset="0"
-         id="stop5763" />
-      <stop
-         style="stop-color:#289580;stop-opacity:1;"
-         offset="1"
-         id="stop5765" />
-    </linearGradient>
     <radialGradient
        inkscape:collect="always"
        xlink:href="#linearGradient4350"
@@ -73,132 +40,6 @@
        fx="113.5383"
        fy="23.876003"
        r="22.751223" />
-    <filter
-       style="color-interpolation-filters:sRGB;"
-       inkscape:menu-tooltip="Paper like emboss effect"
-       inkscape:menu="Bumps"
-       inkscape:label="Paper Bump"
-       id="filter5326">
-      <feTurbulence
-         result="result0"
-         seed="0"
-         baseFrequency="1"
-         numOctaves="5"
-         type="fractalNoise"
-         id="feTurbulence5328" />
-      <feConvolveMatrix
-         result="result5"
-         order="5 5"
-         kernelMatrix="-2 0 0 0 -2 0 -2 0 -2 0 0 0 -10 0 0 0 -2 0 -2 0 -2 0 0 0 -2 "
-         targetX="2"
-         targetY="2"
-         id="feConvolveMatrix5330" />
-      <feComposite
-         result="result2"
-         k3="0.5"
-         k2="0.5"
-         k1="1.5"
-         operator="arithmetic"
-         in="result5"
-         in2="SourceGraphic"
-         id="feComposite5332" />
-      <feColorMatrix
-         in="result2"
-         type="luminanceToAlpha"
-         result="result2"
-         id="feColorMatrix5334" />
-      <feDiffuseLighting
-         surfaceScale="5"
-         result="result1"
-         diffuseConstant="0.6"
-         id="feDiffuseLighting5336">
-        <feDistantLight
-           elevation="35"
-           azimuth="225"
-           id="feDistantLight5338" />
-      </feDiffuseLighting>
-      <feComposite
-         operator="arithmetic"
-         in="result1"
-         k1="1.5"
-         k3="0.5"
-         result="result3"
-         in2="SourceGraphic"
-         id="feComposite5340" />
-      <feBlend
-         in="result3"
-         mode="normal"
-         result="result6"
-         in2="result1"
-         id="feBlend5342" />
-      <feComposite
-         operator="in"
-         in2="SourceGraphic"
-         id="feComposite5344" />
-    </filter>
-    <filter
-       style="color-interpolation-filters:sRGB;"
-       inkscape:menu-tooltip="Paper like emboss effect"
-       inkscape:menu="Bumps"
-       inkscape:label="Paper Bump"
-       id="filter6288">
-      <feTurbulence
-         result="result0"
-         seed="0"
-         baseFrequency="1"
-         numOctaves="10"
-         type="fractalNoise"
-         id="feTurbulence6290" />
-      <feConvolveMatrix
-         result="result5"
-         order="2 2"
-         kernelMatrix="-2 0 0 0 -2 0 -2 0 -2 0 0 0 -10 0 0 0 -2 0 -2 0 -2 0 0 0 -2 "
-         targetX="2"
-         targetY="2"
-         id="feConvolveMatrix6292" />
-      <feComposite
-         result="result2"
-         k3="0.5"
-         k2="0.5"
-         k1="1.5"
-         operator="arithmetic"
-         in="result5"
-         in2="SourceGraphic"
-         id="feComposite6294" />
-      <feColorMatrix
-         in="result2"
-         type="luminanceToAlpha"
-         result="result2"
-         id="feColorMatrix6296" />
-      <feDiffuseLighting
-         surfaceScale="5"
-         result="result1"
-         diffuseConstant="0.6"
-         id="feDiffuseLighting6298">
-        <feDistantLight
-           elevation="35"
-           azimuth="225"
-           id="feDistantLight6300" />
-      </feDiffuseLighting>
-      <feComposite
-         operator="arithmetic"
-         in="result1"
-         k1="1.5"
-         k3="0.5"
-         result="result3"
-         in2="SourceGraphic"
-         id="feComposite6302" />
-      <feBlend
-         in="result3"
-         mode="normal"
-         result="result6"
-         in2="result1"
-         id="feBlend6304" />
-      <feComposite
-         operator="in"
-         in2="SourceGraphic"
-         id="feComposite6306" />
-    </filter>
     <filter
        style="color-interpolation-filters:sRGB;"
        inkscape:menu-tooltip="Paper like emboss effect"
@@ -271,14 +112,14 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="7.6013979"
-     inkscape:cx="49.735109"
+     inkscape:cx="26.384141"
      inkscape:cy="21.982042"
      inkscape:current-layer="layer2"
      showgrid="true"
      inkscape:grid-bbox="true"
      inkscape:document-units="px"
      inkscape:window-width="1368"
-     inkscape:window-height="670"
+     inkscape:window-height="667"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1" />
@@ -290,7 +131,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>

@@ -15,7 +15,7 @@
    id="svg5181"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="viewInfo.svg">
+   sodipodi:docname="inspectInfo.svg">
   <defs
      id="defs5183">
     <linearGradient
@@ -71,14 +71,14 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="4.9497475"
-     inkscape:cx="35.294467"
+     inkscape:cx="-0.5659481"
      inkscape:cy="28.142687"
      inkscape:current-layer="layer1"
      showgrid="true"
      inkscape:grid-bbox="true"
      inkscape:document-units="px"
      inkscape:window-width="1368"
-     inkscape:window-height="675"
+     inkscape:window-height="667"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1" />
@@ -102,17 +102,14 @@
     <g
        id="layer1-3"
        inkscape:label="Layer 1"
-       transform="translate(-10.272975,4.6060894)">
-      <path
-         sodipodi:type="arc"
-         style="fill:#a1a39d;fill-opacity:1;stroke:#000000;stroke-width:2.00045533;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       transform="translate(-10.303329,4.4444419)">
+      <circle
+         style="fill:#a1a39d;fill-opacity:1;stroke:#000000;stroke-width:2.00045538;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          id="path3938"
-         sodipodi:cx="32.5"
-         sodipodi:cy="33.07143"
-         sodipodi:rx="31.071428"
-         sodipodi:ry="31.071428"
-         d="M 63.571428,33.07143 A 31.071428,31.071428 0 0 1 32.5,64.142859 31.071428,31.071428 0 0 1 1.4285717,33.07143 31.071428,31.071428 0 0 1 32.5,2.0000019 31.071428,31.071428 0 0 1 63.571428,33.07143 Z"
-         transform="matrix(0.99777284,0,0,0.99777284,9.8759387,-21.442444)" />
+         transform="matrix(0.99777284,0,0,0.99777284,9.8759387,-21.442444)"
+         cx="32.5"
+         cy="33.07143"
+         r="31.071428" />
     </g>
     <rect
        style="opacity:1;fill:url(#linearGradient3253);fill-opacity:1;stroke:url(#linearGradient3245);stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"

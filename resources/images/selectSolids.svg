@@ -14,7 +14,7 @@
    height="48px"
    id="svg5181"
    version="1.1"
-   inkscape:version="0.48.4 r9939"
+   inkscape:version="0.91 r13725"
    sodipodi:docname="selectSolids.svg">
   <defs
      id="defs5183">
@@ -39,17 +39,6 @@
          style="stop-color:#c3c344;stop-opacity:1;"
          offset="1"
          id="stop5783" />
-    </linearGradient>
-    <linearGradient
-       id="linearGradient5769">
-      <stop
-         style="stop-color:#000000;stop-opacity:1;"
-         offset="0"
-         id="stop5771" />
-      <stop
-         style="stop-color:#000000;stop-opacity:0;"
-         offset="1"
-         id="stop5773" />
     </linearGradient>
     <linearGradient
        id="linearGradient5761">
@@ -98,16 +87,16 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="7.6013979"
-     inkscape:cx="25.430305"
+     inkscape:cx="2.0793369"
      inkscape:cy="26.665501"
      inkscape:current-layer="layer1"
      showgrid="true"
      inkscape:grid-bbox="true"
      inkscape:document-units="px"
-     inkscape:window-width="1366"
-     inkscape:window-height="691"
-     inkscape:window-x="-3"
-     inkscape:window-y="-3"
+     inkscape:window-width="1368"
+     inkscape:window-height="667"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
      inkscape:window-maximized="1" />
   <metadata
      id="metadata5186">
@@ -117,7 +106,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -154,7 +143,7 @@
        transform="translate(-0.52621898,3.0257592)">
       <path
          transform="matrix(0.75924578,0,0,0.75428334,-5.7403902,4.3347559)"
-         d="M 36.857142,26.071428 C 36.857142,32.107112 31.996234,37 26,37 20.003766,37 15.142858,32.107112 15.142858,26.071428 c 0,-6.035683 4.860908,-10.928571 10.857142,-10.928571 5.996234,0 10.857142,4.892888 10.857142,10.928571 z"
+         d="M 36.857142,26.071428 A 10.857142,10.928572 0 0 1 26,37 10.857142,10.928572 0 0 1 15.142858,26.071428 10.857142,10.928572 0 0 1 26,15.142857 10.857142,10.928572 0 0 1 36.857142,26.071428 Z"
          sodipodi:ry="10.928572"
          sodipodi:rx="10.857142"
          sodipodi:cy="26.071428"

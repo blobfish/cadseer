@@ -22,17 +22,6 @@
   <defs
      id="defs2945">
     <linearGradient
-       id="linearGradient4349">
-      <stop
-         style="stop-color:#898709;stop-opacity:1;"
-         offset="0"
-         id="stop4351" />
-      <stop
-         style="stop-color:#000000;stop-opacity:1;"
-         offset="1"
-         id="stop4353" />
-    </linearGradient>
-    <linearGradient
        id="linearGradient5241">
       <stop
          style="stop-color:#212c45;stop-opacity:1;"
@@ -50,17 +39,6 @@
          style="stop-color:#000000;stop-opacity:1;"
          offset="0"
          id="stop5229" />
-    </linearGradient>
-    <linearGradient
-       id="linearGradient3902">
-      <stop
-         style="stop-color:#000000;stop-opacity:0.58823532;"
-         offset="0"
-         id="stop3904" />
-      <stop
-         style="stop-color:#000000;stop-opacity:0.39215687;"
-         offset="1"
-         id="stop3906" />
     </linearGradient>
     <linearGradient
        id="linearGradient3894">
@@ -95,35 +73,6 @@
          offset="1"
          id="stop3796" />
     </linearGradient>
-    <linearGradient
-       id="linearGradient3784">
-      <stop
-         style="stop-color:#bebebe;stop-opacity:1;"
-         offset="0"
-         id="stop3786" />
-      <stop
-         style="stop-color:#ffffff;stop-opacity:0.39215687;"
-         offset="1"
-         id="stop3788" />
-    </linearGradient>
-    <linearGradient
-       id="linearGradient3377">
-      <stop
-         id="stop3379"
-         offset="0"
-         style="stop-color:#71b2f8;stop-opacity:1;" />
-      <stop
-         id="stop3381"
-         offset="1"
-         style="stop-color:#002795;stop-opacity:1;" />
-    </linearGradient>
-    <inkscape:perspective
-       sodipodi:type="inkscape:persp3d"
-       inkscape:vp_x="0 : 32 : 1"
-       inkscape:vp_y="0 : 1000 : 0"
-       inkscape:vp_z="64 : 32 : 1"
-       inkscape:persp3d-origin="32 : 21.333333 : 1"
-       id="perspective2951" />
     <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient3792"
@@ -173,9 +122,9 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="7.3309305"
-     inkscape:cx="37.635089"
+     inkscape:cx="13.42261"
      inkscape:cy="30.615101"
-     inkscape:current-layer="g3240"
+     inkscape:current-layer="g3629"
      showgrid="true"
      inkscape:document-units="px"
      inkscape:grid-bbox="true"

@@ -15,7 +15,7 @@
    id="svg5181"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="selectEndPoints.svg">
+   sodipodi:docname="selectPointsEnd.svg">
   <defs
      id="defs5183">
     <linearGradient
@@ -29,48 +29,6 @@
          offset="1"
          id="stop5812" />
     </linearGradient>
-    <linearGradient
-       id="linearGradient5779">
-      <stop
-         style="stop-color:#00ff00;stop-opacity:1;"
-         offset="0"
-         id="stop5781" />
-      <stop
-         style="stop-color:#66ba73;stop-opacity:1;"
-         offset="1"
-         id="stop5783" />
-    </linearGradient>
-    <linearGradient
-       id="linearGradient5769">
-      <stop
-         style="stop-color:#000000;stop-opacity:1;"
-         offset="0"
-         id="stop5771" />
-      <stop
-         style="stop-color:#000000;stop-opacity:0;"
-         offset="1"
-         id="stop5773" />
-    </linearGradient>
-    <linearGradient
-       id="linearGradient5761">
-      <stop
-         style="stop-color:#00d36d;stop-opacity:1;"
-         offset="0"
-         id="stop5763" />
-      <stop
-         style="stop-color:#289580;stop-opacity:1;"
-         offset="1"
-         id="stop5765" />
-    </linearGradient>
-    <linearGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient5808"
-       id="linearGradient5814"
-       x1="23.11351"
-       y1="9.2996483"
-       x2="26.823488"
-       y2="9.3229036"
-       gradientUnits="userSpaceOnUse" />
     <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient5808"
@@ -90,14 +48,14 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="7.6013979"
-     inkscape:cx="5.2431027"
+     inkscape:cx="-18.107865"
      inkscape:cy="24.467356"
      inkscape:current-layer="layer1"
      showgrid="true"
      inkscape:grid-bbox="true"
      inkscape:document-units="px"
      inkscape:window-width="1368"
-     inkscape:window-height="670"
+     inkscape:window-height="667"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1" />
@@ -109,7 +67,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
