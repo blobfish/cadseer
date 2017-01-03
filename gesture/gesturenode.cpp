@@ -118,6 +118,7 @@ osg::Geode* gsn::buildIconGeode(const char *resourceName, double radius)
   osg::Vec3d currentPoint(radius, 0.0, 0.0);
   std::vector<osg::Vec3d> points;
   points.push_back(osg::Vec3d(0.0, 0.0, 0.0));
+  float p = 0.495; //cheats texture point to help with perimeter noise.
   textureCoordinates->push_back(osg::Vec2(0.5, 0.5));
   osg::Quat rotation(2 * M_PI / sides , osg::Vec3d(0.0, 0.0, 1.0));
   for (int index = 0; index < sides; ++index)
@@ -126,7 +127,7 @@ osg::Geode* gsn::buildIconGeode(const char *resourceName, double radius)
     osg::Vec3 tempPointVec(currentPoint);
     tempPointVec.normalize();
     osg::Vec2 tempTextVec(tempPointVec.x(), tempPointVec.y());
-    textureCoordinates->push_back((tempTextVec * 0.5) + osg::Vec2(0.5, 0.5));
+    textureCoordinates->push_back((tempTextVec * p) + osg::Vec2(0.5, 0.5));
     currentPoint = rotation * currentPoint;
   }
   points.push_back(osg::Vec3d(radius, 0.0, 0.0));
