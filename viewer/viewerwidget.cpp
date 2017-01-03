@@ -375,6 +375,8 @@ void ViewerWidget::exportOSGDispatched(const msg::Message&)
     (!fileName.endsWith(QObject::tr(".ive")))
   )
     fileName += QObject::tr(".osgt");
+    
+  clearSelections();
   
   osgDB::writeNodeFile(*root, fileName.toStdString());
 }
