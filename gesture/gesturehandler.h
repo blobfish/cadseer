@@ -50,13 +50,18 @@ protected:
     osg::Matrixd aggregateMatrix;
     bool currentNodeLeft;
     osg::Vec3 lastHitPoint;
+    
+    float time();
 
     double iconRadius;
     double includedAngle; //in degrees
-    double mininumSprayRadius;
+    double minimumSprayRadius;
     double nodeSpread;
+    void updateVariables();
     
     std::unique_ptr<msg::Observer> observer;
+    void setupDispatcher();
+    void preferencesChangedDispatched(const msg::Message&);
 };
 
 class GestureAllSwitchesOffVisitor : public osg::NodeVisitor

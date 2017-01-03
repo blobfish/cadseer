@@ -75,6 +75,7 @@ namespace prf
   class Visual;
   class Dragger;
   class InteractiveParameter;
+  class Gesture;
   class RecentProjects;
   class Project;
   class Root;
@@ -1167,6 +1168,416 @@ namespace prf
   };
 
   /**
+   * @brief Class corresponding to the %Gesture schema type.
+   *
+   * @nosubgrouping
+   */
+  class Gesture: public ::xml_schema::Type
+  {
+    public:
+    /**
+     * @name animationSeconds
+     *
+     * @brief Accessor and modifier functions for the %animationSeconds
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::DecPositive AnimationSecondsType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< AnimationSecondsType, char > AnimationSecondsTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const AnimationSecondsType&
+    animationSeconds () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    AnimationSecondsType&
+    animationSeconds ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    animationSeconds (const AnimationSecondsType& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly
+     * instead of making a copy.
+     */
+    void
+    animationSeconds (::std::unique_ptr< AnimationSecondsType > p);
+
+    /**
+     * @brief Return the default value for the element.
+     *
+     * @return The element's default value.
+     */
+    static AnimationSecondsType
+    animationSeconds_default_value ();
+
+    //@}
+
+    /**
+     * @name iconRadius
+     *
+     * @brief Accessor and modifier functions for the %iconRadius
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::xml_schema::Int IconRadiusType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< IconRadiusType, char > IconRadiusTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const IconRadiusType&
+    iconRadius () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    IconRadiusType&
+    iconRadius ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    iconRadius (const IconRadiusType& x);
+
+    /**
+     * @brief Return the default value for the element.
+     *
+     * @return The element's default value.
+     */
+    static IconRadiusType
+    iconRadius_default_value ();
+
+    //@}
+
+    /**
+     * @name includeAngle
+     *
+     * @brief Accessor and modifier functions for the %includeAngle
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::xml_schema::Int IncludeAngleType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< IncludeAngleType, char > IncludeAngleTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const IncludeAngleType&
+    includeAngle () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    IncludeAngleType&
+    includeAngle ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    includeAngle (const IncludeAngleType& x);
+
+    /**
+     * @brief Return the default value for the element.
+     *
+     * @return The element's default value.
+     */
+    static IncludeAngleType
+    includeAngle_default_value ();
+
+    //@}
+
+    /**
+     * @name spreadFactor
+     *
+     * @brief Accessor and modifier functions for the %spreadFactor
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::DecPositive SpreadFactorType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< SpreadFactorType, char > SpreadFactorTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const SpreadFactorType&
+    spreadFactor () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    SpreadFactorType&
+    spreadFactor ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    spreadFactor (const SpreadFactorType& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly
+     * instead of making a copy.
+     */
+    void
+    spreadFactor (::std::unique_ptr< SpreadFactorType > p);
+
+    /**
+     * @brief Return the default value for the element.
+     *
+     * @return The element's default value.
+     */
+    static SpreadFactorType
+    spreadFactor_default_value ();
+
+    //@}
+
+    /**
+     * @name sprayFactor
+     *
+     * @brief Accessor and modifier functions for the %sprayFactor
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::DecPositive SprayFactorType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< SprayFactorType, char > SprayFactorTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const SprayFactorType&
+    sprayFactor () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    SprayFactorType&
+    sprayFactor ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    sprayFactor (const SprayFactorType& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly
+     * instead of making a copy.
+     */
+    void
+    sprayFactor (::std::unique_ptr< SprayFactorType > p);
+
+    /**
+     * @brief Return the default value for the element.
+     *
+     * @return The element's default value.
+     */
+    static SprayFactorType
+    sprayFactor_default_value ();
+
+    //@}
+
+    /**
+     * @name Constructors
+     */
+    //@{
+
+    /**
+     * @brief Create an instance from the ultimate base and
+     * initializers for required elements and attributes.
+     */
+    Gesture (const AnimationSecondsType&,
+             const IconRadiusType&,
+             const IncludeAngleType&,
+             const SpreadFactorType&,
+             const SprayFactorType&);
+
+    /**
+     * @brief Create an instance from a DOM element.
+     *
+     * @param e A DOM element to extract the data from.
+     * @param f Flags to create the new instance with.
+     * @param c A pointer to the object that will contain the new
+     * instance.
+     */
+    Gesture (const ::xercesc::DOMElement& e,
+             ::xml_schema::Flags f = 0,
+             ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy constructor.
+     *
+     * @param x An instance to make a copy of.
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    Gesture (const Gesture& x,
+             ::xml_schema::Flags f = 0,
+             ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy the instance polymorphically.
+     *
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     * @return A pointer to the dynamically allocated copy.
+     *
+     * This function ensures that the dynamic type of the instance is
+     * used for copying and should be used for polymorphic object
+     * models instead of the copy constructor.
+     */
+    virtual Gesture*
+    _clone (::xml_schema::Flags f = 0,
+            ::xml_schema::Container* c = 0) const;
+
+    /**
+     * @brief Copy assignment operator.
+     *
+     * @param x An instance to make a copy of.
+     * @return A reference to itself.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    Gesture&
+    operator= (const Gesture& x);
+
+    //@}
+
+    /**
+     * @brief Destructor.
+     */
+    virtual 
+    ~Gesture ();
+
+    // Implementation.
+    //
+
+    //@cond
+
+    protected:
+    void
+    parse (::xsd::cxx::xml::dom::parser< char >&,
+           ::xml_schema::Flags);
+
+    protected:
+    ::xsd::cxx::tree::one< AnimationSecondsType > animationSeconds_;
+    ::xsd::cxx::tree::one< IconRadiusType > iconRadius_;
+    ::xsd::cxx::tree::one< IncludeAngleType > includeAngle_;
+    ::xsd::cxx::tree::one< SpreadFactorType > spreadFactor_;
+    ::xsd::cxx::tree::one< SprayFactorType > sprayFactor_;
+
+    //@endcond
+  };
+
+  /**
    * @brief Class corresponding to the %RecentProjects schema type.
    *
    * @nosubgrouping
@@ -1852,6 +2263,64 @@ namespace prf
     //@}
 
     /**
+     * @name gesture
+     *
+     * @brief Accessor and modifier functions for the %gesture
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::Gesture GestureType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< GestureType, char > GestureTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const GestureType&
+    gesture () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    GestureType&
+    gesture ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    gesture (const GestureType& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly
+     * instead of making a copy.
+     */
+    void
+    gesture (::std::unique_ptr< GestureType > p);
+
+    //@}
+
+    /**
      * @name project
      *
      * @brief Accessor and modifier functions for the %project
@@ -1921,6 +2390,7 @@ namespace prf
     Root (const VisualType&,
           const DraggerType&,
           const InteractiveParameterType&,
+          const GestureType&,
           const ProjectType&);
 
     /**
@@ -1934,6 +2404,7 @@ namespace prf
     Root (::std::unique_ptr< VisualType >,
           ::std::unique_ptr< DraggerType >,
           ::std::unique_ptr< InteractiveParameterType >,
+          ::std::unique_ptr< GestureType >,
           ::std::unique_ptr< ProjectType >);
 
     /**
@@ -2009,6 +2480,7 @@ namespace prf
     ::xsd::cxx::tree::one< VisualType > visual_;
     ::xsd::cxx::tree::one< DraggerType > dragger_;
     ::xsd::cxx::tree::one< InteractiveParameterType > interactiveParameter_;
+    ::xsd::cxx::tree::one< GestureType > gesture_;
     ::xsd::cxx::tree::one< ProjectType > project_;
 
     //@endcond
@@ -2308,6 +2780,9 @@ namespace prf
 
   void
   operator<< (::xercesc::DOMElement&, const InteractiveParameter&);
+
+  void
+  operator<< (::xercesc::DOMElement&, const Gesture&);
 
   void
   operator<< (::xercesc::DOMElement&, const RecentProjects&);

@@ -36,21 +36,21 @@
 #include <gesture/gesturenode.h>
 #include <modelviz/nodemaskdefs.h>
 
-osg::MatrixTransform *gsn::buildMenuNode(const char *resourceName)
+osg::MatrixTransform *gsn::buildMenuNode(const char *resourceName, double radius)
 {
-    osg::ref_ptr<osg::MatrixTransform> mainNode = buildCommonNode(resourceName);
+    osg::ref_ptr<osg::MatrixTransform> mainNode = buildCommonNode(resourceName, radius);
     mainNode->setNodeMask(mdv::gestureMenu);
     return mainNode.release();
 }
 
-osg::MatrixTransform* gsn::buildCommandNode(const char *resourceName)
+osg::MatrixTransform* gsn::buildCommandNode(const char *resourceName, double radius)
 {
-    osg::ref_ptr<osg::MatrixTransform> mainNode = buildCommonNode(resourceName);
+    osg::ref_ptr<osg::MatrixTransform> mainNode = buildCommonNode(resourceName, radius);
     mainNode->setNodeMask(mdv::gestureCommand);
     return mainNode.release();
 }
 
-osg::MatrixTransform* gsn::buildCommonNode(const char *resourceName)
+osg::MatrixTransform* gsn::buildCommonNode(const char *resourceName, double radius)
 {
     osg::ref_ptr<osg::MatrixTransform> mainNode = new osg::MatrixTransform();
 
@@ -59,13 +59,15 @@ osg::MatrixTransform* gsn::buildCommonNode(const char *resourceName)
     mainNode->addChild(lineSwitch.get());
 
     osg::ref_ptr<osg::Switch> iconSwitch = new osg::Switch();
-    iconSwitch->addChild(buildIconGeode(resourceName));
+    osg::Geode *tempGeode = buildIconGeode(resourceName, radius);
+    if (tempGeode)
+      iconSwitch->addChild(tempGeode);
     mainNode->addChild(iconSwitch.get());
 
     return mainNode.release();
 }
 
-osg::Geode* gsn::buildIconGeode(const char *resourceName)
+osg::Geode* gsn::buildIconGeode(const char *resourceName, double radius)
 {
   //alright this sucks. getting svg icons onto geode is a pain.
   //I tried something I found on the web, but looks like ass.
@@ -81,13 +83,19 @@ osg::Geode* gsn::buildIconGeode(const char *resourceName)
   {
     QFile resourceFile(resourceName);
     if (!resourceFile.open(QIODevice::ReadOnly | QIODevice::Text))
-      qDebug() << "couldn't resource file";
+    {
+      qDebug() << "couldn't resource: " << resourceName;
+      return nullptr;
+    }
     QByteArray buffer = resourceFile.readAll();
     resourceFile.close();
      
     QFile newFile(resourceFileName);
     if (!newFile.open(QIODevice::WriteOnly | QIODevice::Text))
-      qDebug() << "couldn't open new temp file";
+    {
+      qDebug() << "couldn't open new temp file in gsn::buildIconGeode";
+      return nullptr;
+    }
     qDebug() << "newfilename is: " << resourceFileName;
     newFile.write(buffer);
     newFile.close();
@@ -106,8 +114,7 @@ osg::Geode* gsn::buildIconGeode(const char *resourceName)
   
   osg::Vec2Array* textureCoordinates = new osg::Vec2Array();
   
-  double radius = 32.0;
-  double sides = 32.0;
+  double sides = radius;
   osg::Vec3d currentPoint(radius, 0.0, 0.0);
   std::vector<osg::Vec3d> points;
   points.push_back(osg::Vec3d(0.0, 0.0, 0.0));

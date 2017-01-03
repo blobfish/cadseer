@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>682</width>
-    <height>521</height>
+    <width>614</width>
+    <height>596</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,43 +33,52 @@
              <property name="title">
               <string>Mesh</string>
              </property>
-             <layout class="QHBoxLayout" name="horizontalLayout">
-              <item>
-               <layout class="QGridLayout" name="gridLayout">
-                <item row="0" column="0" alignment="Qt::AlignRight">
-                 <widget class="QLabel" name="linearDeflectionLabel">
-                  <property name="text">
-                   <string>&amp;Linear Deflection</string>
-                  </property>
-                  <property name="buddy">
-                   <cstring>linearDeflectionEdit</cstring>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="1">
-                 <widget class="QLineEdit" name="angularDeflectionEdit"/>
-                </item>
-                <item row="1" column="0" alignment="Qt::AlignRight">
-                 <widget class="QLabel" name="angularDeflectionLabel">
-                  <property name="text">
-                   <string>&amp;Angular Deflection</string>
-                  </property>
-                  <property name="buddy">
-                   <cstring>angularDeflectionEdit</cstring>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1">
-                 <widget class="QLineEdit" name="linearDeflectionEdit">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
+             <layout class="QGridLayout" name="gridLayout">
+              <item row="0" column="0" alignment="Qt::AlignRight">
+               <widget class="QLabel" name="linearDeflectionLabel">
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Linear deviation controlling mesh roughness.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>&amp;Linear Deflection</string>
+                </property>
+                <property name="buddy">
+                 <cstring>linearDeflectionEdit</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="linearDeflectionEdit">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Linear deviation controlling mesh roughness.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0" alignment="Qt::AlignRight">
+               <widget class="QLabel" name="angularDeflectionLabel">
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Angular deviation controlling mesh roughness.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>&amp;Angular Deflection</string>
+                </property>
+                <property name="buddy">
+                 <cstring>angularDeflectionEdit</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="angularDeflectionEdit">
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Angular deviation controlling mesh roughness.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
               </item>
              </layout>
             </widget>
@@ -79,66 +88,84 @@
              <property name="title">
               <string>Dragger</string>
              </property>
-             <layout class="QHBoxLayout" name="horizontalLayout_3">
-              <item>
-               <layout class="QGridLayout" name="draggerGroup">
-                <item row="0" column="0">
-                 <layout class="QGridLayout" name="gridLayout_2">
-                  <item row="0" column="0" alignment="Qt::AlignRight">
-                   <widget class="QLabel" name="linearIncrementLabel">
-                    <property name="text">
-                     <string>Linear Increment</string>
-                    </property>
-                    <property name="buddy">
-                     <cstring>linearIncrementEdit</cstring>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="1">
-                   <widget class="QLineEdit" name="linearIncrementEdit"/>
-                  </item>
-                  <item row="1" column="0" alignment="Qt::AlignRight">
-                   <widget class="QLabel" name="angularIncrementLabel">
-                    <property name="text">
-                     <string>Angular Increment</string>
-                    </property>
-                    <property name="buddy">
-                     <cstring>angularIncrementEdit</cstring>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="1">
-                   <widget class="QLineEdit" name="angularIncrementEdit"/>
-                  </item>
-                  <item row="2" column="0" alignment="Qt::AlignRight">
-                   <widget class="QLabel" name="updateOnFinishLabel">
-                    <property name="text">
-                     <string>Update On Finish</string>
-                    </property>
-                    <property name="buddy">
-                     <cstring>updateOnFinishCombo</cstring>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="1">
-                   <widget class="QComboBox" name="updateOnFinishCombo">
-                    <item>
-                     <property name="text">
-                      <string>True</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>False</string>
-                     </property>
-                    </item>
-                   </widget>
-                  </item>
-                 </layout>
+             <layout class="QGridLayout" name="gridLayout_2">
+              <item row="0" column="0" alignment="Qt::AlignRight">
+               <widget class="QLabel" name="linearIncrementLabel">
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Increment for linear dragger snapping.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Linear Increment</string>
+                </property>
+                <property name="buddy">
+                 <cstring>linearIncrementEdit</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="linearIncrementEdit">
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Increment for linear dragger snapping.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0" alignment="Qt::AlignRight">
+               <widget class="QLabel" name="angularIncrementLabel">
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Increment for angular dragger snapping.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Angular Increment</string>
+                </property>
+                <property name="buddy">
+                 <cstring>angularIncrementEdit</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="angularIncrementEdit">
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Increment for linear dragger snapping.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0" alignment="Qt::AlignRight">
+               <widget class="QLabel" name="updateOnFinishLabel">
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls automatic updates on changes.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Update On Finish</string>
+                </property>
+                <property name="buddy">
+                 <cstring>updateOnFinishCombo</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QComboBox" name="updateOnFinishCombo">
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls automatic updates on changes.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>True</string>
+                 </property>
                 </item>
-               </layout>
+                <item>
+                 <property name="text">
+                  <string>False</string>
+                 </property>
+                </item>
+               </widget>
               </item>
              </layout>
+             <zorder>updateOnFinishLabel</zorder>
+             <zorder>linearIncrementLabel</zorder>
+             <zorder>linearIncrementEdit</zorder>
+             <zorder>angularIncrementLabel</zorder>
+             <zorder>angularIncrementEdit</zorder>
+             <zorder>updateOnFinishCombo</zorder>
             </widget>
            </item>
            <item>
@@ -163,49 +190,175 @@
              <property name="title">
               <string>Interactive Parameter</string>
              </property>
-             <layout class="QHBoxLayout" name="horizontalLayout_2">
-              <item>
-               <layout class="QGridLayout" name="InteractiveParameterLayout">
-                <item row="0" column="0" alignment="Qt::AlignRight">
-                 <widget class="QLabel" name="characterSizeLabel">
-                  <property name="text">
-                   <string>Character Size</string>
-                  </property>
-                  <property name="buddy">
-                   <cstring>characterSizeEdit</cstring>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="1">
-                 <widget class="QLineEdit" name="arrowWidthEdit"/>
-                </item>
-                <item row="2" column="1">
-                 <widget class="QLineEdit" name="arrowHeightEdit"/>
-                </item>
-                <item row="2" column="0" alignment="Qt::AlignRight">
-                 <widget class="QLabel" name="arrowHeightLabel">
-                  <property name="text">
-                   <string>Arrow Height</string>
-                  </property>
-                  <property name="buddy">
-                   <cstring>arrowHeightEdit</cstring>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1">
-                 <widget class="QLineEdit" name="characterSizeEdit"/>
-                </item>
-                <item row="1" column="0" alignment="Qt::AlignRight">
-                 <widget class="QLabel" name="arrowWidthLabel">
-                  <property name="text">
-                   <string>Arrow Width</string>
-                  </property>
-                  <property name="buddy">
-                   <cstring>arrowWidthEdit</cstring>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
+             <layout class="QGridLayout" name="gridLayout_5">
+              <item row="0" column="0" alignment="Qt::AlignRight">
+               <widget class="QLabel" name="characterSizeLabel">
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Character size of dimension.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Character Size</string>
+                </property>
+                <property name="buddy">
+                 <cstring>characterSizeEdit</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="characterSizeEdit">
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Character size of dimension.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0" alignment="Qt::AlignRight">
+               <widget class="QLabel" name="arrowWidthLabel">
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Width of arrow.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Arrow Width</string>
+                </property>
+                <property name="buddy">
+                 <cstring>arrowWidthEdit</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="arrowWidthEdit">
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Width of arrow.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0" alignment="Qt::AlignRight">
+               <widget class="QLabel" name="arrowHeightLabel">
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Height of arrow.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Arrow Height</string>
+                </property>
+                <property name="buddy">
+                 <cstring>arrowHeightEdit</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QLineEdit" name="arrowHeightEdit">
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Height of arrow.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="gestureGroupBox">
+             <property name="title">
+              <string>Gesture</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_4">
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="gestureTimeEdit">
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Amount of time, in seconds, to expand menu sub items.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0" alignment="Qt::AlignRight">
+               <widget class="QLabel" name="gestureTimeLabel">
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Amount of time, in seconds, to expand menu sub items.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Animation Seconds</string>
+                </property>
+                <property name="buddy">
+                 <cstring>gestureTimeEdit</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0" alignment="Qt::AlignRight">
+               <widget class="QLabel" name="gestureIconRadiusLabel">
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Icon radius in pixels.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Icon Radius</string>
+                </property>
+                <property name="buddy">
+                 <cstring>gestureIconRadiusEdit</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0" alignment="Qt::AlignRight">
+               <widget class="QLabel" name="gestureIncludeAngleLabel">
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum included angle of sub-items.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Include Angle</string>
+                </property>
+                <property name="buddy">
+                 <cstring>gestureIncludeAngleEdit</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QLineEdit" name="gestureSpreadFactorEdit">
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Factor of icon radius describing distance between sub items.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0" alignment="Qt::AlignRight">
+               <widget class="QLabel" name="gestureSpreadFactorLabel">
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Factor of icon radius describing distance between sub items.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Spread Factor</string>
+                </property>
+                <property name="buddy">
+                 <cstring>gestureSpreadFactorEdit</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="gestureIconRadiusEdit">
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Icon radius in pixels.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QLineEdit" name="gestureIncludeAngleEdit">
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum included angle of sub-items.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0" alignment="Qt::AlignRight">
+               <widget class="QLabel" name="gestureSprayFactorLabel">
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Factor of icon radius describing minimum distance between menu and sub items.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Spray Factor</string>
+                </property>
+                <property name="buddy">
+                 <cstring>gestureSprayFactorEdit</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="1">
+               <widget class="QLineEdit" name="gestureSprayFactorEdit">
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Factor of icon radius describing minimum distance between menu and sub items.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
               </item>
              </layout>
             </widget>
@@ -241,7 +394,6 @@
         </spacer>
        </item>
       </layout>
-      <zorder>verticalSpacer</zorder>
      </widget>
      <widget class="QWidget" name="projectTab">
       <attribute name="title">

@@ -8,32 +8,42 @@
 </xs:simpleType>
 
 <xs:complexType name="Mesh">
-  <xs:sequence minOccurs="1" maxOccurs="1">
+  <xs:all>
     <xs:element name="linearDeflection" type="DecPositive" default="0.25"/>
     <xs:element name="angularDeflection" type="DecPositive" default="0.5"/>
-  </xs:sequence>
+  </xs:all>
 </xs:complexType>
 
 <xs:complexType name="Visual">
-  <xs:sequence minOccurs="1" maxOccurs="1">
+  <xs:all>
     <xs:element name="mesh" type="Mesh"/>
-  </xs:sequence>
+  </xs:all>
 </xs:complexType>
 
 <xs:complexType name="Dragger">
-  <xs:sequence minOccurs="1" maxOccurs="1">
+  <xs:all>
     <xs:element name="triggerUpdateOnFinish" type="xs:boolean" default="false"/>
     <xs:element name="linearIncrement" type="DecPositive" default="1.0"/>
     <xs:element name="angularIncrement" type="DecPositive" default="15.0"/>
-  </xs:sequence>
+  </xs:all>
 </xs:complexType>
 
 <xs:complexType name="InteractiveParameter">
-  <xs:sequence minOccurs="1" maxOccurs="1">
+  <xs:all>
     <xs:element name="characterSize" type="DecPositive" default="1.0"/>
     <xs:element name="arrowWidth" type="DecPositive" default="0.5"/>
     <xs:element name="arrowHeight" type="DecPositive" default="1.0"/>
-  </xs:sequence>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="Gesture">
+  <xs:all>
+    <xs:element name="animationSeconds" type="DecPositive" default="1.0"/>
+    <xs:element name="iconRadius" type="xs:int" default="32"/>
+    <xs:element name="includeAngle" type="xs:int" default="90"/>
+    <xs:element name="spreadFactor" type="DecPositive" default="0.10"/>
+    <xs:element name="sprayFactor" type="DecPositive" default="1.0"/>
+  </xs:all>
 </xs:complexType>
 
 <xs:complexType name="RecentProjects">
@@ -52,12 +62,13 @@
 </xs:complexType>
 
 <xs:complexType name="Root">
-  <xs:sequence minOccurs="1" maxOccurs="1">
+  <xs:all>
     <xs:element name="visual" type="Visual"/>
     <xs:element name="dragger" type="Dragger"/>
     <xs:element name="interactiveParameter" type="InteractiveParameter"/>
+    <xs:element name="gesture" type="Gesture"/>
     <xs:element name="project" type="Project"/>
-  </xs:sequence>
+  </xs:all>
 </xs:complexType>
 
 <xs:element name="root" type="Root"/>

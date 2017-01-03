@@ -320,6 +320,148 @@ namespace prf
   }
 
 
+  // Gesture
+  // 
+
+  const Gesture::AnimationSecondsType& Gesture::
+  animationSeconds () const
+  {
+    return this->animationSeconds_.get ();
+  }
+
+  Gesture::AnimationSecondsType& Gesture::
+  animationSeconds ()
+  {
+    return this->animationSeconds_.get ();
+  }
+
+  void Gesture::
+  animationSeconds (const AnimationSecondsType& x)
+  {
+    this->animationSeconds_.set (x);
+  }
+
+  void Gesture::
+  animationSeconds (::std::unique_ptr< AnimationSecondsType > x)
+  {
+    this->animationSeconds_.set (std::move (x));
+  }
+
+  Gesture::AnimationSecondsType Gesture::
+  animationSeconds_default_value ()
+  {
+    return AnimationSecondsType (1.0);
+  }
+
+  const Gesture::IconRadiusType& Gesture::
+  iconRadius () const
+  {
+    return this->iconRadius_.get ();
+  }
+
+  Gesture::IconRadiusType& Gesture::
+  iconRadius ()
+  {
+    return this->iconRadius_.get ();
+  }
+
+  void Gesture::
+  iconRadius (const IconRadiusType& x)
+  {
+    this->iconRadius_.set (x);
+  }
+
+  Gesture::IconRadiusType Gesture::
+  iconRadius_default_value ()
+  {
+    return IconRadiusType (32);
+  }
+
+  const Gesture::IncludeAngleType& Gesture::
+  includeAngle () const
+  {
+    return this->includeAngle_.get ();
+  }
+
+  Gesture::IncludeAngleType& Gesture::
+  includeAngle ()
+  {
+    return this->includeAngle_.get ();
+  }
+
+  void Gesture::
+  includeAngle (const IncludeAngleType& x)
+  {
+    this->includeAngle_.set (x);
+  }
+
+  Gesture::IncludeAngleType Gesture::
+  includeAngle_default_value ()
+  {
+    return IncludeAngleType (90);
+  }
+
+  const Gesture::SpreadFactorType& Gesture::
+  spreadFactor () const
+  {
+    return this->spreadFactor_.get ();
+  }
+
+  Gesture::SpreadFactorType& Gesture::
+  spreadFactor ()
+  {
+    return this->spreadFactor_.get ();
+  }
+
+  void Gesture::
+  spreadFactor (const SpreadFactorType& x)
+  {
+    this->spreadFactor_.set (x);
+  }
+
+  void Gesture::
+  spreadFactor (::std::unique_ptr< SpreadFactorType > x)
+  {
+    this->spreadFactor_.set (std::move (x));
+  }
+
+  Gesture::SpreadFactorType Gesture::
+  spreadFactor_default_value ()
+  {
+    return SpreadFactorType (.10);
+  }
+
+  const Gesture::SprayFactorType& Gesture::
+  sprayFactor () const
+  {
+    return this->sprayFactor_.get ();
+  }
+
+  Gesture::SprayFactorType& Gesture::
+  sprayFactor ()
+  {
+    return this->sprayFactor_.get ();
+  }
+
+  void Gesture::
+  sprayFactor (const SprayFactorType& x)
+  {
+    this->sprayFactor_.set (x);
+  }
+
+  void Gesture::
+  sprayFactor (::std::unique_ptr< SprayFactorType > x)
+  {
+    this->sprayFactor_.set (std::move (x));
+  }
+
+  Gesture::SprayFactorType Gesture::
+  sprayFactor_default_value ()
+  {
+    return SprayFactorType (1.0);
+  }
+
+
   // RecentProjects
   // 
 
@@ -515,6 +657,30 @@ namespace prf
   interactiveParameter (::std::unique_ptr< InteractiveParameterType > x)
   {
     this->interactiveParameter_.set (std::move (x));
+  }
+
+  const Root::GestureType& Root::
+  gesture () const
+  {
+    return this->gesture_.get ();
+  }
+
+  Root::GestureType& Root::
+  gesture ()
+  {
+    return this->gesture_.get ();
+  }
+
+  void Root::
+  gesture (const GestureType& x)
+  {
+    this->gesture_.set (x);
+  }
+
+  void Root::
+  gesture (::std::unique_ptr< GestureType > x)
+  {
+    this->gesture_.set (std::move (x));
   }
 
   const Root::ProjectType& Root::
@@ -1102,6 +1268,196 @@ namespace prf
   {
   }
 
+  // Gesture
+  //
+
+  Gesture::
+  Gesture (const AnimationSecondsType& animationSeconds,
+           const IconRadiusType& iconRadius,
+           const IncludeAngleType& includeAngle,
+           const SpreadFactorType& spreadFactor,
+           const SprayFactorType& sprayFactor)
+  : ::xml_schema::Type (),
+    animationSeconds_ (animationSeconds, this),
+    iconRadius_ (iconRadius, this),
+    includeAngle_ (includeAngle, this),
+    spreadFactor_ (spreadFactor, this),
+    sprayFactor_ (sprayFactor, this)
+  {
+  }
+
+  Gesture::
+  Gesture (const Gesture& x,
+           ::xml_schema::Flags f,
+           ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    animationSeconds_ (x.animationSeconds_, f, this),
+    iconRadius_ (x.iconRadius_, f, this),
+    includeAngle_ (x.includeAngle_, f, this),
+    spreadFactor_ (x.spreadFactor_, f, this),
+    sprayFactor_ (x.sprayFactor_, f, this)
+  {
+  }
+
+  Gesture::
+  Gesture (const ::xercesc::DOMElement& e,
+           ::xml_schema::Flags f,
+           ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    animationSeconds_ (this),
+    iconRadius_ (this),
+    includeAngle_ (this),
+    spreadFactor_ (this),
+    sprayFactor_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void Gesture::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // animationSeconds
+      //
+      if (n.name () == "animationSeconds" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< AnimationSecondsType > r (
+          AnimationSecondsTraits::create (i, f, this));
+
+        if (!animationSeconds_.present ())
+        {
+          this->animationSeconds_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      // iconRadius
+      //
+      if (n.name () == "iconRadius" && n.namespace_ ().empty ())
+      {
+        if (!iconRadius_.present ())
+        {
+          this->iconRadius_.set (IconRadiusTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      // includeAngle
+      //
+      if (n.name () == "includeAngle" && n.namespace_ ().empty ())
+      {
+        if (!includeAngle_.present ())
+        {
+          this->includeAngle_.set (IncludeAngleTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      // spreadFactor
+      //
+      if (n.name () == "spreadFactor" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< SpreadFactorType > r (
+          SpreadFactorTraits::create (i, f, this));
+
+        if (!spreadFactor_.present ())
+        {
+          this->spreadFactor_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      // sprayFactor
+      //
+      if (n.name () == "sprayFactor" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< SprayFactorType > r (
+          SprayFactorTraits::create (i, f, this));
+
+        if (!sprayFactor_.present ())
+        {
+          this->sprayFactor_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!animationSeconds_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "animationSeconds",
+        "");
+    }
+
+    if (!iconRadius_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "iconRadius",
+        "");
+    }
+
+    if (!includeAngle_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "includeAngle",
+        "");
+    }
+
+    if (!spreadFactor_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "spreadFactor",
+        "");
+    }
+
+    if (!sprayFactor_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "sprayFactor",
+        "");
+    }
+  }
+
+  Gesture* Gesture::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class Gesture (*this, f, c);
+  }
+
+  Gesture& Gesture::
+  operator= (const Gesture& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->animationSeconds_ = x.animationSeconds_;
+      this->iconRadius_ = x.iconRadius_;
+      this->includeAngle_ = x.includeAngle_;
+      this->spreadFactor_ = x.spreadFactor_;
+      this->sprayFactor_ = x.sprayFactor_;
+    }
+
+    return *this;
+  }
+
+  Gesture::
+  ~Gesture ()
+  {
+  }
+
   // RecentProjects
   //
 
@@ -1374,11 +1730,13 @@ namespace prf
   Root (const VisualType& visual,
         const DraggerType& dragger,
         const InteractiveParameterType& interactiveParameter,
+        const GestureType& gesture,
         const ProjectType& project)
   : ::xml_schema::Type (),
     visual_ (visual, this),
     dragger_ (dragger, this),
     interactiveParameter_ (interactiveParameter, this),
+    gesture_ (gesture, this),
     project_ (project, this)
   {
   }
@@ -1387,11 +1745,13 @@ namespace prf
   Root (::std::unique_ptr< VisualType > visual,
         ::std::unique_ptr< DraggerType > dragger,
         ::std::unique_ptr< InteractiveParameterType > interactiveParameter,
+        ::std::unique_ptr< GestureType > gesture,
         ::std::unique_ptr< ProjectType > project)
   : ::xml_schema::Type (),
     visual_ (std::move (visual), this),
     dragger_ (std::move (dragger), this),
     interactiveParameter_ (std::move (interactiveParameter), this),
+    gesture_ (std::move (gesture), this),
     project_ (std::move (project), this)
   {
   }
@@ -1404,6 +1764,7 @@ namespace prf
     visual_ (x.visual_, f, this),
     dragger_ (x.dragger_, f, this),
     interactiveParameter_ (x.interactiveParameter_, f, this),
+    gesture_ (x.gesture_, f, this),
     project_ (x.project_, f, this)
   {
   }
@@ -1416,6 +1777,7 @@ namespace prf
     visual_ (this),
     dragger_ (this),
     interactiveParameter_ (this),
+    gesture_ (this),
     project_ (this)
   {
     if ((f & ::xml_schema::Flags::base) == 0)
@@ -1477,6 +1839,20 @@ namespace prf
         }
       }
 
+      // gesture
+      //
+      if (n.name () == "gesture" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< GestureType > r (
+          GestureTraits::create (i, f, this));
+
+        if (!gesture_.present ())
+        {
+          this->gesture_.set (::std::move (r));
+          continue;
+        }
+      }
+
       // project
       //
       if (n.name () == "project" && n.namespace_ ().empty ())
@@ -1515,6 +1891,13 @@ namespace prf
         "");
     }
 
+    if (!gesture_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "gesture",
+        "");
+    }
+
     if (!project_.present ())
     {
       throw ::xsd::cxx::tree::expected_element< char > (
@@ -1539,6 +1922,7 @@ namespace prf
       this->visual_ = x.visual_;
       this->dragger_ = x.dragger_;
       this->interactiveParameter_ = x.interactiveParameter_;
+      this->gesture_ = x.gesture_;
       this->project_ = x.project_;
     }
 
@@ -1973,6 +2357,67 @@ namespace prf
   }
 
   void
+  operator<< (::xercesc::DOMElement& e, const Gesture& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // animationSeconds
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "animationSeconds",
+          e));
+
+      s << i.animationSeconds ();
+    }
+
+    // iconRadius
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "iconRadius",
+          e));
+
+      s << i.iconRadius ();
+    }
+
+    // includeAngle
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "includeAngle",
+          e));
+
+      s << i.includeAngle ();
+    }
+
+    // spreadFactor
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "spreadFactor",
+          e));
+
+      s << i.spreadFactor ();
+    }
+
+    // sprayFactor
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "sprayFactor",
+          e));
+
+      s << i.sprayFactor ();
+    }
+  }
+
+  void
   operator<< (::xercesc::DOMElement& e, const RecentProjects& i)
   {
     e << static_cast< const ::xml_schema::Type& > (i);
@@ -2078,6 +2523,17 @@ namespace prf
           e));
 
       s << i.interactiveParameter ();
+    }
+
+    // gesture
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "gesture",
+          e));
+
+      s << i.gesture ();
     }
 
     // project

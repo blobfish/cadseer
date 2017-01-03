@@ -55,6 +55,7 @@ SET(TESTING_SOURCES
 SET(GESTURE_SOURCES
     gesture/gesturehandler.cpp
     gesture/gesturenode.cpp
+    gesture/animations.cpp
     )
     
 SET(MESSAGE_SOURCES

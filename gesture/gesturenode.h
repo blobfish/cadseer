@@ -28,10 +28,10 @@ class Geode;
 
 namespace gsn
 {
-osg::MatrixTransform* buildMenuNode(const char *resourceName);
-osg::MatrixTransform* buildCommandNode(const char *resourceName);
-osg::MatrixTransform* buildCommonNode(const char *resourceName);
-osg::Geode* buildIconGeode(const char *resourceName);
+osg::MatrixTransform* buildMenuNode(const char *, double);
+osg::MatrixTransform* buildCommandNode(const char *, double);
+osg::MatrixTransform* buildCommonNode(const char *, double);
+osg::Geode* buildIconGeode(const char *, double);
 osg::Geode* buildLineGeode();
 }
 

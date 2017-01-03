@@ -43,6 +43,7 @@ namespace prf
     void updateDeflections();
     void updateDragger();
     void updateProject();
+    void updateGesture();
     Ui::dialog* ui;
     Manager *manager;
     bool visualDirty = false;

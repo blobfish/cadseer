@@ -32,7 +32,9 @@ using namespace prf;
 
 Dialog::Dialog(Manager *managerIn, QWidget *parent) : QDialog(parent), ui(new Ui::dialog), manager(managerIn)
 {
+  this->setWindowFlags(this->windowFlags() | Qt::WindowContextHelpButtonHint);
   ui->setupUi(this);
+  
   initialize();
   
   connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
@@ -71,6 +73,13 @@ void Dialog::initialize()
   ui->basePathEdit->setText(QString::fromStdString(manager->rootPtr->project().basePath()));
   ui->gitNameEdit->setText(QString::fromStdString(manager->rootPtr->project().gitName()));
   ui->gitEmailEdit->setText(QString::fromStdString(manager->rootPtr->project().gitEmail()));
+  
+  ui->gestureTimeEdit->setValidator(positiveDouble);
+  ui->gestureTimeEdit->setText(QString().setNum(manager->rootPtr->gesture().animationSeconds()));
+  ui->gestureIconRadiusEdit->setText(QString().setNum(manager->rootPtr->gesture().iconRadius()));
+  ui->gestureIncludeAngleEdit->setText(QString().setNum(manager->rootPtr->gesture().includeAngle()));
+  ui->gestureSpreadFactorEdit->setText(QString().setNum(manager->rootPtr->gesture().spreadFactor()));
+  ui->gestureSprayFactorEdit->setText(QString().setNum(manager->rootPtr->gesture().sprayFactor()));
 }
 
 void Dialog::accept()
@@ -80,6 +89,7 @@ void Dialog::accept()
     updateDeflections();
     updateDragger();
     updateProject();
+    updateGesture();
     
     manager->saveConfig();
     QDialog::accept();
@@ -189,6 +199,34 @@ void Dialog::updateProject()
   manager->rootPtr->project().basePath() = ui->basePathEdit->text().toStdString();
   manager->rootPtr->project().gitName() = ui->gitNameEdit->text().toStdString();
   manager->rootPtr->project().gitEmail() = ui->gitEmailEdit->text().toStdString();
+}
+
+void Dialog::updateGesture()
+{
+  double temp = ui->gestureTimeEdit->text().toDouble();
+  if (temp < 0.01)
+    temp = 0.01;
+  manager->rootPtr->gesture().animationSeconds() = temp;
+  
+  int iconRadius = ui->gestureIconRadiusEdit->text().toInt();
+  iconRadius = std::max(iconRadius, 8);
+  iconRadius = std::min(iconRadius, 128);
+  manager->rootPtr->gesture().iconRadius() = iconRadius;
+  
+  int includeAngle = ui->gestureIncludeAngleEdit->text().toInt();
+  includeAngle = std::max(includeAngle, 15);
+  includeAngle = std::min(includeAngle, 360);
+  manager->rootPtr->gesture().includeAngle() = includeAngle;
+  
+  double spreadFactor = ui->gestureSpreadFactorEdit->text().toDouble();
+  spreadFactor = std::max(spreadFactor, 0.01);
+  spreadFactor = std::min(spreadFactor, 10.0);
+  manager->rootPtr->gesture().spreadFactor() = spreadFactor;
+  
+  double sprayFactor = ui->gestureSprayFactorEdit->text().toDouble();
+  sprayFactor = std::max(sprayFactor, 0.01);
+  sprayFactor = std::min(sprayFactor, 20.0);
+  manager->rootPtr->gesture().sprayFactor() = sprayFactor;
 }
 
 void Dialog::basePathBrowseSlot()
