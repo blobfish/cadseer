@@ -83,6 +83,10 @@ void Inert::serialRead(const prj::srl::FeatureInert& inert)
 {
   CSysBase::serialIn(inert.featureCSysBase());
   
-  setModelClean();
-  setVisualDirty();
+  //we are not using the function calls because they send state messages.
+  //At this point the feature has not been added to the project so other
+  //objects, such as dagview, don't have knowledge of this feature.
+  
+  state.set(ftr::StateOffset::ModelDirty, false);
+  state.set(ftr::StateOffset::VisualDirty, true);
 }
