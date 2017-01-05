@@ -88,12 +88,15 @@ public:
   void setName(const QString &nameIn){name = nameIn;}
   QString getName() const {return name;}
   ftr::State getState() const {return state;}
+  void setColor(const osg::Vec4 &);
+  osg::Vec4& getColor(){return color;}
   virtual void updateModel(const UpdateMap&) = 0;
   virtual void updateVisual(); //called after update.
   virtual Type getType() const = 0;
   virtual const std::string& getTypeString() const = 0;
   virtual const QIcon& getIcon() const = 0;
   virtual Descriptor getDescriptor() const = 0;
+  virtual void applyColor(); //!< called by set color.
   virtual QTextStream& getInfo(QTextStream &) const;
   QTextStream&  getShapeInfo(QTextStream &, const boost::uuids::uuid&) const;
   boost::uuids::uuid getId() const {return id;}
@@ -138,6 +141,8 @@ protected:
   osg::ref_ptr<osg::MatrixTransform> mainTransform;
   osg::ref_ptr<osg::Switch> overlaySwitch;
   osg::ref_ptr<osg::LOD> lod;
+  
+  osg::Vec4 color;
 };
 }
 

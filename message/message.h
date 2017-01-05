@@ -107,6 +107,8 @@ namespace msg
     static const Mask ViewIsolate(Mask().set(                   68));//!< command. move up someday.
     static const Mask Info(Mask().set(                          69));//!< window move up someday.
     static const Mask DebugInquiry(Mask().set(                  70));//!< command move up someday.
+    static const Mask Color(Mask().set(                         71));//!< command move up someday.
+    static const Mask Edit(Mask().set(                          72));//!< modifier move up someday.
   
     typedef boost::variant
     <

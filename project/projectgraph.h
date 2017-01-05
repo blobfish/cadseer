@@ -160,6 +160,21 @@ namespace prg
       }
       const GraphTypeIn *graph;
     };
+    
+    template <typename GraphTypeIn>
+    struct TargetEdgeFilter
+    {
+      TargetEdgeFilter() : graph(nullptr) {}
+      TargetEdgeFilter(const GraphTypeIn &graphIn) : graph(&graphIn) {}
+      template <typename EdgeType>
+      bool operator()(const EdgeType& edgeIn) const
+      {
+        if (!graph)
+          return false;
+        return (*graph)[edgeIn].inputType == ftr::InputTypes::target;
+      }
+      const GraphTypeIn *graph;
+    };
 }
 
 #endif // PROJECTGRAPH_H

@@ -26,6 +26,7 @@
 #include <command/featuretodragger.h>
 #include <command/draggertofeature.h>
 #include <command/checkgeometry.h>
+#include <command/editcolor.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <selection/message.h>
@@ -82,6 +83,9 @@ void Manager::setupDispatcher()
   
   mask = msg::Request | msg::CheckGeometry;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::checkGeometryDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Edit | msg::Color;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::editColorDispatched, this, _1)));
 }
 
 void Manager::cancelCommandDispatched(const msg::Message &)
@@ -204,4 +208,10 @@ void Manager::checkGeometryDispatched(const msg::Message&)
 {
   std::shared_ptr<CheckGeometry> checkGeometry(new CheckGeometry());
   addCommand(checkGeometry);
+}
+
+void Manager::editColorDispatched(const msg::Message&)
+{
+  std::shared_ptr<EditColor> editColor(new EditColor());
+  addCommand(editColor);
 }

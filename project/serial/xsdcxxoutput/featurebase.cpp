@@ -616,6 +616,110 @@ namespace prj
     }
 
 
+    // ColorValue
+    // 
+
+
+    // Color
+    // 
+
+    const Color::RType& Color::
+    r () const
+    {
+      return this->r_.get ();
+    }
+
+    Color::RType& Color::
+    r ()
+    {
+      return this->r_.get ();
+    }
+
+    void Color::
+    r (const RType& x)
+    {
+      this->r_.set (x);
+    }
+
+    void Color::
+    r (::std::unique_ptr< RType > x)
+    {
+      this->r_.set (std::move (x));
+    }
+
+    const Color::GType& Color::
+    g () const
+    {
+      return this->g_.get ();
+    }
+
+    Color::GType& Color::
+    g ()
+    {
+      return this->g_.get ();
+    }
+
+    void Color::
+    g (const GType& x)
+    {
+      this->g_.set (x);
+    }
+
+    void Color::
+    g (::std::unique_ptr< GType > x)
+    {
+      this->g_.set (std::move (x));
+    }
+
+    const Color::BType& Color::
+    b () const
+    {
+      return this->b_.get ();
+    }
+
+    Color::BType& Color::
+    b ()
+    {
+      return this->b_.get ();
+    }
+
+    void Color::
+    b (const BType& x)
+    {
+      this->b_.set (x);
+    }
+
+    void Color::
+    b (::std::unique_ptr< BType > x)
+    {
+      this->b_.set (std::move (x));
+    }
+
+    const Color::AType& Color::
+    a () const
+    {
+      return this->a_.get ();
+    }
+
+    Color::AType& Color::
+    a ()
+    {
+      return this->a_.get ();
+    }
+
+    void Color::
+    a (const AType& x)
+    {
+      this->a_.set (x);
+    }
+
+    void Color::
+    a (::std::unique_ptr< AType > x)
+    {
+      this->a_.set (std::move (x));
+    }
+
+
     // FeatureBase
     // 
 
@@ -707,6 +811,36 @@ namespace prj
     seerShape (::std::unique_ptr< SeerShapeType > x)
     {
       this->seerShape_.set (std::move (x));
+    }
+
+    const FeatureBase::ColorOptional& FeatureBase::
+    color () const
+    {
+      return this->color_;
+    }
+
+    FeatureBase::ColorOptional& FeatureBase::
+    color ()
+    {
+      return this->color_;
+    }
+
+    void FeatureBase::
+    color (const ColorType& x)
+    {
+      this->color_.set (x);
+    }
+
+    void FeatureBase::
+    color (const ColorOptional& x)
+    {
+      this->color_ = x;
+    }
+
+    void FeatureBase::
+    color (::std::unique_ptr< ColorType > x)
+    {
+      this->color_.set (std::move (x));
     }
   }
 }
@@ -1981,6 +2115,230 @@ namespace prj
     {
     }
 
+    // ColorValue
+    //
+
+    ColorValue::
+    ColorValue (const ::xml_schema::Decimal& _xsd_Decimal_base)
+    : ::xsd::cxx::tree::fundamental_base< ::xml_schema::Decimal, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::decimal > (_xsd_Decimal_base)
+    {
+    }
+
+    ColorValue::
+    ColorValue (const ColorValue& x,
+                ::xml_schema::Flags f,
+                ::xml_schema::Container* c)
+    : ::xsd::cxx::tree::fundamental_base< ::xml_schema::Decimal, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::decimal > (x, f, c)
+    {
+    }
+
+    ColorValue::
+    ColorValue (const ::xercesc::DOMElement& e,
+                ::xml_schema::Flags f,
+                ::xml_schema::Container* c)
+    : ::xsd::cxx::tree::fundamental_base< ::xml_schema::Decimal, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::decimal > (e, f, c)
+    {
+    }
+
+    ColorValue::
+    ColorValue (const ::xercesc::DOMAttr& a,
+                ::xml_schema::Flags f,
+                ::xml_schema::Container* c)
+    : ::xsd::cxx::tree::fundamental_base< ::xml_schema::Decimal, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::decimal > (a, f, c)
+    {
+    }
+
+    ColorValue::
+    ColorValue (const ::std::string& s,
+                const ::xercesc::DOMElement* e,
+                ::xml_schema::Flags f,
+                ::xml_schema::Container* c)
+    : ::xsd::cxx::tree::fundamental_base< ::xml_schema::Decimal, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::decimal > (s, e, f, c)
+    {
+    }
+
+    ColorValue* ColorValue::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class ColorValue (*this, f, c);
+    }
+
+    ColorValue::
+    ~ColorValue ()
+    {
+    }
+
+    // Color
+    //
+
+    Color::
+    Color (const RType& r,
+           const GType& g,
+           const BType& b,
+           const AType& a)
+    : ::xml_schema::Type (),
+      r_ (r, this),
+      g_ (g, this),
+      b_ (b, this),
+      a_ (a, this)
+    {
+    }
+
+    Color::
+    Color (const Color& x,
+           ::xml_schema::Flags f,
+           ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      r_ (x.r_, f, this),
+      g_ (x.g_, f, this),
+      b_ (x.b_, f, this),
+      a_ (x.a_, f, this)
+    {
+    }
+
+    Color::
+    Color (const ::xercesc::DOMElement& e,
+           ::xml_schema::Flags f,
+           ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      r_ (this),
+      g_ (this),
+      b_ (this),
+      a_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void Color::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // r
+        //
+        if (n.name () == "r" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< RType > r (
+            RTraits::create (i, f, this));
+
+          if (!r_.present ())
+          {
+            this->r_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // g
+        //
+        if (n.name () == "g" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< GType > r (
+            GTraits::create (i, f, this));
+
+          if (!g_.present ())
+          {
+            this->g_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // b
+        //
+        if (n.name () == "b" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< BType > r (
+            BTraits::create (i, f, this));
+
+          if (!b_.present ())
+          {
+            this->b_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // a
+        //
+        if (n.name () == "a" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< AType > r (
+            ATraits::create (i, f, this));
+
+          if (!a_.present ())
+          {
+            this->a_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        break;
+      }
+
+      if (!r_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "r",
+          "");
+      }
+
+      if (!g_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "g",
+          "");
+      }
+
+      if (!b_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "b",
+          "");
+      }
+
+      if (!a_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "a",
+          "");
+      }
+    }
+
+    Color* Color::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class Color (*this, f, c);
+    }
+
+    Color& Color::
+    operator= (const Color& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->r_ = x.r_;
+        this->g_ = x.g_;
+        this->b_ = x.b_;
+        this->a_ = x.a_;
+      }
+
+      return *this;
+    }
+
+    Color::
+    ~Color ()
+    {
+    }
+
     // FeatureBase
     //
 
@@ -1996,7 +2354,8 @@ namespace prj
     : ::xml_schema::Type (),
       name_ (name, this),
       id_ (id, this),
-      seerShape_ (this)
+      seerShape_ (this),
+      color_ (this)
     {
     }
 
@@ -2007,7 +2366,8 @@ namespace prj
     : ::xml_schema::Type (x, f, c),
       name_ (x.name_, f, this),
       id_ (x.id_, f, this),
-      seerShape_ (x.seerShape_, f, this)
+      seerShape_ (x.seerShape_, f, this),
+      color_ (x.color_, f, this)
     {
     }
 
@@ -2018,7 +2378,8 @@ namespace prj
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
       name_ (this),
       id_ (this),
-      seerShape_ (this)
+      seerShape_ (this),
+      color_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -2079,6 +2440,20 @@ namespace prj
           }
         }
 
+        // color
+        //
+        if (n.name () == "color" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< ColorType > r (
+            ColorTraits::create (i, f, this));
+
+          if (!this->color_)
+          {
+            this->color_.set (::std::move (r));
+            continue;
+          }
+        }
+
         break;
       }
 
@@ -2113,6 +2488,7 @@ namespace prj
         this->name_ = x.name_;
         this->id_ = x.id_;
         this->seerShape_ = x.seerShape_;
+        this->color_ = x.color_;
       }
 
       return *this;
@@ -2457,6 +2833,75 @@ namespace prj
     }
 
     void
+    operator<< (::xercesc::DOMElement& e, const ColorValue& i)
+    {
+      e << static_cast< const ::xsd::cxx::tree::fundamental_base< ::xml_schema::Decimal, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::decimal >& > (i);
+    }
+
+    void
+    operator<< (::xercesc::DOMAttr& a, const ColorValue& i)
+    {
+      a << static_cast< const ::xsd::cxx::tree::fundamental_base< ::xml_schema::Decimal, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::decimal >& > (i);
+    }
+
+    void
+    operator<< (::xml_schema::ListStream& l,
+                const ColorValue& i)
+    {
+      l << static_cast< const ::xsd::cxx::tree::fundamental_base< ::xml_schema::Decimal, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::decimal >& > (i);
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const Color& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // r
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "r",
+            e));
+
+        s << i.r ();
+      }
+
+      // g
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "g",
+            e));
+
+        s << i.g ();
+      }
+
+      // b
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "b",
+            e));
+
+        s << i.b ();
+      }
+
+      // a
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "a",
+            e));
+
+        s << i.a ();
+      }
+    }
+
+    void
     operator<< (::xercesc::DOMElement& e, const FeatureBase& i)
     {
       e << static_cast< const ::xml_schema::Type& > (i);
@@ -2493,6 +2938,18 @@ namespace prj
             e));
 
         s << *i.seerShape ();
+      }
+
+      // color
+      //
+      if (i.color ())
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "color",
+            e));
+
+        s << *i.color ();
       }
     }
   }

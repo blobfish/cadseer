@@ -83,6 +83,8 @@ namespace prj
     class DerivedRecord;
     class DerivedContainer;
     class SeerShape;
+    class ColorValue;
+    class Color;
     class FeatureBase;
   }
 }
@@ -2519,6 +2521,432 @@ namespace prj
     };
 
     /**
+     * @brief Class corresponding to the %ColorValue schema type.
+     *
+     * @nosubgrouping
+     */
+    class ColorValue: public ::xsd::cxx::tree::fundamental_base< ::xml_schema::Decimal, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::decimal >
+    {
+      public:
+      /**
+       * @name Constructors
+       */
+      //@{
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes.
+       */
+      ColorValue (const ::xml_schema::Decimal&);
+
+      /**
+       * @brief Create an instance from a DOM element.
+       *
+       * @param e A DOM element to extract the data from.
+       * @param f Flags to create the new instance with.
+       * @param c A pointer to the object that will contain the new
+       * instance.
+       */
+      ColorValue (const ::xercesc::DOMElement& e,
+                  ::xml_schema::Flags f = 0,
+                  ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Create an instance from a DOM attribute.
+       *
+       * @param a A DOM attribute to extract the data from.
+       * @param f Flags to create the new instance with.
+       * @param c A pointer to the object that will contain the new
+       * instance.
+       */
+      ColorValue (const ::xercesc::DOMAttr& a,
+                  ::xml_schema::Flags f = 0,
+                  ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Create an instance from a string fragment.
+       *
+       * @param s A string fragment to extract the data from.
+       * @param e A pointer to DOM element containing the string fragment.
+       * @param f Flags to create the new instance with.
+       * @param c A pointer to the object that will contain the new
+       * instance.
+       */
+      ColorValue (const ::std::string& s,
+                  const ::xercesc::DOMElement* e,
+                  ::xml_schema::Flags f = 0,
+                  ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy constructor.
+       *
+       * @param x An instance to make a copy of.
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      ColorValue (const ColorValue& x,
+                  ::xml_schema::Flags f = 0,
+                  ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy the instance polymorphically.
+       *
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       * @return A pointer to the dynamically allocated copy.
+       *
+       * This function ensures that the dynamic type of the instance is
+       * used for copying and should be used for polymorphic object
+       * models instead of the copy constructor.
+       */
+      virtual ColorValue*
+      _clone (::xml_schema::Flags f = 0,
+              ::xml_schema::Container* c = 0) const;
+
+      //@}
+
+      /**
+       * @brief Destructor.
+       */
+      virtual 
+      ~ColorValue ();
+    };
+
+    /**
+     * @brief Class corresponding to the %Color schema type.
+     *
+     * @nosubgrouping
+     */
+    class Color: public ::xml_schema::Type
+    {
+      public:
+      /**
+       * @name r
+       *
+       * @brief Accessor and modifier functions for the %r
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::ColorValue RType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< RType, char > RTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const RType&
+      r () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      RType&
+      r ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      r (const RType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      r (::std::unique_ptr< RType > p);
+
+      //@}
+
+      /**
+       * @name g
+       *
+       * @brief Accessor and modifier functions for the %g
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::ColorValue GType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< GType, char > GTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const GType&
+      g () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      GType&
+      g ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      g (const GType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      g (::std::unique_ptr< GType > p);
+
+      //@}
+
+      /**
+       * @name b
+       *
+       * @brief Accessor and modifier functions for the %b
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::ColorValue BType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< BType, char > BTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const BType&
+      b () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      BType&
+      b ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      b (const BType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      b (::std::unique_ptr< BType > p);
+
+      //@}
+
+      /**
+       * @name a
+       *
+       * @brief Accessor and modifier functions for the %a
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::ColorValue AType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< AType, char > ATraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const AType&
+      a () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      AType&
+      a ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      a (const AType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      a (::std::unique_ptr< AType > p);
+
+      //@}
+
+      /**
+       * @name Constructors
+       */
+      //@{
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes.
+       */
+      Color (const RType&,
+             const GType&,
+             const BType&,
+             const AType&);
+
+      /**
+       * @brief Create an instance from a DOM element.
+       *
+       * @param e A DOM element to extract the data from.
+       * @param f Flags to create the new instance with.
+       * @param c A pointer to the object that will contain the new
+       * instance.
+       */
+      Color (const ::xercesc::DOMElement& e,
+             ::xml_schema::Flags f = 0,
+             ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy constructor.
+       *
+       * @param x An instance to make a copy of.
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      Color (const Color& x,
+             ::xml_schema::Flags f = 0,
+             ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy the instance polymorphically.
+       *
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       * @return A pointer to the dynamically allocated copy.
+       *
+       * This function ensures that the dynamic type of the instance is
+       * used for copying and should be used for polymorphic object
+       * models instead of the copy constructor.
+       */
+      virtual Color*
+      _clone (::xml_schema::Flags f = 0,
+              ::xml_schema::Container* c = 0) const;
+
+      /**
+       * @brief Copy assignment operator.
+       *
+       * @param x An instance to make a copy of.
+       * @return A reference to itself.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      Color&
+      operator= (const Color& x);
+
+      //@}
+
+      /**
+       * @brief Destructor.
+       */
+      virtual 
+      ~Color ();
+
+      // Implementation.
+      //
+
+      //@cond
+
+      protected:
+      void
+      parse (::xsd::cxx::xml::dom::parser< char >&,
+             ::xml_schema::Flags);
+
+      protected:
+      ::xsd::cxx::tree::one< RType > r_;
+      ::xsd::cxx::tree::one< GType > g_;
+      ::xsd::cxx::tree::one< BType > b_;
+      ::xsd::cxx::tree::one< AType > a_;
+
+      //@endcond
+    };
+
+    /**
      * @brief Class corresponding to the %FeatureBase schema type.
      *
      * @nosubgrouping
@@ -2737,6 +3165,82 @@ namespace prj
       //@}
 
       /**
+       * @name color
+       *
+       * @brief Accessor and modifier functions for the %color
+       * optional element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::Color ColorType;
+
+      /**
+       * @brief Element optional container type.
+       */
+      typedef ::xsd::cxx::tree::optional< ColorType > ColorOptional;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< ColorType, char > ColorTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element
+       * container.
+       *
+       * @return A constant reference to the optional container.
+       */
+      const ColorOptional&
+      color () const;
+
+      /**
+       * @brief Return a read-write reference to the element container.
+       *
+       * @return A reference to the optional container.
+       */
+      ColorOptional&
+      color ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      color (const ColorType& x);
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x An optional container with the new value to set.
+       *
+       * If the value is present in @a x then this function makes a copy 
+       * of this value and sets it as the new value of the element.
+       * Otherwise the element container is set the 'not present' state.
+       */
+      void
+      color (const ColorOptional& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly instead
+       * of making a copy.
+       */
+      void
+      color (::std::unique_ptr< ColorType > p);
+
+      //@}
+
+      /**
        * @name Constructors
        */
       //@{
@@ -2823,6 +3327,7 @@ namespace prj
       ::xsd::cxx::tree::one< IdType > id_;
       static const IdType id_default_value_;
       SeerShapeOptional seerShape_;
+      ColorOptional color_;
 
       //@endcond
     };
@@ -2886,6 +3391,19 @@ namespace prj
 
     void
     operator<< (::xercesc::DOMElement&, const SeerShape&);
+
+    void
+    operator<< (::xercesc::DOMElement&, const ColorValue&);
+
+    void
+    operator<< (::xercesc::DOMAttr&, const ColorValue&);
+
+    void
+    operator<< (::xml_schema::ListStream&,
+                const ColorValue&);
+
+    void
+    operator<< (::xercesc::DOMElement&, const Color&);
 
     void
     operator<< (::xercesc::DOMElement&, const FeatureBase&);

@@ -81,11 +81,28 @@
   </xs:all>
 </xs:complexType>
 
+<xs:simpleType name="ColorValue">
+  <xs:restriction base="xs:decimal">
+    <xs:minExclusive value="0.0"/>
+    <xs:maxInclusive value="1.0"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:complexType name="Color">
+  <xs:all>
+    <xs:element name="r" type="srl:ColorValue"/>
+    <xs:element name="g" type="srl:ColorValue"/>
+    <xs:element name="b" type="srl:ColorValue"/>
+    <xs:element name="a" type="srl:ColorValue"/>
+  </xs:all>
+</xs:complexType>
+  
 <xs:complexType name="FeatureBase">
   <xs:all>
     <xs:element name="name" type="xs:string" default="Empty"/>
     <xs:element name="id" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
     <xs:element name="seerShape" type="srl:SeerShape"  minOccurs="0" maxOccurs="1"/>
+    <xs:element name="color" type="srl:Color"  minOccurs="0" maxOccurs="1"/>
   </xs:all>
 </xs:complexType>
 

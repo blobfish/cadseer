@@ -77,6 +77,7 @@ namespace dag
     void removeFeatureSlot();
     void toggleOverlaySlot();
     void viewIsolateSlot();
+    void editColorSlot();
 //     void updateSlot();
 //     void onRenameSlot();
 //     void renameAcceptedSlot();

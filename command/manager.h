@@ -58,6 +58,7 @@ namespace cmd
     void draggerToFeatureDispatched(const msg::Message &);
     void checkGeometryDispatched(const msg::Message&);
     void selectionMaskDispatched(const msg::Message&);
+    void editColorDispatched(const msg::Message&);
   };
   
   Manager& manager();

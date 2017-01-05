@@ -123,11 +123,8 @@ void Project::updateModel()
     projectGraph[currentVertex].feature->serialWrite(QDir(QString::fromStdString(saveDirectory)));
   }
   
-  if (!isLoading)
-  {
-    serialWrite();
-    gitManager->update();
-  }
+  serialWrite();
+  gitManager->update();
   
   updateLeafStatus();
   
@@ -664,6 +661,54 @@ void Project::setAllVisualDirty()
   }
 }
 
+void Project::setColor(const boost::uuids::uuid &featureIdIn, const osg::Vec4 &colorIn)
+{
+  //the following is a good example of accumulating history of 1 object.
+  
+  //first remove any non 'target' edges. this will limit the following searches.
+  TargetEdgeFilter<Graph> edgeFilter(projectGraph);
+  typedef boost::filtered_graph<Graph, TargetEdgeFilter<Graph>, boost::keep_all> TargetFilteredGraph;
+  TargetFilteredGraph tFilteredGraph(projectGraph, edgeFilter, boost::keep_all());
+  
+  //find forward connected vertices.
+  Vertex baseVertex = findVertex(featureIdIn);
+  std::vector<Vertex> vertexes; //note: name 'vertices' clashes with forall_vertices macro.
+  gu::BFSLimitVisitor<Vertex> vis(vertexes);
+  boost::breadth_first_search(tFilteredGraph, baseVertex, visitor(vis));
+  
+  //find reverse connected vertices.
+  typedef boost::reverse_graph<TargetFilteredGraph, TargetFilteredGraph&> TFReversedGraph;
+  TFReversedGraph rGraph = boost::make_reverse_graph(tFilteredGraph);
+  gu::BFSLimitVisitor<VertexReversed> rVis(vertexes);
+  boost::breadth_first_search(rGraph, baseVertex, visitor(rVis));
+  
+  //filter on the accumulated vertexes.
+  gu::SubsetFilter<Graph> vertexFilter(projectGraph, vertexes);
+  typedef boost::filtered_graph<Graph, boost::keep_all, gu::SubsetFilter<Graph> > FilteredGraph;
+  FilteredGraph filteredGraph(projectGraph, boost::keep_all(), vertexFilter);
+  outputGraphviz(filteredGraph, "/home/tanderson/temp/filtered.dot");
+  
+  //set color of all objects.
+  BGL_FORALL_VERTICES(currentVertex, filteredGraph, FilteredGraph)
+  {
+    projectGraph[currentVertex].feature->setColor(colorIn);
+    //this is a hack. Currently, in order for this color change to be serialized
+    //at next update we would have to mark the feature dirty. Marking the feature dirty
+    //and causing models to be recalculated seems excessive for such a minor change as
+    //object color. So here we just serialize the changed features to 'sneak' the
+    //color change into the git commit.
+    projectGraph[currentVertex].feature->serialWrite(QDir(QString::fromStdString(saveDirectory)));
+  }
+  
+  //log action to git.
+  std::ostringstream gitMessage;
+  gitMessage << QObject::tr("Changing color of feature: ").toStdString()
+    << findFeature(featureIdIn)->getName().toStdString()
+    << "    Id: "
+    << gu::idToString(featureIdIn);
+  gitManager->appendGitMessage(gitMessage.str());
+}
+
 std::vector<boost::uuids::uuid> Project::getAllFeatureIds() const
 {
   std::vector<uuid> out;
@@ -796,6 +841,7 @@ void Project::initializeNew()
 void Project::open()
 {
   isLoading = true;
+  gitManager->appendGitMessage("Project Open");
   observer->messageOutSignal(msg::Message(msg::Request | msg::Git | msg::Freeze));
   
   std::string projectPath = saveDirectory + QDir::separator().toLatin1() + "project.prjt";

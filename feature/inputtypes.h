@@ -31,7 +31,8 @@ namespace ftr
   {
     none = 0,
     target,
-    tool
+    tool,
+    create
   };
     
   inline const static std::string& getInputTypeString(InputTypes typeIn)
@@ -40,7 +41,8 @@ namespace ftr
     {
       "None",
       "Target",
-      "Tool"
+      "Tool",
+      "Create"
     };
     
     std::size_t casted = static_cast<std::size_t>(typeIn);
@@ -54,7 +56,8 @@ namespace ftr
     {
       {"None", InputTypes::none},
       {"Target", InputTypes::target},
-      {"Tool", InputTypes::tool}
+      {"Tool", InputTypes::tool},
+      {"Create", InputTypes::create}
     };
     
     auto it = map.find(stringIn);

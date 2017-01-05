@@ -109,7 +109,7 @@ osg::Matrixd DatumPlanePlanarOffset::solve(const UpdateMap &mapIn)
   if (mapIn.size() != 1)
     throw std::runtime_error("DatumPlanePlanarOffset: wrong number of inputs");
   
-  UpdateMap::const_iterator it = mapIn.find(InputTypes::target);
+  UpdateMap::const_iterator it = mapIn.find(InputTypes::create);
   if (it == mapIn.end())
     throw std::runtime_error("DatumPlanePlanarOffset: no input feature");
   
@@ -204,7 +204,7 @@ DatumPlaneConnections DatumPlanePlanarOffset::setUpFromSelection(const slc::Cont
   
   DatumPlaneConnections out;
   DatumPlaneConnection connection;
-  connection.inputType = ftr::InputTypes::target;
+  connection.inputType = ftr::InputTypes::create;
   connection.parentId = containersIn.at(0).featureId;
   out.push_back(connection);
   
@@ -239,7 +239,7 @@ osg::Matrixd DatumPlanePlanarCenter::solve(const UpdateMap &mapIn)
   if (mapIn.size() == 1)
   {
     //note: can't do a center with only 1 datum plane. so we know this condition must be a shape.
-    UpdateMap::const_iterator it = mapIn.find(InputTypes::target);
+    UpdateMap::const_iterator it = mapIn.find(InputTypes::create);
     if (it == mapIn.end())
       throw std::runtime_error("DatumPlanePlanarCenter: Conflict between map size and count");
     if (!it->second->hasSeerShape())
@@ -265,7 +265,7 @@ osg::Matrixd DatumPlanePlanarCenter::solve(const UpdateMap &mapIn)
   {
     //with 2 inputs, either one can be a face or a datum.
     double radius1, radius2;
-    auto it = mapIn.equal_range(InputTypes::target);
+    auto it = mapIn.equal_range(InputTypes::create);
     if (it.first == it.second)
       throw std::runtime_error("DatumPlanePlanarCenter: Size of inputs not consistant with input types");
     if (it.first->second->getType() == Type::DatumPlane)
@@ -382,16 +382,16 @@ DatumPlaneConnections DatumPlanePlanarCenter::setUpFromSelection(const slc::Cont
   DatumPlaneConnections out;
   if (containersIn.at(0).featureId == containersIn.at(1).featureId)
   {
-    connection.inputType = ftr::InputTypes::target;
+    connection.inputType = ftr::InputTypes::create;
     connection.parentId = containersIn.at(0).featureId;
     out.push_back(connection);
   }
   else
   {
-    connection.inputType = ftr::InputTypes::target;
+    connection.inputType = ftr::InputTypes::create;
     connection.parentId = containersIn.at(0).featureId;
     out.push_back(connection);
-    connection.inputType = ftr::InputTypes::target;
+    connection.inputType = ftr::InputTypes::create;
     connection.parentId = containersIn.at(1).featureId;
     out.push_back(connection);
   }
@@ -452,7 +452,7 @@ osg::Matrixd DatumPlanePlanarParallelThroughEdge::solve(const UpdateMap &mapIn)
   {
     //if only one 'in' connection that means we have a face and an edge belonging to
     //the same object.
-    UpdateMap::const_iterator it = mapIn.find(InputTypes::target);
+    UpdateMap::const_iterator it = mapIn.find(InputTypes::create);
     if (it == mapIn.end())
       throw std::runtime_error("DatumPlanarParallelThroughEdge: Conflict between map size and count");
     if (faceId.is_nil() || edgeId.is_nil())
@@ -485,7 +485,7 @@ osg::Matrixd DatumPlanePlanarParallelThroughEdge::solve(const UpdateMap &mapIn)
   {
     bool foundPlane = false;
     bool foundEdge = false;
-    auto it = mapIn.equal_range(InputTypes::target);
+    auto it = mapIn.equal_range(InputTypes::create);
     if (it.first == it.second)
       throw std::runtime_error("DatumPlanarParallelThroughEdge: equal range returned 0");
     if (it.first->second->getType() == Type::DatumPlane)
@@ -608,7 +608,7 @@ DatumPlaneConnections DatumPlanePlanarParallelThroughEdge::setUpFromSelection(co
   DatumPlaneConnections out;
   if (containersIn.at(0).featureId == containersIn.at(1).featureId)
   {
-    connection.inputType = InputTypes::target;
+    connection.inputType = InputTypes::create;
     connection.parentId = containersIn.at(0).featureId;
     out.push_back(connection);
     
@@ -630,21 +630,21 @@ DatumPlaneConnections DatumPlanePlanarParallelThroughEdge::setUpFromSelection(co
     if (container.selectionType == slc::Type::Face)
     {
       faceId = container.shapeId;
-      connection.inputType = InputTypes::target;
+      connection.inputType = InputTypes::create;
       connection.parentId = container.featureId;
       out.push_back(connection);
     }
     else if(container.selectionType == slc::Type::Edge)
     {
       edgeId = container.shapeId;
-      connection.inputType = InputTypes::target;
+      connection.inputType = InputTypes::create;
       connection.parentId = container.featureId;
       out.push_back(connection);
     }
     else if(container.featureType == Type::DatumPlane)
     {
       faceId = container.shapeId; //will be nil
-      connection.inputType = InputTypes::target;
+      connection.inputType = InputTypes::create;
       connection.parentId = container.featureId;
       out.push_back(connection);
     }

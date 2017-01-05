@@ -54,6 +54,8 @@ Base::Base()
   
   name = QObject::tr("Empty");
   
+  color = osg::Vec4(.1f, .7f, .1f, 1.0f);
+  
   mainSwitch = new osg::Switch();
   mainSwitch->setName("feature");
   mainSwitch->setNodeMask(mdv::object);
@@ -156,7 +158,7 @@ TopoDS_Compound Base::compoundWrap(const TopoDS_Shape& shapeIn)
 void Base::updateVisual()
 {
   //clear all the children from the main transform.
-  lod->removeChildren(0, mainTransform->getNumChildren());
+  lod->removeChildren(0, lod->getNumChildren());
   
   if (seerShape->isNull())
     return;
@@ -177,7 +179,27 @@ void Base::updateVisual()
   osg::ref_ptr<osg::KdTreeBuilder> kdTreeBuilder = new osg::KdTreeBuilder();
   lod->accept(*kdTreeBuilder);
   
+  applyColor();
+  
   setVisualClean();
+}
+
+void Base::setColor(const osg::Vec4 &colorIn)
+{
+  color = colorIn;
+  applyColor();
+}
+
+void Base::applyColor()
+{
+  if (!hasSeerShape())
+    return;
+  mdv::ShapeGeometry *shapeViz =
+  dynamic_cast<mdv::ShapeGeometry*>(lod->getChild(0)->asSwitch()->getChild(0));
+  if (shapeViz)
+  {
+    shapeViz->setColor(color);
+  }
 }
 
 void Base::show3D()
@@ -346,6 +368,15 @@ prj::srl::FeatureBase Base::serialOut()
   if (hasSeerShape())
       out.seerShape() = seerShape->serialOut();
   
+  prj::srl::Color colorOut
+  (
+    color.r(),
+    color.g(),
+    color.b(),
+    color.a()
+  );
+  out.color()= colorOut;
+  
   return out;
 }
 
@@ -359,6 +390,14 @@ void Base::serialIn(const prj::srl::FeatureBase& sBaseIn)
   
   if (sBaseIn.seerShape().present())
     seerShape->serialIn(sBaseIn.seerShape().get());
+  
+  if (sBaseIn.color().present())
+  {
+    color.r() = sBaseIn.color().get().r();
+    color.g() = sBaseIn.color().get().g();
+    color.b() = sBaseIn.color().get().b();
+    color.a() = sBaseIn.color().get().a();
+  }
 }
 
 const TopoDS_Shape& Base::getShape() const

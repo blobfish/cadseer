@@ -461,6 +461,12 @@ void GestureHandler::constructMenu()
     remove->setUserValue(attributeStatus, QObject::tr("Remove Command").toStdString());
     editBase->insertChild(editBase->getNumChildren() - 2, remove);
     
+    osg::MatrixTransform *editColor = gsn::buildCommandNode(":/resources/images/editColor.svg", iconRadius);
+    editColor->setMatrix(dummy);
+    editColor->setUserValue(attributeMask, (msg::Request | msg::Edit | msg::Color).to_string());
+    editColor->setUserValue(attributeStatus, QObject::tr("Edit Color Command").toStdString());
+    editBase->insertChild(editBase->getNumChildren() - 2, editColor);
+    
     osg::MatrixTransform *editUpdate = gsn::buildCommandNode(":/resources/images/editUpdate.svg", iconRadius);
     editUpdate->setMatrix(dummy);
     editUpdate->setUserValue(attributeMask, (msg::Request | msg::Update).to_string());

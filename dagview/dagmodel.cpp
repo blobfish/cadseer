@@ -1114,6 +1114,10 @@ void Model::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     QAction* viewIsolateAction = contextMenu.addAction(viewIsolateIcon, tr("View Isolate"));
     connect(viewIsolateAction, SIGNAL(triggered()), this, SLOT(viewIsolateSlot()));
     
+    static QIcon editColorIcon(":/resources/images/dagViewEditColor.svg");
+    QAction* editColorAction = contextMenu.addAction(editColorIcon, tr("Edit Color"));
+    connect(editColorAction, SIGNAL(triggered()), this, SLOT(editColorSlot()));
+    
     contextMenu.addSeparator();
     
     if (getAllSelected().size() == 1)
@@ -1198,6 +1202,11 @@ void Model::toggleOverlaySlot()
 void Model::viewIsolateSlot()
 {
   observer->messageOutSignal(msg::Message(msg::Request | msg::ViewIsolate));
+}
+
+void Model::editColorSlot()
+{
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Edit | msg::Color));
 }
 
 // void Model::onRenameSlot()
