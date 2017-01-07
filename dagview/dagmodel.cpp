@@ -32,10 +32,12 @@
 #include <QColor>
 #include <QPainter>
 #include <QKeyEvent>
+#include <QFocusEvent>
 #include <QMenu>
 #include <QTimer>
 
 #include <application/application.h>
+#include <project/project.h>
 #include <globalutilities.h>
 #include <tools/idtools.h>
 #include <message/dispatch.h>
@@ -45,31 +47,38 @@
 
 using namespace dag;
 
-// LineEdit::LineEdit(QWidget* parentIn): QLineEdit(parentIn)
-// {
-// 
-// }
-// 
-// void LineEdit::keyPressEvent(QKeyEvent *eventIn)
-// {
-//   if (eventIn->key() == Qt::Key_Escape)
-//   {
-//     Q_EMIT rejectedSignal();
-//     eventIn->accept();
-//     return;
-//   }
-//   if (
-//     (eventIn->key() == Qt::Key_Enter) ||
-//     (eventIn->key() == Qt::Key_Return)
-//   )
-//   {
-//     Q_EMIT acceptedSignal();
-//     eventIn->accept();
-//     return;
-//   }
-//   
-//   QLineEdit::keyPressEvent(eventIn);
-// }
+LineEdit::LineEdit(QWidget* parentIn): QLineEdit(parentIn)
+{
+
+}
+
+void LineEdit::keyPressEvent(QKeyEvent *eventIn)
+{
+  if (eventIn->key() == Qt::Key_Escape)
+  {
+    Q_EMIT rejectedSignal();
+    eventIn->accept();
+    return;
+  }
+  if (
+    (eventIn->key() == Qt::Key_Enter) ||
+    (eventIn->key() == Qt::Key_Return)
+  )
+  {
+    Q_EMIT acceptedSignal();
+    eventIn->accept();
+    return;
+  }
+  
+  QLineEdit::keyPressEvent(eventIn);
+}
+
+void LineEdit::focusOutEvent(QFocusEvent *e)
+{
+  QLineEdit::focusOutEvent(e);
+  
+  Q_EMIT rejectedSignal();
+}
 
 //I dont think I should have to call invalidate
 //and definitely not on the whole scene!
@@ -95,12 +104,6 @@ Model::Model(QObject *parentIn) : QGraphicsScene(parentIn)
 //   setupFilters();
 //   
   currentPrehighlight = nullptr;
-//   
-//   ParameterGrp::handle group = App::GetApplication().GetUserParameter().
-//           GetGroup("BaseApp")->GetGroup("Preferences")->GetGroup("DAGView");
-//     selectionMode = static_cast<SelectionMode>(group->GetInt("SelectionMode", 0));
-//     group->SetInt("SelectionMode", static_cast<int>(selectionMode)); //ensure entry exists.
-//     
   QIcon temp(":/resources/images/dagViewVisible.svg");
   visiblePixmapEnabled = temp.pixmap(iconSize, iconSize, QIcon::Normal, QIcon::On);
   visiblePixmapDisabled = temp.pixmap(iconSize, iconSize, QIcon::Disabled, QIcon::Off);
@@ -113,18 +116,6 @@ Model::Model(QObject *parentIn) : QGraphicsScene(parentIn)
   pendingPixmap = pendingIcon.pixmap(iconSize, iconSize);
   QIcon inactiveIcon(":/resources/images/dagViewInactive.svg");
   inactivePixmap = inactiveIcon.pixmap(iconSize, iconSize);
-//   
-//   renameAction = new QAction(this);
-//   renameAction->setText(tr("Rename"));
-//   renameAction->setStatusTip(tr("Rename object"));
-//   renameAction->setShortcut(Qt::Key_F2);
-//   connect(renameAction, SIGNAL(triggered()), this, SLOT(onRenameSlot()));
-//   
-//   editingFinishedAction = new QAction(this);
-//   editingFinishedAction->setText(tr("Finish editing"));
-//   editingFinishedAction->setStatusTip(tr("Finish editing object"));
-//   connect(this->editingFinishedAction, SIGNAL(triggered()),
-//           this, SLOT(editingFinishedSlot()));
 }
 
 Model::~Model()
@@ -324,6 +315,9 @@ void Model::setupDispatcher()
   
   mask = msg::Response | msg::Feature | msg::Status;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::featureStateChangedDispatched, this, _1)));
+  
+  mask = msg::Response | msg::Edit | msg::Feature | msg::Name;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::featureRenamedDispatched, this, _1)));
 }
 
 void Model::featureStateChangedDispatched(const msg::Message &messageIn)
@@ -422,6 +416,13 @@ void Model::featureStateChangedDispatched(const msg::Message &messageIn)
   graph[vertex].stateIconRaw->setToolTip(toolTip);
 }
 
+void Model::featureRenamedDispatched(const msg::Message &messageIn)
+{
+  ftr::Message fMessage = boost::get<ftr::Message>(messageIn.payload);
+  Vertex vertex = findRecord(vertexIdContainer, fMessage.featureId).vertex;
+  graph[vertex].textRaw->setPlainText(fMessage.string);
+}
+
 void Model::preselectionAdditionDispatched(const msg::Message &messageIn)
 {
   std::ostringstream debug;
@@ -514,124 +515,6 @@ void Model::closeProjectDispatched(const msg::Message&)
   invalidate();
 }
 
-
-// void Model::selectionChanged(const SelectionChanges& msg)
-// {
-//   //note that treeview uses set selection which sends a message with just a document name
-//   //and no object name. Have to explore further.
-//   
-//   auto getAllEdges = [this](const Vertex &vertexIn)
-//   {
-//     //is there really no function to get both in and out edges?
-//     std::vector<Edge> out;
-//     
-//     OutEdgeIterator outIt, outItEnd;
-//     for (boost::tie(outIt, outItEnd) = boost::out_edges(vertexIn, *theGraph); outIt != outItEnd; ++outIt)
-//       out.push_back(*outIt);
-//     
-//     InEdgeIterator inIt, inItEnd;
-//     for (boost::tie(inIt, inItEnd) = boost::in_edges(vertexIn, *theGraph); inIt != inItEnd; ++inIt)
-//       out.push_back(*inIt);
-//     
-//     return out;
-//   };
-//   
-//   auto highlightConnectorOn = [this, getAllEdges](const Vertex &vertexIn)
-//   {
-//     QColor color = (*theGraph)[vertexIn].text->defaultTextColor();
-//     QPen pen(color);
-//     pen.setWidth(3.0);
-//     auto edges = getAllEdges(vertexIn);
-//     for (auto edge : edges)
-//     {
-//       (*theGraph)[edge].connector->setPen(pen);
-//       (*theGraph)[edge].connector->setZValue(1.0);
-//     }
-//   };
-//   
-//   auto highlightConnectorOff = [this, getAllEdges](const Vertex &vertexIn)
-//   {
-//     auto edges = getAllEdges(vertexIn);
-//     for (auto edge : edges)
-//     {
-//       (*theGraph)[edge].connector->setPen(QPen());
-//       (*theGraph)[edge].connector->setZValue(0.0);
-//     }
-//   };
-//   
-//   //lamda for clearing selections.
-//   auto clearSelection = [this, highlightConnectorOff]()
-//   {
-//     BGL_FORALL_VERTICES(currentVertex, *theGraph, Graph)
-//     {
-//       RectItem *rect = (*theGraph)[currentVertex].rectangle.get();
-//       assert(rect);
-//       rect->selectionOff();
-//       highlightConnectorOff(currentVertex);
-//     }
-//   };
-//   
-//   //lamda for getting rectangle.
-//   auto getRectangle = [this](const char *in)
-//   {
-//     assert(in);
-//     std::string name(in);
-//     assert(!name.empty());
-//     const GraphLinkRecord &record = findRecord(name, *graphLink);
-//     RectItem *rect = (*theGraph)[record.vertex].rectangle.get();
-//     assert(rect);
-//     return rect;
-//   };
-//   
-//   if (msg.Type == SelectionChanges::AddSelection)
-//   {
-//     if (msg.pObjectName)
-//     {
-//       RectItem *rect = getRectangle(msg.pObjectName);
-//       rect->selectionOn();
-//       highlightConnectorOn(findRecord(std::string(msg.pObjectName), *graphLink).vertex);
-//     }
-//   }
-//   else if(msg.Type == SelectionChanges::RmvSelection)
-//   {
-//     if (msg.pObjectName)
-//     {
-//       RectItem *rect = getRectangle(msg.pObjectName);
-//       rect->selectionOff();
-//       highlightConnectorOff(findRecord(std::string(msg.pObjectName), *graphLink).vertex);
-//     }
-//   }
-//   else if(msg.Type == SelectionChanges::SetSelection)
-//   {
-//     clearSelection();
-//     
-//     auto selections = Gui::Selection().getSelection(msg.pDocName);
-//     for (const auto &selection : selections)
-//     {
-//       assert(selection.FeatName);
-//       RectItem *rect = getRectangle(selection.FeatName);
-//       rect->selectionOn();
-//       highlightConnectorOn(findRecord(selection.FeatName, *graphLink).vertex);
-//     }
-//   }
-//   else if(msg.Type == SelectionChanges::ClrSelection)
-//   {
-//     clearSelection();
-//   }
-//   
-//   this->invalidate();
-// }
-
-// void Model::awake()
-// {
-//   if (graphDirty)
-//   {
-//     updateSlot();
-//     this->invalidate();
-//   }
-//   updateStates();
-// }
-
 void Model::projectUpdatedDispatched(const msg::Message &)
 {
   std::ostringstream debug;
@@ -674,7 +557,6 @@ void Model::projectUpdatedDispatched(const msg::Message &)
   GraphReversed::adjacency_iterator parentIt, parentItEnd;
   
   std::size_t maxColumn = 0;
-  float maxTextLength = 0;
   std::size_t currentRow = 0;
   
   for (auto currentIt = sorted.begin(); currentIt != sorted.end(); ++currentIt)
@@ -1118,52 +1000,25 @@ void Model::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     QAction* editColorAction = contextMenu.addAction(editColorIcon, tr("Edit Color"));
     connect(editColorAction, SIGNAL(triggered()), this, SLOT(editColorSlot()));
     
+    static QIcon editRenameIcon(":/resources/images/dagViewEditRename.svg");
+    QAction* editRenameAction = contextMenu.addAction(editRenameIcon, tr("Rename"));
+    connect(editRenameAction, SIGNAL(triggered()), this, SLOT(editRenameSlot()));
+    if (getAllSelected().size() != 1)
+      editRenameAction->setDisabled(true);
+    
     contextMenu.addSeparator();
     
-    if (getAllSelected().size() == 1)
-    {
-      static QIcon leafIcon(":/resources/images/dagViewLeaf.svg");
-      QAction* setCurrentLeafAction = contextMenu.addAction(leafIcon, tr("Set Current Leaf"));
-      connect(setCurrentLeafAction, SIGNAL(triggered()), this, SLOT(setCurrentLeafSlot()));
-    }
+    static QIcon leafIcon(":/resources/images/dagViewLeaf.svg");
+    QAction* setCurrentLeafAction = contextMenu.addAction(leafIcon, tr("Set Current Leaf"));
+    connect(setCurrentLeafAction, SIGNAL(triggered()), this, SLOT(setCurrentLeafSlot()));
+    if (getAllSelected().size() != 1)
+      setCurrentLeafAction->setDisabled(true);
     
     static QIcon removeIcon(":/resources/images/dagViewRemove.svg");
     QAction* removeFeatureAction = contextMenu.addAction(removeIcon, tr("Remove Feature"));
     connect(removeFeatureAction, SIGNAL(triggered()), this, SLOT(removeFeatureSlot()));
     
-    
     contextMenu.exec(event->screenPos());
-//     
-//     //don't like that I am doing this again here after getRectFromPosition call.
-//     QGraphicsItem *item = itemAt(event->scenePos());
-//     QGraphicsPixmapItem *pixmapItem = dynamic_cast<QGraphicsPixmapItem *>(item);
-//     if (pixmapItem && (pixmapItem == (*theGraph)[record.vertex].visibleIcon.get()))
-//     {
-//       visiblyIsolate(record.vertex);
-//       return;
-//     }
-//     
-//     
-//     MenuItem view;
-//     Gui::Application::Instance->setupContextMenu("Tree", &view);
-//     QMenu contextMenu;
-//     MenuManager::getInstance()->setupContextMenu(&view, contextMenu);
-//     
-//     //actions for only one selection.
-//     std::vector<Gui::DAG::Vertex> selections = getAllSelected();
-//     if (selections.size() == 1)
-//     {
-//       contextMenu.addAction(renameAction);
-//       //when we have only one selection then we know it is rect from above.
-//       if (!rect->isEditing())
-//         const_cast<Gui::ViewProviderDocumentObject*>(record.VPDObject)->setupContextMenu
-//           (&contextMenu, this, SLOT(editingStartSlot())); //const hack.
-//       else
-//         contextMenu.addAction(editingFinishedAction);
-//     }
-//     
-//     if (contextMenu.actions().count() > 0)
-//         contextMenu.exec(event->screenPos());
   }
   
   QGraphicsScene::contextMenuEvent(event);
@@ -1209,125 +1064,72 @@ void Model::editColorSlot()
   observer->messageOutSignal(msg::Message(msg::Request | msg::Edit | msg::Color));
 }
 
-// void Model::onRenameSlot()
-// {
-//   assert(proxy == nullptr);
-//   std::vector<Gui::DAG::Vertex> selections = getAllSelected();
-//   assert(selections.size() == 1);
-//   
-//   LineEdit *lineEdit = new LineEdit();
-//   auto *text = (*theGraph)[selections.front()].text.get();
-//   lineEdit->setText(text->toPlainText());
-//   connect(lineEdit, SIGNAL(acceptedSignal()), this, SLOT(renameAcceptedSlot()));
-//   connect(lineEdit, SIGNAL(rejectedSignal()), this, SLOT(renameRejectedSlot()));
-//   
-//   proxy = this->addWidget(lineEdit);
-//   proxy->setGeometry(text->sceneBoundingRect());
-//   
-//   lineEdit->selectAll();
-//   QTimer::singleShot(0, lineEdit, SLOT(setFocus())); 
-// }
+void Model::editRenameSlot()
+{
+  assert(proxy == nullptr);
+  std::vector<Vertex> selections = getAllSelected();
+  assert(selections.size() == 1);
+  
+  LineEdit *lineEdit = new LineEdit();
+  auto *text = graph[selections.front()].textRaw;
+  lineEdit->setText(text->toPlainText());
+  connect(lineEdit, SIGNAL(acceptedSignal()), this, SLOT(renameAcceptedSlot()));
+  connect(lineEdit, SIGNAL(rejectedSignal()), this, SLOT(renameRejectedSlot()));
+  
+  proxy = this->addWidget(lineEdit);
+  QRectF geometry = text->sceneBoundingRect();
+  if (maxTextLength > 0.0)
+    geometry.setWidth(maxTextLength);
+  proxy->setGeometry(geometry);
+  
+  lineEdit->selectAll();
+  QTimer::singleShot(0, lineEdit, SLOT(setFocus())); 
+}
 
-// void Model::renameAcceptedSlot()
-// {
-//   assert(proxy);
-//   
-//   std::vector<Gui::DAG::Vertex> selections = getAllSelected();
-//   assert(selections.size() == 1);
-//   const GraphLinkRecord &record = findRecord(selections.front(), *graphLink);
-//   
-//   LineEdit *lineEdit = dynamic_cast<LineEdit*>(proxy->widget());
-//   assert(lineEdit);
-//   const_cast<App::DocumentObject*>(record.DObject)->Label.setValue(lineEdit->text().toUtf8().constData()); //const hack
-//   
-//   finishRename();
-// }
+void Model::renameAcceptedSlot()
+{
+  assert(proxy);
+  
+  std::vector<Vertex> selections = getAllSelected();
+  assert(selections.size() == 1);
+  
+  LineEdit *lineEdit = dynamic_cast<LineEdit*>(proxy->widget());
+  assert(lineEdit);
+  QString freshName = lineEdit->text();
+  if (!freshName.isEmpty())
+  {
+    std::shared_ptr<ftr::Base> feature = graph[selections.front()].feature.lock();
+    QString oldName = feature->getName();
+    feature->setName(freshName);
+    
+    //setting the name doesn't make the feature dirty and thus doesn't
+    //serialize it. Here we force a serialization so rename is in sync
+    //with git, but doesn't trigger an unneeded update.
+    feature->serialWrite(QDir(QString::fromStdString
+      (static_cast<app::Application*>(qApp)->getProject()->getSaveDirectory())));
+    
+    std::ostringstream gitStream;
+    gitStream << "Rename feature id: " << gu::idToString(feature->getId())
+    << "    From: " << oldName.toStdString()
+    << "    To: " << freshName.toStdString();
+    observer->messageOutSignal(msg::buildGitMessage(gitStream.str()));
+  }
+  
+  finishRename();
+  
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+}
 
-// void Model::renameRejectedSlot()
-// {
-//   finishRename();
-// }
+void Model::renameRejectedSlot()
+{
+  finishRename();
+}
 
-// void Model::finishRename()
-// {
-//   assert(proxy);
-//   this->removeItem(proxy);
-//   proxy->deleteLater();
-//   proxy = nullptr;
-//   this->invalidate();
-// }
-
-// void Model::editingStartSlot()
-// {
-//   QAction* action = qobject_cast<QAction*>(sender());
-//   if (action)
-//   {
-//     int edit = action->data().toInt();
-//     auto selections = getAllSelected();
-//     assert(selections.size() == 1);
-//     const GraphLinkRecord &record = findRecord(selections.front(), *graphLink);
-//     Gui::Document* doc = Gui::Application::Instance->getDocument(record.DObject->getDocument());
-//     MDIView *view = doc->getActiveView();
-//     if (view)
-//       getMainWindow()->setActiveWindow(view);
-//     doc->setEdit(const_cast<ViewProviderDocumentObject*>(record.VPDObject), edit);
-//   }
-// }
-
-// void Model::editingFinishedSlot()
-// {
-//   auto selections = getAllSelected();
-//   assert(selections.size() == 1);
-//   const GraphLinkRecord &record = findRecord(selections.front(), *graphLink);
-//   Gui::Document* doc = Gui::Application::Instance->getDocument(record.DObject->getDocument());
-//   doc->commitCommand();
-//   doc->resetEdit();
-//   doc->getDocument()->recompute();
-// }
-
-// void Model::visiblyIsolate(Gui::DAG::Vertex sourceIn)
-// {
-//   auto buildSkipTypes = []()
-//   {
-//     std::vector<Base::Type> out;
-//     Base::Type type;
-//     type = Base::Type::fromName("App::DocumentObjectGroup");
-//     if (type != Base::Type::badType()) out.push_back(type);
-//     type = Base::Type::fromName("App::Part");
-//     if (type != Base::Type::badType()) out.push_back(type);
-//     type = Base::Type::fromName("PartDesign::Body");
-//     if (type != Base::Type::badType()) out.push_back(type);
-//     
-//     return out;
-//   };
-//   
-//   auto testSkipType = [](const App::DocumentObject *dObject, const std::vector<Base::Type> &types)
-//   {
-//     for (const auto &currentType : types)
-//     {
-//       if (dObject->isDerivedFrom(currentType))
-//         return true;
-//     }
-//     return false;
-//   };
-//   
-//   indexVerticesEdges();
-//   Path connectedVertices;
-//   ConnectionVisitor visitor(connectedVertices);
-//   boost::breadth_first_search(*theGraph, sourceIn, boost::visitor(visitor));
-//   boost::breadth_first_search(boost::make_reverse_graph(*theGraph), sourceIn, boost::visitor(visitor));
-//   
-//   //note source vertex is added twice to Path. Once for each search.
-//   static std::vector<Base::Type> skipTypes = buildSkipTypes();
-//   for (const auto &currentVertex : connectedVertices)
-//   {
-//     const GraphLinkRecord &record = findRecord(currentVertex, *graphLink);
-//     if (testSkipType(record.DObject, skipTypes))
-//       continue;
-//     const_cast<ViewProviderDocumentObject *>(record.VPDObject)->hide(); //const hack
-//   }
-//   
-//   const GraphLinkRecord &sourceRecord = findRecord(sourceIn, *graphLink);
-//   if (!testSkipType(sourceRecord.DObject, skipTypes))
-//     const_cast<ViewProviderDocumentObject *>(sourceRecord.VPDObject)->show(); //const hack
-// }
+void Model::finishRename()
+{
+  assert(proxy);
+  this->removeItem(proxy);
+  delete proxy;
+  proxy = nullptr;
+  this->invalidate();
+}

@@ -85,7 +85,7 @@ public:
   void setNonLeaf();
   bool isLeaf() const {return !(state.test(ftr::StateOffset::NonLeaf));}
   bool isNonLeaf() const {return (state.test(ftr::StateOffset::NonLeaf));}
-  void setName(const QString &nameIn){name = nameIn;}
+  void setName(const QString &nameIn);
   QString getName() const {return name;}
   ftr::State getState() const {return state;}
   void setColor(const osg::Vec4 &);

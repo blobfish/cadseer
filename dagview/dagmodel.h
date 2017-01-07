@@ -40,24 +40,25 @@
 
 // #include "DAGFilter.h"
 
-class QGraphicsSceneHoverEvent;
 class QGraphicsProxyWidget;
+class QFocusEvent;
 
 namespace msg{class Message; class Observer;}
 
 namespace dag
 {
-//   class LineEdit : public QLineEdit
-//   {
-//   Q_OBJECT
-//   public:
-//     LineEdit(QWidget *parentIn = 0);
-//   Q_SIGNALS:
-//     void acceptedSignal();
-//     void rejectedSignal();
-//   protected:
-//   virtual void keyPressEvent(QKeyEvent*);
-//   };
+  class LineEdit : public QLineEdit
+  {
+    Q_OBJECT
+    public:
+      LineEdit(QWidget *parentIn = 0);
+    Q_SIGNALS:
+      void acceptedSignal();
+      void rejectedSignal();
+    protected:
+    virtual void keyPressEvent(QKeyEvent*) override;
+    virtual void focusOutEvent(QFocusEvent*) override;
+  };
   
   class Model : public QGraphicsScene
   {
@@ -78,12 +79,9 @@ namespace dag
     void toggleOverlaySlot();
     void viewIsolateSlot();
     void editColorSlot();
-//     void updateSlot();
-//     void onRenameSlot();
-//     void renameAcceptedSlot();
-//     void renameRejectedSlot();
-//     void editingStartSlot();
-//     void editingFinishedSlot();
+    void editRenameSlot();
+    void renameAcceptedSlot();
+    void renameRejectedSlot();
     
   private:
     void indexVerticesEdges();
@@ -100,6 +98,7 @@ namespace dag
     void selectionSubtractionDispatched(const msg::Message &);
     void closeProjectDispatched(const msg::Message&);
     void featureStateChangedDispatched(const msg::Message &);
+    void featureRenamedDispatched(const msg::Message &);
     
     Graph graph;
     GraphLinkContainer graphLink;
@@ -126,36 +125,29 @@ namespace dag
     float iconToIcon;                           //!< spacing between icons.
     float iconToText;                           //!< spacing between last icon and text.
     float rowPadding;                           //!< spaces added to rectangle bacground width ends.
+    float maxTextLength;                        //!< used for setting edit box for rename.
     std::vector<QBrush> backgroundBrushes;      //!< brushes to paint background rectangles.
     std::vector<QBrush> forgroundBrushes;       //!< brushes to paint points, connectors, text.
     void setupViewConstants();
   //@}
-//     
+    
     RectItem *currentPrehighlight;
-//     
-//     enum class SelectionMode
-//     {
-//       Single,
-//       Multiple
-//     };
-//     SelectionMode selectionMode;
     std::vector<Vertex> getAllSelected();
-//     void visiblyIsolate(Vertex sourceIn); //!< hide any connected feature and turn on sourceIn.
-//     
+
     QPointF lastPick;
     bool lastPickValid = false;
-//     
+    
     QPixmap visiblePixmapEnabled;
     QPixmap visiblePixmapDisabled;
     QPixmap passPixmap;
     QPixmap failPixmap;
     QPixmap pendingPixmap;
     QPixmap inactivePixmap;
-//     
-//     QAction *renameAction;
-//     QAction *editingFinishedAction;
-//     QGraphicsProxyWidget *proxy = nullptr;
-//     void finishRename();
+    
+    QAction *renameAction;
+    QAction *editingFinishedAction;
+    QGraphicsProxyWidget *proxy = nullptr;
+    void finishRename();
 //     
 //     //filters
 //     void setupFilters();

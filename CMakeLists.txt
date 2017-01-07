@@ -178,6 +178,7 @@ SET(COMMAND_SOURCES
     command/draggertofeature.cpp
     command/checkgeometry.cpp
     command/editcolor.cpp
+    command/featurerename.cpp
     )
     
 SET(LIBRARY_SOURCES

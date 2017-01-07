@@ -1,6 +1,6 @@
 /*
  * CadSeer. Parametric Solid Modeling.
- * Copyright (C) 2016  Thomas S. Anderson blobfish.at.gmx.com
+ * Copyright (C) 2017  Thomas S. Anderson blobfish.at.gmx.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,28 +17,28 @@
  *
  */
 
-#include <tools/idtools.h>
-#include <feature/message.h>
+#ifndef CMD_FEATURERENAME_H
+#define CMD_FEATURERENAME_H
 
-using namespace ftr;
+#include <command/base.h>
 
-using boost::uuids::uuid;
-
-Message::Message() :
-  featureId(gu::createNilId()),
-  state(0),
-  stateOffset(0),
-  freshValue(false)
-{}
-
-Message::Message(const uuid &idIn, State stateIn, unsigned long stateOffsetIn, bool freshValueIn) :
-  featureId(idIn),
-  state(stateIn),
-  stateOffset(stateOffsetIn),
-  freshValue(freshValueIn)
-{}
-
-Message::Message(const uuid &idIn, const QString &stringIn) :
-  featureId(idIn),
-  string(stringIn)
-{}
+namespace cmd
+{
+  class FeatureRename : public Base
+  {
+  public:
+    FeatureRename();
+    virtual ~FeatureRename() override;
+    
+    virtual std::string getCommandName() override{return "Rename Feature";}
+    virtual std::string getStatusMessage() override;
+    virtual void activate() override;
+    virtual void deactivate() override;
+    
+  private:
+    void setupDispatcher();
+    void selectionAdditionDispatched(const msg::Message&);
+    void go();
+  };
+}
+#endif // CMD_FEATURERENAME_H

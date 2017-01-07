@@ -47,6 +47,7 @@
     <file>resources/images/editUpdate.svg</file>
     <file>resources/images/editForceUpdate.svg</file>
     <file>resources/images/editColor.svg</file>
+    <file>resources/images/editRename.svg</file>
     <file>resources/images/fileBase.svg</file>
     <file>resources/images/fileImport.svg</file>
     <file>resources/images/fileExport.svg</file>
@@ -64,6 +65,7 @@
     <file>resources/images/dagViewOverlay.svg</file>
     <file>resources/images/dagViewIsolate.svg</file>
     <file>resources/images/dagViewEditColor.svg</file>
+    <file>resources/images/dagViewEditRename.svg</file>
     <file>resources/images/cadSeer.svg</file>
     <file>resources/images/preferences.svg</file>
     <file>resources/images/linkIcon.svg</file>

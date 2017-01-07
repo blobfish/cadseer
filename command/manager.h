@@ -59,6 +59,7 @@ namespace cmd
     void checkGeometryDispatched(const msg::Message&);
     void selectionMaskDispatched(const msg::Message&);
     void editColorDispatched(const msg::Message&);
+    void featureRenameDispatched(const msg::Message&);
   };
   
   Manager& manager();

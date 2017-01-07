@@ -22,6 +22,8 @@
 
 #include <boost/uuid/uuid.hpp>
 
+#include <QString>
+
 #include <feature/states.h>
 
 namespace ftr
@@ -30,10 +32,12 @@ namespace ftr
   {
     Message();
     Message(const boost::uuids::uuid&, State, unsigned long, bool);
+    Message(const boost::uuids::uuid&, const QString&);
     boost::uuids::uuid featureId;
     State state;
     unsigned long stateOffset; //!< category that triggered message.
     bool freshValue;
+    QString string;
   };
 }
 

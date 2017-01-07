@@ -27,6 +27,7 @@
 #include <command/draggertofeature.h>
 #include <command/checkgeometry.h>
 #include <command/editcolor.h>
+#include <command/featurerename.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <selection/message.h>
@@ -86,6 +87,9 @@ void Manager::setupDispatcher()
   
   mask = msg::Request | msg::Edit | msg::Color;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::editColorDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Edit | msg::Feature | msg::Name;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::featureRenameDispatched, this, _1)));
 }
 
 void Manager::cancelCommandDispatched(const msg::Message &)
@@ -214,4 +218,10 @@ void Manager::editColorDispatched(const msg::Message&)
 {
   std::shared_ptr<EditColor> editColor(new EditColor());
   addCommand(editColor);
+}
+
+void Manager::featureRenameDispatched(const msg::Message&)
+{
+  std::shared_ptr<FeatureRename> featureRename(new FeatureRename());
+  addCommand(featureRename);
 }

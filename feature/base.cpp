@@ -145,6 +145,15 @@ void Base::setVisualDirty()
   observer->messageOutSignal(mMessage);
 }
 
+void Base::setName(const QString &nameIn)
+{
+  name = nameIn;
+  
+  ftr::Message fMessage(id, name);
+  msg::Message mMessage(msg::Response | msg::Edit | msg::Feature | msg::Name);
+  mMessage.payload = fMessage;
+  observer->messageOutSignal(mMessage);
+}
 
 TopoDS_Compound Base::compoundWrap(const TopoDS_Shape& shapeIn)
 {
