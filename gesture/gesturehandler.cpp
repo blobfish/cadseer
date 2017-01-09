@@ -664,6 +664,18 @@ void GestureHandler::constructMenu()
     debugShapeGraph->setUserValue(attributeStatus, QObject::tr("Write shape graph to application directory").toStdString());
     debugBase->insertChild(debugBase->getNumChildren() - 2, debugShapeGraph);
     
+    osg::MatrixTransform *debugDumpProjectGraph = gsn::buildCommandNode(":/resources/images/debugDumpProjectGraph.svg", iconRadius);
+    debugDumpProjectGraph->setMatrix(dummy);
+    debugDumpProjectGraph->setUserValue(attributeMask, (msg::Request | msg::DebugDumpProjectGraph).to_string());
+    debugDumpProjectGraph->setUserValue(attributeStatus, QObject::tr("Write project graph to application directory").toStdString());
+    debugBase->insertChild(debugBase->getNumChildren() - 2, debugDumpProjectGraph);
+    
+    osg::MatrixTransform *debugDumpDAGViewGraph = gsn::buildCommandNode(":/resources/images/debugDumpDAGViewGraph.svg", iconRadius);
+    debugDumpDAGViewGraph->setMatrix(dummy);
+    debugDumpDAGViewGraph->setUserValue(attributeMask, (msg::Request | msg::DebugDumpDAGViewGraph).to_string());
+    debugDumpDAGViewGraph->setUserValue(attributeStatus, QObject::tr("Write DAGView graph to application directory").toStdString());
+    debugBase->insertChild(debugBase->getNumChildren() - 2, debugDumpDAGViewGraph);
+    
     osg::MatrixTransform *debugInquiry = gsn::buildCommandNode(":/resources/images/debugInquiry.svg", iconRadius);
     debugInquiry->setMatrix(dummy);
     debugInquiry->setUserValue(attributeMask, (msg::Request | msg::DebugInquiry).to_string());

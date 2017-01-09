@@ -99,6 +99,7 @@ namespace dag
     void closeProjectDispatched(const msg::Message&);
     void featureStateChangedDispatched(const msg::Message &);
     void featureRenamedDispatched(const msg::Message &);
+    void dumpDAGViewGraphDispatched(const msg::Message &);
     
     Graph graph;
     GraphLinkContainer graphLink;

@@ -100,6 +100,7 @@ private:
     void saveProjectRequestDispatched(const msg::Message &);
     void checkShapeIdsDispatched(const msg::Message &);
     void featureStateChangedDispatched(const msg::Message &);
+    void dumpProjectGraphDispatched(const msg::Message &);
 };
 }
 

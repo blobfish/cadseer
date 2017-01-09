@@ -318,6 +318,9 @@ void Model::setupDispatcher()
   
   mask = msg::Response | msg::Edit | msg::Feature | msg::Name;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::featureRenamedDispatched, this, _1)));
+  
+  mask = msg::Request | msg::DebugDumpDAGViewGraph;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::dumpDAGViewGraphDispatched, this, _1)));
 }
 
 void Model::featureStateChangedDispatched(const msg::Message &messageIn)
@@ -522,11 +525,6 @@ void Model::projectUpdatedDispatched(const msg::Message &)
   msg::dispatch().dumpString(debug.str());
   
   indexVerticesEdges();
-  //something here to check preferences about writing this out.
-  QString fileName = static_cast<app::Application *>(qApp)->getApplicationDirectory().path();
-  fileName += QDir::separator();
-  fileName += "dagView.dot";
-  outputGraphviz<Graph>(graph, fileName.toStdString());
   
 //   auto dumpMask = [] (const ColumnMask& columnMaskIn)
 //   {
@@ -733,6 +731,16 @@ void Model::projectUpdatedDispatched(const msg::Message &)
     rect.setWidth(localCurrentX + maxTextLength + 2.0 * rowPadding);
     rectangle->setRect(rect);
   }
+}
+
+void Model::dumpDAGViewGraphDispatched(const msg::Message &)
+{
+  indexVerticesEdges();
+  //something here to check preferences about writing this out.
+  QString fileName = static_cast<app::Application *>(qApp)->getApplicationDirectory().path();
+  fileName += QDir::separator();
+  fileName += "dagView.dot";
+  outputGraphviz<Graph>(graph, fileName.toStdString());
 }
 
 void Model::removeAllItems()

@@ -77,12 +77,6 @@ void Project::updateModel()
   
   expressionManager->update();
   
-  //something here to check preferences about writing this out.
-  QString fileName = static_cast<app::Application *>(qApp)->getApplicationDirectory().path();
-  fileName += QDir::separator();
-  fileName += "project.dot";
-  writeGraphViz(fileName.toStdString().c_str());
-  
   Path sorted;
   try
   {
@@ -456,6 +450,9 @@ void Project::setupDispatcher()
   
   mask = msg::Response | msg::Feature | msg::Status;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::featureStateChangedDispatched, this, _1)));
+  
+  mask = msg::Request | msg::DebugDumpProjectGraph;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::dumpProjectGraphDispatched, this, _1)));
 }
 
 void Project::featureStateChangedDispatched(const msg::Message &messageIn)
@@ -606,6 +603,16 @@ void Project::checkShapeIdsDispatched(const msg::Message&)
   
   if (!foundDuplicate)
     std::cout << std::endl << "No duplicate ids found. Test passed" << std::endl;
+}
+
+void Project::dumpProjectGraphDispatched(const msg::Message &)
+{
+  indexVerticesEdges();
+  
+  QString fileName = static_cast<app::Application *>(qApp)->getApplicationDirectory().path();
+  fileName += QDir::separator();
+  fileName += "project.dot";
+  writeGraphViz(fileName.toStdString().c_str());
 }
 
 void Project::indexVerticesEdges()
