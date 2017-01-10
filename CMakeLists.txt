@@ -91,6 +91,7 @@ SET(FEATURE_SOURCES
     feature/seershapeinfo.cpp
     feature/datumplane.cpp
     feature/message.cpp
+    feature/hollow.cpp
     )
     
 SET(EXPRESSION_SOURCES
@@ -156,6 +157,7 @@ SET(PROJECT_SOURCES
     project/serial/xsdcxxoutput/featurechamfer.cpp
     project/serial/xsdcxxoutput/featuredraft.cpp
     project/serial/xsdcxxoutput/featuredatumplane.cpp
+    project/serial/xsdcxxoutput/featurehollow.cpp
     )
     
 SET(APPLICATION_SOURCES

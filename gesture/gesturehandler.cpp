@@ -416,6 +416,12 @@ void GestureHandler::constructMenu()
     constructionDraft->setUserValue(attributeStatus, QObject::tr("Draft Command").toStdString());
     constructionFinishing->insertChild(constructionFinishing->getNumChildren() - 2, constructionDraft);
     
+    osg::MatrixTransform *constructionHollow = gsn::buildCommandNode(":/resources/images/constructionHollow.svg", iconRadius);
+    constructionHollow->setMatrix(dummy);
+    constructionHollow->setUserValue(attributeMask, (msg::Request | msg::Construct | msg::Hollow).to_string());
+    constructionHollow->setUserValue(attributeStatus, QObject::tr("Hollow Command").toStdString());
+    constructionFinishing->insertChild(constructionFinishing->getNumChildren() - 2, constructionHollow);
+    
     //booleans
     osg::MatrixTransform *constructionBoolean;
     constructionBoolean = gsn::buildMenuNode(":/resources/images/constructionBoolean.svg", iconRadius);

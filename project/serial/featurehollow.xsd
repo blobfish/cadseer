@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="http://www.cadseer.com/prj/srl"
+  xmlns:srl="http://www.cadseer.com/prj/srl"
+>
+  
+<xs:include schemaLocation="featurebase.xsd"/>
+
+<xs:complexType name="HollowPick">
+  <xs:all>
+    <xs:element name="faceId" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+    <xs:element name="u" type="xs:double" default="NaN"/>
+    <xs:element name="v" type="xs:double" default="NaN"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="HollowPicks">
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+    <xs:element name="array" type="srl:HollowPick"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="FeatureHollow">
+  <xs:all>
+    <xs:element name="featureBase" type="srl:FeatureBase"/>
+    <xs:element name="hollowPicks" type="srl:HollowPicks"/>
+    <xs:element name="offset" type="srl:Parameter"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:element name="hollow" type="srl:FeatureHollow"/>
+  
+</xs:schema> 

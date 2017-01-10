@@ -210,7 +210,7 @@ void Draft::serialWrite(const QDir &dIn)
     neutralPick.v
   );
   
-  prj::srl::FeatureDraft chamferOut
+  prj::srl::FeatureDraft draftOut
   (
     Base::serialOut(),
     targetPicksOut,
@@ -220,7 +220,7 @@ void Draft::serialWrite(const QDir &dIn)
   
   xml_schema::NamespaceInfomap infoMap;
   std::ofstream stream(buildFilePathName(dIn).toUtf8().constData());
-  prj::srl::draft(stream, chamferOut, infoMap);
+  prj::srl::draft(stream, draftOut, infoMap);
 }
 
 void Draft::serialRead(const prj::srl::FeatureDraft &sDraftIn)

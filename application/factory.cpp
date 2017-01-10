@@ -58,6 +58,7 @@
 #include <feature/chamfer.h>
 #include <feature/draft.h>
 #include <feature/datumplane.h>
+#include <feature/hollow.h>
 #include <library/lineardimension.h>
 
 using namespace app;
@@ -155,6 +156,9 @@ void Factory::setupDispatcher()
   
   mask = msg::Request | msg::ViewIsolate;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::viewIsolateDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Construct | msg::Hollow;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newHollowDispatched, this, _1)));
   
 //   mask = msg::Request | msg::DebugInquiry;
 //   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::messageStressTestDispatched, this, _1)));
@@ -614,6 +618,52 @@ void Factory::newDatumPlaneDispatched(const msg::Message&)
   for (const auto &connection : connections)
     project->connect(connection.parentId, dPlane->getId(), connection.inputType);
 
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
+}
+
+void Factory::newHollowDispatched(const msg::Message&)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  assert(project);
+  
+  if (containers.empty())
+    return;
+  
+  uuid targetFeatureId = containers.at(0).featureId;
+  ftr::Base *targetFeature = project->findFeature(targetFeatureId);
+  assert(targetFeature->hasSeerShape());
+  const ftr::SeerShape &targetSeerShape = targetFeature->getSeerShape();
+  
+  std::vector<ftr::HollowPick> hollowPicks;
+  for (const auto &currentSelection : containers)
+  {
+    if
+    (
+      currentSelection.featureId != targetFeatureId ||
+      currentSelection.selectionType != slc::Type::Face
+    )
+      continue;
+      
+    ftr::HollowPick hPick;
+    hPick.faceId = currentSelection.shapeId;
+    TopoDS_Face face = TopoDS::Face(targetSeerShape.findShapeIdRecord(currentSelection.shapeId).shape);
+    ftr::Hollow::calculateUVParameter(face, currentSelection.pointLocation, hPick.u, hPick.v);
+    hollowPicks.push_back(hPick);
+  }
+  if (hollowPicks.empty())
+    return;
+  
+  std::shared_ptr<ftr::Hollow> hollow(new ftr::Hollow());
+  hollow->setHollowPicks(hollowPicks);
+  project->addFeature(hollow);
+  project->connect(targetFeatureId, hollow->getId(), ftr::InputTypes::target);
+  
+  targetFeature->hide3D();
+  
   observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
   observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
 }

@@ -31,6 +31,7 @@
 #include <feature/draft.h>
 #include <feature/inert.h>
 #include <feature/datumplane.h>
+#include <feature/hollow.h>
 #include <project/serial/xsdcxxoutput/featurebox.h>
 #include <project/serial/xsdcxxoutput/featurecylinder.h>
 #include <project/serial/xsdcxxoutput/featuresphere.h>
@@ -43,6 +44,7 @@
 #include <project/serial/xsdcxxoutput/featurechamfer.h>
 #include <project/serial/xsdcxxoutput/featuredraft.h>
 #include <project/serial/xsdcxxoutput/featuredatumplane.h>
+#include <project/serial/xsdcxxoutput/featurehollow.h>
 
 #include "featureload.h"
 
@@ -66,6 +68,7 @@ directory(directoryIn), fileExtension(".fetr")
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Chamfer), std::bind(&FeatureLoad::loadChamfer, this, std::placeholders::_1, std::placeholders::_2)));
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Draft), std::bind(&FeatureLoad::loadDraft, this, std::placeholders::_1, std::placeholders::_2)));
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::DatumPlane), std::bind(&FeatureLoad::loadDatumPlane, this, std::placeholders::_1, std::placeholders::_2)));
+  functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Hollow), std::bind(&FeatureLoad::loadHollow, this, std::placeholders::_1, std::placeholders::_2)));
 }
 
 FeatureLoad::~FeatureLoad()
@@ -243,3 +246,17 @@ std::shared_ptr< ftr::Base > FeatureLoad::loadDatumPlane(const std::string &file
   
   return freshDatumPlane;
 }
+
+std::shared_ptr< ftr::Base > FeatureLoad::loadHollow(const std::string &fileNameIn, std::size_t shapeOffsetIn)
+{
+  auto sHollow = srl::hollow(fileNameIn, ::xml_schema::Flags::dont_validate);
+  assert(sHollow);
+  
+  std::shared_ptr<ftr::Hollow> freshHollow(new ftr::Hollow);
+  freshHollow->setShape(shapeVector.at(shapeOffsetIn));
+  freshHollow->serialRead(*sHollow);
+  
+  return freshHollow;
+}
+
+
