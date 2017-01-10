@@ -693,7 +693,6 @@ void Project::setColor(const boost::uuids::uuid &featureIdIn, const osg::Vec4 &c
   gu::SubsetFilter<Graph> vertexFilter(projectGraph, vertexes);
   typedef boost::filtered_graph<Graph, boost::keep_all, gu::SubsetFilter<Graph> > FilteredGraph;
   FilteredGraph filteredGraph(projectGraph, boost::keep_all(), vertexFilter);
-  outputGraphviz(filteredGraph, "/home/tanderson/temp/filtered.dot");
   
   //set color of all objects.
   BGL_FORALL_VERTICES(currentVertex, filteredGraph, FilteredGraph)
