@@ -203,12 +203,14 @@ void Base::applyColor()
 {
   if (!hasSeerShape())
     return;
-  mdv::ShapeGeometry *shapeViz =
-  dynamic_cast<mdv::ShapeGeometry*>(lod->getChild(0)->asSwitch()->getChild(0));
+  
+  if (lod->getNumChildren() == 0)
+    return;
+  
+  mdv::ShapeGeometry *shapeViz = dynamic_cast<mdv::ShapeGeometry*>
+    (lod->getChild(0)->asSwitch()->getChild(0));
   if (shapeViz)
-  {
     shapeViz->setColor(color);
-  }
 }
 
 void Base::show3D()

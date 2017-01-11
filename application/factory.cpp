@@ -345,8 +345,13 @@ void Factory::newUnionDispatched(const msg::Message&)
     
   assert(project);
   
-  for (const auto &id : featureIds)  
-    project->findFeature(id)->hide3D();
+  for (const auto &id : featureIds)
+  {
+    ftr::Base *feature = project->findFeature(id);
+    assert(feature);
+    feature->hide3D();
+    feature->hideOverlay();
+  }
   
   //union keyword. whoops
   std::shared_ptr<ftr::Union> onion(new ftr::Union());
@@ -354,6 +359,8 @@ void Factory::newUnionDispatched(const msg::Message&)
   project->connect(featureIds.at(0), onion->getId(), ftr::InputTypes::target);
   for (auto it = featureIds.begin() + 1; it != featureIds.end(); ++it)
     project->connect(*it, onion->getId(), ftr::InputTypes::tool);
+  
+  onion->setColor(project->findFeature(featureIds.at(0))->getColor());
   
   observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
   observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
@@ -387,14 +394,21 @@ void Factory::newSubtractDispatched(const msg::Message&)
     
   assert(project);
   
-  for (const auto &id : featureIds)  
-    project->findFeature(id)->hide3D();
+  for (const auto &id : featureIds)
+  {
+    ftr::Base *feature = project->findFeature(id);
+    assert(feature);
+    feature->hide3D();
+    feature->hideOverlay();
+  }
   
   std::shared_ptr<ftr::Subtract> subtract(new ftr::Subtract());
   project->addFeature(subtract);
   project->connect(featureIds.at(0), subtract->getId(), ftr::InputTypes::target);
   for (auto it = featureIds.begin() + 1; it != featureIds.end(); ++it)
     project->connect(*it, subtract->getId(), ftr::InputTypes::tool);
+  
+  subtract->setColor(project->findFeature(featureIds.at(0))->getColor());
   
   observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
   observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
@@ -428,14 +442,21 @@ void Factory::newIntersectDispatched(const msg::Message&)
     
   assert(project);
   
-  for (const auto &id : featureIds)  
-    project->findFeature(id)->hide3D();
+  for (const auto &id : featureIds)
+  {
+    ftr::Base *feature = project->findFeature(id);
+    assert(feature);
+    feature->hide3D();
+    feature->hideOverlay();
+  }
   
   std::shared_ptr<ftr::Intersect> intersect(new ftr::Intersect());
   project->addFeature(intersect);
   project->connect(featureIds.at(0), intersect->getId(), ftr::InputTypes::target);
   for (auto it = featureIds.begin() + 1; it != featureIds.end(); ++it)
     project->connect(*it, intersect->getId(), ftr::InputTypes::tool);
+  
+  intersect->setColor(project->findFeature(featureIds.at(0))->getColor());
   
   observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
   observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
@@ -495,6 +516,8 @@ void Factory::newBlendDispatched(const msg::Message&)
   
   ftr::Base *targetFeature = project->findFeature(targetFeatureId);
   targetFeature->hide3D();
+  targetFeature->hideOverlay();
+  blend->setColor(targetFeature->getColor());
   
   observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
   observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
@@ -539,6 +562,8 @@ void Factory::newChamferDispatched(const msg::Message&)
   
   ftr::Base *targetFeature = project->findFeature(targetFeatureId);
   targetFeature->hide3D();
+  targetFeature->hideOverlay();
+  chamfer->setColor(targetFeature->getColor());
   
   observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
   observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
@@ -587,6 +612,8 @@ void Factory::newDraftDispatched(const msg::Message&)
   
   ftr::Base *targetFeature = project->findFeature(targetFeatureId);
   targetFeature->hide3D();
+  targetFeature->hideOverlay();
+  draft->setColor(targetFeature->getColor());
   
   observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
   observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
@@ -663,6 +690,8 @@ void Factory::newHollowDispatched(const msg::Message&)
   project->connect(targetFeatureId, hollow->getId(), ftr::InputTypes::target);
   
   targetFeature->hide3D();
+  targetFeature->hideOverlay();
+  hollow->setColor(targetFeature->getColor());
   
   observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
   observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
