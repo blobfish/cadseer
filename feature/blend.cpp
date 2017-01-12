@@ -70,7 +70,7 @@ std::shared_ptr< Parameter > Blend::buildPositionParameter()
   return out;
 }
 
-VariableBlend Blend::buildDefaultVariable(const SeerShape &seerShapeIn, const BlendPick &pickIn)
+VariableBlend Blend::buildDefaultVariable(const SeerShape &seerShapeIn, const Pick &pickIn)
 {
   VariableBlend out;
   out.pick = pickIn;
@@ -93,40 +93,6 @@ VariableBlend Blend::buildDefaultVariable(const SeerShape &seerShapeIn, const Bl
   out.entries.push_back(entry2);
   
   return out;
-}
-
-double Blend::calculateUParameter(const TopoDS_Edge &edgeIn, const osg::Vec3d &point)
-{
-  TopoDS_Shape aVertex = BRepBuilderAPI_MakeVertex(gp_Pnt(point.x(), point.y(), point.z())).Vertex();
-  BRepExtrema_DistShapeShape dist(edgeIn, aVertex);
-  if (dist.NbSolution() < 1)
-  {
-    std::cout << "Warning: no solution for distshapeshape in Blend::calculateU" << std::endl;
-    return 0.0;
-  }
-  if (dist.SupportTypeShape1(1) != BRepExtrema_IsOnEdge)
-  {
-    std::cout << "Warning: wrong support type in Blend::calculateU" << std::endl;
-    return 0.0;
-  }
-  
-  double closestParameter;
-  dist.ParOnEdgeS1(1, closestParameter);
-  
-  double firstP, lastP;
-  BRep_Tool::Curve(edgeIn, firstP, lastP);
-  //normalize parameter to 0 to 1.
-  return (closestParameter - firstP) / (lastP - firstP);
-}
-
-osg::Vec3d Blend::calculateUPoint(const TopoDS_Edge &edgeIn, double parameter)
-{
-  double firstP, lastP;
-  const Handle_Geom_Curve &curve = BRep_Tool::Curve(edgeIn, firstP, lastP);
-  double parameterOut = parameter * (lastP - firstP) + firstP;
-  gp_Pnt occPoint;
-  curve->D0(parameterOut, occPoint);
-  return gu::toOsg(occPoint);
 }
 
 void Blend::addSimpleBlend(const SimpleBlend &simpleBlendIn)
@@ -191,7 +157,7 @@ void Blend::updateModel(const UpdateMap& mapIn)
         if (!labelDone)
         {
         labelDone = true;
-        simpleBlend.label->setMatrix(osg::Matrixd::translate(calculateUPoint(TopoDS::Edge(tempShape), pick.u)));
+        simpleBlend.label->setMatrix(osg::Matrixd::translate(pick.getPoint(TopoDS::Edge(tempShape))));
         }
       }
     }
@@ -364,17 +330,7 @@ void Blend::serialWrite(const QDir &dIn)
   prj::srl::SimpleBlends sBlendsOut;
   for (const auto &sBlend : simpleBlends)
   {
-    prj::srl::BlendPicks bPicksOut;
-    for (const auto &bPick : sBlend.picks)
-    {
-      prj::srl::BlendPick bPickOut
-      (
-        gu::idToString(bPick.id),
-        bPick.u,
-        bPick.v
-      );
-      bPicksOut.array().push_back(bPickOut);
-    }
+    prj::srl::Picks bPicksOut = ::ftr::serialOut(sBlend.picks);
     prj::srl::SimpleBlend sBlendOut
     (
       bPicksOut,
@@ -386,13 +342,7 @@ void Blend::serialWrite(const QDir &dIn)
   prj::srl::VariableBlends vBlendsOut;
   for (const auto &vBlend : variableBlends)
   {
-    prj::srl::BlendPick bPickOut
-    (
-      gu::idToString(vBlend.pick.id),
-      vBlend.pick.u,
-      vBlend.pick.v
-    );
-    
+    prj::srl::Pick bPickOut = vBlend.pick.serialOut();
     prj::srl::VariableEntries vEntriesOut;
     for (const auto vEntry : vBlend.entries)
     {
@@ -443,10 +393,8 @@ void Blend::serialRead(const prj::srl::FeatureBlend& sBlendIn)
     SimpleBlend simpleBlend;
     for (const auto &bPickIn : simpleBlendIn.blendPicks().array())
     {
-      BlendPick pick;
-      pick.id = gu::stringToId(bPickIn.id());
-      pick.u = bPickIn.u();
-      pick.v = bPickIn.v();
+      Pick pick;
+      pick.serialIn(bPickIn);
       simpleBlend.picks.push_back(pick);
     }
     simpleBlend.radius = buildRadiusParameter();
@@ -457,9 +405,7 @@ void Blend::serialRead(const prj::srl::FeatureBlend& sBlendIn)
   for (const auto &variableBlendIn : sBlendIn.variableBlends().array())
   {
     VariableBlend vBlend;
-    vBlend.pick.id = gu::stringToId(variableBlendIn.blendPick().id());
-    vBlend.pick.u = variableBlendIn.blendPick().u();
-    vBlend.pick.v = variableBlendIn.blendPick().v();
+    vBlend.pick.serialIn(variableBlendIn.blendPick());
     for (const auto &entryIn : variableBlendIn.variableEntries().array())
     {
       VariableEntry entry;

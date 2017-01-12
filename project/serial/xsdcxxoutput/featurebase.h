@@ -86,6 +86,8 @@ namespace prj
     class ColorValue;
     class Color;
     class FeatureBase;
+    class Pick;
+    class Picks;
   }
 }
 
@@ -3331,6 +3333,440 @@ namespace prj
 
       //@endcond
     };
+
+    /**
+     * @brief Class corresponding to the %Pick schema type.
+     *
+     * @nosubgrouping
+     */
+    class Pick: public ::xml_schema::Type
+    {
+      public:
+      /**
+       * @name id
+       *
+       * @brief Accessor and modifier functions for the %id
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::xml_schema::String IdType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< IdType, char > IdTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const IdType&
+      id () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      IdType&
+      id ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      id (const IdType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      id (::std::unique_ptr< IdType > p);
+
+      /**
+       * @brief Return the default value for the element.
+       *
+       * @return A read-only (constant) reference to the element's
+       * default value.
+       */
+      static const IdType&
+      id_default_value ();
+
+      //@}
+
+      /**
+       * @name u
+       *
+       * @brief Accessor and modifier functions for the %u
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::xml_schema::Double UType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< UType, char, ::xsd::cxx::tree::schema_type::double_ > UTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const UType&
+      u () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      UType&
+      u ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      u (const UType& x);
+
+      /**
+       * @brief Return the default value for the element.
+       *
+       * @return The element's default value.
+       */
+      static UType
+      u_default_value ();
+
+      //@}
+
+      /**
+       * @name v
+       *
+       * @brief Accessor and modifier functions for the %v
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::xml_schema::Double VType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< VType, char, ::xsd::cxx::tree::schema_type::double_ > VTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const VType&
+      v () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      VType&
+      v ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      v (const VType& x);
+
+      /**
+       * @brief Return the default value for the element.
+       *
+       * @return The element's default value.
+       */
+      static VType
+      v_default_value ();
+
+      //@}
+
+      /**
+       * @name Constructors
+       */
+      //@{
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes.
+       */
+      Pick (const IdType&,
+            const UType&,
+            const VType&);
+
+      /**
+       * @brief Create an instance from a DOM element.
+       *
+       * @param e A DOM element to extract the data from.
+       * @param f Flags to create the new instance with.
+       * @param c A pointer to the object that will contain the new
+       * instance.
+       */
+      Pick (const ::xercesc::DOMElement& e,
+            ::xml_schema::Flags f = 0,
+            ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy constructor.
+       *
+       * @param x An instance to make a copy of.
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      Pick (const Pick& x,
+            ::xml_schema::Flags f = 0,
+            ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy the instance polymorphically.
+       *
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       * @return A pointer to the dynamically allocated copy.
+       *
+       * This function ensures that the dynamic type of the instance is
+       * used for copying and should be used for polymorphic object
+       * models instead of the copy constructor.
+       */
+      virtual Pick*
+      _clone (::xml_schema::Flags f = 0,
+              ::xml_schema::Container* c = 0) const;
+
+      /**
+       * @brief Copy assignment operator.
+       *
+       * @param x An instance to make a copy of.
+       * @return A reference to itself.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      Pick&
+      operator= (const Pick& x);
+
+      //@}
+
+      /**
+       * @brief Destructor.
+       */
+      virtual 
+      ~Pick ();
+
+      // Implementation.
+      //
+
+      //@cond
+
+      protected:
+      void
+      parse (::xsd::cxx::xml::dom::parser< char >&,
+             ::xml_schema::Flags);
+
+      protected:
+      ::xsd::cxx::tree::one< IdType > id_;
+      static const IdType id_default_value_;
+      ::xsd::cxx::tree::one< UType > u_;
+      ::xsd::cxx::tree::one< VType > v_;
+
+      //@endcond
+    };
+
+    /**
+     * @brief Class corresponding to the %Picks schema type.
+     *
+     * @nosubgrouping
+     */
+    class Picks: public ::xml_schema::Type
+    {
+      public:
+      /**
+       * @name array
+       *
+       * @brief Accessor and modifier functions for the %array
+       * sequence element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::Pick ArrayType;
+
+      /**
+       * @brief Element sequence container type.
+       */
+      typedef ::xsd::cxx::tree::sequence< ArrayType > ArraySequence;
+
+      /**
+       * @brief Element iterator type.
+       */
+      typedef ArraySequence::iterator ArrayIterator;
+
+      /**
+       * @brief Element constant iterator type.
+       */
+      typedef ArraySequence::const_iterator ArrayConstIterator;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< ArrayType, char > ArrayTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element
+       * sequence.
+       *
+       * @return A constant reference to the sequence container.
+       */
+      const ArraySequence&
+      array () const;
+
+      /**
+       * @brief Return a read-write reference to the element sequence.
+       *
+       * @return A reference to the sequence container.
+       */
+      ArraySequence&
+      array ();
+
+      /**
+       * @brief Copy elements from a given sequence.
+       *
+       * @param s A sequence to copy elements from.
+       *
+       * For each element in @a s this function makes a copy and adds it 
+       * to the sequence. Note that this operation completely changes the 
+       * sequence and all old elements will be lost.
+       */
+      void
+      array (const ArraySequence& s);
+
+      //@}
+
+      /**
+       * @name Constructors
+       */
+      //@{
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes.
+       */
+      Picks ();
+
+      /**
+       * @brief Create an instance from a DOM element.
+       *
+       * @param e A DOM element to extract the data from.
+       * @param f Flags to create the new instance with.
+       * @param c A pointer to the object that will contain the new
+       * instance.
+       */
+      Picks (const ::xercesc::DOMElement& e,
+             ::xml_schema::Flags f = 0,
+             ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy constructor.
+       *
+       * @param x An instance to make a copy of.
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      Picks (const Picks& x,
+             ::xml_schema::Flags f = 0,
+             ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy the instance polymorphically.
+       *
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       * @return A pointer to the dynamically allocated copy.
+       *
+       * This function ensures that the dynamic type of the instance is
+       * used for copying and should be used for polymorphic object
+       * models instead of the copy constructor.
+       */
+      virtual Picks*
+      _clone (::xml_schema::Flags f = 0,
+              ::xml_schema::Container* c = 0) const;
+
+      /**
+       * @brief Copy assignment operator.
+       *
+       * @param x An instance to make a copy of.
+       * @return A reference to itself.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      Picks&
+      operator= (const Picks& x);
+
+      //@}
+
+      /**
+       * @brief Destructor.
+       */
+      virtual 
+      ~Picks ();
+
+      // Implementation.
+      //
+
+      //@cond
+
+      protected:
+      void
+      parse (::xsd::cxx::xml::dom::parser< char >&,
+             ::xml_schema::Flags);
+
+      protected:
+      ArraySequence array_;
+
+      //@endcond
+    };
   }
 }
 
@@ -3407,6 +3843,12 @@ namespace prj
 
     void
     operator<< (::xercesc::DOMElement&, const FeatureBase&);
+
+    void
+    operator<< (::xercesc::DOMElement&, const Pick&);
+
+    void
+    operator<< (::xercesc::DOMElement&, const Picks&);
   }
 }
 

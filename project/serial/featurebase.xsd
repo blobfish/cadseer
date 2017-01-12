@@ -106,4 +106,20 @@
   </xs:all>
 </xs:complexType>
 
+<!-- following definitions are not used directly in base, but might be in derived -->
+
+<xs:complexType name="Pick">
+  <xs:all>
+    <xs:element name="id" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+    <xs:element name="u" type="xs:double" default="0.0"/>
+    <xs:element name="v" type="xs:double" default="0.0"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="Picks">
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+    <xs:element name="array" type="srl:Pick"/>
+  </xs:sequence>
+</xs:complexType>
+
 </xs:schema> 

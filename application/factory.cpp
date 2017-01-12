@@ -488,9 +488,9 @@ void Factory::newBlendDispatched(const msg::Message&)
       continue;
     
     TopoDS_Edge edge = TopoDS::Edge(targetSeerShape.getOCCTShape(currentSelection.shapeId));  
-    ftr::BlendPick pick;
+    ftr::Pick pick;
     pick.id = currentSelection.shapeId;
-    pick.u = ftr::Blend::calculateUParameter(edge, currentSelection.pointLocation);
+    pick.setParameter(edge, currentSelection.pointLocation);
     
     //simple radius test  
     simpleBlend.picks.push_back(pick);
@@ -593,9 +593,9 @@ void Factory::newDraftDispatched(const msg::Message&)
       continue;
       
     TopoDS_Face face = TopoDS::Face(targetSeerShape.findShapeIdRecord(currentSelection.shapeId).shape);  
-    ftr::DraftPick pick;
-    pick.faceId = currentSelection.shapeId;
-    ftr::Draft::calculateUVParameter(face, currentSelection.pointLocation, pick.u, pick.v);
+    ftr::Pick pick;
+    pick.id = currentSelection.shapeId;
+    pick.setParameter(face, currentSelection.pointLocation);
     convey.targets.push_back(pick);
   }
   if (convey.targets.empty())
@@ -665,7 +665,7 @@ void Factory::newHollowDispatched(const msg::Message&)
   assert(targetFeature->hasSeerShape());
   const ftr::SeerShape &targetSeerShape = targetFeature->getSeerShape();
   
-  std::vector<ftr::HollowPick> hollowPicks;
+  ftr::Picks hollowPicks;
   for (const auto &currentSelection : containers)
   {
     if
@@ -675,10 +675,10 @@ void Factory::newHollowDispatched(const msg::Message&)
     )
       continue;
       
-    ftr::HollowPick hPick;
-    hPick.faceId = currentSelection.shapeId;
+    ftr::Pick hPick;
+    hPick.id = currentSelection.shapeId;
     TopoDS_Face face = TopoDS::Face(targetSeerShape.findShapeIdRecord(currentSelection.shapeId).shape);
-    ftr::Hollow::calculateUVParameter(face, currentSelection.pointLocation, hPick.u, hPick.v);
+    hPick.setParameter(face, currentSelection.pointLocation);
     hollowPicks.push_back(hPick);
   }
   if (hollowPicks.empty())

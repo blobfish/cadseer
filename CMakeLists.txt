@@ -92,6 +92,7 @@ SET(FEATURE_SOURCES
     feature/datumplane.cpp
     feature/message.cpp
     feature/hollow.cpp
+    feature/pick.cpp
     )
     
 SET(EXPRESSION_SOURCES

@@ -22,6 +22,7 @@
 
 #include <osg/ref_ptr>
 
+#include <feature/pick.h>
 #include <feature/base.h>
 
 class BRepOffsetAPI_DraftAngle;
@@ -34,17 +35,11 @@ namespace prj{namespace srl{class FeatureDraft;}}
 namespace ftr
 {
   class SeerShape;
-  struct DraftPick
-  {
-    boost::uuids::uuid faceId; //!< reference face. set with referenceFaceId.
-    double u; //!< u parameter on picked object
-    double v;//!< v parameter on picked object
-  };
   
   struct DraftConvey
   {
-    std::vector<DraftPick> targets;
-    DraftPick neutralPlane;
+    Picks targets;
+    Pick neutralPlane;
     std::shared_ptr<Parameter> angle; //!< parameter containing angle.
     osg::ref_ptr<lbr::PLabel> label; //!< graphic icon
   };
@@ -66,11 +61,9 @@ namespace ftr
       void setDraft(const DraftConvey &);
       
       static std::shared_ptr<Parameter> buildAngleParameter();
-      static void calculateUVParameter(const TopoDS_Face&, const osg::Vec3d&, double&, double&);
-      static osg::Vec3d calculateUVPoint(const TopoDS_Face&, double, double);
     protected:
-      std::vector<DraftPick> targetPicks;
-      DraftPick neutralPick;
+      Picks targetPicks;
+      Pick neutralPick;
       
       std::shared_ptr<Parameter> angle; //!< parameter containing draft angle.
       osg::ref_ptr<lbr::PLabel> label; //!< graphic icon

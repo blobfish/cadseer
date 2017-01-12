@@ -842,6 +842,110 @@ namespace prj
     {
       this->color_.set (std::move (x));
     }
+
+
+    // Pick
+    // 
+
+    const Pick::IdType& Pick::
+    id () const
+    {
+      return this->id_.get ();
+    }
+
+    Pick::IdType& Pick::
+    id ()
+    {
+      return this->id_.get ();
+    }
+
+    void Pick::
+    id (const IdType& x)
+    {
+      this->id_.set (x);
+    }
+
+    void Pick::
+    id (::std::unique_ptr< IdType > x)
+    {
+      this->id_.set (std::move (x));
+    }
+
+    const Pick::IdType& Pick::
+    id_default_value ()
+    {
+      return id_default_value_;
+    }
+
+    const Pick::UType& Pick::
+    u () const
+    {
+      return this->u_.get ();
+    }
+
+    Pick::UType& Pick::
+    u ()
+    {
+      return this->u_.get ();
+    }
+
+    void Pick::
+    u (const UType& x)
+    {
+      this->u_.set (x);
+    }
+
+    Pick::UType Pick::
+    u_default_value ()
+    {
+      return UType (.0);
+    }
+
+    const Pick::VType& Pick::
+    v () const
+    {
+      return this->v_.get ();
+    }
+
+    Pick::VType& Pick::
+    v ()
+    {
+      return this->v_.get ();
+    }
+
+    void Pick::
+    v (const VType& x)
+    {
+      this->v_.set (x);
+    }
+
+    Pick::VType Pick::
+    v_default_value ()
+    {
+      return VType (.0);
+    }
+
+
+    // Picks
+    // 
+
+    const Picks::ArraySequence& Picks::
+    array () const
+    {
+      return this->array_;
+    }
+
+    Picks::ArraySequence& Picks::
+    array ()
+    {
+      return this->array_;
+    }
+
+    void Picks::
+    array (const ArraySequence& s)
+    {
+      this->array_ = s;
+    }
   }
 }
 
@@ -2498,6 +2602,229 @@ namespace prj
     ~FeatureBase ()
     {
     }
+
+    // Pick
+    //
+
+    const Pick::IdType Pick::id_default_value_ (
+      "00000000-0000-0000-0000-000000000000");
+
+    Pick::
+    Pick (const IdType& id,
+          const UType& u,
+          const VType& v)
+    : ::xml_schema::Type (),
+      id_ (id, this),
+      u_ (u, this),
+      v_ (v, this)
+    {
+    }
+
+    Pick::
+    Pick (const Pick& x,
+          ::xml_schema::Flags f,
+          ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      id_ (x.id_, f, this),
+      u_ (x.u_, f, this),
+      v_ (x.v_, f, this)
+    {
+    }
+
+    Pick::
+    Pick (const ::xercesc::DOMElement& e,
+          ::xml_schema::Flags f,
+          ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      id_ (this),
+      u_ (this),
+      v_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void Pick::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // id
+        //
+        if (n.name () == "id" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< IdType > r (
+            IdTraits::create (i, f, this));
+
+          if (!id_.present ())
+          {
+            this->id_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // u
+        //
+        if (n.name () == "u" && n.namespace_ ().empty ())
+        {
+          if (!u_.present ())
+          {
+            this->u_.set (UTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // v
+        //
+        if (n.name () == "v" && n.namespace_ ().empty ())
+        {
+          if (!v_.present ())
+          {
+            this->v_.set (VTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        break;
+      }
+
+      if (!id_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "id",
+          "");
+      }
+
+      if (!u_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "u",
+          "");
+      }
+
+      if (!v_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "v",
+          "");
+      }
+    }
+
+    Pick* Pick::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class Pick (*this, f, c);
+    }
+
+    Pick& Pick::
+    operator= (const Pick& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->id_ = x.id_;
+        this->u_ = x.u_;
+        this->v_ = x.v_;
+      }
+
+      return *this;
+    }
+
+    Pick::
+    ~Pick ()
+    {
+    }
+
+    // Picks
+    //
+
+    Picks::
+    Picks ()
+    : ::xml_schema::Type (),
+      array_ (this)
+    {
+    }
+
+    Picks::
+    Picks (const Picks& x,
+           ::xml_schema::Flags f,
+           ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      array_ (x.array_, f, this)
+    {
+    }
+
+    Picks::
+    Picks (const ::xercesc::DOMElement& e,
+           ::xml_schema::Flags f,
+           ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      array_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void Picks::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // array
+        //
+        if (n.name () == "array" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< ArrayType > r (
+            ArrayTraits::create (i, f, this));
+
+          this->array_.push_back (::std::move (r));
+          continue;
+        }
+
+        break;
+      }
+    }
+
+    Picks* Picks::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class Picks (*this, f, c);
+    }
+
+    Picks& Picks::
+    operator= (const Picks& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->array_ = x.array_;
+      }
+
+      return *this;
+    }
+
+    Picks::
+    ~Picks ()
+    {
+    }
   }
 }
 
@@ -2950,6 +3277,65 @@ namespace prj
             e));
 
         s << *i.color ();
+      }
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const Pick& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // id
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "id",
+            e));
+
+        s << i.id ();
+      }
+
+      // u
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "u",
+            e));
+
+        s << ::xml_schema::AsDouble(i.u ());
+      }
+
+      // v
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "v",
+            e));
+
+        s << ::xml_schema::AsDouble(i.v ());
+      }
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const Picks& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // array
+      //
+      for (Picks::ArrayConstIterator
+           b (i.array ().begin ()), n (i.array ().end ());
+           b != n; ++b)
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "array",
+            e));
+
+        s << *b;
       }
     }
   }

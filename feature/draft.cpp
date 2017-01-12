@@ -98,7 +98,7 @@ void Draft::updateModel(const UpdateMap& mapIn)
     
     BRepOffsetAPI_DraftAngle dMaker(targetSeerShape.getRootOCCTShape());
     
-    TopoDS_Shape neutralShape = targetSeerShape.findShapeIdRecord(neutralPick.faceId).shape;
+    TopoDS_Shape neutralShape = targetSeerShape.findShapeIdRecord(neutralPick.id).shape;
     gp_Pln plane = derivePlaneFromShape(neutralShape);
     
     double localAngle = osg::DegreesToRadians(angle->getValue());
@@ -106,12 +106,12 @@ void Draft::updateModel(const UpdateMap& mapIn)
     bool labelDone = false; //set label position to first pick.
     for (const auto &p : targetPicks)
     {
-      if (!targetSeerShape.hasShapeIdRecord(p.faceId))
+      if (!targetSeerShape.hasShapeIdRecord(p.id))
       {
-        std::cout << gu::idToString(id) << " Draft missing: " << gu::idToString(p.faceId) << std::endl;
+        std::cout << gu::idToString(id) << " Draft missing: " << gu::idToString(p.id) << std::endl;
         continue;
       }
-      const TopoDS_Face &face = TopoDS::Face(targetSeerShape.findShapeIdRecord(p.faceId).shape);
+      const TopoDS_Face &face = TopoDS::Face(targetSeerShape.findShapeIdRecord(p.id).shape);
       dMaker.Add(face, direction, localAngle, plane);
       if (!dMaker.AddDone())
       {
@@ -121,7 +121,7 @@ void Draft::updateModel(const UpdateMap& mapIn)
       if (!labelDone)
       {
         labelDone = true;
-        label->setMatrix(osg::Matrixd::translate(calculateUVPoint(face, p.u, p.v)));
+        label->setMatrix(osg::Matrixd::translate(Pick::point(face, p.u, p.v)));
       }
     }
     dMaker.Build();
@@ -191,25 +191,8 @@ void Draft::generatedMatch(BRepOffsetAPI_DraftAngle &dMaker, const SeerShape &ta
 
 void Draft::serialWrite(const QDir &dIn)
 {
-  prj::srl::DraftPicks targetPicksOut;
-  for (const auto &targetPick : targetPicks)
-  {
-    prj::srl::DraftPick targetPickOut
-    (
-      gu::idToString(targetPick.faceId),
-      targetPick.u,
-      targetPick.v
-    );
-    targetPicksOut.array().push_back(targetPickOut);
-  }
-  
-  prj::srl::DraftPick neutralPickOut
-  (
-    gu::idToString(neutralPick.faceId),
-    neutralPick.u,
-    neutralPick.v
-  );
-  
+  prj::srl::Picks targetPicksOut = ::ftr::serialOut(targetPicks);
+  prj::srl::Pick neutralPickOut = neutralPick.serialOut();
   prj::srl::FeatureDraft draftOut
   (
     Base::serialOut(),
@@ -227,18 +210,8 @@ void Draft::serialRead(const prj::srl::FeatureDraft &sDraftIn)
 {
   Base::serialIn(sDraftIn.featureBase());
   
-  for (const auto &targetPickIn : sDraftIn.targetPicks().array())
-  {
-    DraftPick pick;
-    pick.faceId = gu::stringToId(targetPickIn.faceId());
-    pick.u = targetPickIn.u();
-    pick.v = targetPickIn.v();
-    targetPicks.push_back(pick);
-  }
-  
-  neutralPick.faceId = gu::stringToId(sDraftIn.neutralPick().faceId());
-  neutralPick.u = sDraftIn.neutralPick().u();
-  neutralPick.v = sDraftIn.neutralPick().v();
+  targetPicks = ::ftr::serialIn(sDraftIn.targetPicks());
+  neutralPick.serialIn(sDraftIn.neutralPick());
   
   angle = buildAngleParameter();
   angle->serialIn(sDraftIn.angle());
@@ -247,30 +220,4 @@ void Draft::serialRead(const prj::srl::FeatureDraft &sDraftIn)
   label = new lbr::PLabel(angle.get());
   label->valueHasChanged();
   overlaySwitch->addChild(label.get());
-}
-
-void Draft::calculateUVParameter(const TopoDS_Face &faceIn, const osg::Vec3d &pointIn, double &uOut, double &vOut)
-{
-  TopoDS_Shape aVertex = BRepBuilderAPI_MakeVertex(gp_Pnt(pointIn.x(), pointIn.y(), pointIn.z())).Vertex();
-  BRepExtrema_DistShapeShape dist(faceIn, aVertex);
-  if (dist.NbSolution() < 1)
-  {
-    std::cout << "Warning: no solution for distshapeshape in Draft::calculateUV" << std::endl;
-    return;
-  }
-  if (dist.SupportTypeShape1(1) != BRepExtrema_IsInFace)
-  {
-    std::cout << "Warning: wrong support type in Draft::calculateUV" << std::endl;
-    return;
-  }
-  
-  dist.ParOnFaceS1(1, uOut, vOut);
-}
-
-osg::Vec3d Draft::calculateUVPoint(const TopoDS_Face &faceIn, double uIn, double vIn)
-{
-  Handle_Geom_Surface surface = BRep_Tool::Surface(faceIn);
-  gp_Pnt occPoint;
-  surface->D0(uIn, vIn, occPoint);
-  return gu::toOsg(occPoint);
 }

@@ -7,25 +7,11 @@
   
 <xs:include schemaLocation="featurebase.xsd"/>
 
-<xs:complexType name="DraftPick">
-  <xs:all>
-    <xs:element name="faceId" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
-    <xs:element name="u" type="xs:double" default="NaN"/>
-    <xs:element name="v" type="xs:double" default="NaN"/>
-  </xs:all>
-</xs:complexType>
-
-<xs:complexType name="DraftPicks">
-  <xs:sequence minOccurs="0" maxOccurs="unbounded">
-    <xs:element name="array" type="srl:DraftPick"/>
-  </xs:sequence>
-</xs:complexType>
-
 <xs:complexType name="FeatureDraft">
   <xs:all>
     <xs:element name="featureBase" type="srl:FeatureBase"/>
-    <xs:element name="targetPicks" type="srl:DraftPicks"/>
-    <xs:element name="neutralPick" type="srl:DraftPick"/>
+    <xs:element name="targetPicks" type="srl:Picks"/>
+    <xs:element name="neutralPick" type="srl:Pick"/>
     <xs:element name="angle" type="srl:Parameter"/>
   </xs:all>
 </xs:complexType>

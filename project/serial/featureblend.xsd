@@ -7,23 +7,9 @@
   
 <xs:include schemaLocation="featurebase.xsd"/>
 
-<xs:complexType name="BlendPick">
-  <xs:all>
-    <xs:element name="id" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
-    <xs:element name="u" type="xs:double" default="NaN"/>
-    <xs:element name="v" type="xs:double" default="NaN"/>
-  </xs:all>
-</xs:complexType>
-
-<xs:complexType name="BlendPicks">
-  <xs:sequence minOccurs="0" maxOccurs="unbounded">
-    <xs:element name="array" type="srl:BlendPick"/>
-  </xs:sequence>
-</xs:complexType>
-
 <xs:complexType name="SimpleBlend">
   <xs:all>
-    <xs:element name="blendPicks" type="srl:BlendPicks"/>
+    <xs:element name="blendPicks" type="srl:Picks"/>
     <xs:element name="radius" type="srl:Parameter"/>
   </xs:all>
 </xs:complexType>
@@ -50,7 +36,7 @@
 
 <xs:complexType name="VariableBlend">
   <xs:all>
-    <xs:element name="blendPick" type="srl:BlendPick"/>
+    <xs:element name="blendPick" type="srl:Pick"/>
     <xs:element name="variableEntries" type="srl:VariableEntries"/>
   </xs:all>
 </xs:complexType>

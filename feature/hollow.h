@@ -22,6 +22,7 @@
 
 #include <TopTools_ListOfShape.hxx>
 
+#include <feature/pick.h>
 #include <feature/base.h>
 
 class BRepOffsetAPI_MakeThickSolid;
@@ -32,15 +33,6 @@ namespace prj{namespace srl{class FeatureHollow;}}
 namespace ftr
 {
   class SeerShape;
-  
-  struct HollowPick
-  {
-    boost::uuids::uuid faceId; //!< reference face
-    double u; //!< u parameter on 1st closing face
-    double v;//!< v parameter on 1st closing face
-    
-    bool operator==(const HollowPick &other){return faceId == other.faceId;}
-  };
   
   class Hollow : public Base
   {
@@ -54,16 +46,14 @@ namespace ftr
     virtual void serialWrite(const QDir&) override;
     void serialRead(const prj::srl::FeatureHollow &);
     
-    void setHollowPicks(const std::vector<HollowPick>&);
-    void addHollowPick(const HollowPick&);
-    void removeHollowPick(const HollowPick&);
-    static void calculateUVParameter(const TopoDS_Face&, const osg::Vec3d&, double&, double&);
-    static osg::Vec3d calculateUVPoint(const TopoDS_Face&, double, double);
+    void setHollowPicks(const Picks&);
+    void addHollowPick(const Pick&);
+    void removeHollowPick(const Pick&);
   private:
     static QIcon icon;
     Parameter offset;
     osg::ref_ptr<lbr::PLabel> label; //!< graphic icon
-    std::vector<HollowPick> hollowPicks;
+    Picks hollowPicks;
     
     /*! used to map new geometry to old geometry. this will end up
      * more complicated than this as hollow can make splits.

@@ -26,6 +26,7 @@
 
 #include <library/plabel.h>
 #include <feature/parameter.h>
+#include <feature/pick.h>
 #include <feature/base.h>
 
 class BRepFilletAPI_MakeFillet;
@@ -36,16 +37,10 @@ namespace prj{namespace srl{class FeatureBlend;}}
 namespace ftr
 {
   class SeerShape;
-struct BlendPick
-{
-  boost::uuids::uuid id; //!< id of edge or face object picked.
-  double u; //!< u parameter on picked object
-  double v;//!< v parameter on picked object
-};
 
 struct SimpleBlend
 {
-  std::vector<BlendPick> picks; //!< vector of picked objects
+  Picks picks; //!< vector of picked objects
   std::shared_ptr<Parameter> radius; //!< parameter containing blend radius.
   osg::ref_ptr<lbr::PLabel> label; //!< graphic icon
 };
@@ -59,7 +54,7 @@ struct VariableEntry
 
 struct VariableBlend
 {
-  BlendPick pick; //!< pick object.
+  Pick pick; //!< pick object.
   std::vector<VariableEntry> entries;
 };
   
@@ -70,9 +65,7 @@ class Blend : public Base
     
     static std::shared_ptr<Parameter> buildRadiusParameter();
     static std::shared_ptr<Parameter> buildPositionParameter();
-    static VariableBlend buildDefaultVariable(const SeerShape&, const BlendPick &);
-    static double calculateUParameter(const TopoDS_Edge&, const osg::Vec3d&);
-    static osg::Vec3d calculateUPoint(const TopoDS_Edge&, double);
+    static VariableBlend buildDefaultVariable(const SeerShape&, const Pick &);
     
     void addSimpleBlend(const SimpleBlend&);
     void addVariableBlend(const VariableBlend&);

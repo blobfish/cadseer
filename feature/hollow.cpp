@@ -85,9 +85,8 @@ void Hollow::updateModel(const UpdateMap &mapIn)
     if (closingFaceShapes.IsEmpty())
       throw std::runtime_error("Hollow: no closing faces");
     
-    const TopoDS_Face &firstFace = TopoDS::Face(targetSeerShape.getOCCTShape(hollowPicks.front().faceId));
-    label->setMatrix(osg::Matrixd::translate(calculateUVPoint(firstFace,
-      hollowPicks.front().u, hollowPicks.front().v)));
+    const TopoDS_Face &firstFace = TopoDS::Face(targetSeerShape.getOCCTShape(hollowPicks.front().id));
+    label->setMatrix(osg::Matrixd::translate(hollowPicks.front().getPoint(firstFace)));
     
     BRepOffsetAPI_MakeThickSolid operation;
     operation.MakeThickSolidByJoin
@@ -134,17 +133,17 @@ void Hollow::updateModel(const UpdateMap &mapIn)
   setModelClean();
 }
 
-void Hollow::setHollowPicks(const std::vector<HollowPick> &picksIn)
+void Hollow::setHollowPicks(const Picks &picksIn)
 {
   hollowPicks = picksIn;
 }
 
-void Hollow::addHollowPick(const HollowPick &pickIn)
+void Hollow::addHollowPick(const Pick &pickIn)
 {
   hollowPicks.push_back(pickIn);
 }
 
-void Hollow::removeHollowPick(const HollowPick &pickIn)
+void Hollow::removeHollowPick(const Pick &pickIn)
 {
   auto it = std::find(hollowPicks.begin(), hollowPicks.end(), pickIn);
   if (it == hollowPicks.end())
@@ -156,47 +155,19 @@ void Hollow::removeHollowPick(const HollowPick &pickIn)
   hollowPicks.erase(it);
 }
 
-//this was copied from draft. need to refactor.
-void Hollow::calculateUVParameter(const TopoDS_Face &faceIn, const osg::Vec3d &pointIn, double &uOut, double &vOut)
-{
-  TopoDS_Shape aVertex = BRepBuilderAPI_MakeVertex(gp_Pnt(pointIn.x(), pointIn.y(), pointIn.z())).Vertex();
-  BRepExtrema_DistShapeShape dist(faceIn, aVertex);
-  if (dist.NbSolution() < 1)
-  {
-    std::cout << "Warning: no solution for distshapeshape in Draft::calculateUV" << std::endl;
-    return;
-  }
-  if (dist.SupportTypeShape1(1) != BRepExtrema_IsInFace)
-  {
-    std::cout << "Warning: wrong support type in Draft::calculateUV" << std::endl;
-    return;
-  }
-  
-  dist.ParOnFaceS1(1, uOut, vOut);
-}
-
-//this was also duplicated from draft. need to refactor.
-osg::Vec3d Hollow::calculateUVPoint(const TopoDS_Face &faceIn, double uIn, double vIn)
-{
-  Handle_Geom_Surface surface = BRep_Tool::Surface(faceIn);
-  gp_Pnt occPoint;
-  surface->D0(uIn, vIn, occPoint);
-  return gu::toOsg(occPoint);
-}
-
 TopTools_ListOfShape Hollow::resolveClosingFaces(const SeerShape &seerShapeIn)
 {
   TopTools_ListOfShape out;
   for (const auto &closingFace : hollowPicks)
   {
-    if (!seerShapeIn.hasShapeIdRecord(closingFace.faceId))
+    if (!seerShapeIn.hasShapeIdRecord(closingFace.id))
     {
       std::cout << "feature id: " << gu::idToString(getId()) << "     can't find face: "
-        << gu::idToString(closingFace.faceId) << " of parent" << std::endl;
+        << gu::idToString(closingFace.id) << " of parent" << std::endl;
       continue;
     }
     
-    const TopoDS_Shape& faceShape = seerShapeIn.getOCCTShape(closingFace.faceId);
+    const TopoDS_Shape& faceShape = seerShapeIn.getOCCTShape(closingFace.id);
     if (faceShape.ShapeType() != TopAbs_FACE)
     {
       std::cout << "feature id: " << gu::idToString(getId()) << "      wrong shape type: "
@@ -262,18 +233,7 @@ void Hollow::generatedMatch(BRepOffsetAPI_MakeThickSolid &operationIn, const See
 
 void Hollow::serialWrite(const QDir &dIn)
 {
-  prj::srl::HollowPicks hPicksOut;
-  for (const auto &hPick : hollowPicks)
-  {
-    prj::srl::HollowPick hPickOut
-    (
-      gu::idToString(hPick.faceId),
-      hPick.u,
-      hPick.v
-    );
-    hPicksOut.array().push_back(hPickOut);
-  }
-  
+  prj::srl::Picks hPicksOut = ::ftr::serialOut(hollowPicks);
   prj::srl::FeatureHollow hollowOut
   (
     Base::serialOut(),
@@ -289,16 +249,7 @@ void Hollow::serialWrite(const QDir &dIn)
 void Hollow::serialRead(const prj::srl::FeatureHollow &sHollowIn)
 {
   Base::serialIn(sHollowIn.featureBase());
-  
-  for (const auto &sHollowPick : sHollowIn.hollowPicks().array())
-  {
-    HollowPick hPick;
-    hPick.faceId = gu::stringToId(sHollowPick.faceId());
-    hPick.u = sHollowPick.u();
-    hPick.v = sHollowPick.v();
-    hollowPicks.push_back(hPick);
-  }
-  
+  hollowPicks = ::ftr::serialIn(sHollowIn.hollowPicks());
   offset.serialIn(sHollowIn.offset());
   offset.connectValue(boost::bind(&Hollow::setModelDirty, this));
   
