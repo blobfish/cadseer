@@ -1069,7 +1069,7 @@ void Model::viewIsolateSlot()
 
 void Model::editColorSlot()
 {
-  observer->messageOutSignal(msg::Message(msg::Request | msg::Edit | msg::Color));
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Edit | msg::Feature | msg::Color));
 }
 
 void Model::editRenameSlot()

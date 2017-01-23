@@ -469,7 +469,7 @@ void GestureHandler::constructMenu()
     
     osg::MatrixTransform *editColor = gsn::buildCommandNode(":/resources/images/editColor.svg", iconRadius);
     editColor->setMatrix(dummy);
-    editColor->setUserValue(attributeMask, (msg::Request | msg::Edit | msg::Color).to_string());
+    editColor->setUserValue(attributeMask, (msg::Request | msg::Edit | msg::Feature | msg::Color).to_string());
     editColor->setUserValue(attributeStatus, QObject::tr("Edit Color Command").toStdString());
     editBase->insertChild(editBase->getNumChildren() - 2, editColor);
     

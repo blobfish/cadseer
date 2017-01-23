@@ -86,7 +86,7 @@ void Manager::setupDispatcher()
   mask = msg::Request | msg::CheckGeometry;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::checkGeometryDispatched, this, _1)));
   
-  mask = msg::Request | msg::Edit | msg::Color;
+  mask = msg::Request | msg::Edit | msg::Feature |msg::Color;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::editColorDispatched, this, _1)));
   
   mask = msg::Request | msg::Edit | msg::Feature | msg::Name;
