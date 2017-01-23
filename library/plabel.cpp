@@ -51,8 +51,8 @@ PLabel::PLabel(ftr::Parameter* parameterIn) : osg::MatrixTransform(), parameter(
   getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
   build();
   
-  parameter->connectValue(boost::bind(&PLabel::valueHasChanged, this));
-  parameter->connectConstant(boost::bind(&PLabel::constantHasChanged, this));
+  valueConnection = parameter->connectValue(boost::bind(&PLabel::valueHasChanged, this));
+  constantConnection = parameter->connectConstant(boost::bind(&PLabel::constantHasChanged, this));
 }
 
 void PLabel::build()

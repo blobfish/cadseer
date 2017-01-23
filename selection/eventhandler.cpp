@@ -442,13 +442,13 @@ void EventHandler::requestSelectionSubtractionDispatched(const msg::Message &mes
   messageOut.mask |= msg::Response | msg::Pre;
   observer->messageOutSignal(messageOut);
   
-  if (slc::isPointType(container.selectionType))
+  if (slc::isPointType(containIt->selectionType))
   {
-    assert(container.pointGeometry.valid());
-    osg::Group *parent = container.pointGeometry->getParent(0)->asGroup();
-    parent->removeChild(container.pointGeometry);
+    assert(containIt->pointGeometry.valid());
+    osg::Group *parent = containIt->pointGeometry->getParent(0)->asGroup();
+    parent->removeChild(containIt->pointGeometry);
   }
-    selectionOperation(sMessage.featureId, container.selectionIds, HighlightVisitor::Operation::Restore);
+    selectionOperation(sMessage.featureId, containIt->selectionIds, HighlightVisitor::Operation::Restore);
     
   selectionContainers.erase(containIt);
 }

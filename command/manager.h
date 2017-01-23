@@ -60,6 +60,7 @@ namespace cmd
     void selectionMaskDispatched(const msg::Message&);
     void editColorDispatched(const msg::Message&);
     void featureRenameDispatched(const msg::Message&);
+    void constructBlendDispatched(const msg::Message&);
   };
   
   Manager& manager();

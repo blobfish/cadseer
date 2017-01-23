@@ -20,6 +20,8 @@
 #ifndef LBR_PLABEL_H
 #define LBR_PLABEL_H
 
+#include <boost/signals2/connection.hpp>
+
 #include <osg/MatrixTransform>
 #include <osg/ref_ptr>
 
@@ -48,6 +50,9 @@ namespace lbr
     ftr::Parameter *parameter = nullptr;
     osg::ref_ptr<osg::AutoTransform> autoTransform;
     osg::ref_ptr<osgText::Text> text;
+    
+    boost::signals2::scoped_connection valueConnection;
+    boost::signals2::scoped_connection constantConnection;
   };
 }
 

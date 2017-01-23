@@ -112,9 +112,6 @@ void Factory::setupDispatcher()
   mask = msg::Request | msg::Construct | msg::Intersect;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newIntersectDispatched, this, _1)));
   
-  mask = msg::Request | msg::Construct | msg::Blend;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newBlendDispatched, this, _1)));
-  
   mask = msg::Request | msg::Construct | msg::Chamfer;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newChamferDispatched, this, _1)));
   
@@ -457,67 +454,6 @@ void Factory::newIntersectDispatched(const msg::Message&)
     project->connect(*it, intersect->getId(), ftr::InputTypes::tool);
   
   intersect->setColor(project->findFeature(featureIds.at(0))->getColor());
-  
-  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
-  observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
-}
-
-void Factory::newBlendDispatched(const msg::Message&)
-{
-  std::ostringstream debug;
-  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
-  msg::dispatch().dumpString(debug.str());
-  
-  assert(project);
-  
-  if (containers.empty())
-    return;
-  
-  //get targetId and filter out edges not belonging to first target.
-  uuid targetFeatureId = containers.at(0).featureId;
-  const ftr::SeerShape &targetSeerShape = project->findFeature(targetFeatureId)->getSeerShape();
-  ftr::SimpleBlend simpleBlend;
-  ftr::VariableBlend vBlend;
-  for (const auto &currentSelection : containers)
-  {
-    if
-    (
-      currentSelection.featureId != targetFeatureId ||
-      currentSelection.selectionType != slc::Type::Edge //just edges for now.
-    )
-      continue;
-    
-    TopoDS_Edge edge = TopoDS::Edge(targetSeerShape.getOCCTShape(currentSelection.shapeId));  
-    ftr::Pick pick;
-    pick.id = currentSelection.shapeId;
-    pick.setParameter(edge, currentSelection.pointLocation);
-    
-    //simple radius test  
-    simpleBlend.picks.push_back(pick);
-    auto simpleRadius = ftr::Blend::buildRadiusParameter();
-    simpleRadius->setValue(1.0);
-    simpleBlend.radius = simpleRadius;
-    
-    //variable blend radius test. really shouldn't be in loop.
-//     vBlend = ftr::Blend::buildDefaultVariable(project->findFeature(targetFeatureId)->getResultContainer(), pick);
-  }
-  if (simpleBlend.picks.empty() && vBlend.entries.empty())
-    return;
-  
-  assert(project);
-  
-  std::shared_ptr<ftr::Blend> blend(new ftr::Blend());
-  project->addFeature(blend);
-  project->connect(targetFeatureId, blend->getId(), ftr::InputTypes::target);
-  if (!simpleBlend.picks.empty())
-    blend->addSimpleBlend(simpleBlend);
-  if (!vBlend.entries.empty())
-    blend->addVariableBlend(vBlend);
-  
-  ftr::Base *targetFeature = project->findFeature(targetFeatureId);
-  targetFeature->hide3D();
-  targetFeature->hideOverlay();
-  blend->setColor(targetFeature->getColor());
   
   observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
   observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));

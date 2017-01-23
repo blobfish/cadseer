@@ -80,16 +80,18 @@ VariableBlend Blend::buildDefaultVariable(const SeerShape &seerShapeIn, const Pi
   const TopoDS_Shape &edge = seerShapeIn.getOCCTShape(pickIn.id); //TODO might be face!
   blendMaker.Add(TopoDS::Edge(edge));
   
-  //no position parameter for vertices
+  //not using position parameter for vertices, but building anyway for consistency
   VariableEntry entry1;
   entry1.id = seerShapeIn.findShapeIdRecord(blendMaker.FirstVertex(1)).id;
   entry1.radius = buildRadiusParameter();
+  entry1.position = buildPositionParameter();
   out.entries.push_back(entry1);
   
   VariableEntry entry2;
   entry2.id = seerShapeIn.findShapeIdRecord(blendMaker.LastVertex(1)).id;
   entry2.radius = buildRadiusParameter();
   entry2.radius->setValue(1.5);
+  entry2.position = buildPositionParameter();
   out.entries.push_back(entry2);
   
   return out;
@@ -118,15 +120,71 @@ void Blend::addSimpleBlend(const SimpleBlend &simpleBlendIn)
 void Blend::addVariableBlend(const VariableBlend &variableBlendIn)
 {
   variableBlends.push_back(variableBlendIn);
-  for (const auto &e : variableBlends.back().entries)
+  for (auto &e : variableBlends.back().entries)
   {
-    if (e.position)
-      e.position->connectValue(boost::bind(&Blend::setModelDirty, this));
+    e.position->connectValue(boost::bind(&Blend::setModelDirty, this));
     e.radius->connectValue(boost::bind(&Blend::setModelDirty, this));
+    
+    if (!e.label)
+      e.label = new lbr::PLabel(e.radius.get());
+    e.label->valueHasChanged();
+    overlaySwitch->addChild(e.label.get());
+    
+    
     //multiple blends? pmap might need to be a multi map
     //pMap.insert(std::make_pair(simpleBlends.back().radius->getName(), simpleBlends.back().radius.get()));
   }
 }
+
+void Blend::clearBlends()
+{
+  for (const auto &sBlend : simpleBlends)
+  {
+    //should not have to disconnect to feature.
+    pMap.erase(sBlend.radius->getName());
+    assert(sBlend.label->getNumParents() == 1);
+    sBlend.label->getParent(0)->removeChild(sBlend.label);
+  }
+  
+  for (const auto &vBlend : variableBlends)
+  {
+    // add incomplete, so this is also.
+    double u = vBlend.pick.u; //dummy for warning suppression.
+    u *= 1.0; //another dummy.
+  }
+  
+  simpleBlends.clear();
+  variableBlends.clear();
+}
+
+/* Typical occt bullshit: v7.1
+ * all radius data, reguardless of assignment method, ends up inside ChFiDS_FilSpine::parandrad.
+ * 'BRepFilletAPI_MakeFillet::Add' are all thin wrappers around the
+ *    'BRepFilletAPI_MakeFillet::SetRadius' functions.
+ * The radius assignments are tied to the edge passed in not the entire spine.
+ *    this is contrary to the documentation!
+ * 'Add' and 'SetRadius' that invole 'Law_Function', clears out all radius data. misleading.
+ * I think we don't have to worry about law function. Set the radius data
+ *    and the appropriate law function will be inferred.... I hope.
+ * https://www.opencascade.com/doc/occt-6.9.1/overview/html/occt_user_guides__modeling_algos.html#occt_modalg_6_1_1
+ *    has an example of using parameter and radius to create an evolved blend. notice the
+ *    parameters are related to the actual edge length. This is confusing as fuck, because if you
+ *    look at the setRadius function for (radius, edge) and (radius, radius, edge) they set the parameter
+ *    radius array with parameters in range [0,1]. Ok the conversion from length to unit parameter is
+ *    is happening in BRepFilletAPI_MakeFillet::SetRadius. BRepFilletAPI_MakeFillet::Length returns the
+ *    length of the whole spine not individual edges. So that isn't much help. I will have to get the length
+ *    of the edge from somewhere else. Can do it, but a pain in the ass, seeing as I save the position on
+ *    edge already in parameter [0,1]
+ * Using parameter and radius set function:
+ *    if the array has only 1 member it will be assigned to the beginning of related edge.
+ *    if the array has only 2 members it will be assigned to the beginning and end of related edge.
+ * So trying to assign a radius to 'nearest' point will have to reference an edge and that
+ *    edges endpoints will have to have a radius value, thus 3 values. So if we have the edges endpoints radius
+ *    value set to satify the above, what happens when we assign a value to a vertex that coincides
+ *    with said endpoints?
+ * I think for now, I will just restrict parameter points for variable radius to vertices. No 'nearest'.
+ * Combining a variable and a constant into the same feature is triggering an occt exception. v7.1.
+ */
 
 void Blend::updateModel(const UpdateMap& mapIn)
 {
@@ -167,17 +225,21 @@ void Blend::updateModel(const UpdateMap& mapIn)
       if (!targetSeerShape.hasShapeIdRecord(vBlend.pick.id))
       {
         std::cout << "Blend: can't find target edge id. Skipping id: " << gu::idToString(vBlend.pick.id) << std::endl;
-	continue;
+        continue;
       }
       TopoDS_Shape tempShape = targetSeerShape.getOCCTShape(vBlend.pick.id);
       assert(!tempShape.IsNull());
       assert(tempShape.ShapeType() == TopAbs_EDGE); //TODO faces someday.
       blendMaker.Add(TopoDS::Edge(tempShape));
-      for (const auto &e : vBlend.entries)
+      for (auto &e : vBlend.entries)
       {
         const TopoDS_Shape &blendShape = targetSeerShape.getOCCTShape(e.id);
         if (blendShape.ShapeType() == TopAbs_VERTEX)
-        blendMaker.SetRadius(e.radius->getValue(), vBlendIndex, TopoDS::Vertex(blendShape));
+        {
+          const TopoDS_Vertex &v = TopoDS::Vertex(blendShape);
+          blendMaker.SetRadius(e.radius->getValue(), vBlendIndex, v);
+          e.label->setMatrix(osg::Matrixd::translate(gu::toOsg(v)));
+        }
         //TODO deal with edges.
       }
       vBlendIndex++;

@@ -28,6 +28,7 @@
 #include <command/checkgeometry.h>
 #include <command/editcolor.h>
 #include <command/featurerename.h>
+#include <command/blend.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <selection/message.h>
@@ -90,6 +91,9 @@ void Manager::setupDispatcher()
   
   mask = msg::Request | msg::Edit | msg::Feature | msg::Name;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::featureRenameDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Construct | msg::Blend;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::constructBlendDispatched, this, _1)));
 }
 
 void Manager::cancelCommandDispatched(const msg::Message &)
@@ -224,4 +228,10 @@ void Manager::featureRenameDispatched(const msg::Message&)
 {
   std::shared_ptr<FeatureRename> featureRename(new FeatureRename());
   addCommand(featureRename);
+}
+
+void Manager::constructBlendDispatched(const msg::Message&)
+{
+  std::shared_ptr<Blend> blend(new Blend());
+  addCommand(blend);
 }

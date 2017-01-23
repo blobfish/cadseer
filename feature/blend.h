@@ -50,6 +50,7 @@ struct VariableEntry
   boost::uuids::uuid id; //!< edge or vertex.
   std::shared_ptr<Parameter> position; //!< parameter along edge 0 to 1. ignored if vertex. maybe invalid
   std::shared_ptr<Parameter> radius; //!< value of blend.
+  osg::ref_ptr<lbr::PLabel> label; //!< graphic icon
 };
 
 struct VariableBlend
@@ -69,6 +70,7 @@ class Blend : public Base
     
     void addSimpleBlend(const SimpleBlend&);
     void addVariableBlend(const VariableBlend&);
+    void clearBlends(); //!< removes all blend definitions.
     
     virtual void updateModel(const UpdateMap&) override;
     virtual Type getType() const override {return Type::Blend;}

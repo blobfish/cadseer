@@ -53,7 +53,6 @@ namespace app
     void newUnionDispatched(const msg::Message&);
     void newSubtractDispatched(const msg::Message&);
     void newIntersectDispatched(const msg::Message&);
-    void newBlendDispatched(const msg::Message&);
     void newChamferDispatched(const msg::Message&);
     void newDraftDispatched(const msg::Message&);
     void newDatumPlaneDispatched(const msg::Message&);
