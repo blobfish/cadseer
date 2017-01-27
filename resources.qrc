@@ -68,6 +68,7 @@
     <file>resources/images/dagViewIsolate.svg</file>
     <file>resources/images/dagViewEditColor.svg</file>
     <file>resources/images/dagViewEditRename.svg</file>
+    <file>resources/images/dagViewEditFeature.svg</file>
     <file>resources/images/cadSeer.svg</file>
     <file>resources/images/preferences.svg</file>
     <file>resources/images/linkIcon.svg</file>
