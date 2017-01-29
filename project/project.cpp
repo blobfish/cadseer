@@ -203,7 +203,7 @@ ftr::Base* Project::findFeature(const uuid &idIn)
   return projectGraph[findVertex(idIn)].feature.get();
 }
 
-prg::Vertex Project::findVertex(const uuid& idIn)
+prg::Vertex Project::findVertex(const uuid& idIn) const
 {
   IdVertexMap::const_iterator it;
   it = map.find(idIn);
@@ -312,7 +312,7 @@ void Project::removeFeature(const uuid& idIn)
   //no post message.
 }
 
-void Project::setFeatureActive(const uuid& idIn)
+void Project::setCurrentLeaf(const uuid& idIn)
 {
   indexVerticesEdges();
   
@@ -363,7 +363,7 @@ void Project::setFeatureActive(const uuid& idIn)
 
 void Project::updateLeafStatus()
 {
-  indexVerticesEdges(); //redundent for setFeatureActive call.
+  indexVerticesEdges(); //redundent for setCurrentLeaf call.
   
   //first set all features to non leaf.
   BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
@@ -485,7 +485,7 @@ void Project::setCurrentLeafDispatched(const msg::Message &messageIn)
   
   prj::Message message = boost::get<prj::Message>(messageIn.payload);
   //send response signal out 'pre set current feature'.
-  setFeatureActive(message.featureId);
+    setCurrentLeaf(message.featureId);
   //send response signal out 'post set current feature'.
 }
 
@@ -726,7 +726,7 @@ std::vector<boost::uuids::uuid> Project::getAllFeatureIds() const
   return out;
 }
 
-Project::VertexEdgePairs Project::getParents(prg::Vertex vertexIn)
+Project::VertexEdgePairs Project::getParents(prg::Vertex vertexIn) const
 {
   VertexEdgePairs out;
   InEdgeIterator inEdgeIt, inEdgeItDone;
@@ -741,7 +741,7 @@ Project::VertexEdgePairs Project::getParents(prg::Vertex vertexIn)
   return out;
 }
 
-Project::VertexEdgePairs Project::getChildren(prg::Vertex vertexIn)
+Project::VertexEdgePairs Project::getChildren(prg::Vertex vertexIn) const
 {
   VertexEdgePairs out;
   OutEdgeIterator outEdgeIt, outEdgeItDone;
@@ -1098,7 +1098,7 @@ void Project::shapeTrackUp(const uuid& featureIdIn, const uuid& shapeId)
 
 void Project::shapeTrackDown(const uuid& featureIdIn, const uuid& shapeId)
 {
-    IdVertexMap::const_iterator it = map.find(featureIdIn);
+  IdVertexMap::const_iterator it = map.find(featureIdIn);
   assert(it != map.end());
   prg::Vertex startVertex = it->second;
   
@@ -1127,4 +1127,90 @@ void Project::shapeTrackDown(const uuid& featureIdIn, const uuid& shapeId)
   appMessage.infoMessage = QString::fromStdString(stream.str());
   viewInfoMessage.payload = appMessage;
   observer->messageOutSignal(viewInfoMessage);
+}
+
+ftr::EditMap Project::getParentMap(const boost::uuids::uuid &idIn) const
+{
+  ftr::EditMap updateMap;
+  for (const auto &pair : getParents(findVertex(idIn)))
+  {
+    auto temp = std::make_pair(projectGraph[pair.second].inputType, projectGraph[pair.first].feature.get());
+    updateMap.insert(temp);
+  }
+  
+  return updateMap;
+}
+
+template <typename VertexT>
+class LeafChildrenVisitor : public boost::default_dfs_visitor
+{
+public:
+  LeafChildrenVisitor(std::vector<VertexT> &leafChildrenIn) :
+    leafChildren(leafChildrenIn)
+  {
+  }
+  
+  template <typename GraphT >
+  void start_vertex(VertexT vertexIn, const GraphT&) const
+  {
+    startVertex = vertexIn;
+  }
+  
+  template <typename GraphT >
+  void discover_vertex(VertexT vertexIn, const GraphT & graphIn) const
+  {
+    if (foundLeaf)
+      return;
+    if (vertexIn == startVertex)
+      return;
+    if (graphIn[vertexIn].feature->isLeaf())
+    {
+      foundLeaf = true;
+      leafChildren.push_back(vertexIn);
+    }
+  }
+  
+  template <typename GraphT >
+  void finish_vertex(VertexT vertexIn, const GraphT &graphIn) const
+  {
+    if (graphIn[vertexIn].feature->isActive())
+      foundLeaf = false;
+  }
+  
+private:
+  std::vector<VertexT> &leafChildren;
+  mutable bool foundLeaf = false;
+  mutable VertexT startVertex;
+};
+
+/*! editing a feature uses setCurrentLeaf to 'rewind' to state
+ * when feature was created. When editing is done we want to return
+ * leaf states to previous state before editing. this is where this
+ * function comes in. It gets leaf status of each path so it can be
+ * 'reset' after editing'
+ */
+std::vector<uuid> Project::getLeafChildren(const uuid &parentIn) const
+{
+  IdVertexMap::const_iterator it = map.find(parentIn);
+  assert(it != map.end());
+  prg::Vertex startVertex = it->second;
+  
+  std::vector<Vertex> limitVertices;
+  gu::BFSLimitVisitor<Vertex>limitVisitor(limitVertices);
+  boost::breadth_first_search(projectGraph, startVertex, visitor(limitVisitor));
+  
+  gu::SubsetFilter<Graph> filter(projectGraph, limitVertices);
+  typedef boost::filtered_graph<Graph, boost::keep_all, gu::SubsetFilter<Graph> > FilteredGraph;
+  typedef boost::graph_traits<FilteredGraph>::vertex_descriptor FilteredVertex;
+  FilteredGraph filteredGraph(projectGraph, boost::keep_all(), filter);
+  
+  std::vector<Vertex> leafChildren;
+  LeafChildrenVisitor<FilteredVertex> leafVisitor(leafChildren);
+  boost::depth_first_search(filteredGraph, visitor(leafVisitor));
+  
+  std::vector<uuid> out;
+  for (const auto &v : leafChildren)
+    out.push_back(projectGraph[v].feature->getId());
+  
+  return out;
 }

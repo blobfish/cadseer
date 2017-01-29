@@ -40,6 +40,8 @@ namespace ftr
 
 struct SimpleBlend
 {
+  SimpleBlend();
+  boost::uuids::uuid id; //!< just used for runtime sync with dialog. no serial etc...
   Picks picks; //!< vector of picked objects
   std::shared_ptr<Parameter> radius; //!< parameter containing blend radius.
   osg::ref_ptr<lbr::PLabel> label; //!< graphic icon
@@ -55,6 +57,8 @@ struct VariableEntry
 
 struct VariableBlend
 {
+  VariableBlend();
+  boost::uuids::uuid id; //!< just used for runtime sync with dialog. no serial etc...
   Pick pick; //!< pick object.
   std::vector<VariableEntry> entries;
 };
@@ -70,7 +74,8 @@ class Blend : public Base
     
     void addSimpleBlend(const SimpleBlend&);
     void addVariableBlend(const VariableBlend&);
-    void clearBlends(); //!< removes all blend definitions.
+    std::vector<SimpleBlend>& getSimpleBlends(){return simpleBlends;}
+    std::vector<VariableBlend>& getVariableBlends(){return variableBlends;}
     
     virtual void updateModel(const UpdateMap&) override;
     virtual Type getType() const override {return Type::Blend;}

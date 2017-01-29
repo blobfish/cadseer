@@ -73,7 +73,8 @@ void Blend::activate()
 void Blend::deactivate()
 {
   isActive = false;
-  
+  if (blendDialog)
+    blendDialog->hide();
 }
 
 void Blend::go()
@@ -134,4 +135,39 @@ void Blend::go()
   
   //if we make it here. we didn't build a blend feature from pre selection.
   blendDialog = new dlg::Blend(mainWindow);
+}
+
+
+BlendEdit::BlendEdit(ftr::Base *feature) : Base()
+{
+  blend = dynamic_cast<ftr::Blend*>(feature);
+  assert(blend);
+}
+
+BlendEdit::~BlendEdit()
+{
+  if (blendDialog)
+    blendDialog->deleteLater();
+}
+
+std::string BlendEdit::getStatusMessage()
+{
+  return "Editing Blend Feature";
+}
+
+void BlendEdit::activate()
+{
+  if (!blendDialog)
+    blendDialog = new dlg::Blend(blend, mainWindow);
+  
+  isActive = true;
+  blendDialog->show();
+  blendDialog->raise();
+  blendDialog->activateWindow();
+}
+
+void BlendEdit::deactivate()
+{
+  blendDialog->hide();
+  isActive = false;
 }

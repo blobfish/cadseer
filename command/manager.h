@@ -23,11 +23,15 @@
 
 #include <stack>
 #include <memory>
+#include <functional>
+#include <map>
 
 #include <selection/definitions.h>
+#include <feature/types.h>
 #include <command/base.h>
 
 namespace msg{class Message; class Observer;}
+namespace ftr{class Base;}
 
 namespace cmd
 {
@@ -61,6 +65,15 @@ namespace cmd
     void editColorDispatched(const msg::Message&);
     void featureRenameDispatched(const msg::Message&);
     void constructBlendDispatched(const msg::Message&);
+    void editFeatureDispatched(const msg::Message&);
+    
+    //editing functions
+    typedef std::function<BasePtr (ftr::Base *)> EditFunction;
+    typedef std::map<ftr::Type, EditFunction> EditFunctionMap;
+    EditFunctionMap editFunctionMap;
+    void setupEditFunctionMap();
+    BasePtr editBlend(ftr::Base *);
+    
   };
   
   Manager& manager();

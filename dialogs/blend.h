@@ -61,6 +61,7 @@ namespace dlg
     ConstantItem(QListWidget *parent);
     std::vector<BlendEntry> picks;
     double radius;
+    boost::uuids::uuid ftrId; //!< nil id means it has been created during dialog edit run.
   };
   
   class VariableItem : public QListWidgetItem
@@ -68,18 +69,17 @@ namespace dlg
   public:
     static const int itemType = QListWidgetItem::UserType + 1;
     VariableItem(QListWidget *parent);
-    
     BlendEntry pick; //!< only 1 pick allowed per variable.
     std::vector<BlendEntry> constraints;
+    boost::uuids::uuid ftrId; //!< nil id means it has been created during dialog edit run.
   };
-  
   
   class Blend : public QDialog
   {
     Q_OBJECT
   public:
     Blend(QWidget*); //!< create blend dialog
-    Blend(const boost::uuids::uuid&, QWidget*); //!< edit blend dialog
+    Blend(ftr::Blend*, QWidget*); //!< edit blend dialog
     virtual ~Blend() override;
     
   protected:
@@ -97,7 +97,9 @@ namespace dlg
     QLineEdit *constantRadiusEdit;
     bool isAccepted = false;
     bool isEditDialog = false;
+    bool overlayWasOn = false; //!< restore overlay state upon edit finish.
     std::set<boost::uuids::uuid> runningIds;
+    std::vector<boost::uuids::uuid> leafChildren; //!< edit mode rewinds to blendParent. this restores state.
     
     void init();
     void buildGui();
@@ -105,8 +107,10 @@ namespace dlg
     void fillInVariable(const VariableItem &);
     void addToSelection(const boost::uuids::uuid&); //!< parent feature shape id.
     void addVariableTableItem(double, const QString&, const boost::uuids::uuid&);
+    void updateBlendFeature();
     
     ftr::Pick convert(const BlendEntry&);
+    BlendEntry convert(const ftr::Pick&);
     
     void setupDispatcher();
     void selectionAdditionDispatched(const msg::Message&);

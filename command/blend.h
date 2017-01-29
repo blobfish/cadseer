@@ -23,6 +23,7 @@
 #include <command/base.h>
 
 namespace dlg{class Blend;}
+namespace ftr{class Blend;}
 
 namespace cmd
 {
@@ -41,6 +42,22 @@ namespace cmd
     void go();
     bool firstRun = true;
     dlg::Blend *blendDialog = nullptr;
+  };
+  
+  class BlendEdit : public Base
+  {
+  public:
+    BlendEdit(ftr::Base*);
+    virtual ~BlendEdit() override;
+    
+    virtual std::string getCommandName() override{return "Blend Edit";}
+    virtual std::string getStatusMessage() override;
+    virtual void activate() override;
+    virtual void deactivate() override;
+    
+  private:
+    dlg::Blend *blendDialog = nullptr;
+    ftr::Blend *blend;
   };
 }
 

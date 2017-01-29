@@ -461,6 +461,12 @@ void GestureHandler::constructMenu()
     editBase->setUserValue(attributeStatus, QObject::tr("Edit Menu").toStdString());
     startNode->insertChild(startNode->getNumChildren() - 2, editBase);
     
+    osg::MatrixTransform *editFeature = gsn::buildCommandNode(":/resources/images/editFeature.svg", iconRadius);
+    editFeature->setMatrix(dummy);
+    editFeature->setUserValue(attributeMask, (msg::Request | msg::Edit | msg::Feature).to_string());
+    editFeature->setUserValue(attributeStatus, QObject::tr("Edit Feature Command").toStdString());
+    editBase->insertChild(editBase->getNumChildren() - 2, editFeature);
+    
     osg::MatrixTransform *remove = gsn::buildCommandNode(":/resources/images/editRemove.svg", iconRadius);
     remove->setMatrix(dummy);
     remove->setUserValue(attributeMask, (msg::Request | msg::Remove).to_string());

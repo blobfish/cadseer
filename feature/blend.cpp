@@ -48,6 +48,9 @@ using boost::uuids::uuid;
 
 QIcon Blend::icon;
 
+SimpleBlend::SimpleBlend() : id(gu::createRandomId()) {}
+VariableBlend::VariableBlend() : id(gu::createRandomId()) {}
+
 Blend::Blend() : Base()
 {
   if (icon.isNull())
@@ -115,6 +118,8 @@ void Blend::addSimpleBlend(const SimpleBlend &simpleBlendIn)
   
   //multiple blends? pmap might need to be a multi map
   pMap.insert(std::make_pair(simpleBlends.back().radius->getName(), simpleBlends.back().radius.get()));
+  
+  setModelDirty();
 }
 
 void Blend::addVariableBlend(const VariableBlend &variableBlendIn)
@@ -133,28 +138,9 @@ void Blend::addVariableBlend(const VariableBlend &variableBlendIn)
     
     //multiple blends? pmap might need to be a multi map
     //pMap.insert(std::make_pair(simpleBlends.back().radius->getName(), simpleBlends.back().radius.get()));
+    
+    setModelDirty();
   }
-}
-
-void Blend::clearBlends()
-{
-  for (const auto &sBlend : simpleBlends)
-  {
-    //should not have to disconnect to feature.
-    pMap.erase(sBlend.radius->getName());
-    assert(sBlend.label->getNumParents() == 1);
-    sBlend.label->getParent(0)->removeChild(sBlend.label);
-  }
-  
-  for (const auto &vBlend : variableBlends)
-  {
-    // add incomplete, so this is also.
-    double u = vBlend.pick.u; //dummy for warning suppression.
-    u *= 1.0; //another dummy.
-  }
-  
-  simpleBlends.clear();
-  variableBlends.clear();
 }
 
 /* Typical occt bullshit: v7.1
@@ -414,6 +400,7 @@ void Blend::serialWrite(const QDir &dIn)
         vEntry.position->serialOut(),
         vEntry.radius->serialOut()
       );
+      vEntriesOut.array().push_back(vEntryOut);
     }
     
     prj::srl::VariableBlend vBlendOut

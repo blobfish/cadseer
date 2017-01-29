@@ -69,12 +69,14 @@ ConstantItem::ConstantItem(QListWidget *parent) :
   QListWidgetItem(QObject::tr("Constant"), parent, ConstantItem::itemType)
 {
   radius = 1.0; //somekind of default.
+  ftrId = gu::createNilId();
 }
 
 VariableItem::VariableItem(QListWidget *parent) :
   QListWidgetItem(QObject::tr("Variable"), parent, VariableItem::itemType)
 {
   pick.pickId = gu::createNilId();
+  ftrId = gu::createNilId();
 }
 
 Blend::Blend(QWidget *parent) : QDialog(parent)
@@ -92,18 +94,55 @@ Blend::Blend(QWidget *parent) : QDialog(parent)
   addConstantBlendSlot();
 }
 
-Blend::Blend(const uuid &editBlendIn, QWidget *parent) : QDialog(parent)
+Blend::Blend(ftr::Blend *editBlendIn, QWidget *parent) : QDialog(parent), blend(editBlendIn)
 {
+  assert(blend);
+  
   init();
   isEditDialog = true;
   
   //smart pointer to remain inValid in edit 'mode'.
   prj::Project *project = static_cast<app::Application*>(qApp)->getProject();
   assert(project);
-  blend = dynamic_cast<ftr::Blend*>(project->findFeature(editBlendIn));
-  assert(blend);
   
-  //todo get parent feature from project and assign.
+  //what if the established feature doesn't have parent??
+  ftr::EditMap editMap = project->getParentMap(blend->getId());
+  assert(editMap.size() == 1);
+  auto it = editMap.find(ftr::InputTypes::target);
+  assert(it != editMap.end());
+  blendParent = it->second;
+  
+  for (const auto &simpleBlend : blend->getSimpleBlends())
+  {
+    ConstantItem *cItem = new ConstantItem(blendList);
+    cItem->ftrId = simpleBlend.id;
+    cItem->radius = simpleBlend.radius->getValue();
+    for (const auto &pick : simpleBlend.picks)
+      cItem->picks.push_back(convert(pick));
+  }
+  
+  for (const auto &variableBlend : blend->getVariableBlends())
+  {
+    VariableItem *vItem = new VariableItem(blendList);
+    vItem->pick = convert(variableBlend.pick);
+    vItem->ftrId = variableBlend.id;
+    for (const auto &entry : variableBlend.entries)
+    {
+      BlendEntry bEntry;
+      bEntry.pickId = entry.id;
+      bEntry.typeString = tr("Vertex"); //only vertices for now.
+      bEntry.radius = entry.radius->getValue();
+      bEntry.highlightIds.push_back(entry.id);
+      bEntry.pointLocation = gu::toOsg(TopoDS::Vertex(blendParent->getSeerShape().getOCCTShape(entry.id)));
+      vItem->constraints.push_back(bEntry);
+    }
+  }
+  
+  leafChildren = project->getLeafChildren(blendParent->getId());
+  project->setCurrentLeaf(blendParent->getId());
+  
+  overlayWasOn = blend->isVisibleOverlay();
+  blend->hideOverlay();
 }
 
 void Blend::init()
@@ -154,6 +193,25 @@ void Blend::closeEvent(QCloseEvent *e)
     assert(blendParent);
     assert(blendParent->hasSeerShape());
     
+    updateBlendFeature();
+    
+    project->addFeature(blendSmart);
+    project->connect(blendParent->getId(), blendSmart->getId(), ftr::InputTypes::target);
+    
+    blendParent->hide3D();
+    blendParent->hideOverlay();
+    blend->setColor(blendParent->getColor());
+  }
+  
+  if (isEditDialog && isAccepted)
+  {
+    //blendsmart is not used during edit so it is invalid and not needed.
+    assert(blend);
+    assert(blendParent);
+    
+    //build a set of blendItem ftr ids for checking for removed definitions.
+    std::set<uuid> blendItemFtrIds;
+
     for (int index = 0; index < blendList->count(); ++index)
     {
       QListWidgetItem *item = blendList->item(index);
@@ -161,6 +219,69 @@ void Blend::closeEvent(QCloseEvent *e)
       {
         ConstantItem *cItem = dynamic_cast<ConstantItem*>(item);
         assert(cItem);
+        blendItemFtrIds.insert(cItem->ftrId);
+      }
+      else if(item->type() == VariableItem::itemType)
+      {
+        VariableItem *vItem = dynamic_cast<VariableItem*>(item);
+        assert(vItem);
+        blendItemFtrIds.insert(vItem->ftrId);
+      }
+      else
+        assert(0);//unrecognized item type
+    }
+    
+    //remove blend definitions from feature that are not present in blend list items set.
+    for (auto it = blend->getSimpleBlends().begin(); it != blend->getSimpleBlends().end();)
+    {
+      assert(blendItemFtrIds.count(it->id) < 2); //should be zero or 1.
+      
+      if (blendItemFtrIds.count(it->id) == 0)
+        it = blend->getSimpleBlends().erase(it);
+      else
+        it++;
+    }
+    
+    for (auto it = blend->getVariableBlends().begin(); it != blend->getVariableBlends().end();)
+    {
+      assert(blendItemFtrIds.count(it->id) < 2); //should be zero or 1.
+      
+      if (blendItemFtrIds.count(it->id) == 0)
+        it = blend->getVariableBlends().erase(it);
+      else
+        it++;
+    }
+    
+    //from here updateBlendFeature needs to either edit or add blend definitions.
+    updateBlendFeature();
+    blend->setModelDirty();
+  }
+  
+  if (isEditDialog)
+  {
+    for (const auto &id : leafChildren)
+      project->setCurrentLeaf(id);
+    
+    if (overlayWasOn)
+      blend->showOverlay();
+  }
+  
+  QDialog::closeEvent(e);
+  observer->messageOutSignal(msg::Mask(msg::Request | msg::Command | msg::Done));
+}
+
+void Blend::updateBlendFeature()
+{
+  for (int index = 0; index < blendList->count(); ++index)
+  {
+    QListWidgetItem *item = blendList->item(index);
+    if (item->type() == ConstantItem::itemType)
+    {
+      ConstantItem *cItem = dynamic_cast<ConstantItem*>(item);
+      assert(cItem);
+      
+      if (cItem->ftrId.is_nil()) //this is something new even in edit mode
+      {
         ftr::SimpleBlend sBlend;
         for (const auto &entry : cItem->picks)
         {
@@ -173,12 +294,32 @@ void Blend::closeEvent(QCloseEvent *e)
         
         blend->addSimpleBlend(sBlend);
       }
-      else if(item->type() == VariableItem::itemType)
+      else //this is not new and has been edited
       {
-        VariableItem *vItem = dynamic_cast<VariableItem*>(item);
-        assert(vItem);
-        
-        ftr::Pick fPick = convert(vItem->pick);
+        std::vector<ftr::SimpleBlend>::iterator it;
+        for (it = blend->getSimpleBlends().begin(); it != blend->getSimpleBlends().end(); ++it)
+        {
+          if (it->id == cItem->ftrId)
+            break;
+        }
+        assert(it != blend->getSimpleBlends().end()); //any non present ftr id should have nilId in item.
+        it->radius->setValue(cItem->radius);
+        it->picks.clear();
+        for (const auto &entry : cItem->picks)
+        {
+          ftr::Pick fPick = convert(entry);
+          it->picks.push_back(fPick);
+        }
+      }
+    }
+    else if(item->type() == VariableItem::itemType)
+    {
+      VariableItem *vItem = dynamic_cast<VariableItem*>(item);
+      assert(vItem);
+      
+      ftr::Pick fPick = convert(vItem->pick);
+      if (vItem->ftrId.is_nil()) //new item even in edit mode.
+      {
         ftr::VariableBlend blendCue = ftr::Blend::buildDefaultVariable(blendParent->getSeerShape(), fPick);
         
         for (const auto &constraint : vItem->constraints)
@@ -208,30 +349,71 @@ void Blend::closeEvent(QCloseEvent *e)
         
         blend->addVariableBlend(blendCue);
       }
-      else
-        assert(0);//unrecognized item type
+      else //editing variable blend definition.
+      {
+        std::vector<ftr::VariableBlend> &ftrVBlends = blend->getVariableBlends();
+        std::vector<ftr::VariableBlend>::iterator it;
+        for (it = ftrVBlends.begin(); it != ftrVBlends.end(); ++it)
+        {
+          if (it->id == vItem->ftrId)
+            break;
+        }
+        assert(it != ftrVBlends.end()); //any non present ftr id should have nilId in item.
+        assert(it->pick.id == vItem->pick.pickId); //shouldn't be able to have a different pick.
+        
+        //build a set of all constraint picks. loop through feature constraints and
+        //remove any not present in the set.
+        std::set<uuid> itemConstraintIds;
+        for (const auto &entry : vItem->constraints)
+          itemConstraintIds.insert(entry.pickId);
+        std::vector<ftr::VariableEntry>::iterator vIt;
+        for (vIt = it->entries.begin(); vIt != it->entries.end();)
+        {
+          assert(itemConstraintIds.count(vIt->id) < 2); //should be zero or 1.
+          if (itemConstraintIds.count(vIt->id) == 0)
+          {
+            assert(vIt->label->getParents().size() == 1);
+            osg::Group *parent = vIt->label->getParent(0);
+            parent->removeChild(vIt->label); //remove label from scene graph.
+            vIt = it->entries.erase(vIt);
+          }
+          else
+            vIt++;
+        }
+        
+        for (const auto &itemEntry : vItem->constraints)
+        {
+          std::vector<ftr::VariableEntry>::iterator fEIt;
+          for (fEIt = it->entries.begin(); fEIt != it->entries.end(); ++fEIt)
+          {
+            if (fEIt->id == itemEntry.pickId)
+              break;
+          }
+          if (fEIt == it->entries.end())
+          {
+            ftr::VariableEntry entry;
+            entry.id = itemEntry.pickId;
+            entry.radius = ftr::Blend::buildRadiusParameter();
+            entry.radius->setValue(itemEntry.radius);
+            entry.radius->connectValue(boost::bind(&ftr::Blend::setModelDirty, blend));
+            entry.position = ftr::Blend::buildPositionParameter();
+            entry.position->connectValue(boost::bind(&ftr::Blend::setModelDirty, blend));
+            entry.label = new lbr::PLabel(entry.radius.get());
+            entry.label->valueHasChanged();
+            blend->getOverlaySwitch()->addChild(entry.label.get());
+            it->entries.push_back(entry);
+          }
+          else
+          {
+            fEIt->radius->setValue(itemEntry.radius);
+          }
+        }
+        
+      }
     }
-    
-    project->addFeature(blendSmart);
-    project->connect(blendParent->getId(), blendSmart->getId(), ftr::InputTypes::target);
-    
-    blendParent->hide3D();
-    blendParent->hideOverlay();
-    blend->setColor(blendParent->getColor());
+    else
+      assert(0);//unrecognized item type
   }
-  
-  if (isEditDialog && isAccepted)
-  {
-    //blendsmart is not used during edit so it is invalid and not needed.
-    assert(blend);
-    assert(blendParent);
-    
-    blend->clearBlends();
-    //todo fill in new blends;
-  }
-  
-  QDialog::closeEvent(e);
-  observer->messageOutSignal(msg::Mask(msg::Request | msg::Command | msg::Done));
 }
 
 ftr::Pick Blend::convert(const BlendEntry &entryIn)
@@ -254,6 +436,47 @@ ftr::Pick Blend::convert(const BlendEntry &entryIn)
   return fPick;
 }
 
+BlendEntry Blend::convert(const ftr::Pick &pickIn)
+{
+  BlendEntry entry;
+  entry.pickId = pickIn.id;
+  const ftr::SeerShape &parentShape = blendParent->getSeerShape();
+  assert(parentShape.hasShapeIdRecord(pickIn.id));
+  const TopoDS_Shape &shape = parentShape.getOCCTShape(pickIn.id);
+  BRepFilletAPI_MakeFillet blendMaker(parentShape.getRootOCCTShape());
+  std::vector<uuid> contourIds;
+  if (shape.ShapeType() == TopAbs_VERTEX)
+  {
+    entry.typeString = tr("Vertex");
+    entry.pointLocation = gu::toOsg(TopoDS::Vertex(shape));
+    runningIds.insert(pickIn.id);
+  }
+  else if (shape.ShapeType() == TopAbs_EDGE)
+  {
+    entry.typeString = tr("Edge");
+    entry.pointLocation = pickIn.getPoint(TopoDS::Edge(shape));
+    
+    blendMaker.Add(TopoDS::Edge(shape));
+    assert(blendMaker.NbContours() == 1);
+    for (int index = 1; index <= blendMaker.NbEdges(1); ++index)
+    {
+      assert(parentShape.hasShapeIdRecord(blendMaker.Edge(1, index)));
+      contourIds.push_back(parentShape.findShapeIdRecord(blendMaker.Edge(1, index)).id);
+      runningIds.insert(contourIds.back());
+    }
+  }
+  else if (shape.ShapeType() == TopAbs_FACE)
+  {
+    entry.typeString = tr("Face");
+    entry.pointLocation = pickIn.getPoint(TopoDS::Face(shape));
+  }
+  else
+    assert(0); // unrecognized occt shape type.
+  
+  entry.highlightIds = contourIds;
+  return entry;
+}
+
 void Blend::addConstantBlendSlot()
 {
   new ConstantItem(blendList);
@@ -272,9 +495,37 @@ void Blend::removeBlendSlot()
   variableTableWidget->clearSelection();
   observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
   
-  qDeleteAll(blendList->selectedItems());
+  QList<QListWidgetItem*> selected = blendList->selectedItems();
+  assert(selected.size() == 1); //we have single selection enabled on control.
   
-  //make sure other widget selections are cleared.
+  //need to update runningIds.
+  QListWidgetItem *item = selected.front();
+  if (item->type() == ConstantItem::itemType)
+  {
+    ConstantItem *cItem = dynamic_cast<ConstantItem*>(item);
+    assert(cItem);
+    for (const auto &pick : cItem->picks)
+    {
+      for (const auto &id : pick.highlightIds)
+        runningIds.erase(id);
+    }
+  }
+  else if (item->type() == VariableItem::itemType)
+  {
+    VariableItem *vItem = dynamic_cast<VariableItem*>(item);
+    assert(vItem);
+    for (const auto &id : vItem->pick.highlightIds)
+      runningIds.erase(id);
+    for (const auto &blendEntry : vItem->constraints)
+    {
+      for (const auto &id : blendEntry.highlightIds)
+        runningIds.erase(id);
+    }
+  }
+  else
+    assert(0); //unrecognized item type.
+  
+  qDeleteAll(selected);
 }
 
 void Blend::blendListCurrentItemChangedSlot(const QItemSelection &current, const QItemSelection&)
@@ -318,7 +569,9 @@ void Blend::blendListCurrentItemChangedSlot(const QItemSelection &current, const
     else
     {
       boost::signals2::shared_connection_block block(observer->connection);
-      observer->messageOutSignal(msg::buildSelectionMask(~slc::All | slc::EndPointsEnabled | slc::EndPointsSelectable));
+      observer->messageOutSignal(msg::buildSelectionMask
+        (~slc::All | slc::PointsEnabled | slc::PointsSelectable |
+        slc::EndPointsEnabled | slc::EndPointsSelectable));
     }
     //enable selection of edges if no edge picked, else end points.
     stackedWidget->setCurrentIndex(1);
@@ -814,8 +1067,6 @@ void Blend::variableTableRemoveSlot()
       eraseMe = it;
       continue;
     }
-    for (const auto &highlight : it->highlightIds)
-      addToSelection(highlight);
   }
   assert(eraseMe != vItem->constraints.end());
   

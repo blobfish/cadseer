@@ -21,6 +21,11 @@
 
 #include <osg/Geometry> //need this for containers.
 
+#include <application/application.h>
+#include <application/mainwindow.h>
+#include <project/project.h>
+#include <viewer/viewerwidget.h>
+#include <feature/base.h>
 #include <command/featuretosystem.h>
 #include <command/systemtofeature.h>
 #include <command/featuretodragger.h>
@@ -51,6 +56,8 @@ Manager::Manager()
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
   observer->name = "cmd::Manager";
   setupDispatcher();
+  
+  setupEditFunctionMap();
   
   selectionMask = slc::AllEnabled;
 }
@@ -94,6 +101,9 @@ void Manager::setupDispatcher()
   
   mask = msg::Request | msg::Construct | msg::Blend;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::constructBlendDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Edit | msg::Feature;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::editFeatureDispatched, this, _1)));
 }
 
 void Manager::cancelCommandDispatched(const msg::Message &)
@@ -234,4 +244,46 @@ void Manager::constructBlendDispatched(const msg::Message&)
 {
   std::shared_ptr<Blend> blend(new Blend());
   addCommand(blend);
+}
+
+void Manager::editFeatureDispatched(const msg::Message&)
+{
+  app::Application *application = static_cast<app::Application*>(qApp);
+  const slc::Containers &selections = application->
+    getMainWindow()->getViewer()->getSelections();
+    
+  //edit feature only works with 1 object pre-selection.
+  if (selections.size() != 1)
+  {
+    observer->messageOutSignal(msg::buildStatusMessage("Select 1 object prior to edit feature command"));
+    return;
+  }
+  
+  if (selections.front().selectionType != slc::Type::Object)
+  {
+    observer->messageOutSignal(msg::buildStatusMessage("Wrong selection type for edit feature command"));
+    return;
+  }
+  
+  ftr::Base *feature = application->getProject()->findFeature(selections.front().featureId);
+  
+  auto it = editFunctionMap.find(feature->getType());
+  if (it == editFunctionMap.end())
+  {
+    observer->messageOutSignal(msg::buildStatusMessage("Editing of feature type not implemented"));
+    return;
+  }
+  
+  addCommand(it->second(feature));
+}
+
+void Manager::setupEditFunctionMap()
+{
+  editFunctionMap.insert(std::make_pair(ftr::Type::Blend, std::bind(&Manager::editBlend, this, std::placeholders::_1)));
+}
+
+BasePtr Manager::editBlend(ftr::Base *feature)
+{
+  std::shared_ptr<Base> command(new BlendEdit(feature));
+  return command;
 }

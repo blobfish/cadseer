@@ -55,7 +55,7 @@ public:
     
     void addFeature(std::shared_ptr<ftr::Base> feature);
     void removeFeature(const boost::uuids::uuid &idIn);
-    void setFeatureActive(const boost::uuids::uuid &idIn);
+    void setCurrentLeaf(const boost::uuids::uuid &idIn);
     void connect(const boost::uuids::uuid &parentIn, const boost::uuids::uuid &childIn, ftr::InputTypes type);
     
     void setSaveDirectory(const std::string &directoryIn);
@@ -66,6 +66,8 @@ public:
     
     void shapeTrackUp(const boost::uuids::uuid &featureIdIn, const boost::uuids::uuid &shapeId);
     void shapeTrackDown(const boost::uuids::uuid &featureIdIn, const boost::uuids::uuid &shapeId);
+    ftr::EditMap getParentMap(const boost::uuids::uuid&) const;
+    std::vector<boost::uuids::uuid> getLeafChildren(const boost::uuids::uuid&) const;
     
     expr::ExpressionManager& getExpressionManager(){return *expressionManager;}
     
@@ -74,11 +76,11 @@ private:
     void indexVerticesEdges();
     prg::Edge connect(prg::Vertex parentIn, prg::Vertex childIn, ftr::InputTypes type);
     prg::Edge connectVertices(prg::Vertex parent, prg::Vertex child, ftr::InputTypes type);
-    prg::Vertex findVertex(const boost::uuids::uuid &idIn);
+    prg::Vertex findVertex(const boost::uuids::uuid &idIn) const;
     typedef std::pair<prg::Vertex, prg::Edge> VertexEdgePair;
     typedef std::vector<VertexEdgePair> VertexEdgePairs;
-    VertexEdgePairs getParents(prg::Vertex);
-    VertexEdgePairs getChildren(prg::Vertex);
+    VertexEdgePairs getParents(prg::Vertex) const;
+    VertexEdgePairs getChildren(prg::Vertex) const;
     void updateLeafStatus();
     
     IdVertexMap map;

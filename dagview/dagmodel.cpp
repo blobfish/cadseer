@@ -1004,6 +1004,12 @@ void Model::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     QAction* viewIsolateAction = contextMenu.addAction(viewIsolateIcon, tr("View Isolate"));
     connect(viewIsolateAction, SIGNAL(triggered()), this, SLOT(viewIsolateSlot()));
     
+    contextMenu.addSeparator();
+    
+    static QIcon editFeatureIcon(":/resources/images/dagViewEditFeature.svg");
+    QAction* editFeatureAction = contextMenu.addAction(editFeatureIcon, tr("Edit Feature"));
+    connect(editFeatureAction, SIGNAL(triggered()), this, SLOT(editFeatureSlot()));
+    
     static QIcon editColorIcon(":/resources/images/dagViewEditColor.svg");
     QAction* editColorAction = contextMenu.addAction(editColorIcon, tr("Edit Color"));
     connect(editColorAction, SIGNAL(triggered()), this, SLOT(editColorSlot()));
@@ -1011,20 +1017,24 @@ void Model::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     static QIcon editRenameIcon(":/resources/images/dagViewEditRename.svg");
     QAction* editRenameAction = contextMenu.addAction(editRenameIcon, tr("Rename"));
     connect(editRenameAction, SIGNAL(triggered()), this, SLOT(editRenameSlot()));
-    if (getAllSelected().size() != 1)
-      editRenameAction->setDisabled(true);
     
     contextMenu.addSeparator();
     
     static QIcon leafIcon(":/resources/images/dagViewLeaf.svg");
     QAction* setCurrentLeafAction = contextMenu.addAction(leafIcon, tr("Set Current Leaf"));
     connect(setCurrentLeafAction, SIGNAL(triggered()), this, SLOT(setCurrentLeafSlot()));
-    if (getAllSelected().size() != 1)
-      setCurrentLeafAction->setDisabled(true);
     
     static QIcon removeIcon(":/resources/images/dagViewRemove.svg");
     QAction* removeFeatureAction = contextMenu.addAction(removeIcon, tr("Remove Feature"));
     connect(removeFeatureAction, SIGNAL(triggered()), this, SLOT(removeFeatureSlot()));
+    
+    //disable actions that work for only 1 feature at a time.
+    if (getAllSelected().size() != 1)
+    {
+      editRenameAction->setDisabled(true);
+      editFeatureAction->setDisabled(true);
+      setCurrentLeafAction->setDisabled(true);
+    }
     
     contextMenu.exec(event->screenPos());
   }
@@ -1092,6 +1102,11 @@ void Model::editRenameSlot()
   
   lineEdit->selectAll();
   QTimer::singleShot(0, lineEdit, SLOT(setFocus())); 
+}
+
+void Model::editFeatureSlot()
+{
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Edit | msg::Feature));
 }
 
 void Model::renameAcceptedSlot()

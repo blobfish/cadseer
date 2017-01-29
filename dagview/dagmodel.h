@@ -80,6 +80,7 @@ namespace dag
     void viewIsolateSlot();
     void editColorSlot();
     void editRenameSlot();
+    void editFeatureSlot();
     void renameAcceptedSlot();
     void renameRejectedSlot();
     
