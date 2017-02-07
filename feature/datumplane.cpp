@@ -696,7 +696,7 @@ void DatumPlane::setSolver(std::shared_ptr<DatumPlaneGenre> solverIn)
   if (g)
   {
     overlaySwitch->addChild(g);
-    pMap.insert(std::make_pair(g->getParameter()->getName(), g->getParameter()));
+    parameterVector.push_back(g->getParameter());
   }
   solver->connect(this);
 }

@@ -20,9 +20,10 @@
 #ifndef PARAMETER_H
 #define PARAMETER_H
 
-#include <string>
+#include <QString>
 
 #include <boost/signals2.hpp>
+#include <boost/uuid/uuid.hpp>
 
 namespace prj{namespace srl{class Parameter;}}
 
@@ -30,33 +31,34 @@ namespace ftr
 {
   namespace ParameterNames
   {
-    static const std::string Radius = "Radius"; //!< cylinder, sphere
-    static const std::string Height = "Height"; //!< cylinder, box, cone
-    static const std::string Length = "Length"; //!< box
-    static const std::string Width = "Width"; //!< box
-    static const std::string Radius1 = "Radius1"; //!< cone
-    static const std::string Radius2 = "Radius2"; //!< cone
-    static const std::string Position = "Position"; //!< blend
-    static const std::string Distance = "Distance"; //!< chamfer
-    static const std::string Angle = "Angle"; //!< draft
-    static const std::string Offset = "Offset"; //!< datum plane
+    static const QString Radius = "Radius"; //!< cylinder, sphere
+    static const QString Height = "Height"; //!< cylinder, box, cone
+    static const QString Length = "Length"; //!< box
+    static const QString Width = "Width"; //!< box
+    static const QString Radius1 = "Radius1"; //!< cone
+    static const QString Radius2 = "Radius2"; //!< cone
+    static const QString Position = "Position"; //!< blend
+    static const QString Distance = "Distance"; //!< chamfer
+    static const QString Angle = "Angle"; //!< draft
+    static const QString Offset = "Offset"; //!< datum plane
   }
   
   class Parameter
   {
   public:
     Parameter();
-    Parameter(const std::string &nameIn, double valueIn);
+    Parameter(const QString &nameIn, double valueIn);
     double getValue() const {return value;}
     void setValue(double valueIn);
-    std::string getName() const {return name;}
-    void setName(const std::string &nameIn){name = nameIn;}
+    QString getName() const {return name;}
+    void setName(const QString &nameIn){name = nameIn;}
     bool isConstant() const {return constant;} //!< true = not linked to forumla.
     void setConstant(bool constantIn);
     operator double() const {return value;}
     Parameter& operator=(double valueIn);
     bool canBeNegative(){return couldBeNegative;}
     void setCanBeNegative(bool negIn){couldBeNegative = negIn;}
+    const boost::uuids::uuid& getId() const {return id;}
     
     typedef boost::signals2::signal<void ()> ValueChangedSignal;
     boost::signals2::connection connectValue(const ValueChangedSignal::slot_type &subscriber) const
@@ -75,9 +77,10 @@ namespace ftr
     
   private:
     bool constant = true;
-    std::string name;
+    QString name;
     double value;
     bool couldBeNegative = false;
+    boost::uuids::uuid id;
     
     //mutable allows us to connect to the signal through a const object.
     mutable ValueChangedSignal valueChangedSignal;
@@ -87,9 +90,7 @@ namespace ftr
   {
     return
     (
-      (lhs.getName() == rhs.getName()) &&
-      (lhs.getValue() == rhs.getValue()) &&
-      (lhs.isConstant() == rhs.isConstant())
+      (lhs.getId() == rhs.getId())
     );
   }
   inline bool operator==(const Parameter &lhs, double valueIn)
@@ -101,7 +102,7 @@ namespace ftr
     return rhs.getValue() == valueIn;
   }
   
-  typedef std::map<std::string, Parameter*> ParameterMap;
+  typedef std::vector<Parameter*> ParameterVector;
 }
 
 #endif // PARAMETER_H

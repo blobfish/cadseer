@@ -895,7 +895,7 @@ void Project::open()
     for (const auto &sLink : project->expressionLinks().array())
     {
       ftr::Base *feature = findFeature(gu::stringToId(sLink.featureId()));
-      ftr::Parameter *parameter = feature->getParameter(sLink.parameterName());
+      ftr::Parameter *parameter = feature->getParameter(QString::fromStdString(sLink.parameterName()));
       expressionManager->addFormulaLink(gu::stringToId(sLink.featureId()), parameter,
                                         gu::stringToId(sLink.expressionId()));
     }

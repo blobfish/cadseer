@@ -10,6 +10,7 @@
     <xs:element name="name" type="xs:string" default="Name"/>
     <xs:element name="constant" type="xs:boolean" default="true"/>
     <xs:element name="value" type="xs:double" default="NaN"/>
+    <xs:element name="id" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
   </xs:all>
 </xs:complexType>
 

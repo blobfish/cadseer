@@ -17,6 +17,7 @@
  *
  */
 
+#include <tools/idtools.h>
 #include <project/serial/xsdcxxoutput/featurebase.h>
 #include "parameter.h"
 
@@ -26,12 +27,14 @@ Parameter::Parameter()
 {
   name = "no name";
   value = 1.0;
+  id = gu::createRandomId();
 }
 
-Parameter::Parameter(const std::string& nameIn, double valueIn)
+Parameter::Parameter(const QString& nameIn, double valueIn)
 {
   name = nameIn;
   value = valueIn;
+  id = gu::createRandomId();
 }
 
 Parameter& Parameter::operator=(double valueIn)
@@ -59,12 +62,13 @@ void Parameter::setValue(double valueIn)
 
 prj::srl::Parameter Parameter::serialOut() const
 {
-  return prj::srl::Parameter(name, constant, value); 
+  return prj::srl::Parameter(name.toStdString(), constant, value, gu::idToString(id)); 
 }
 
 void Parameter::serialIn(const prj::srl::Parameter& sParameterIn)
 {
-  name = sParameterIn.name();
+  name = QString::fromStdString(sParameterIn.name());
   setConstant(sParameterIn.constant());
   setValue(sParameterIn.value());
+  id = gu::stringToId(sParameterIn.id());
 }

@@ -82,9 +82,9 @@ Cone::Cone() : CSysBase(),
   
   initializeMaps();
   
-  pMap.insert(std::make_pair(ParameterNames::Radius1, &radius1));
-  pMap.insert(std::make_pair(ParameterNames::Radius2, &radius2));
-  pMap.insert(std::make_pair(ParameterNames::Height, &height));
+  parameterVector.push_back(&radius1);
+  parameterVector.push_back(&radius2);
+  parameterVector.push_back(&height);
   
   radius1.connectValue(boost::bind(&Cone::setModelDirty, this));
   radius2.connectValue(boost::bind(&Cone::setModelDirty, this));

@@ -81,8 +81,8 @@ Cylinder::Cylinder() : CSysBase(), radius(ParameterNames::Radius, 5.0), height(P
   
   initializeMaps();
   
-  pMap.insert(std::make_pair(ParameterNames::Radius, &radius));
-  pMap.insert(std::make_pair(ParameterNames::Height, &height));
+  parameterVector.push_back(&radius);
+  parameterVector.push_back(&height);
   
   radius.connectValue(boost::bind(&Cylinder::setModelDirty, this));
   height.connectValue(boost::bind(&Cylinder::setModelDirty, this));

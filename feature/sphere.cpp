@@ -64,7 +64,7 @@ Sphere::Sphere() : CSysBase(), radius(ParameterNames::Radius, 5.0)
   
   initializeMaps();
   
-  pMap.insert(std::make_pair(ParameterNames::Radius, &radius));
+  parameterVector.push_back(&radius);
   radius.connectValue(boost::bind(&Sphere::setModelDirty, this));
   
   setupIPGroup();

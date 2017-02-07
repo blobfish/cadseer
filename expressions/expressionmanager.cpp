@@ -353,7 +353,7 @@ void ExpressionManager::addFormulaLink(const uuid &featureIdIn, ftr::Parameter *
 {
   FormulaLink virginLink;
   virginLink.featureId = featureIdIn;
-  virginLink.parameterName = parameterIn->getName();
+  virginLink.parameterName = parameterIn->getName().toStdString();
   virginLink.formulaId = formulaIdIn;
   virginLink.parameter = parameterIn;
   
@@ -369,7 +369,7 @@ void ExpressionManager::removeFormulaLink(const uuid &featureIdIn, ftr::Paramete
 {
   FormulaLinkContainerType::index<FormulaLink::ByFormulaIdParameterName>::type::iterator it, it2, itEnd;
   
-  boost::tie(it, itEnd) = formulaLinks.get<FormulaLink::ByFormulaIdParameterName>().equal_range(boost::make_tuple(featureIdIn, parameterIn->getName()));
+  boost::tie(it, itEnd) = formulaLinks.get<FormulaLink::ByFormulaIdParameterName>().equal_range(boost::make_tuple(featureIdIn, parameterIn->getName().toStdString()));
   formulaLinks.get<FormulaLink::ByFormulaIdParameterName>().erase(it, itEnd);
   parameterIn->setConstant(true);
 }
@@ -385,14 +385,14 @@ bool ExpressionManager::hasFormulaLink(const uuid &featureIdIn, const uuid &form
 bool ExpressionManager::hasFormulaLink(const uuid &featureIdIn, ftr::Parameter *parameterIn) const
 {
   FormulaLinkContainerType::index<FormulaLink::ByFormulaIdParameterName>::type::iterator it;
-  it = formulaLinks.get<FormulaLink::ByFormulaIdParameterName>().find(boost::make_tuple(featureIdIn, parameterIn->getName()));
+  it = formulaLinks.get<FormulaLink::ByFormulaIdParameterName>().find(boost::make_tuple(featureIdIn, parameterIn->getName().toStdString()));
   return it != formulaLinks.get<FormulaLink::ByFormulaIdParameterName>().end();
 }
 
 uuid ExpressionManager::getFormulaLink(const uuid &featureIdIn, ftr::Parameter *parameterIn) const
 {
   FormulaLinkContainerType::index<FormulaLink::ByFormulaIdParameterName>::type::iterator it;
-  it = formulaLinks.get<FormulaLink::ByFormulaIdParameterName>().find(boost::make_tuple(featureIdIn, parameterIn->getName()));
+  it = formulaLinks.get<FormulaLink::ByFormulaIdParameterName>().find(boost::make_tuple(featureIdIn, parameterIn->getName().toStdString()));
   assert(it != formulaLinks.get<FormulaLink::ByFormulaIdParameterName>().end());
   return it->formulaId;
 }

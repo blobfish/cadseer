@@ -125,6 +125,36 @@ namespace prj
       return ValueType (::std::numeric_limits< ::xml_schema::Double >::quiet_NaN ());
     }
 
+    const Parameter::IdType& Parameter::
+    id () const
+    {
+      return this->id_.get ();
+    }
+
+    Parameter::IdType& Parameter::
+    id ()
+    {
+      return this->id_.get ();
+    }
+
+    void Parameter::
+    id (const IdType& x)
+    {
+      this->id_.set (x);
+    }
+
+    void Parameter::
+    id (::std::unique_ptr< IdType > x)
+    {
+      this->id_.set (std::move (x));
+    }
+
+    const Parameter::IdType& Parameter::
+    id_default_value ()
+    {
+      return id_default_value_;
+    }
+
 
     // EvolveRecord
     // 
@@ -961,14 +991,19 @@ namespace prj
     const Parameter::NameType Parameter::name_default_value_ (
       "Name");
 
+    const Parameter::IdType Parameter::id_default_value_ (
+      "00000000-0000-0000-0000-000000000000");
+
     Parameter::
     Parameter (const NameType& name,
                const ConstantType& constant,
-               const ValueType& value)
+               const ValueType& value,
+               const IdType& id)
     : ::xml_schema::Type (),
       name_ (name, this),
       constant_ (constant, this),
-      value_ (value, this)
+      value_ (value, this),
+      id_ (id, this)
     {
     }
 
@@ -979,7 +1014,8 @@ namespace prj
     : ::xml_schema::Type (x, f, c),
       name_ (x.name_, f, this),
       constant_ (x.constant_, f, this),
-      value_ (x.value_, f, this)
+      value_ (x.value_, f, this),
+      id_ (x.id_, f, this)
     {
     }
 
@@ -990,7 +1026,8 @@ namespace prj
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
       name_ (this),
       constant_ (this),
-      value_ (this)
+      value_ (this),
+      id_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -1045,6 +1082,20 @@ namespace prj
           }
         }
 
+        // id
+        //
+        if (n.name () == "id" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< IdType > r (
+            IdTraits::create (i, f, this));
+
+          if (!id_.present ())
+          {
+            this->id_.set (::std::move (r));
+            continue;
+          }
+        }
+
         break;
       }
 
@@ -1068,6 +1119,13 @@ namespace prj
           "value",
           "");
       }
+
+      if (!id_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "id",
+          "");
+      }
     }
 
     Parameter* Parameter::
@@ -1086,6 +1144,7 @@ namespace prj
         this->name_ = x.name_;
         this->constant_ = x.constant_;
         this->value_ = x.value_;
+        this->id_ = x.id_;
       }
 
       return *this;
@@ -2883,6 +2942,17 @@ namespace prj
             e));
 
         s << ::xml_schema::AsDouble(i.value ());
+      }
+
+      // id
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "id",
+            e));
+
+        s << i.id ();
       }
     }
 

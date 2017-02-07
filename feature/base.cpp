@@ -439,14 +439,40 @@ QString Base::buildFilePathName(const QDir &dIn) const
   return out;
 }
 
-bool Base::hasParameter(const std::string &nameIn)
+bool Base::hasParameter(const QString &nameIn) const
 {
-  return (pMap.count(nameIn) > 0);
+  for (const auto &p : parameterVector)
+    if (p->getName() == nameIn)
+      return true;
+    
+  return false;
 }
 
-Parameter* Base::getParameter(const std::string &nameIn)
+Parameter* Base::getParameter(const QString &nameIn) const
 {
-  return pMap.at(nameIn);
+  for (const auto &p : parameterVector)
+    if (p->getName() == nameIn)
+      return p;
+  assert(0); //no parameter by that name. use hasParameter.
+  return nullptr;
+}
+
+bool Base::hasParameter(const boost::uuids::uuid &idIn) const
+{
+  for (const auto &p : parameterVector)
+    if (p->getId() == idIn)
+      return true;
+    
+  return false;
+}
+
+Parameter* Base::getParameter(const boost::uuids::uuid &idIn) const
+{
+  for (const auto &p : parameterVector)
+    if (p->getId() == idIn)
+      return p;
+  assert(0); //no parameter by that name. use hasParameter.
+  return nullptr;
 }
 
 QTextStream& Base::getInfo(QTextStream &stream) const
@@ -470,12 +496,12 @@ QTextStream& Base::getInfo(QTextStream &stream) const
         << "Feture is leaf: " << boolString(isLeaf()) << endl;
         
     stream << endl << "Parameters:" << endl;
-    for (const auto &p : pMap)
+    for (const auto &p : parameterVector)
     {
         stream
-            << "    Parameter name: " << QString::fromStdString(p.second->getName())
-            << "    Value: " << QString::number(p.second->getValue(), 'f', 12)
-            << "    Is linked: " << boolString(!(p.second->isConstant())) << endl;
+            << "    Parameter name: " << p->getName()
+            << "    Value: " << QString::number(p->getValue(), 'f', 12)
+            << "    Is linked: " << boolString(!(p->isConstant())) << endl;
     }
     
     return stream;

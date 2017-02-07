@@ -300,6 +300,73 @@ namespace prj
       //@}
 
       /**
+       * @name id
+       *
+       * @brief Accessor and modifier functions for the %id
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::xml_schema::String IdType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< IdType, char > IdTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const IdType&
+      id () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      IdType&
+      id ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      id (const IdType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      id (::std::unique_ptr< IdType > p);
+
+      /**
+       * @brief Return the default value for the element.
+       *
+       * @return A read-only (constant) reference to the element's
+       * default value.
+       */
+      static const IdType&
+      id_default_value ();
+
+      //@}
+
+      /**
        * @name Constructors
        */
       //@{
@@ -310,7 +377,8 @@ namespace prj
        */
       Parameter (const NameType&,
                  const ConstantType&,
-                 const ValueType&);
+                 const ValueType&,
+                 const IdType&);
 
       /**
        * @brief Create an instance from a DOM element.
@@ -386,6 +454,8 @@ namespace prj
       static const NameType name_default_value_;
       ::xsd::cxx::tree::one< ConstantType > constant_;
       ::xsd::cxx::tree::one< ValueType > value_;
+      ::xsd::cxx::tree::one< IdType > id_;
+      static const IdType id_default_value_;
 
       //@endcond
     };

@@ -130,9 +130,9 @@ Box::Box() :
   
   initializeMaps();
   
-  pMap.insert(std::make_pair(ParameterNames::Length, &length));
-  pMap.insert(std::make_pair(ParameterNames::Width, &width));
-  pMap.insert(std::make_pair(ParameterNames::Height, &height));
+  parameterVector.push_back(&length);
+  parameterVector.push_back(&width);
+  parameterVector.push_back(&height);
   
   length.connectValue(boost::bind(&Box::setModelDirty, this));
   width.connectValue(boost::bind(&Box::setModelDirty, this));

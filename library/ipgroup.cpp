@@ -254,7 +254,7 @@ bool IPGroup::processMotion(const osgManipulator::MotionCommand &commandIn)
     
     //add git message.
     std::ostringstream gitStream;
-    gitStream << QObject::tr("Parameter ").toStdString() << parameter->getName() <<
+    gitStream << QObject::tr("Parameter ").toStdString() << parameter->getName().toStdString() <<
       QObject::tr(" changed to: ").toStdString() << parameter->getValue();
     observer->messageOutSignal(msg::buildGitMessage(gitStream.str()));
     

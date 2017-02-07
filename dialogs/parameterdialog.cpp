@@ -81,7 +81,7 @@ void ParameterDialog::buildGui()
   
   QVBoxLayout *mainLayout = new QVBoxLayout(this);
   
-  QLabel *nameLabel = new QLabel(QString::fromUtf8(parameter->getName().c_str()), this);
+  QLabel *nameLabel = new QLabel(parameter->getName(), this);
   editLine = new ExpressionEdit(this);
   if (parameter->isConstant())
     QTimer::singleShot(0, editLine->trafficLabel, SLOT(setTrafficGreenSlot()));
@@ -192,7 +192,7 @@ void ParameterDialog::updateSlot()
   std::ostringstream gitStream;
   gitStream
     << QObject::tr("Feature: ").toStdString() << feature->getName().toStdString()
-    << QObject::tr("    Parameter ").toStdString() << parameter->getName();
+    << QObject::tr("    Parameter ").toStdString() << parameter->getName().toStdString();
 
   //just run it through a string translator and expression manager.
   expr::ExpressionManager localManager;

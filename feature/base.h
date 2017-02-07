@@ -115,8 +115,10 @@ public:
   osg::MatrixTransform* getMainTransform() const {return mainTransform.get();}
   bool hasSeerShape() const {return static_cast<bool>(seerShape);}
   const SeerShape& getSeerShape() const {assert(seerShape); return *seerShape;}
-  bool hasParameter(const std::string &nameIn);
-  Parameter* getParameter(const std::string &nameIn);
+  bool hasParameter(const QString &nameIn) const; //!< parameter names are not unique.
+  Parameter* getParameter(const QString &nameIn) const; //!< parameter names are not unique.
+  bool hasParameter(const boost::uuids::uuid &idIn) const;
+  Parameter* getParameter(const boost::uuids::uuid &idin) const;
   
   virtual void serialWrite(const QDir &); //!< override in leaf classes only.
   std::string getFileName() const; //!< used by git.
@@ -134,7 +136,7 @@ protected:
   void serialIn(const prj::srl::FeatureBase& sBaseIn);
   
   QString name;
-  ParameterMap pMap;
+  ParameterVector parameterVector;
   
   std::unique_ptr<msg::Observer> observer;
   
