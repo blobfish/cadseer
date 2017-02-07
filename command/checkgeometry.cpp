@@ -56,7 +56,11 @@ void CheckGeometry::activate()
   }
 
   if (dialog)
+  {
     dialog->show();
+    dialog->raise();
+    dialog->activateWindow();
+  }
 }
 
 void CheckGeometry::deactivate()
@@ -112,5 +116,9 @@ void CheckGeometry::selectionAdditionDispatched(const msg::Message&)
     return;
   go();
   if (dialog)
+  {
     dialog->show();
+    dialog->raise();
+    dialog->activateWindow();
+  }
 }

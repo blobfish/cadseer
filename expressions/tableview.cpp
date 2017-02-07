@@ -35,8 +35,10 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPainter>
+#include <QTimer>
 
 #include <tools/idtools.h>
+#include <dialogs/expressionedit.h>
 #include <expressions/tableview.h>
 #include <expressions/tablemodel.h>
 #include <expressions/expressionmanager.h>
@@ -442,55 +444,6 @@ TableViewSelection::TableViewSelection(QWidget* parent): QTableView(parent)
   this->verticalHeader()->setVisible(false);
 }
 
-ExpressionDelegate::ExpressionDelegate(QObject *parent): QStyledItemDelegate(parent)
-{
-
-}
-
-QWidget* ExpressionDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&, const QModelIndex&) const
-{
-  TrafficEdit *trafficEdit = new TrafficEdit(parent);
-  return trafficEdit;
-}
-
-void ExpressionDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
-{
-  TrafficEdit *tEdit = dynamic_cast<TrafficEdit *>(editor); assert(tEdit);
-  tEdit->trafficLabel->setPixmap(tEdit->trafficGreen); //expect current string is valid.
-  LineEdit *lineEdit = tEdit->lineEdit;
-  assert(lineEdit);
-  const QSortFilterProxyModel *proxyModel = dynamic_cast<const QSortFilterProxyModel *>(index.model());
-  assert(proxyModel);
-  const TableModel *myModel = dynamic_cast<const TableModel *>(proxyModel->sourceModel());
-  assert(myModel);
-  
-  lineEdit->sTranslator = myModel->getStringTranslator();
-  lineEdit->setText(index.model()->data(index, Qt::EditRole).toString());
-}
-
-void ExpressionDelegate::updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex&) const
-{
-  //this is called before setEditorData.
-  editor->setGeometry(option.rect);
-  TrafficEdit *tEdit = static_cast<TrafficEdit*>(editor);
-  tEdit->iconHeight = option.rect.height();
-  tEdit->updatePixmaps();
-}
-
-void ExpressionDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
-{
-  LineEdit *lineEdit = dynamic_cast<TrafficEdit *>(editor)->lineEdit;
-  lineEdit->removeTempFormula(); //temp formula might be invalid and we should be done with it.
-  if (!model->setData(index, lineEdit->text(), Qt::EditRole))
-  {
-    //view must be used as parent when constructing the delegate.
-    QAbstractItemView *view = dynamic_cast<QAbstractItemView *>(this->parent());
-    assert(view);
-    QMessageBox::critical(view, tr("Error:"), model->data(index, (Qt::UserRole+1)).toString());
-    QMetaObject::invokeMethod(view, "edit", Qt::QueuedConnection, Q_ARG(QModelIndex, index));
-  }
-}
-
 NameDelegate::NameDelegate(QObject* parent): QStyledItemDelegate(parent)
 {
 
@@ -509,110 +462,54 @@ void NameDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, cons
   }
 }
 
-LineEdit::LineEdit(QWidget* parent): QLineEdit(parent)
+ExpressionDelegate::ExpressionDelegate(QObject *parent): QStyledItemDelegate(parent)
 {
-  connect (this, SIGNAL(textEdited(const QString&)), this, SLOT(parseStringSlot(const QString&)));
-}
-
-LineEdit::~LineEdit()
-{
-  removeTempFormula();
-}
-
-void LineEdit::removeTempFormula()
-{
-  if (sTranslator->eManager.hasFormula(testFormulaName))
-    sTranslator->eManager.removeFormula(testFormulaName);
-}
-
-void LineEdit::setSelectionSlot(const int& start, const int& length)
-{
-  this->setSelection(start, length);
-}
-
-void LineEdit::parseStringSlot(const QString &textIn)
-{
-  Q_EMIT parseWorkingSignal();
-  qApp->processEvents(); //need this or we never see yellow signal.
   
-  ExpressionManager &eManager = sTranslator->eManager;
-  if (eManager.hasFormula(testFormulaName))
-    eManager.cleanFormula(eManager.getFormulaId(testFormulaName));
+}
+
+QWidget* ExpressionDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&, const QModelIndex&) const
+{
+  dlg::ExpressionEdit *editor = new dlg::ExpressionEdit(parent);
+  return editor;
+}
+
+void ExpressionDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
+{
+  dlg::ExpressionEdit *eEditor = dynamic_cast<dlg::ExpressionEdit *>(editor); assert(eEditor);
+  eEditor->lineEdit->setText(index.model()->data(index, Qt::EditRole).toString());
+  QTimer::singleShot(0, eEditor->trafficLabel, SLOT(setTrafficGreenSlot()));
+  eEditor->trafficLabel->setTrafficGreenSlot(); //expect current string is valid.
   
-  std::ostringstream stream;
-  stream << testFormulaName << "=" << textIn.toStdString();
-  if (sTranslator->parseString(stream.str()) != StringTranslator::ParseSucceeded)
+  const QSortFilterProxyModel *proxyModel = dynamic_cast<const QSortFilterProxyModel *>(index.model());
+  assert(proxyModel);
+  //I have to be able to use the model when temp parsing!
+  TableModel *tableModel = const_cast<TableModel*>(dynamic_cast<const TableModel *>(proxyModel->sourceModel()));
+  assert(tableModel);
+  
+  connect (eEditor->lineEdit, SIGNAL(textEdited(QString)), tableModel, SLOT(parseStringSlot(QString)));
+  connect (tableModel, SIGNAL(parseWorkingSignal()), eEditor->trafficLabel, SLOT(setTrafficYellowSlot()));
+  connect (tableModel, SIGNAL(parseSucceededSignal(QString)), editor, SLOT(goToolTipSlot(QString)));
+  connect (tableModel, SIGNAL(parseSucceededSignal()), eEditor->trafficLabel, SLOT(setTrafficGreenSlot()));
+  connect (tableModel, SIGNAL(parseFailedSignal(QString)), editor, SLOT(goToolTipSlot(QString)));
+  connect (tableModel, SIGNAL(parseFailedSignal()), eEditor->trafficLabel, SLOT(setTrafficRedSlot()));
+}
+
+void ExpressionDelegate::updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex&) const
+{
+  //this is called before setEditorData.
+  editor->setGeometry(option.rect);
+}
+
+void ExpressionDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
+{
+  dlg::ExpressionEdit *eEditor = dynamic_cast<dlg::ExpressionEdit *>(editor);
+  assert(eEditor);
+  if (!model->setData(index, eEditor->lineEdit->text(), Qt::EditRole))
   {
-    int position = sTranslator->getFailedPosition() - testFormulaName.size() - 1;
-    this->setToolTip(textIn.left( position) + "?");
-    Q_EMIT parseFailedSignal();
+    //view must be used as parent when constructing the delegate.
+    QAbstractItemView *view = dynamic_cast<QAbstractItemView *>(this->parent());
+    assert(view);
+    QMessageBox::critical(view, tr("Error:"), model->data(index, (Qt::UserRole+1)).toString());
+    QMetaObject::invokeMethod(view, "edit", Qt::QueuedConnection, Q_ARG(QModelIndex, index));
   }
-  else
-  {
-    sTranslator->eManager.update();
-    this->setToolTip(QString::number(sTranslator->eManager.getFormulaValue(sTranslator->getFormulaOutId())));
-    Q_EMIT parseSucceededSignal();
-  }
-  
-  QPoint point(0.0, -1.5 * (this->frameGeometry().height()));
-  QHelpEvent *toolTipEvent = new QHelpEvent(QEvent::ToolTip, point, this->mapToGlobal(point));
-  qApp->postEvent(this, toolTipEvent);
-}
-
-TrafficEdit::TrafficEdit(QWidget* parent): QWidget(parent, Qt::Widget | Qt::FramelessWindowHint)
-{
-  this->setContentsMargins(0, 0, 0, 0);
-  QHBoxLayout *layout = new QHBoxLayout();
-  layout->setSpacing(0);
-  layout->setContentsMargins(0, 0, 0, 0);
-  
-  lineEdit = new LineEdit(this);
-  layout->addWidget(lineEdit);
-  
-  trafficLabel = new QLabel(this);
-  layout->addWidget(trafficLabel);
-  
-  this->setLayout(layout);
-  this->setFocusProxy(lineEdit);
-  
-  connect (lineEdit, SIGNAL(parseFailedSignal()),  this, SLOT(setTrafficRedSlot()));
-  connect(lineEdit, SIGNAL(parseWorkingSignal()), this, SLOT(setTrafficYellowSlot()));
-  connect(lineEdit, SIGNAL(parseSucceededSignal()), this, SLOT(setTrafficGreenSlot()));
-}
-
-void TrafficEdit::updatePixmaps()
-{
-  assert(iconHeight > 0);
-  QPixmap temp(iconHeight, iconHeight);
-  temp.fill(QPalette::Window);
-  trafficRed = buildPixmap(":/resources/images/trafficRed.svg");
-  trafficYellow = buildPixmap(":/resources/images/trafficYellow.svg");
-  trafficGreen = buildPixmap(":/resources/images/trafficGreen.svg");
-}
-
-QPixmap TrafficEdit::buildPixmap(const QString &name)
-{
-  QPixmap temp = QPixmap(name).scaled(iconHeight, iconHeight, Qt::KeepAspectRatio);
-  QPixmap out(iconHeight, iconHeight);
-  QPainter painter(&out);
-  painter.fillRect(out.rect(), this->palette().color(QPalette::Window));
-  painter.drawPixmap(out.rect(), temp, temp.rect());
-  painter.end();
-  
-  return out;
-}
-
-void TrafficEdit::setTrafficRedSlot()
-{
-  trafficLabel->setPixmap(trafficRed);
-}
-
-void TrafficEdit::setTrafficYellowSlot()
-{
-  trafficLabel->setPixmap(trafficYellow);
-}
-
-void TrafficEdit::setTrafficGreenSlot()
-{
-  trafficLabel->setPixmap(trafficGreen);
 }

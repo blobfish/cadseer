@@ -79,8 +79,19 @@ public:
     //! Add a new row to the model.
     void addDefaultRow();
     
-    //! Need to get the string translator to line edit widget.
-    StringTranslator* getStringTranslator() const;
+  //@{
+  //! items related to temp parsing in the editor delegate.
+public Q_SLOTS:
+  void parseStringSlot(const QString &textIn); //!< no lhs or equals.
+Q_SIGNALS:
+  void parseWorkingSignal();
+  void parseSucceededSignal(const QString&); //!< string representation of value.
+  void parseSucceededSignal();
+  void parseFailedSignal(const QString&); //!< string showing failure position.
+  void parseFailedSignal();
+private:
+  const std::string testFormulaName = "f9d2e8f0_2354_40ef_8d3c_4b8ced3a2504"; //!< unique name for temp.
+  //@}
     
 private:
   //! Manager containing expressions and groups.

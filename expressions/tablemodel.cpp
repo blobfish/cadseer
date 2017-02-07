@@ -21,6 +21,7 @@
 #include <fstream>
 #include <iostream>
 
+#include <QCoreApplication>
 #include <QtCore/QTextStream>
 #include <QtCore/QStringList>
 #include <QtCore/QMimeData>
@@ -396,11 +397,6 @@ void TableModel::importExpressions(std::istream &streamIn, boost::uuids::uuid gr
   this->endInsertRows();
 }
 
-StringTranslator* TableModel::getStringTranslator() const
-{
-  return sTranslator.get();
-}
-
 void TableModel::buildOrModifyMapEntry(const boost::uuids::uuid &idIn, const std::string &rhsIn) const
 {
   IdToRhsMap::iterator it;
@@ -421,6 +417,34 @@ void TableModel::removeRhs(const boost::uuids::uuid &idIn) const
   IdToRhsMap::iterator it = idToRhsMap.find(idIn);
   assert(it != idToRhsMap.end());
   idToRhsMap.erase(it);
+}
+
+void TableModel::parseStringSlot(const QString &textIn)
+{
+  Q_EMIT parseWorkingSignal();
+  qApp->processEvents(); //need this or we never see yellow signal.
+  
+  assert(!eManager.hasFormula(testFormulaName));
+  
+  std::ostringstream stream;
+  stream << testFormulaName << "=" << textIn.toStdString();
+  if (sTranslator->parseString(stream.str()) != StringTranslator::ParseSucceeded)
+  {
+    int position = sTranslator->getFailedPosition() - testFormulaName.size() - 1;
+    QString string = textIn.left(position) + "?";
+    Q_EMIT parseFailedSignal(string);
+    Q_EMIT parseFailedSignal();
+  }
+  else
+  {
+    sTranslator->eManager.update();
+    QString string = QString::number(sTranslator->eManager.getFormulaValue(sTranslator->getFormulaOutId()));
+    Q_EMIT parseSucceededSignal(string);
+    Q_EMIT parseSucceededSignal();
+  }
+  
+  if (eManager.hasFormula(testFormulaName))
+    eManager.removeFormula(testFormulaName);
 }
 
 BaseProxyModel::BaseProxyModel(QObject* parent): QSortFilterProxyModel(parent)

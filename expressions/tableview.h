@@ -141,46 +141,6 @@ public:
   //! @brief set the new name or re-edit upon failure.
   virtual void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const;
 };
-
-//! @brief Editor for expression.
-class LineEdit : public QLineEdit
-{
-  Q_OBJECT
-public:
-  explicit LineEdit(QWidget *parent = 0);
-  ~LineEdit();
-  void removeTempFormula();
-  StringTranslator *sTranslator;
-  const std::string testFormulaName = "f9d2e8f0_2354_40ef_8d3c_4b8ced3a2504";
-public Q_SLOTS:
-  //! This will highlight text to indicate parse failure position.
-  void setSelectionSlot(const int &start, const int &length);
-  void parseStringSlot(const QString &);
-Q_SIGNALS:
-  void parseFailedSignal();
-  void parseWorkingSignal();
-  void parseSucceededSignal();
-};
-
-class TrafficEdit : public QWidget
-{
-  Q_OBJECT
-public:
-  explicit TrafficEdit(QWidget *parent = 0);
-  LineEdit *lineEdit;
-  int iconHeight = 0;
-  QLabel *trafficLabel;
-  QPixmap trafficRed;
-  QPixmap trafficYellow;
-  QPixmap trafficGreen;
-  void updatePixmaps();
-  QPixmap buildPixmap(const QString &name);
-public Q_SLOTS:
-  void setTrafficRedSlot();
-  void setTrafficYellowSlot();
-  void setTrafficGreenSlot();
-};
-
 }
 
 

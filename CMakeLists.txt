@@ -129,6 +129,7 @@ SET(DIALOG_SOURCES
     dialogs/checkgeometry.cpp
     dialogs/widgetgeometry.cpp
     dialogs/blend.cpp
+    dialogs/expressionedit.cpp
     )
     
 SET(PREFERENCE_SOURCES
@@ -252,6 +253,7 @@ SET(CADSEER_MOC_HDRS
     dialogs/checkgeometry.h
     dialogs/widgetgeometry.h
     dialogs/blend.h
+    dialogs/expressionedit.h
     preferences/dialog.h
     dialogs/parameterdialog.h
     project/projectdialog.h

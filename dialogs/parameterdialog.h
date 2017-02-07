@@ -22,6 +22,10 @@
 
 #include <memory>
 
+#ifndef Q_MOC_RUN
+#include <boost/signals2/connection.hpp>
+#endif
+
 #include <QDialog>
 #include <QLineEdit>
 
@@ -38,19 +42,7 @@ namespace msg{class Message; class Observer;}
 
 namespace dlg
 {
-  class EnterEdit : public QLineEdit
-  {
-  Q_OBJECT
-  public:
-    explicit EnterEdit(QWidget *parentIn) : QLineEdit(parentIn){}
-    
-  Q_SIGNALS:
-    void goUpdateSignal();
-    
-  protected:
-    virtual void keyPressEvent(QKeyEvent*) override;
-  };
-  
+  class ExpressionEdit;
   class ParameterDialog : public QDialog
   {
     Q_OBJECT
@@ -58,31 +50,23 @@ namespace dlg
     ParameterDialog(ftr::Parameter *parameterIn, const boost::uuids::uuid &idIn);
     virtual ~ParameterDialog() override;
     ftr::Parameter *parameter = nullptr;
-    
-  protected:
-    virtual void keyPressEvent(QKeyEvent*) override;
-    virtual void dragEnterEvent(QDragEnterEvent *) override;
-    virtual void dropEvent(QDropEvent *) override;
 
   private:
     void buildGui();
     void valueHasChanged();
     void constantHasChanged();
+    boost::signals2::connection valueConnection;
+    boost::signals2::connection constantConnection;
     std::unique_ptr<msg::Observer> observer;
     void featureRemovedDispatched(const msg::Message &);
     ftr::Base *feature;
-    EnterEdit *editLine;
-    QPushButton *linkButton;
-    QLabel *linkLabel;
+    ExpressionEdit *editLine;
     double lastValue;
-    QPixmap trafficRed;
-    QPixmap trafficYellow;
-    QPixmap trafficGreen;
-    QLabel *trafficLabel;
   private Q_SLOTS:
     void updateSlot();
-    void linkButtonClickedSlot(bool checkedState);
     void textEditedSlot(const QString &);
+    void requestLinkSlot(const QString &);
+    void requestUnlinkSlot();
   };
 }
 

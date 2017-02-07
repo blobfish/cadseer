@@ -197,4 +197,6 @@ void MainWindow::preferencesChanged(const msg::Message&)
 void MainWindow::infoTextDispatched(const msg::Message&)
 {
     infoDialog->show();
+    infoDialog->raise();
+    infoDialog->activateWindow();
 }

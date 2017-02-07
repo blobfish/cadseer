@@ -323,6 +323,8 @@ bool OverlayHandler::handle
         
         dlg::ParameterDialog *dialog = new dlg::ParameterDialog(dimension->getParameter(), gu::getId(visitor.out));
         dialog->show();
+        dialog->raise();
+        dialog->activateWindow();
         dimension.release();
       }
       else
@@ -353,6 +355,8 @@ bool OverlayHandler::handle
                 
                 dlg::ParameterDialog *dialog = new dlg::ParameterDialog(pLabel->getParameter(), gu::getId(visitor.out));
                 dialog->show();
+                dialog->raise();
+                dialog->activateWindow();
                 pLabel.release();
             }
         }

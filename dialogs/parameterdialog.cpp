@@ -22,6 +22,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QPushButton>
+#include <QTimer>
 
 #include <tools/idtools.h>
 #include <expressions/expressionmanager.h>
@@ -36,38 +37,43 @@
 #include <message/observer.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
-#include "parameterdialog.h"
+#include <dialogs/expressionedit.h>
+#include <dialogs/widgetgeometry.h>
+#include <dialogs/parameterdialog.h>
 
 using namespace dlg;
-
-void EnterEdit::keyPressEvent(QKeyEvent *eventIn)
-{
-  QLineEdit::keyPressEvent(eventIn);
-  if (eventIn->key() == Qt::Key_Tab)
-    Q_EMIT goUpdateSignal();
-}
 
 ParameterDialog::ParameterDialog(ftr::Parameter *parameterIn, const boost::uuids::uuid &idIn):
   QDialog(static_cast<app::Application*>(qApp)->getMainWindow()),
   parameter(parameterIn)
 {
   assert(parameter);
-  this->setAcceptDrops(true);
   
   feature = static_cast<app::Application*>(qApp)->getProject()->findFeature(idIn);
   assert(feature);
   buildGui();
-  constantHasChanged(); //call valueHasChanged if needs to
+  constantHasChanged();
   
-  parameter->connectValue(boost::bind(&ParameterDialog::valueHasChanged, this));
-  parameter->connectConstant(boost::bind(&ParameterDialog::constantHasChanged, this));
+  valueConnection = parameter->connectValue
+    (boost::bind(&ParameterDialog::valueHasChanged, this));
+  constantConnection = parameter->connectConstant
+    (boost::bind(&ParameterDialog::constantHasChanged, this));
   
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
   observer->dispatcher.insert(std::make_pair(msg::Response | msg::Pre | msg::Remove | msg::Feature,
     boost::bind(&ParameterDialog::featureRemovedDispatched, this, boost::placeholders::_1)));
+  
+  WidgetGeometry *filter = new WidgetGeometry(this, "dlg::ParameterDialog");
+  this->installEventFilter(filter);
+  
+  this->setAttribute(Qt::WA_DeleteOnClose);
 }
 
-ParameterDialog::~ParameterDialog(){}
+ParameterDialog::~ParameterDialog()
+{
+  valueConnection.disconnect();
+  constantConnection.disconnect();
+}
 
 void ParameterDialog::buildGui()
 {
@@ -76,163 +82,88 @@ void ParameterDialog::buildGui()
   QVBoxLayout *mainLayout = new QVBoxLayout(this);
   
   QLabel *nameLabel = new QLabel(QString::fromUtf8(parameter->getName().c_str()), this);
-  editLine = new EnterEdit(this);
-  editLine->setAcceptDrops(false);
-  int iconHeight(editLine->height());
-  trafficRed = QPixmap(":/resources/images/trafficRed.svg").scaled(iconHeight, iconHeight, Qt::KeepAspectRatio);
-  trafficYellow = QPixmap(":/resources/images/trafficYellow.svg").scaled(iconHeight, iconHeight, Qt::KeepAspectRatio);
-  trafficGreen = QPixmap(":/resources/images/trafficGreen.svg").scaled(iconHeight, iconHeight, Qt::KeepAspectRatio);
-  trafficLabel = new QLabel(this);
-  trafficLabel->setPixmap(trafficGreen);
+  editLine = new ExpressionEdit(this);
+  if (parameter->isConstant())
+    QTimer::singleShot(0, editLine->trafficLabel, SLOT(setTrafficGreenSlot()));
+  else
+    QTimer::singleShot(0, editLine->trafficLabel, SLOT(setLinkSlot()));
   QHBoxLayout *editLayout = new QHBoxLayout();
   editLayout->addWidget(nameLabel);
   editLayout->addWidget(editLine);
-  editLayout->addWidget(trafficLabel);
   
   mainLayout->addLayout(editLayout);
   
-  mainLayout->addSpacing(10);
-  mainLayout->addStretch();
+  ExpressionEditFilter *filter = new ExpressionEditFilter(this);
+  editLine->lineEdit->installEventFilter(filter);
   
-  QHBoxLayout *buttonLayout = new QHBoxLayout();
-  linkButton = new QPushButton(this);
-  linkButton->setCheckable(true);
-  linkButton->setFocusPolicy(Qt::ClickFocus);
-  linkLabel = new QLabel(this);
-  buttonLayout->addWidget(linkButton);
-  buttonLayout->addStretch();
-  buttonLayout->addWidget(linkLabel);
-  mainLayout->addLayout(buttonLayout);
-  
-  connect(editLine, SIGNAL(goUpdateSignal()), this, SLOT(updateSlot()));
-  connect(editLine, SIGNAL(textEdited(QString)), this, SLOT(textEditedSlot(QString)));
-  connect(this, SIGNAL(accepted()), this, SLOT(updateSlot()));
-  connect(linkButton, SIGNAL(clicked(bool)), this, SLOT(linkButtonClickedSlot(bool)));
+  connect(editLine->lineEdit, SIGNAL(textEdited(QString)), this, SLOT(textEditedSlot(QString)));
+  connect(editLine->lineEdit, SIGNAL(returnPressed()), this, SLOT(updateSlot()));
+  connect(editLine->trafficLabel, SIGNAL(requestUnlinkSignal()), SLOT(requestUnlinkSlot()));
+  connect(filter, SIGNAL(requestLinkSignal(QString)), this, SLOT(requestLinkSlot(QString)));
 }
 
-void ParameterDialog::keyPressEvent(QKeyEvent *eventIn)
+void ParameterDialog::requestLinkSlot(const QString &stringIn)
 {
-  if
-  (
-    (eventIn->key() == Qt::Key_Return) ||
-    (eventIn->key() == Qt::Key_Enter)
-  )
+  boost::uuids::uuid id = gu::stringToId(stringIn.toStdString());
+  assert(!id.is_nil());
+  
+  expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
+  if (!parameter->isConstant())
   {
-    this->accept();
-    return;
-  }
-  else if (eventIn->key() == Qt::Key_Escape)
-  {
-    this->reject();
-    return;
+    //parameter is already linked.
+    assert(eManager.hasFormulaLink(feature->getId(), parameter));
+    eManager.removeFormulaLink(feature->getId(), parameter);
   }
   
-  QDialog::keyPressEvent(eventIn);
+  assert(eManager.hasFormula(id));
+  eManager.addFormulaLink(feature->getId(), parameter, id);
+  
+  if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
+    observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
+  
+  this->activateWindow();
 }
 
-static boost::uuids::uuid getId(const QString &stringIn)
+void ParameterDialog::requestUnlinkSlot()
 {
-  boost::uuids::uuid idOut = gu::createNilId();
-  if (stringIn.startsWith("ExpressionId;"))
-  {
-    QStringList split = stringIn.split(";");
-    if (split.size() == 2)
-      idOut = gu::stringToId(split.at(1).toStdString());
-  }
-  return idOut;
-}
-
-void ParameterDialog::dragEnterEvent(QDragEnterEvent *event)
-{
-  if (event->mimeData()->hasText())
-  {
-    QString textIn = event->mimeData()->text();
-    boost::uuids::uuid id = getId(textIn);
-    if (!id.is_nil())
-    {
-      const expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
-      if (eManager.hasFormula(id))
-	event->acceptProposedAction();
-    }
-  }
-}
-
-void ParameterDialog::dropEvent(QDropEvent *event)
-{
-  if (event->mimeData()->hasText())
-  {
-    QString textIn = event->mimeData()->text();
-    boost::uuids::uuid id = getId(textIn);
-    if (!id.is_nil())
-    {
-      expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
-      if (!parameter->isConstant())
-      {
-        //parameter is already linked.
-        assert(eManager.hasFormulaLink(feature->getId(), parameter));
-        eManager.removeFormulaLink(feature->getId(), parameter);
-      }
-      
-      assert(eManager.hasFormula(id));
-      eManager.addFormulaLink(feature->getId(), parameter, id);
-      if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
-      {
-        observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
-      }
-    }
-  }
+  expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
+  assert(eManager.hasFormulaLink(feature->getId(), parameter));
+  eManager.removeFormulaLink(feature->getId(), parameter);
+  //manager sets the parameter to constant or not.
 }
 
 void ParameterDialog::valueHasChanged()
 {
   lastValue = parameter->getValue();
-  editLine->setText(QString::number(parameter->getValue(), 'f', 12));
   if (parameter->isConstant())
   {
-    editLine->selectAll();
-    linkLabel->setText(QString::number(parameter->getValue(), 'f', 4));
+    editLine->lineEdit->setText(QString::number(parameter->getValue(), 'f', 12));
+    editLine->lineEdit->selectAll();
   }
+  //if it is linked we shouldn't need to change.
 }
 
 void ParameterDialog::constantHasChanged()
 {
   if (parameter->isConstant())
   {
-    linkButton->setChecked(false);
-    linkButton->setIcon(QIcon(":resources/images/unlinkIcon.svg"));
-    linkButton->setText(tr("unlinked"));
-    linkButton->setDisabled(true);
-    editLine->setEnabled(true);
+    editLine->trafficLabel->setTrafficGreenSlot();
+    editLine->lineEdit->setReadOnly(false);
     editLine->setFocus();
   }
   else
   {
-    linkButton->setChecked(true);
-    linkButton->setIcon(QIcon(":resources/images/linkIcon.svg"));
-    linkButton->setText(tr("linked"));
-    linkButton->setEnabled(true);
-    
     const expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
     assert(eManager.hasFormulaLink(feature->getId(), parameter));
     std::string formulaName = eManager.getFormulaName(eManager.getFormulaLink(feature->getId(), parameter));
-    linkLabel->setText(QString::fromStdString(formulaName));
     
+    editLine->trafficLabel->setLinkSlot();
+    editLine->lineEdit->setText(QString::fromStdString(formulaName));
     editLine->clearFocus();
-    editLine->deselect();
-    editLine->setDisabled(true);
+    editLine->lineEdit->deselect();
+    editLine->lineEdit->setReadOnly(true);
   }
   valueHasChanged();
-}
-
-void ParameterDialog::linkButtonClickedSlot(bool checkedState)
-{
-  if (!checkedState)
-  {
-    expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
-    assert(eManager.hasFormulaLink(feature->getId(), parameter));
-    eManager.removeFormulaLink(feature->getId(), parameter);
-    //manager sets the parameter to constant or not.
-  }
 }
 
 void ParameterDialog::featureRemovedDispatched(const msg::Message &messageIn)
@@ -247,60 +178,57 @@ void ParameterDialog::featureRemovedDispatched(const msg::Message &messageIn)
 
 void ParameterDialog::updateSlot()
 {
+  //if we are linked, we shouldn't need to do anything.
+  if (!parameter->isConstant())
+    return;
+
+  auto fail = [&]()
+  {
+    editLine->lineEdit->setText(QString::number(lastValue, 'f', 12));
+    editLine->lineEdit->selectAll();
+    editLine->trafficLabel->setTrafficGreenSlot();
+  };
+
   std::ostringstream gitStream;
   gitStream
     << QObject::tr("Feature: ").toStdString() << feature->getName().toStdString()
     << QObject::tr("    Parameter ").toStdString() << parameter->getName();
-    
-  double temp = editLine->text().toDouble();
-  if
-  (
-    (parameter->canBeNegative()) ||
-    ((!parameter->canBeNegative()) && (temp > 0.0))
-  )
+
+  //just run it through a string translator and expression manager.
+  expr::ExpressionManager localManager;
+  expr::StringTranslator translator(localManager);
+  std::string formula("temp = ");
+  formula += editLine->lineEdit->text().toStdString();
+  if (translator.parseString(formula) == expr::StringTranslator::ParseSucceeded)
   {
-    parameter->setValue(temp);
-    if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
+    localManager.update();
+    double value = localManager.getFormulaValue(translator.getFormulaOutId());
+    if (parameter->canBeNegative() || (value > 0.0))
     {
-      gitStream  << QObject::tr("    changed to: ").toStdString() << parameter->getValue();
-      observer->messageOutSignal(msg::buildGitMessage(gitStream.str()));
-      
-      observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
-    }
-  }
-  else
-  {
-    expr::ExpressionManager localManager;
-    expr::StringTranslator translator(localManager);
-    std::string formula("temp = ");
-    formula += editLine->text().toStdString();
-    if (translator.parseString(formula) == expr::StringTranslator::ParseSucceeded)
-    {
-      localManager.update();
-      double value = localManager.getFormulaValue(translator.getFormulaOutId());
       parameter->setValue(value);
       if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
       {
         gitStream  << QObject::tr("    changed to: ").toStdString() << parameter->getValue();
         observer->messageOutSignal(msg::buildGitMessage(gitStream.str()));
-        
         observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
       }
     }
     else
     {
-      std::cout << "fail position: " << translator.getFailedPosition() - 7 << std::endl;
-      editLine->setText(QString::number(lastValue, 'f', 12));
-      editLine->selectAll();
-      trafficLabel->setPixmap(trafficGreen);
-      linkLabel->setText(QString::number(lastValue, 'f', 4));
+      observer->messageOutSignal(msg::buildStatusMessage(QObject::tr("Value out of range").toStdString()));
+      fail();
     }
+  }
+  else
+  {
+    observer->messageOutSignal(msg::buildStatusMessage(QObject::tr("Parsing failed").toStdString()));
+    fail();
   }
 }
 
 void ParameterDialog::textEditedSlot(const QString &textIn)
 {
-  trafficLabel->setPixmap(trafficYellow);
+  editLine->trafficLabel->setTrafficYellowSlot();
   qApp->processEvents(); //need this or we never see yellow signal.
   
   expr::ExpressionManager localManager;
@@ -310,13 +238,14 @@ void ParameterDialog::textEditedSlot(const QString &textIn)
   if (translator.parseString(formula) == expr::StringTranslator::ParseSucceeded)
   {
     localManager.update();
-    trafficLabel->setPixmap(trafficGreen);
+    editLine->trafficLabel->setTrafficGreenSlot();
     double value = localManager.getFormulaValue(translator.getFormulaOutId());
-    linkLabel->setText(QString::number(value, 'f', 4));
+    editLine->goToolTipSlot(QString::number(value));
   }
   else
   {
-    trafficLabel->setPixmap(trafficRed);
-    linkLabel->setText("?");
+    editLine->trafficLabel->setTrafficRedSlot();
+    int position = translator.getFailedPosition() - 8; // 7 chars for 'temp = ' + 1
+    editLine->goToolTipSlot(textIn.left(position) + "?");
   }
 }

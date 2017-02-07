@@ -28,6 +28,7 @@
 #include <QDialog>
 #include <QListWidgetItem>
 #include <QStackedWidget>
+#include <QStyledItemDelegate>
 
 #include <osg/Vec3d>
 
@@ -43,6 +44,8 @@ namespace slc{class Message;}
 
 namespace dlg
 {
+  class ExpressionEdit;
+  
   struct BlendEntry
   {
     BlendEntry();
@@ -50,6 +53,7 @@ namespace dlg
     boost::uuids::uuid pickId; //!< the pick id.
     QString typeString; //!< the type. i.e. 'Edge' or 'Face'
     double radius; //!< this member not used for constant item.
+    boost::uuids::uuid expressionLinkId; //!< nil id means no link. Not used for constant item.
     std::vector<boost::uuids::uuid> highlightIds;//!< entities to highlight. possibly includes pick id
     osg::Vec3d pointLocation;
   };
@@ -62,6 +66,7 @@ namespace dlg
     std::vector<BlendEntry> picks;
     double radius;
     boost::uuids::uuid ftrId; //!< nil id means it has been created during dialog edit run.
+    boost::uuids::uuid expressionLinkId; //!< nil id means no link.
   };
   
   class VariableItem : public QListWidgetItem
@@ -82,8 +87,9 @@ namespace dlg
     Blend(ftr::Blend*, QWidget*); //!< edit blend dialog
     virtual ~Blend() override;
     
-  protected:
-    virtual void closeEvent (QCloseEvent*) override;
+  public Q_SLOTS:
+    virtual void reject() override;
+    virtual void accept() override;
     
   private:
     std::shared_ptr<ftr::Blend> blendSmart;
@@ -94,7 +100,7 @@ namespace dlg
     QStackedWidget *stackedWidget;
     QTableWidget *constantTableWidget;
     QTableWidget *variableTableWidget;
-    QLineEdit *constantRadiusEdit;
+    dlg::ExpressionEdit *constantRadiusEdit;
     bool isAccepted = false;
     bool isEditDialog = false;
     bool overlayWasOn = false; //!< restore overlay state upon edit finish.
@@ -106,7 +112,7 @@ namespace dlg
     void fillInConstant(const ConstantItem &);
     void fillInVariable(const VariableItem &);
     void addToSelection(const boost::uuids::uuid&); //!< parent feature shape id.
-    void addVariableTableItem(double, const QString&, const boost::uuids::uuid&);
+    QTableWidgetItem* addVariableTableItem(const QString &, const QString&, const boost::uuids::uuid&);
     void updateBlendFeature();
     
     ftr::Pick convert(const BlendEntry&);
@@ -115,21 +121,71 @@ namespace dlg
     void setupDispatcher();
     void selectionAdditionDispatched(const msg::Message&);
     
+    void finishDialog();
+    
   private Q_SLOTS:
     void addConstantBlendSlot();
     void addVariableBlendSlot();
     void removeBlendSlot();
     
-    void myAcceptedSlot();
-    void myRejectedSlot();
-    
     void blendListCurrentItemChangedSlot(const QItemSelection&, const QItemSelection&);
+    
     void constantRadiusEditingFinishedSlot();
+    void constantRadiusEditedSlot(const QString &);
     void constantTableSelectionChangedSlot(const QItemSelection&, const QItemSelection&);
     void constantTableRemoveSlot();
+    void requestConstantLinkSlot(const QString&);
+    void requestConstantUnlinkSlot();
+    
     void variableTableSelectionChangedSlot(const QItemSelection&, const QItemSelection&);
     void variableTableItemChangedSlot(QTableWidgetItem *item);
     void variableTableRemoveSlot();
+    void requestVariableLinkSlot(QTableWidgetItem*, const QString&);
+    void requestVariableUnlinkSlot();
+    
+    void selectFirstBlendSlot(); //!< used with timer for delayed initial selection.
+  };
+  
+  //! a filter to do drag and drop for expression edit.
+  class VariableDropFilter : public QObject
+  {
+    Q_OBJECT
+  public:
+    explicit VariableDropFilter(QObject *parent) : QObject(parent){}
+    
+  protected:
+    virtual bool eventFilter(QObject *obj, QEvent *event) override;
+    
+  Q_SIGNALS:
+    void requestLinkSignal(QTableWidgetItem*, const QString&);
+  };
+  
+  //! @brief Delegate for variable table widget.
+  class VariableDelegate : public QStyledItemDelegate
+  {
+    Q_OBJECT
+  public:
+    //! Parent must be the table view.
+    explicit VariableDelegate(QObject *parent);
+    //! Creates the editor.
+    virtual QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const;
+    //! Fill editor with text to edit.
+    virtual void setEditorData(QWidget* editor, const QModelIndex& index) const;
+    //! Match editor to cell size.
+    virtual void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const;
+    //! Set the model data or re-edit upon failure.
+    virtual void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const;
+    
+  private Q_SLOTS:
+    void textEditedSlot(const QString &);
+    void requestUnlinkSlot();
+    
+  Q_SIGNALS:
+    void requestUnlinkSignal();
+    
+  private:
+    mutable dlg::ExpressionEdit *eEditor = nullptr;
+    mutable bool isExpressionLinked = false;
   };
 }
 
