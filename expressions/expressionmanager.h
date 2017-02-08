@@ -57,25 +57,20 @@ public:
   void removeFormula(const boost::uuids::uuid &fIdIn);
 };
 
-/*! @brief Link between formula and properties
+/*! @brief Link between formula and parameters
  * 
  * boost multi_index link.
  */
-
 struct FormulaLink
 {
-  boost::uuids::uuid featureId;
-  std::string parameterName;
+  boost::uuids::uuid parameterId;
   boost::uuids::uuid formulaId;
   ftr::Parameter *parameter = nullptr;
   
   //@{
   //! used as tags.
-  struct ByFeatureId{};
-  struct ByParameterName{}; 
+  struct ByParameterId{};
   struct ByFormulaId{};
-  struct ByFormulaIdParameterName{};
-  struct ByFeatureIdFormulaId{};
   //@}
 };
 
@@ -86,32 +81,12 @@ typedef boost::multi_index_container
   FormulaLink,
   BMI::indexed_by
   <
-    BMI::ordered_non_unique
+    BMI::ordered_unique //parameter can only be linked to one formula
     <
-      BMI::tag<FormulaLink::ByFeatureId>,
-      BMI::member<FormulaLink, boost::uuids::uuid, &FormulaLink::featureId>
+      BMI::tag<FormulaLink::ByParameterId>,
+      BMI::member<FormulaLink, boost::uuids::uuid, &FormulaLink::parameterId>
     >,
-    BMI::ordered_unique
-    <
-      BMI::tag<FormulaLink::ByFormulaIdParameterName>,
-      BMI::composite_key
-      <
-        FormulaLink,
-        BMI::member<FormulaLink, boost::uuids::uuid, &FormulaLink::featureId>,
-        BMI::member<FormulaLink, std::string, &FormulaLink::parameterName>
-      >
-    >,
-    BMI::ordered_non_unique
-    <
-      BMI::tag<FormulaLink::ByFeatureIdFormulaId>,
-      BMI::composite_key
-      <
-        FormulaLink,
-        BMI::member<FormulaLink, boost::uuids::uuid, &FormulaLink::featureId>,
-        BMI::member<FormulaLink, boost::uuids::uuid, &FormulaLink::formulaId>
-      >
-    >,
-    BMI::ordered_non_unique
+    BMI::ordered_non_unique //formula can be linked to many parameters.
     <
       BMI::tag<FormulaLink::ByFormulaId>,
       BMI::member<FormulaLink, boost::uuids::uuid, &FormulaLink::formulaId>
@@ -217,16 +192,18 @@ public:
   void removeFormula(const std::string &nameIn);
   //@}
   
-  //! Link parameter to formula. first parameter is feature id. last is formula id.
-  void addFormulaLink(const boost::uuids::uuid &, ftr::Parameter *, const boost::uuids::uuid &);
-  //! erase parameter link to formula.
-  void removeFormulaLink(const boost::uuids::uuid &, ftr::Parameter *);
-  //! checks if a feature and formula are linked. first parameter is feature id. last is formula id. 
-  bool hasFormulaLink(const boost::uuids::uuid &, const boost::uuids::uuid &) const;
-  //! checks for a formula link to feature id and to parameter.
-  bool hasFormulaLink(const boost::uuids::uuid &, ftr::Parameter *) const;
-  //! find formula id linked to feature id and to parameter. assert if not present
-  boost::uuids::uuid getFormulaLink(const boost::uuids::uuid &, ftr::Parameter *) const;
+  //! Link parameter to formula. first is parameter ptr. last is formula id.
+  void addLink(ftr::Parameter *, const boost::uuids::uuid &);
+  //! erase link by parameter id.
+  void removeParameterLink(const boost::uuids::uuid &);
+  //! checks if parameter is linked by parameter id. 
+  bool hasParameterLink(const boost::uuids::uuid &) const;
+  //! get formula id by parameter id.
+  boost::uuids::uuid getFormulaLink(const boost::uuids::uuid &) const;
+  //! check if a formula has been linked by formula id.
+  bool isFormulaLinked(const boost::uuids::uuid &) const;
+  //! get all the parameter ids linked to formula id passed in.
+  std::vector<boost::uuids::uuid> getParametersLinked(const boost::uuids::uuid &) const;
   //! Dispatch values to parameters.
   void dispatchValues();
   //! Write a list of links to stream.

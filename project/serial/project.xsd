@@ -56,8 +56,7 @@
 
 <xs:complexType name="ExpressionLink">
   <xs:all>
-    <xs:element name="featureId" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
-    <xs:element name="parameterName" type="xs:string" default=""/>
+    <xs:element name="parameterId" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
     <xs:element name="expressionId" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
   </xs:all>
 </xs:complexType>

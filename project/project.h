@@ -46,6 +46,7 @@ public:
     void readOCC(const std::string &fileName);
     void addOCCShape(const TopoDS_Shape &shapeIn);
     ftr::Base* findFeature(const boost::uuids::uuid &idIn);
+    ftr::Parameter* findParameter(const boost::uuids::uuid &idIn) const;
     void updateModel();
     void updateVisual();
     void writeGraphViz(const std::string &fileName);

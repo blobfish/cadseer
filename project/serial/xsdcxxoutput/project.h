@@ -1677,9 +1677,9 @@ namespace prj
     {
       public:
       /**
-       * @name featureId
+       * @name parameterId
        *
-       * @brief Accessor and modifier functions for the %featureId
+       * @brief Accessor and modifier functions for the %parameterId
        * required element.
        */
       //@{
@@ -1687,28 +1687,28 @@ namespace prj
       /**
        * @brief Element type.
        */
-      typedef ::xml_schema::String FeatureIdType;
+      typedef ::xml_schema::String ParameterIdType;
 
       /**
        * @brief Element traits type.
        */
-      typedef ::xsd::cxx::tree::traits< FeatureIdType, char > FeatureIdTraits;
+      typedef ::xsd::cxx::tree::traits< ParameterIdType, char > ParameterIdTraits;
 
       /**
        * @brief Return a read-only (constant) reference to the element.
        *
        * @return A constant reference to the element.
        */
-      const FeatureIdType&
-      featureId () const;
+      const ParameterIdType&
+      parameterId () const;
 
       /**
        * @brief Return a read-write reference to the element.
        *
        * @return A reference to the element.
        */
-      FeatureIdType&
-      featureId ();
+      ParameterIdType&
+      parameterId ();
 
       /**
        * @brief Set the element value.
@@ -1719,7 +1719,7 @@ namespace prj
        * the new value of the element.
        */
       void
-      featureId (const FeatureIdType& x);
+      parameterId (const ParameterIdType& x);
 
       /**
        * @brief Set the element value without copying.
@@ -1730,7 +1730,7 @@ namespace prj
        * instead of making a copy.
        */
       void
-      featureId (::std::unique_ptr< FeatureIdType > p);
+      parameterId (::std::unique_ptr< ParameterIdType > p);
 
       /**
        * @brief Return the default value for the element.
@@ -1738,75 +1738,8 @@ namespace prj
        * @return A read-only (constant) reference to the element's
        * default value.
        */
-      static const FeatureIdType&
-      featureId_default_value ();
-
-      //@}
-
-      /**
-       * @name parameterName
-       *
-       * @brief Accessor and modifier functions for the %parameterName
-       * required element.
-       */
-      //@{
-
-      /**
-       * @brief Element type.
-       */
-      typedef ::xml_schema::String ParameterNameType;
-
-      /**
-       * @brief Element traits type.
-       */
-      typedef ::xsd::cxx::tree::traits< ParameterNameType, char > ParameterNameTraits;
-
-      /**
-       * @brief Return a read-only (constant) reference to the element.
-       *
-       * @return A constant reference to the element.
-       */
-      const ParameterNameType&
-      parameterName () const;
-
-      /**
-       * @brief Return a read-write reference to the element.
-       *
-       * @return A reference to the element.
-       */
-      ParameterNameType&
-      parameterName ();
-
-      /**
-       * @brief Set the element value.
-       *
-       * @param x A new value to set.
-       *
-       * This function makes a copy of its argument and sets it as
-       * the new value of the element.
-       */
-      void
-      parameterName (const ParameterNameType& x);
-
-      /**
-       * @brief Set the element value without copying.
-       *
-       * @param p A new value to use.
-       *
-       * This function will try to use the passed value directly
-       * instead of making a copy.
-       */
-      void
-      parameterName (::std::unique_ptr< ParameterNameType > p);
-
-      /**
-       * @brief Return the default value for the element.
-       *
-       * @return A read-only (constant) reference to the element's
-       * default value.
-       */
-      static const ParameterNameType&
-      parameterName_default_value ();
+      static const ParameterIdType&
+      parameterId_default_value ();
 
       //@}
 
@@ -1886,8 +1819,7 @@ namespace prj
        * @brief Create an instance from the ultimate base and
        * initializers for required elements and attributes.
        */
-      ExpressionLink (const FeatureIdType&,
-                      const ParameterNameType&,
+      ExpressionLink (const ParameterIdType&,
                       const ExpressionIdType&);
 
       /**
@@ -1960,10 +1892,8 @@ namespace prj
              ::xml_schema::Flags);
 
       protected:
-      ::xsd::cxx::tree::one< FeatureIdType > featureId_;
-      static const FeatureIdType featureId_default_value_;
-      ::xsd::cxx::tree::one< ParameterNameType > parameterName_;
-      static const ParameterNameType parameterName_default_value_;
+      ::xsd::cxx::tree::one< ParameterIdType > parameterId_;
+      static const ParameterIdType parameterId_default_value_;
       ::xsd::cxx::tree::one< ExpressionIdType > expressionId_;
       static const ExpressionIdType expressionId_default_value_;
 

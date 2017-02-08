@@ -141,8 +141,8 @@ Blend::Blend(ftr::Blend *editBlendIn, QWidget *parent) : QDialog(parent), blend(
     else
     {
       const expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
-      assert(eManager.hasFormulaLink(blend->getId(), simpleBlend.radius.get()));
-      cItem->expressionLinkId = eManager.getFormulaLink(blend->getId(), simpleBlend.radius.get());
+      assert(eManager.hasParameterLink(simpleBlend.radius->getId()));
+      cItem->expressionLinkId = eManager.getFormulaLink(simpleBlend.radius->getId());
     }
     for (const auto &pick : simpleBlend.picks)
       cItem->picks.push_back(convert(pick));
@@ -168,8 +168,8 @@ Blend::Blend(ftr::Blend *editBlendIn, QWidget *parent) : QDialog(parent), blend(
       else
       {
         const expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
-        assert(eManager.hasFormulaLink(blend->getId(), entry.radius.get()));
-        bEntry.expressionLinkId = eManager.getFormulaLink(blend->getId(), entry.radius.get());
+        assert(eManager.hasParameterLink(entry.radius->getId()));
+        bEntry.expressionLinkId = eManager.getFormulaLink(entry.radius->getId());
       }
       vItem->constraints.push_back(bEntry);
     }
@@ -357,7 +357,7 @@ void Blend::updateBlendFeature()
         if (!cItem->expressionLinkId.is_nil())
         {
           assert(eManager.hasFormula(cItem->expressionLinkId));
-          eManager.addFormulaLink(blend->getId(), radiusParameter.get(), cItem->expressionLinkId);
+          eManager.addLink(radiusParameter.get(), cItem->expressionLinkId);
         }
         sBlend.radius = radiusParameter;
         
@@ -375,12 +375,12 @@ void Blend::updateBlendFeature()
         it->radius->setValue(cItem->radius);
         //if it is already linked just remove it by default.
         //we will add it back if needed
-        if (eManager.hasFormulaLink(blend->getId(), it->radius.get()))
-          eManager.removeFormulaLink(blend->getId(), it->radius.get());
+        if (eManager.hasParameterLink(it->radius->getId()))
+          eManager.removeParameterLink(it->radius->getId());
         if (!cItem->expressionLinkId.is_nil())
         {
           assert(eManager.hasFormula(cItem->expressionLinkId));
-          eManager.addFormulaLink(blend->getId(), it->radius.get(), cItem->expressionLinkId);
+          eManager.addLink(it->radius.get(), cItem->expressionLinkId);
         }
         it->picks.clear();
         for (const auto &entry : cItem->picks)
@@ -411,12 +411,12 @@ void Blend::updateBlendFeature()
             if (it->id != constraintId)
               continue;
             it->radius->setValue(constraint.radius);
-            if (eManager.hasFormulaLink(blend->getId(), it->radius.get()))
-              eManager.removeFormulaLink(blend->getId(), it->radius.get());
+            if (eManager.hasParameterLink(it->radius->getId()))
+              eManager.removeParameterLink(it->radius->getId());
             if (!constraint.expressionLinkId.is_nil())
             {
               assert(eManager.hasFormula(constraint.expressionLinkId));
-              eManager.addFormulaLink(blend->getId(), it->radius.get(), constraint.expressionLinkId);
+              eManager.addLink(it->radius.get(), constraint.expressionLinkId);
             }
             break;
           }
@@ -430,7 +430,7 @@ void Blend::updateBlendFeature()
             if (!constraint.expressionLinkId.is_nil())
             {
               assert(eManager.hasFormula(constraint.expressionLinkId));
-              eManager.addFormulaLink(blend->getId(), it->radius.get(), constraint.expressionLinkId);
+              eManager.addLink(it->radius.get(), constraint.expressionLinkId);
             }
             entry.position = ftr::Blend::buildPositionParameter();
             blendCue.entries.push_back(entry);
@@ -489,7 +489,7 @@ void Blend::updateBlendFeature()
             if (!itemEntry.expressionLinkId.is_nil())
             {
               assert(eManager.hasFormula(itemEntry.expressionLinkId));
-              eManager.addFormulaLink(blend->getId(), entry.radius.get(), itemEntry.expressionLinkId);
+              eManager.addLink(entry.radius.get(), itemEntry.expressionLinkId);
             }
             entry.position = ftr::Blend::buildPositionParameter();
             entry.position->connectValue(boost::bind(&ftr::Blend::setModelDirty, blend));
@@ -504,7 +504,7 @@ void Blend::updateBlendFeature()
             if (!itemEntry.expressionLinkId.is_nil())
             {
               assert(eManager.hasFormula(itemEntry.expressionLinkId));
-              eManager.addFormulaLink(blend->getId(), fEIt->radius.get(), itemEntry.expressionLinkId);
+              eManager.addLink(fEIt->radius.get(), itemEntry.expressionLinkId);
             }
           }
         }

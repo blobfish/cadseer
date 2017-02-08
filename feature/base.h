@@ -119,6 +119,7 @@ public:
   Parameter* getParameter(const QString &nameIn) const; //!< parameter names are not unique.
   bool hasParameter(const boost::uuids::uuid &idIn) const;
   Parameter* getParameter(const boost::uuids::uuid &idin) const;
+  const ParameterVector& getParameterVector() const{return parameterVector;}
   
   virtual void serialWrite(const QDir &); //!< override in leaf classes only.
   std::string getFileName() const; //!< used by git.

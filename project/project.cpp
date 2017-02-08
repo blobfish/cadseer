@@ -203,6 +203,18 @@ ftr::Base* Project::findFeature(const uuid &idIn)
   return projectGraph[findVertex(idIn)].feature.get();
 }
 
+ftr::Parameter* Project::findParameter(const uuid &idIn) const
+{
+  BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
+  {
+    if (!projectGraph[currentVertex].feature->hasParameter(idIn))
+      continue;
+    return projectGraph[currentVertex].feature->getParameter(idIn);
+  }
+  assert(0); //no such parameter.
+  return nullptr;
+}
+
 prg::Vertex Project::findVertex(const uuid& idIn) const
 {
   IdVertexMap::const_iterator it;
@@ -817,7 +829,7 @@ void Project::serialWrite()
   prj::srl::ExpressionLinks eLinks;
   for (const auto& link : expressionManager->getLinkContainer())
   {
-    prj::srl::ExpressionLink sLink(gu::idToString(link.featureId), link.parameterName, gu::idToString(link.formulaId));
+    prj::srl::ExpressionLink sLink(gu::idToString(link.parameterId), gu::idToString(link.formulaId));
     eLinks.array().push_back(sLink);
   }
   
@@ -894,10 +906,8 @@ void Project::open()
     expressionManager->update(); //addFormulaLink requires that everything be up to date.
     for (const auto &sLink : project->expressionLinks().array())
     {
-      ftr::Base *feature = findFeature(gu::stringToId(sLink.featureId()));
-      ftr::Parameter *parameter = feature->getParameter(QString::fromStdString(sLink.parameterName()));
-      expressionManager->addFormulaLink(gu::stringToId(sLink.featureId()), parameter,
-                                        gu::stringToId(sLink.expressionId()));
+      ftr::Parameter *parameter = findParameter(gu::stringToId(sLink.parameterId()));
+      expressionManager->addLink(parameter, gu::stringToId(sLink.expressionId()));
     }
     
     updateModel();

@@ -111,12 +111,12 @@ void ParameterDialog::requestLinkSlot(const QString &stringIn)
   if (!parameter->isConstant())
   {
     //parameter is already linked.
-    assert(eManager.hasFormulaLink(feature->getId(), parameter));
-    eManager.removeFormulaLink(feature->getId(), parameter);
+    assert(eManager.hasParameterLink(parameter->getId()));
+    eManager.removeParameterLink(parameter->getId());
   }
   
   assert(eManager.hasFormula(id));
-  eManager.addFormulaLink(feature->getId(), parameter, id);
+  eManager.addLink(parameter, id);
   
   if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
     observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
@@ -127,8 +127,8 @@ void ParameterDialog::requestLinkSlot(const QString &stringIn)
 void ParameterDialog::requestUnlinkSlot()
 {
   expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
-  assert(eManager.hasFormulaLink(feature->getId(), parameter));
-  eManager.removeFormulaLink(feature->getId(), parameter);
+  assert(eManager.hasParameterLink(parameter->getId()));
+  eManager.removeParameterLink(parameter->getId());
   //manager sets the parameter to constant or not.
 }
 
@@ -154,8 +154,8 @@ void ParameterDialog::constantHasChanged()
   else
   {
     const expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
-    assert(eManager.hasFormulaLink(feature->getId(), parameter));
-    std::string formulaName = eManager.getFormulaName(eManager.getFormulaLink(feature->getId(), parameter));
+    assert(eManager.hasParameterLink(parameter->getId()));
+    std::string formulaName = eManager.getFormulaName(eManager.getFormulaLink(parameter->getId()));
     
     editLine->trafficLabel->setLinkSlot();
     editLine->lineEdit->setText(QString::fromStdString(formulaName));

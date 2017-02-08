@@ -29,6 +29,8 @@
 #include <osg/Geometry> //yuck!
 
 #include <tools/idtools.h>
+#include <application/application.h>
+#include <project/project.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <expressions/expressionmanager.h>
@@ -563,8 +565,10 @@ bool SelectionProxyModel::filterAcceptsRow(int source_row, const QModelIndex&) c
   using boost::uuids::uuid;
   
   boost::uuids::uuid formulaId = gu::stringToId(sourceModel()->data(sourceModel()->index(source_row, 0), Qt::UserRole).toString().toStdString());
+  std::vector<uuid> linkedParameterIds = eManager.getParametersLinked(formulaId);
+  if (linkedParameterIds.empty())
+    return false;
   
-  std::vector<uuid> featureIds;
   for (const auto &container : containers)
   {
     if
@@ -573,8 +577,13 @@ bool SelectionProxyModel::filterAcceptsRow(int source_row, const QModelIndex&) c
       (container.selectionType != slc::Type::Feature)
     )
       continue;
-    if (eManager.hasFormulaLink(container.featureId, formulaId))
-      return true;
+  
+    ftr::Base *feature = static_cast<app::Application*>(qApp)->getProject()->findFeature(container.featureId);
+    for (const auto &linkedParameterId : linkedParameterIds)
+    {
+      if (feature->hasParameter(linkedParameterId))
+        return true;
+    }
   }
   
   return false;

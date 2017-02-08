@@ -435,64 +435,34 @@ namespace prj
     // ExpressionLink
     // 
 
-    const ExpressionLink::FeatureIdType& ExpressionLink::
-    featureId () const
+    const ExpressionLink::ParameterIdType& ExpressionLink::
+    parameterId () const
     {
-      return this->featureId_.get ();
+      return this->parameterId_.get ();
     }
 
-    ExpressionLink::FeatureIdType& ExpressionLink::
-    featureId ()
+    ExpressionLink::ParameterIdType& ExpressionLink::
+    parameterId ()
     {
-      return this->featureId_.get ();
-    }
-
-    void ExpressionLink::
-    featureId (const FeatureIdType& x)
-    {
-      this->featureId_.set (x);
+      return this->parameterId_.get ();
     }
 
     void ExpressionLink::
-    featureId (::std::unique_ptr< FeatureIdType > x)
+    parameterId (const ParameterIdType& x)
     {
-      this->featureId_.set (std::move (x));
-    }
-
-    const ExpressionLink::FeatureIdType& ExpressionLink::
-    featureId_default_value ()
-    {
-      return featureId_default_value_;
-    }
-
-    const ExpressionLink::ParameterNameType& ExpressionLink::
-    parameterName () const
-    {
-      return this->parameterName_.get ();
-    }
-
-    ExpressionLink::ParameterNameType& ExpressionLink::
-    parameterName ()
-    {
-      return this->parameterName_.get ();
+      this->parameterId_.set (x);
     }
 
     void ExpressionLink::
-    parameterName (const ParameterNameType& x)
+    parameterId (::std::unique_ptr< ParameterIdType > x)
     {
-      this->parameterName_.set (x);
+      this->parameterId_.set (std::move (x));
     }
 
-    void ExpressionLink::
-    parameterName (::std::unique_ptr< ParameterNameType > x)
+    const ExpressionLink::ParameterIdType& ExpressionLink::
+    parameterId_default_value ()
     {
-      this->parameterName_.set (std::move (x));
-    }
-
-    const ExpressionLink::ParameterNameType& ExpressionLink::
-    parameterName_default_value ()
-    {
-      return parameterName_default_value_;
+      return parameterId_default_value_;
     }
 
     const ExpressionLink::ExpressionIdType& ExpressionLink::
@@ -1511,22 +1481,17 @@ namespace prj
     // ExpressionLink
     //
 
-    const ExpressionLink::FeatureIdType ExpressionLink::featureId_default_value_ (
+    const ExpressionLink::ParameterIdType ExpressionLink::parameterId_default_value_ (
       "00000000-0000-0000-0000-000000000000");
-
-    const ExpressionLink::ParameterNameType ExpressionLink::parameterName_default_value_ (
-      "");
 
     const ExpressionLink::ExpressionIdType ExpressionLink::expressionId_default_value_ (
       "00000000-0000-0000-0000-000000000000");
 
     ExpressionLink::
-    ExpressionLink (const FeatureIdType& featureId,
-                    const ParameterNameType& parameterName,
+    ExpressionLink (const ParameterIdType& parameterId,
                     const ExpressionIdType& expressionId)
     : ::xml_schema::Type (),
-      featureId_ (featureId, this),
-      parameterName_ (parameterName, this),
+      parameterId_ (parameterId, this),
       expressionId_ (expressionId, this)
     {
     }
@@ -1536,8 +1501,7 @@ namespace prj
                     ::xml_schema::Flags f,
                     ::xml_schema::Container* c)
     : ::xml_schema::Type (x, f, c),
-      featureId_ (x.featureId_, f, this),
-      parameterName_ (x.parameterName_, f, this),
+      parameterId_ (x.parameterId_, f, this),
       expressionId_ (x.expressionId_, f, this)
     {
     }
@@ -1547,8 +1511,7 @@ namespace prj
                     ::xml_schema::Flags f,
                     ::xml_schema::Container* c)
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
-      featureId_ (this),
-      parameterName_ (this),
+      parameterId_ (this),
       expressionId_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
@@ -1568,30 +1531,16 @@ namespace prj
         const ::xsd::cxx::xml::qualified_name< char > n (
           ::xsd::cxx::xml::dom::name< char > (i));
 
-        // featureId
+        // parameterId
         //
-        if (n.name () == "featureId" && n.namespace_ ().empty ())
+        if (n.name () == "parameterId" && n.namespace_ ().empty ())
         {
-          ::std::unique_ptr< FeatureIdType > r (
-            FeatureIdTraits::create (i, f, this));
+          ::std::unique_ptr< ParameterIdType > r (
+            ParameterIdTraits::create (i, f, this));
 
-          if (!featureId_.present ())
+          if (!parameterId_.present ())
           {
-            this->featureId_.set (::std::move (r));
-            continue;
-          }
-        }
-
-        // parameterName
-        //
-        if (n.name () == "parameterName" && n.namespace_ ().empty ())
-        {
-          ::std::unique_ptr< ParameterNameType > r (
-            ParameterNameTraits::create (i, f, this));
-
-          if (!parameterName_.present ())
-          {
-            this->parameterName_.set (::std::move (r));
+            this->parameterId_.set (::std::move (r));
             continue;
           }
         }
@@ -1613,17 +1562,10 @@ namespace prj
         break;
       }
 
-      if (!featureId_.present ())
+      if (!parameterId_.present ())
       {
         throw ::xsd::cxx::tree::expected_element< char > (
-          "featureId",
-          "");
-      }
-
-      if (!parameterName_.present ())
-      {
-        throw ::xsd::cxx::tree::expected_element< char > (
-          "parameterName",
+          "parameterId",
           "");
       }
 
@@ -1648,8 +1590,7 @@ namespace prj
       if (this != &x)
       {
         static_cast< ::xml_schema::Type& > (*this) = x;
-        this->featureId_ = x.featureId_;
-        this->parameterName_ = x.parameterName_;
+        this->parameterId_ = x.parameterId_;
         this->expressionId_ = x.expressionId_;
       }
 
@@ -2475,26 +2416,15 @@ namespace prj
     {
       e << static_cast< const ::xml_schema::Type& > (i);
 
-      // featureId
+      // parameterId
       //
       {
         ::xercesc::DOMElement& s (
           ::xsd::cxx::xml::dom::create_element (
-            "featureId",
+            "parameterId",
             e));
 
-        s << i.featureId ();
-      }
-
-      // parameterName
-      //
-      {
-        ::xercesc::DOMElement& s (
-          ::xsd::cxx::xml::dom::create_element (
-            "parameterName",
-            e));
-
-        s << i.parameterName ();
+        s << i.parameterId ();
       }
 
       // expressionId
