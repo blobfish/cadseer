@@ -64,12 +64,14 @@ std::shared_ptr< Parameter > Blend::buildRadiusParameter()
 {
   //some kind of default radius?
   std::shared_ptr<Parameter> out(new Parameter(ParameterNames::Radius, 1.0));
+  out->setConstraint(ParameterConstraint::buildZeroPositive());
   return out;
 }
 
 std::shared_ptr< Parameter > Blend::buildPositionParameter()
 {
   std::shared_ptr<Parameter> out(new Parameter(ParameterNames::Position, 0.0));
+  out->setConstraint(ParameterConstraint::buildUnit());
   return out;
 }
 

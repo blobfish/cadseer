@@ -81,6 +81,9 @@ Cylinder::Cylinder() : CSysBase(), radius(ParameterNames::Radius, 5.0), height(P
   
   initializeMaps();
   
+  radius.setConstraint(ParameterConstraint::buildNonZeroPositive());
+  height.setConstraint(ParameterConstraint::buildNonZeroPositive());
+  
   parameterVector.push_back(&radius);
   parameterVector.push_back(&height);
   

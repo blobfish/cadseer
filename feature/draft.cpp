@@ -57,7 +57,7 @@ Draft::~Draft() //for forward declare with osg::ref_ptr
 
 std::shared_ptr<Parameter> Draft::buildAngleParameter()
 {
-   //some kind of default distance?
+   //some kind of default angle?
   std::shared_ptr<Parameter> out(new Parameter(ParameterNames::Angle, 10.0));
   return out;
 }

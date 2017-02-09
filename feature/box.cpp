@@ -130,6 +130,10 @@ Box::Box() :
   
   initializeMaps();
   
+  length.setConstraint(ParameterConstraint::buildNonZeroPositive());
+  width.setConstraint(ParameterConstraint::buildNonZeroPositive());
+  height.setConstraint(ParameterConstraint::buildNonZeroPositive());
+  
   parameterVector.push_back(&length);
   parameterVector.push_back(&width);
   parameterVector.push_back(&height);

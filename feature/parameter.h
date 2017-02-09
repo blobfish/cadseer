@@ -43,6 +43,42 @@ namespace ftr
     static const QString Offset = "Offset"; //!< datum plane
   }
   
+  struct ParameterBoundary
+  {
+    enum class End
+    {
+      None,
+      Open, //!< doesn't contain value.
+      Closed //!< does contain value.
+    };
+    ParameterBoundary(double, End);
+    double value;
+    End end = End::None;
+  };
+  
+  struct ParameterInterval
+  {
+    ParameterInterval(const ParameterBoundary&, const ParameterBoundary&);
+    ParameterBoundary lower;
+    ParameterBoundary upper;
+    bool test(double) const;
+  };
+  
+  struct ParameterConstraint
+  {
+    std::vector<ParameterInterval> intervals;
+    bool test(double) const;
+    
+    static ParameterConstraint buildAll();
+    static ParameterConstraint buildNonZeroPositive();
+    static ParameterConstraint buildZeroPositive();
+    static ParameterConstraint buildNonZeroNegative();
+    static ParameterConstraint buildZeroNegative();
+    static ParameterConstraint buildNonZero();
+    static ParameterConstraint buildUnit();
+    static void unitTest();
+  };
+  
   class Parameter
   {
   public:
@@ -56,9 +92,9 @@ namespace ftr
     void setConstant(bool constantIn);
     operator double() const {return value;}
     Parameter& operator=(double valueIn);
-    bool canBeNegative(){return couldBeNegative;}
-    void setCanBeNegative(bool negIn){couldBeNegative = negIn;}
     const boost::uuids::uuid& getId() const {return id;}
+    void setConstraint(const ParameterConstraint &);
+    bool isValidValue(const double &valueIn);
     
     typedef boost::signals2::signal<void ()> ValueChangedSignal;
     boost::signals2::connection connectValue(const ValueChangedSignal::slot_type &subscriber) const
@@ -79,8 +115,8 @@ namespace ftr
     bool constant = true;
     QString name;
     double value;
-    bool couldBeNegative = false;
     boost::uuids::uuid id;
+    ParameterConstraint constraint;
     
     //mutable allows us to connect to the signal through a const object.
     mutable ValueChangedSignal valueChangedSignal;

@@ -91,8 +91,6 @@ static osg::Matrixd getFaceSystem(const TopoDS_Shape &faceShape)
 DatumPlanePlanarOffset::DatumPlanePlanarOffset():
   offset(new Parameter(ParameterNames::Offset, 1.0))
 {
-  offset->setCanBeNegative(true);
-  
   offsetIP = new lbr::IPGroup(offset.get());
   offsetIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(1.0, 0.0, 0.0)));
   offsetIP->noAutoRotateDragger();

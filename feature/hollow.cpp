@@ -47,7 +47,7 @@ Hollow::Hollow() : Base(), offset(ParameterNames::Offset, 0.1)
   name = QObject::tr("Hollow");
   mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
-  offset.setCanBeNegative(true);
+  offset.setConstraint(ParameterConstraint::buildNonZero());
   offset.connectValue(boost::bind(&Hollow::setModelDirty, this));
   
   label = new lbr::PLabel(&offset);

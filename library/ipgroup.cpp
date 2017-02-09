@@ -229,11 +229,13 @@ bool IPGroup::processMotion(const osgManipulator::MotionCommand &commandIn)
     
     //limit to positive overall size.
     //might make this a custom manipulator constraint.
-    if ((!parameter->canBeNegative()) && (freshOverall <= 0.0))
+    if (!parameter->isValidValue(freshOverall))
     {
       osg::Matrixd temp = dragger->getMatrix();
       temp.setTrans(osg::Vec3d(0.0, 0.0, overallDim->getSpread()));
       dragger->setMatrix(temp);
+      observer->messageOutSignal(msg::buildStatusMessage(
+        QObject::tr("Value out of range").toStdString()));
       return false;
     }
     lastTranslation = diff;

@@ -203,7 +203,7 @@ void ParameterDialog::updateSlot()
   {
     localManager.update();
     double value = localManager.getFormulaValue(translator.getFormulaOutId());
-    if (parameter->canBeNegative() || (value > 0.0))
+    if (parameter->isValidValue(value))
     {
       parameter->setValue(value);
       if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())

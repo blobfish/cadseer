@@ -57,6 +57,7 @@ std::shared_ptr< Parameter > Chamfer::buildSymParameter()
 {
   //some kind of default distance?
   std::shared_ptr<Parameter> out(new Parameter(ParameterNames::Distance, 1.0));
+  out->setConstraint(ParameterConstraint::buildNonZeroPositive());
   return out;
 }
 

@@ -64,6 +64,8 @@ Sphere::Sphere() : CSysBase(), radius(ParameterNames::Radius, 5.0)
   
   initializeMaps();
   
+  radius.setConstraint(ParameterConstraint::buildNonZeroPositive());
+  
   parameterVector.push_back(&radius);
   radius.connectValue(boost::bind(&Sphere::setModelDirty, this));
   

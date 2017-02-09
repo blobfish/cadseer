@@ -82,6 +82,10 @@ Cone::Cone() : CSysBase(),
   
   initializeMaps();
   
+  radius1.setConstraint(ParameterConstraint::buildZeroPositive());
+  radius2.setConstraint(ParameterConstraint::buildZeroPositive());
+  height.setConstraint(ParameterConstraint::buildNonZeroPositive());
+  
   parameterVector.push_back(&radius1);
   parameterVector.push_back(&radius2);
   parameterVector.push_back(&height);
