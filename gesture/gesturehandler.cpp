@@ -348,6 +348,12 @@ void GestureHandler::constructMenu()
     viewLine->setUserValue(attributeStatus, QObject::tr("View Lines Command").toStdString());
     viewBase->insertChild(viewBase->getNumChildren() - 2, viewLine);
     
+    osg::MatrixTransform *viewToggleHiddenLines = gsn::buildCommandNode(":/resources/images/viewHiddenLines.svg", iconRadius);
+    viewToggleHiddenLines->setMatrix(dummy);
+    viewToggleHiddenLines->setUserValue(attributeMask, (msg::Request | msg::ViewToggleHiddenLine).to_string());
+    viewToggleHiddenLines->setUserValue(attributeStatus, QObject::tr("Toggle hidden lines Command").toStdString());
+    viewBase->insertChild(viewBase->getNumChildren() - 2, viewToggleHiddenLines);
+    
     osg::MatrixTransform *viewIsolate = gsn::buildCommandNode(":/resources/images/viewIsolate.svg", iconRadius);
     viewIsolate->setMatrix(dummy);
     viewIsolate->setUserValue(attributeMask, (msg::Request | msg::ViewIsolate).to_string());

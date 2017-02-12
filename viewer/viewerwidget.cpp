@@ -43,6 +43,7 @@
 #include <viewer/viewerwidget.h>
 #include <viewer/gleventwidget.h>
 #include <modelviz/nodemaskdefs.h>
+#include <modelviz/hiddenlineeffect.h>
 #include <selection/definitions.h>
 #include <testing/plotter.h>
 #include <gesture/gesturehandler.h>
@@ -55,8 +56,26 @@
 #include <viewer/textcamera.h>
 #include <viewer/overlaycamera.h>
 #include <feature/base.h>
+#include <preferences/preferencesXML.h>
+#include <preferences/manager.h>
 
 using namespace vwr;
+
+class HiddenLineVisitor : public osg::NodeVisitor
+{
+public:
+  HiddenLineVisitor(bool visIn) :
+    osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), visibility(visIn){}
+  virtual void apply(osg::Group &aGroup) override
+  {
+    mdv::HiddenLineEffect *effect = dynamic_cast<mdv::HiddenLineEffect*>(&aGroup);
+    if (effect)
+      effect->setHiddenLine(visibility);
+    traverse(aGroup);
+  }
+protected:
+  bool visibility;
+};
 
 ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel) : QWidget(), osgViewer::CompositeViewer()
 {
@@ -69,7 +88,7 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     connect(&_timer, SIGNAL(timeout()), this, SLOT(update()));
 
     root = new osg::Group;
-    root->setName("viewer root");
+    root->setName("root");
     
     osg::ref_ptr<osg::PolygonMode> pm = new osg::PolygonMode;
     root->getOrCreateStateSet()->setAttribute(pm.get());
@@ -187,8 +206,21 @@ const osg::Matrixd& ViewerWidget::getViewSystem() const
 
 void ViewerWidget::update()
 {
-    osgUtil::Optimizer opt;
-    opt.optimize(root);
+  //I am not sure how useful calling optimizer on my generated data is?
+  //TODO build large file and run with and without the optimizer to test.
+  
+  //remove redundant nodes was screwing up hidden line effect.
+  osgUtil::Optimizer opt;
+  opt.optimize
+  (
+    root,
+    osgUtil::Optimizer::DEFAULT_OPTIMIZATIONS
+    & ~osgUtil::Optimizer::REMOVE_REDUNDANT_NODES
+  );
+  
+  //set the hidden line state.
+  HiddenLineVisitor v(prf::Manager().rootPtr->visual().display().showHiddenLines());
+  root->accept(v);
 }
 
 void ViewerWidget::createMainCamera(osg::Camera *camera)
@@ -267,6 +299,7 @@ osg::Camera* ViewerWidget::createBackgroundCamera()
     geode->addDrawable(quad.get());
 
     osg::Camera *bgCamera = new osg::Camera();
+    bgCamera->setName("backgrd");
     bgCamera->setGraphicsContext(windowQt);
     bgCamera->setCullingActive(false);
     bgCamera->setAllowEventFocus(false);
@@ -298,6 +331,7 @@ osg::Camera* ViewerWidget::createGestureCamera()
     quad->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
 
     osg::Camera *fadeCamera = new osg::Camera();
+    fadeCamera->setName("gesture");
     fadeCamera->setCullingActive(false);
     fadeCamera->setClearMask(GL_DEPTH_BUFFER_BIT);
     fadeCamera->setAllowEventFocus(false);
@@ -423,6 +457,9 @@ void ViewerWidget::setupDispatcher()
   
   mask = msg::Request | msg::SystemToggle;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::systemToggleDispatched, this, _1)));
+  
+  mask = msg::Request | msg::ViewToggleHiddenLine;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewToggleHiddenLinesDispatched, this, _1)));
 }
 
 void ViewerWidget::featureAddedDispatched(const msg::Message &messageIn)
@@ -469,19 +506,14 @@ void ViewerWidget::systemToggleDispatched(const msg::Message&)
     systemSwitch->setAllChildrenOn();
 }
 
-VisibleVisitor::VisibleVisitor(bool visIn) : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), visibility(visIn)
+void ViewerWidget::viewToggleHiddenLinesDispatched(const msg::Message&)
 {
-}
-
-void VisibleVisitor::apply(osg::Switch &aSwitch)
-{
-    traverse(aSwitch);
-
-    if (aSwitch.getNodeMask() & mdv::vertex)
-    {
-        if (visibility)
-            aSwitch.setAllChildrenOn();
-        else
-            aSwitch.setAllChildrenOff();
-    }
+  prf::Manager &manager = prf::manager();
+  bool oldValue = manager.rootPtr->visual().display().showHiddenLines();
+  manager.rootPtr->visual().display().showHiddenLines() = !oldValue;
+  manager.saveConfig();
+  
+  //set the hidden line state.
+  HiddenLineVisitor v(!oldValue);
+  root->accept(v);
 }

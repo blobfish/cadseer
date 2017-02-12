@@ -703,6 +703,8 @@ void Factory::preferencesDispatched(const msg::Message&)
     project->setAllVisualDirty();
     project->updateVisual();
   }
+  else if(dialog->isHiddenLinesDirty())
+    observer->messageOutSignal(msg::Message(msg::Response | msg::Post | msg::UpdateVisual));
   
   msg::Message prfResponse;
   prfResponse.mask = msg::Response | msg::Preferences;

@@ -58,6 +58,10 @@ void Dialog::initialize()
   ui->angularDeflectionEdit->setValidator(positiveDouble);
   ui->linearDeflectionEdit->setText(QString().setNum(manager->rootPtr->visual().mesh().linearDeflection()));
   ui->angularDeflectionEdit->setText(QString().setNum(manager->rootPtr->visual().mesh().angularDeflection()));
+  if (manager->rootPtr->visual().display().showHiddenLines())
+    ui->hiddenLineCombo->setCurrentIndex(0);
+  else
+    ui->hiddenLineCombo->setCurrentIndex(1);
   
   ui->linearIncrementEdit->setText(QString().setNum(manager->rootPtr->dragger().linearIncrement()));
   ui->angularIncrementEdit->setText(QString().setNum(manager->rootPtr->dragger().angularIncrement()));
@@ -86,7 +90,7 @@ void Dialog::accept()
 {
   try
   {
-    updateDeflections();
+    updateVisual();
     updateDragger();
     updateProject();
     updateGesture();
@@ -100,7 +104,7 @@ void Dialog::accept()
   }
 }
 
-void Dialog::updateDeflections()
+void Dialog::updateVisual()
 {
   bool dummy;
   double tempLinearDeflection = ui->linearDeflectionEdit->text().toDouble(&dummy);
@@ -126,6 +130,14 @@ void Dialog::updateDeflections()
   {
     manager->rootPtr->visual().mesh().angularDeflection() = tempAngularDeflection;
     visualDirty = true;
+  }
+  
+  bool hiddenLines = ui->hiddenLineCombo->currentIndex() == 0;
+  if (hiddenLines != manager->rootPtr->visual().display().showHiddenLines())
+  {
+    hiddenLinesDirty = true;
+    manager->rootPtr->visual().display().showHiddenLines() = hiddenLines;
+    //some kind of notification.
   }
 }
 

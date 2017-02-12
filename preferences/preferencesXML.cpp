@@ -110,6 +110,34 @@ namespace prf
   }
 
 
+  // Display
+  // 
+
+  const Display::ShowHiddenLinesType& Display::
+  showHiddenLines () const
+  {
+    return this->showHiddenLines_.get ();
+  }
+
+  Display::ShowHiddenLinesType& Display::
+  showHiddenLines ()
+  {
+    return this->showHiddenLines_.get ();
+  }
+
+  void Display::
+  showHiddenLines (const ShowHiddenLinesType& x)
+  {
+    this->showHiddenLines_.set (x);
+  }
+
+  Display::ShowHiddenLinesType Display::
+  showHiddenLines_default_value ()
+  {
+    return ShowHiddenLinesType (false);
+  }
+
+
   // Visual
   // 
 
@@ -135,6 +163,30 @@ namespace prf
   mesh (::std::unique_ptr< MeshType > x)
   {
     this->mesh_.set (std::move (x));
+  }
+
+  const Visual::DisplayType& Visual::
+  display () const
+  {
+    return this->display_.get ();
+  }
+
+  Visual::DisplayType& Visual::
+  display ()
+  {
+    return this->display_.get ();
+  }
+
+  void Visual::
+  display (const DisplayType& x)
+  {
+    this->display_.set (x);
+  }
+
+  void Visual::
+  display (::std::unique_ptr< DisplayType > x)
+  {
+    this->display_.set (std::move (x));
   }
 
 
@@ -884,20 +936,113 @@ namespace prf
   {
   }
 
+  // Display
+  //
+
+  Display::
+  Display (const ShowHiddenLinesType& showHiddenLines)
+  : ::xml_schema::Type (),
+    showHiddenLines_ (showHiddenLines, this)
+  {
+  }
+
+  Display::
+  Display (const Display& x,
+           ::xml_schema::Flags f,
+           ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    showHiddenLines_ (x.showHiddenLines_, f, this)
+  {
+  }
+
+  Display::
+  Display (const ::xercesc::DOMElement& e,
+           ::xml_schema::Flags f,
+           ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    showHiddenLines_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void Display::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // showHiddenLines
+      //
+      if (n.name () == "showHiddenLines" && n.namespace_ ().empty ())
+      {
+        if (!showHiddenLines_.present ())
+        {
+          this->showHiddenLines_.set (ShowHiddenLinesTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!showHiddenLines_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "showHiddenLines",
+        "");
+    }
+  }
+
+  Display* Display::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class Display (*this, f, c);
+  }
+
+  Display& Display::
+  operator= (const Display& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->showHiddenLines_ = x.showHiddenLines_;
+    }
+
+    return *this;
+  }
+
+  Display::
+  ~Display ()
+  {
+  }
+
   // Visual
   //
 
   Visual::
-  Visual (const MeshType& mesh)
+  Visual (const MeshType& mesh,
+          const DisplayType& display)
   : ::xml_schema::Type (),
-    mesh_ (mesh, this)
+    mesh_ (mesh, this),
+    display_ (display, this)
   {
   }
 
   Visual::
-  Visual (::std::unique_ptr< MeshType > mesh)
+  Visual (::std::unique_ptr< MeshType > mesh,
+          ::std::unique_ptr< DisplayType > display)
   : ::xml_schema::Type (),
-    mesh_ (std::move (mesh), this)
+    mesh_ (std::move (mesh), this),
+    display_ (std::move (display), this)
   {
   }
 
@@ -906,7 +1051,8 @@ namespace prf
           ::xml_schema::Flags f,
           ::xml_schema::Container* c)
   : ::xml_schema::Type (x, f, c),
-    mesh_ (x.mesh_, f, this)
+    mesh_ (x.mesh_, f, this),
+    display_ (x.display_, f, this)
   {
   }
 
@@ -915,7 +1061,8 @@ namespace prf
           ::xml_schema::Flags f,
           ::xml_schema::Container* c)
   : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
-    mesh_ (this)
+    mesh_ (this),
+    display_ (this)
   {
     if ((f & ::xml_schema::Flags::base) == 0)
     {
@@ -948,6 +1095,20 @@ namespace prf
         }
       }
 
+      // display
+      //
+      if (n.name () == "display" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< DisplayType > r (
+          DisplayTraits::create (i, f, this));
+
+        if (!display_.present ())
+        {
+          this->display_.set (::std::move (r));
+          continue;
+        }
+      }
+
       break;
     }
 
@@ -955,6 +1116,13 @@ namespace prf
     {
       throw ::xsd::cxx::tree::expected_element< char > (
         "mesh",
+        "");
+    }
+
+    if (!display_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "display",
         "");
     }
   }
@@ -973,6 +1141,7 @@ namespace prf
     {
       static_cast< ::xml_schema::Type& > (*this) = x;
       this->mesh_ = x.mesh_;
+      this->display_ = x.display_;
     }
 
     return *this;
@@ -2262,6 +2431,23 @@ namespace prf
   }
 
   void
+  operator<< (::xercesc::DOMElement& e, const Display& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // showHiddenLines
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "showHiddenLines",
+          e));
+
+      s << i.showHiddenLines ();
+    }
+  }
+
+  void
   operator<< (::xercesc::DOMElement& e, const Visual& i)
   {
     e << static_cast< const ::xml_schema::Type& > (i);
@@ -2275,6 +2461,17 @@ namespace prf
           e));
 
       s << i.mesh ();
+    }
+
+    // display
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "display",
+          e));
+
+      s << i.display ();
     }
   }
 

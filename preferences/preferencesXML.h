@@ -72,6 +72,7 @@ namespace prf
 {
   class DecPositive;
   class Mesh;
+  class Display;
   class Visual;
   class Dragger;
   class InteractiveParameter;
@@ -425,6 +426,155 @@ namespace prf
   };
 
   /**
+   * @brief Class corresponding to the %Display schema type.
+   *
+   * @nosubgrouping
+   */
+  class Display: public ::xml_schema::Type
+  {
+    public:
+    /**
+     * @name showHiddenLines
+     *
+     * @brief Accessor and modifier functions for the %showHiddenLines
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::xml_schema::Boolean ShowHiddenLinesType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< ShowHiddenLinesType, char > ShowHiddenLinesTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const ShowHiddenLinesType&
+    showHiddenLines () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    ShowHiddenLinesType&
+    showHiddenLines ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    showHiddenLines (const ShowHiddenLinesType& x);
+
+    /**
+     * @brief Return the default value for the element.
+     *
+     * @return The element's default value.
+     */
+    static ShowHiddenLinesType
+    showHiddenLines_default_value ();
+
+    //@}
+
+    /**
+     * @name Constructors
+     */
+    //@{
+
+    /**
+     * @brief Create an instance from the ultimate base and
+     * initializers for required elements and attributes.
+     */
+    Display (const ShowHiddenLinesType&);
+
+    /**
+     * @brief Create an instance from a DOM element.
+     *
+     * @param e A DOM element to extract the data from.
+     * @param f Flags to create the new instance with.
+     * @param c A pointer to the object that will contain the new
+     * instance.
+     */
+    Display (const ::xercesc::DOMElement& e,
+             ::xml_schema::Flags f = 0,
+             ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy constructor.
+     *
+     * @param x An instance to make a copy of.
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    Display (const Display& x,
+             ::xml_schema::Flags f = 0,
+             ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy the instance polymorphically.
+     *
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     * @return A pointer to the dynamically allocated copy.
+     *
+     * This function ensures that the dynamic type of the instance is
+     * used for copying and should be used for polymorphic object
+     * models instead of the copy constructor.
+     */
+    virtual Display*
+    _clone (::xml_schema::Flags f = 0,
+            ::xml_schema::Container* c = 0) const;
+
+    /**
+     * @brief Copy assignment operator.
+     *
+     * @param x An instance to make a copy of.
+     * @return A reference to itself.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    Display&
+    operator= (const Display& x);
+
+    //@}
+
+    /**
+     * @brief Destructor.
+     */
+    virtual 
+    ~Display ();
+
+    // Implementation.
+    //
+
+    //@cond
+
+    protected:
+    void
+    parse (::xsd::cxx::xml::dom::parser< char >&,
+           ::xml_schema::Flags);
+
+    protected:
+    ::xsd::cxx::tree::one< ShowHiddenLinesType > showHiddenLines_;
+
+    //@endcond
+  };
+
+  /**
    * @brief Class corresponding to the %Visual schema type.
    *
    * @nosubgrouping
@@ -491,6 +641,64 @@ namespace prf
     //@}
 
     /**
+     * @name display
+     *
+     * @brief Accessor and modifier functions for the %display
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::Display DisplayType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< DisplayType, char > DisplayTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const DisplayType&
+    display () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    DisplayType&
+    display ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    display (const DisplayType& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly
+     * instead of making a copy.
+     */
+    void
+    display (::std::unique_ptr< DisplayType > p);
+
+    //@}
+
+    /**
      * @name Constructors
      */
     //@{
@@ -499,7 +707,8 @@ namespace prf
      * @brief Create an instance from the ultimate base and
      * initializers for required elements and attributes.
      */
-    Visual (const MeshType&);
+    Visual (const MeshType&,
+            const DisplayType&);
 
     /**
      * @brief Create an instance from the ultimate base and
@@ -509,7 +718,8 @@ namespace prf
      * This constructor will try to use the passed values directly
      * instead of making copies.
      */
-    Visual (::std::unique_ptr< MeshType >);
+    Visual (::std::unique_ptr< MeshType >,
+            ::std::unique_ptr< DisplayType >);
 
     /**
      * @brief Create an instance from a DOM element.
@@ -582,6 +792,7 @@ namespace prf
 
     protected:
     ::xsd::cxx::tree::one< MeshType > mesh_;
+    ::xsd::cxx::tree::one< DisplayType > display_;
 
     //@endcond
   };
@@ -2771,6 +2982,9 @@ namespace prf
 
   void
   operator<< (::xercesc::DOMElement&, const Mesh&);
+
+  void
+  operator<< (::xercesc::DOMElement&, const Display&);
 
   void
   operator<< (::xercesc::DOMElement&, const Visual&);

@@ -63,6 +63,7 @@ protected:
     osg::Camera* createGestureCamera();
     osg::Camera* mainCamera;
     QTimer _timer;
+    bool isHiddenLines = false; //!< read from prefs.
     osg::ref_ptr<osg::Group> root;
     osg::ref_ptr<osg::Switch> infoSwitch;
     osg::ref_ptr<slc::EventHandler> selectionHandler;
@@ -85,19 +86,11 @@ protected:
     void viewFitDispatched(const msg::Message &);
     void viewFillDispatched(const msg::Message &);
     void viewLineDispatched(const msg::Message &);
+    void viewToggleHiddenLinesDispatched(const msg::Message&);
     void exportOSGDispatched(const msg::Message &);
     void closeProjectDispatched(const msg::Message &);
     void systemResetDispatched(const msg::Message &);
     void systemToggleDispatched(const msg::Message &);
-};
-
-class VisibleVisitor : public osg::NodeVisitor
-{
-public:
-    VisibleVisitor(bool visIn);
-    virtual void apply(osg::Switch &aSwitch);
-protected:
-    bool visibility;
 };
 }
 

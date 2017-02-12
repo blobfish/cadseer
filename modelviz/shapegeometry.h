@@ -108,7 +108,6 @@ namespace mdv
     osg::ref_ptr<ShapeGeometry> edgeGeometry;
     osg::ref_ptr<ShapeGeometry> vertexGeometry;
     osg::ref_ptr<osg::Depth> faceDepth;
-    osg::ref_ptr<osg::Depth> edgeDepth;
     osg::ref_ptr<osg::LineWidth> lineWidth;
   };
 }

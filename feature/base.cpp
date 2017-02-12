@@ -62,6 +62,7 @@ Base::Base()
   mainSwitch->setUserValue(gu::idAttributeTitle, gu::idToString(id));
   
   mainTransform = new osg::MatrixTransform();
+  mainTransform->setName("mainTransform");
   mainTransform->setMatrix(osg::Matrixd::identity());
   mainSwitch->addChild(mainTransform);
   

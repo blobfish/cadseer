@@ -15,7 +15,7 @@ find_package(OpenCasCade REQUIRED)
 SET(OCE_LIBRARIES ${OCC_LIBRARIES})
 
 FIND_PACKAGE(OpenSceneGraph REQUIRED)
-SET(OPENSCENEGRAPH_LIBRARIES "OpenThreads;osg;osgDB;osgUtil;osgViewer;osgQt;osgGA;osgText;osgManipulator")
+SET(OPENSCENEGRAPH_LIBRARIES "OpenThreads;osg;osgDB;osgUtil;osgViewer;osgQt;osgGA;osgText;osgManipulator;osgFX")
 
 find_package(Spnav)
 IF(SPNAV_FOUND)
@@ -46,6 +46,8 @@ SET(MODELVIZ_SOURCES
     modelviz/base.cpp
     modelviz/shapegeometry.cpp
     modelviz/datumplane.cpp
+    modelviz/hiddenlineeffect.cpp
+    modelviz/hiddenlinetechnique.cpp
     )
 
 SET(TESTING_SOURCES

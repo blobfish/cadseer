@@ -33,6 +33,7 @@
 #include <osg/Point>
 
 #include <feature/seershape.h>
+#include <modelviz/hiddenlineeffect.h>
 #include <modelviz/shapegeometryprivate.h>
 #include <modelviz/shapegeometry.h>
 #include <modelviz/nodemaskdefs.h>
@@ -135,9 +136,6 @@ ShapeGeometryBuilder::ShapeGeometryBuilder(std::shared_ptr<ftr::SeerShape> seerS
   BRepBndLib::Add(copiedShape, bound);
   TopExp::MapShapesAndAncestors(copiedShape, TopAbs_EDGE, TopAbs_FACE, edgeToFace);
   
-  edgeDepth = new osg::Depth();
-  edgeDepth->setRange(0.001, 1.001);
-  
   lineWidth = new osg::LineWidth(2.0f);
   
   faceDepth = new osg::Depth();
@@ -189,7 +187,8 @@ void ShapeGeometryBuilder::go(double deflection, double angle)
 
 void ShapeGeometryBuilder::initialize()
 {
-  out = new osg::Switch();
+  if (!out)
+    out = new osg::Switch();
   
   if (shouldBuildFaces)
   {
@@ -225,7 +224,6 @@ void ShapeGeometryBuilder::initialize()
     edgeGeometry = new ShapeGeometry();
     edgeGeometry->setNodeMask(mdv::edge);
     edgeGeometry->setName("edges");
-    edgeGeometry->getOrCreateStateSet()->setAttribute(edgeDepth.get());
     edgeGeometry->getOrCreateStateSet()->setAttribute(lineWidth.get());
     edgeGeometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
     
@@ -238,7 +236,10 @@ void ShapeGeometryBuilder::initialize()
     
     edgeGeometry->seerShape = seerShape;
     
-    out->addChild(edgeGeometry.get());
+    HiddenLineEffect *effect = new HiddenLineEffect();
+    effect->addChild(edgeGeometry.get());
+    
+    out->addChild(effect);
   }
   else
     edgeGeometry = osg::ref_ptr<ShapeGeometry>();
@@ -265,7 +266,7 @@ void ShapeGeometryBuilder::recursiveConstruct(const TopoDS_Shape &shapeIn)
     const TopoDS_Shape &currentShape = it.Value();
     TopAbs_ShapeEnum currentType = currentShape.ShapeType();
     if (processed.Contains(currentShape))
-	continue;
+      continue;
     processed.Add(currentShape);
     if (!(seerShape->hasShapeIdRecord(currentShape)))
       continue; //probably seam edge.
@@ -335,7 +336,7 @@ void ShapeGeometryBuilder::faceConstruct(const TopoDS_Face &faceIn)
   {
     gp_Pnt point = nodes.Value(index);
     if(!identity)
-	point.Transform(transformation);
+      point.Transform(transformation);
     vertices->push_back(osg::Vec3(point.X(), point.Y(), point.Z()));
     normals->push_back(osg::Vec3(0.0, 0.0, 0.0));
     colors->push_back(faceGeometry->getColor());

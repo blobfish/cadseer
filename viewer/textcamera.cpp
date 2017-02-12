@@ -113,6 +113,7 @@ TextCamera::TextCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
   setAllowEventFocus(false);
   setViewMatrix(osg::Matrix::identity());
   setClearMask(0);
+  setName("text");
   
   infoSwitch = new osg::Switch();
   osg::StateSet* stateset = infoSwitch->getOrCreateStateSet();

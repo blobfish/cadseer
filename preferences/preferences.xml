@@ -5,6 +5,9 @@
       <linearDeflection>0.25</linearDeflection>
       <angularDeflection>0.5</angularDeflection>
     </mesh>
+    <display>
+      <showHiddenLines>false</showHiddenLines>
+    </display>
   </visual>
   <dragger>
     <triggerUpdateOnFinish>true</triggerUpdateOnFinish>

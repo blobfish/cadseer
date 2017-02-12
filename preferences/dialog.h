@@ -35,18 +35,20 @@ namespace prf
     Dialog(Manager *, QWidget* = 0);
     ~Dialog();
     bool isVisualDirty(){return visualDirty;}
+    bool isHiddenLinesDirty(){return hiddenLinesDirty;}
   public Q_SLOTS:
     virtual void accept() override;
     void basePathBrowseSlot();
   private:
     void initialize();
-    void updateDeflections();
+    void updateVisual();
     void updateDragger();
     void updateProject();
     void updateGesture();
     Ui::dialog* ui;
     Manager *manager;
     bool visualDirty = false;
+    bool hiddenLinesDirty = false;
   };
 }
 

@@ -14,9 +14,16 @@
   </xs:all>
 </xs:complexType>
 
+<xs:complexType name="Display">
+  <xs:all>
+    <xs:element name="showHiddenLines" type="xs:boolean" default="false"/>
+  </xs:all>
+</xs:complexType>
+
 <xs:complexType name="Visual">
   <xs:all>
     <xs:element name="mesh" type="Mesh"/>
+    <xs:element name="display" type="Display"/>
   </xs:all>
 </xs:complexType>
 
