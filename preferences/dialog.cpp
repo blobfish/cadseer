@@ -25,6 +25,7 @@
 
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
+#include <dialogs/widgetgeometry.h>
 #include <preferences/dialog.h>
 #include <ui_dialog.h> //in build directory
 
@@ -40,6 +41,9 @@ Dialog::Dialog(Manager *managerIn, QWidget *parent) : QDialog(parent), ui(new Ui
   connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
   connect(ui->buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
   connect(ui->basePathButton, SIGNAL(clicked()), this, SLOT(basePathBrowseSlot()));
+  
+  dlg::WidgetGeometry *filter = new dlg::WidgetGeometry(this, "prf::PreferencesDialog");
+  this->installEventFilter(filter);
 }
 
 Dialog::~Dialog()

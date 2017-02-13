@@ -22,9 +22,12 @@
 #include <QDoubleValidator>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QSettings>
 
+#include <application/application.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
+#include <dialogs/widgetgeometry.h>
 #include <project/projectdialog.h>
 #include <ui_projectdialog.h> //in build directory
 
@@ -38,10 +41,27 @@ Dialog::Dialog(QWidget *parent) : QDialog(parent), ui(new Ui::projectDialog)
   connect(ui->newButton, SIGNAL(clicked()), this, SLOT(goNewSlot()));
   connect(ui->openButton, SIGNAL(clicked()), this, SLOT(goOpenSlot()));
   connect(ui->recentTableWidget, SIGNAL(cellClicked(int,int)), this, SLOT(goRecentSlot(int,int)));
+  
+  dlg::WidgetGeometry *filter = new dlg::WidgetGeometry(this, "prj::ProjectDialog");
+  this->installEventFilter(filter);
+  
+  QSettings &settings = static_cast<app::Application*>(qApp)->getUserSettings();
+  settings.beginGroup("prj::ProjectDialog");
+  settings.beginGroup("RecentTable");
+  ui->recentTableWidget->horizontalHeader()->restoreState(settings.value("header").toByteArray());
+  settings.endGroup();
+  settings.endGroup();
 }
 
 Dialog::~Dialog()
 {
+  QSettings &settings = static_cast<app::Application*>(qApp)->getUserSettings();
+  settings.beginGroup("prj::ProjectDialog");
+  settings.beginGroup("RecentTable");
+  settings.setValue("header", ui->recentTableWidget->horizontalHeader()->saveState());
+  settings.endGroup();
+  settings.endGroup();
+  
   delete ui;
 }
 

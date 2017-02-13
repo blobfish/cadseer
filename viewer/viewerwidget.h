@@ -23,7 +23,6 @@
 #include <memory>
 
 #include <QWidget>
-#include <QTimer>
 
 #include <osg/ref_ptr>
 #include <osgViewer/CompositeViewer>
@@ -46,7 +45,7 @@ public:
     virtual ~ViewerWidget() override;
     
     virtual void paintEvent(QPaintEvent* event);
-    void update();
+    void myUpdate();
     osg::Group* getRoot(){return root;}
     slc::EventHandler* getSelectionEventHandler();
     const slc::Containers& getSelections() const;
@@ -62,7 +61,6 @@ protected:
     osg::Camera* createBackgroundCamera();
     osg::Camera* createGestureCamera();
     osg::Camera* mainCamera;
-    QTimer _timer;
     bool isHiddenLines = false; //!< read from prefs.
     osg::ref_ptr<osg::Group> root;
     osg::ref_ptr<osg::Switch> infoSwitch;

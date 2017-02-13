@@ -20,12 +20,12 @@
 #include <iostream>
 #include <iomanip>
 
-#include <QtCore/QTimer>
 #include <QHBoxLayout>
 #include <QApplication>
 #include <QDir>
 #include <QString>
 #include <QFileDialog>
+#include <QTimer>
 
 #include <osgViewer/ViewerEventHandlers>
 #include <osgGA/OrbitManipulator>
@@ -85,7 +85,8 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     
     setThreadingModel(threadingModel);
     setKeyEventSetsDone(0); //stops the viewer from freezing when the escape key is pressed.
-    connect(&_timer, SIGNAL(timeout()), this, SLOT(update()));
+    QTimer *timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(update())); //inherited update slot.
 
     root = new osg::Group;
     root->setName("root");
@@ -165,7 +166,7 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     layout->addWidget(windowQt->getGLWidget());
     setLayout(layout);
 
-    _timer.start( 10 );
+    timer->start(10);
 }
 
 ViewerWidget::~ViewerWidget() //for forward declarations.
@@ -204,7 +205,7 @@ const osg::Matrixd& ViewerWidget::getViewSystem() const
     return mainCamera->getViewMatrix();
 }
 
-void ViewerWidget::update()
+void ViewerWidget::myUpdate()
 {
   //I am not sure how useful calling optimizer on my generated data is?
   //TODO build large file and run with and without the optimizer to test.
@@ -484,7 +485,7 @@ void ViewerWidget::featureRemovedDispatched(const msg::Message &messageIn)
 
 void ViewerWidget::visualUpdatedDispatched(const msg::Message &)
 {
-  this->update();
+  this->myUpdate();
 }
 
 void ViewerWidget::closeProjectDispatched(const msg::Message&)
