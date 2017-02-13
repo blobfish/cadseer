@@ -32,6 +32,8 @@
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Vertex.hxx>
 #include <TopoDS.hxx>
+#include <STEPControl_Writer.hxx>
+#include <APIHeaderSection_MakeHeader.hxx>
 
 #include <tools/idtools.h>
 #include <message/dispatch.h>
@@ -44,6 +46,7 @@
 #include <viewer/message.h>
 #include <preferences/dialog.h>
 #include <application/factory.h>
+#include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <feature/seershape.h>
 #include <feature/types.h>
@@ -126,6 +129,9 @@ void Factory::setupDispatcher()
   
   mask = msg::Request | msg::ExportOCC;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::exportOCCDispatched, this, _1)));
+  
+  mask = msg::Request | msg::ExportStep;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::exportStepDispatched, this, _1)));
   
   mask = msg::Request | msg::Preferences;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::preferencesDispatched, this, _1)));
@@ -682,6 +688,76 @@ void Factory::exportOCCDispatched(const msg::Message&)
   assert(project);
     
   BRepTools::Write(project->findFeature(containers.at(0).featureId)->getShape(), fileName.toStdString().c_str());
+  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+}
+
+void Factory::exportStepDispatched(const msg::Message&)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  if 
+  (
+    (containers.empty()) ||
+    (containers.at(0).selectionType != slc::Type::Object)
+  )
+  {
+    observer->messageOutSignal(msg::buildStatusMessage("Incorrect selection"));
+    return;
+  }
+    
+  app::Application *application = dynamic_cast<app::Application *>(qApp);
+  assert(application);
+  
+  QString fileName = QFileDialog::getSaveFileName
+  (
+    application->getMainWindow(),
+    QObject::tr("Save File"), QDir::homePath(),
+    QObject::tr("step (*.step *.stp)")
+  );
+  if (fileName.isEmpty())
+    return;
+  if
+  (
+    (!fileName.endsWith(QObject::tr(".step"))) &&
+    (!fileName.endsWith(QObject::tr(".stp")))
+  )
+    fileName += QObject::tr(".step");
+    
+  assert(project);
+  
+  //for now just get the first shape from selection.
+  ftr::Base *feature = project->findFeature(containers.at(0).featureId);
+  const TopoDS_Shape &shape = feature->getShape();
+  if (shape.IsNull())
+  {
+    observer->messageOutSignal(msg::buildStatusMessage("Shape of feature is null"));
+    return;
+  }
+  
+  STEPControl_Writer stepOut;
+  if (stepOut.Transfer(shape, STEPControl_AsIs) != IFSelect_RetDone)
+  {
+    observer->messageOutSignal(msg::buildStatusMessage("Step translation failed"));
+    return;
+  }
+  
+  std::string author = prf::manager().rootPtr->project().gitName();
+  APIHeaderSection_MakeHeader header(stepOut.Model());
+  header.SetName(new TCollection_HAsciiString(fileName.toUtf8().data()));
+  header.SetOriginatingSystem(new TCollection_HAsciiString("CadSeer"));
+  header.SetAuthorValue (1, new TCollection_HAsciiString(author.c_str()));
+  header.SetOrganizationValue (1, new TCollection_HAsciiString(author.c_str()));
+  header.SetDescriptionValue(1, new TCollection_HAsciiString(feature->getName().toUtf8().data()));
+  header.SetAuthorisation(new TCollection_HAsciiString(author.c_str()));
+  
+  if (stepOut.Write(fileName.toStdString().c_str()) != IFSelect_RetDone)
+  {
+    observer->messageOutSignal(msg::buildStatusMessage("Step write failed"));
+    return;
+  }
+  
   observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
 }
 
