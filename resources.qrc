@@ -58,6 +58,7 @@
     <file>resources/images/fileSave.svg</file>
     <file>resources/images/fileOSG.svg</file>
     <file>resources/images/fileOCC.svg</file>
+    <file>resources/images/fileStep.svg</file>
     <file>resources/images/dagViewFail.svg</file>
     <file>resources/images/dagViewPass.svg</file>
     <file>resources/images/dagViewPending.svg</file>
