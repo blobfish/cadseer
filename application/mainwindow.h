@@ -73,9 +73,6 @@ private:
     void setupDispatcher();
     void preferencesChanged(const msg::Message&);
     void infoTextDispatched(const msg::Message&);
-    
-private Q_SLOTS:
-    void incrementChangedSlot();
 };
 }
 

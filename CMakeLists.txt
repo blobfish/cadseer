@@ -250,6 +250,7 @@ SET(CADSEER_MOC_HDRS
     application/application.h
     application/splitterdecorated.h
     application/infowindow.h
+    application/incrementwidget.h
     selection/manager.h
     dialogs/boxdialog.h
     dialogs/checkgeometry.h

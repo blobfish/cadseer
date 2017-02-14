@@ -35,6 +35,7 @@
 #include <message/dispatch.h>
 #include <message/message.h>
 #include <message/observer.h>
+#include <dialogs/expressionedit.h>
 #include <application/incrementwidget.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
@@ -90,12 +91,6 @@ MainWindow::MainWindow(QWidget *parent) :
     incrementWidget = new IncrementWidgetAction
       (this, tr("Translation Increment:"), tr("Rotation Increment:"));
     ui->toolBar->addAction(incrementWidget);
-    incrementWidget->lineEdit1->setText(QString::number(prf::manager().rootPtr->dragger().linearIncrement(), 'f', 12));
-    incrementWidget->lineEdit2->setText(QString::number(prf::manager().rootPtr->dragger().angularIncrement(), 'f', 12));
-    incrementWidget->lineEdit1->setCursorPosition(0);
-    incrementWidget->lineEdit2->setCursorPosition(0);
-    connect(incrementWidget->lineEdit1, SIGNAL(editingFinished()), this, SLOT(incrementChangedSlot()));
-    connect(incrementWidget->lineEdit2, SIGNAL(editingFinished()), this, SLOT(incrementChangedSlot()));
     
     //build the info window.
     infoDialog = new InfoDialog(this);
@@ -153,28 +148,6 @@ void MainWindow::setupSelectionToolbar()
     connect(ui->actionSelectScreenPoints, SIGNAL(triggered(bool)), selectionManager, SLOT(triggeredScreenPoints(bool)));
 }
 
-void MainWindow::incrementChangedSlot()
-{
-  double temp;
-  
-  temp = incrementWidget->lineEdit1->text().toDouble();
-  if (temp != 0.0)
-    prf::manager().rootPtr->dragger().linearIncrement() = temp;
-  else
-    incrementWidget->lineEdit1->setText(QString::number(prf::manager().rootPtr->dragger().linearIncrement(), 'f', 12));
-  
-  temp = incrementWidget->lineEdit2->text().toDouble();
-  if (temp != 0.0)
-    prf::manager().rootPtr->dragger().angularIncrement() = temp;
-  else
-    incrementWidget->lineEdit2->setText(QString::number(prf::manager().rootPtr->dragger().angularIncrement(), 'f', 12));
-  
-  incrementWidget->lineEdit1->setCursorPosition(0);
-  incrementWidget->lineEdit2->setCursorPosition(0);
-  
-  prf::manager().saveConfig();
-}
-
 void MainWindow::setupDispatcher()
 {
   msg::Mask mask;
@@ -188,10 +161,10 @@ void MainWindow::setupDispatcher()
 
 void MainWindow::preferencesChanged(const msg::Message&)
 {
-  incrementWidget->lineEdit1->setText(QString::number(prf::manager().rootPtr->dragger().linearIncrement(), 'f', 12));
-  incrementWidget->lineEdit2->setText(QString::number(prf::manager().rootPtr->dragger().angularIncrement(), 'f', 12));
-  incrementWidget->lineEdit1->setCursorPosition(0);
-  incrementWidget->lineEdit2->setCursorPosition(0);
+  incrementWidget->lineEdit1->lineEdit->setText(QString::number(prf::manager().rootPtr->dragger().linearIncrement(), 'f', 12));
+  incrementWidget->lineEdit2->lineEdit->setText(QString::number(prf::manager().rootPtr->dragger().angularIncrement(), 'f', 12));
+  incrementWidget->lineEdit1->lineEdit->setCursorPosition(0);
+  incrementWidget->lineEdit2->lineEdit->setCursorPosition(0);
 }
 
 void MainWindow::infoTextDispatched(const msg::Message&)
