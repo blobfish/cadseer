@@ -35,12 +35,12 @@ namespace lbr
     virtual const char* className() const {return "LinearDragger";}
     
     LinearDragger();
-    void setScreenScale(float);
-    float getScreenScale(){return screenScale;}
+    void setScreenScale(double);
+    double getScreenScale(){return screenScale;}
     void setIncrement(double);
     double getIncrement() const;
   protected:
-    float screenScale;
+    double screenScale;
     osg::ref_ptr<osg::AutoTransform> autoScaleTransform;
     osg::ref_ptr<osg::MatrixTransform> scaleTransform;
     osg::ref_ptr<osgManipulator::GridConstraint> incrementConstraint;

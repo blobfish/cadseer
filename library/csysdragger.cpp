@@ -188,12 +188,12 @@ void CSysDragger::setupDefaultTranslation()
 
   //Rotate axes to correct position.
   osg::Quat xRotation;
-  xRotation.makeRotate(osg::Vec3d(0.0f, 0.0f, 1.0f), osg::Vec3d(1.0f, 0.0f, 0.0f));
-  xTranslate->setMatrix(osg::Matrix(xRotation));
+  xRotation.makeRotate(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(1.0, 0.0, 0.0));
+  xTranslate->setMatrix(osg::Matrixd(xRotation));
 
   osg::Quat yRotation;
-  yRotation.makeRotate(osg::Vec3d(0.0f, 0.0f, 1.0f), osg::Vec3d(0.0f, 1.0f, 0.0f));
-  yTranslate->setMatrix(osg::Matrix(yRotation));
+  yRotation.makeRotate(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(0.0, 1.0, 0.0));
+  yTranslate->setMatrix(osg::Matrixd(yRotation));
 
   // Send different colors for each dragger.
   xTranslate->setColor(osg::Vec4(1.0f,0.0f,0.0f,1.0f));
@@ -312,8 +312,8 @@ void CSysDragger::updateMatrix(const Matrixd &mIn)
       // Get the LocalToWorld and WorldToLocal matrix for this node.
       osg::NodePath nodePathToRoot;
       computeNodePathToRoot(*transform, nodePathToRoot);
-      osg::Matrix localToWorld = osg::computeLocalToWorld(nodePathToRoot);
-      osg::Matrix worldToLocal = osg::Matrix::inverse(localToWorld);
+      osg::Matrixd localToWorld = osg::computeLocalToWorld(nodePathToRoot);
+      osg::Matrixd worldToLocal = osg::Matrixd::inverse(localToWorld);
       
       transform->setMatrix(worldToLocal * diffMatrix * localToWorld * transform->getMatrix());
     }

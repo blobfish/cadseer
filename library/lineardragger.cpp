@@ -26,7 +26,7 @@
 
 using namespace lbr;
 
-LinearDragger::LinearDragger() : Translate1DDragger(osg::Vec3(0.0,0.0,0.0), osg::Vec3(0.0,0.0,1.0))
+LinearDragger::LinearDragger() : Translate1DDragger(osg::Vec3d(0.0,0.0,0.0), osg::Vec3d(0.0,0.0,1.0))
 {
   setHandleEvents(false);
   
@@ -48,13 +48,13 @@ LinearDragger::LinearDragger() : Translate1DDragger(osg::Vec3(0.0,0.0,0.0), osg:
   scaleTransform->addChild(lbr::Manager::getManager().getGeometry(lbr::csys::TranslationLineTag));
   scaleTransform->addChild(lbr::Manager::getManager().getGeometry(lbr::csys::TranslationCylinderTag));
   
-  incrementConstraint = new osgManipulator::GridConstraint(*this, osg::Vec3(0.0, 0.0, 0.0), osg::Vec3(0.5, 0.5, 0.5));
+  incrementConstraint = new osgManipulator::GridConstraint(*this, osg::Vec3d(0.0, 0.0, 0.0), osg::Vec3d(0.5, 0.5, 0.5));
   this->addConstraint(incrementConstraint.get());
   
   this->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
 }
 
-void LinearDragger::setScreenScale(float scaleIn)
+void LinearDragger::setScreenScale(double scaleIn)
 {
   if (screenScale == scaleIn)
     return;
