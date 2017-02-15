@@ -14,7 +14,44 @@ find_package(Boost REQUIRED COMPONENTS system graph timer)
 find_package(OpenCasCade REQUIRED)
 SET(OCE_LIBRARIES ${OCC_LIBRARIES})
 
-FIND_PACKAGE(OpenSceneGraph REQUIRED)
+# OSG_PROJECT_PATH lets user define cmake variables based on a locally built and
+# non-installed copy of the openscenegraph source code. assumes standard osg path
+# and a 'build' sub directory
+# example:
+# cmake -DOSG_PROJECT_PATH="/home/tanderson/Programming/OpenSceneGraph/OpenSceneGraphGit/source" ../source
+# don't forget about the library runtime path:
+# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/tanderson/Programming/OpenSceneGraph/OpenSceneGraphGit/build/lib
+SET(OSG_PROJECT_PATH "" CACHE PATH "Path to OpenSceneGraph project path")
+MARK_AS_ADVANCED(OSG_PROJECT_PATH)
+IF(OSG_PROJECT_PATH)
+    MESSAGE(STATUS "OSG_PROJECT_PATH is set to: ${OSG_PROJECT_PATH}")
+    
+    set(SOURCE_INCLUDE "${OSG_PROJECT_PATH}/include")
+    message(STATUS "${SOURCE_INCLUDE}")
+    if(NOT EXISTS ${SOURCE_INCLUDE})
+        message(FATAL_ERROR "include path not valid. ${SOURCE_INCLUDE}")
+    endif(NOT EXISTS ${SOURCE_INCLUDE})
+    set(OPENSCENEGRAPH_INCLUDE_DIRS ${OPENSCENEGRAPH_INCLUDE_DIRS} ${SOURCE_INCLUDE})
+    
+    set(BUILD_INCLUDE "${OSG_PROJECT_PATH}/build/include")
+    if(NOT EXISTS ${BUILD_INCLUDE})
+        message(FATAL_ERROR "build include path not valid. ${BUILD_INCLUDE}")
+    endif(NOT EXISTS ${BUILD_INCLUDE})
+    set(OPENSCENEGRAPH_INCLUDE_DIRS ${OPENSCENEGRAPH_INCLUDE_DIRS} ${BUILD_INCLUDE})
+    
+    include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
+    
+    set(BUILD_LIB "${OSG_PROJECT_PATH}/build/lib")
+    if(NOT EXISTS ${BUILD_LIB})
+        message(FATAL_ERROR "build library path not valid. ${BUILD_LIB}")
+    endif(NOT EXISTS ${BUILD_LIB})
+    
+    link_directories(${BUILD_LIB})
+    
+ELSE(OSG_PROJECT_PATH)
+    MESSAGE(STATUS "OSG_PROJECT_PATH is empty. Using find_package for OpenSceneGraph")
+    FIND_PACKAGE(OpenSceneGraph REQUIRED)
+ENDIF(OSG_PROJECT_PATH)
 SET(OPENSCENEGRAPH_LIBRARIES "OpenThreads;osg;osgDB;osgUtil;osgViewer;osgQt;osgGA;osgText;osgManipulator;osgFX")
 
 find_package(Spnav)
