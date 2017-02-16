@@ -105,7 +105,7 @@ void Base::setModelDirty()
     ftr::Message fMessage(id, state, StateOffset::ModelDirty, true);
     msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
     mMessage.payload = fMessage;
-    observer->messageOutSignal(mMessage);
+    observer->out(mMessage);
   }
   setVisualDirty();
 }
@@ -119,7 +119,7 @@ void Base::setModelClean()
   ftr::Message fMessage(id, state, StateOffset::ModelDirty, false);
   msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
   mMessage.payload = fMessage;
-  observer->messageOutSignal(mMessage);
+  observer->out(mMessage);
 }
 
 void Base::setVisualClean()
@@ -131,7 +131,7 @@ void Base::setVisualClean()
   ftr::Message fMessage(id, state, StateOffset::VisualDirty, false);
   msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
   mMessage.payload = fMessage;
-  observer->messageOutSignal(mMessage);
+  observer->out(mMessage);
 }
 
 void Base::setVisualDirty()
@@ -143,7 +143,7 @@ void Base::setVisualDirty()
   ftr::Message fMessage(id, state, StateOffset::VisualDirty, true);
   msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
   mMessage.payload = fMessage;
-  observer->messageOutSignal(mMessage);
+  observer->out(mMessage);
 }
 
 void Base::setName(const QString &nameIn)
@@ -153,7 +153,7 @@ void Base::setName(const QString &nameIn)
   ftr::Message fMessage(id, name);
   msg::Message mMessage(msg::Response | msg::Edit | msg::Feature | msg::Name);
   mMessage.payload = fMessage;
-  observer->messageOutSignal(mMessage);
+  observer->out(mMessage);
 }
 
 TopoDS_Compound Base::compoundWrap(const TopoDS_Shape& shapeIn)
@@ -229,7 +229,7 @@ void Base::show3D()
   ftr::Message fMessage(id, state, StateOffset::Hidden3D, false);
   msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
   mMessage.payload = fMessage;
-  observer->messageOutSignal(mMessage);
+  observer->out(mMessage);
 }
 
 void Base::hide3D()
@@ -245,7 +245,7 @@ void Base::hide3D()
   ftr::Message fMessage(id, state, StateOffset::Hidden3D, true);
   msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
   mMessage.payload = fMessage;
-  observer->messageOutSignal(mMessage);
+  observer->out(mMessage);
 }
 
 void Base::toggle3D()
@@ -267,7 +267,7 @@ void Base::showOverlay()
   ftr::Message fMessage(id, state, StateOffset::HiddenOverlay, false);
   msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
   mMessage.payload = fMessage;
-  observer->messageOutSignal(mMessage);
+  observer->out(mMessage);
 }
 
 void Base::hideOverlay()
@@ -280,7 +280,7 @@ void Base::hideOverlay()
   ftr::Message fMessage(id, state, StateOffset::HiddenOverlay, true);
   msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
   mMessage.payload = fMessage;
-  observer->messageOutSignal(mMessage);
+  observer->out(mMessage);
 }
 
 void Base::toggleOverlay()
@@ -300,7 +300,7 @@ void Base::setSuccess()
   ftr::Message fMessage(id, state, StateOffset::Failure, false);
   msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
   mMessage.payload = fMessage;
-  observer->messageOutSignal(mMessage);
+  observer->out(mMessage);
 }
 
 void Base::setFailure()
@@ -312,7 +312,7 @@ void Base::setFailure()
   ftr::Message fMessage(id, state, StateOffset::Failure, true);
   msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
   mMessage.payload = fMessage;
-  observer->messageOutSignal(mMessage);
+  observer->out(mMessage);
 }
 
 void Base::setActive()
@@ -324,7 +324,7 @@ void Base::setActive()
   ftr::Message fMessage(id, state, StateOffset::Inactive, false);
   msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
   mMessage.payload = fMessage;
-  observer->messageOutSignal(mMessage);
+  observer->out(mMessage);
 }
 
 void Base::setInActive()
@@ -336,7 +336,7 @@ void Base::setInActive()
   ftr::Message fMessage(id, state, StateOffset::Inactive, true);
   msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
   mMessage.payload = fMessage;
-  observer->messageOutSignal(mMessage);
+  observer->out(mMessage);
 }
 
 void Base::setLeaf()
@@ -348,7 +348,7 @@ void Base::setLeaf()
   ftr::Message fMessage(id, state, StateOffset::NonLeaf, false);
   msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
   mMessage.payload = fMessage;
-  observer->messageOutSignal(mMessage);
+  observer->out(mMessage);
 }
 
 void Base::setNonLeaf()
@@ -360,7 +360,7 @@ void Base::setNonLeaf()
   ftr::Message fMessage(id, state, StateOffset::NonLeaf, true);
   msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
   mMessage.payload = fMessage;
-  observer->messageOutSignal(mMessage);
+  observer->out(mMessage);
 }
 
 void Base::serialWrite(const QDir&)

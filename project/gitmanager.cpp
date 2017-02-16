@@ -321,10 +321,10 @@ GitMessageFreezer::~GitMessageFreezer()
 
 void GitMessageFreezer::freeze()
 {
-  observer->messageOutSignal(msg::Message(msg::Request | msg::Git | msg::Freeze));
+  observer->out(msg::Message(msg::Request | msg::Git | msg::Freeze));
 }
 
 void GitMessageFreezer::thaw()
 {
-  observer->messageOutSignal(msg::Message(msg::Request | msg::Git | msg::Thaw));
+  observer->out(msg::Message(msg::Request | msg::Git | msg::Thaw));
 }

@@ -115,16 +115,16 @@ bool DCallBack::receive(const osgManipulator::MotionCommand &commandIn)
       std::ostringstream gitStream;
       gitStream << QObject::tr("Reposition feature: ").toStdString() << csysBase->getName().toStdString() <<
         " id: " << gu::idToString(csysBase->getId());
-      observer->messageOutSignal(msg::buildGitMessage(gitStream.str()));
+      observer->out(msg::buildGitMessage(gitStream.str()));
       
       if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
       {
-        observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
+        observer->out(msg::Mask(msg::Request | msg::Update));
       }
     }
   }
   
-  observer->messageOutSignal(msg::buildStatusMessage(stream.str()));
+  observer->out(msg::buildStatusMessage(stream.str()));
   
   return out;
 }

@@ -116,7 +116,7 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
     {
       if (eventAdapter.getKey() == osgGA::GUIEventAdapter::KEY_Escape)
       {
-        observer->messageOutSignal(msg::Message(msg::Request | msg::Command | msg::Cancel));
+        observer->out(msg::Message(msg::Request | msg::Command | msg::Cancel));
         return true;
       }
     }
@@ -188,7 +188,7 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
             //selections we need to make observers aware of this 'hidden' change.
             msg::Message clearMessage(msg::Response | msg::Pre | msg::Preselection | msg::Remove);
             clearMessage.payload = containerToMessage(lastPrehighlight);
-            observer->messageOutSignal(clearMessage);
+            observer->out(clearMessage);
             
             if (slc::isPointType(lastPrehighlight.selectionType))
             {
@@ -208,7 +208,7 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
             msg::Message addMessage(msg::Response | msg::Post | msg::Selection | msg::Add);
             addMessage.payload = containerToMessage(lastPrehighlight);
             lastPrehighlight = Container(); //set to null before signal in case we end up in 'this' again.
-            observer->messageOutSignal(addMessage);
+            observer->out(addMessage);
         }
         //not clearing the selection anymore on a empty pick.
 //         else
@@ -244,7 +244,7 @@ void EventHandler::clearSelections()
     {
         msg::Message removeMessage(msg::Response | msg::Pre | msg::Selection | msg::Remove);
         removeMessage.payload = containerToMessage(*it);
-        observer->messageOutSignal(removeMessage);
+        observer->out(removeMessage);
         
         if (slc::isPointType(it->selectionType))
         {
@@ -285,7 +285,7 @@ void EventHandler::setPrehighlight(slc::Container &selected)
     
     msg::Message addMessage(msg::Response | msg::Post | msg::Preselection | msg::Add);
     addMessage.payload = containerToMessage(lastPrehighlight);
-    observer->messageOutSignal(addMessage);
+    observer->out(addMessage);
 }
 
 void EventHandler::clearPrehighlight()
@@ -295,7 +295,7 @@ void EventHandler::clearPrehighlight()
     
     msg::Message removeMessage(msg::Response | msg::Pre | msg::Preselection | msg::Remove);
     removeMessage.payload = containerToMessage(lastPrehighlight);
-    observer->messageOutSignal(removeMessage);
+    observer->out(removeMessage);
     
     if (slc::isPointType(lastPrehighlight.selectionType))
     {
@@ -420,7 +420,7 @@ void EventHandler::requestSelectionAdditionDispatched(const msg::Message &messag
   msg::Message messageOut = messageIn;
   messageOut.mask &= ~msg::Request;
   messageOut.mask |= msg::Response | msg::Post;
-  observer->messageOutSignal(messageOut);
+  observer->out(messageOut);
 }
 
 void EventHandler::requestSelectionSubtractionDispatched(const msg::Message &messageIn)
@@ -440,7 +440,7 @@ void EventHandler::requestSelectionSubtractionDispatched(const msg::Message &mes
   msg::Message messageOut = messageIn;
   messageOut.mask &= ~msg::Request;
   messageOut.mask |= msg::Response | msg::Pre;
-  observer->messageOutSignal(messageOut);
+  observer->out(messageOut);
   
   if (slc::isPointType(containIt->selectionType))
   {

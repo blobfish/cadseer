@@ -19,6 +19,8 @@
 
 #include <iostream>
 
+#include <boost/signals2/shared_connection_block.hpp>
+
 #include <message/dispatch.h>
 #include <message/observer.h>
 
@@ -26,7 +28,7 @@ using namespace msg;
 
 Observer::Observer()
 {
-  messageOutSignal.connect(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
+    out.connect(boost::bind(&msg::Dispatch::messageInSlot, &msg::dispatch(), _1));
   connection = msg::dispatch().connectMessageOut(boost::bind(&Observer::messageInSlot, this, _1));
 }
 
@@ -46,4 +48,15 @@ void Observer::messageInSlot(const Message &messageIn)
   stackDepth++;
   it->second(messageIn);
   stackDepth--;
+}
+
+void Observer::outBlocked(const Message &messageIn)
+{
+  boost::signals2::shared_connection_block block(connection);
+  out(messageIn);
+}
+
+boost::signals2::shared_connection_block Observer::createBlocker()
+{
+  return boost::signals2::shared_connection_block(connection);
 }

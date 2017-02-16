@@ -827,7 +827,7 @@ void Model::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     sMessage.featureType = record.feature.lock()->getType();
     sMessage.shapeId = gu::createNilId();
     message.payload = sMessage;
-    observer->messageOutSignal(message);
+    observer->out(message);
   };
   
   auto setPrehighlight = [this](RectItem *rectIn)
@@ -841,7 +841,7 @@ void Model::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     sMessage.featureType = record.feature.lock()->getType();
     sMessage.shapeId = gu::createNilId();
     message.payload = sMessage;
-    observer->messageOutSignal(message);
+    observer->out(message);
   };
   
   RectItem *rect = getRectFromPosition(event->scenePos());
@@ -868,7 +868,7 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
     sMessage.featureType = findRecord(graphLink, featureIdIn).feature.lock()->getType();
     sMessage.shapeId = gu::createNilId();
     message.payload = sMessage;
-    observer->messageOutSignal(message);
+    observer->out(message);
   };
   
   auto getFeatureIdFromRect = [this](RectItem *rectIn)
@@ -940,7 +940,7 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
     msg::Message message(msg::Request | msg::Selection | msg::Clear);
     slc::Message sMessage;
     message.payload = sMessage;
-    observer->messageOutSignal(message);
+    observer->out(message);
   }
   
   QGraphicsScene::mousePressEvent(event);
@@ -991,7 +991,7 @@ void Model::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
       sMessage.featureId = record.featureId;
       sMessage.featureType = record.feature.lock()->getType();
       message.payload = sMessage;
-      observer->messageOutSignal(message);
+      observer->out(message);
     }
     
     QMenu contextMenu;
@@ -1052,13 +1052,13 @@ void Model::setCurrentLeafSlot()
   prjMessageOut.featureId = graph[currentSelections.front()].featureId;
   msg::Message messageOut(msg::Request | msg::SetCurrentLeaf);
   messageOut.payload = prjMessageOut;
-  observer->messageOutSignal(messageOut);
+  observer->out(messageOut);
 }
 
 void Model::removeFeatureSlot()
 {
   msg::Message message(msg::Request | msg::Remove);
-  observer->messageOutSignal(message);
+  observer->out(message);
 }
 
 void Model::toggleOverlaySlot()
@@ -1066,7 +1066,7 @@ void Model::toggleOverlaySlot()
   auto currentSelections = getAllSelected();
   
   msg::Message message(msg::Request | msg::Selection | msg::Clear);
-  observer->messageOutSignal(message);
+  observer->out(message);
   
   for (auto v : currentSelections)
     graph[v].feature.lock()->toggleOverlay();
@@ -1074,12 +1074,12 @@ void Model::toggleOverlaySlot()
 
 void Model::viewIsolateSlot()
 {
-  observer->messageOutSignal(msg::Message(msg::Request | msg::ViewIsolate));
+  observer->out(msg::Message(msg::Request | msg::ViewIsolate));
 }
 
 void Model::editColorSlot()
 {
-  observer->messageOutSignal(msg::Message(msg::Request | msg::Edit | msg::Feature | msg::Color));
+  observer->out(msg::Message(msg::Request | msg::Edit | msg::Feature | msg::Color));
 }
 
 void Model::editRenameSlot()
@@ -1106,7 +1106,7 @@ void Model::editRenameSlot()
 
 void Model::editFeatureSlot()
 {
-  observer->messageOutSignal(msg::Message(msg::Request | msg::Edit | msg::Feature));
+  observer->out(msg::Message(msg::Request | msg::Edit | msg::Feature));
 }
 
 void Model::renameAcceptedSlot()
@@ -1135,12 +1135,12 @@ void Model::renameAcceptedSlot()
     gitStream << "Rename feature id: " << gu::idToString(feature->getId())
     << "    From: " << oldName.toStdString()
     << "    To: " << freshName.toStdString();
-    observer->messageOutSignal(msg::buildGitMessage(gitStream.str()));
+    observer->out(msg::buildGitMessage(gitStream.str()));
   }
   
   finishRename();
   
-  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
 }
 
 void Model::renameRejectedSlot()

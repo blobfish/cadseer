@@ -389,7 +389,7 @@ bool CSysCallBack::receive(const osgManipulator::MotionCommand &commandIn)
 //     }
 //   }
   
-  observer->messageOutSignal(msg::buildStatusMessage(stream.str()));
+  observer->out(msg::buildStatusMessage(stream.str()));
   
   return out;
 }

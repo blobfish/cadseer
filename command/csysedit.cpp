@@ -260,12 +260,12 @@ void CSysEdit::activate()
   if (type == Type::Origin)
     csysDragger->highlightOrigin();
   
-  boost::signals2::shared_connection_block block(observer->connection);
+  auto block = observer->createBlocker();
   msg::Message messageOut(msg::Message(msg::Request | msg::Selection | msg::Add));
   for (const auto &sMessage : messages)
   {
     messageOut.payload = sMessage;
-    observer->messageOutSignal(messageOut);
+    observer->out(messageOut);
   }
   isActive = true;
 }

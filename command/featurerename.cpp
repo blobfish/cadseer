@@ -99,13 +99,13 @@ void FeatureRename::go()
       gitStream << "Rename feature id: " << gu::idToString(feature->getId())
       << "    From: " << oldName.toStdString()
       << "    To: " << freshName.toStdString();
-      observer->messageOutSignal(msg::buildGitMessage(gitStream.str()));
+      observer->out(msg::buildGitMessage(gitStream.str()));
     }
     
     sendDone();
   }
   else
-    observer->messageOutSignal(msg::buildSelectionMask(slc::ObjectsEnabled | slc::ObjectsSelectable));
+    observer->out(msg::buildSelectionMask(slc::ObjectsEnabled | slc::ObjectsSelectable));
 }
 
 void FeatureRename::setupDispatcher()

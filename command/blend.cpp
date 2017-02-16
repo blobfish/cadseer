@@ -127,8 +127,8 @@ void Blend::go()
       targetFeature->hideOverlay();
       blend->setColor(targetFeature->getColor());
       
-      observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
-      observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
+      observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
+      observer->out(msg::Mask(msg::Request | msg::Update));
       return; 
     }
   }

@@ -195,7 +195,7 @@ void Manager::sendUpdatedMask()
   out.selectionMask = selectionMask;
   msg::Message mOut(msg::Response | msg::Selection | msg::SetMask);
   mOut.payload = out;
-  observer->messageOutSignal(mOut);
+  observer->out(mOut);
 }
 
 void Manager::updateToolbar()

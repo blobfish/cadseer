@@ -73,7 +73,7 @@ Project::~Project()
 
 void Project::updateModel()
 {
-  observer->messageOutSignal(msg::Message(msg::Response | msg::Pre | msg::UpdateModel));
+  observer->out(msg::Message(msg::Response | msg::Pre | msg::UpdateModel));
   
   expressionManager->update();
   
@@ -92,7 +92,7 @@ void Project::updateModel()
   //the update of a feature will trigger a state change signal.
   //we don't want to handle that state change here in the project
   //so we block.
-  boost::signals2::shared_connection_block block(observer->connection);
+  auto block = observer->createBlocker();
   
   //loop through and update each feature.
   for (auto it = sorted.rbegin(); it != sorted.rend(); ++it)
@@ -122,16 +122,16 @@ void Project::updateModel()
   
   updateLeafStatus();
   
-  observer->messageOutSignal(msg::Message(msg::Response | msg::Post | msg::UpdateModel));
+  observer->out(msg::Message(msg::Response | msg::Post | msg::UpdateModel));
 }
 
 void Project::updateVisual()
 {
   //if we have selection and then destroy the geometry when the
   //the visual updates, things get out of sync. so clear the selection.
-  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
   
-  observer->messageOutSignal(msg::Message(msg::Response | msg::Pre | msg::UpdateVisual));
+  observer->out(msg::Message(msg::Response | msg::Pre | msg::UpdateVisual));
   
   Path sorted;
   try
@@ -144,6 +144,8 @@ void Project::updateVisual()
     std::cout << std::endl << "Graph is not a dag exception in Project::update()" << std::endl << std::endl;
     return;
   }
+  
+  auto block = observer->createBlocker();
   
   for(auto it = sorted.rbegin(); it != sorted.rend(); ++it)
   {
@@ -159,7 +161,7 @@ void Project::updateVisual()
       feature->updateVisual();
   }
   
-  observer->messageOutSignal(msg::Message(msg::Response | msg::Post | msg::UpdateVisual));
+  observer->out(msg::Message(msg::Response | msg::Post | msg::UpdateVisual));
 }
 
 void Project::writeGraphViz(const std::string& fileName)
@@ -249,7 +251,7 @@ void Project::addFeature(std::shared_ptr<ftr::Base> feature)
   prj::Message pMessage;
   pMessage.feature = feature;
   postMessage.payload = pMessage;
-  observer->messageOutSignal(postMessage);
+  observer->out(postMessage);
 }
 
 void Project::removeFeature(const uuid& idIn)
@@ -286,7 +288,7 @@ void Project::removeFeature(const uuid& idIn)
     pMessage.featureId2 = idIn;
     pMessage.inputType = projectGraph[current.second].inputType;
     preMessage.payload = pMessage;
-    observer->messageOutSignal(preMessage);
+    observer->out(preMessage);
   }
   
   for (const auto &current : children)
@@ -297,14 +299,14 @@ void Project::removeFeature(const uuid& idIn)
     pMessage.featureId2 = projectGraph[current.first].feature->getId();
     pMessage.inputType = projectGraph[current.second].inputType;
     preMessage.payload = pMessage;
-    observer->messageOutSignal(preMessage);
+    observer->out(preMessage);
   }
   
   msg::Message preMessage(msg::Response | msg::Pre | msg::Remove | msg::Feature);
   prj::Message pMessage;
   pMessage.feature = feature;
   preMessage.payload = pMessage;
-  observer->messageOutSignal(preMessage);
+  observer->out(preMessage);
   
   //remove file if exists.
   QString fileName = QString::fromStdString(feature->getFileName());
@@ -331,12 +333,12 @@ void Project::setCurrentLeaf(const uuid& idIn)
   //sometimes the visual of a feature is dirty and doesn't get updated 
   //until we try to show it. However it might be selected meaning that
   //we will destroy the old geometry that is highlighted. So clear the seleciton.
-  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
   
   //the visitor will be setting features to an inactive state which
   //triggers the signal and we would end up back into this->stateChangedSlot.
   //so we block all the connections to avoid this.
-  boost::signals2::shared_connection_block block(observer->connection);
+  auto block = observer->createBlocker();
   
   prg::Vertex vertex = findVertex(idIn);
   
@@ -429,7 +431,7 @@ void Project::connect(const boost::uuids::uuid& parentIn, const boost::uuids::uu
   pMessage.featureId2 = childIn; 
   pMessage.inputType = type;
   postMessage.payload = pMessage;
-  observer->messageOutSignal(postMessage);
+  observer->out(postMessage);
 }
 
 void Project::setupDispatcher()
@@ -482,7 +484,7 @@ void Project::featureStateChangedDispatched(const msg::Message &messageIn)
   //executes. This prevents the cycles from setting a dependent dirty.
   indexVerticesEdges();
   
-  boost::signals2::shared_connection_block block(observer->connection);
+  auto block = observer->createBlocker();
   
   prg::Vertex vertex = findVertex(fMessage.featureId);
   SetDirtyVisitor visitor;
@@ -657,7 +659,7 @@ Edge Project::connect(Vertex parentIn, Vertex childIn, ftr::InputTypes type)
   pMessage.featureId2 = projectGraph[childIn].feature->getId(); 
   pMessage.inputType = type;
   postMessage.payload = pMessage;
-  observer->messageOutSignal(postMessage);
+  observer->out(postMessage);
   
   return edge;
 }
@@ -843,11 +845,11 @@ void Project::serialWrite()
 
 void Project::save()
 {
-  observer->messageOutSignal(msg::Message(msg::Response | msg::Pre | msg::SaveProject));
+  observer->out(msg::Message(msg::Response | msg::Pre | msg::SaveProject));
   
   gitManager->save();
   
-  observer->messageOutSignal(msg::Message(msg::Response | msg::Post | msg::SaveProject));
+  observer->out(msg::Message(msg::Response | msg::Post | msg::SaveProject));
 }
 
 void Project::initializeNew()
@@ -860,7 +862,7 @@ void Project::open()
 {
   isLoading = true;
   gitManager->appendGitMessage("Project Open");
-  observer->messageOutSignal(msg::Message(msg::Request | msg::Git | msg::Freeze));
+  observer->out(msg::Message(msg::Request | msg::Git | msg::Freeze));
   
   std::string projectPath = saveDirectory + QDir::separator().toLatin1() + "project.prjt";
   std::string shapePath = saveDirectory + QDir::separator().toLatin1() + "project.brep";
@@ -935,7 +937,7 @@ void Project::open()
     std::cerr << e << std::endl;
   }
   
-  observer->messageOutSignal(msg::Message(msg::Request | msg::Git | msg::Thaw));
+  observer->out(msg::Message(msg::Request | msg::Git | msg::Thaw));
   isLoading = false;
 }
 
@@ -1103,7 +1105,7 @@ void Project::shapeTrackUp(const uuid& featureIdIn, const uuid& shapeId)
   app::Message appMessage;
   appMessage.infoMessage = QString::fromStdString(stream.str());
   viewInfoMessage.payload = appMessage;
-  observer->messageOutSignal(viewInfoMessage);
+  observer->out(viewInfoMessage);
 }
 
 void Project::shapeTrackDown(const uuid& featureIdIn, const uuid& shapeId)
@@ -1136,7 +1138,7 @@ void Project::shapeTrackDown(const uuid& featureIdIn, const uuid& shapeId)
   app::Message appMessage;
   appMessage.infoMessage = QString::fromStdString(stream.str());
   viewInfoMessage.payload = appMessage;
-  observer->messageOutSignal(viewInfoMessage);
+  observer->out(viewInfoMessage);
 }
 
 ftr::EditMap Project::getParentMap(const boost::uuids::uuid &idIn) const

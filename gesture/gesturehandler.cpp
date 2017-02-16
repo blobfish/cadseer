@@ -69,7 +69,7 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
     auto clearStatus = [&]()
     {
       //clear any status message
-      observer->messageOutSignal(msg::buildStatusMessage(""));
+      observer->out(msg::buildStatusMessage(""));
     };
     
     if (eventAdapter.getModKeyMask() & osgGA::GUIEventAdapter::MODKEY_LEFT_CTRL)
@@ -114,7 +114,7 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
                     msg::Mask msgMask(msgMaskString);
                     msg::Message messageOut;
                     messageOut.mask = msgMask;
-                    observer->messageOutSignal(messageOut);
+                    observer->out(messageOut);
                 }
                 else
                     assert(0); //gesture node doesn't have msgMask attribute;
@@ -169,7 +169,7 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
                 std::string statusString;
                 if (currentNode->getUserValue(attributeStatus, statusString))
                 {
-                  observer->messageOutSignal(msg::buildStatusMessage(statusString));
+                  observer->out(msg::buildStatusMessage(statusString));
                 }
 
                 osg::Switch *geometrySwitch = dynamic_cast<osg::Switch*>(parentNode->getChild(parentNode->getNumChildren() - 1));
@@ -764,7 +764,7 @@ double GestureHandler::calculateSprayRadius(int nodeCount)
 void GestureHandler::startDrag(const osgGA::GUIEventAdapter& eventAdapter)
 {
     //send status
-    observer->messageOutSignal(msg::buildStatusMessage(QObject::tr("Start Menu").toStdString()));
+    observer->out(msg::buildStatusMessage(QObject::tr("Start Menu").toStdString()));
   
     gestureSwitch->setAllChildrenOn();
     osg::Switch *startSwitch = dynamic_cast<osg::Switch *>(startNode->getChild(startNode->getNumChildren() - 1));

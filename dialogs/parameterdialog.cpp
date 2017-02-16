@@ -119,7 +119,7 @@ void ParameterDialog::requestLinkSlot(const QString &stringIn)
   eManager.addLink(parameter, id);
   
   if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
-    observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
+    observer->out(msg::Mask(msg::Request | msg::Update));
   
   this->activateWindow();
 }
@@ -209,19 +209,19 @@ void ParameterDialog::updateSlot()
       if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
       {
         gitStream  << QObject::tr("    changed to: ").toStdString() << parameter->getValue();
-        observer->messageOutSignal(msg::buildGitMessage(gitStream.str()));
-        observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
+        observer->out(msg::buildGitMessage(gitStream.str()));
+        observer->out(msg::Mask(msg::Request | msg::Update));
       }
     }
     else
     {
-      observer->messageOutSignal(msg::buildStatusMessage(QObject::tr("Value out of range").toStdString()));
+      observer->out(msg::buildStatusMessage(QObject::tr("Value out of range").toStdString()));
       fail();
     }
   }
   else
   {
-    observer->messageOutSignal(msg::buildStatusMessage(QObject::tr("Parsing failed").toStdString()));
+    observer->out(msg::buildStatusMessage(QObject::tr("Parsing failed").toStdString()));
     fail();
   }
 }

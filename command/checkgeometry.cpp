@@ -51,7 +51,7 @@ void CheckGeometry::activate()
   
   if (!hasRan)
   {
-    observer->messageOutSignal(msg::buildSelectionMask(slc::ObjectsEnabled | slc::ObjectsSelectable));
+    observer->out(msg::buildSelectionMask(slc::ObjectsEnabled | slc::ObjectsSelectable));
     go();
   }
 
@@ -90,15 +90,15 @@ void CheckGeometry::go()
       dialog->setWindowTitle(freshTitle);
       hasRan = true;
       dialog->go();
-      observer->messageOutSignal(msg::buildSelectionMask(~slc::All));
-      observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+      observer->out(msg::buildSelectionMask(~slc::All));
+      observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
       return;
     }
   }
   
   //here we didn't have an acceptable pre seleciton.
-  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
-  observer->messageOutSignal(msg::buildStatusMessage("Select object to check"));
+  observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  observer->out(msg::buildStatusMessage("Select object to check"));
 }
 
 void CheckGeometry::setupDispatcher()

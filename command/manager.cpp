@@ -146,11 +146,11 @@ void Manager::doneSlot()
     stack.pop();
   }
   clearSelection();
-  observer->messageOutSignal(msg::buildStatusMessage(""));
+  observer->outBlocked(msg::buildStatusMessage(""));
   
   if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
   {
-    observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
+    observer->outBlocked(msg::Mask(msg::Request | msg::Update));
   }
   
   if (!stack.empty())
@@ -158,13 +158,13 @@ void Manager::doneSlot()
   else
   {
     sendCommandMessage("Active command count: 0");
-    observer->messageOutSignal(msg::buildSelectionMask(selectionMask));
+    observer->outBlocked(msg::buildSelectionMask(selectionMask));
   }
 }
 
 void Manager::activateTop()
 {
-  observer->messageOutSignal(msg::buildStatusMessage(stack.top()->getStatusMessage()));
+  observer->outBlocked(msg::buildStatusMessage(stack.top()->getStatusMessage()));
   
   std::ostringstream stream;
   stream << 
@@ -181,12 +181,12 @@ void Manager::sendCommandMessage(const std::string& messageIn)
   vwr::Message statusVMessage;
   statusVMessage.text = messageIn;
   statusMessage.payload = statusVMessage;
-  observer->messageOutSignal(statusMessage);
+  observer->outBlocked(statusMessage);
 }
 
 void Manager::clearSelection()
 {
-  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  observer->outBlocked(msg::Message(msg::Request | msg::Selection | msg::Clear));
 }
 
 void Manager::selectionMaskDispatched(const msg::Message &messageIn)
@@ -255,13 +255,13 @@ void Manager::editFeatureDispatched(const msg::Message&)
   //edit feature only works with 1 object pre-selection.
   if (selections.size() != 1)
   {
-    observer->messageOutSignal(msg::buildStatusMessage("Select 1 object prior to edit feature command"));
+    observer->outBlocked(msg::buildStatusMessage("Select 1 object prior to edit feature command"));
     return;
   }
   
   if (selections.front().selectionType != slc::Type::Object)
   {
-    observer->messageOutSignal(msg::buildStatusMessage("Wrong selection type for edit feature command"));
+    observer->outBlocked(msg::buildStatusMessage("Wrong selection type for edit feature command"));
     return;
   }
   
@@ -270,7 +270,7 @@ void Manager::editFeatureDispatched(const msg::Message&)
   auto it = editFunctionMap.find(feature->getType());
   if (it == editFunctionMap.end())
   {
-    observer->messageOutSignal(msg::buildStatusMessage("Editing of feature type not implemented"));
+    observer->outBlocked(msg::buildStatusMessage("Editing of feature type not implemented"));
     return;
   }
   

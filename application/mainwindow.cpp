@@ -101,7 +101,7 @@ MainWindow::MainWindow(QWidget *parent) :
     observer->name = "app::MainWindow";
     setupDispatcher();
     
-    observer->messageOutSignal(msg::buildSelectionMask(slc::AllEnabled));
+    observer->out(msg::buildSelectionMask(slc::AllEnabled));
 }
 
 MainWindow::~MainWindow()
@@ -111,7 +111,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent (QCloseEvent *event)
 {
-  observer->messageOutSignal(msg::Message(msg::Request | msg::Command | msg::Clear));
+  observer->out(msg::Message(msg::Request | msg::Command | msg::Clear));
   QMainWindow::closeEvent(event);
 }
 

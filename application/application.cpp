@@ -227,7 +227,7 @@ void Application::createNewProject(const std::string &directoryIn)
 {
   msg::Message preMessage;
   preMessage.mask = msg::Response | msg::Pre | msg::NewProject;
-  observer->messageOutSignal(preMessage);
+  observer->out(preMessage);
   
   //directoryIn has been verified to exist before this call.
   std::unique_ptr<prj::Project> tempProject(new prj::Project());
@@ -239,14 +239,14 @@ void Application::createNewProject(const std::string &directoryIn)
   
   msg::Message postMessage;
   postMessage.mask = msg::Response | msg::Post | msg::NewProject;
-  observer->messageOutSignal(postMessage);
+  observer->out(postMessage);
 }
 
 void Application::openProject(const std::string &directoryIn)
 {
   msg::Message preMessage;
   preMessage.mask = msg::Response | msg::Pre | msg::OpenProject;
-  observer->messageOutSignal(preMessage);
+  observer->out(preMessage);
   
   assert(!project);
   //directoryIn has been verified to exist before this call.
@@ -259,11 +259,11 @@ void Application::openProject(const std::string &directoryIn)
   
   msg::Message postMessage;
   postMessage.mask = msg::Response | msg::Post | msg::OpenProject;
-  observer->messageOutSignal(postMessage);
+  observer->out(postMessage);
   
   msg::Message viewFitMessage;
   viewFitMessage.mask = msg::Request | msg::ViewFit;
-  observer->messageOutSignal(viewFitMessage);
+  observer->out(viewFitMessage);
 }
 
 void Application::closeProject()
@@ -272,7 +272,7 @@ void Application::closeProject()
   
   msg::Message preMessage;
   preMessage.mask = msg::Response | msg::Pre | msg::CloseProject;
-  observer->messageOutSignal(preMessage);
+  observer->out(preMessage);
  
   if (project)
   {
@@ -282,7 +282,7 @@ void Application::closeProject()
   
   msg::Message postMessage;
   postMessage.mask = msg::Response | msg::Post | msg::CloseProject;
-  observer->messageOutSignal(postMessage);
+  observer->out(postMessage);
 }
 
 void Application::updateTitle()

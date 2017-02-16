@@ -51,6 +51,6 @@ Base::~Base()
 
 void Base::sendDone()
 {
-  observer->messageOutSignal(msg::Message(msg::Request | msg::Command | msg::Done));
+  observer->out(msg::Message(msg::Request | msg::Command | msg::Done));
 }
 

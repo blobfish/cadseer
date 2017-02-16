@@ -20,9 +20,11 @@
 #ifndef MSG_OBSERVER_H
 #define MSG_OBSERVER_H
 
-#include <boost/signals2.hpp>
+#include <boost/signals2/signal.hpp>
 
 #include <message/message.h>
+
+namespace boost{namespace signals2{class shared_connection_block;}}
 
 namespace msg
 {
@@ -33,9 +35,11 @@ namespace msg
     ~Observer();
     std::string name = "no name"; //used for any error messages.
     typedef boost::signals2::signal<void (const msg::Message &)> MessageOutSignal;
-    MessageOutSignal messageOutSignal; //outgoing messages
+    MessageOutSignal out; //outgoing messages
     MessageDispatcher dispatcher; //incoming message map.
     boost::signals2::connection connection;
+    void outBlocked(const msg::Message &); //!< block, send message, unblock.
+    boost::signals2::shared_connection_block createBlocker();
   private:
     void messageInSlot(const Message &);
     std::size_t stackDepth = 0;

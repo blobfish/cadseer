@@ -234,7 +234,7 @@ bool IPGroup::processMotion(const osgManipulator::MotionCommand &commandIn)
       osg::Matrixd temp = dragger->getMatrix();
       temp.setTrans(osg::Vec3d(0.0, 0.0, overallDim->getSpread()));
       dragger->setMatrix(temp);
-      observer->messageOutSignal(msg::buildStatusMessage(
+      observer->out(msg::buildStatusMessage(
         QObject::tr("Value out of range").toStdString()));
       return false;
     }
@@ -258,15 +258,15 @@ bool IPGroup::processMotion(const osgManipulator::MotionCommand &commandIn)
     std::ostringstream gitStream;
     gitStream << QObject::tr("Parameter ").toStdString() << parameter->getName().toStdString() <<
       QObject::tr(" changed to: ").toStdString() << parameter->getValue();
-    observer->messageOutSignal(msg::buildGitMessage(gitStream.str()));
+    observer->out(msg::buildGitMessage(gitStream.str()));
     
     if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
     {
-      observer->messageOutSignal(msg::Mask(msg::Request | msg::Update));
+      observer->out(msg::Mask(msg::Request | msg::Update));
     }
   }
   
-  observer->messageOutSignal(msg::buildStatusMessage(stream.str()));
+  observer->out(msg::buildStatusMessage(stream.str()));
   
   return true;
 }

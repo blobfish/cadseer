@@ -406,7 +406,7 @@ void BasicCheckPage::selectionChangedSlot()
     osg::Group *parent = boundingSphere->getParent(0);
     parent->removeChild(boundingSphere.get()); //this should make boundingSphere invalid.
   }
-  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
   
   //get the fresh id.
   QList<QTreeWidgetItem*> freshSelections = treeWidget->selectedItems();
@@ -446,11 +446,11 @@ void BasicCheckPage::selectionChangedSlot()
   //select the geometry.
   msg::Message message(msg::Request | msg::Selection | msg::Add);
   message.payload = sMessage;
-  observer->messageOutSignal(message);
+  observer->out(message);
   
   if (!bSphere.valid())
   {
-    observer->messageOutSignal(msg::buildStatusMessage("Unable to calculate bounding sphere"));
+    observer->out(msg::buildStatusMessage("Unable to calculate bounding sphere"));
     return;
   }
   
@@ -619,7 +619,7 @@ void BOPCheckPage::selectionChangedSlot()
     osg::Group *parent = boundingSphere->getParent(0);
     parent->removeChild(boundingSphere.get()); //this should make boundingSphere invalid.
   }
-  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
   
   //get the fresh id.
   QList<QTableWidgetItem*> freshSelections = tableWidget->selectedItems();
@@ -659,11 +659,11 @@ void BOPCheckPage::selectionChangedSlot()
   //select the geometry.
   msg::Message message(msg::Request | msg::Selection | msg::Add);
   message.payload = sMessage;
-  observer->messageOutSignal(message);
+  observer->out(message);
   
   if (!bSphere.valid())
   {
-    observer->messageOutSignal(msg::buildStatusMessage("Unable to calculate bounding sphere"));
+    observer->out(msg::buildStatusMessage("Unable to calculate bounding sphere"));
     return;
   }
   
@@ -785,7 +785,7 @@ void ToleranceCheckPage::selectionChangedSlot()
     osg::Group *parent = boundingSphere->getParent(0);
     parent->removeChild(boundingSphere.get()); //this should make boundingSphere invalid.
   }
-  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
   
   //get the fresh id.
   QList<QTableWidgetItem*> freshSelections = tableWidget->selectedItems();
@@ -825,11 +825,11 @@ void ToleranceCheckPage::selectionChangedSlot()
   //select the geometry.
   msg::Message message(msg::Request | msg::Selection | msg::Add);
   message.payload = sMessage;
-  observer->messageOutSignal(message);
+  observer->out(message);
   
   if (!bSphere.valid())
   {
-    observer->messageOutSignal(msg::buildStatusMessage("Unable to calculate bounding sphere"));
+    observer->out(msg::buildStatusMessage("Unable to calculate bounding sphere"));
     return;
   }
   
@@ -884,7 +884,7 @@ CheckGeometry::~CheckGeometry(){}
 void CheckGeometry::closeEvent(QCloseEvent *e)
 {
   QDialog::closeEvent(e);
-  observer->messageOutSignal(msg::Mask(msg::Request | msg::Command | msg::Done));
+  observer->out(msg::Mask(msg::Request | msg::Command | msg::Done));
 }
 
 void CheckGeometry::buildGui()

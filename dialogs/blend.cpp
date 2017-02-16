@@ -214,7 +214,7 @@ void Blend::init()
   settings.endGroup();
   settings.endGroup();
   
-  observer->messageOutSignal(msg::buildSelectionMask(~slc::All));
+  observer->out(msg::buildSelectionMask(~slc::All));
 }
 
 Blend::~Blend()
@@ -328,7 +328,7 @@ void Blend::finishDialog()
       blend->showOverlay();
   }
   
-  observer->messageOutSignal(msg::Mask(msg::Request | msg::Command | msg::Done));
+  observer->out(msg::Mask(msg::Request | msg::Command | msg::Done));
 }
 
 void Blend::updateBlendFeature()
@@ -593,7 +593,7 @@ void Blend::removeBlendSlot()
 {
   constantTableWidget->clearSelection();
   variableTableWidget->clearSelection();
-  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
   
   QList<QListWidgetItem*> selected = blendList->selectedItems();
   assert(selected.size() == 1); //we have single selection enabled on control.
@@ -632,13 +632,12 @@ void Blend::blendListCurrentItemChangedSlot(const QItemSelection &current, const
 {
   constantTableWidget->clearSelection();
   variableTableWidget->clearSelection();
-  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
   
   if (current.indexes().isEmpty())
   {
     stackedWidget->hide();
-    boost::signals2::shared_connection_block block(observer->connection);
-    observer->messageOutSignal(msg::buildSelectionMask(~slc::All));
+    observer->outBlocked(msg::buildSelectionMask(~slc::All));
     return;
   }
   stackedWidget->show();
@@ -651,8 +650,7 @@ void Blend::blendListCurrentItemChangedSlot(const QItemSelection &current, const
     ConstantItem *cItem = dynamic_cast<ConstantItem*>(currentItem);
     assert(cItem);
     fillInConstant(*cItem);
-    boost::signals2::shared_connection_block block(observer->connection);
-    observer->messageOutSignal(msg::buildSelectionMask(~slc::All | slc::EdgesEnabled | slc::EdgesSelectable));
+    observer->outBlocked(msg::buildSelectionMask(~slc::All | slc::EdgesEnabled | slc::EdgesSelectable));
     stackedWidget->setCurrentIndex(0);
   }
   else if(currentItem->type() == VariableItem::itemType)
@@ -663,13 +661,11 @@ void Blend::blendListCurrentItemChangedSlot(const QItemSelection &current, const
     fillInVariable(*vItem);
     if (vItem->pick.pickId.is_nil())
     {
-      boost::signals2::shared_connection_block block(observer->connection);
-      observer->messageOutSignal(msg::buildSelectionMask(~slc::All | slc::EdgesEnabled | slc::EdgesSelectable));
+      observer->outBlocked(msg::buildSelectionMask(~slc::All | slc::EdgesEnabled | slc::EdgesSelectable));
     }
     else
     {
-      boost::signals2::shared_connection_block block(observer->connection);
-      observer->messageOutSignal(msg::buildSelectionMask
+      observer->outBlocked(msg::buildSelectionMask
         (~slc::All | slc::PointsEnabled | slc::PointsSelectable |
         slc::EndPointsEnabled | slc::EndPointsSelectable));
     }
@@ -744,10 +740,6 @@ void Blend::fillInVariable(const VariableItem &itemIn)
 
 void Blend::addToSelection(const boost::uuids::uuid &shapeIdIn)
 {
-  // I can't ever see us needing to handeling a selection addition response
-  // triggered from ourselves. Just block and revisit if needed.
-  boost::signals2::shared_connection_block block(observer->connection);
-  
   const ftr::SeerShape &parentShape = blendParent->getSeerShape();
   assert(parentShape.hasShapeIdRecord(shapeIdIn));
   slc::Type sType = slc::convert(parentShape.getOCCTShape(shapeIdIn).ShapeType());
@@ -760,7 +752,7 @@ void Blend::addToSelection(const boost::uuids::uuid &shapeIdIn)
   freshSMessage.featureType = blendParent->getType();
   freshSMessage.shapeId = shapeIdIn;
   freshMMessage.payload = freshSMessage;
-  observer->messageOutSignal(freshMMessage);
+  observer->outBlocked(freshMMessage);
 }
 
 void Blend::constantRadiusEditingFinishedSlot()
@@ -784,13 +776,13 @@ void Blend::constantRadiusEditingFinishedSlot()
     localManager.update();
     double value = localManager.getFormulaValue(translator.getFormulaOutId());
     if (!(value > 0.0))
-      observer->messageOutSignal(msg::buildStatusMessage(QObject::tr("Need positive radei").toStdString()));
+      observer->out(msg::buildStatusMessage(QObject::tr("Need positive radei").toStdString()));
     else
       cItem->radius = value;
   }
   else
   {
-    observer->messageOutSignal(msg::buildStatusMessage(QObject::tr("Parsing failed").toStdString()));
+    observer->out(msg::buildStatusMessage(QObject::tr("Parsing failed").toStdString()));
   }
   
   constantRadiusEdit->lineEdit->setText(QString::number(cItem->radius, 'f', 12));
@@ -836,8 +828,7 @@ void Blend::constantTableSelectionChangedSlot(const QItemSelection &current, con
   ConstantItem *cItem = dynamic_cast<ConstantItem*>(blendList->selectedItems().front());
   assert(cItem);
   
-  boost::signals2::shared_connection_block block(observer->connection);
-  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  observer->outBlocked(msg::Message(msg::Request | msg::Selection | msg::Clear));
   
   for (const auto &pick : cItem->picks)
   {
@@ -853,7 +844,7 @@ void Blend::constantTableRemoveSlot()
   QModelIndexList selection = constantTableWidget->selectionModel()->selectedIndexes();
   if (selection.isEmpty())
   {
-    observer->messageOutSignal(msg::buildStatusMessage("Nothing selected to remove"));
+    observer->out(msg::buildStatusMessage("Nothing selected to remove"));
     return;
   }
   
@@ -862,8 +853,7 @@ void Blend::constantTableRemoveSlot()
   uuid pickId = gu::stringToId(constantTableWidget->model()->data(index).toString().toStdString());
   constantTableWidget->removeRow(index.row());
   constantTableWidget->clearSelection();
-  boost::signals2::shared_connection_block block(observer->connection);
-  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  observer->outBlocked(msg::Message(msg::Request | msg::Selection | msg::Clear));
   
   ConstantItem *cItem = dynamic_cast<ConstantItem*>(blendList->selectedItems().front());
   assert(cItem);
@@ -902,9 +892,8 @@ void Blend::selectionAdditionDispatched(const msg::Message &messageIn)
   QList<QListWidgetItem *> items = blendList->selectedItems();
   if(items.isEmpty())
   {
-    observer->messageOutSignal(msg::buildStatusMessage("Add and/or select blend from dialog"));
-    boost::signals2::shared_connection_block block(observer->connection);
-    observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+    observer->out(msg::buildStatusMessage("Add and/or select blend from dialog"));
+    observer->outBlocked(msg::Message(msg::Request | msg::Selection | msg::Clear));
     return;
   }
   
@@ -917,18 +906,16 @@ void Blend::selectionAdditionDispatched(const msg::Message &messageIn)
     assert(blendParent);
     if (!blendParent->hasSeerShape())
     {
-      observer->messageOutSignal(msg::buildStatusMessage("Invalid object to blend"));
-      boost::signals2::shared_connection_block block(observer->connection);
-      observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+      observer->out(msg::buildStatusMessage("Invalid object to blend"));
+      observer->outBlocked(msg::Message(msg::Request | msg::Selection | msg::Clear));
       return;
     }
   }
   
   if (blendParent->getId() != sMessage.featureId)
   {
-    observer->messageOutSignal(msg::buildStatusMessage("Can't tie blend feature to multiple bodies"));
-    boost::signals2::shared_connection_block block(observer->connection);
-    observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+    observer->out(msg::buildStatusMessage("Can't tie blend feature to multiple bodies"));
+    observer->outBlocked(msg::Message(msg::Request | msg::Selection | msg::Clear));
     return;
   }
   
@@ -946,9 +933,9 @@ void Blend::selectionAdditionDispatched(const msg::Message &messageIn)
       contourIds.push_back(parentShape.findShapeIdRecord(blendMaker.Edge(1, index)).id);
       if (runningIds.count(contourIds.back()) != 0)
       {
-        boost::signals2::shared_connection_block block(observer->connection);
-        observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
-        observer->messageOutSignal(msg::buildStatusMessage("Blend contour overlaps other contour"));
+        auto block = observer->createBlocker();
+        observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
+        observer->out(msg::buildStatusMessage("Blend contour overlaps other contour"));
         return;
       }
     }
@@ -1022,8 +1009,7 @@ void Blend::selectionAdditionDispatched(const msg::Message &messageIn)
       addVariableTableItem(QString::number(lastEntry.radius, 'f', 12), lastEntry.typeString, lastEntry.pickId);
       runningIds.insert(lastId);
 
-      boost::signals2::shared_connection_block block(observer->connection);
-      observer->messageOutSignal(msg::buildSelectionMask
+      observer->outBlocked(msg::buildSelectionMask
         (~slc::All | slc::PointsEnabled | slc::PointsSelectable |
         slc::EndPointsEnabled | slc::EndPointsSelectable));
     }
@@ -1045,9 +1031,9 @@ void Blend::selectionAdditionDispatched(const msg::Message &messageIn)
       {
         msg::Message out = messageIn;
         out.mask = msg::Request | msg::Selection | msg::Remove;
-        boost::signals2::shared_connection_block block(observer->connection);
-        observer->messageOutSignal(out);
-        observer->messageOutSignal(msg::buildStatusMessage("Point already defined"));
+        auto block = observer->createBlocker();
+        observer->out(out);
+        observer->out(msg::buildStatusMessage("Point already defined"));
         return;
       }
       
@@ -1064,9 +1050,9 @@ void Blend::selectionAdditionDispatched(const msg::Message &messageIn)
       {
         msg::Message out = messageIn;
         out.mask = msg::Request | msg::Selection | msg::Remove;
-        boost::signals2::shared_connection_block block(observer->connection);
-        observer->messageOutSignal(out);
-        observer->messageOutSignal(msg::buildStatusMessage("Point not on contour"));
+        auto block = observer->createBlocker();
+        observer->out(out);
+        observer->out(msg::buildStatusMessage("Point not on contour"));
         return;
       }
       
@@ -1080,8 +1066,8 @@ void Blend::selectionAdditionDispatched(const msg::Message &messageIn)
       addVariableTableItem(QString::number(fresh.radius, 'f', 12), fresh.typeString, fresh.pickId);
       
       variableTableWidget->selectionModel()->clearSelection();
-      boost::signals2::shared_connection_block block(observer->connection);
-      observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+      auto block = observer->createBlocker();
+      observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
       
       //we just came from the 3d view, so in order for dialog to get
       //keyboard input we need to activate.
@@ -1092,7 +1078,7 @@ void Blend::selectionAdditionDispatched(const msg::Message &messageIn)
       variableTableWidget->setCurrentItem(item);
       variableTableWidget->editItem(item);
       
-      observer->messageOutSignal(msg::buildStatusMessage("New vertex added. Set radius"));
+      observer->out(msg::buildStatusMessage("New vertex added. Set radius"));
     }
   }
 }
@@ -1127,8 +1113,8 @@ void Blend::variableTableSelectionChangedSlot(const QItemSelection &current, con
   if (current.indexes().isEmpty())
     return;
   
-  boost::signals2::shared_connection_block block(observer->connection);
-  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  auto block = observer->createBlocker();
+  observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
   
   QModelIndex index = variableTableWidget->model()->index(current.indexes().front().row(), 2);
   assert(index.isValid());
@@ -1155,7 +1141,7 @@ void Blend::variableTableSelectionChangedSlot(const QItemSelection &current, con
   freshSMessage.shapeId = parentEdge;
   freshSMessage.pointLocation = gu::toOsg(TopoDS::Vertex(parentShape.getOCCTShape(pickId)));
   freshMMessage.payload = freshSMessage;
-  observer->messageOutSignal(freshMMessage);
+  observer->out(freshMMessage);
 }
 
 void Blend::variableTableItemChangedSlot(QTableWidgetItem *item)
@@ -1185,7 +1171,7 @@ void Blend::variableTableItemChangedSlot(QTableWidgetItem *item)
       constraint.radius = temp;
     else
     {
-      observer->messageOutSignal(msg::buildStatusMessage("No negative radei"));
+      observer->out(msg::buildStatusMessage("No negative radei"));
       item->setData(Qt::DisplayRole, QString::number(constraint.radius, 'f', 12));
     }
     
@@ -1198,7 +1184,7 @@ void Blend::variableTableRemoveSlot()
   QModelIndexList selection = variableTableWidget->selectionModel()->selectedIndexes();
   if (selection.isEmpty())
   {
-    observer->messageOutSignal(msg::buildStatusMessage("Nothing selected to remove"));
+    observer->out(msg::buildStatusMessage("Nothing selected to remove"));
     return;
   }
   
@@ -1206,7 +1192,7 @@ void Blend::variableTableRemoveSlot()
   //these must be present so don't remove.
   if (selection.front().row() < 2)
   {
-    observer->messageOutSignal(msg::buildStatusMessage("Can't remove start or finish vertices"));
+    observer->out(msg::buildStatusMessage("Can't remove start or finish vertices"));
     return;
   }
   
@@ -1215,8 +1201,7 @@ void Blend::variableTableRemoveSlot()
   uuid pickId = gu::stringToId(variableTableWidget->model()->data(index).toString().toStdString());
   variableTableWidget->removeRow(index.row());
   variableTableWidget->clearSelection();
-  boost::signals2::shared_connection_block block(observer->connection);
-  observer->messageOutSignal(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  observer->outBlocked(msg::Message(msg::Request | msg::Selection | msg::Clear));
   
   VariableItem *vItem = dynamic_cast<VariableItem*>(blendList->selectedItems().front());
   assert(vItem);
@@ -1236,7 +1221,7 @@ void Blend::variableTableRemoveSlot()
   
   vItem->constraints.erase(eraseMe);
   
-  observer->messageOutSignal(msg::buildStatusMessage("Vertex removed."));
+  observer->out(msg::buildStatusMessage("Vertex removed."));
 }
 
 void Blend::requestConstantLinkSlot(const QString &stringIn)
@@ -1284,7 +1269,7 @@ void Blend::requestVariableLinkSlot(QTableWidgetItem *item, const QString &idIn)
   assert(eManager.hasFormula(expressionId));
   if (!(eManager.getFormulaValue(expressionId) > 0.0))
   {
-    observer->messageOutSignal(msg::buildStatusMessage("No negative radei"));
+    observer->out(msg::buildStatusMessage("No negative radei"));
     return;
   }
   
