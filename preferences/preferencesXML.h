@@ -489,6 +489,61 @@ namespace prf
     //@}
 
     /**
+     * @name showCurrentSystem
+     *
+     * @brief Accessor and modifier functions for the %showCurrentSystem
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::xml_schema::Boolean ShowCurrentSystemType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< ShowCurrentSystemType, char > ShowCurrentSystemTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const ShowCurrentSystemType&
+    showCurrentSystem () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    ShowCurrentSystemType&
+    showCurrentSystem ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    showCurrentSystem (const ShowCurrentSystemType& x);
+
+    /**
+     * @brief Return the default value for the element.
+     *
+     * @return The element's default value.
+     */
+    static ShowCurrentSystemType
+    showCurrentSystem_default_value ();
+
+    //@}
+
+    /**
      * @name Constructors
      */
     //@{
@@ -497,7 +552,8 @@ namespace prf
      * @brief Create an instance from the ultimate base and
      * initializers for required elements and attributes.
      */
-    Display (const ShowHiddenLinesType&);
+    Display (const ShowHiddenLinesType&,
+             const ShowCurrentSystemType&);
 
     /**
      * @brief Create an instance from a DOM element.
@@ -570,6 +626,7 @@ namespace prf
 
     protected:
     ::xsd::cxx::tree::one< ShowHiddenLinesType > showHiddenLines_;
+    ::xsd::cxx::tree::one< ShowCurrentSystemType > showCurrentSystem_;
 
     //@endcond
   };

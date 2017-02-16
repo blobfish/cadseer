@@ -17,6 +17,7 @@
 <xs:complexType name="Display">
   <xs:all>
     <xs:element name="showHiddenLines" type="xs:boolean" default="false"/>
+    <xs:element name="showCurrentSystem" type="xs:boolean" default="true"/>
   </xs:all>
 </xs:complexType>
 

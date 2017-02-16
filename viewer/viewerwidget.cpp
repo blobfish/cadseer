@@ -144,6 +144,7 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     currentSystemCallBack = new lbr::CSysCallBack(currentSystem.get());
     currentSystem->addDraggerCallback(currentSystemCallBack.get());
     systemSwitch->addChild(currentSystem);
+    systemSwitch->setValue(0, prf::manager().rootPtr->visual().display().showCurrentSystem());
 
     view->setSceneData(root);
     view->addEventHandler(new osgViewer::StatsHandler);
@@ -505,6 +506,10 @@ void ViewerWidget::systemToggleDispatched(const msg::Message&)
     systemSwitch->setAllChildrenOff();
   else
     systemSwitch->setAllChildrenOn();
+  
+  prf::Manager &manager = prf::manager();
+  manager.rootPtr->visual().display().showCurrentSystem() = systemSwitch->getValue(0);
+  manager.saveConfig();
 }
 
 void ViewerWidget::viewToggleHiddenLinesDispatched(const msg::Message&)

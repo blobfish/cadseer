@@ -36,7 +36,8 @@ namespace prf
     void saveConfig();
     bool isOk(){return ok;}
   private:
-    bool createDefault();
+    bool createDefaultXml();
+    bool createDefaultXsd();
     void setup();
     bool readConfig();
     QDir appDirectory;

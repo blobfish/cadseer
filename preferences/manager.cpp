@@ -35,8 +35,8 @@
 
 //ok this is screwy. the parser, by default, validates the xml so it
 //needs the xsd at runtime. We have the xsd and a default xml in
-//the qt controlled resources. setup() creates these files in the temp
-//directory if they don't already exist.
+//the qt controlled resources. files will be copied into application
+//directory if needed.
 
 
 using namespace prf;
@@ -55,9 +55,14 @@ Manager::Manager()
   fileNameXML = "preferences.xml";
   filePathXML = appDirectory.absolutePath() + QDir::separator() + fileNameXML;
   filePathXSD = appDirectory.absolutePath() + QDir::separator() + "preferences.xsd";
+  
+  //just overwrite the xsd for now so it is always current.
+  if (!createDefaultXsd())
+    return;
+  
   if (!appDirectory.exists(fileNameXML))
   {
-    if (!createDefault())
+    if (!createDefaultXml())
       return;
   }
   
@@ -68,7 +73,7 @@ Manager::Manager()
     if (appDirectory.exists(backUpPath))
       appDirectory.remove(backUpPath);
     appDirectory.rename(filePathXML, backUpPath);
-    if (!createDefault())
+    if (!createDefaultXml())
       return;
     
     //try to read the newly created default
@@ -78,13 +83,9 @@ Manager::Manager()
     
   assert(rootPtr);
   ok = true;
-  
-//   std::cout << std::endl <<
-//   "linear deflection is: " << rootPtr->visual().mesh().linearDeflection() <<
-//   "      angularDeflection is: " << rootPtr->visual().mesh().angularDeflection() << std::endl;
 }
 
-bool Manager::createDefault()
+bool Manager::createDefaultXml()
 {
   //xml
   QString xmlResourceName(":/preferences/preferences.xml");
@@ -105,6 +106,11 @@ bool Manager::createDefault()
   newFileXML.write(bufferXML);
   newFileXML.close();
   
+  return true;
+}
+
+bool Manager::createDefaultXsd()
+{
   //xsd. just over write it.
   QString xsdResourceName(":/preferences/preferencesXML.xsd");
   QFile resourceFileXSD(xsdResourceName);
@@ -115,7 +121,7 @@ bool Manager::createDefault()
   }
   QByteArray bufferXSD = resourceFileXSD.readAll();
   resourceFileXSD.close();
-    
+  
   QFile newFileXSD(filePathXSD);
   if (!newFileXSD.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
   {
@@ -127,7 +133,6 @@ bool Manager::createDefault()
   
   return true;
 }
-
 
 void Manager::saveConfig()
 {

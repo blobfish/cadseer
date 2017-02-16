@@ -137,6 +137,30 @@ namespace prf
     return ShowHiddenLinesType (false);
   }
 
+  const Display::ShowCurrentSystemType& Display::
+  showCurrentSystem () const
+  {
+    return this->showCurrentSystem_.get ();
+  }
+
+  Display::ShowCurrentSystemType& Display::
+  showCurrentSystem ()
+  {
+    return this->showCurrentSystem_.get ();
+  }
+
+  void Display::
+  showCurrentSystem (const ShowCurrentSystemType& x)
+  {
+    this->showCurrentSystem_.set (x);
+  }
+
+  Display::ShowCurrentSystemType Display::
+  showCurrentSystem_default_value ()
+  {
+    return ShowCurrentSystemType (true);
+  }
+
 
   // Visual
   // 
@@ -940,9 +964,11 @@ namespace prf
   //
 
   Display::
-  Display (const ShowHiddenLinesType& showHiddenLines)
+  Display (const ShowHiddenLinesType& showHiddenLines,
+           const ShowCurrentSystemType& showCurrentSystem)
   : ::xml_schema::Type (),
-    showHiddenLines_ (showHiddenLines, this)
+    showHiddenLines_ (showHiddenLines, this),
+    showCurrentSystem_ (showCurrentSystem, this)
   {
   }
 
@@ -951,7 +977,8 @@ namespace prf
            ::xml_schema::Flags f,
            ::xml_schema::Container* c)
   : ::xml_schema::Type (x, f, c),
-    showHiddenLines_ (x.showHiddenLines_, f, this)
+    showHiddenLines_ (x.showHiddenLines_, f, this),
+    showCurrentSystem_ (x.showCurrentSystem_, f, this)
   {
   }
 
@@ -960,7 +987,8 @@ namespace prf
            ::xml_schema::Flags f,
            ::xml_schema::Container* c)
   : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
-    showHiddenLines_ (this)
+    showHiddenLines_ (this),
+    showCurrentSystem_ (this)
   {
     if ((f & ::xml_schema::Flags::base) == 0)
     {
@@ -990,6 +1018,17 @@ namespace prf
         }
       }
 
+      // showCurrentSystem
+      //
+      if (n.name () == "showCurrentSystem" && n.namespace_ ().empty ())
+      {
+        if (!showCurrentSystem_.present ())
+        {
+          this->showCurrentSystem_.set (ShowCurrentSystemTraits::create (i, f, this));
+          continue;
+        }
+      }
+
       break;
     }
 
@@ -997,6 +1036,13 @@ namespace prf
     {
       throw ::xsd::cxx::tree::expected_element< char > (
         "showHiddenLines",
+        "");
+    }
+
+    if (!showCurrentSystem_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "showCurrentSystem",
         "");
     }
   }
@@ -1015,6 +1061,7 @@ namespace prf
     {
       static_cast< ::xml_schema::Type& > (*this) = x;
       this->showHiddenLines_ = x.showHiddenLines_;
+      this->showCurrentSystem_ = x.showCurrentSystem_;
     }
 
     return *this;
@@ -2444,6 +2491,17 @@ namespace prf
           e));
 
       s << i.showHiddenLines ();
+    }
+
+    // showCurrentSystem
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "showCurrentSystem",
+          e));
+
+      s << i.showCurrentSystem ();
     }
   }
 
