@@ -163,7 +163,6 @@ SET(TOOLS_SOURCES
     )
     
 SET(DIALOG_SOURCES
-    dialogs/boxdialog.cpp
     dialogs/parameterdialog.cpp
     dialogs/checkgeometry.cpp
     dialogs/widgetgeometry.cpp
@@ -261,7 +260,6 @@ SET(CADSEER_SOURCES
     dagview/dagmodelgraph.cpp
     dagview/dagrectitem.cpp
     globalutilities.cpp
-    coordinatesystem.cpp
     ${MODELVIZ_SOURCES}
     ${TESTING_SOURCES}
     ${GESTURE_SOURCES}
@@ -289,7 +287,6 @@ SET(CADSEER_MOC_HDRS
     application/infowindow.h
     application/incrementwidget.h
     selection/manager.h
-    dialogs/boxdialog.h
     dialogs/checkgeometry.h
     dialogs/widgetgeometry.h
     dialogs/blend.h
