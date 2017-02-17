@@ -261,6 +261,9 @@ void Project::removeFeature(const uuid& idIn)
   
   feature->setModelDirty(); //this will make all children dirty.
   
+  //shouldn't need anymore messages into project for this function call.
+  auto block = observer->createBlocker();
+  
   VertexEdgePairs parents = getParents(vertex);
   VertexEdgePairs children = getChildren(vertex);
   //for now all children get connected to target parent.
@@ -289,6 +292,12 @@ void Project::removeFeature(const uuid& idIn)
     pMessage.inputType = projectGraph[current.second].inputType;
     preMessage.payload = pMessage;
     observer->out(preMessage);
+    
+    //make parents have same visible state as the feature being removed.
+    if (feature->isVisible3D())
+      projectGraph[current.first].feature->show3D();
+    else
+      projectGraph[current.first].feature->hide3D();
   }
   
   for (const auto &current : children)
