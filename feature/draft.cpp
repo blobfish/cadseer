@@ -148,11 +148,11 @@ void Draft::updateModel(const UpdateMap& mapIn)
   catch (Standard_Failure)
   {
     Handle_Standard_Failure e = Standard_Failure::Caught();
-    std::cout << std::endl << "Error in chamfer update. " << e->GetMessageString() << std::endl;
+    std::cout << std::endl << "Error in draft update. " << e->GetMessageString() << std::endl;
   }
   catch (std::exception &e)
   {
-    std::cout << std::endl << "Error in chamfer update. " << e.what() << std::endl;
+    std::cout << std::endl << "Error in draft update. " << e.what() << std::endl;
   }
   setModelClean();
 }

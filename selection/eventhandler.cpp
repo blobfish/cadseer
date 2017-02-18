@@ -520,7 +520,7 @@ Container EventHandler::messageToContainer(const Message &messageIn)
   container.shapeId = messageIn.shapeId;
   container.pointLocation = messageIn.pointLocation;
   
-  if (feature->hasSeerShape())
+  if (feature->hasSeerShape() && !feature->getSeerShape().isNull())
   {
     const ftr::SeerShape &seerShape = feature->getSeerShape();
     if
