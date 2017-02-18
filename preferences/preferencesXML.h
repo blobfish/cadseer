@@ -79,6 +79,9 @@ namespace prf
   class Gesture;
   class RecentProjects;
   class Project;
+  class SpaceballButton;
+  class SpaceballButtons;
+  class HotKeys;
   class Root;
 }
 
@@ -2349,6 +2352,527 @@ namespace prf
   };
 
   /**
+   * @brief Class corresponding to the %SpaceballButton schema type.
+   *
+   * @nosubgrouping
+   */
+  class SpaceballButton: public ::xml_schema::Type
+  {
+    public:
+    /**
+     * @name number
+     *
+     * @brief Accessor and modifier functions for the %number
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::xml_schema::Int NumberType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< NumberType, char > NumberTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const NumberType&
+    number () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    NumberType&
+    number ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    number (const NumberType& x);
+
+    //@}
+
+    /**
+     * @name mask
+     *
+     * @brief Accessor and modifier functions for the %mask
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::xml_schema::String MaskType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< MaskType, char > MaskTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const MaskType&
+    mask () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    MaskType&
+    mask ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    mask (const MaskType& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly
+     * instead of making a copy.
+     */
+    void
+    mask (::std::unique_ptr< MaskType > p);
+
+    //@}
+
+    /**
+     * @name Constructors
+     */
+    //@{
+
+    /**
+     * @brief Create an instance from the ultimate base and
+     * initializers for required elements and attributes.
+     */
+    SpaceballButton (const NumberType&,
+                     const MaskType&);
+
+    /**
+     * @brief Create an instance from a DOM element.
+     *
+     * @param e A DOM element to extract the data from.
+     * @param f Flags to create the new instance with.
+     * @param c A pointer to the object that will contain the new
+     * instance.
+     */
+    SpaceballButton (const ::xercesc::DOMElement& e,
+                     ::xml_schema::Flags f = 0,
+                     ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy constructor.
+     *
+     * @param x An instance to make a copy of.
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    SpaceballButton (const SpaceballButton& x,
+                     ::xml_schema::Flags f = 0,
+                     ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy the instance polymorphically.
+     *
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     * @return A pointer to the dynamically allocated copy.
+     *
+     * This function ensures that the dynamic type of the instance is
+     * used for copying and should be used for polymorphic object
+     * models instead of the copy constructor.
+     */
+    virtual SpaceballButton*
+    _clone (::xml_schema::Flags f = 0,
+            ::xml_schema::Container* c = 0) const;
+
+    /**
+     * @brief Copy assignment operator.
+     *
+     * @param x An instance to make a copy of.
+     * @return A reference to itself.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    SpaceballButton&
+    operator= (const SpaceballButton& x);
+
+    //@}
+
+    /**
+     * @brief Destructor.
+     */
+    virtual 
+    ~SpaceballButton ();
+
+    // Implementation.
+    //
+
+    //@cond
+
+    protected:
+    void
+    parse (::xsd::cxx::xml::dom::parser< char >&,
+           ::xml_schema::Flags);
+
+    protected:
+    ::xsd::cxx::tree::one< NumberType > number_;
+    ::xsd::cxx::tree::one< MaskType > mask_;
+
+    //@endcond
+  };
+
+  /**
+   * @brief Class corresponding to the %SpaceballButtons schema type.
+   *
+   * @nosubgrouping
+   */
+  class SpaceballButtons: public ::xml_schema::Type
+  {
+    public:
+    /**
+     * @name array
+     *
+     * @brief Accessor and modifier functions for the %array
+     * sequence element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::SpaceballButton ArrayType;
+
+    /**
+     * @brief Element sequence container type.
+     */
+    typedef ::xsd::cxx::tree::sequence< ArrayType > ArraySequence;
+
+    /**
+     * @brief Element iterator type.
+     */
+    typedef ArraySequence::iterator ArrayIterator;
+
+    /**
+     * @brief Element constant iterator type.
+     */
+    typedef ArraySequence::const_iterator ArrayConstIterator;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< ArrayType, char > ArrayTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element
+     * sequence.
+     *
+     * @return A constant reference to the sequence container.
+     */
+    const ArraySequence&
+    array () const;
+
+    /**
+     * @brief Return a read-write reference to the element sequence.
+     *
+     * @return A reference to the sequence container.
+     */
+    ArraySequence&
+    array ();
+
+    /**
+     * @brief Copy elements from a given sequence.
+     *
+     * @param s A sequence to copy elements from.
+     *
+     * For each element in @a s this function makes a copy and adds it 
+     * to the sequence. Note that this operation completely changes the 
+     * sequence and all old elements will be lost.
+     */
+    void
+    array (const ArraySequence& s);
+
+    //@}
+
+    /**
+     * @name Constructors
+     */
+    //@{
+
+    /**
+     * @brief Create an instance from the ultimate base and
+     * initializers for required elements and attributes.
+     */
+    SpaceballButtons ();
+
+    /**
+     * @brief Create an instance from a DOM element.
+     *
+     * @param e A DOM element to extract the data from.
+     * @param f Flags to create the new instance with.
+     * @param c A pointer to the object that will contain the new
+     * instance.
+     */
+    SpaceballButtons (const ::xercesc::DOMElement& e,
+                      ::xml_schema::Flags f = 0,
+                      ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy constructor.
+     *
+     * @param x An instance to make a copy of.
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    SpaceballButtons (const SpaceballButtons& x,
+                      ::xml_schema::Flags f = 0,
+                      ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy the instance polymorphically.
+     *
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     * @return A pointer to the dynamically allocated copy.
+     *
+     * This function ensures that the dynamic type of the instance is
+     * used for copying and should be used for polymorphic object
+     * models instead of the copy constructor.
+     */
+    virtual SpaceballButtons*
+    _clone (::xml_schema::Flags f = 0,
+            ::xml_schema::Container* c = 0) const;
+
+    /**
+     * @brief Copy assignment operator.
+     *
+     * @param x An instance to make a copy of.
+     * @return A reference to itself.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    SpaceballButtons&
+    operator= (const SpaceballButtons& x);
+
+    //@}
+
+    /**
+     * @brief Destructor.
+     */
+    virtual 
+    ~SpaceballButtons ();
+
+    // Implementation.
+    //
+
+    //@cond
+
+    protected:
+    void
+    parse (::xsd::cxx::xml::dom::parser< char >&,
+           ::xml_schema::Flags);
+
+    protected:
+    ArraySequence array_;
+
+    //@endcond
+  };
+
+  /**
+   * @brief Class corresponding to the %HotKeys schema type.
+   *
+   * @nosubgrouping
+   */
+  class HotKeys: public ::xml_schema::Type
+  {
+    public:
+    /**
+     * @name spaceballButtons
+     *
+     * @brief Accessor and modifier functions for the %spaceballButtons
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::SpaceballButtons SpaceballButtonsType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< SpaceballButtonsType, char > SpaceballButtonsTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const SpaceballButtonsType&
+    spaceballButtons () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    SpaceballButtonsType&
+    spaceballButtons ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    spaceballButtons (const SpaceballButtonsType& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly
+     * instead of making a copy.
+     */
+    void
+    spaceballButtons (::std::unique_ptr< SpaceballButtonsType > p);
+
+    //@}
+
+    /**
+     * @name Constructors
+     */
+    //@{
+
+    /**
+     * @brief Create an instance from the ultimate base and
+     * initializers for required elements and attributes.
+     */
+    HotKeys (const SpaceballButtonsType&);
+
+    /**
+     * @brief Create an instance from the ultimate base and
+     * initializers for required elements and attributes
+     * (::std::unique_ptr version).
+     *
+     * This constructor will try to use the passed values directly
+     * instead of making copies.
+     */
+    HotKeys (::std::unique_ptr< SpaceballButtonsType >);
+
+    /**
+     * @brief Create an instance from a DOM element.
+     *
+     * @param e A DOM element to extract the data from.
+     * @param f Flags to create the new instance with.
+     * @param c A pointer to the object that will contain the new
+     * instance.
+     */
+    HotKeys (const ::xercesc::DOMElement& e,
+             ::xml_schema::Flags f = 0,
+             ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy constructor.
+     *
+     * @param x An instance to make a copy of.
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    HotKeys (const HotKeys& x,
+             ::xml_schema::Flags f = 0,
+             ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy the instance polymorphically.
+     *
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     * @return A pointer to the dynamically allocated copy.
+     *
+     * This function ensures that the dynamic type of the instance is
+     * used for copying and should be used for polymorphic object
+     * models instead of the copy constructor.
+     */
+    virtual HotKeys*
+    _clone (::xml_schema::Flags f = 0,
+            ::xml_schema::Container* c = 0) const;
+
+    /**
+     * @brief Copy assignment operator.
+     *
+     * @param x An instance to make a copy of.
+     * @return A reference to itself.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    HotKeys&
+    operator= (const HotKeys& x);
+
+    //@}
+
+    /**
+     * @brief Destructor.
+     */
+    virtual 
+    ~HotKeys ();
+
+    // Implementation.
+    //
+
+    //@cond
+
+    protected:
+    void
+    parse (::xsd::cxx::xml::dom::parser< char >&,
+           ::xml_schema::Flags);
+
+    protected:
+    ::xsd::cxx::tree::one< SpaceballButtonsType > spaceballButtons_;
+
+    //@endcond
+  };
+
+  /**
    * @brief Class corresponding to the %Root schema type.
    *
    * @nosubgrouping
@@ -2647,6 +3171,64 @@ namespace prf
     //@}
 
     /**
+     * @name hotKeys
+     *
+     * @brief Accessor and modifier functions for the %hotKeys
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::HotKeys HotKeysType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< HotKeysType, char > HotKeysTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const HotKeysType&
+    hotKeys () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    HotKeysType&
+    hotKeys ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    hotKeys (const HotKeysType& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly
+     * instead of making a copy.
+     */
+    void
+    hotKeys (::std::unique_ptr< HotKeysType > p);
+
+    //@}
+
+    /**
      * @name Constructors
      */
     //@{
@@ -2659,7 +3241,8 @@ namespace prf
           const DraggerType&,
           const InteractiveParameterType&,
           const GestureType&,
-          const ProjectType&);
+          const ProjectType&,
+          const HotKeysType&);
 
     /**
      * @brief Create an instance from the ultimate base and
@@ -2673,7 +3256,8 @@ namespace prf
           ::std::unique_ptr< DraggerType >,
           ::std::unique_ptr< InteractiveParameterType >,
           ::std::unique_ptr< GestureType >,
-          ::std::unique_ptr< ProjectType >);
+          ::std::unique_ptr< ProjectType >,
+          ::std::unique_ptr< HotKeysType >);
 
     /**
      * @brief Create an instance from a DOM element.
@@ -2750,6 +3334,7 @@ namespace prf
     ::xsd::cxx::tree::one< InteractiveParameterType > interactiveParameter_;
     ::xsd::cxx::tree::one< GestureType > gesture_;
     ::xsd::cxx::tree::one< ProjectType > project_;
+    ::xsd::cxx::tree::one< HotKeysType > hotKeys_;
 
     //@endcond
   };
@@ -3060,6 +3645,15 @@ namespace prf
 
   void
   operator<< (::xercesc::DOMElement&, const Project&);
+
+  void
+  operator<< (::xercesc::DOMElement&, const SpaceballButton&);
+
+  void
+  operator<< (::xercesc::DOMElement&, const SpaceballButtons&);
+
+  void
+  operator<< (::xercesc::DOMElement&, const HotKeys&);
 
   void
   operator<< (::xercesc::DOMElement&, const Root&);

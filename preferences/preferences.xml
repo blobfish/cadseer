@@ -33,4 +33,7 @@
     <gitEmail>Your@Email</gitEmail>
     <recentProjects></recentProjects>
   </project>
+  <hotKeys>
+    <spaceballButtons></spaceballButtons>
+  </hotKeys>
 </root>

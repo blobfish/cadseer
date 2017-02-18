@@ -69,6 +69,26 @@
   </xs:all>
 </xs:complexType>
 
+<xs:complexType name="SpaceballButton">
+  <xs:all>
+    <xs:element name="number" type="xs:int"/>
+    <xs:element name="mask" type="xs:string"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="SpaceballButtons">
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+    <xs:element name="array" type="SpaceballButton"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="HotKeys">
+  <xs:all>
+    <xs:element name="spaceballButtons" type="SpaceballButtons"/>
+    <!--    add accelerator keys here    -->
+  </xs:all>
+</xs:complexType>
+
 <xs:complexType name="Root">
   <xs:all>
     <xs:element name="visual" type="Visual"/>
@@ -76,6 +96,7 @@
     <xs:element name="interactiveParameter" type="InteractiveParameter"/>
     <xs:element name="gesture" type="Gesture"/>
     <xs:element name="project" type="Project"/>
+    <xs:element name="hotKeys" type="HotKeys"/>
   </xs:all>
 </xs:complexType>
 

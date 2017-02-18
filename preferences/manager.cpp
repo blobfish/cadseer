@@ -171,3 +171,33 @@ bool Manager::readConfig()
   return false;
 }
 
+void Manager::setSpaceballButton(int number, const std::string &maskString)
+{
+  auto &buttons = rootPtr->hotKeys().spaceballButtons().array();
+  
+  auto it = buttons.begin();
+  for (; it != buttons.end(); ++it)
+  {
+    if (it->number() == number)
+    {
+      it->mask() = maskString;
+      break;
+    }
+  }
+  if (it == buttons.end())
+    buttons.push_back(SpaceballButton(number, maskString));
+}
+
+std::string Manager::getSpaceballButton(int number) const
+{
+  const auto &buttons = rootPtr->hotKeys().spaceballButtons().array();
+  
+  auto it = buttons.begin();
+  for (; it != buttons.end(); ++it)
+  {
+    if (it->number() == number)
+      return it->mask();
+  }
+  
+  return std::string();
+}

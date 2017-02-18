@@ -128,24 +128,32 @@ bool Application::x11EventFilter(XEvent *event)
     spnav_event navEvent;
     if (!spnav_x11_event(event, &navEvent))
         return false;
-//    std::cout << "got spacenav event" << std::endl;
+    
+    QWidget *currentWidget = qApp->focusWidget();
+    if (!currentWidget)
+      return false;
 
     if (navEvent.type == SPNAV_EVENT_MOTION)
     {
         spb::MotionEvent *qEvent = new spb::MotionEvent();
         qEvent->setTranslations(navEvent.motion.x, navEvent.motion.y, navEvent.motion.z);
         qEvent->setRotations(navEvent.motion.rx, navEvent.motion.ry, navEvent.motion.rz);
-
-        QWidget *currentWidget = qApp->focusWidget();
-        if (currentWidget)
-            this->postEvent(currentWidget, qEvent);
+        this->postEvent(currentWidget, qEvent);
         return true;
     }
 
     if (navEvent.type == SPNAV_EVENT_BUTTON)
     {
-        return true;
+      spb::ButtonEvent *qEvent = new spb::ButtonEvent();
+      qEvent->setButtonNumber(navEvent.button.bnum);
+      if (navEvent.button.press == 1)
+        qEvent->setButtonStatus(spb::BUTTON_PRESSED);
+      else
+        qEvent->setButtonStatus(spb::BUTTON_RELEASED);
+      this->postEvent(currentWidget, qEvent);
+      return true;
     }
+    
     return false;
 }
 
@@ -166,6 +174,25 @@ bool Application::notify(QObject* receiver, QEvent* e)
         
       //make a new event and post to parent.
       spb::MotionEvent *newEvent = new spb::MotionEvent(*motionEvent);
+      QObject *theParent = receiver->parent();
+      if (!theParent || theParent == mainWindow.get())
+        postEvent(mainWindow->getViewer()->getGraphicsWidget(), newEvent);
+      else
+        postEvent(theParent, newEvent);
+      return true;
+    }
+    else if(e->type() == spb::ButtonEvent::Type)
+    {
+      spb::ButtonEvent *buttonEvent = dynamic_cast<spb::ButtonEvent*>(e);
+      if
+      (
+        (!buttonEvent) ||
+        (buttonEvent->isHandled())
+      )
+        return true;
+        
+      //make a new event and post to parent.
+      spb::ButtonEvent *newEvent = new spb::ButtonEvent(*buttonEvent);
       QObject *theParent = receiver->parent();
       if (!theParent || theParent == mainWindow.get())
         postEvent(mainWindow->getViewer()->getGraphicsWidget(), newEvent);

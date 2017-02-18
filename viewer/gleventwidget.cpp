@@ -17,7 +17,7 @@
  *
  */
 
-#include <iostream>
+#include <cassert>
 
 #include <viewer/gleventwidget.h>
 #include <viewer/spaceballqevent.h>
@@ -42,6 +42,15 @@ bool GLEventWidget::event(QEvent* event)
         _gw->getEventQueue()->addEvent(osgEvent);
         return true;
     }
+    else if (event->type() == spb::ButtonEvent::Type)
+    {
+      static_cast<spb::ButtonEvent*>(event)->setHandled(true);
+      osg::ref_ptr<osgGA::GUIEventAdapter> osgEvent = _gw->getEventQueue()->createEvent();
+      osgEvent->setEventType(osgGA::GUIEventAdapter::USER);
+      osgEvent->setUserData(convertEvent(event).get());
+      _gw->getEventQueue()->addEvent(osgEvent);
+      return true;
+    }
     return inherited::event(event);
 }
 
@@ -59,5 +68,17 @@ osg::ref_ptr<spb::SpaceballOSGEvent> GLEventWidget::convertEvent(QEvent* qEvent)
         osgEvent->rotationY = spaceQEvent->rotationY();
         osgEvent->rotationZ = spaceQEvent->rotationZ();
     }
+    else if (qEvent->type() == spb::ButtonEvent::Type)
+    {
+      spb::ButtonEvent *buttonQEvent = dynamic_cast<spb::ButtonEvent*>(qEvent);
+      assert(buttonQEvent);
+      osgEvent->theType = spb::SpaceballOSGEvent::Button;
+      osgEvent->buttonNumber = buttonQEvent->buttonNumber();
+      if (buttonQEvent->buttonStatus() == spb::BUTTON_PRESSED)
+        osgEvent->theButtonState = spb::SpaceballOSGEvent::Pressed;
+      else
+        osgEvent->theButtonState = spb::SpaceballOSGEvent::Released;
+    }
+    
     return osgEvent;
 }

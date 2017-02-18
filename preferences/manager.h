@@ -35,6 +35,10 @@ namespace prf
     std::unique_ptr<Root> rootPtr;
     void saveConfig();
     bool isOk(){return ok;}
+    
+    //spaceball buttons.
+    void setSpaceballButton(int, const std::string&);
+    std::string getSpaceballButton(int) const; //!< empty string means not assigned.
   private:
     bool createDefaultXml();
     bool createDefaultXsd();

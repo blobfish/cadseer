@@ -660,6 +660,102 @@ namespace prf
   }
 
 
+  // SpaceballButton
+  // 
+
+  const SpaceballButton::NumberType& SpaceballButton::
+  number () const
+  {
+    return this->number_.get ();
+  }
+
+  SpaceballButton::NumberType& SpaceballButton::
+  number ()
+  {
+    return this->number_.get ();
+  }
+
+  void SpaceballButton::
+  number (const NumberType& x)
+  {
+    this->number_.set (x);
+  }
+
+  const SpaceballButton::MaskType& SpaceballButton::
+  mask () const
+  {
+    return this->mask_.get ();
+  }
+
+  SpaceballButton::MaskType& SpaceballButton::
+  mask ()
+  {
+    return this->mask_.get ();
+  }
+
+  void SpaceballButton::
+  mask (const MaskType& x)
+  {
+    this->mask_.set (x);
+  }
+
+  void SpaceballButton::
+  mask (::std::unique_ptr< MaskType > x)
+  {
+    this->mask_.set (std::move (x));
+  }
+
+
+  // SpaceballButtons
+  // 
+
+  const SpaceballButtons::ArraySequence& SpaceballButtons::
+  array () const
+  {
+    return this->array_;
+  }
+
+  SpaceballButtons::ArraySequence& SpaceballButtons::
+  array ()
+  {
+    return this->array_;
+  }
+
+  void SpaceballButtons::
+  array (const ArraySequence& s)
+  {
+    this->array_ = s;
+  }
+
+
+  // HotKeys
+  // 
+
+  const HotKeys::SpaceballButtonsType& HotKeys::
+  spaceballButtons () const
+  {
+    return this->spaceballButtons_.get ();
+  }
+
+  HotKeys::SpaceballButtonsType& HotKeys::
+  spaceballButtons ()
+  {
+    return this->spaceballButtons_.get ();
+  }
+
+  void HotKeys::
+  spaceballButtons (const SpaceballButtonsType& x)
+  {
+    this->spaceballButtons_.set (x);
+  }
+
+  void HotKeys::
+  spaceballButtons (::std::unique_ptr< SpaceballButtonsType > x)
+  {
+    this->spaceballButtons_.set (std::move (x));
+  }
+
+
   // Root
   // 
 
@@ -781,6 +877,30 @@ namespace prf
   project (::std::unique_ptr< ProjectType > x)
   {
     this->project_.set (std::move (x));
+  }
+
+  const Root::HotKeysType& Root::
+  hotKeys () const
+  {
+    return this->hotKeys_.get ();
+  }
+
+  Root::HotKeysType& Root::
+  hotKeys ()
+  {
+    return this->hotKeys_.get ();
+  }
+
+  void Root::
+  hotKeys (const HotKeysType& x)
+  {
+    this->hotKeys_.set (x);
+  }
+
+  void Root::
+  hotKeys (::std::unique_ptr< HotKeysType > x)
+  {
+    this->hotKeys_.set (std::move (x));
   }
 }
 
@@ -1939,6 +2059,302 @@ namespace prf
   {
   }
 
+  // SpaceballButton
+  //
+
+  SpaceballButton::
+  SpaceballButton (const NumberType& number,
+                   const MaskType& mask)
+  : ::xml_schema::Type (),
+    number_ (number, this),
+    mask_ (mask, this)
+  {
+  }
+
+  SpaceballButton::
+  SpaceballButton (const SpaceballButton& x,
+                   ::xml_schema::Flags f,
+                   ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    number_ (x.number_, f, this),
+    mask_ (x.mask_, f, this)
+  {
+  }
+
+  SpaceballButton::
+  SpaceballButton (const ::xercesc::DOMElement& e,
+                   ::xml_schema::Flags f,
+                   ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    number_ (this),
+    mask_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void SpaceballButton::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // number
+      //
+      if (n.name () == "number" && n.namespace_ ().empty ())
+      {
+        if (!number_.present ())
+        {
+          this->number_.set (NumberTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      // mask
+      //
+      if (n.name () == "mask" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< MaskType > r (
+          MaskTraits::create (i, f, this));
+
+        if (!mask_.present ())
+        {
+          this->mask_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!number_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "number",
+        "");
+    }
+
+    if (!mask_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "mask",
+        "");
+    }
+  }
+
+  SpaceballButton* SpaceballButton::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class SpaceballButton (*this, f, c);
+  }
+
+  SpaceballButton& SpaceballButton::
+  operator= (const SpaceballButton& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->number_ = x.number_;
+      this->mask_ = x.mask_;
+    }
+
+    return *this;
+  }
+
+  SpaceballButton::
+  ~SpaceballButton ()
+  {
+  }
+
+  // SpaceballButtons
+  //
+
+  SpaceballButtons::
+  SpaceballButtons ()
+  : ::xml_schema::Type (),
+    array_ (this)
+  {
+  }
+
+  SpaceballButtons::
+  SpaceballButtons (const SpaceballButtons& x,
+                    ::xml_schema::Flags f,
+                    ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    array_ (x.array_, f, this)
+  {
+  }
+
+  SpaceballButtons::
+  SpaceballButtons (const ::xercesc::DOMElement& e,
+                    ::xml_schema::Flags f,
+                    ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    array_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void SpaceballButtons::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // array
+      //
+      if (n.name () == "array" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< ArrayType > r (
+          ArrayTraits::create (i, f, this));
+
+        this->array_.push_back (::std::move (r));
+        continue;
+      }
+
+      break;
+    }
+  }
+
+  SpaceballButtons* SpaceballButtons::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class SpaceballButtons (*this, f, c);
+  }
+
+  SpaceballButtons& SpaceballButtons::
+  operator= (const SpaceballButtons& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->array_ = x.array_;
+    }
+
+    return *this;
+  }
+
+  SpaceballButtons::
+  ~SpaceballButtons ()
+  {
+  }
+
+  // HotKeys
+  //
+
+  HotKeys::
+  HotKeys (const SpaceballButtonsType& spaceballButtons)
+  : ::xml_schema::Type (),
+    spaceballButtons_ (spaceballButtons, this)
+  {
+  }
+
+  HotKeys::
+  HotKeys (::std::unique_ptr< SpaceballButtonsType > spaceballButtons)
+  : ::xml_schema::Type (),
+    spaceballButtons_ (std::move (spaceballButtons), this)
+  {
+  }
+
+  HotKeys::
+  HotKeys (const HotKeys& x,
+           ::xml_schema::Flags f,
+           ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    spaceballButtons_ (x.spaceballButtons_, f, this)
+  {
+  }
+
+  HotKeys::
+  HotKeys (const ::xercesc::DOMElement& e,
+           ::xml_schema::Flags f,
+           ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    spaceballButtons_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void HotKeys::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // spaceballButtons
+      //
+      if (n.name () == "spaceballButtons" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< SpaceballButtonsType > r (
+          SpaceballButtonsTraits::create (i, f, this));
+
+        if (!spaceballButtons_.present ())
+        {
+          this->spaceballButtons_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!spaceballButtons_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "spaceballButtons",
+        "");
+    }
+  }
+
+  HotKeys* HotKeys::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class HotKeys (*this, f, c);
+  }
+
+  HotKeys& HotKeys::
+  operator= (const HotKeys& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->spaceballButtons_ = x.spaceballButtons_;
+    }
+
+    return *this;
+  }
+
+  HotKeys::
+  ~HotKeys ()
+  {
+  }
+
   // Root
   //
 
@@ -1947,13 +2363,15 @@ namespace prf
         const DraggerType& dragger,
         const InteractiveParameterType& interactiveParameter,
         const GestureType& gesture,
-        const ProjectType& project)
+        const ProjectType& project,
+        const HotKeysType& hotKeys)
   : ::xml_schema::Type (),
     visual_ (visual, this),
     dragger_ (dragger, this),
     interactiveParameter_ (interactiveParameter, this),
     gesture_ (gesture, this),
-    project_ (project, this)
+    project_ (project, this),
+    hotKeys_ (hotKeys, this)
   {
   }
 
@@ -1962,13 +2380,15 @@ namespace prf
         ::std::unique_ptr< DraggerType > dragger,
         ::std::unique_ptr< InteractiveParameterType > interactiveParameter,
         ::std::unique_ptr< GestureType > gesture,
-        ::std::unique_ptr< ProjectType > project)
+        ::std::unique_ptr< ProjectType > project,
+        ::std::unique_ptr< HotKeysType > hotKeys)
   : ::xml_schema::Type (),
     visual_ (std::move (visual), this),
     dragger_ (std::move (dragger), this),
     interactiveParameter_ (std::move (interactiveParameter), this),
     gesture_ (std::move (gesture), this),
-    project_ (std::move (project), this)
+    project_ (std::move (project), this),
+    hotKeys_ (std::move (hotKeys), this)
   {
   }
 
@@ -1981,7 +2401,8 @@ namespace prf
     dragger_ (x.dragger_, f, this),
     interactiveParameter_ (x.interactiveParameter_, f, this),
     gesture_ (x.gesture_, f, this),
-    project_ (x.project_, f, this)
+    project_ (x.project_, f, this),
+    hotKeys_ (x.hotKeys_, f, this)
   {
   }
 
@@ -1994,7 +2415,8 @@ namespace prf
     dragger_ (this),
     interactiveParameter_ (this),
     gesture_ (this),
-    project_ (this)
+    project_ (this),
+    hotKeys_ (this)
   {
     if ((f & ::xml_schema::Flags::base) == 0)
     {
@@ -2083,6 +2505,20 @@ namespace prf
         }
       }
 
+      // hotKeys
+      //
+      if (n.name () == "hotKeys" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< HotKeysType > r (
+          HotKeysTraits::create (i, f, this));
+
+        if (!hotKeys_.present ())
+        {
+          this->hotKeys_.set (::std::move (r));
+          continue;
+        }
+      }
+
       break;
     }
 
@@ -2120,6 +2556,13 @@ namespace prf
         "project",
         "");
     }
+
+    if (!hotKeys_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "hotKeys",
+        "");
+    }
   }
 
   Root* Root::
@@ -2140,6 +2583,7 @@ namespace prf
       this->interactiveParameter_ = x.interactiveParameter_;
       this->gesture_ = x.gesture_;
       this->project_ = x.project_;
+      this->hotKeys_ = x.hotKeys_;
     }
 
     return *this;
@@ -2743,6 +3187,71 @@ namespace prf
   }
 
   void
+  operator<< (::xercesc::DOMElement& e, const SpaceballButton& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // number
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "number",
+          e));
+
+      s << i.number ();
+    }
+
+    // mask
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "mask",
+          e));
+
+      s << i.mask ();
+    }
+  }
+
+  void
+  operator<< (::xercesc::DOMElement& e, const SpaceballButtons& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // array
+    //
+    for (SpaceballButtons::ArrayConstIterator
+         b (i.array ().begin ()), n (i.array ().end ());
+         b != n; ++b)
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "array",
+          e));
+
+      s << *b;
+    }
+  }
+
+  void
+  operator<< (::xercesc::DOMElement& e, const HotKeys& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // spaceballButtons
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "spaceballButtons",
+          e));
+
+      s << i.spaceballButtons ();
+    }
+  }
+
+  void
   operator<< (::xercesc::DOMElement& e, const Root& i)
   {
     e << static_cast< const ::xml_schema::Type& > (i);
@@ -2800,6 +3309,17 @@ namespace prf
           e));
 
       s << i.project ();
+    }
+
+    // hotKeys
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "hotKeys",
+          e));
+
+      s << i.hotKeys ();
     }
   }
 

@@ -43,6 +43,7 @@ protected:
     void contractSubNodes();
     bool rightButtonDown;
     bool dragStarted;
+    int spaceballButton = -1; //button pressed or -1 for no button pressed.
     osg::ref_ptr<osg::Switch> gestureSwitch;
     osg::ref_ptr<osg::Camera> gestureCamera;
     osg::ref_ptr<osg::MatrixTransform> startNode;

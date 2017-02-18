@@ -38,6 +38,7 @@
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <gesture/animations.h>
+#include <viewer/spaceballosgevent.h>
 #include <gesture/gesturehandler.h>
 
 static const std::string attributeMask = "CommandAttributeTitle";
@@ -65,6 +66,47 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
                             osgGA::GUIActionAdapter&, osg::Object *,
                             osg::NodeVisitor *)
 {
+  if (eventAdapter.getEventType() == osgGA::GUIEventAdapter::USER)
+  {
+    const spb::SpaceballOSGEvent *event = 
+      dynamic_cast<const spb::SpaceballOSGEvent *>(eventAdapter.getUserData());
+    assert (event);
+    
+    if (event->theType == spb::SpaceballOSGEvent::Button)
+    {
+      int currentButton = event->buttonNumber;
+      spb::SpaceballOSGEvent::ButtonState currentState = event->theButtonState;
+      if (currentState == spb::SpaceballOSGEvent::Pressed)
+      {
+        spaceballButton = currentButton;
+        if (!rightButtonDown)
+        {
+          std::string maskString = prf::manager().getSpaceballButton(spaceballButton);
+          if (!maskString.empty())
+          {
+            msg::Mask msgMask(maskString);
+            msg::Message messageOut;
+            messageOut.mask = msgMask;
+            observer->out(messageOut);
+          }
+        }
+        else
+        {
+          std::ostringstream stream;
+          stream << QObject::tr("Link to spaceball button ").toStdString() << spaceballButton;
+          observer->out(msg::buildStatusMessage(stream.str()));
+        }
+      }
+      else
+      {
+        assert(currentState == spb::SpaceballOSGEvent::Released);
+        spaceballButton = -1;
+        observer->out(msg::buildStatusMessage(""));
+      }
+      return true;
+    }
+  }
+  
     //lambda to clear status.
     auto clearStatus = [&]()
     {
@@ -111,6 +153,12 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
                 std::string msgMaskString;
                 if (currentNode->getUserValue(attributeMask, msgMaskString))
                 {
+                    if (spaceballButton != -1)
+                    {
+                      prf::manager().setSpaceballButton(spaceballButton, msgMaskString);
+                      prf::manager().saveConfig();
+                    }
+                    
                     msg::Mask msgMask(msgMaskString);
                     msg::Message messageOut;
                     messageOut.mask = msgMask;
