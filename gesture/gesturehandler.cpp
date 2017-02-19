@@ -378,6 +378,12 @@ void GestureHandler::constructMenu()
     viewRight->setUserValue(attributeStatus, QObject::tr("View Right Command").toStdString());
     viewStandard->insertChild(viewStandard->getNumChildren() - 2, viewRight);
 
+    osg::MatrixTransform *viewIso = gsn::buildCommandNode(":/resources/images/viewIso.svg", iconRadius);
+    viewIso->setMatrix(dummy);
+    viewIso->setUserValue(attributeMask, (msg::Request | msg::ViewIso).to_string());
+    viewIso->setUserValue(attributeStatus, QObject::tr("View Iso Command").toStdString());
+    viewStandard->insertChild(viewStandard->getNumChildren() - 2, viewIso);
+
     osg::MatrixTransform *viewFit = gsn::buildCommandNode(":/resources/images/viewFit.svg", iconRadius);
     viewFit->setMatrix(dummy);
     viewFit->setUserValue(attributeMask, (msg::Request | msg::ViewFit).to_string());

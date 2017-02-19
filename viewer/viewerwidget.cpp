@@ -371,6 +371,14 @@ void ViewerWidget::viewRightDispatched(const msg::Message&)
     spaceballManipulator->viewFit();
 }
 
+void ViewerWidget::viewIsoDispatched(const msg::Message &)
+{
+  osg::Vec3d upVector(-1.0, 1.0, 1.0); upVector.normalize();
+  osg::Vec3d lookVector(-1.0, 1.0, -1.0); lookVector.normalize();
+  spaceballManipulator->setView(lookVector, upVector);
+  spaceballManipulator->viewFit();
+}
+
 void ViewerWidget::viewFitDispatched(const msg::Message&)
 {
   spaceballManipulator->home(1.0);
@@ -438,6 +446,9 @@ void ViewerWidget::setupDispatcher()
   
   mask = msg::Request | msg::ViewRight;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewRightDispatched, this, _1)));
+  
+  mask = msg::Request | msg::ViewIso;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewIsoDispatched, this, _1)));
   
   mask = msg::Request | msg::ViewFit;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewFitDispatched, this, _1)));

@@ -115,6 +115,7 @@ namespace msg
     static const Mask Hollow(Mask().set(                        76));//!< command move up someday.
     static const Mask ViewToggleHiddenLine(Mask().set(          77));//!< command move up someday.
     static const Mask ExportStep(Mask().set(                    78));//!< command move up someday.
+    static const Mask ViewIso(Mask().set(                       79));//!< command move up someday.
   
     typedef boost::variant
     <

@@ -81,6 +81,7 @@ protected:
     void viewTopDispatched(const msg::Message &);
     void viewFrontDispatched(const msg::Message &);
     void viewRightDispatched(const msg::Message &);
+    void viewIsoDispatched(const msg::Message &);
     void viewFitDispatched(const msg::Message &);
     void viewFillDispatched(const msg::Message &);
     void viewLineDispatched(const msg::Message &);
