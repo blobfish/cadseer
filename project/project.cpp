@@ -21,6 +21,8 @@
 #include <iostream>
 #include <stack>
 
+#include <QTextStream>
+
 #include <boost/graph/topological_sort.hpp>
 #include <boost/graph/filtered_graph.hpp>
 #include <boost/graph/depth_first_search.hpp>
@@ -69,6 +71,17 @@ Project::Project()
 
 Project::~Project()
 {
+}
+
+QTextStream& Project::getInfo(QTextStream &stream) const
+{
+  stream
+  << QObject::tr("Project Directory: ") << QString::fromStdString(getSaveDirectory()) << endl;
+  //maybe some git stuff.
+  
+  expressionManager->getInfo(stream);
+  
+  return stream;
 }
 
 void Project::updateModel()

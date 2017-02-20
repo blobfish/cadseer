@@ -27,6 +27,7 @@
 
 #include <project/projectgraph.h>
 
+class QTextStream;
 class TopoDS_Shape;
 
 namespace msg{class Message; class Observer;}
@@ -71,6 +72,8 @@ public:
     std::vector<boost::uuids::uuid> getLeafChildren(const boost::uuids::uuid&) const;
     
     expr::ExpressionManager& getExpressionManager(){return *expressionManager;}
+    
+    QTextStream& getInfo(QTextStream&) const;
     
 private:
     //! index all the vertices of the graph. needed for algorthims when using listS.

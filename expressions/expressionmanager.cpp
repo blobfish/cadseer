@@ -22,6 +22,8 @@
 #include <iostream>
 #include <iomanip>
 
+#include <QTextStream>
+
 #include <boost/graph/topological_sort.hpp>
 #include <boost/graph/adj_list_serialize.hpp>
 
@@ -466,3 +468,15 @@ void ExpressionManager::featureRemovedDispatched(const msg::Message &messageIn)
   }
 }
 
+QTextStream& ExpressionManager::getInfo(QTextStream &stream) const
+{
+  stream << endl << QObject::tr("Formulas:") << endl;
+  auto ids = getAllFormulaIds();
+  for (const auto &id : ids)
+  {
+    stream << QString::fromStdString(getFormulaName(id))
+    << "    " << QString::number(getFormulaValue(id), 'f', 12) << endl;
+  }
+  
+  return stream;
+}

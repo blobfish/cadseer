@@ -30,6 +30,8 @@
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/composite_key.hpp>
 
+class QTextStream;
+
 namespace ftr{class Parameter;}
 namespace msg{class Message; class Observer;}
 
@@ -216,6 +218,8 @@ public:
   
   //! Contains ids for a subset of expressions.
   std::vector<Group> userDefinedGroups;
+  
+  QTextStream& getInfo(QTextStream&) const;
   
 private:
   //! Pointer to GraphWrapper.

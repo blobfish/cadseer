@@ -914,6 +914,11 @@ void Factory::debugShapeGraphDispatched(const msg::Message&)
 
 void Factory::viewInfoDispatched(const msg::Message &)
 {
+  QString infoMessage;
+  QTextStream stream(&infoMessage);
+  stream << endl;
+  
+  
     //maybe if selection is empty we will dump out application information.
     //or better yet project information or even better yet both. careful
     //we might want to turn the window on and off keeping information as a 
@@ -922,65 +927,68 @@ void Factory::viewInfoDispatched(const msg::Message &)
     //other than this command.
     assert(project);
     if (containers.empty())
-        return;
-    
-    QString infoMessage;
-    QTextStream stream(&infoMessage);
-    stream << endl;
-    for (const auto &container : containers)
     {
-        ftr::Base *feature = project->findFeature(container.featureId);
-        stream <<  endl;
-        if
-        (
-            (container.selectionType == slc::Type::Object) ||
-            (container.selectionType == slc::Type::Feature)
-        )
-        {
-            feature->getInfo(stream);
-        }
-        else if
-        (
-            (container.selectionType == slc::Type::Solid) ||
-            (container.selectionType == slc::Type::Shell) ||
-            (container.selectionType == slc::Type::Face) ||
-            (container.selectionType == slc::Type::Wire) ||
-            (container.selectionType == slc::Type::Edge)
-        )
-        {
-            feature->getShapeInfo(stream, container.shapeId);
-        }
-        else if (container.selectionType == slc::Type::StartPoint)
-        {
+      //nothing selected so get app and project information.
+      //TODO get git hash for application version.
+      project->getInfo(stream);
+    }
+    else
+    {
+      for (const auto &container : containers)
+      {
+          ftr::Base *feature = project->findFeature(container.featureId);
+          stream <<  endl;
+          if
+          (
+              (container.selectionType == slc::Type::Object) ||
+              (container.selectionType == slc::Type::Feature)
+          )
+          {
+              feature->getInfo(stream);
+          }
+          else if
+          (
+              (container.selectionType == slc::Type::Solid) ||
+              (container.selectionType == slc::Type::Shell) ||
+              (container.selectionType == slc::Type::Face) ||
+              (container.selectionType == slc::Type::Wire) ||
+              (container.selectionType == slc::Type::Edge)
+          )
+          {
+              feature->getShapeInfo(stream, container.shapeId);
+          }
+          else if (container.selectionType == slc::Type::StartPoint)
+          {
+              const ftr::SeerShape &s = feature->getSeerShape();
+              feature->getShapeInfo(stream, s.useGetStartVertex(container.shapeId));
+              forcepoint(stream)
+                  << qSetRealNumberPrecision(12)
+                  << "Point location: ["
+                  << container.pointLocation.x() << ", "
+                  << container.pointLocation.y() << ", "
+                  << container.pointLocation.z() << "]";
+          }
+          else if (container.selectionType == slc::Type::EndPoint)
+          {
             const ftr::SeerShape &s = feature->getSeerShape();
-            feature->getShapeInfo(stream, s.useGetStartVertex(container.shapeId));
+            feature->getShapeInfo(stream, s.useGetEndVertex(container.shapeId));
             forcepoint(stream)
-                << qSetRealNumberPrecision(12)
-                << "Point location: ["
-                << container.pointLocation.x() << ", "
-                << container.pointLocation.y() << ", "
-                << container.pointLocation.z() << "]";
-        }
-        else if (container.selectionType == slc::Type::EndPoint)
-        {
-          const ftr::SeerShape &s = feature->getSeerShape();
-          feature->getShapeInfo(stream, s.useGetEndVertex(container.shapeId));
-          forcepoint(stream)
-            << qSetRealNumberPrecision(12)
-            << "Point location: ["
-            << container.pointLocation.x() << ", "
-            << container.pointLocation.y() << ", "
-            << container.pointLocation.z() << "]";
-        }
-        else //all other points.
-        {
-          forcepoint(stream)
-            << qSetRealNumberPrecision(12)
-            << "Point location: ["
-            << container.pointLocation.x() << ", "
-            << container.pointLocation.y() << ", "
-            << container.pointLocation.z() << "]";
-        }
+              << qSetRealNumberPrecision(12)
+              << "Point location: ["
+              << container.pointLocation.x() << ", "
+              << container.pointLocation.y() << ", "
+              << container.pointLocation.z() << "]";
+          }
+          else //all other points.
+          {
+            forcepoint(stream)
+              << qSetRealNumberPrecision(12)
+              << "Point location: ["
+              << container.pointLocation.x() << ", "
+              << container.pointLocation.y() << ", "
+              << container.pointLocation.z() << "]";
+          }
+      }
     }
     
     msg::Message viewInfoMessage(msg::Request | msg::Info | msg::Text);
