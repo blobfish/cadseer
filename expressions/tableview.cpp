@@ -21,7 +21,7 @@
 #include <assert.h>
 #include <fstream>
 
-#include <QCoreApplication>
+#include <QApplication>
 #include <QtGui/QLineEdit>
 #include <QtGui/QHeaderView>
 #include <QAction>
@@ -36,6 +36,7 @@
 #include <QLabel>
 #include <QPainter>
 #include <QTimer>
+#include <QClipboard>
 
 #include <tools/idtools.h>
 #include <dialogs/expressionedit.h>
@@ -150,6 +151,22 @@ void TableViewAll::importFormulaSlot()
   myModel->importExpressions(fileStream, gu::createNilId());
 }
 
+void TableViewAll::copyFormulaValueSlot()
+{
+  QSortFilterProxyModel *pModel = dynamic_cast<QSortFilterProxyModel *>(this->model());
+  assert(pModel);
+  TableModel *myModel = dynamic_cast<TableModel *>(pModel->sourceModel());
+  assert(myModel);
+  
+  QModelIndexList indexes = this->selectedIndexes();
+  if (indexes.size() != 1)
+    return;
+  
+  QModelIndex sourceIndex = pModel->mapToSource(indexes.front());
+  QClipboard *clipboard = QApplication::clipboard();
+  clipboard->setText(QString::number(myModel->data(sourceIndex).toDouble(), 'f', 12));
+}
+
 void TableViewAll::showEvent(QShowEvent* event)
 {
     QWidget::showEvent(event);
@@ -189,6 +206,11 @@ void TableViewAll::contextMenuEvent(QContextMenuEvent* event)
   //add Group.
   menu.addAction(addGroupAction);
   
+  menu.addSeparator();
+  
+  //copy value to clipboard
+  menu.addAction(copyFormulaValueAction);
+  
   if(!this->selectionModel()->hasSelection())
   {
     removeFormulaAction->setDisabled(true);
@@ -201,6 +223,15 @@ void TableViewAll::contextMenuEvent(QContextMenuEvent* event)
     if (!groups.empty())
       groupMenu->setEnabled(true);
   }
+  
+  if
+  (
+    (this->selectionModel()->selectedIndexes().size() == 1)
+    && (this->selectionModel()->selectedIndexes().front().column() == 2)
+  )
+    copyFormulaValueAction->setEnabled(true);
+  else
+    copyFormulaValueAction->setDisabled(true);
   
   menu.exec(event->globalPos());
 }
@@ -236,6 +267,12 @@ void TableViewAll::buildActions()
   addGroupAction->setShortcutContext(Qt::WidgetShortcut);
   this->addAction(addGroupAction);
   connect(addGroupAction, SIGNAL(triggered()), this, SIGNAL(addGroupSignal()));
+  
+  copyFormulaValueAction = new QAction(tr("Copy Value"), this);
+  copyFormulaValueAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
+  copyFormulaValueAction->setShortcutContext(Qt::WidgetShortcut);
+  this->addAction(copyFormulaValueAction);
+  connect(copyFormulaValueAction, SIGNAL(triggered()), this, SLOT(copyFormulaValueSlot()));
 }
 
 
@@ -280,6 +317,11 @@ void TableViewGroup::contextMenuEvent(QContextMenuEvent* event)
   menu.addAction(renameGroupAction);
   menu.addAction(removeGroupAction);
   
+  menu.addSeparator();
+  
+  //copy value to clipboard
+  menu.addAction(copyFormulaValueAction);
+  
   if(!this->selectionModel()->hasSelection())
   {
     removeFormulaAction->setDisabled(true);
@@ -292,6 +334,15 @@ void TableViewGroup::contextMenuEvent(QContextMenuEvent* event)
     removeFromGroupAction->setEnabled(true);
     exportFormulaAction->setEnabled(true);
   }
+  
+  if
+  (
+    (this->selectionModel()->selectedIndexes().size() == 1)
+    && (this->selectionModel()->selectedIndexes().front().column() == 2)
+  )
+    copyFormulaValueAction->setEnabled(true);
+  else
+    copyFormulaValueAction->setDisabled(true);
   
   menu.exec(event->globalPos());
 }
@@ -394,6 +445,22 @@ void TableViewGroup::importFormulaSlot()
   pModel->importExpressions(fileStream);
 }
 
+void TableViewGroup::copyFormulaValueSlot()
+{
+  GroupProxyModel *pModel = dynamic_cast<GroupProxyModel *>(this->model());
+  assert(pModel);
+  TableModel *myModel = dynamic_cast<TableModel *>(pModel->sourceModel());
+  assert(myModel);
+  
+  QModelIndexList indexes = this->selectedIndexes();
+  if (indexes.size() != 1)
+    return;
+  
+  QModelIndex sourceIndex = pModel->mapToSource(indexes.front());
+  QClipboard *clipboard = QApplication::clipboard();
+  clipboard->setText(QString::number(myModel->data(sourceIndex).toDouble(), 'f', 12));
+}
+
 void TableViewGroup::buildActions()
 {
   addFormulaAction = new QAction(tr("Add Formula"), this);
@@ -437,12 +504,55 @@ void TableViewGroup::buildActions()
   removeGroupAction->setShortcutContext(Qt::WidgetShortcut);
   this->addAction(removeGroupAction);
   connect(removeGroupAction, SIGNAL(triggered()), this, SLOT(removeGroupSlot()));
+  
+  copyFormulaValueAction = new QAction(tr("Copy Value"), this);
+  copyFormulaValueAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
+  copyFormulaValueAction->setShortcutContext(Qt::WidgetShortcut);
+  this->addAction(copyFormulaValueAction);
+  connect(copyFormulaValueAction, SIGNAL(triggered()), this, SLOT(copyFormulaValueSlot()));
 }
 
 TableViewSelection::TableViewSelection(QWidget* parent): QTableView(parent)
 {
   this->verticalHeader()->setVisible(false);
+  
+  copyFormulaValueAction = new QAction(tr("Copy Value"), this);
+  copyFormulaValueAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
+  copyFormulaValueAction->setShortcutContext(Qt::WidgetShortcut);
+  this->addAction(copyFormulaValueAction);
+  connect(copyFormulaValueAction, SIGNAL(triggered()), this, SLOT(copyFormulaValueSlot()));
 }
+
+void TableViewSelection::contextMenuEvent(QContextMenuEvent* event)
+{
+  if
+  (
+    (this->selectionModel()->selectedIndexes().size() == 1)
+    && (this->selectionModel()->selectedIndexes().front().column() == 2)
+  )
+  {
+    QMenu menu;
+    menu.addAction(copyFormulaValueAction);
+    menu.exec(event->globalPos());
+  }
+}
+
+void TableViewSelection::copyFormulaValueSlot()
+{
+  SelectionProxyModel *pModel = dynamic_cast<SelectionProxyModel *>(this->model());
+  assert(pModel);
+  TableModel *myModel = dynamic_cast<TableModel *>(pModel->sourceModel());
+  assert(myModel);
+  
+  QModelIndexList indexes = this->selectedIndexes();
+  if (indexes.size() != 1)
+    return;
+  
+  QModelIndex sourceIndex = pModel->mapToSource(indexes.front());
+  QClipboard *clipboard = QApplication::clipboard();
+  clipboard->setText(QString::number(myModel->data(sourceIndex).toDouble(), 'f', 12));
+}
+
 
 NameDelegate::NameDelegate(QObject* parent): QStyledItemDelegate(parent)
 {

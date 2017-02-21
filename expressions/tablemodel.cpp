@@ -109,7 +109,7 @@ Qt::ItemFlags TableModel::flags(const QModelIndex& index) const
   {
     Qt::ItemFlags(Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled),
     Qt::ItemFlags(Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsEnabled),
-    Qt::ItemFlags(Qt::NoItemFlags)
+    Qt::ItemFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled)
     
   };
   

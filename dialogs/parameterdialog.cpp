@@ -118,6 +118,12 @@ void ParameterDialog::requestLinkSlot(const QString &stringIn)
   assert(eManager.hasFormula(id));
   eManager.addLink(parameter, id);
   
+  std::ostringstream gm;
+  gm << "Linking parameter " << parameter->getName().toStdString()
+  << " to formula " << eManager.getFormulaName(id);
+  
+  observer->outBlocked(msg::buildGitMessage(gm.str()));
+  
   if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
     observer->out(msg::Mask(msg::Request | msg::Update));
   
@@ -128,8 +134,17 @@ void ParameterDialog::requestUnlinkSlot()
 {
   expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
   assert(eManager.hasParameterLink(parameter->getId()));
+  boost::uuids::uuid fId = eManager.getFormulaLink(parameter->getId());
   eManager.removeParameterLink(parameter->getId());
   //manager sets the parameter to constant or not.
+  
+  std::ostringstream gm;
+  gm << "Unlinking parameter " << parameter->getName().toStdString()
+  << " from formula " << eManager.getFormulaName(fId);
+  
+  //unlinking itself shouldn't trigger an update because the parameter value is still the same.
+  
+  observer->outBlocked(msg::buildGitMessage(gm.str()));
 }
 
 void ParameterDialog::valueHasChanged()

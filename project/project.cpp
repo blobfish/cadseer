@@ -857,9 +857,24 @@ void Project::serialWrite()
     eLinks.array().push_back(sLink);
   }
   
+  prj::srl::ExpressionGroups eGroups;
+  for (const auto &group : expressionManager->userDefinedGroups)
+  {
+    prj::srl::ExpressionGroupEntries entries;
+    for (const auto &eId : group.formulaIds)
+      entries.array().push_back(gu::idToString(eId));
+    prj::srl::ExpressionGroup eGroup(gu::idToString(group.id), group.name, entries);
+    eGroups.array().push_back(eGroup);
+  }
+  
   prj::srl::AppVersion version(0, 0, 0);
   std::string projectPath = saveDirectory + QDir::separator().toLatin1() + "project.prjt";
-  srl::Project p(version, 0, features, connections, expressions, eLinks);
+  srl::Project p(version, 0, features, connections, expressions);
+  if (!eLinks.array().empty())
+    p.expressionLinks().set(eLinks);
+  if (!eGroups.array().empty())
+    p.expressionGroups().set(eGroups);
+  
   xml_schema::NamespaceInfomap infoMap;
   std::ofstream stream(projectPath.c_str());
   srl::project(stream, p, infoMap);
@@ -928,10 +943,28 @@ void Project::open()
     }
     
     expressionManager->update(); //addFormulaLink requires that everything be up to date.
-    for (const auto &sLink : project->expressionLinks().array())
+    if (project->expressionLinks().present())
     {
-      ftr::Parameter *parameter = findParameter(gu::stringToId(sLink.parameterId()));
-      expressionManager->addLink(parameter, gu::stringToId(sLink.expressionId()));
+      for (const auto &sLink : project->expressionLinks().get().array())
+      {
+        ftr::Parameter *parameter = findParameter(gu::stringToId(sLink.parameterId()));
+        expressionManager->addLink(parameter, gu::stringToId(sLink.expressionId()));
+      }
+    }
+    
+    if (project->expressionGroups().present())
+    {
+      for (const auto &sGroup : project->expressionGroups().get().array())
+      {
+        expr::Group eGroup;
+        eGroup.id = gu::stringToId(sGroup.id());
+        eGroup.name = sGroup.name();
+        for (const auto &entry : sGroup.entries().array())
+        {
+          eGroup.formulaIds.push_back(gu::stringToId(entry));
+        }
+        expressionManager->userDefinedGroups.push_back(eGroup);
+      }
     }
     
     updateModel();

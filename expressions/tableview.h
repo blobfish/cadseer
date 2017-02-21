@@ -54,6 +54,8 @@ public Q_SLOTS:
   void exportFormulaSlot();
   //! Import expressions from file.
   void importFormulaSlot();
+  //! Copy the formulas value to clipboard.
+  void copyFormulaValueSlot();
 Q_SIGNALS:
   void addGroupSignal();
 private:
@@ -64,6 +66,7 @@ private:
   QAction *exportFormulaAction;
   QAction *importFormulaAction;
   QAction *addGroupAction;
+  QAction *copyFormulaValueAction;
 };
 
 //! @brief Table view for a group of expressions.
@@ -91,6 +94,8 @@ public Q_SLOTS:
   void exportFormulaSlot();
   //! Import expressions from file.
   void importFormulaSlot();
+  //! Copy the formulas value to clipboard.
+  void copyFormulaValueSlot();
 Q_SIGNALS:
   //! Notify the tab widget about renamed group.
   void groupRenamedSignal(QWidget *tab, const QString &newName);
@@ -106,13 +111,24 @@ private:
   QAction *removeFromGroupAction;
   QAction *renameGroupAction;
   QAction *removeGroupAction;
+  QAction *copyFormulaValueAction;
 };
 
 //! @brief view for selection context expressions.
 class TableViewSelection : public QTableView
 {
+  Q_OBJECT
 public:
   explicit TableViewSelection(QWidget *parent = 0);
+  //! Show the menu.
+  virtual void contextMenuEvent(QContextMenuEvent *event);
+  
+public Q_SLOTS:
+  //! Copy the formulas value to clipboard.
+  void copyFormulaValueSlot();
+  
+private:
+  QAction *copyFormulaValueAction;
 };
 
 //! @brief Delegate for editing the expression in the table.
