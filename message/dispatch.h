@@ -17,7 +17,7 @@
  *
  */
 
-#include <boost/signals2.hpp>
+#include <boost/signals2/signal.hpp>
 
 #include <message/message.h>
 

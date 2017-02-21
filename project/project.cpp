@@ -26,6 +26,7 @@
 #include <boost/graph/topological_sort.hpp>
 #include <boost/graph/filtered_graph.hpp>
 #include <boost/graph/depth_first_search.hpp>
+#include <boost/signals2/shared_connection_block.hpp>
 
 #include <BRep_Builder.hxx>
 #include <BRepTools.hxx>

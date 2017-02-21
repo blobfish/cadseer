@@ -35,6 +35,8 @@
 #include <QMessageBox>
 #include <QDebug>
 
+#include <boost/signals2/shared_connection_block.hpp>
+
 #include <TopoDS.hxx>
 #include <BRepFilletAPI_MakeFillet.hxx>
 

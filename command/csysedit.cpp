@@ -19,6 +19,8 @@
 
 #include <cassert>
 
+#include <boost/signals2/shared_connection_block.hpp>
+
 #include <globalutilities.h>
 #include <library/csysdragger.h>
 #include <project/project.h>

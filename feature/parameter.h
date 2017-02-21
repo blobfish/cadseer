@@ -22,7 +22,7 @@
 
 #include <QString>
 
-#include <boost/signals2.hpp>
+#include <boost/signals2/signal.hpp>
 #include <boost/uuid/uuid.hpp>
 
 namespace prj{namespace srl{class Parameter;}}
