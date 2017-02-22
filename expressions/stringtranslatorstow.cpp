@@ -43,10 +43,10 @@ class FormulaVisitor : public boost::default_dfs_visitor
 public:
     FormulaVisitor(std::list<std::string> &stringIn) : expression(stringIn), currentPosition(expression.begin())
     {
-        typeMap.insert(std::make_pair(expr::NodeType::Addition, " + "));
-        typeMap.insert(std::make_pair(expr::NodeType::Subtraction, " - "));
-        typeMap.insert(std::make_pair(expr::NodeType::Multiplication, " * "));
-        typeMap.insert(std::make_pair(expr::NodeType::Division, " / "));
+        typeMap.insert(std::make_pair(expr::NodeType::ScalarAddition, " + "));
+        typeMap.insert(std::make_pair(expr::NodeType::ScalarSubtraction, " - "));
+        typeMap.insert(std::make_pair(expr::NodeType::ScalarMultiplication, " * "));
+        typeMap.insert(std::make_pair(expr::NodeType::ScalarDivision, " / "));
     }
       
     template<typename FindVertex, typename FindGraph>
@@ -86,7 +86,7 @@ public:
             temp.push_back(currentPosition);
             itStack.push(temp);
         }
-        else if (graph[vertex]->getType() == expr::NodeType::Parentheses)
+        else if (graph[vertex]->getType() == expr::NodeType::ScalarParentheses)
         {
             currentPosition = expression.insert(currentPosition, "(");
             currentPosition++;
@@ -95,7 +95,7 @@ public:
             temp.push_back(currentPosition);
             itStack.push(temp);
         }
-        else if (graph[vertex]->getType() == expr::NodeType::Constant)
+        else if (graph[vertex]->getType() == expr::NodeType::ScalarConstant)
         {
             std::ostringstream stream;
             stream << graph[vertex]->getValue();
@@ -104,7 +104,7 @@ public:
             temp.push_back(currentPosition);
             itStack.push(temp);
         }
-        else if (graph[vertex]->getType() == expr::NodeType::Sin)
+        else if (graph[vertex]->getType() == expr::NodeType::ScalarSin)
         {
             currentPosition = expression.insert(currentPosition, "sin(");
             currentPosition++;
@@ -113,7 +113,7 @@ public:
             temp.push_back(currentPosition);
             itStack.push(temp);
         }
-        else if (graph[vertex]->getType() == expr::NodeType::Cos)
+        else if (graph[vertex]->getType() == expr::NodeType::ScalarCos)
         {
             currentPosition = expression.insert(currentPosition, "cos(");
             currentPosition++;
@@ -122,7 +122,7 @@ public:
             temp.push_back(currentPosition);
             itStack.push(temp);
         }
-        else if (graph[vertex]->getType() == expr::NodeType::Tan)
+        else if (graph[vertex]->getType() == expr::NodeType::ScalarTan)
         {
             currentPosition = expression.insert(currentPosition, "tan(");
             currentPosition++;
@@ -131,7 +131,7 @@ public:
             temp.push_back(currentPosition);
             itStack.push(temp);
         }
-        else if (graph[vertex]->getType() == expr::NodeType::Asin)
+        else if (graph[vertex]->getType() == expr::NodeType::ScalarAsin)
         {
             currentPosition = expression.insert(currentPosition, "asin(");
             currentPosition++;
@@ -140,7 +140,7 @@ public:
             temp.push_back(currentPosition);
             itStack.push(temp);
         }
-        else if (graph[vertex]->getType() == expr::NodeType::Acos)
+        else if (graph[vertex]->getType() == expr::NodeType::ScalarAcos)
         {
             currentPosition = expression.insert(currentPosition, "acos(");
             currentPosition++;
@@ -149,7 +149,7 @@ public:
             temp.push_back(currentPosition);
             itStack.push(temp);
         }
-        else if (graph[vertex]->getType() == expr::NodeType::Atan)
+        else if (graph[vertex]->getType() == expr::NodeType::ScalarAtan)
         {
             currentPosition = expression.insert(currentPosition, "atan(");
             currentPosition++;
@@ -158,7 +158,7 @@ public:
             temp.push_back(currentPosition);
             itStack.push(temp);
         }
-        else if (graph[vertex]->getType() == expr::NodeType::Pow)
+        else if (graph[vertex]->getType() == expr::NodeType::ScalarPow)
         {
             currentPosition = expression.insert(currentPosition, "pow(");
             currentPosition++;
@@ -170,7 +170,7 @@ public:
             temp.push_back(currentPosition);
             itStack.push(temp);
         }
-        else if (graph[vertex]->getType() == expr::NodeType::Atan2)
+        else if (graph[vertex]->getType() == expr::NodeType::ScalarAtan2)
         {
             currentPosition = expression.insert(currentPosition, "atan2(");
             currentPosition++;
@@ -182,7 +182,7 @@ public:
             temp.push_back(currentPosition);
             itStack.push(temp);
         }
-        else if (graph[vertex]->getType() == expr::NodeType::Abs)
+        else if (graph[vertex]->getType() == expr::NodeType::ScalarAbs)
         {
             currentPosition = expression.insert(currentPosition, "abs(");
             currentPosition++;
@@ -191,7 +191,7 @@ public:
             temp.push_back(currentPosition);
             itStack.push(temp);
         }
-        else if (graph[vertex]->getType() == expr::NodeType::Min)
+        else if (graph[vertex]->getType() == expr::NodeType::ScalarMin)
         {
             currentPosition = expression.insert(currentPosition, "min(");
             currentPosition++;
@@ -203,7 +203,7 @@ public:
             temp.push_back(currentPosition);
             itStack.push(temp);
         }
-        else if (graph[vertex]->getType() == expr::NodeType::Max)
+        else if (graph[vertex]->getType() == expr::NodeType::ScalarMax)
         {
             currentPosition = expression.insert(currentPosition, "max(");
             currentPosition++;
@@ -215,7 +215,7 @@ public:
             temp.push_back(currentPosition);
             itStack.push(temp);
         }
-        else if (graph[vertex]->getType() == expr::NodeType::Floor)
+        else if (graph[vertex]->getType() == expr::NodeType::ScalarFloor)
         {
             currentPosition = expression.insert(currentPosition, "floor(");
             currentPosition++;
@@ -227,7 +227,7 @@ public:
             temp.push_back(currentPosition);
             itStack.push(temp);
         }
-        else if (graph[vertex]->getType() == expr::NodeType::Ceil)
+        else if (graph[vertex]->getType() == expr::NodeType::ScalarCeil)
         {
             currentPosition = expression.insert(currentPosition, "ceil(");
             currentPosition++;
@@ -239,7 +239,7 @@ public:
             temp.push_back(currentPosition);
             itStack.push(temp);
         }
-        else if (graph[vertex]->getType() == expr::NodeType::Round)
+        else if (graph[vertex]->getType() == expr::NodeType::ScalarRound)
         {
             currentPosition = expression.insert(currentPosition, "round(");
             currentPosition++;
@@ -251,7 +251,7 @@ public:
             temp.push_back(currentPosition);
             itStack.push(temp);
         }
-        else if (graph[vertex]->getType() == expr::NodeType::RadToDeg)
+        else if (graph[vertex]->getType() == expr::NodeType::ScalarRadToDeg)
         {
             currentPosition = expression.insert(currentPosition, "radtodeg(");
             currentPosition++;
@@ -260,7 +260,7 @@ public:
             temp.push_back(currentPosition);
             itStack.push(temp);
         }
-        else if (graph[vertex]->getType() == expr::NodeType::DegToRad)
+        else if (graph[vertex]->getType() == expr::NodeType::ScalarDegToRad)
         {
             currentPosition = expression.insert(currentPosition, "degtorad(");
             currentPosition++;
@@ -269,7 +269,7 @@ public:
             temp.push_back(currentPosition);
             itStack.push(temp);
         }
-        else if (graph[vertex]->getType() == expr::NodeType::Log)
+        else if (graph[vertex]->getType() == expr::NodeType::ScalarLog)
         {
             currentPosition = expression.insert(currentPosition, "log(");
             currentPosition++;
@@ -278,7 +278,7 @@ public:
             temp.push_back(currentPosition);
             itStack.push(temp);
         }
-        else if (graph[vertex]->getType() == expr::NodeType::Exp)
+        else if (graph[vertex]->getType() == expr::NodeType::ScalarExp)
         {
             currentPosition = expression.insert(currentPosition, "exp(");
             currentPosition++;
@@ -287,7 +287,7 @@ public:
             temp.push_back(currentPosition);
             itStack.push(temp);
         }
-        else if (graph[vertex]->getType() == expr::NodeType::Sqrt)
+        else if (graph[vertex]->getType() == expr::NodeType::ScalarSqrt)
         {
             currentPosition = expression.insert(currentPosition, "sqrt(");
             currentPosition++;
@@ -296,7 +296,7 @@ public:
             temp.push_back(currentPosition);
             itStack.push(temp);
         }
-        else if (graph[vertex]->getType() == expr::NodeType::Hypot)
+        else if (graph[vertex]->getType() == expr::NodeType::ScalarHypot)
         {
             currentPosition = expression.insert(currentPosition, "hypot(");
             currentPosition++;
@@ -308,25 +308,25 @@ public:
             temp.push_back(currentPosition);
             itStack.push(temp);
         }
-        else if (graph[vertex]->getType() == expr::NodeType::Conditional)
+        else if (graph[vertex]->getType() == expr::NodeType::ScalarConditional)
         {
             currentPosition = expression.insert(currentPosition, "if(");
             currentPosition++;
             StackEntry temp;
 
-            expr::ConditionalNode *node = dynamic_cast<expr::ConditionalNode*>(graph[vertex].get());
+            expr::ScalarConditionalNode *node = dynamic_cast<expr::ScalarConditionalNode*>(graph[vertex].get());
             assert(node);
-            if (node->type == expr::ConditionalNode::GreaterThan)
+            if (node->type == expr::ScalarConditionalNode::GreaterThan)
                 currentPosition = expression.insert(currentPosition, " > ");
-            else if (node->type == expr::ConditionalNode::LessThan)
+            else if (node->type == expr::ScalarConditionalNode::LessThan)
                 currentPosition = expression.insert(currentPosition, " < ");
-            else if (node->type == expr::ConditionalNode::GreaterThanEqual)
+            else if (node->type == expr::ScalarConditionalNode::GreaterThanEqual)
                 currentPosition = expression.insert(currentPosition, " >= ");
-            else if (node->type == expr::ConditionalNode::LessThanEqual)
+            else if (node->type == expr::ScalarConditionalNode::LessThanEqual)
                 currentPosition = expression.insert(currentPosition, " <= ");
-            else if(node->type == expr::ConditionalNode::Equal)
+            else if(node->type == expr::ScalarConditionalNode::Equal)
                 currentPosition = expression.insert(currentPosition, " == ");
-            else if (node->type == expr::ConditionalNode::NotEqual)
+            else if (node->type == expr::ScalarConditionalNode::NotEqual)
                 currentPosition = expression.insert(currentPosition, " != ");
 
             temp.push_back(currentPosition); //lhs position.
@@ -396,7 +396,7 @@ public:
       
 private:
     //!Type for mapping.
-    typedef boost::unordered_map<expr::NodeType::Type, std::string> TypeMap;
+    typedef boost::unordered_map<expr::NodeType, std::string> TypeMap;
     //!Map between operators and string chars. '+' '-' '*' '/'. This might go away.
     TypeMap typeMap;
     //!Current position for insertion into #expression.
@@ -497,9 +497,9 @@ void StringTranslatorStow::cleanFailedParse()
     graphWrapper.graph[formulaNodeOut]->setClean();
 }
 
-void StringTranslatorStow::buildConstantNode(const double& valueIn)
+void StringTranslatorStow::buildScalarConstantNode(const double& valueIn)
 {
-  Vertex cNode = graphWrapper.buildConstantNode(valueIn);
+  Vertex cNode = graphWrapper.buildScalarConstantNode(valueIn);
   vStack.push(cNode);
   addedVertices.push_back(cNode);
 }
@@ -533,11 +533,11 @@ void StringTranslatorStow::buildFormulaNode(const std::string& stringIn, bool &c
   vStack.push(fVertex);
 }
 
-void StringTranslatorStow::buildAdditionNode()
+void StringTranslatorStow::buildScalarAdditionNode()
 {
 //   assert(currentNode != graphWrapper.graph.null_vertex());
   
-  Vertex aNode = graphWrapper.buildAdditionNode();
+  Vertex aNode = graphWrapper.buildScalarAdditionNode();
   vStack.push(aNode);
   addedVertices.push_back(aNode);
 }
@@ -549,16 +549,16 @@ void StringTranslatorStow::buildSubractionNode()
   addedVertices.push_back(sNode);
 }
 
-void StringTranslatorStow::buildMultiplicationNode()
+void StringTranslatorStow::buildScalarMultiplicationNode()
 {
-  Vertex mNode = graphWrapper.buildMultiplicationNode(); 
+  Vertex mNode = graphWrapper.buildScalarMultiplicationNode(); 
   vStack.push(mNode);
   addedVertices.push_back(mNode);
 }
 
-void StringTranslatorStow::buildDivisionNode()
+void StringTranslatorStow::buildScalarDivisionNode()
 {
-  Vertex dNode = graphWrapper.buildDivisionNode();
+  Vertex dNode = graphWrapper.buildScalarDivisionNode();
   vStack.push(dNode);
   addedVertices.push_back(dNode);
 }
@@ -574,14 +574,14 @@ void StringTranslatorStow::buildLinkNode(const std::string &stringIn, bool &carr
   vStack.push(lVertex);
 }
 
-void StringTranslatorStow::startParenthesesNode()
+void StringTranslatorStow::startScalarParenthesesNode()
 {
-  Vertex pNode = graphWrapper.buildParenthesesNode();
+  Vertex pNode = graphWrapper.buildScalarParenthesesNode();
   vStack.push(pNode);
   addedVertices.push_back(pNode);
 }
 
-void StringTranslatorStow::finishParenthesesNode()
+void StringTranslatorStow::finishScalarParenthesesNode()
 {
   Vertex op = vStack.top();
   vStack.pop();
@@ -589,149 +589,149 @@ void StringTranslatorStow::finishParenthesesNode()
   buildEdgeNone(parentheses, op);
 }
 
-void StringTranslatorStow::buildSinNode()
+void StringTranslatorStow::buildScalarSinNode()
 {
-  Vertex sNode = graphWrapper.buildSinNode();
+  Vertex sNode = graphWrapper.buildScalarSinNode();
   vStack.push(sNode);
   addedVertices.push_back(sNode);
 }
 
-void StringTranslatorStow::buildCosNode()
+void StringTranslatorStow::buildScalarCosNode()
 {
-  Vertex cNode = graphWrapper.buildCosNode();
+  Vertex cNode = graphWrapper.buildScalarCosNode();
   vStack.push(cNode);
   addedVertices.push_back(cNode);
 }
 
-void StringTranslatorStow::buildTanNode()
+void StringTranslatorStow::buildScalarTanNode()
 {
-  Vertex tNode = graphWrapper.buildTanNode();
+  Vertex tNode = graphWrapper.buildScalarTanNode();
   vStack.push(tNode);
   addedVertices.push_back(tNode);
 }
 
-void StringTranslatorStow::buildAsinNode()
+void StringTranslatorStow::buildScalarAsinNode()
 {
-  Vertex node = graphWrapper.buildAsinNode();
+  Vertex node = graphWrapper.buildScalarAsinNode();
   vStack.push(node);
   addedVertices.push_back(node);
 }
 
-void StringTranslatorStow::buildAcosNode()
+void StringTranslatorStow::buildScalarAcosNode()
 {
-  Vertex node = graphWrapper.buildAcosNode();
+  Vertex node = graphWrapper.buildScalarAcosNode();
   vStack.push(node);
   addedVertices.push_back(node);
 }
 
-void StringTranslatorStow::buildAtanNode()
+void StringTranslatorStow::buildScalarAtanNode()
 {
-  Vertex node = graphWrapper.buildAtanNode();
+  Vertex node = graphWrapper.buildScalarAtanNode();
   vStack.push(node);
   addedVertices.push_back(node);
 }
 
-void StringTranslatorStow::buildAtan2Node()
+void StringTranslatorStow::buildScalarAtan2Node()
 {
-  Vertex node = graphWrapper.buildAtan2Node();
+  Vertex node = graphWrapper.buildScalarAtan2Node();
   vStack.push(node);
   addedVertices.push_back(node);
 }
 
-void StringTranslatorStow::buildPowNode()
+void StringTranslatorStow::buildScalarPowNode()
 {
-  Vertex node = graphWrapper.buildPowNode();
+  Vertex node = graphWrapper.buildScalarPowNode();
   vStack.push(node);
   addedVertices.push_back(node);
 }
 
-void StringTranslatorStow::buildAbsNode()
+void StringTranslatorStow::buildScalarAbsNode()
 {
-  Vertex node = graphWrapper.buildAbsNode();
+  Vertex node = graphWrapper.buildScalarAbsNode();
   vStack.push(node);
   addedVertices.push_back(node);
 }
 
-void StringTranslatorStow::buildMinNode()
+void StringTranslatorStow::buildScalarMinNode()
 {
-  Vertex node = graphWrapper.buildMinNode();
+  Vertex node = graphWrapper.buildScalarMinNode();
   vStack.push(node);
   addedVertices.push_back(node);
 }
 
-void StringTranslatorStow::buildMaxNode()
+void StringTranslatorStow::buildScalarMaxNode()
 {
-  Vertex node = graphWrapper.buildMaxNode();
+  Vertex node = graphWrapper.buildScalarMaxNode();
   vStack.push(node);
   addedVertices.push_back(node);
 }
 
-void StringTranslatorStow::buildFloorNode()
+void StringTranslatorStow::buildScalarFloorNode()
 {
-  Vertex node = graphWrapper.buildFloorNode();
+  Vertex node = graphWrapper.buildScalarFloorNode();
   vStack.push(node);
   addedVertices.push_back(node);
 }
 
-void StringTranslatorStow::buildCeilNode()
+void StringTranslatorStow::buildScalarCeilNode()
 {
-  Vertex node = graphWrapper.buildCeilNode();
+  Vertex node = graphWrapper.buildScalarCeilNode();
   vStack.push(node);
   addedVertices.push_back(node);
 }
 
-void StringTranslatorStow::buildRoundNode()
+void StringTranslatorStow::buildScalarRoundNode()
 {
-  Vertex node = graphWrapper.buildRoundNode();
+  Vertex node = graphWrapper.buildScalarRoundNode();
   vStack.push(node);
   addedVertices.push_back(node);
 }
 
-void StringTranslatorStow::buildRadToDegNode()
+void StringTranslatorStow::buildScalarRadToDegNode()
 {
-  Vertex node = graphWrapper.buildRadToDegNode();
+  Vertex node = graphWrapper.buildScalarRadToDegNode();
   vStack.push(node);
   addedVertices.push_back(node);
 }
 
-void StringTranslatorStow::buildDegToRadNode()
+void StringTranslatorStow::buildScalarDegToRadNode()
 {
-  Vertex node = graphWrapper.buildDegToRadNode();
+  Vertex node = graphWrapper.buildScalarDegToRadNode();
   vStack.push(node);
   addedVertices.push_back(node);
 }
 
-void StringTranslatorStow::buildLogNode()
+void StringTranslatorStow::buildScalarLogNode()
 {
-  Vertex node = graphWrapper.buildLogNode();
+  Vertex node = graphWrapper.buildScalarLogNode();
   vStack.push(node);
   addedVertices.push_back(node);
 }
 
-void StringTranslatorStow::buildExpNode()
+void StringTranslatorStow::buildScalarExpNode()
 {
-  Vertex node = graphWrapper.buildExpNode();
+  Vertex node = graphWrapper.buildScalarExpNode();
   vStack.push(node);
   addedVertices.push_back(node);
 }
 
-void StringTranslatorStow::buildSqrtNode()
+void StringTranslatorStow::buildScalarSqrtNode()
 {
-  Vertex node = graphWrapper.buildSqrtNode();
+  Vertex node = graphWrapper.buildScalarSqrtNode();
   vStack.push(node);
   addedVertices.push_back(node);
 }
 
-void StringTranslatorStow::buildHypotNode()
+void StringTranslatorStow::buildScalarHypotNode()
 {
-  Vertex node = graphWrapper.buildHypotNode();
+  Vertex node = graphWrapper.buildScalarHypotNode();
   vStack.push(node);
   addedVertices.push_back(node);
 }
 
-void StringTranslatorStow::buildConditionalNode()
+void StringTranslatorStow::buildScalarConditionalNode()
 {
-  Vertex node = graphWrapper.buildConditionalNode();
+  Vertex node = graphWrapper.buildScalarConditionalNode();
   vStack.push(node);
   addedVertices.push_back(node);
 }
@@ -739,49 +739,49 @@ void StringTranslatorStow::buildConditionalNode()
 void StringTranslatorStow::setConditionGreaterThan()
 {
   Vertex ifNode = vStack.top();
-  ConditionalNode *node = dynamic_cast<ConditionalNode*>(graphWrapper.graph[ifNode].get());
+  ScalarConditionalNode *node = dynamic_cast<ScalarConditionalNode*>(graphWrapper.graph[ifNode].get());
   assert(node);
-  node->type = ConditionalNode::GreaterThan;
+  node->type = ScalarConditionalNode::GreaterThan;
 }
 
 void StringTranslatorStow::setConditionLessThan()
 {
   Vertex ifNode = vStack.top();
-  ConditionalNode *node = dynamic_cast<ConditionalNode*>(graphWrapper.graph[ifNode].get());
+  ScalarConditionalNode *node = dynamic_cast<ScalarConditionalNode*>(graphWrapper.graph[ifNode].get());
   assert(node);
-  node->type = ConditionalNode::LessThan;
+  node->type = ScalarConditionalNode::LessThan;
 }
 
 void StringTranslatorStow::setConditionGreaterThanEqual()
 {
   Vertex ifNode = vStack.top();
-  ConditionalNode *node = dynamic_cast<ConditionalNode*>(graphWrapper.graph[ifNode].get());
+  ScalarConditionalNode *node = dynamic_cast<ScalarConditionalNode*>(graphWrapper.graph[ifNode].get());
   assert(node);
-  node->type = ConditionalNode::GreaterThanEqual;
+  node->type = ScalarConditionalNode::GreaterThanEqual;
 }
 
 void StringTranslatorStow::setConditionLessThanEqual()
 {
   Vertex ifNode = vStack.top();
-  ConditionalNode *node = dynamic_cast<ConditionalNode*>(graphWrapper.graph[ifNode].get());
+  ScalarConditionalNode *node = dynamic_cast<ScalarConditionalNode*>(graphWrapper.graph[ifNode].get());
   assert(node);
-  node->type = ConditionalNode::LessThanEqual;
+  node->type = ScalarConditionalNode::LessThanEqual;
 }
 
 void StringTranslatorStow::setConditionEqual()
 {
   Vertex ifNode = vStack.top();
-  ConditionalNode *node = dynamic_cast<ConditionalNode*>(graphWrapper.graph[ifNode].get());
+  ScalarConditionalNode *node = dynamic_cast<ScalarConditionalNode*>(graphWrapper.graph[ifNode].get());
   assert(node);
-  node->type = ConditionalNode::Equal;
+  node->type = ScalarConditionalNode::Equal;
 }
 
 void StringTranslatorStow::setConditionNotEqual()
 {
   Vertex ifNode = vStack.top();
-  ConditionalNode *node = dynamic_cast<ConditionalNode*>(graphWrapper.graph[ifNode].get());
+  ScalarConditionalNode *node = dynamic_cast<ScalarConditionalNode*>(graphWrapper.graph[ifNode].get());
   assert(node);
-  node->type = ConditionalNode::NotEqual;
+  node->type = ScalarConditionalNode::NotEqual;
 }
 
 void StringTranslatorStow::setConditionLhs()

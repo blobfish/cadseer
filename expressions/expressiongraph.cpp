@@ -100,7 +100,7 @@ EdgePropertiesMap GraphWrapper::buildEdgePropertiesMap(const Vertex& source) con
   for (;it != itEnd; ++it)
   {
     Vertex target = boost::target(*it, graph);
-    out.insert(std::make_pair(graph[*it], graph[target]->getValue()));
+    out.insert(std::make_pair(graph[*it], graph[target].get()));
   }
   return out;
 }
@@ -285,10 +285,10 @@ double GraphWrapper::getFormulaValue(const boost::uuids::uuid& idIn) const
   return getFormulaValue(getFormulaVertex(idIn));
 }
 
-Vertex GraphWrapper::buildConstantNode(const double& constantIn)
+Vertex GraphWrapper::buildScalarConstantNode(const double& constantIn)
 {
-  Vertex cVertex = buildNode<ConstantNode>();
-  static_cast<ConstantNode*>(graph[cVertex].get())->setValue(constantIn);
+  Vertex cVertex = buildNode<ScalarConstantNode>();
+  static_cast<ScalarConstantNode*>(graph[cVertex].get())->setValue(constantIn);
   return cVertex;
 }
 
@@ -347,7 +347,7 @@ void GraphWrapper::removeFormula(const Vertex& vertexIn)
   boost::tie(it, itEnd) = boost::in_edges(vertexIn, graph);
   for (;it != itEnd; ++it)
   {
-    Vertex constant = buildConstantNode(oldValue);
+    Vertex constant = buildScalarConstantNode(oldValue);
     graph[constant]->setClean(); //should equal so no need to be the default dirty.
     Vertex dependent = boost::source(*it, graph);
     Edge edge = buildEdge(dependent, constant);

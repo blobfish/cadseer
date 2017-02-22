@@ -25,15 +25,14 @@
 #include <boost/unordered_map.hpp>
 
 namespace expr{
+  
+  class AbstractNode;
 
-//! @brief Edge properties are attached to graph edges.
-namespace EdgeProperty
-{
 /*! @brief Edge properties are attached to graph edges.
  * 
  * These properties indicate child node relevance to parent operation. @see Graph
  */
-enum EdgePropertyType
+enum class EdgeProperty
 {
   None,
   Lhs,
@@ -43,12 +42,11 @@ enum EdgePropertyType
   Then,
   Else
 };
-}
 
 //! @brief Return a string associated to an edge property.
-static std::string getEdgePropertyString(const EdgeProperty::EdgePropertyType &property)
+static std::string getEdgePropertyString(const EdgeProperty &property)
 {
-  static std::map<EdgeProperty::EdgePropertyType, std::string> strings;
+  static std::map<EdgeProperty, std::string> strings;
   static bool init =  false;
   if (!init) {
       init = true;
@@ -60,7 +58,7 @@ static std::string getEdgePropertyString(const EdgeProperty::EdgePropertyType &p
       strings[EdgeProperty::Then] = "Then";
       strings[EdgeProperty::Else] = "Else";
   }
-  std::map<EdgeProperty::EdgePropertyType, std::string>::iterator it = strings.find(property);
+  std::map<EdgeProperty, std::string>::iterator it = strings.find(property);
   return it != strings.end() ? it->second : std::string();
 }
 
@@ -69,7 +67,7 @@ static std::string getEdgePropertyString(const EdgeProperty::EdgePropertyType &p
  * this allows us to pass in values to the nodes calculate method without the nodes
  * needing to know anything about the graph.
  */
-typedef boost::unordered_map<EdgeProperty::EdgePropertyType, double> EdgePropertiesMap;
+typedef boost::unordered_map<EdgeProperty, AbstractNode*> EdgePropertiesMap;
 
 }
 

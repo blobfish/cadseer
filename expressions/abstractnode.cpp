@@ -32,13 +32,13 @@ AbstractNode::AbstractNode() : dirtyTest(true), value(1.0)
 
 }
 
-double AbstractNode::getValue()
+double AbstractNode::getValue() const
 {
   assert(this->isClean());
-  return value;
+  return boost::get<double>(value);
 }
 
-ConstantNode::ConstantNode() : AbstractNode()
+ScalarConstantNode::ScalarConstantNode() : AbstractNode()
 {
 
 }
@@ -52,254 +52,254 @@ void FormulaNode::calculate(const EdgePropertiesMap &propertyMap)
 {
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  value = propertyMap.at(EdgeProperty::None);
+  value = propertyMap.at(EdgeProperty::None)->getValue();
   this->setClean();
 }
 
-AdditionNode::AdditionNode() : AbstractNode()
+ScalarAdditionNode::ScalarAdditionNode() : AbstractNode()
 {
 
 }
 
-void AdditionNode::calculate(const EdgePropertiesMap& propertyMap)
+void ScalarAdditionNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 2);
   assert(propertyMap.count(EdgeProperty::Lhs) == 1);
   assert(propertyMap.count(EdgeProperty::Rhs) == 1);
-  value = propertyMap.at(EdgeProperty::Lhs) + propertyMap.at(EdgeProperty::Rhs);
+  value = propertyMap.at(EdgeProperty::Lhs)->getValue() + propertyMap.at(EdgeProperty::Rhs)->getValue();
   this->setClean();
 }
 
-SubtractionNode::SubtractionNode() : AbstractNode()
+ScalarSubtractionNode::ScalarSubtractionNode() : AbstractNode()
 {
 
 }
 
-void SubtractionNode::calculate(const EdgePropertiesMap& propertyMap)
+void ScalarSubtractionNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 2);
   assert(propertyMap.count(EdgeProperty::Lhs) == 1);
   assert(propertyMap.count(EdgeProperty::Rhs) == 1);
-  value = propertyMap.at(EdgeProperty::Lhs) - propertyMap.at(EdgeProperty::Rhs);
+  value = propertyMap.at(EdgeProperty::Lhs)->getValue() - propertyMap.at(EdgeProperty::Rhs)->getValue();
   this->setClean();
 }
 
-MultiplicationNode::MultiplicationNode() : AbstractNode()
+ScalarMultiplicationNode::ScalarMultiplicationNode() : AbstractNode()
 {
 
 }
 
-void MultiplicationNode::calculate(const EdgePropertiesMap& propertyMap)
+void ScalarMultiplicationNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 2);
   assert(propertyMap.count(EdgeProperty::Lhs) == 1);
   assert(propertyMap.count(EdgeProperty::Rhs) == 1);
-  value = propertyMap.at(EdgeProperty::Lhs) * propertyMap.at(EdgeProperty::Rhs);
+  value = propertyMap.at(EdgeProperty::Lhs)->getValue() * propertyMap.at(EdgeProperty::Rhs)->getValue();
   this->setClean();
 }
 
-DivisionNode::DivisionNode() : AbstractNode()
+ScalarDivisionNode::ScalarDivisionNode() : AbstractNode()
 {
 
 }
 
-void DivisionNode::calculate(const EdgePropertiesMap& propertyMap)
+void ScalarDivisionNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 2);
   assert(propertyMap.count(EdgeProperty::Lhs) == 1);
   assert(propertyMap.count(EdgeProperty::Rhs) == 1);
-  value = propertyMap.at(EdgeProperty::Lhs) / propertyMap.at(EdgeProperty::Rhs);
+  value = propertyMap.at(EdgeProperty::Lhs)->getValue() / propertyMap.at(EdgeProperty::Rhs)->getValue();
   this->setClean();
 }
 
-ParenthesesNode::ParenthesesNode() : AbstractNode()
+ScalarParenthesesNode::ScalarParenthesesNode() : AbstractNode()
 {
 
 }
 
-void ParenthesesNode::calculate(const EdgePropertiesMap& propertyMap)
+void ScalarParenthesesNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  value = propertyMap.at(EdgeProperty::None);
+  value = propertyMap.at(EdgeProperty::None)->getValue();
   this->setClean();
 }
 
-SinNode::SinNode() : AbstractNode()
+ScalarSinNode::ScalarSinNode() : AbstractNode()
 {
 
 }
 
-void SinNode::calculate(const EdgePropertiesMap& propertyMap)
+void ScalarSinNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  double childValue = propertyMap.at(EdgeProperty::None);
+  double childValue = propertyMap.at(EdgeProperty::None)->getValue();
   value = std::sin(childValue);
   this->setClean();
 }
 
-CosNode::CosNode() : AbstractNode()
+ScalarCosNode::ScalarCosNode() : AbstractNode()
 {
 
 }
 
-void CosNode::calculate(const EdgePropertiesMap& propertyMap)
+void ScalarCosNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  double childValue = propertyMap.at(EdgeProperty::None);
+  double childValue = propertyMap.at(EdgeProperty::None)->getValue();
   value = std::cos(childValue);
   this->setClean();
 }
 
-TanNode::TanNode() : AbstractNode()
+ScalarTanNode::ScalarTanNode() : AbstractNode()
 {
 
 }
 
-void TanNode::calculate(const EdgePropertiesMap& propertyMap)
+void ScalarTanNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  double childValue = propertyMap.at(EdgeProperty::None);
+  double childValue = propertyMap.at(EdgeProperty::None)->getValue();
   value = std::tan(childValue);
   this->setClean();
 }
 
-AsinNode::AsinNode() : AbstractNode()
+ScalarAsinNode::ScalarAsinNode() : AbstractNode()
 {
 
 }
 
-void AsinNode::calculate(const EdgePropertiesMap& propertyMap)
+void ScalarAsinNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  double childValue = propertyMap.at(EdgeProperty::None);
+  double childValue = propertyMap.at(EdgeProperty::None)->getValue();
   value = std::asin(childValue);
   this->setClean();
 }
 
-AcosNode::AcosNode() : AbstractNode()
+ScalarAcosNode::ScalarAcosNode() : AbstractNode()
 {
 
 }
 
-void AcosNode::calculate(const EdgePropertiesMap& propertyMap)
+void ScalarAcosNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  double childValue = propertyMap.at(EdgeProperty::None);
+  double childValue = propertyMap.at(EdgeProperty::None)->getValue();
   value = std::acos(childValue);
   this->setClean();
 }
 
-AtanNode::AtanNode() : AbstractNode()
+ScalarAtanNode::ScalarAtanNode() : AbstractNode()
 {
 
 }
 
-void AtanNode::calculate(const EdgePropertiesMap& propertyMap)
+void ScalarAtanNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  double childValue = propertyMap.at(EdgeProperty::None);
+  double childValue = propertyMap.at(EdgeProperty::None)->getValue();
   value = std::atan(childValue);
   this->setClean();
 }
 
-Atan2Node::Atan2Node() : AbstractNode()
+ScalarAtan2Node::ScalarAtan2Node() : AbstractNode()
 {
 
 }
 
-void Atan2Node::calculate(const EdgePropertiesMap& propertyMap)
+void ScalarAtan2Node::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 2);
   assert(propertyMap.count(EdgeProperty::Parameter1) == 1);
   assert(propertyMap.count(EdgeProperty::Parameter2) == 1);
   // y is first to match standard function.
-  double y = propertyMap.at(EdgeProperty::Parameter1);
-  double x = propertyMap.at(EdgeProperty::Parameter2);
+  double y = propertyMap.at(EdgeProperty::Parameter1)->getValue();
+  double x = propertyMap.at(EdgeProperty::Parameter2)->getValue();
   value = std::atan2(y, x);
   this->setClean();
 }
 
-PowNode::PowNode()
+ScalarPowNode::ScalarPowNode()
 {
 
 }
 
-void PowNode::calculate(const EdgePropertiesMap& propertyMap)
+void ScalarPowNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 2);
   assert(propertyMap.count(EdgeProperty::Parameter1) == 1);
   assert(propertyMap.count(EdgeProperty::Parameter2) == 1);
-  double base = propertyMap.at(EdgeProperty::Parameter1);
-  double exp = propertyMap.at(EdgeProperty::Parameter2);
+  double base = propertyMap.at(EdgeProperty::Parameter1)->getValue();
+  double exp = propertyMap.at(EdgeProperty::Parameter2)->getValue();
   value = std::pow(base, exp);
   this->setClean();
 }
 
-AbsNode::AbsNode() : AbstractNode()
+ScalarAbsNode::ScalarAbsNode() : AbstractNode()
 {
 
 }
 
-void AbsNode::calculate(const EdgePropertiesMap& propertyMap)
+void ScalarAbsNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  double valueIn = propertyMap.at(EdgeProperty::None);
+  double valueIn = propertyMap.at(EdgeProperty::None)->getValue();
   value = std::fabs(valueIn);
   this->setClean();
 }
 
-MinNode::MinNode() : AbstractNode()
+ScalarMinNode::ScalarMinNode() : AbstractNode()
 {
 
 }
 
-void MinNode::calculate(const EdgePropertiesMap& propertyMap)
+void ScalarMinNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 2);
   assert(propertyMap.count(EdgeProperty::Parameter1) == 1);
   assert(propertyMap.count(EdgeProperty::Parameter2) == 1);
-  double p1 = propertyMap.at(EdgeProperty::Parameter1);
-  double p2 = propertyMap.at(EdgeProperty::Parameter2);
+  double p1 = propertyMap.at(EdgeProperty::Parameter1)->getValue();
+  double p2 = propertyMap.at(EdgeProperty::Parameter2)->getValue();
   value = std::min(p1, p2);
   this->setClean();
 }
 
-MaxNode::MaxNode() : AbstractNode()
+ScalarMaxNode::ScalarMaxNode() : AbstractNode()
 {
 
 }
 
-void MaxNode::calculate(const EdgePropertiesMap& propertyMap)
+void ScalarMaxNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 2);
   assert(propertyMap.count(EdgeProperty::Parameter1) == 1);
   assert(propertyMap.count(EdgeProperty::Parameter2) == 1);
-  double p1 = propertyMap.at(EdgeProperty::Parameter1);
-  double p2 = propertyMap.at(EdgeProperty::Parameter2);
+  double p1 = propertyMap.at(EdgeProperty::Parameter1)->getValue();
+  double p2 = propertyMap.at(EdgeProperty::Parameter2)->getValue();
   value = std::max(p1, p2);
   this->setClean();
 }
 
-FloorNode::FloorNode()
+ScalarFloorNode::ScalarFloorNode()
 {
 
 }
 
-void FloorNode::calculate(const EdgePropertiesMap& propertyMap)
+void ScalarFloorNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 2);
   assert(propertyMap.count(EdgeProperty::Parameter1) == 1);
   assert(propertyMap.count(EdgeProperty::Parameter2) == 1);
-  double p1 = propertyMap.at(EdgeProperty::Parameter1);
-  double p2 = propertyMap.at(EdgeProperty::Parameter2);
+  double p1 = propertyMap.at(EdgeProperty::Parameter1)->getValue();
+  double p2 = propertyMap.at(EdgeProperty::Parameter2)->getValue();
   
   if (p2 == 0)
   {
@@ -321,18 +321,18 @@ void FloorNode::calculate(const EdgePropertiesMap& propertyMap)
   this->setClean();
 }
 
-CeilNode::CeilNode()
+ScalarCeilNode::ScalarCeilNode()
 {
 
 }
 
-void CeilNode::calculate(const EdgePropertiesMap& propertyMap)
+void ScalarCeilNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 2);
   assert(propertyMap.count(EdgeProperty::Parameter1) == 1);
   assert(propertyMap.count(EdgeProperty::Parameter2) == 1);
-  double p1 = propertyMap.at(EdgeProperty::Parameter1);
-  double p2 = propertyMap.at(EdgeProperty::Parameter2);
+  double p1 = propertyMap.at(EdgeProperty::Parameter1)->getValue();
+  double p2 = propertyMap.at(EdgeProperty::Parameter2)->getValue();
   
   if (p2 == 0)
   {
@@ -355,18 +355,18 @@ void CeilNode::calculate(const EdgePropertiesMap& propertyMap)
   this->setClean();
 }
 
-RoundNode::RoundNode()
+ScalarRoundNode::ScalarRoundNode()
 {
 
 }
 
-void RoundNode::calculate(const EdgePropertiesMap& propertyMap)
+void ScalarRoundNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 2);
   assert(propertyMap.count(EdgeProperty::Parameter1) == 1);
   assert(propertyMap.count(EdgeProperty::Parameter2) == 1);
-  double p1 = propertyMap.at(EdgeProperty::Parameter1);
-  double p2 = propertyMap.at(EdgeProperty::Parameter2);
+  double p1 = propertyMap.at(EdgeProperty::Parameter1)->getValue();
+  double p2 = propertyMap.at(EdgeProperty::Parameter2)->getValue();
   
   if (p2 == 0)
   {
@@ -394,108 +394,108 @@ void RoundNode::calculate(const EdgePropertiesMap& propertyMap)
   this->setClean();
 }
 
-RadToDegNode::RadToDegNode() : AbstractNode()
+ScalarRadToDegNode::ScalarRadToDegNode() : AbstractNode()
 {
 
 }
 
-void RadToDegNode::calculate(const EdgePropertiesMap& propertyMap)
+void ScalarRadToDegNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  double valueIn = propertyMap.at(EdgeProperty::None);
+  double valueIn = propertyMap.at(EdgeProperty::None)->getValue();
   value = valueIn * 180 / boost::math::constants::pi<double>();
   this->setClean();
 }
 
-DegToRadNode::DegToRadNode() : AbstractNode()
+ScalarDegToRadNode::ScalarDegToRadNode() : AbstractNode()
 {
 
 }
 
-void DegToRadNode::calculate(const EdgePropertiesMap& propertyMap)
+void ScalarDegToRadNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  double valueIn = propertyMap.at(EdgeProperty::None);
+  double valueIn = propertyMap.at(EdgeProperty::None)->getValue();
   value = valueIn * boost::math::constants::pi<double>() / 180.0;
   this->setClean();
 }
 
-LogNode::LogNode() : AbstractNode()
+ScalarLogNode::ScalarLogNode() : AbstractNode()
 {
 
 }
 
-void LogNode::calculate(const EdgePropertiesMap& propertyMap)
+void ScalarLogNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  double valueIn = propertyMap.at(EdgeProperty::None);
+  double valueIn = propertyMap.at(EdgeProperty::None)->getValue();
   value = std::log(valueIn);
   this->setClean();
 }
 
-ExpNode::ExpNode() : AbstractNode()
+ScalarExpNode::ScalarExpNode() : AbstractNode()
 {
 
 }
 
-void ExpNode::calculate(const EdgePropertiesMap& propertyMap)
+void ScalarExpNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  double valueIn = propertyMap.at(EdgeProperty::None);
+  double valueIn = propertyMap.at(EdgeProperty::None)->getValue();
   value = std::exp(valueIn);
   this->setClean();
 }
 
-SqrtNode::SqrtNode() : AbstractNode()
+ScalarSqrtNode::ScalarSqrtNode() : AbstractNode()
 {
   
 }
 
-void SqrtNode::calculate(const EdgePropertiesMap& propertyMap)
+void ScalarSqrtNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  double valueIn = propertyMap.at(EdgeProperty::None);
+  double valueIn = propertyMap.at(EdgeProperty::None)->getValue();
   value = std::sqrt(valueIn);
   this->setClean();
 }
 
-HypotNode::HypotNode() : AbstractNode()
+ScalarHypotNode::ScalarHypotNode() : AbstractNode()
 {
 
 }
 
-void HypotNode::calculate(const EdgePropertiesMap& propertyMap)
+void ScalarHypotNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 2);
   assert(propertyMap.count(EdgeProperty::Parameter1) == 1);
   assert(propertyMap.count(EdgeProperty::Parameter2) == 1);
-  double p1 = propertyMap.at(EdgeProperty::Parameter1);
-  double p2 = propertyMap.at(EdgeProperty::Parameter2);
+  double p1 = propertyMap.at(EdgeProperty::Parameter1)->getValue();
+  double p2 = propertyMap.at(EdgeProperty::Parameter2)->getValue();
   value = hypot(p1, p2);
   this->setClean();
 }
 
-ConditionalNode::ConditionalNode() : AbstractNode(), type(ConditionalNode::None)
+ScalarConditionalNode::ScalarConditionalNode() : AbstractNode(), type(ScalarConditionalNode::None)
 {
 
 }
 
-void ConditionalNode::calculate(const EdgePropertiesMap& propertyMap)
+void ScalarConditionalNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 4);
   assert(propertyMap.count(EdgeProperty::Lhs) == 1);
   assert(propertyMap.count(EdgeProperty::Rhs) == 1);
   assert(propertyMap.count(EdgeProperty::Then) == 1);
   assert(propertyMap.count(EdgeProperty::Else) == 1);
-  double lhs = propertyMap.at(EdgeProperty::Lhs);
-  double rhs = propertyMap.at(EdgeProperty::Rhs);
-  double localThen = propertyMap.at(EdgeProperty::Then);
-  double localElse = propertyMap.at(EdgeProperty::Else);
+  double lhs = propertyMap.at(EdgeProperty::Lhs)->getValue();
+  double rhs = propertyMap.at(EdgeProperty::Rhs)->getValue();
+  double localThen = propertyMap.at(EdgeProperty::Then)->getValue();
+  double localElse = propertyMap.at(EdgeProperty::Else)->getValue();
   
   if (type == GreaterThan)
   {

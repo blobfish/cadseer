@@ -36,12 +36,12 @@ namespace expr{
 typedef std::unique_ptr<AbstractNode> VertexProperty;
 
 typedef boost::property<boost::vertex_index_t, std::size_t, VertexProperty> vertex_prop;
-typedef boost::property<boost::edge_index_t, std::size_t, EdgeProperty::EdgePropertyType> edge_prop;
+typedef boost::property<boost::edge_index_t, std::size_t, EdgeProperty> edge_prop;
 
 /*! @brief The graph definition for containment of all abstract node decendents.
  * 
  * This is the data structure at the heart of the expression evaluations.
- * @see VertexProperty @see EdgeProperty::EdgePropertyType
+ * @see VertexProperty @see EdgeProperty
  */
 typedef boost::adjacency_list<boost::multisetS, boost::listS, boost::bidirectionalS, vertex_prop, edge_prop> Graph;
 typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
@@ -189,34 +189,34 @@ public:
     graph[vertex] = std::move(std::unique_ptr<T>(new T()));
     return vertex;
   }
-  Vertex buildConstantNode(const double &constantIn);
+  Vertex buildScalarConstantNode(const double &constantIn);
   Vertex buildFormulaNode(const std::string& stringIn);
-  Vertex buildAdditionNode(){return buildNode<AdditionNode>();}
-  Vertex buildSubractionNode(){return buildNode<SubtractionNode>();}
-  Vertex buildMultiplicationNode(){return buildNode<MultiplicationNode>();}
-  Vertex buildDivisionNode(){return buildNode<DivisionNode>();}
-  Vertex buildParenthesesNode(){return buildNode<ParenthesesNode>();}
-  Vertex buildSinNode(){return buildNode<SinNode>();}
-  Vertex buildCosNode(){return buildNode<CosNode>();}
-  Vertex buildTanNode(){return buildNode<TanNode>();}
-  Vertex buildAsinNode(){return buildNode<AsinNode>();}
-  Vertex buildAcosNode(){return buildNode<AcosNode>();}
-  Vertex buildAtanNode(){return buildNode<AtanNode>();}
-  Vertex buildAtan2Node(){return buildNode<Atan2Node>();}
-  Vertex buildPowNode(){return buildNode<PowNode>();}
-  Vertex buildAbsNode(){return buildNode<AbsNode>();}
-  Vertex buildMinNode(){return buildNode<MinNode>();}
-  Vertex buildMaxNode(){return buildNode<MaxNode>();}
-  Vertex buildFloorNode(){return buildNode<FloorNode>();}
-  Vertex buildCeilNode(){return buildNode<CeilNode>();}
-  Vertex buildRoundNode(){return buildNode<RoundNode>();}
-  Vertex buildRadToDegNode(){return buildNode<RadToDegNode>();}
-  Vertex buildDegToRadNode(){return buildNode<DegToRadNode>();}
-  Vertex buildLogNode(){return buildNode<LogNode>();}
-  Vertex buildExpNode(){return buildNode<ExpNode>();}
-  Vertex buildSqrtNode(){return buildNode<SqrtNode>();}
-  Vertex buildHypotNode(){return buildNode<HypotNode>();}
-  Vertex buildConditionalNode(){return buildNode<ConditionalNode>();}
+  Vertex buildScalarAdditionNode(){return buildNode<ScalarAdditionNode>();}
+  Vertex buildSubractionNode(){return buildNode<ScalarSubtractionNode>();}
+  Vertex buildScalarMultiplicationNode(){return buildNode<ScalarMultiplicationNode>();}
+  Vertex buildScalarDivisionNode(){return buildNode<ScalarDivisionNode>();}
+  Vertex buildScalarParenthesesNode(){return buildNode<ScalarParenthesesNode>();}
+  Vertex buildScalarSinNode(){return buildNode<ScalarSinNode>();}
+  Vertex buildScalarCosNode(){return buildNode<ScalarCosNode>();}
+  Vertex buildScalarTanNode(){return buildNode<ScalarTanNode>();}
+  Vertex buildScalarAsinNode(){return buildNode<ScalarAsinNode>();}
+  Vertex buildScalarAcosNode(){return buildNode<ScalarAcosNode>();}
+  Vertex buildScalarAtanNode(){return buildNode<ScalarAtanNode>();}
+  Vertex buildScalarAtan2Node(){return buildNode<ScalarAtan2Node>();}
+  Vertex buildScalarPowNode(){return buildNode<ScalarPowNode>();}
+  Vertex buildScalarAbsNode(){return buildNode<ScalarAbsNode>();}
+  Vertex buildScalarMinNode(){return buildNode<ScalarMinNode>();}
+  Vertex buildScalarMaxNode(){return buildNode<ScalarMaxNode>();}
+  Vertex buildScalarFloorNode(){return buildNode<ScalarFloorNode>();}
+  Vertex buildScalarCeilNode(){return buildNode<ScalarCeilNode>();}
+  Vertex buildScalarRoundNode(){return buildNode<ScalarRoundNode>();}
+  Vertex buildScalarRadToDegNode(){return buildNode<ScalarRadToDegNode>();}
+  Vertex buildScalarDegToRadNode(){return buildNode<ScalarDegToRadNode>();}
+  Vertex buildScalarLogNode(){return buildNode<ScalarLogNode>();}
+  Vertex buildScalarExpNode(){return buildNode<ScalarExpNode>();}
+  Vertex buildScalarSqrtNode(){return buildNode<ScalarSqrtNode>();}
+  Vertex buildScalarHypotNode(){return buildNode<ScalarHypotNode>();}
+  Vertex buildScalarConditionalNode(){return buildNode<ScalarConditionalNode>();}
   //@}
   
   //! @brief Build a graph edge.

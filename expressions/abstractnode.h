@@ -23,46 +23,43 @@
 #include <boost/uuid/uuid.hpp>
 
 #include <expressions/expressionedgeproperty.h>
+#include <expressions/value.h>
 
 namespace expr{
 
 //! @brief Types for graph vertices
-namespace NodeType
+enum class NodeType
 {
-  //! @brief Types for graph vertices
-  enum Type
-  {
-    None,
-    Formula,
-    Constant,
-    Addition,
-    Subtraction,
-    Multiplication,
-    Division,
-    Parentheses,
-    Sin,
-    Cos,
-    Tan,
-    Asin,
-    Acos,
-    Atan,
-    Atan2,
-    Pow,
-    Abs,
-    Min,
-    Max,
-    Floor,
-    Ceil,
-    Round,
-    RadToDeg,
-    DegToRad,
-    Log,
-    Exp,
-    Sqrt,
-    Hypot,
-    Conditional
-  };
-}
+  None,
+  Formula,
+  ScalarConstant,
+  ScalarAddition,
+  ScalarSubtraction,
+  ScalarMultiplication,
+  ScalarDivision,
+  ScalarParentheses,
+  ScalarSin,
+  ScalarCos,
+  ScalarTan,
+  ScalarAsin,
+  ScalarAcos,
+  ScalarAtan,
+  ScalarAtan2,
+  ScalarPow,
+  ScalarAbs,
+  ScalarMin,
+  ScalarMax,
+  ScalarFloor,
+  ScalarCeil,
+  ScalarRound,
+  ScalarRadToDeg,
+  ScalarDegToRad,
+  ScalarLog,
+  ScalarExp,
+  ScalarSqrt,
+  ScalarHypot,
+  ScalarConditional
+};
 
 /*! @brief Abstract. 
  * 
@@ -80,15 +77,15 @@ public:
   //@}
   //@{
   //! Inquire dirty state. @see dirtyTest
-  bool isDirty(){return dirtyTest;}
-  bool isClean(){return !dirtyTest;}
+  bool isDirty() const{return dirtyTest;}
+  bool isClean() const{return !dirtyTest;}
   //@}
   //! Returns the value. @see value
-  double getValue();
-  //! get this nodes type. @see NodeType::Type
-  virtual NodeType::Type getType() = 0;
+  double getValue() const;
+  //! get this nodes type. @see NodeType
+  virtual NodeType getType() const = 0;
   //! get this nodes types name.
-  virtual std::string className() = 0;
+  virtual std::string className() const = 0;
   /*! @brief calculate the value of this node.
    * 
    * Property map is constructed in the computation of the graph.
@@ -96,23 +93,31 @@ public:
    * This separates the graph definition from the nodes. @see EdgePropertiesMap
    */
   virtual void calculate(const EdgePropertiesMap &propertyMap) = 0;
+  /*! @brief get the output type of node.
+   * 
+   * we are now supporting some basic vector math variable and
+   * we need to verify that the input types are of the expected
+   * type.
+   */
+  virtual ValueType getOutputType() const = 0;
   
 protected:
   //! Signifies whether the node needs to be calculated.
   bool dirtyTest;
   //! Value of this node. @see calculate
-  double value;
+  Value value;
 };
 
 /*! @brief Constant number. No parameters. */
-class ConstantNode : public AbstractNode
+class ScalarConstantNode : public AbstractNode
 {
 public:
-  ConstantNode();
-  virtual ~ConstantNode() {}
-  virtual NodeType::Type getType() {return NodeType::Constant;}
-  virtual std::string className() {return "Constant";}
+  ScalarConstantNode();
+  virtual ~ScalarConstantNode() {}
+  virtual NodeType getType() const override {return NodeType::ScalarConstant;}
+  virtual std::string className() const override {return "ScalarConstant";}
   virtual void calculate(const EdgePropertiesMap &propertyMap) {setClean();}
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
   
   //! Set the value of this constant node.
   void setValue(const double &valueIn){value = valueIn;}
@@ -127,9 +132,10 @@ class FormulaNode : public AbstractNode
 public:
   FormulaNode();
   virtual ~FormulaNode() {}
-  virtual NodeType::Type getType() {return NodeType::Formula;}
-  virtual std::string className() {return "Formula";}
+  virtual NodeType getType() const override {return NodeType::Formula;}
+  virtual std::string className() const override {return "Formula";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Variant;}
   
   //! Returns the id. @see id
   boost::uuids::uuid getId(){return id;}
@@ -144,293 +150,319 @@ protected:
 };
 
 /*! @brief Addition. 2 parameters. */
-class AdditionNode : public AbstractNode
+class ScalarAdditionNode : public AbstractNode
 {
 public:
-  AdditionNode();
-  virtual ~AdditionNode() {}
-  virtual NodeType::Type getType() {return NodeType::Addition;}
-  virtual std::string className() {return "Addition";}
+  ScalarAdditionNode();
+  virtual ~ScalarAdditionNode() {}
+  virtual NodeType getType() const override {return NodeType::ScalarAddition;}
+  virtual std::string className() const override {return "ScalarAddition";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
 };
 
 /*! @brief Subtraction. 2 parameters. */
-class SubtractionNode : public AbstractNode
+class ScalarSubtractionNode : public AbstractNode
 {
 public:
-  SubtractionNode();
-  virtual ~SubtractionNode() {}
-  virtual NodeType::Type getType() {return NodeType::Subtraction;}
-  virtual std::string className() {return "Subtraction";}
+  ScalarSubtractionNode();
+  virtual ~ScalarSubtractionNode() {}
+  virtual NodeType getType() const override {return NodeType::ScalarSubtraction;}
+  virtual std::string className() const override {return "ScalarSubtraction";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
 };
 
 /*! @brief Multiplication. 2 parameters. */
-class MultiplicationNode : public AbstractNode
+class ScalarMultiplicationNode : public AbstractNode
 {
 public:
-  MultiplicationNode();
-  virtual ~MultiplicationNode() {}
-  virtual NodeType::Type getType() {return NodeType::Multiplication;}
-  virtual std::string className() {return "Multiplication";}
+  ScalarMultiplicationNode();
+  virtual ~ScalarMultiplicationNode() {}
+  virtual NodeType getType() const override {return NodeType::ScalarMultiplication;}
+  virtual std::string className() const override {return "ScalarMultiplication";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
 };
 
 /*! @brief Division.  2 parameters.*/
-class DivisionNode : public AbstractNode
+class ScalarDivisionNode : public AbstractNode
 {
 public:
-  DivisionNode();
-  virtual ~DivisionNode() {}
-  virtual NodeType::Type getType() {return NodeType::Division;}
-  virtual std::string className() {return "Division";}
+  ScalarDivisionNode();
+  virtual ~ScalarDivisionNode() {}
+  virtual NodeType getType() const override {return NodeType::ScalarDivision;}
+  virtual std::string className() const override {return "ScalarDivision";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
 };
 
 /*! @brief Parenthesis. 1 parameter. */
-class ParenthesesNode : public AbstractNode
+class ScalarParenthesesNode : public AbstractNode
 {
 public:
-  ParenthesesNode();
-  virtual ~ParenthesesNode() {}
-  virtual NodeType::Type getType() {return NodeType::Parentheses;}
-  virtual std::string className() {return "Parentheses";}
+  ScalarParenthesesNode();
+  virtual ~ScalarParenthesesNode() {}
+  virtual NodeType getType() const override {return NodeType::ScalarParentheses;}
+  virtual std::string className() const override {return "ScalarParentheses";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
 };
 
 /*! @brief Sin. 1 parameter. */
-class SinNode : public AbstractNode
+class ScalarSinNode : public AbstractNode
 {
 public:
-  SinNode();
-  virtual ~SinNode() {}
-  virtual NodeType::Type getType() {return NodeType::Sin;}
-  virtual std::string className() {return "Sin";}
+  ScalarSinNode();
+  virtual ~ScalarSinNode() {}
+  virtual NodeType getType() const override {return NodeType::ScalarSin;}
+  virtual std::string className() const override {return "ScalarSin";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
 };
 
 /*! @brief Cosine. 1 parameter. */
-class CosNode : public AbstractNode
+class ScalarCosNode : public AbstractNode
 {
 public:
-  CosNode();
-  virtual ~CosNode() {}
-  virtual NodeType::Type getType() {return NodeType::Cos;}
-  virtual std::string className() {return "Cos";}
+  ScalarCosNode();
+  virtual ~ScalarCosNode() {}
+  virtual NodeType getType() const override {return NodeType::ScalarCos;}
+  virtual std::string className() const override {return "ScalarCos";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
 };
 
 /*! @brief Tangent. 1 parameter. */
-class TanNode : public AbstractNode
+class ScalarTanNode : public AbstractNode
 {
 public:
-  TanNode();
-  virtual ~TanNode() {}
-  virtual NodeType::Type getType() {return NodeType::Tan;}
-  virtual std::string className() {return "Tan";}
+  ScalarTanNode();
+  virtual ~ScalarTanNode() {}
+  virtual NodeType getType() const override {return NodeType::ScalarTan;}
+  virtual std::string className() const override {return "ScalarTan";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
 };
 
 /*! @brief Arc Sin. 1 parameter. */
-class AsinNode : public AbstractNode
+class ScalarAsinNode : public AbstractNode
 {
 public:
-  AsinNode();
-  virtual ~AsinNode() {}
-  virtual NodeType::Type getType() {return NodeType::Asin;}
-  virtual std::string className() {return "Asin";}
+  ScalarAsinNode();
+  virtual ~ScalarAsinNode() {}
+  virtual NodeType getType() const override {return NodeType::ScalarAsin;}
+  virtual std::string className() const override {return "ScalarAsin";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
 };
 
 /*! @brief Arc Cosine. 1 parameter.*/
-class AcosNode : public AbstractNode
+class ScalarAcosNode : public AbstractNode
 {
 public:
-  AcosNode();
-  virtual ~AcosNode() {}
-  virtual NodeType::Type getType() {return NodeType::Acos;}
-  virtual std::string className() {return "Acos";}
+  ScalarAcosNode();
+  virtual ~ScalarAcosNode() {}
+  virtual NodeType getType() const override {return NodeType::ScalarAcos;}
+  virtual std::string className() const override {return "ScalarAcos";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
 };
 
 /*! @brief Arc Tangent. 1 parameter. */
-class AtanNode : public AbstractNode
+class ScalarAtanNode : public AbstractNode
 {
 public:
-  AtanNode();
-  virtual ~AtanNode() {}
-  virtual NodeType::Type getType() {return NodeType::Atan;}
-  virtual std::string className() {return "Atan";}
+  ScalarAtanNode();
+  virtual ~ScalarAtanNode() {}
+  virtual NodeType getType() const override {return NodeType::ScalarAtan;}
+  virtual std::string className() const override {return "ScalarAtan";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
 };
 
 /*! @brief Arc Tangent function with 2 parameters.
  * 
  * first parameter is the y component and x is the second. Like std::atan2 function.
  */
-class Atan2Node : public AbstractNode
+class ScalarAtan2Node : public AbstractNode
 {
 public:
-  Atan2Node();
-  virtual ~Atan2Node() {}
-  virtual NodeType::Type getType() {return NodeType::Atan2;}
-  virtual std::string className() {return "Atan2";}
+  ScalarAtan2Node();
+  virtual ~ScalarAtan2Node() {}
+  virtual NodeType getType() const override {return NodeType::ScalarAtan2;}
+  virtual std::string className() const override {return "ScalarAtan2";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
 };
 
 /*! @brief Power. 2 parameters with one base and one exponent. */
-class PowNode : public AbstractNode
+class ScalarPowNode : public AbstractNode
 {
 public:
-  PowNode();
-  virtual ~PowNode() {}
-  virtual NodeType::Type getType() {return NodeType::Pow;}
-  virtual std::string className() {return "Pow";}
+  ScalarPowNode();
+  virtual ~ScalarPowNode() {}
+  virtual NodeType getType() const override {return NodeType::ScalarPow;}
+  virtual std::string className() const override {return "ScalarPow";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
 };
 
 /*! @brief Absolute Value. 1 parameter*/
-class AbsNode : public AbstractNode
+class ScalarAbsNode : public AbstractNode
 {
 public:
-  AbsNode();
-  virtual ~AbsNode() {}
-  virtual NodeType::Type getType() {return NodeType::Abs;}
-  virtual std::string className() {return "Abs";}
+  ScalarAbsNode();
+  virtual ~ScalarAbsNode() {}
+  virtual NodeType getType() const override {return NodeType::ScalarAbs;}
+  virtual std::string className() const override {return "ScalarAbs";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
 };
 
 /*! @brief Minimum Value. 2 parameters */
-class MinNode : public AbstractNode
+class ScalarMinNode : public AbstractNode
 {
 public:
-  MinNode();
-  virtual ~MinNode() {}
-  virtual NodeType::Type getType() {return NodeType::Min;}
-  virtual std::string className() {return "Min";}
+  ScalarMinNode();
+  virtual ~ScalarMinNode() {}
+  virtual NodeType getType() const override {return NodeType::ScalarMin;}
+  virtual std::string className() const override {return "ScalarMin";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
 };
 
 /*! @brief Maximum Value. 2 parameters */
-class MaxNode : public AbstractNode
+class ScalarMaxNode : public AbstractNode
 {
 public:
-  MaxNode();
-  virtual ~MaxNode() {}
-  virtual NodeType::Type getType() {return NodeType::Max;}
-  virtual std::string className() {return "Max";}
+  ScalarMaxNode();
+  virtual ~ScalarMaxNode() {}
+  virtual NodeType getType() const override {return NodeType::ScalarMax;}
+  virtual std::string className() const override {return "ScalarMax";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
 };
 
 /*! @brief Round Down. 2 parameters */
-class FloorNode : public AbstractNode
+class ScalarFloorNode : public AbstractNode
 {
 public:
-  FloorNode();
-  virtual ~FloorNode() {}
-  virtual NodeType::Type getType() {return NodeType::Floor;}
-  virtual std::string className() {return "Floor";}
+  ScalarFloorNode();
+  virtual ~ScalarFloorNode() {}
+  virtual NodeType getType() const override {return NodeType::ScalarFloor;}
+  virtual std::string className() const override {return "ScalarFloor";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
 };
 
 /*! @brief Round Up. 2 parameters */
-class CeilNode : public AbstractNode
+class ScalarCeilNode : public AbstractNode
 {
 public:
-  CeilNode();
-  virtual ~CeilNode() {}
-  virtual NodeType::Type getType() {return NodeType::Ceil;}
-  virtual std::string className() {return "Ceil";}
+  ScalarCeilNode();
+  virtual ~ScalarCeilNode() {}
+  virtual NodeType getType() const override {return NodeType::ScalarCeil;}
+  virtual std::string className() const override {return "ScalarCeil";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
 };
 
 /*! @brief Round. 2 parameters */
-class RoundNode : public AbstractNode
+class ScalarRoundNode : public AbstractNode
 {
 public:
-  RoundNode();
-  virtual ~RoundNode() {}
-  virtual NodeType::Type getType() {return NodeType::Round;}
-  virtual std::string className() {return "Round";}
+  ScalarRoundNode();
+  virtual ~ScalarRoundNode() {}
+  virtual NodeType getType() const override {return NodeType::ScalarRound;}
+  virtual std::string className() const override {return "ScalarRound";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
 };
 
 /*! @brief Convert radians to degrees. 1 parameter */
-class RadToDegNode : public AbstractNode
+class ScalarRadToDegNode : public AbstractNode
 {
 public:
-  RadToDegNode();
-  virtual ~RadToDegNode() {}
-  virtual NodeType::Type getType() {return NodeType::RadToDeg;}
-  virtual std::string className() {return "RadToDeg";}
+  ScalarRadToDegNode();
+  virtual ~ScalarRadToDegNode() {}
+  virtual NodeType getType() const override {return NodeType::ScalarRadToDeg;}
+  virtual std::string className() const override {return "ScalarRadToDeg";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
 };
 
 /*! @brief Convert degrees to radians. 1 parameter */
-class DegToRadNode : public AbstractNode
+class ScalarDegToRadNode : public AbstractNode
 {
 public:
-  DegToRadNode();
-  virtual ~DegToRadNode() {}
-  virtual NodeType::Type getType() {return NodeType::DegToRad;}
-  virtual std::string className() {return "DegToRad";}
+  ScalarDegToRadNode();
+  virtual ~ScalarDegToRadNode() {}
+  virtual NodeType getType() const override {return NodeType::ScalarDegToRad;}
+  virtual std::string className() const override {return "ScalarDegToRad";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
 };
 
 /*! @brief Logarithm. 1 parameter */
-class LogNode : public AbstractNode
+class ScalarLogNode : public AbstractNode
 {
 public:
-  LogNode();
-  virtual ~LogNode() {}
-  virtual NodeType::Type getType() {return NodeType::Log;}
-  virtual std::string className() {return "Log";}
+  ScalarLogNode();
+  virtual ~ScalarLogNode() {}
+  virtual NodeType getType() const override {return NodeType::ScalarLog;}
+  virtual std::string className() const override {return "ScalarLog";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
 };
 
 /*! @brief Exponent. 1 parameter */
-class ExpNode : public AbstractNode
+class ScalarExpNode : public AbstractNode
 {
 public:
-  ExpNode();
-  virtual ~ExpNode() {}
-  virtual NodeType::Type getType() {return NodeType::Exp;}
-  virtual std::string className() {return "Exp";}
+  ScalarExpNode();
+  virtual ~ScalarExpNode() {}
+  virtual NodeType getType() const override {return NodeType::ScalarExp;}
+  virtual std::string className() const override {return "ScalarExp";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
 };
 
 /*! @brief Square root. 1 parameter */
-class SqrtNode : public AbstractNode
+class ScalarSqrtNode : public AbstractNode
 {
 public:
-  SqrtNode();
-  virtual ~SqrtNode() {}
-  virtual NodeType::Type getType() {return NodeType::Sqrt;}
-  virtual std::string className() {return "Sqrt";}
+  ScalarSqrtNode();
+  virtual ~ScalarSqrtNode() {}
+  virtual NodeType getType() const override {return NodeType::ScalarSqrt;}
+  virtual std::string className() const override {return "ScalarSqrt";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
 };
 
 /*! @brief Hypotenuse. 2 parameters */
-class HypotNode : public AbstractNode
+class ScalarHypotNode : public AbstractNode
 {
 public:
-  HypotNode();
-  virtual ~HypotNode() {}
-  virtual NodeType::Type getType() {return NodeType::Hypot;}
-  virtual std::string className() {return "Hypot";}
+  ScalarHypotNode();
+  virtual ~ScalarHypotNode() {}
+  virtual NodeType getType() const override {return NodeType::ScalarHypot;}
+  virtual std::string className() const override {return "ScalarHypot";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
 };
 
 /*! @brief If, Then, Else. 4 parameters */
-class ConditionalNode : public AbstractNode
+class ScalarConditionalNode : public AbstractNode
 {
 public:
   enum Type{None, GreaterThan, LessThan, GreaterThanEqual, LessThanEqual, Equal, NotEqual};
-  ConditionalNode();
-  virtual ~ConditionalNode() {}
-  virtual NodeType::Type getType() {return NodeType::Conditional;}
-  virtual std::string className() {return "Conditional";}
+  ScalarConditionalNode();
+  virtual ~ScalarConditionalNode() {}
+  virtual NodeType getType() const override {return NodeType::ScalarConditional;}
+  virtual std::string className() const override {return "ScalarConditional";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Scalar;}
   Type type;
 };
 
