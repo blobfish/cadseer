@@ -25,7 +25,7 @@
 #include <QTimer>
 #include <QKeyEvent>
 
-#include <expressions/expressionmanager.h>
+#include <expressions/manager.h>
 #include <expressions/stringtranslator.h>
 #include <dialogs/expressionedit.h>
 #include <preferences/preferencesXML.h>

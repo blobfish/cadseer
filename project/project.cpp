@@ -41,7 +41,7 @@
 #include <feature/base.h>
 #include <feature/seershape.h>
 #include <feature/inert.h>
-#include <expressions/expressionmanager.h>
+#include <expressions/manager.h>
 #include <expressions/stringtranslator.h> //for serialize.
 #include <project/message.h>
 #include <message/message.h>

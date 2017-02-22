@@ -25,7 +25,7 @@
 #include <QTimer>
 
 #include <tools/idtools.h>
-#include <expressions/expressionmanager.h>
+#include <expressions/manager.h>
 #include <expressions/stringtranslator.h>
 #include <application/application.h>
 #include <project/project.h>

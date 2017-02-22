@@ -37,9 +37,9 @@
 #include <preferences/manager.h>
 
 #include <tools/idtools.h>
-#include <expressions/expressionedgeproperty.h>
-#include <expressions/expressiongraph.h>
-#include <expressions/expressionmanager.h>
+#include <expressions/edgeproperty.h>
+#include <expressions/graph.h>
+#include <expressions/manager.h>
 
 //temp.
 #include <sstream>

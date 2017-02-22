@@ -24,7 +24,7 @@
 #include <boost/graph/topological_sort.hpp>
 #include <boost/graph/graphviz.hpp>
 
-#include <expressions/expressiongraph.h>
+#include <expressions/graph.h>
 
 using namespace expr;
 

@@ -25,7 +25,7 @@
 
 #include <expressions/stringtranslatorstow.h>
 #include <expressions/stringtranslator.h>
-#include <expressions/expressionmanager.h>
+#include <expressions/manager.h>
 
 using namespace expr;
 

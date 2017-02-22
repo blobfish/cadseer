@@ -42,7 +42,7 @@
 #include <dialogs/expressionedit.h>
 #include <expressions/tableview.h>
 #include <expressions/tablemodel.h>
-#include <expressions/expressionmanager.h>
+#include <expressions/manager.h>
 #include <expressions/stringtranslator.h>
 
 using namespace expr;

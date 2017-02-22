@@ -35,8 +35,8 @@
 #include <message/observer.h>
 #include <expressions/tablemodel.h>
 #include <expressions/tableview.h>
-#include <expressions/expressionmanager.h>
-#include <expressions/expressionwidget.h>
+#include <expressions/manager.h>
+#include <expressions/widget.h>
 #include <project/project.h>
 
 using namespace expr;

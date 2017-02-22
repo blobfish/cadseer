@@ -45,7 +45,7 @@
 #include <application/mainwindow.h>
 #include <application/splitterdecorated.h>
 #include <project/project.h>
-#include <expressions/expressionmanager.h>
+#include <expressions/manager.h>
 #include <expressions/stringtranslator.h>
 #include <message/message.h>
 #include <message/observer.h>

@@ -136,9 +136,9 @@ SET(FEATURE_SOURCES
     
 SET(EXPRESSION_SOURCES
     expressions/abstractnode.cpp
-    expressions/expressiongraph.cpp
-    expressions/expressionmanager.cpp
-    expressions/expressionwidget.cpp
+    expressions/graph.cpp
+    expressions/manager.cpp
+    expressions/widget.cpp
     expressions/stringtranslator.cpp
     expressions/stringtranslatorstow.cpp
     expressions/tablemodel.cpp
@@ -294,7 +294,7 @@ SET(CADSEER_MOC_HDRS
     preferences/dialog.h
     dialogs/parameterdialog.h
     project/projectdialog.h
-    expressions/expressionwidget.h
+    expressions/widget.h
     expressions/tablemodel.h
     expressions/tableview.h
     )

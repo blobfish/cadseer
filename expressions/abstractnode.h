@@ -22,7 +22,7 @@
 
 #include <boost/uuid/uuid.hpp>
 
-#include <expressions/expressionedgeproperty.h>
+#include <expressions/edgeproperty.h>
 #include <expressions/value.h>
 
 namespace expr{
