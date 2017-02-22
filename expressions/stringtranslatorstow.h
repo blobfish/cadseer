@@ -35,7 +35,7 @@ namespace expr
   {
   public:
     //! construct a translator
-    StringTranslatorStow(expr::ExpressionManager &eManagerIn);
+    StringTranslatorStow(expr::Manager &eManagerIn);
     ~StringTranslatorStow();
     
     /*! @brief Construct graph representation from the string.
@@ -134,8 +134,8 @@ namespace expr
     */
     void cleanFailedParse();
     
-    //!ExpressionManager to work on.
-    expr::ExpressionManager &eManager;
+    //!Manager to work on.
+    expr::Manager &eManager;
     //!GraphWrapper to work on.
     expr::GraphWrapper &graphWrapper;
     

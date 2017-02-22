@@ -416,7 +416,7 @@ private:
     expr::Vertex startVertex;
 };
   
-StringTranslatorStow::StringTranslatorStow(ExpressionManager &eManagerIn) : failedPosition(-1), eManager(eManagerIn),
+StringTranslatorStow::StringTranslatorStow(Manager &eManagerIn) : failedPosition(-1), eManager(eManagerIn),
   graphWrapper(eManager.getGraphWrapper())
 {
 }

@@ -31,7 +31,7 @@ class QTextStream;
 class TopoDS_Shape;
 
 namespace msg{class Message; class Observer;}
-namespace expr{class ExpressionManager;}
+namespace expr{class Manager;}
 
 typedef std::map<boost::uuids::uuid, prg::Vertex> IdVertexMap;
 
@@ -71,7 +71,7 @@ public:
     ftr::EditMap getParentMap(const boost::uuids::uuid&) const;
     std::vector<boost::uuids::uuid> getLeafChildren(const boost::uuids::uuid&) const;
     
-    expr::ExpressionManager& getExpressionManager(){return *expressionManager;}
+    expr::Manager& getManager(){return *expressionManager;}
     
     QTextStream& getInfo(QTextStream&) const;
     
@@ -92,7 +92,7 @@ private:
     std::string saveDirectory;
     void serialWrite();
     std::unique_ptr<GitManager> gitManager;
-    std::unique_ptr<expr::ExpressionManager> expressionManager;
+    std::unique_ptr<expr::Manager> expressionManager;
     bool isLoading = false;
     
     std::unique_ptr<msg::Observer> observer;

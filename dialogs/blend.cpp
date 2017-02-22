@@ -142,7 +142,7 @@ Blend::Blend(ftr::Blend *editBlendIn, QWidget *parent) : QDialog(parent), blend(
     }
     else
     {
-      const expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
+      const expr::Manager &eManager = static_cast<app::Application *>(qApp)->getProject()->getManager();
       assert(eManager.hasParameterLink(simpleBlend.radius->getId()));
       cItem->expressionLinkId = eManager.getFormulaLink(simpleBlend.radius->getId());
     }
@@ -169,7 +169,7 @@ Blend::Blend(ftr::Blend *editBlendIn, QWidget *parent) : QDialog(parent), blend(
       }
       else
       {
-        const expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
+        const expr::Manager &eManager = static_cast<app::Application *>(qApp)->getProject()->getManager();
         assert(eManager.hasParameterLink(entry.radius->getId()));
         bEntry.expressionLinkId = eManager.getFormulaLink(entry.radius->getId());
       }
@@ -335,8 +335,8 @@ void Blend::finishDialog()
 
 void Blend::updateBlendFeature()
 {
-  expr::ExpressionManager &eManager = 
-    static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
+  expr::Manager &eManager = 
+    static_cast<app::Application *>(qApp)->getProject()->getManager();
   
   for (int index = 0; index < blendList->count(); ++index)
   {
@@ -690,7 +690,7 @@ void Blend::fillInConstant(const ConstantItem &itemIn)
   }
   else
   {
-    const expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
+    const expr::Manager &eManager = static_cast<app::Application *>(qApp)->getProject()->getManager();
     assert(eManager.hasFormula(itemIn.expressionLinkId));
     constantRadiusEdit->lineEdit->setText
       (QString::fromStdString(eManager.getFormulaName(itemIn.expressionLinkId)));
@@ -728,7 +728,7 @@ void Blend::fillInVariable(const VariableItem &itemIn)
     }
     else
     {
-      const expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
+      const expr::Manager &eManager = static_cast<app::Application *>(qApp)->getProject()->getManager();
       assert(eManager.hasFormula(constraint.expressionLinkId));
       QString radiusString = QString::fromStdString(eManager.getFormulaName(constraint.expressionLinkId));
       QTableWidgetItem *radiusItem = addVariableTableItem(radiusString, constraint.typeString, constraint.pickId);
@@ -769,7 +769,7 @@ void Blend::constantRadiusEditingFinishedSlot()
   if (!cItem->expressionLinkId.is_nil())
     return;
   
-  expr::ExpressionManager localManager;
+  expr::Manager localManager;
   expr::StringTranslator translator(localManager);
   std::string formula("temp = ");
   formula += constantRadiusEdit->lineEdit->text().toStdString();
@@ -797,7 +797,7 @@ void Blend::constantRadiusEditedSlot(const QString &textIn)
   constantRadiusEdit->trafficLabel->setTrafficYellowSlot();
   qApp->processEvents(); //need this or we never see yellow signal.
   
-  expr::ExpressionManager localManager;
+  expr::Manager localManager;
   expr::StringTranslator translator(localManager);
   std::string formula("temp = ");
   formula += textIn.toStdString();
@@ -1230,7 +1230,7 @@ void Blend::requestConstantLinkSlot(const QString &stringIn)
 {
   boost::uuids::uuid formulaId = gu::stringToId(stringIn.toStdString());
   assert(!formulaId.is_nil());
-  expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
+  expr::Manager &eManager = static_cast<app::Application *>(qApp)->getProject()->getManager();
   assert(eManager.hasFormula(formulaId));
   
   ConstantItem *cItem = dynamic_cast<ConstantItem*>(blendList->selectedItems().front());
@@ -1247,7 +1247,7 @@ void Blend::requestConstantLinkSlot(const QString &stringIn)
 
 void Blend::requestConstantUnlinkSlot()
 {
-  expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
+  expr::Manager &eManager = static_cast<app::Application *>(qApp)->getProject()->getManager();
   
   ConstantItem *cItem = dynamic_cast<ConstantItem*>(blendList->selectedItems().front());
   assert(cItem);
@@ -1267,7 +1267,7 @@ void Blend::requestVariableLinkSlot(QTableWidgetItem *item, const QString &idIn)
 {
   uuid expressionId = gu::stringToId(idIn.toStdString());
   assert(!expressionId.is_nil());
-  expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
+  expr::Manager &eManager = static_cast<app::Application *>(qApp)->getProject()->getManager();
   assert(eManager.hasFormula(expressionId));
   if (!(eManager.getFormulaValue(expressionId) > 0.0))
   {
@@ -1312,7 +1312,7 @@ void Blend::requestVariableUnlinkSlot()
   uuid pickId = gu::stringToId(variableTableWidget->model()->data(idIndex).toString().toStdString());
   assert(!pickId.is_nil());
   
-  expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
+  expr::Manager &eManager = static_cast<app::Application *>(qApp)->getProject()->getManager();
   
   for (auto &constraint : vItem->constraints)
   {
@@ -1597,7 +1597,7 @@ void VariableDelegate::setModelData(QWidget*, QAbstractItemModel* model, const Q
   if (isExpressionLinked)
     return; //shouldn't need to do anything if the expression is linked.
   
-  expr::ExpressionManager localManager;
+  expr::Manager localManager;
   expr::StringTranslator translator(localManager);
   std::string formula("temp = ");
   formula += eEditor->lineEdit->text().toStdString();
@@ -1642,7 +1642,7 @@ void VariableDelegate::textEditedSlot(const QString &textIn)
   eEditor->trafficLabel->setTrafficYellowSlot();
   qApp->processEvents(); //need this or we never see yellow signal.
   
-  expr::ExpressionManager localManager;
+  expr::Manager localManager;
   expr::StringTranslator translator(localManager);
   std::string formula("temp = ");
   formula += textIn.toStdString();

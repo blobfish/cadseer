@@ -66,7 +66,7 @@ Project::Project()
   std::unique_ptr<GitManager> tempManager(new GitManager());
   gitManager = std::move(tempManager);
   
-  std::unique_ptr<expr::ExpressionManager> tempEManager(new expr::ExpressionManager());
+  std::unique_ptr<expr::Manager> tempEManager(new expr::Manager());
   expressionManager = std::move(tempEManager);
 }
 

@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef EXPRESSIONGRAPH_H
-#define EXPRESSIONGRAPH_H
+#ifndef EXPR_GRAPH_H
+#define EXPR_GRAPH_H
 
 #include <memory>
 #include <stack>
@@ -126,7 +126,7 @@ public:
   /*! @brief Remove formula.
    * 
    * Any dependent formula will be replaced by a constant node of formulas current value.
-   * Don't call these directly. Go through the manager so groups will be updated. @see ExpressionManager::removeFormula
+   * Don't call these directly. Go through the manager so groups will be updated. @see Manager::removeFormula
    */
   void removeFormula(const boost::uuids::uuid &idIn);
   void removeFormula(const Vertex &vertexIn);
@@ -463,4 +463,4 @@ private:
 };
 
 }
-#endif // EXPRESSIONGRAPH_H
+#endif // EXPR_GRAPH_H

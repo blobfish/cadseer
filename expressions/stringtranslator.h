@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef STRINGTRANSLATOR_H
-#define STRINGTRANSLATOR_H
+#ifndef EXPR_STRINGTRANSLATOR_H
+#define EXPR_STRINGTRANSLATOR_H
 
 #include <memory>
 
@@ -27,14 +27,14 @@
 namespace expr
 {
   class StringTranslatorStow;
-  class ExpressionManager;
+  class Manager;
   
   class StringTranslator
   {
     public:
       enum TotalState{None, ParseFailed, ParseSucceeded};
       
-      StringTranslator(ExpressionManager &);
+      StringTranslator(Manager &);
       ~StringTranslator();
       
       //! parse the string.
@@ -47,11 +47,11 @@ namespace expr
       std::string buildStringRhs(const boost::uuids::uuid &) const;
       //! Get the id of the newly created or edit formula
       boost::uuids::uuid getFormulaOutId() const;
-      //! the underlying ExpressionManager.
-      ExpressionManager& eManager;
+      //! the underlying Manager.
+      Manager& eManager;
     private:
       std::unique_ptr<StringTranslatorStow> translatorStow;
   };
 }
 
-#endif // STRINGTRANSLATOR_H
+#endif // EXPR_STRINGTRANSLATOR_H

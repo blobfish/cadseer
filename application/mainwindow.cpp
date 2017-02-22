@@ -55,7 +55,7 @@ MainWindow::MainWindow(QWidget *parent) :
     dagModel = new dag::Model(this);
     dagView = new dag::View(this);
     dagView->setScene(dagModel);
-    expressionWidget = new expr::ExpressionWidget(this);
+    expressionWidget = new expr::Widget(this);
     SplitterDecorated *subSplitter = new SplitterDecorated(this);
     subSplitter->setOrientation(Qt::Vertical);
     subSplitter->addWidget(expressionWidget);

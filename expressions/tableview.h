@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef TABLEVIEW_H
-#define TABLEVIEW_H
+#ifndef EXPR_TABLEVIEW_H
+#define EXPR_TABLEVIEW_H
 
 #include <QTableView>
 #include <QStyledItemDelegate>
@@ -160,4 +160,4 @@ public:
 }
 
 
-#endif // TABLEVIEW_H
+#endif // EXPR_TABLEVIEW_H

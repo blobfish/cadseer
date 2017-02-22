@@ -67,52 +67,52 @@ void Group::removeFormula(const boost::uuids::uuid& fIdIn)
   formulaIds.erase(it);
 }
 
-ExpressionManager::ExpressionManager()
+Manager::Manager()
 {
   graphPtr = std::move(std::unique_ptr<GraphWrapper>(new GraphWrapper()));
   
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
-  observer->name = "expr::ExpressionWidget";
+  observer->name = "expr::Widget";
   setupDispatcher();
   
   //allgroup id set upon serialize restore.
   allGroup.name = "All";
 }
 
-ExpressionManager::~ExpressionManager()
+Manager::~Manager()
 {
 
 }
 
-GraphWrapper& ExpressionManager::getGraphWrapper()
+GraphWrapper& Manager::getGraphWrapper()
 {
   return *graphPtr;
 }
 
-void ExpressionManager::update()
+void Manager::update()
 {
   graphPtr->update();
   dispatchValues();
 }
 
-void ExpressionManager::writeOutGraph(const std::string& pathName)
+void Manager::writeOutGraph(const std::string& pathName)
 {
   graphPtr->writeOutGraph(pathName);
 }
 
-void ExpressionManager::addFormulaToAllGroup(boost::uuids::uuid idIn)
+void Manager::addFormulaToAllGroup(boost::uuids::uuid idIn)
 {
   allGroup.formulaIds.push_back(idIn);
 }
 
-void ExpressionManager::removeFormulaFromAllGroup(boost::uuids::uuid idIn)
+void Manager::removeFormulaFromAllGroup(boost::uuids::uuid idIn)
 {
   std::vector<boost::uuids::uuid>::iterator it = std::find(allGroup.formulaIds.begin(), allGroup.formulaIds.end(), idIn);
   assert (it != allGroup.formulaIds.end());
   allGroup.formulaIds.erase(it);
 }
 
-boost::uuids::uuid ExpressionManager::createUserGroup(const std::string& groupNameIn)
+boost::uuids::uuid Manager::createUserGroup(const std::string& groupNameIn)
 {
   //ensure unique group name.
   for (std::vector<Group>::iterator it = userDefinedGroups.begin(); it != userDefinedGroups.end(); ++it)
@@ -127,7 +127,7 @@ boost::uuids::uuid ExpressionManager::createUserGroup(const std::string& groupNa
   return virginGroup.id;
 }
 
-void ExpressionManager::renameUserGroup(const boost::uuids::uuid& idIn, const std::string &newName)
+void Manager::renameUserGroup(const boost::uuids::uuid& idIn, const std::string &newName)
 {
   assert(this->hasUserGroup(idIn));
   assert(!this->hasUserGroup(newName));
@@ -141,7 +141,7 @@ void ExpressionManager::renameUserGroup(const boost::uuids::uuid& idIn, const st
   }
 }
 
-void ExpressionManager::removeUserGroup(const boost::uuids::uuid& idIn)
+void Manager::removeUserGroup(const boost::uuids::uuid& idIn)
 {
   for (std::vector<Group>::iterator it = userDefinedGroups.begin(); it != userDefinedGroups.end(); ++it)
   {
@@ -154,7 +154,7 @@ void ExpressionManager::removeUserGroup(const boost::uuids::uuid& idIn)
   assert(0); //no group of that id.
 }
 
-bool ExpressionManager::hasUserGroup(const std::string& groupNameIn) const
+bool Manager::hasUserGroup(const std::string& groupNameIn) const
 {
   for (std::vector<Group>::const_iterator it = userDefinedGroups.begin(); it != userDefinedGroups.end(); ++it)
   {
@@ -164,7 +164,7 @@ bool ExpressionManager::hasUserGroup(const std::string& groupNameIn) const
   return false;
 }
 
-bool ExpressionManager::hasUserGroup(const boost::uuids::uuid& groupIdIn) const
+bool Manager::hasUserGroup(const boost::uuids::uuid& groupIdIn) const
 {
   for (std::vector<Group>::const_iterator it = userDefinedGroups.begin(); it != userDefinedGroups.end(); ++it)
   {
@@ -174,7 +174,7 @@ bool ExpressionManager::hasUserGroup(const boost::uuids::uuid& groupIdIn) const
   return false;
 }
 
-void ExpressionManager::addFormulaToUserGroup(const boost::uuids::uuid& groupIdIn, const boost::uuids::uuid& formulaIdIn)
+void Manager::addFormulaToUserGroup(const boost::uuids::uuid& groupIdIn, const boost::uuids::uuid& formulaIdIn)
 {
   for (std::vector<Group>::iterator groupIt = userDefinedGroups.begin(); groupIt != userDefinedGroups.end(); ++groupIt)
   {
@@ -185,7 +185,7 @@ void ExpressionManager::addFormulaToUserGroup(const boost::uuids::uuid& groupIdI
   }
 }
 
-bool ExpressionManager::doesUserGroupContainFormula(const boost::uuids::uuid& groupIdIn, const boost::uuids::uuid& formulaIdIn)
+bool Manager::doesUserGroupContainFormula(const boost::uuids::uuid& groupIdIn, const boost::uuids::uuid& formulaIdIn)
 {
   for (std::vector<Group>::iterator groupIt = userDefinedGroups.begin(); groupIt != userDefinedGroups.end(); ++groupIt)
   {
@@ -198,7 +198,7 @@ bool ExpressionManager::doesUserGroupContainFormula(const boost::uuids::uuid& gr
   return false;
 }
 
-void ExpressionManager::removeFormulaFromUserGroup(const boost::uuids::uuid& groupIdIn, const boost::uuids::uuid& formulaIdIn)
+void Manager::removeFormulaFromUserGroup(const boost::uuids::uuid& groupIdIn, const boost::uuids::uuid& formulaIdIn)
 {
   for (std::vector<Group>::iterator groupIt = userDefinedGroups.begin(); groupIt != userDefinedGroups.end(); ++groupIt)
   {
@@ -215,7 +215,7 @@ void ExpressionManager::removeFormulaFromUserGroup(const boost::uuids::uuid& gro
   assert(0); //couldn't find group with id and or formula with id.
 }
 
-boost::uuids::uuid ExpressionManager::getUserGroupId(const std::string& groupNameIn) const
+boost::uuids::uuid Manager::getUserGroupId(const std::string& groupNameIn) const
 {
   for (std::vector<Group>::const_iterator groupIt = userDefinedGroups.begin(); groupIt != userDefinedGroups.end(); ++groupIt)
   {
@@ -227,13 +227,13 @@ boost::uuids::uuid ExpressionManager::getUserGroupId(const std::string& groupNam
   assert(0); //no user group of name.
 }
 
-boost::uuids::uuid ExpressionManager::getFormulaId(const std::string& nameIn) const
+boost::uuids::uuid Manager::getFormulaId(const std::string& nameIn) const
 {
   assert(graphPtr->hasFormula(nameIn));
   return (graphPtr->getFormulaId(nameIn));
 }
 
-void ExpressionManager::setFormulaId(const boost::uuids::uuid &oldIdIn, const boost::uuids::uuid &newIdIn)
+void Manager::setFormulaId(const boost::uuids::uuid &oldIdIn, const boost::uuids::uuid &newIdIn)
 {
   assert(graphPtr->hasFormula(oldIdIn));
   
@@ -245,69 +245,69 @@ void ExpressionManager::setFormulaId(const boost::uuids::uuid &oldIdIn, const bo
   graphPtr->setFormulaId(oldIdIn, newIdIn);
 }
 
-std::string ExpressionManager::getFormulaName(const boost::uuids::uuid& idIn) const
+std::string Manager::getFormulaName(const boost::uuids::uuid& idIn) const
 {
   assert(graphPtr->hasFormula(idIn));
   return graphPtr->getFormulaName(idIn);
 }
 
-bool ExpressionManager::hasFormula(const uuid& idIn) const
+bool Manager::hasFormula(const uuid& idIn) const
 {
   return graphPtr->hasFormula(idIn);
 }
 
-bool ExpressionManager::hasFormula(const std::string& nameIn) const
+bool Manager::hasFormula(const std::string& nameIn) const
 {
   return graphPtr->hasFormula(nameIn);
 }
 
-double ExpressionManager::getFormulaValue(const uuid& idIn) const
+double Manager::getFormulaValue(const uuid& idIn) const
 {
   assert(graphPtr->hasFormula(idIn));
   return graphPtr->getFormulaValue(idIn);
 }
 
-void ExpressionManager::setFormulaName(const uuid& idIn, const std::string& nameIn)
+void Manager::setFormulaName(const uuid& idIn, const std::string& nameIn)
 {
   assert(graphPtr->hasFormula(idIn));
   graphPtr->setFormulaName(idIn, nameIn);
 }
 
-void ExpressionManager::cleanFormula(const uuid& idIn)
+void Manager::cleanFormula(const uuid& idIn)
 {
   assert(graphPtr->hasFormula(idIn));
   graphPtr->cleanFormula(idIn);
 }
 
-bool ExpressionManager::hasCycle(const uuid& idIn, std::string& nameOut)
+bool Manager::hasCycle(const uuid& idIn, std::string& nameOut)
 {
   assert(graphPtr->hasFormula(idIn));
   return graphPtr->hasCycle(idIn, nameOut);
 }
 
-void ExpressionManager::setFormulaDependentsDirty(const uuid& idIn)
+void Manager::setFormulaDependentsDirty(const uuid& idIn)
 {
   assert(graphPtr->hasFormula(idIn));
   graphPtr->setFormulaDependentsDirty(idIn);
 }
 
-std::vector< uuid > ExpressionManager::getDependentFormulaIds(const uuid& parentIn)
+std::vector< uuid > Manager::getDependentFormulaIds(const uuid& parentIn)
 {
   assert(graphPtr->hasFormula(parentIn));
   return graphPtr->getDependentFormulaIds(parentIn);
 }
 
-std::vector< uuid > ExpressionManager::getAllFormulaIdsSorted() const
+std::vector< uuid > Manager::getAllFormulaIdsSorted() const
 {
   return graphPtr->getAllFormulaIdsSorted();
 }
 
-std::vector< uuid > ExpressionManager::getAllFormulaIds() const
+std::vector< uuid > Manager::getAllFormulaIds() const
 {
   return graphPtr->getAllFormulaIds();
 }
 
-std::string ExpressionManager::getUserGroupName(const boost::uuids::uuid& groupIdIn) const
+std::string Manager::getUserGroupName(const boost::uuids::uuid& groupIdIn) const
 {
   for (std::vector<Group>::const_iterator groupIt = userDefinedGroups.begin(); groupIt != userDefinedGroups.end(); ++groupIt)
   {
@@ -319,14 +319,14 @@ std::string ExpressionManager::getUserGroupName(const boost::uuids::uuid& groupI
   assert(0); //no user group of id.
 }
 
-void ExpressionManager::removeFormula(const std::string& nameIn)
+void Manager::removeFormula(const std::string& nameIn)
 {
   assert(graphPtr->hasFormula(nameIn));
   boost::uuids::uuid fId = graphPtr->getFormulaId(nameIn);
   this->removeFormula(fId);
 }
 
-void ExpressionManager::removeFormula(const boost::uuids::uuid& idIn)
+void Manager::removeFormula(const boost::uuids::uuid& idIn)
 {
   removeFormulaFromAllGroup(idIn);
   for (std::vector<Group>::iterator it = userDefinedGroups.begin(); it != userDefinedGroups.end(); ++it)
@@ -352,7 +352,7 @@ void ExpressionManager::removeFormula(const boost::uuids::uuid& idIn)
   formulaLinks.get<FormulaLink::ByFormulaId>().erase(it2, itEnd);
 }
 
-void ExpressionManager::addLink(ftr::Parameter *parameterIn, const uuid &formulaIdIn)
+void Manager::addLink(ftr::Parameter *parameterIn, const uuid &formulaIdIn)
 {
   FormulaLink virginLink;
   virginLink.parameterId = parameterIn->getId();
@@ -367,7 +367,7 @@ void ExpressionManager::addLink(ftr::Parameter *parameterIn, const uuid &formula
   parameterIn->setConstant(false);
 }
 
-void ExpressionManager::removeParameterLink(const uuid &parameterIdIn)
+void Manager::removeParameterLink(const uuid &parameterIdIn)
 {
   //a parameter can only have one link. so no equal range for this.
   
@@ -380,14 +380,14 @@ void ExpressionManager::removeParameterLink(const uuid &parameterIdIn)
   formulaLinks.get<FormulaLink::ByParameterId>().erase(it);
 }
 
-bool ExpressionManager::hasParameterLink(const uuid &parameterIdIn) const
+bool Manager::hasParameterLink(const uuid &parameterIdIn) const
 {
   FormulaLinkContainerType::index<FormulaLink::ByParameterId>::type::iterator it;
   it = formulaLinks.get<FormulaLink::ByParameterId>().find(parameterIdIn);
   return it != formulaLinks.get<FormulaLink::ByParameterId>().end();
 }
 
-uuid ExpressionManager::getFormulaLink(const uuid &parameterIdIn) const
+uuid Manager::getFormulaLink(const uuid &parameterIdIn) const
 {
   FormulaLinkContainerType::index<FormulaLink::ByParameterId>::type::iterator it;
   it = formulaLinks.get<FormulaLink::ByParameterId>().find(parameterIdIn);
@@ -396,7 +396,7 @@ uuid ExpressionManager::getFormulaLink(const uuid &parameterIdIn) const
   return it->formulaId;
 }
 
-bool ExpressionManager::isFormulaLinked(const uuid &formulaIdIn) const
+bool Manager::isFormulaLinked(const uuid &formulaIdIn) const
 {
   FormulaLinkContainerType::index<FormulaLink::ByFormulaId>::type::iterator it, itEnd;
   
@@ -404,7 +404,7 @@ bool ExpressionManager::isFormulaLinked(const uuid &formulaIdIn) const
   return it != itEnd;
 }
 
-std::vector<uuid> ExpressionManager::getParametersLinked(const uuid &formulaIdIn) const
+std::vector<uuid> Manager::getParametersLinked(const uuid &formulaIdIn) const
 {
   std::vector<uuid> out;
   
@@ -415,7 +415,7 @@ std::vector<uuid> ExpressionManager::getParametersLinked(const uuid &formulaIdIn
   return out;
 }
 
-void ExpressionManager::dispatchValues()
+void Manager::dispatchValues()
 {
   /* it is safe to just send all the values because, each parameter
    * makes sure the new value is different than the old
@@ -428,7 +428,7 @@ void ExpressionManager::dispatchValues()
   }
 }
 
-void ExpressionManager::dumpLinks(std::ostream& stream)
+void Manager::dumpLinks(std::ostream& stream)
 {
   FormulaLinkContainerType::const_iterator it;
   for (it = formulaLinks.begin(); it != formulaLinks.end(); ++it)
@@ -439,15 +439,15 @@ void ExpressionManager::dumpLinks(std::ostream& stream)
   }
 }
 
-void ExpressionManager::setupDispatcher()
+void Manager::setupDispatcher()
 {
   msg::Mask mask;
   
   mask = msg::Response | msg::Pre | msg::Remove | msg::Feature;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ExpressionManager::featureRemovedDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::featureRemovedDispatched, this, _1)));
 }
 
-void ExpressionManager::featureRemovedDispatched(const msg::Message &messageIn)
+void Manager::featureRemovedDispatched(const msg::Message &messageIn)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
@@ -468,7 +468,7 @@ void ExpressionManager::featureRemovedDispatched(const msg::Message &messageIn)
   }
 }
 
-QTextStream& ExpressionManager::getInfo(QTextStream &stream) const
+QTextStream& Manager::getInfo(QTextStream &stream) const
 {
   stream << endl << QObject::tr("Formulas:") << endl;
   auto ids = getAllFormulaIds();

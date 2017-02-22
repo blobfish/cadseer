@@ -29,7 +29,7 @@
 
 using namespace expr;
 
-StringTranslator::StringTranslator(ExpressionManager &eManagerIn) : eManager(eManagerIn)
+StringTranslator::StringTranslator(Manager &eManagerIn) : eManager(eManagerIn)
 {
   translatorStow = std::move(std::unique_ptr<StringTranslatorStow>(new StringTranslatorStow(eManagerIn)));
 }

@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef SCOPEDEXPRESSIONWIDGET_H
-#define SCOPEDEXPRESSIONWIDGET_H
+#ifndef EXPR_WIDGET_H
+#define EXPR_WIDGET_H
 
 #include <memory>
 
@@ -31,24 +31,24 @@ class QToolBar;
 
 namespace expr
 {
-  class ExpressionManager;
+  class Manager;
   class TableModel;
   class TableViewAll;
 
-/*! @brief Widget for interacting with one ExpressionManager
+/*! @brief Widget for interacting with one Manager
  * 
  * Contains a tab widget containing a widget for each group.
  */
-class ExpressionWidget : public QWidget
+class Widget : public QWidget
 {
   Q_OBJECT
 public:
-    explicit ExpressionWidget(QWidget* parent = 0, Qt::WindowFlags f = 0);
-    virtual ~ExpressionWidget() override;
+    explicit Widget(QWidget* parent = 0, Qt::WindowFlags f = 0);
+    virtual ~Widget() override;
     
     //! acts as a parent of all widgets and allows us to remove all the widgets between close and open of projects.
     TableViewAll *tableViewAll = nullptr;
-    //! Model interface between the ExpressionManager and the Qt MVC framework.
+    //! Model interface between the Manager and the Qt MVC framework.
     TableModel *mainTable = nullptr;
     //! Each tab will be a group. Will have at least one, the allGroup.
     QTabWidget *tabWidget = nullptr;
@@ -77,8 +77,8 @@ private:
   void addGroupView(const boost::uuids::uuid &idIn, const QString &name);
   //! Build examples string.
   std::string buildExamplesString();
-  //! ExpressionManager to interface with.
-  ExpressionManager *eManager = nullptr;
+  //! Manager to interface with.
+  Manager *eManager = nullptr;
   std::unique_ptr<msg::Observer> observer;
   void setupDispatcher();
   void closeProjectDispatched(const msg::Message &);
@@ -86,4 +86,4 @@ private:
 };
 }
 
-#endif // SCOPEDEXPRESSIONWIDGET_H
+#endif // EXPR_WIDGET_H

@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef TABLEMODEL_H
-#define TABLEMODEL_H
+#ifndef EXPR_TABLEMODEL_H
+#define EXPR_TABLEMODEL_H
 
 #include <memory>
 #include <vector>
@@ -34,11 +34,11 @@
 namespace msg{class Message; class Observer;}
 
 namespace expr{
-  class ExpressionManager;
+  class Manager;
   class Group;
   class StringTranslator;
 
-/*! @brief Main interface between ExpressionManager and Qt MVC
+/*! @brief Main interface between Manager and Qt MVC
  * 
  * LastFailed* members are used to store information from a failed parse.
  * The delegate uses #lastFailedPosition and #lastFailedText to restore and highlight
@@ -48,7 +48,7 @@ class TableModel : public QAbstractTableModel
 {
   Q_OBJECT
 public:
-    explicit TableModel(expr::ExpressionManager &eManagerIn, QObject* parent = 0);
+    explicit TableModel(expr::Manager &eManagerIn, QObject* parent = 0);
     virtual ~TableModel() override;
     virtual int rowCount(const QModelIndex& parent = QModelIndex()) const;
     virtual int columnCount(const QModelIndex& parent = QModelIndex()) const;
@@ -95,7 +95,7 @@ private:
     
 private:
   //! Manager containing expressions and groups.
-  expr::ExpressionManager &eManager;
+  expr::Manager &eManager;
   //! Translator to interface with the manager.
   boost::shared_ptr<StringTranslator> sTranslator;
   //! Observer into message system
@@ -132,7 +132,7 @@ class GroupProxyModel : public BaseProxyModel
 {
   Q_OBJECT
 public:
-  explicit GroupProxyModel(expr::ExpressionManager &eManagerIn, boost::uuids::uuid groupIdIn, QObject *parent = 0);
+  explicit GroupProxyModel(expr::Manager &eManagerIn, boost::uuids::uuid groupIdIn, QObject *parent = 0);
   //! Add a new formula to the source model and add it to the group.
   QModelIndex addDefaultRow();
   //! Remove the expressions from the group.
@@ -162,7 +162,7 @@ public Q_SLOTS:
   void refreshSlot();
 private:
   //! Reference to manager
-  expr::ExpressionManager &eManager;
+  expr::Manager &eManager;
   //! Group id this model is referencing.
   boost::uuids::uuid groupId;
 };
@@ -175,7 +175,7 @@ class SelectionProxyModel : public BaseProxyModel
 {
   Q_OBJECT
 public:
-  explicit SelectionProxyModel(expr::ExpressionManager &, QObject *parent = 0);
+  explicit SelectionProxyModel(expr::Manager &, QObject *parent = 0);
   virtual ~SelectionProxyModel();
   
 protected:
@@ -183,7 +183,7 @@ protected:
   
 private:
   //! Reference to manager
-  expr::ExpressionManager &eManager;
+  expr::Manager &eManager;
   std::unique_ptr<msg::Observer> observer;
   void setupDispatcher();
   slc::Containers containers;
@@ -204,4 +204,4 @@ public:
 };
 }
 
-#endif // TABLEMODEL_H
+#endif // EXPR_TABLEMODEL_H

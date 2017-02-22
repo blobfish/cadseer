@@ -43,22 +43,22 @@ using namespace expr;
 
 static QString defaultDirectory = QDir::homePath();
 
-ExpressionWidget::ExpressionWidget(QWidget* parent, Qt::WindowFlags f):
+Widget::Widget(QWidget* parent, Qt::WindowFlags f):
   QWidget(parent, f)
 {
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
-  observer->name = "expr::ExpressionWidget";
+  observer->name = "expr::Widget";
   setupDispatcher();
     
   setupGui();
 }
 
-ExpressionWidget::~ExpressionWidget()
+Widget::~Widget()
 {
 
 }
 
-void ExpressionWidget::setupGui()
+void Widget::setupGui()
 {
   QVBoxLayout *mainLayout = new QVBoxLayout();
   this->setLayout(mainLayout);
@@ -79,21 +79,21 @@ void ExpressionWidget::setupGui()
   mainLayout->addWidget(splitter);
 }
 
-void ExpressionWidget::writeOutGraphSlot()
+void Widget::writeOutGraphSlot()
 {
   QString filePath = static_cast<app::Application *>(qApp)->getApplicationDirectory().absolutePath() + 
     QDir::separator() + "expressionGraph.dot";
   eManager->writeOutGraph(filePath.toStdString().c_str());
 }
 
-void ExpressionWidget::groupRenamedSlot(QWidget *tab, const QString &newName)
+void Widget::groupRenamedSlot(QWidget *tab, const QString &newName)
 {
   int index = tabWidget->indexOf(tab);
   assert(index >= 0); //no such widget
   tabWidget->setTabText(index, newName);
 }
 
-void ExpressionWidget::addGroupSlot()
+void Widget::addGroupSlot()
 {
   bool ok;
   QString newName = QInputDialog::getText(this, tr("Enter Group Name"), tr("Name:"), QLineEdit::Normal, "Group Name", &ok);
@@ -110,7 +110,7 @@ void ExpressionWidget::addGroupSlot()
   addGroupView(groupId, newName);
 }
 
-void ExpressionWidget::removeGroupSlot(QWidget *tab)
+void Widget::removeGroupSlot(QWidget *tab)
 {
   int tabIndex = tabWidget->indexOf(tab);
   assert(tabIndex >= 0); //no such widget
@@ -118,7 +118,7 @@ void ExpressionWidget::removeGroupSlot(QWidget *tab)
   tab->deleteLater();
 }
 
-void ExpressionWidget::addGroupView(const boost::uuids::uuid& idIn, const QString &name)
+void Widget::addGroupView(const boost::uuids::uuid& idIn, const QString &name)
 {
   TableViewGroup *userView = new TableViewGroup(tableViewAll);
   userView->setDragEnabled(true);
@@ -135,7 +135,7 @@ void ExpressionWidget::addGroupView(const boost::uuids::uuid& idIn, const QStrin
   connect(userView, SIGNAL(groupRemovedSignal(QWidget*)), this, SLOT(removeGroupSlot(QWidget*)));
 }
 
-void ExpressionWidget::fillInTestManagerSlot()
+void Widget::fillInTestManagerSlot()
 {
   std::string examplesString = buildExamplesString();
   std::istringstream inStream(examplesString.c_str());
@@ -164,14 +164,14 @@ void ExpressionWidget::fillInTestManagerSlot()
   }
 }
 
-void ExpressionWidget::dumpLinksSlot()
+void Widget::dumpLinksSlot()
 {
   std::cout << std::endl << "expression links: " << std::endl;
   eManager->dumpLinks(std::cout);
   std::cout << std::endl;
 }
 
-void ExpressionWidget::goExamplesTabSlot()
+void Widget::goExamplesTabSlot()
 {
   static bool added = false;
   static QTextEdit *examplesTab = nullptr;
@@ -199,7 +199,7 @@ void ExpressionWidget::goExamplesTabSlot()
   }
 }
 
-std::string ExpressionWidget::buildExamplesString()
+std::string Widget::buildExamplesString()
 {
   std::ostringstream stream;
   stream << 
@@ -249,34 +249,34 @@ std::string ExpressionWidget::buildExamplesString()
   return stream.str();
 }
 
-void ExpressionWidget::setupDispatcher()
+void Widget::setupDispatcher()
 {
   msg::Mask mask;
   
   mask = msg::Response | msg::Pre | msg::CloseProject;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ExpressionWidget::closeProjectDispatched, this, boost::placeholders::_1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::closeProjectDispatched, this, boost::placeholders::_1)));
   
   mask = msg::Response | msg::Post | msg::OpenProject;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ExpressionWidget::openNewProjectDispatched, this, boost::placeholders::_1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::openNewProjectDispatched, this, boost::placeholders::_1)));
   
   mask = msg::Response | msg::Post | msg::NewProject;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ExpressionWidget::openNewProjectDispatched, this, boost::placeholders::_1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::openNewProjectDispatched, this, boost::placeholders::_1)));
 }
 
-void ExpressionWidget::closeProjectDispatched(const msg::Message&)
+void Widget::closeProjectDispatched(const msg::Message&)
 {
   tabWidget->clear();
   tableViewAll->deleteLater(); //should delete all child models and views.
   tableViewAll = nullptr;
   mainTable = nullptr; //was a child of tabwidget, so should be deleted.
-  eManager = nullptr; //ExpressionManager owned by project. should be deleted there.
+  eManager = nullptr; //Manager owned by project. should be deleted there.
 
 }
 
-void ExpressionWidget::openNewProjectDispatched(const msg::Message&)
+void Widget::openNewProjectDispatched(const msg::Message&)
 {
   assert(!eManager);
-  eManager = &(static_cast<app::Application *>(qApp)->getProject()->getExpressionManager());
+  eManager = &(static_cast<app::Application *>(qApp)->getProject()->getManager());
   assert(eManager);
   
   assert(!tableViewAll);

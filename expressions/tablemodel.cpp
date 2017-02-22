@@ -39,7 +39,7 @@
 
 using namespace expr;
 
-TableModel::TableModel(ExpressionManager &eManagerIn, QObject* parent):
+TableModel::TableModel(Manager &eManagerIn, QObject* parent):
   QAbstractTableModel(parent), lastFailedPosition(-1), lastFailedText(""), lastFailedMessage(""),
   eManager(eManagerIn), sTranslator(new StringTranslator(eManager))
 {
@@ -468,7 +468,7 @@ void BaseProxyModel::delayedSortSlot()
   this->sort(0);
 }
 
-GroupProxyModel::GroupProxyModel(ExpressionManager &eManagerIn, boost::uuids::uuid groupIdIn, QObject* parent)
+GroupProxyModel::GroupProxyModel(Manager &eManagerIn, boost::uuids::uuid groupIdIn, QObject* parent)
   : BaseProxyModel(parent), eManager(eManagerIn), groupId(groupIdIn)
 {
 
@@ -550,7 +550,7 @@ void GroupProxyModel::importExpressions(std::istream &streamIn)
   tableModel->importExpressions(streamIn, groupId);
 }
 
-SelectionProxyModel::SelectionProxyModel(expr::ExpressionManager &eManagerIn, QObject* parent):
+SelectionProxyModel::SelectionProxyModel(expr::Manager &eManagerIn, QObject* parent):
   BaseProxyModel(parent), eManager(eManagerIn)
 {
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));

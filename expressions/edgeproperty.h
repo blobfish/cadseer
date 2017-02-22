@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef EDGEPROPERTY_H
-#define EDGEPROPERTY_H
+#ifndef EXPR_EDGEPROPERTY_H
+#define EXPR_EDGEPROPERTY_H
 
 #include <vector>
 #include <map>
@@ -71,5 +71,5 @@ typedef boost::unordered_map<EdgeProperty, AbstractNode*> EdgePropertiesMap;
 
 }
 
-#endif //EDGEPROPERTY_H
+#endif //EXPR_EDGEPROPERTY_H
 

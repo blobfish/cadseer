@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef EXPRESSIONNODES_H
-#define EXPRESSIONNODES_H
+#ifndef EXPR_NODES_H
+#define EXPR_NODES_H
 
 #include <boost/uuid/uuid.hpp>
 
@@ -467,4 +467,4 @@ public:
 };
 
 }
-#endif // EXPRESSIONNODES_H
+#endif // EXPR_NODES_H

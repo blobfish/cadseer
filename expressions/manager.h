@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef EXPRESSIONMANAGER_H
-#define EXPRESSIONMANAGER_H
+#ifndef EXPR_MANAGER_H
+#define EXPR_MANAGER_H
 
 #include <memory>
 
@@ -108,11 +108,11 @@ typedef boost::multi_index_container
  * This allows notifications to be send of individual formula modifications, along with
  * activating the undo/redo functionality.
  */
-class ExpressionManager
+class Manager
 {
 public:
-  ExpressionManager();
-  ~ExpressionManager();
+  Manager();
+  ~Manager();
   
   //! Cycle the graph and recalculate dirty nodes.
   void update();
@@ -234,4 +234,4 @@ private:
 
 }
 
-#endif // EXPRESSIONMANAGER_H
+#endif // EXPR_MANAGER_H

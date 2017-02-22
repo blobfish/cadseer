@@ -107,7 +107,7 @@ void ParameterDialog::requestLinkSlot(const QString &stringIn)
   boost::uuids::uuid id = gu::stringToId(stringIn.toStdString());
   assert(!id.is_nil());
   
-  expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
+  expr::Manager &eManager = static_cast<app::Application *>(qApp)->getProject()->getManager();
   if (!parameter->isConstant())
   {
     //parameter is already linked.
@@ -132,7 +132,7 @@ void ParameterDialog::requestLinkSlot(const QString &stringIn)
 
 void ParameterDialog::requestUnlinkSlot()
 {
-  expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
+  expr::Manager &eManager = static_cast<app::Application *>(qApp)->getProject()->getManager();
   assert(eManager.hasParameterLink(parameter->getId()));
   boost::uuids::uuid fId = eManager.getFormulaLink(parameter->getId());
   eManager.removeParameterLink(parameter->getId());
@@ -168,7 +168,7 @@ void ParameterDialog::constantHasChanged()
   }
   else
   {
-    const expr::ExpressionManager &eManager = static_cast<app::Application *>(qApp)->getProject()->getExpressionManager();
+    const expr::Manager &eManager = static_cast<app::Application *>(qApp)->getProject()->getManager();
     assert(eManager.hasParameterLink(parameter->getId()));
     std::string formulaName = eManager.getFormulaName(eManager.getFormulaLink(parameter->getId()));
     
@@ -210,7 +210,7 @@ void ParameterDialog::updateSlot()
     << QObject::tr("    Parameter ").toStdString() << parameter->getName().toStdString();
 
   //just run it through a string translator and expression manager.
-  expr::ExpressionManager localManager;
+  expr::Manager localManager;
   expr::StringTranslator translator(localManager);
   std::string formula("temp = ");
   formula += editLine->lineEdit->text().toStdString();
@@ -246,7 +246,7 @@ void ParameterDialog::textEditedSlot(const QString &textIn)
   editLine->trafficLabel->setTrafficYellowSlot();
   qApp->processEvents(); //need this or we never see yellow signal.
   
-  expr::ExpressionManager localManager;
+  expr::Manager localManager;
   expr::StringTranslator translator(localManager);
   std::string formula("temp = ");
   formula += textIn.toStdString();

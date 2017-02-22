@@ -108,7 +108,7 @@ void IncrementWidgetAction::textEditedCommon(const QString &textIn, dlg::Express
   editor->trafficLabel->setTrafficYellowSlot();
   qApp->processEvents(); //need this or we never see yellow signal.
   
-  expr::ExpressionManager localManager;
+  expr::Manager localManager;
   expr::StringTranslator translator(localManager);
   std::string formula("temp = ");
   formula += textIn.toStdString();
@@ -165,7 +165,7 @@ void IncrementWidgetAction::editingFinishedSlot2()
 
 double IncrementWidgetAction::editingFinishedCommon(dlg::ExpressionEdit *editor)
 {
-  expr::ExpressionManager localManager;
+  expr::Manager localManager;
   expr::StringTranslator translator(localManager);
   std::string formula("temp = ");
   formula += editor->lineEdit->text().toStdString();
