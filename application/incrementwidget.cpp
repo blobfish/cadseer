@@ -27,6 +27,7 @@
 
 #include <expressions/manager.h>
 #include <expressions/stringtranslator.h>
+#include <expressions/value.h>
 #include <dialogs/expressionedit.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
@@ -116,7 +117,8 @@ void IncrementWidgetAction::textEditedCommon(const QString &textIn, dlg::Express
   {
     localManager.update();
     editor->trafficLabel->setTrafficGreenSlot();
-    double value = localManager.getFormulaValue(translator.getFormulaOutId());
+    assert(localManager.getFormulaValueType(translator.getFormulaOutId()) == expr::ValueType::Scalar);
+    double value = boost::get<double>(localManager.getFormulaValue(translator.getFormulaOutId()));
     editor->goToolTipSlot(QString::number(value));
   }
   else
@@ -172,7 +174,8 @@ double IncrementWidgetAction::editingFinishedCommon(dlg::ExpressionEdit *editor)
   if (translator.parseString(formula) == expr::StringTranslator::ParseSucceeded)
   {
     localManager.update();
-    double tempValue = localManager.getFormulaValue(translator.getFormulaOutId());
+    assert(localManager.getFormulaValueType(translator.getFormulaOutId()) == expr::ValueType::Scalar);
+    double tempValue = boost::get<double>(localManager.getFormulaValue(translator.getFormulaOutId()));
     return tempValue;
   }
   

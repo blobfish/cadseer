@@ -776,7 +776,8 @@ void Blend::constantRadiusEditingFinishedSlot()
   if (translator.parseString(formula) == expr::StringTranslator::ParseSucceeded)
   {
     localManager.update();
-    double value = localManager.getFormulaValue(translator.getFormulaOutId());
+    assert(localManager.getFormulaValueType(translator.getFormulaOutId()) == expr::ValueType::Scalar);
+    double value = boost::get<double>(localManager.getFormulaValue(translator.getFormulaOutId()));
     if (!(value > 0.0))
       observer->out(msg::buildStatusMessage(QObject::tr("Need positive radei").toStdString()));
     else
@@ -805,7 +806,8 @@ void Blend::constantRadiusEditedSlot(const QString &textIn)
   {
     localManager.update();
     constantRadiusEdit->trafficLabel->setTrafficGreenSlot();
-    double value = localManager.getFormulaValue(translator.getFormulaOutId());
+    assert(localManager.getFormulaValueType(translator.getFormulaOutId()) == expr::ValueType::Scalar);
+    double value = boost::get<double>(localManager.getFormulaValue(translator.getFormulaOutId()));
     constantRadiusEdit->goToolTipSlot(QString::number(value));
   }
   else
@@ -1253,11 +1255,13 @@ void Blend::requestConstantUnlinkSlot()
   assert(cItem);
   assert(!cItem->expressionLinkId.is_nil());
   assert(eManager.hasFormula(cItem->expressionLinkId));
+  assert(eManager.getFormulaValueType(cItem->expressionLinkId) == expr::ValueType::Scalar);
   
   constantRadiusEdit->trafficLabel->setTrafficGreenSlot();
   constantRadiusEdit->lineEdit->setReadOnly(false);
   constantRadiusEdit->lineEdit->setFocus();
-  constantRadiusEdit->lineEdit->setText(QString::number(eManager.getFormulaValue(cItem->expressionLinkId), 'f', 12));
+  constantRadiusEdit->lineEdit->setText(QString::number(
+    boost::get<double>(eManager.getFormulaValue(cItem->expressionLinkId)), 'f', 12));
   constantRadiusEdit->lineEdit->selectAll();
   
   cItem->expressionLinkId = gu::createNilId();
@@ -1269,7 +1273,8 @@ void Blend::requestVariableLinkSlot(QTableWidgetItem *item, const QString &idIn)
   assert(!expressionId.is_nil());
   expr::Manager &eManager = static_cast<app::Application *>(qApp)->getProject()->getManager();
   assert(eManager.hasFormula(expressionId));
-  if (!(eManager.getFormulaValue(expressionId) > 0.0))
+  assert(eManager.getFormulaValueType(expressionId) == expr::ValueType::Scalar);
+  if (!(boost::get<double>(eManager.getFormulaValue(expressionId)) > 0.0))
   {
     observer->out(msg::buildStatusMessage("No negative radei"));
     return;
@@ -1320,7 +1325,8 @@ void Blend::requestVariableUnlinkSlot()
       continue;
     
     assert(eManager.hasFormula(constraint.expressionLinkId));
-    double value = eManager.getFormulaValue(constraint.expressionLinkId);
+    assert(eManager.getFormulaValueType(constraint.expressionLinkId) == expr::ValueType::Scalar);
+    double value = boost::get<double>(eManager.getFormulaValue(constraint.expressionLinkId));
     QTableWidgetItem *item = variableTableWidget->item(vSelection.front().row(), 0);
     assert(item);
     item->setText(QString::number(value, 'f', 12));
@@ -1604,7 +1610,8 @@ void VariableDelegate::setModelData(QWidget*, QAbstractItemModel* model, const Q
   if (translator.parseString(formula) == expr::StringTranslator::ParseSucceeded)
   {
     localManager.update();
-    double value = localManager.getFormulaValue(translator.getFormulaOutId());
+    assert(localManager.getFormulaValueType(translator.getFormulaOutId()) == expr::ValueType::Scalar);
+    double value = boost::get<double>(localManager.getFormulaValue(translator.getFormulaOutId()));
     QString freshValue = QString::number(value, 'f', 12);
     if (value < 0.0)
     {
@@ -1650,7 +1657,8 @@ void VariableDelegate::textEditedSlot(const QString &textIn)
   {
     localManager.update();
     eEditor->trafficLabel->setTrafficGreenSlot();
-    double value = localManager.getFormulaValue(translator.getFormulaOutId());
+    assert(localManager.getFormulaValueType(translator.getFormulaOutId()) == expr::ValueType::Scalar);
+    double value = boost::get<double>(localManager.getFormulaValue(translator.getFormulaOutId()));
     eEditor->goToolTipSlot(QString::number(value));
   }
   else

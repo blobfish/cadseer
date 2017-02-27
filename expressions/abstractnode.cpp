@@ -32,10 +32,10 @@ AbstractNode::AbstractNode() : dirtyTest(true), value(1.0)
 
 }
 
-double AbstractNode::getValue() const
+Value AbstractNode::getValue() const
 {
   assert(this->isClean());
-  return boost::get<double>(value);
+  return value;
 }
 
 ScalarConstantNode::ScalarConstantNode() : AbstractNode()
@@ -43,7 +43,8 @@ ScalarConstantNode::ScalarConstantNode() : AbstractNode()
 
 }
 
-FormulaNode::FormulaNode() : AbstractNode(), name("no name"), id(gu::createRandomId())
+FormulaNode::FormulaNode() : AbstractNode(), name("no name"),
+id(gu::createRandomId()), valueType(ValueType::Variant)
 {
 
 }
@@ -53,7 +54,13 @@ void FormulaNode::calculate(const EdgePropertiesMap &propertyMap)
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
   value = propertyMap.at(EdgeProperty::None)->getValue();
+  valueType = propertyMap.at(EdgeProperty::None)->getOutputType();
   this->setClean();
+}
+
+ValueType FormulaNode::getOutputType() const
+{
+  return valueType;
 }
 
 ScalarAdditionNode::ScalarAdditionNode() : AbstractNode()
@@ -66,7 +73,10 @@ void ScalarAdditionNode::calculate(const EdgePropertiesMap& propertyMap)
   assert(propertyMap.size() == 2);
   assert(propertyMap.count(EdgeProperty::Lhs) == 1);
   assert(propertyMap.count(EdgeProperty::Rhs) == 1);
-  value = propertyMap.at(EdgeProperty::Lhs)->getValue() + propertyMap.at(EdgeProperty::Rhs)->getValue();
+  assert(propertyMap.at(EdgeProperty::Lhs)->getOutputType() == ValueType::Scalar);
+  assert(propertyMap.at(EdgeProperty::Rhs)->getOutputType() == ValueType::Scalar);
+  value = boost::get<double>(propertyMap.at(EdgeProperty::Lhs)->getValue()) +
+    boost::get<double>(propertyMap.at(EdgeProperty::Rhs)->getValue());
   this->setClean();
 }
 
@@ -80,7 +90,10 @@ void ScalarSubtractionNode::calculate(const EdgePropertiesMap& propertyMap)
   assert(propertyMap.size() == 2);
   assert(propertyMap.count(EdgeProperty::Lhs) == 1);
   assert(propertyMap.count(EdgeProperty::Rhs) == 1);
-  value = propertyMap.at(EdgeProperty::Lhs)->getValue() - propertyMap.at(EdgeProperty::Rhs)->getValue();
+  assert(propertyMap.at(EdgeProperty::Lhs)->getOutputType() == ValueType::Scalar);
+  assert(propertyMap.at(EdgeProperty::Rhs)->getOutputType() == ValueType::Scalar);
+  value = boost::get<double>(propertyMap.at(EdgeProperty::Lhs)->getValue()) -
+    boost::get<double>(propertyMap.at(EdgeProperty::Rhs)->getValue());
   this->setClean();
 }
 
@@ -94,7 +107,10 @@ void ScalarMultiplicationNode::calculate(const EdgePropertiesMap& propertyMap)
   assert(propertyMap.size() == 2);
   assert(propertyMap.count(EdgeProperty::Lhs) == 1);
   assert(propertyMap.count(EdgeProperty::Rhs) == 1);
-  value = propertyMap.at(EdgeProperty::Lhs)->getValue() * propertyMap.at(EdgeProperty::Rhs)->getValue();
+  assert(propertyMap.at(EdgeProperty::Lhs)->getOutputType() == ValueType::Scalar);
+  assert(propertyMap.at(EdgeProperty::Rhs)->getOutputType() == ValueType::Scalar);
+  value = boost::get<double>(propertyMap.at(EdgeProperty::Lhs)->getValue()) *
+    boost::get<double>(propertyMap.at(EdgeProperty::Rhs)->getValue());
   this->setClean();
 }
 
@@ -108,7 +124,10 @@ void ScalarDivisionNode::calculate(const EdgePropertiesMap& propertyMap)
   assert(propertyMap.size() == 2);
   assert(propertyMap.count(EdgeProperty::Lhs) == 1);
   assert(propertyMap.count(EdgeProperty::Rhs) == 1);
-  value = propertyMap.at(EdgeProperty::Lhs)->getValue() / propertyMap.at(EdgeProperty::Rhs)->getValue();
+  assert(propertyMap.at(EdgeProperty::Lhs)->getOutputType() == ValueType::Scalar);
+  assert(propertyMap.at(EdgeProperty::Rhs)->getOutputType() == ValueType::Scalar);
+  value = boost::get<double>(propertyMap.at(EdgeProperty::Lhs)->getValue()) /
+    boost::get<double>(propertyMap.at(EdgeProperty::Rhs)->getValue());
   this->setClean();
 }
 
@@ -119,9 +138,11 @@ ScalarParenthesesNode::ScalarParenthesesNode() : AbstractNode()
 
 void ScalarParenthesesNode::calculate(const EdgePropertiesMap& propertyMap)
 {
+  //not sure whether the parenthesis node will always be tied to scalar.
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  value = propertyMap.at(EdgeProperty::None)->getValue();
+  assert(propertyMap.at(EdgeProperty::None)->getOutputType() == ValueType::Scalar);
+  value = boost::get<double>(propertyMap.at(EdgeProperty::None)->getValue());
   this->setClean();
 }
 
@@ -134,7 +155,8 @@ void ScalarSinNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  double childValue = propertyMap.at(EdgeProperty::None)->getValue();
+  assert(propertyMap.at(EdgeProperty::None)->getOutputType() == ValueType::Scalar);
+  double childValue = boost::get<double>(propertyMap.at(EdgeProperty::None)->getValue());
   value = std::sin(childValue);
   this->setClean();
 }
@@ -148,7 +170,8 @@ void ScalarCosNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  double childValue = propertyMap.at(EdgeProperty::None)->getValue();
+  assert(propertyMap.at(EdgeProperty::None)->getOutputType() == ValueType::Scalar);
+  double childValue = boost::get<double>(propertyMap.at(EdgeProperty::None)->getValue());
   value = std::cos(childValue);
   this->setClean();
 }
@@ -162,7 +185,8 @@ void ScalarTanNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  double childValue = propertyMap.at(EdgeProperty::None)->getValue();
+  assert(propertyMap.at(EdgeProperty::None)->getOutputType() == ValueType::Scalar);
+  double childValue = boost::get<double>(propertyMap.at(EdgeProperty::None)->getValue());
   value = std::tan(childValue);
   this->setClean();
 }
@@ -176,7 +200,8 @@ void ScalarAsinNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  double childValue = propertyMap.at(EdgeProperty::None)->getValue();
+  assert(propertyMap.at(EdgeProperty::None)->getOutputType() == ValueType::Scalar);
+  double childValue = boost::get<double>(propertyMap.at(EdgeProperty::None)->getValue());
   value = std::asin(childValue);
   this->setClean();
 }
@@ -190,7 +215,8 @@ void ScalarAcosNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  double childValue = propertyMap.at(EdgeProperty::None)->getValue();
+  assert(propertyMap.at(EdgeProperty::None)->getOutputType() == ValueType::Scalar);
+  double childValue = boost::get<double>(propertyMap.at(EdgeProperty::None)->getValue());
   value = std::acos(childValue);
   this->setClean();
 }
@@ -204,7 +230,8 @@ void ScalarAtanNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  double childValue = propertyMap.at(EdgeProperty::None)->getValue();
+  assert(propertyMap.at(EdgeProperty::None)->getOutputType() == ValueType::Scalar);
+  double childValue = boost::get<double>(propertyMap.at(EdgeProperty::None)->getValue());
   value = std::atan(childValue);
   this->setClean();
 }
@@ -219,9 +246,11 @@ void ScalarAtan2Node::calculate(const EdgePropertiesMap& propertyMap)
   assert(propertyMap.size() == 2);
   assert(propertyMap.count(EdgeProperty::Parameter1) == 1);
   assert(propertyMap.count(EdgeProperty::Parameter2) == 1);
+  assert(propertyMap.at(EdgeProperty::Parameter1)->getOutputType() == ValueType::Scalar);
+  assert(propertyMap.at(EdgeProperty::Parameter2)->getOutputType() == ValueType::Scalar);
   // y is first to match standard function.
-  double y = propertyMap.at(EdgeProperty::Parameter1)->getValue();
-  double x = propertyMap.at(EdgeProperty::Parameter2)->getValue();
+  double y = boost::get<double>(propertyMap.at(EdgeProperty::Parameter1)->getValue());
+  double x = boost::get<double>(propertyMap.at(EdgeProperty::Parameter2)->getValue());
   value = std::atan2(y, x);
   this->setClean();
 }
@@ -236,8 +265,10 @@ void ScalarPowNode::calculate(const EdgePropertiesMap& propertyMap)
   assert(propertyMap.size() == 2);
   assert(propertyMap.count(EdgeProperty::Parameter1) == 1);
   assert(propertyMap.count(EdgeProperty::Parameter2) == 1);
-  double base = propertyMap.at(EdgeProperty::Parameter1)->getValue();
-  double exp = propertyMap.at(EdgeProperty::Parameter2)->getValue();
+  assert(propertyMap.at(EdgeProperty::Parameter1)->getOutputType() == ValueType::Scalar);
+  assert(propertyMap.at(EdgeProperty::Parameter2)->getOutputType() == ValueType::Scalar);
+  double base = boost::get<double>(propertyMap.at(EdgeProperty::Parameter1)->getValue());
+  double exp = boost::get<double>(propertyMap.at(EdgeProperty::Parameter2)->getValue());
   value = std::pow(base, exp);
   this->setClean();
 }
@@ -251,7 +282,8 @@ void ScalarAbsNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  double valueIn = propertyMap.at(EdgeProperty::None)->getValue();
+  assert(propertyMap.at(EdgeProperty::None)->getOutputType() == ValueType::Scalar);
+  double valueIn = boost::get<double>(propertyMap.at(EdgeProperty::None)->getValue());
   value = std::fabs(valueIn);
   this->setClean();
 }
@@ -266,8 +298,10 @@ void ScalarMinNode::calculate(const EdgePropertiesMap& propertyMap)
   assert(propertyMap.size() == 2);
   assert(propertyMap.count(EdgeProperty::Parameter1) == 1);
   assert(propertyMap.count(EdgeProperty::Parameter2) == 1);
-  double p1 = propertyMap.at(EdgeProperty::Parameter1)->getValue();
-  double p2 = propertyMap.at(EdgeProperty::Parameter2)->getValue();
+  assert(propertyMap.at(EdgeProperty::Parameter1)->getOutputType() == ValueType::Scalar);
+  assert(propertyMap.at(EdgeProperty::Parameter2)->getOutputType() == ValueType::Scalar);
+  double p1 = boost::get<double>(propertyMap.at(EdgeProperty::Parameter1)->getValue());
+  double p2 = boost::get<double>(propertyMap.at(EdgeProperty::Parameter2)->getValue());
   value = std::min(p1, p2);
   this->setClean();
 }
@@ -282,8 +316,10 @@ void ScalarMaxNode::calculate(const EdgePropertiesMap& propertyMap)
   assert(propertyMap.size() == 2);
   assert(propertyMap.count(EdgeProperty::Parameter1) == 1);
   assert(propertyMap.count(EdgeProperty::Parameter2) == 1);
-  double p1 = propertyMap.at(EdgeProperty::Parameter1)->getValue();
-  double p2 = propertyMap.at(EdgeProperty::Parameter2)->getValue();
+  assert(propertyMap.at(EdgeProperty::Parameter1)->getOutputType() == ValueType::Scalar);
+  assert(propertyMap.at(EdgeProperty::Parameter2)->getOutputType() == ValueType::Scalar);
+  double p1 = boost::get<double>(propertyMap.at(EdgeProperty::Parameter1)->getValue());
+  double p2 = boost::get<double>(propertyMap.at(EdgeProperty::Parameter2)->getValue());
   value = std::max(p1, p2);
   this->setClean();
 }
@@ -298,8 +334,10 @@ void ScalarFloorNode::calculate(const EdgePropertiesMap& propertyMap)
   assert(propertyMap.size() == 2);
   assert(propertyMap.count(EdgeProperty::Parameter1) == 1);
   assert(propertyMap.count(EdgeProperty::Parameter2) == 1);
-  double p1 = propertyMap.at(EdgeProperty::Parameter1)->getValue();
-  double p2 = propertyMap.at(EdgeProperty::Parameter2)->getValue();
+  assert(propertyMap.at(EdgeProperty::Parameter1)->getOutputType() == ValueType::Scalar);
+  assert(propertyMap.at(EdgeProperty::Parameter2)->getOutputType() == ValueType::Scalar);
+  double p1 = boost::get<double>(propertyMap.at(EdgeProperty::Parameter1)->getValue());
+  double p2 = boost::get<double>(propertyMap.at(EdgeProperty::Parameter2)->getValue());
   
   if (p2 == 0)
   {
@@ -331,8 +369,10 @@ void ScalarCeilNode::calculate(const EdgePropertiesMap& propertyMap)
   assert(propertyMap.size() == 2);
   assert(propertyMap.count(EdgeProperty::Parameter1) == 1);
   assert(propertyMap.count(EdgeProperty::Parameter2) == 1);
-  double p1 = propertyMap.at(EdgeProperty::Parameter1)->getValue();
-  double p2 = propertyMap.at(EdgeProperty::Parameter2)->getValue();
+  assert(propertyMap.at(EdgeProperty::Parameter1)->getOutputType() == ValueType::Scalar);
+  assert(propertyMap.at(EdgeProperty::Parameter2)->getOutputType() == ValueType::Scalar);
+  double p1 = boost::get<double>(propertyMap.at(EdgeProperty::Parameter1)->getValue());
+  double p2 = boost::get<double>(propertyMap.at(EdgeProperty::Parameter2)->getValue());
   
   if (p2 == 0)
   {
@@ -365,8 +405,10 @@ void ScalarRoundNode::calculate(const EdgePropertiesMap& propertyMap)
   assert(propertyMap.size() == 2);
   assert(propertyMap.count(EdgeProperty::Parameter1) == 1);
   assert(propertyMap.count(EdgeProperty::Parameter2) == 1);
-  double p1 = propertyMap.at(EdgeProperty::Parameter1)->getValue();
-  double p2 = propertyMap.at(EdgeProperty::Parameter2)->getValue();
+  assert(propertyMap.at(EdgeProperty::Parameter1)->getOutputType() == ValueType::Scalar);
+  assert(propertyMap.at(EdgeProperty::Parameter2)->getOutputType() == ValueType::Scalar);
+  double p1 = boost::get<double>(propertyMap.at(EdgeProperty::Parameter1)->getValue());
+  double p2 = boost::get<double>(propertyMap.at(EdgeProperty::Parameter2)->getValue());
   
   if (p2 == 0)
   {
@@ -403,7 +445,8 @@ void ScalarRadToDegNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  double valueIn = propertyMap.at(EdgeProperty::None)->getValue();
+  assert(propertyMap.at(EdgeProperty::None)->getOutputType() == ValueType::Scalar);
+  double valueIn = boost::get<double>(propertyMap.at(EdgeProperty::None)->getValue());
   value = valueIn * 180 / boost::math::constants::pi<double>();
   this->setClean();
 }
@@ -417,7 +460,8 @@ void ScalarDegToRadNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  double valueIn = propertyMap.at(EdgeProperty::None)->getValue();
+  assert(propertyMap.at(EdgeProperty::None)->getOutputType() == ValueType::Scalar);
+  double valueIn = boost::get<double>(propertyMap.at(EdgeProperty::None)->getValue());
   value = valueIn * boost::math::constants::pi<double>() / 180.0;
   this->setClean();
 }
@@ -431,7 +475,8 @@ void ScalarLogNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  double valueIn = propertyMap.at(EdgeProperty::None)->getValue();
+  assert(propertyMap.at(EdgeProperty::None)->getOutputType() == ValueType::Scalar);
+  double valueIn = boost::get<double>(propertyMap.at(EdgeProperty::None)->getValue());
   value = std::log(valueIn);
   this->setClean();
 }
@@ -445,7 +490,8 @@ void ScalarExpNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  double valueIn = propertyMap.at(EdgeProperty::None)->getValue();
+  assert(propertyMap.at(EdgeProperty::None)->getOutputType() == ValueType::Scalar);
+  double valueIn = boost::get<double>(propertyMap.at(EdgeProperty::None)->getValue());
   value = std::exp(valueIn);
   this->setClean();
 }
@@ -459,7 +505,8 @@ void ScalarSqrtNode::calculate(const EdgePropertiesMap& propertyMap)
 {
   assert(propertyMap.size() == 1);
   assert(propertyMap.count(EdgeProperty::None) == 1);
-  double valueIn = propertyMap.at(EdgeProperty::None)->getValue();
+  assert(propertyMap.at(EdgeProperty::None)->getOutputType() == ValueType::Scalar);
+  double valueIn = boost::get<double>(propertyMap.at(EdgeProperty::None)->getValue());
   value = std::sqrt(valueIn);
   this->setClean();
 }
@@ -474,8 +521,10 @@ void ScalarHypotNode::calculate(const EdgePropertiesMap& propertyMap)
   assert(propertyMap.size() == 2);
   assert(propertyMap.count(EdgeProperty::Parameter1) == 1);
   assert(propertyMap.count(EdgeProperty::Parameter2) == 1);
-  double p1 = propertyMap.at(EdgeProperty::Parameter1)->getValue();
-  double p2 = propertyMap.at(EdgeProperty::Parameter2)->getValue();
+  assert(propertyMap.at(EdgeProperty::Parameter1)->getOutputType() == ValueType::Scalar);
+  assert(propertyMap.at(EdgeProperty::Parameter2)->getOutputType() == ValueType::Scalar);
+  double p1 = boost::get<double>(propertyMap.at(EdgeProperty::Parameter1)->getValue());
+  double p2 = boost::get<double>(propertyMap.at(EdgeProperty::Parameter2)->getValue());
   value = hypot(p1, p2);
   this->setClean();
 }
@@ -492,10 +541,14 @@ void ScalarConditionalNode::calculate(const EdgePropertiesMap& propertyMap)
   assert(propertyMap.count(EdgeProperty::Rhs) == 1);
   assert(propertyMap.count(EdgeProperty::Then) == 1);
   assert(propertyMap.count(EdgeProperty::Else) == 1);
-  double lhs = propertyMap.at(EdgeProperty::Lhs)->getValue();
-  double rhs = propertyMap.at(EdgeProperty::Rhs)->getValue();
-  double localThen = propertyMap.at(EdgeProperty::Then)->getValue();
-  double localElse = propertyMap.at(EdgeProperty::Else)->getValue();
+  assert(propertyMap.at(EdgeProperty::Lhs)->getOutputType() == ValueType::Scalar);
+  assert(propertyMap.at(EdgeProperty::Rhs)->getOutputType() == ValueType::Scalar);
+  assert(propertyMap.at(EdgeProperty::Then)->getOutputType() == ValueType::Scalar);
+  assert(propertyMap.at(EdgeProperty::Else)->getOutputType() == ValueType::Scalar);
+  double lhs = boost::get<double>(propertyMap.at(EdgeProperty::Lhs)->getValue());
+  double rhs = boost::get<double>(propertyMap.at(EdgeProperty::Rhs)->getValue());
+  double localThen = boost::get<double>(propertyMap.at(EdgeProperty::Then)->getValue());
+  double localElse = boost::get<double>(propertyMap.at(EdgeProperty::Else)->getValue());
   
   if (type == GreaterThan)
   {
@@ -541,5 +594,28 @@ void ScalarConditionalNode::calculate(const EdgePropertiesMap& propertyMap)
   }
   else
     assert(0); //unrecognized operator.
+  this->setClean();
+}
+
+VectorConstantNode::VectorConstantNode() : AbstractNode()
+{
+  
+}
+
+void VectorConstantNode::calculate(const EdgePropertiesMap& propertyMap)
+{
+  assert(propertyMap.size() == 3);
+  assert(propertyMap.count(EdgeProperty::X) == 1);
+  assert(propertyMap.count(EdgeProperty::Y) == 1);
+  assert(propertyMap.count(EdgeProperty::Z) == 1);
+  assert(propertyMap.at(EdgeProperty::X)->getOutputType() == ValueType::Scalar);
+  assert(propertyMap.at(EdgeProperty::Y)->getOutputType() == ValueType::Scalar);
+  assert(propertyMap.at(EdgeProperty::Z)->getOutputType() == ValueType::Scalar);
+  value = osg::Vec3d
+  (
+    boost::get<double>(propertyMap.at(EdgeProperty::X)->getValue()),
+    boost::get<double>(propertyMap.at(EdgeProperty::Y)->getValue()),
+    boost::get<double>(propertyMap.at(EdgeProperty::Z)->getValue())
+  );
   this->setClean();
 }

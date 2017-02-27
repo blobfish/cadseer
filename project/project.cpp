@@ -42,6 +42,7 @@
 #include <feature/seershape.h>
 #include <feature/inert.h>
 #include <expressions/manager.h>
+#include <expressions/formulalink.h>
 #include <expressions/stringtranslator.h> //for serialize.
 #include <project/message.h>
 #include <message/message.h>
@@ -852,7 +853,7 @@ void Project::serialWrite()
   }
   
   prj::srl::ExpressionLinks eLinks;
-  for (const auto& link : expressionManager->getLinkContainer())
+  for (const auto& link : expressionManager->getLinkContainer().container)
   {
     prj::srl::ExpressionLink sLink(gu::idToString(link.parameterId), gu::idToString(link.formulaId));
     eLinks.array().push_back(sLink);

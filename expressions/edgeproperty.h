@@ -40,7 +40,10 @@ enum class EdgeProperty
   Parameter1,
   Parameter2,
   Then,
-  Else
+  Else,
+  X,
+  Y,
+  Z
 };
 
 //! @brief Return a string associated to an edge property.
@@ -57,6 +60,9 @@ static std::string getEdgePropertyString(const EdgeProperty &property)
       strings[EdgeProperty::Parameter2] = "Parameter2";
       strings[EdgeProperty::Then] = "Then";
       strings[EdgeProperty::Else] = "Else";
+      strings[EdgeProperty::X] = "X";
+      strings[EdgeProperty::Y] = "Y";
+      strings[EdgeProperty::Z] = "Z";
   }
   std::map<EdgeProperty, std::string>::iterator it = strings.find(property);
   return it != strings.end() ? it->second : std::string();

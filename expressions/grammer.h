@@ -55,13 +55,14 @@ namespace expr
       using boost::spirit::qi::lit;
       
     expression = formulaName [boost::phoenix::bind(&StringTranslatorStow::buildFormulaNode, &translator, boost::spirit::_1, _pass)] >>
-        '=' >> rhs [boost::phoenix::bind(&StringTranslatorStow::finish, &translator)];
-    rhs = term >>
+        '=' >> (scalarRhs [boost::phoenix::bind(&StringTranslatorStow::finish, &translator)] |
+        vectorRhs [boost::phoenix::bind(&StringTranslatorStow::finish, &translator)]);
+    scalarRhs = term >>
         *((char_('+') [boost::phoenix::bind(&StringTranslatorStow::buildScalarAdditionNode, &translator)] >>
         term [boost::phoenix::bind(&StringTranslatorStow::makeCurrentRHS, &translator)]) |
         (char_('-') [boost::phoenix::bind(&StringTranslatorStow::buildSubractionNode, &translator)] >>
         term [boost::phoenix::bind(&StringTranslatorStow::makeCurrentRHS, &translator)]));
-    item = double_ [boost::phoenix::bind(&StringTranslatorStow::buildScalarConstantNode, &translator, boost::spirit::_1)] |
+    scalarItem = double_ [boost::phoenix::bind(&StringTranslatorStow::buildScalarConstantNode, &translator, boost::spirit::_1)] |
         linkName [boost::phoenix::bind(&StringTranslatorStow::buildLinkNode, &translator, boost::spirit::_1, _pass)];
     function1 = (lit("sin(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarSinNode, &translator)] |
         lit("cos(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarCosNode, &translator)] |
@@ -74,7 +75,7 @@ namespace expr
         lit("log(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarLogNode, &translator)] |
         lit("exp(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarExpNode, &translator)] |
         lit("sqrt(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarSqrtNode, &translator)] |
-        lit("abs(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarAbsNode, &translator)]) >> rhs >>
+        lit("abs(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarAbsNode, &translator)]) >> scalarRhs >>
         char_(')') [boost::phoenix::bind(&StringTranslatorStow::finishFunction1, &translator)];
     function2 = (lit("pow(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarPowNode, &translator)] |
         lit("atan2(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarAtan2Node, &translator)] |
@@ -83,8 +84,8 @@ namespace expr
         lit("floor(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarFloorNode, &translator)] |
         lit("ceil(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarCeilNode, &translator)] |
         lit("round(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarRoundNode, &translator)] | 
-        lit("hypot(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarHypotNode, &translator)]) >> rhs >>
-        char_(',') [boost::phoenix::bind(&StringTranslatorStow::setParameter1, &translator)] >> rhs >>
+        lit("hypot(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarHypotNode, &translator)]) >> scalarRhs >>
+        char_(',') [boost::phoenix::bind(&StringTranslatorStow::setParameter1, &translator)] >> scalarRhs >>
         char_(')') [boost::phoenix::bind(&StringTranslatorStow::setParameter2, &translator)];
     //when one parser is a subset of another (i.e. '>' and '>=') put the larger first, so it fails before trying the smaller.
     conditionalOperator = lit(">=") [boost::phoenix::bind(&StringTranslatorStow::setConditionGreaterThanEqual, &translator)] |
@@ -93,29 +94,35 @@ namespace expr
         lit("<") [boost::phoenix::bind(&StringTranslatorStow::setConditionLessThan, &translator)] |
         lit("==") [boost::phoenix::bind(&StringTranslatorStow::setConditionEqual, &translator)] |
         lit("!=") [boost::phoenix::bind(&StringTranslatorStow::setConditionNotEqual, &translator)];
-    condition = rhs [boost::phoenix::bind(&StringTranslatorStow::setConditionLhs, &translator)] >> conditionalOperator >>
-        rhs [boost::phoenix::bind(&StringTranslatorStow::setConditionRhs, &translator)];
+    condition = scalarRhs [boost::phoenix::bind(&StringTranslatorStow::setConditionLhs, &translator)] >> conditionalOperator >>
+                    scalarRhs [boost::phoenix::bind(&StringTranslatorStow::setConditionRhs, &translator)];
     ifCondition = lit("if(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarConditionalNode, &translator)] >>
         condition >> lit(")") >>
-        lit("then(") >> rhs [boost::phoenix::bind(&StringTranslatorStow::setConditionThen, &translator)] >> char_(')') >>
-        lit("else(") >> rhs [boost::phoenix::bind(&StringTranslatorStow::setConditionElse, &translator)] >> char_(')');
+        lit("then(") >> scalarRhs [boost::phoenix::bind(&StringTranslatorStow::setConditionThen, &translator)] >> char_(')') >>
+        lit("else(") >> scalarRhs [boost::phoenix::bind(&StringTranslatorStow::setConditionElse, &translator)] >> char_(')');
     keyword = lit("sin(") | lit("cos(") | lit("tan(") | lit("asin(") | lit("acos(") | lit("atan(") | lit("pow(") |
         lit("atan2(") | lit("abs(") | lit("min(") | lit("max(") | lit("floor(") | lit("ceil(") | lit("round(") |
         lit("radtodeg(") | lit("degtorad(") | lit("log(") | lit("exp(") | lit("sqrt(") | lit("hypot(") | lit("if(");
     linkName = (alpha >> *(alnum | char_('_'))) - keyword;
     formulaName = (alpha >> *(alnum | char_('_'))) - keyword;
-    factor = item | function1 | function2 | ifCondition |
-        char_('(') [boost::phoenix::bind(&StringTranslatorStow::startScalarParenthesesNode, &translator)] >> rhs >>
+    factor = scalarItem | function1 | function2 | ifCondition |
+        char_('(') [boost::phoenix::bind(&StringTranslatorStow::startScalarParenthesesNode, &translator)] >> scalarRhs >>
         char_ (')') [boost::phoenix::bind(&StringTranslatorStow::finishScalarParenthesesNode, &translator)];
     term = factor >>
         *((char_('*') [boost::phoenix::bind(&StringTranslatorStow::buildScalarMultiplicationNode, &translator)] >>
         factor [boost::phoenix::bind(&StringTranslatorStow::makeCurrentRHS, &translator)]) |
         (char_('/') [boost::phoenix::bind(&StringTranslatorStow::buildScalarDivisionNode, &translator)] >>
         factor [boost::phoenix::bind(&StringTranslatorStow::makeCurrentRHS, &translator)]));
+    vector = char_('[') [boost::phoenix::bind(&StringTranslatorStow::buildVectorConstantNode, &translator)]
+      >> scalarItem [boost::phoenix::bind(&StringTranslatorStow::setVectorX, &translator)] >> char_(',')
+      >> scalarItem [boost::phoenix::bind(&StringTranslatorStow::setVectorY, &translator)] >> char_(',')
+      >> scalarItem [boost::phoenix::bind(&StringTranslatorStow::setVectorZ, &translator)] >> char_(']');
+      vectorItem = vector | linkName [boost::phoenix::bind(&StringTranslatorStow::buildLinkNode, &translator, boost::spirit::_1, _pass)];
+    vectorRhs = vectorItem;
       
       BOOST_SPIRIT_DEBUG_NODE(expression);
-      BOOST_SPIRIT_DEBUG_NODE(rhs);
-      BOOST_SPIRIT_DEBUG_NODE(item);
+      BOOST_SPIRIT_DEBUG_NODE(scalarRhs);
+      BOOST_SPIRIT_DEBUG_NODE(scalarItem);
       BOOST_SPIRIT_DEBUG_NODE(keyword);
       BOOST_SPIRIT_DEBUG_NODE(linkName);
       BOOST_SPIRIT_DEBUG_NODE(formulaName);
@@ -126,10 +133,13 @@ namespace expr
       BOOST_SPIRIT_DEBUG_NODE(conditionalOperator);
       BOOST_SPIRIT_DEBUG_NODE(condition);
       BOOST_SPIRIT_DEBUG_NODE(ifCondition);
+      BOOST_SPIRIT_DEBUG_NODE(vector);
+      BOOST_SPIRIT_DEBUG_NODE(vectorItem);
+      BOOST_SPIRIT_DEBUG_NODE(vectorRhs);
     }
     rule<Iterator, space_type> expression;
-    rule<Iterator, space_type> rhs;
-    rule<Iterator, space_type> item;
+    rule<Iterator, space_type> scalarRhs;
+    rule<Iterator, space_type> scalarItem;
     rule<Iterator, space_type> term;
     rule<Iterator, space_type> factor;
     rule<Iterator, space_type> function1;
@@ -137,6 +147,9 @@ namespace expr
     rule<Iterator, space_type> conditionalOperator;
     rule<Iterator, space_type> condition;
     rule<Iterator, space_type> ifCondition;
+    rule<Iterator, space_type> vector;
+    rule<Iterator, space_type> vectorItem;
+    rule<Iterator, space_type> vectorRhs;
     rule<Iterator, space_type, std::string()> keyword;
     rule<Iterator, space_type, std::string()> linkName;
     rule<Iterator, space_type, std::string()> formulaName;

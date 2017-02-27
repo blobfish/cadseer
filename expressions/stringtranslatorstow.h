@@ -103,6 +103,10 @@ namespace expr
     void setParameter1();
     void setParameter2();
     void finishFunction1();
+    void buildVectorConstantNode();
+    void setVectorX();
+    void setVectorY();
+    void setVectorZ();
     //@}
     
     //! Build the RHS string. No formula name or equals.

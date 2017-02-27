@@ -25,10 +25,8 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/unordered_map.hpp>
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/member.hpp>
-#include <boost/multi_index/ordered_index.hpp>
-#include <boost/multi_index/composite_key.hpp>
+
+#include <expressions/value.h>
 
 class QTextStream;
 
@@ -38,6 +36,7 @@ namespace msg{class Message; class Observer;}
 namespace expr{
 
 class GraphWrapper;
+struct FormulaLinksWrapper;
 
 /*! @brief A collection of formulas
  * 
@@ -58,43 +57,6 @@ public:
   //! remove formula with passed in id from this group.
   void removeFormula(const boost::uuids::uuid &fIdIn);
 };
-
-/*! @brief Link between formula and parameters
- * 
- * boost multi_index link.
- */
-struct FormulaLink
-{
-  boost::uuids::uuid parameterId;
-  boost::uuids::uuid formulaId;
-  ftr::Parameter *parameter = nullptr;
-  
-  //@{
-  //! used as tags.
-  struct ByParameterId{};
-  struct ByFormulaId{};
-  //@}
-};
-
-namespace BMI = boost::multi_index;
-//! Container type to hold formula to property links.
-typedef boost::multi_index_container
-<
-  FormulaLink,
-  BMI::indexed_by
-  <
-    BMI::ordered_unique //parameter can only be linked to one formula
-    <
-      BMI::tag<FormulaLink::ByParameterId>,
-      BMI::member<FormulaLink, boost::uuids::uuid, &FormulaLink::parameterId>
-    >,
-    BMI::ordered_non_unique //formula can be linked to many parameters.
-    <
-      BMI::tag<FormulaLink::ByFormulaId>,
-      BMI::member<FormulaLink, boost::uuids::uuid, &FormulaLink::formulaId>
-    >
-  >
-> FormulaLinkContainerType;
 
 /*! @brief Container to store and manage expressions.
  * 
@@ -179,7 +141,8 @@ public:
   std::string getFormulaName(const boost::uuids::uuid &idIn) const;
   bool hasFormula(const std::string &nameIn) const;
   bool hasFormula(const boost::uuids::uuid &idIn) const;
-  double getFormulaValue(const boost::uuids::uuid &idIn) const;
+  Value getFormulaValue(const boost::uuids::uuid &idIn) const;
+  ValueType getFormulaValueType(const boost::uuids::uuid &idIn) const;
   void setFormulaName(const boost::uuids::uuid &idIn, const std::string &nameIn);
   void cleanFormula(const boost::uuids::uuid &idIn);
   bool hasCycle(const boost::uuids::uuid &idIn, std::string &nameOut);
@@ -211,7 +174,7 @@ public:
   //! Write a list of links to stream.
   void dumpLinks(std::ostream &stream);
   //! get all the links. created for serialize.
-  const FormulaLinkContainerType& getLinkContainer() const{return formulaLinks;}
+  const FormulaLinksWrapper& getLinkContainer() const{return *formulaLinksPtr;}
   
   //! Contains an id to all existing formulas.
   Group allGroup;
@@ -225,7 +188,7 @@ private:
   //! Pointer to GraphWrapper.
   std::unique_ptr<GraphWrapper> graphPtr;
   //! Container for formula to properties links.
-  FormulaLinkContainerType formulaLinks;
+  std::unique_ptr<FormulaLinksWrapper> formulaLinksPtr;
   
   std::unique_ptr<msg::Observer> observer;
   void setupDispatcher();

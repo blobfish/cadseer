@@ -349,21 +349,39 @@ public:
 
             itStack.push(temp);
         }
-    }
         
+        else if (graph[vertex]->getType() == expr::NodeType::VectorConstant)
+        {
+          currentPosition = expression.insert(currentPosition, "[");
+          currentPosition++;
+          currentPosition = expression.insert(currentPosition, ", ");
+          StackEntry temp;
+          temp.push_back(currentPosition);
+          currentPosition++;
+          currentPosition = expression.insert(currentPosition, ", ");
+          temp.push_back(currentPosition);
+          currentPosition++;
+          currentPosition = expression.insert(currentPosition, "]");
+          temp.push_back(currentPosition);
+          itStack.push(temp);
+        }
+    }
+    
     template<typename FindEdge, typename FindGraph>
     void examine_edge(FindEdge edge, FindGraph &graph)
     {
         if (graph[edge] == expr::EdgeProperty::Lhs || graph[edge] == expr::EdgeProperty::Parameter1 ||
-            graph[edge] == expr::EdgeProperty::None)
+            graph[edge] == expr::EdgeProperty::None || graph[edge] == expr::EdgeProperty::X)
         {
             currentPosition = itStack.top().at(0);
         }
-        else if(graph[edge] == expr::EdgeProperty::Rhs || graph[edge] == expr::EdgeProperty::Parameter2)
+        else if(graph[edge] == expr::EdgeProperty::Rhs || graph[edge] == expr::EdgeProperty::Parameter2 ||
+          graph[edge] == expr::EdgeProperty::Y
+        )
         {
             currentPosition = itStack.top().at(1);
         }
-        else if(graph[edge] == expr::EdgeProperty::Then)
+        else if(graph[edge] == expr::EdgeProperty::Then || graph[edge] == expr::EdgeProperty::Z)
         {
             currentPosition = itStack.top().at(2);
         }
@@ -844,6 +862,40 @@ void StringTranslatorStow::finishFunction1()
   vStack.pop();
   Vertex trig = vStack.top();
   buildEdgeNone(trig, child);
+}
+
+void StringTranslatorStow::buildVectorConstantNode()
+{
+  Vertex aNode = graphWrapper.buildVectorConstantNode();
+  vStack.push(aNode);
+  addedVertices.push_back(aNode);
+}
+
+void StringTranslatorStow::setVectorX()
+{
+  Vertex xNode = vStack.top();
+  vStack.pop();
+  Vertex VectorNode = vStack.top();
+  Edge edge = buildEdgeCommon(VectorNode, xNode);
+  graphWrapper.graph[edge] = EdgeProperty::X;
+}
+
+void StringTranslatorStow::setVectorY()
+{
+  Vertex yNode = vStack.top();
+  vStack.pop();
+  Vertex VectorNode = vStack.top();
+  Edge edge = buildEdgeCommon(VectorNode, yNode);
+  graphWrapper.graph[edge] = EdgeProperty::Y;
+}
+
+void StringTranslatorStow::setVectorZ()
+{
+  Vertex zNode = vStack.top();
+  vStack.pop();
+  Vertex VectorNode = vStack.top();
+  Edge edge = buildEdgeCommon(VectorNode, zNode);
+  graphWrapper.graph[edge] = EdgeProperty::Z;
 }
 
 void StringTranslatorStow::buildEdgeLHS(const Vertex &source, const Vertex &target)

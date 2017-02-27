@@ -17,24 +17,18 @@
  *
  */
 
-#include <boost/variant.hpp>
+#include <boost/variant/variant.hpp>
+#include <boost/variant/static_visitor.hpp>
+#include <boost/variant/get.hpp>
 
 #include <osg/Matrixd>
+#include <osg/io_utils>
 
 #ifndef EXPR_VALUE_H
 #define EXPR_VALUE_H
 
 namespace expr
 {
-  //!* an object capable of holding all expression outputs.
-  typedef boost::variant
-  <
-    double,
-    osg::Vec3d,    //!< vector
-    osg::Quat,     //!< orientation
-    osg::Matrixd   //!< coordinate system
-  > Value;
-  
   /*! @brief ValueTypes. 
    * 
    * represent what kind of output the nodes have.
@@ -44,9 +38,52 @@ namespace expr
     Variant = 0,  //!< might be any.
     Scalar,       //!< double value
     Vector,       //!< osg::Vec3d
-    Orientation,  //!< osg::Matrixd with only rotation set.
+    Orientation,  //!< osg::Quat
     CSys          //!< osg::matrixd
   };
+  
+  //!* an object capable of holding all expression outputs.
+  typedef boost::variant
+  <
+    double,
+    osg::Vec3d,    //!< vector
+    osg::Quat,     //!< orientation
+    osg::Matrixd   //!< coordinate system
+  > Value;
+  
+  class ValueStreamVisitor : public boost::static_visitor<>
+  {
+  public:
+    ValueStreamVisitor(std::ostream &streamIn): stream(streamIn){}
+    std::ostream &stream;
+    
+    void operator()(const double &dIn) const
+    {
+      stream << dIn;
+    }
+    
+    void operator()(const osg::Vec3d &vIn) const
+    {
+      stream << vIn;
+    }
+    
+    void operator()(const osg::Quat &qIn) const
+    {
+      stream << qIn;
+    }
+    
+    void operator()(const osg::Matrixd &mIn) const
+    {
+      stream << mIn;
+    }
+  };
+}
+
+inline std::ostream& operator<<(std::ostream &stream, const expr::Value &valueIn)
+{
+  expr::ValueStreamVisitor visitor(stream);
+  boost::apply_visitor(visitor, valueIn);
+  return stream;
 }
 
 #endif // EXPR_VALUE_H

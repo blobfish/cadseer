@@ -39,6 +39,7 @@
 #include <tools/idtools.h>
 #include <expressions/edgeproperty.h>
 #include <expressions/graph.h>
+#include <expressions/formulalink.h>
 #include <expressions/manager.h>
 
 //temp.
@@ -70,6 +71,7 @@ void Group::removeFormula(const boost::uuids::uuid& fIdIn)
 Manager::Manager()
 {
   graphPtr = std::move(std::unique_ptr<GraphWrapper>(new GraphWrapper()));
+  formulaLinksPtr = std::move(std::unique_ptr<FormulaLinksWrapper>(new FormulaLinksWrapper()));
   
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
   observer->name = "expr::Widget";
@@ -261,10 +263,16 @@ bool Manager::hasFormula(const std::string& nameIn) const
   return graphPtr->hasFormula(nameIn);
 }
 
-double Manager::getFormulaValue(const uuid& idIn) const
+Value Manager::getFormulaValue(const uuid& idIn) const
 {
   assert(graphPtr->hasFormula(idIn));
   return graphPtr->getFormulaValue(idIn);
+}
+
+ValueType Manager::getFormulaValueType(const uuid &idIn) const
+{
+  assert(graphPtr->hasFormula(idIn));
+  return graphPtr->getFormulaValueType(idIn);
 }
 
 void Manager::setFormulaName(const uuid& idIn, const std::string& nameIn)
@@ -339,7 +347,7 @@ void Manager::removeFormula(const boost::uuids::uuid& idIn)
   //update any linked parameters.
   FormulaLinkContainerType::index<FormulaLink::ByFormulaId>::type::iterator it, it2, itEnd;
   
-  boost::tie(it, itEnd) = formulaLinks.get<FormulaLink::ByFormulaId>().equal_range(idIn);
+  boost::tie(it, itEnd) = formulaLinksPtr->container.get<FormulaLink::ByFormulaId>().equal_range(idIn);
   if (it == itEnd)
     return;
   it2 = it;
@@ -349,7 +357,7 @@ void Manager::removeFormula(const boost::uuids::uuid& idIn)
     it->parameter->setConstant(true); //change parameter constant to true.
   }
   
-  formulaLinks.get<FormulaLink::ByFormulaId>().erase(it2, itEnd);
+  formulaLinksPtr->container.get<FormulaLink::ByFormulaId>().erase(it2, itEnd);
 }
 
 void Manager::addLink(ftr::Parameter *parameterIn, const uuid &formulaIdIn)
@@ -359,10 +367,11 @@ void Manager::addLink(ftr::Parameter *parameterIn, const uuid &formulaIdIn)
   virginLink.formulaId = formulaIdIn;
   virginLink.parameter = parameterIn;
   
-  formulaLinks.insert(virginLink);
+  formulaLinksPtr->container.insert(virginLink);
   
   //update current object.
-  double value = graphPtr->getFormulaValue(formulaIdIn);
+  //todo address other variant types.
+  double value = boost::get<double>(graphPtr->getFormulaValue(formulaIdIn));
   parameterIn->setValue(value);
   parameterIn->setConstant(false);
 }
@@ -372,26 +381,26 @@ void Manager::removeParameterLink(const uuid &parameterIdIn)
   //a parameter can only have one link. so no equal range for this.
   
   FormulaLinkContainerType::index<FormulaLink::ByParameterId>::type::iterator it;
-  it = formulaLinks.get<FormulaLink::ByParameterId>().find(parameterIdIn);
-  assert(it != formulaLinks.get<FormulaLink::ByParameterId>().end()); //use has first.
+  it = formulaLinksPtr->container.get<FormulaLink::ByParameterId>().find(parameterIdIn);
+  assert(it != formulaLinksPtr->container.get<FormulaLink::ByParameterId>().end()); //use has first.
   
   it->parameter->setConstant(true);
   
-  formulaLinks.get<FormulaLink::ByParameterId>().erase(it);
+  formulaLinksPtr->container.get<FormulaLink::ByParameterId>().erase(it);
 }
 
 bool Manager::hasParameterLink(const uuid &parameterIdIn) const
 {
   FormulaLinkContainerType::index<FormulaLink::ByParameterId>::type::iterator it;
-  it = formulaLinks.get<FormulaLink::ByParameterId>().find(parameterIdIn);
-  return it != formulaLinks.get<FormulaLink::ByParameterId>().end();
+  it = formulaLinksPtr->container.get<FormulaLink::ByParameterId>().find(parameterIdIn);
+  return it != formulaLinksPtr->container.get<FormulaLink::ByParameterId>().end();
 }
 
 uuid Manager::getFormulaLink(const uuid &parameterIdIn) const
 {
   FormulaLinkContainerType::index<FormulaLink::ByParameterId>::type::iterator it;
-  it = formulaLinks.get<FormulaLink::ByParameterId>().find(parameterIdIn);
-  assert(it != formulaLinks.get<FormulaLink::ByParameterId>().end()); //use has first.
+  it = formulaLinksPtr->container.get<FormulaLink::ByParameterId>().find(parameterIdIn);
+  assert(it != formulaLinksPtr->container.get<FormulaLink::ByParameterId>().end()); //use has first.
   
   return it->formulaId;
 }
@@ -400,7 +409,7 @@ bool Manager::isFormulaLinked(const uuid &formulaIdIn) const
 {
   FormulaLinkContainerType::index<FormulaLink::ByFormulaId>::type::iterator it, itEnd;
   
-  boost::tie(it, itEnd) = formulaLinks.get<FormulaLink::ByFormulaId>().equal_range(formulaIdIn);
+  boost::tie(it, itEnd) = formulaLinksPtr->container.get<FormulaLink::ByFormulaId>().equal_range(formulaIdIn);
   return it != itEnd;
 }
 
@@ -409,7 +418,7 @@ std::vector<uuid> Manager::getParametersLinked(const uuid &formulaIdIn) const
   std::vector<uuid> out;
   
   FormulaLinkContainerType::index<FormulaLink::ByFormulaId>::type::iterator it, itEnd;
-  boost::tie(it, itEnd) = formulaLinks.get<FormulaLink::ByFormulaId>().equal_range(formulaIdIn);
+  boost::tie(it, itEnd) = formulaLinksPtr->container.get<FormulaLink::ByFormulaId>().equal_range(formulaIdIn);
   for (; it != itEnd; ++it)
     out.push_back(it->parameterId);
   return out;
@@ -421,17 +430,18 @@ void Manager::dispatchValues()
    * makes sure the new value is different than the old
    */
   FormulaLinkContainerType::const_iterator it;
-  for (it = formulaLinks.begin(); it != formulaLinks.end(); ++it)
+  for (it = formulaLinksPtr->container.begin(); it != formulaLinksPtr->container.end(); ++it)
   {
     assert(it->parameter);
-    it->parameter->setValue(graphPtr->getFormulaValue(it->formulaId));
+    //todo address other value types.
+    it->parameter->setValue(boost::get<double>(graphPtr->getFormulaValue(it->formulaId)));
   }
 }
 
 void Manager::dumpLinks(std::ostream& stream)
 {
   FormulaLinkContainerType::const_iterator it;
-  for (it = formulaLinks.begin(); it != formulaLinks.end(); ++it)
+  for (it = formulaLinksPtr->container.begin(); it != formulaLinksPtr->container.end(); ++it)
   {
     stream << "parameter id: " << gu::idToString(it->parameterId)
       << "    parameter name: " << std::left << std::setw(20) << it->parameter->getName().toStdString()
@@ -460,7 +470,7 @@ void Manager::featureRemovedDispatched(const msg::Message &messageIn)
   
   for (const auto &p : pVector)
   {
-    auto &container = formulaLinks.get<FormulaLink::ByParameterId>();
+    auto &container = formulaLinksPtr->container.get<FormulaLink::ByParameterId>();
     FormulaLinkContainerType::index<FormulaLink::ByParameterId>::type::iterator it;
     it = container.find(p->getId());
     if (it != container.end())
@@ -474,8 +484,9 @@ QTextStream& Manager::getInfo(QTextStream &stream) const
   auto ids = getAllFormulaIds();
   for (const auto &id : ids)
   {
+    //todo address other variant types.
     stream << QString::fromStdString(getFormulaName(id))
-    << "    " << QString::number(getFormulaValue(id), 'f', 12) << endl;
+    << "    " << QString::number(boost::get<double>(getFormulaValue(id)), 'f', 12) << endl;
   }
   
   return stream;

@@ -144,8 +144,14 @@ public:
   void setFormulaId(const boost::uuids::uuid &oldIdIn, const boost::uuids::uuid &newIdIn);
   //@{
   //! @brief Get the formula value.
-  double getFormulaValue(const Vertex &vIn) const;
-  double getFormulaValue(const boost::uuids::uuid &idIn) const;
+  Value getFormulaValue(const Vertex &vIn) const;
+  Value getFormulaValue(const boost::uuids::uuid &idIn) const;
+  //@}
+  
+  //@{
+  //! Get the output type of formula.
+  ValueType getFormulaValueType(const Vertex &vIn) const;
+  ValueType getFormulaValueType(const boost::uuids::uuid &idIn) const;
   //@}
   
   /*! @brief Get a vector of all the formula names.
@@ -217,6 +223,7 @@ public:
   Vertex buildScalarSqrtNode(){return buildNode<ScalarSqrtNode>();}
   Vertex buildScalarHypotNode(){return buildNode<ScalarHypotNode>();}
   Vertex buildScalarConditionalNode(){return buildNode<ScalarConditionalNode>();}
+  Vertex buildVectorConstantNode(){return buildNode<VectorConstantNode>();}
   //@}
   
   //! @brief Build a graph edge.

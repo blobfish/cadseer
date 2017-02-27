@@ -27,6 +27,7 @@
 #include <tools/idtools.h>
 #include <expressions/manager.h>
 #include <expressions/stringtranslator.h>
+#include <expressions/value.h>
 #include <application/application.h>
 #include <project/project.h>
 #include <application/mainwindow.h>
@@ -217,7 +218,8 @@ void ParameterDialog::updateSlot()
   if (translator.parseString(formula) == expr::StringTranslator::ParseSucceeded)
   {
     localManager.update();
-    double value = localManager.getFormulaValue(translator.getFormulaOutId());
+    assert(localManager.getFormulaValueType(translator.getFormulaOutId()) == expr::ValueType::Scalar);
+    double value = boost::get<double>(localManager.getFormulaValue(translator.getFormulaOutId()));
     if (parameter->isValidValue(value))
     {
       parameter->setValue(value);
@@ -254,7 +256,8 @@ void ParameterDialog::textEditedSlot(const QString &textIn)
   {
     localManager.update();
     editLine->trafficLabel->setTrafficGreenSlot();
-    double value = localManager.getFormulaValue(translator.getFormulaOutId());
+    assert(localManager.getFormulaValueType(translator.getFormulaOutId()) == expr::ValueType::Scalar);
+    double value = boost::get<double>(localManager.getFormulaValue(translator.getFormulaOutId()));
     editLine->goToolTipSlot(QString::number(value));
   }
   else

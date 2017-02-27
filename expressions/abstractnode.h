@@ -22,6 +22,8 @@
 
 #include <boost/uuid/uuid.hpp>
 
+#include <osg/Vec3d>
+
 #include <expressions/edgeproperty.h>
 #include <expressions/value.h>
 
@@ -58,7 +60,8 @@ enum class NodeType
   ScalarExp,
   ScalarSqrt,
   ScalarHypot,
-  ScalarConditional
+  ScalarConditional,
+  VectorConstant
 };
 
 /*! @brief Abstract. 
@@ -81,7 +84,7 @@ public:
   bool isClean() const{return !dirtyTest;}
   //@}
   //! Returns the value. @see value
-  double getValue() const;
+  Value getValue() const;
   //! get this nodes type. @see NodeType
   virtual NodeType getType() const = 0;
   //! get this nodes types name.
@@ -135,7 +138,7 @@ public:
   virtual NodeType getType() const override {return NodeType::Formula;}
   virtual std::string className() const override {return "Formula";}
   virtual void calculate(const EdgePropertiesMap &propertyMap);
-  virtual ValueType getOutputType() const override {return ValueType::Variant;}
+  virtual ValueType getOutputType() const override;
   
   //! Returns the id. @see id
   boost::uuids::uuid getId(){return id;}
@@ -144,9 +147,12 @@ public:
   
   //! Name of the formula
   std::string name;
+  
 protected:
   //! Unique identifier.
   boost::uuids::uuid id;
+  //! derive value type in calculate and cache
+  ValueType valueType;
 };
 
 /*! @brief Addition. 2 parameters. */
@@ -464,6 +470,21 @@ public:
   virtual void calculate(const EdgePropertiesMap &propertyMap);
   virtual ValueType getOutputType() const override {return ValueType::Scalar;}
   Type type;
+};
+
+/*! @brief Constant number. No parameters. */
+class VectorConstantNode : public AbstractNode
+{
+public:
+  VectorConstantNode();
+  virtual ~VectorConstantNode() override {}
+  virtual NodeType getType() const override {return NodeType::VectorConstant;}
+  virtual std::string className() const override {return "VectorConstant";}
+  virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Vector;}
+  
+  //! Set the value of this vector constant node.
+  void setValue(const osg::Vec3d &valueIn){value = valueIn;}
 };
 
 }

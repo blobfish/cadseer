@@ -27,6 +27,7 @@
 #include <expressions/graph.h>
 
 using namespace expr;
+using boost::uuids::uuid;
 
 GraphWrapper::GraphWrapper()
 {
@@ -271,7 +272,7 @@ std::string GraphWrapper::getFormulaName(const boost::uuids::uuid& idIn) const
   return getFormulaName(fVertex);
 }
 
-double GraphWrapper::getFormulaValue(const Vertex& vIn) const
+Value GraphWrapper::getFormulaValue(const Vertex& vIn) const
 {
   assert(graph[vIn]->getType() == NodeType::Formula);
   FormulaNode *fNode = dynamic_cast<FormulaNode *>(graph[vIn].get());
@@ -279,10 +280,22 @@ double GraphWrapper::getFormulaValue(const Vertex& vIn) const
   return fNode->getValue();
 }
 
-double GraphWrapper::getFormulaValue(const boost::uuids::uuid& idIn) const
+Value GraphWrapper::getFormulaValue(const boost::uuids::uuid& idIn) const
 {
   assert(hasFormula(idIn));
   return getFormulaValue(getFormulaVertex(idIn));
+}
+
+ValueType GraphWrapper::getFormulaValueType(const Vertex &vIn) const
+{
+  assert(graph[vIn]->getType() == NodeType::Formula);
+  return graph[vIn]->getOutputType();
+}
+
+ValueType GraphWrapper::getFormulaValueType(const uuid &idIn) const
+{
+  assert(hasFormula(idIn));
+  return getFormulaValueType(getFormulaVertex(idIn));
 }
 
 Vertex GraphWrapper::buildScalarConstantNode(const double& constantIn)
@@ -339,7 +352,8 @@ void GraphWrapper::removeFormula(const boost::uuids::uuid& idIn)
 
 void GraphWrapper::removeFormula(const Vertex& vertexIn)
 {
-  double oldValue = static_cast<FormulaNode *>(graph[vertexIn].get())->getValue();
+  ValueType valueType = static_cast<FormulaNode *>(graph[vertexIn].get())->getOutputType();
+  Value oldValue = static_cast<FormulaNode *>(graph[vertexIn].get())->getValue();
   cleanFormula(vertexIn);
   
   //any dependents will get a constant value equal to the original formula.
@@ -347,8 +361,13 @@ void GraphWrapper::removeFormula(const Vertex& vertexIn)
   boost::tie(it, itEnd) = boost::in_edges(vertexIn, graph);
   for (;it != itEnd; ++it)
   {
-    Vertex constant = buildScalarConstantNode(oldValue);
-    graph[constant]->setClean(); //should equal so no need to be the default dirty.
+    Vertex constant = graph.null_vertex();
+    if (valueType == ValueType::Scalar)
+    {
+      constant = buildScalarConstantNode(boost::get<double>(oldValue));
+      graph[constant]->setClean(); //should equal so no need to be the default dirty.
+    }
+    // address other types and a check for null.
     Vertex dependent = boost::source(*it, graph);
     Edge edge = buildEdge(dependent, constant);
     graph[edge] = graph[*it];

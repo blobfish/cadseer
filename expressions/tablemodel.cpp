@@ -74,7 +74,21 @@ QVariant TableModel::data(const QModelIndex& index, int role) const
       return QString::fromStdString(getRhs(currentId));
     }
     if (index.column() == 2)
-      return eManager.getFormulaValue(currentId);
+    {
+      if (eManager.getFormulaValueType(currentId) == expr::ValueType::Scalar)
+        return boost::get<double>(eManager.getFormulaValue(currentId));
+      else if (eManager.getFormulaValueType(currentId) == expr::ValueType::Vector)
+      {
+        osg::Vec3d vector = boost::get<osg::Vec3d>(eManager.getFormulaValue(currentId));
+        std::ostringstream stream;
+        stream << "["
+          << vector.x() << ", "
+          << vector.y() << ", "
+          << vector.z()
+          << "]";
+        return QString::fromStdString(stream.str());
+      }
+    }
   }
   
   if (role == Qt::UserRole)
@@ -440,7 +454,14 @@ void TableModel::parseStringSlot(const QString &textIn)
   else
   {
     sTranslator->eManager.update();
-    QString string = QString::number(sTranslator->eManager.getFormulaValue(sTranslator->getFormulaOutId()));
+    QString string;
+    if(sTranslator->eManager.getFormulaValueType(sTranslator->getFormulaOutId()) == expr::ValueType::Scalar)
+    {
+      string = QString::number(boost::get<double>(sTranslator->eManager.getFormulaValue(
+        sTranslator->getFormulaOutId())));
+    }
+    else
+      string = "vector"; //temp
     Q_EMIT parseSucceededSignal(string);
     Q_EMIT parseSucceededSignal();
   }
