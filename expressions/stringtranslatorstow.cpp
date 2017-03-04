@@ -24,7 +24,7 @@
 #include <boost/graph/depth_first_search.hpp>
 #include <boost/graph/filtered_graph.hpp>
 
-#include <expressions/grammer.h>
+#include <expressions/grammar.h>
 #include <expressions/stringtranslatorstow.h>
 #include <tools/graphtools.h>
 
