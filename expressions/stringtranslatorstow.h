@@ -66,7 +66,7 @@ namespace expr
     void buildScalarDivisionNode();
     void startScalarParenthesesNode();
     void buildLinkNode(const std::string &stringIn, bool &carryOn);
-    void makeCurrentRHS();
+    void makeCurrentRHS(bool &carryOn);
     void finish();
     void finishScalarParenthesesNode();
     void buildScalarSinNode();
@@ -96,17 +96,15 @@ namespace expr
     void setConditionLessThanEqual();
     void setConditionEqual();
     void setConditionNotEqual();
-    void setConditionLhs();
-    void setConditionRhs();
+    void setConditionLhs(bool &carryOn);
+    void setConditionRhs(bool &carryOn);
     void setConditionThen();
     void setConditionElse();
-    void setParameter1();
-    void setParameter2();
-    void finishFunction1();
+    void setParameter1(bool &carryOn);
+    void setParameter2(bool &carryOn);
+    void finishFunction1(bool &carryOn);
     void buildVectorConstantNode();
-    void setVectorX();
-    void setVectorY();
-    void setVectorZ();
+    void buildQuatConstantNode();
     //@}
     
     //! Build the RHS string. No formula name or equals.
@@ -117,6 +115,8 @@ namespace expr
     boost::uuids::uuid getFormulaOutId() const;
     //! Failing position of the parse. -1 means no failure.
     int failedPosition; //-1 means no failure.
+    //! A message relevant to parsing failure.
+    std::string failureMessage;
     
   protected:
     //@{

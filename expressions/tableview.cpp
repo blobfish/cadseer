@@ -164,7 +164,12 @@ void TableViewAll::copyFormulaValueSlot()
   
   QModelIndex sourceIndex = pModel->mapToSource(indexes.front());
   QClipboard *clipboard = QApplication::clipboard();
-  clipboard->setText(QString::number(myModel->data(sourceIndex).toDouble(), 'f', 12));
+  
+  QVariant value = myModel->data(sourceIndex);
+  if (value.type() == QVariant::Double)
+    clipboard->setText(QString::number(value.toDouble(), 'f', 12));
+  if (value.type() == QVariant::String)
+    clipboard->setText(value.toString());
 }
 
 void TableViewAll::showEvent(QShowEvent* event)
@@ -458,7 +463,12 @@ void TableViewGroup::copyFormulaValueSlot()
   
   QModelIndex sourceIndex = pModel->mapToSource(indexes.front());
   QClipboard *clipboard = QApplication::clipboard();
-  clipboard->setText(QString::number(myModel->data(sourceIndex).toDouble(), 'f', 12));
+  
+  QVariant value = myModel->data(sourceIndex);
+  if (value.type() == QVariant::Double)
+    clipboard->setText(QString::number(value.toDouble(), 'f', 12));
+  if (value.type() == QVariant::String)
+    clipboard->setText(value.toString());
 }
 
 void TableViewGroup::buildActions()
@@ -550,7 +560,12 @@ void TableViewSelection::copyFormulaValueSlot()
   
   QModelIndex sourceIndex = pModel->mapToSource(indexes.front());
   QClipboard *clipboard = QApplication::clipboard();
-  clipboard->setText(QString::number(myModel->data(sourceIndex).toDouble(), 'f', 12));
+  
+  QVariant value = myModel->data(sourceIndex);
+  if (value.type() == QVariant::Double)
+    clipboard->setText(QString::number(value.toDouble(), 'f', 12));
+  if (value.type() == QVariant::String)
+    clipboard->setText(value.toString());
 }
 
 

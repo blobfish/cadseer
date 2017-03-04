@@ -88,6 +88,22 @@ QVariant TableModel::data(const QModelIndex& index, int role) const
           << "]";
         return QString::fromStdString(stream.str());
       }
+      else if (eManager.getFormulaValueType(currentId) == expr::ValueType::Quat)
+      {
+        osg::Quat quat = boost::get<osg::Quat>(eManager.getFormulaValue(currentId));
+        osg::Vec3d quatVec;
+        double angle;
+        quat.getRotate(angle, quatVec);
+        std::ostringstream stream;
+        stream << "[["
+        << quatVec.x() << ", "
+        << quatVec.y() << ", "
+        << quatVec.z()
+        << "],"
+        << angle
+        << "]";
+        return QString::fromStdString(stream.str());
+      }
     }
   }
   
@@ -401,9 +417,9 @@ void TableModel::importExpressions(std::istream &streamIn, boost::uuids::uuid gr
       boost::uuids::uuid fId = sTranslator->getFormulaOutId();
       eManager.addFormulaToUserGroup(groupId, fId);
     }
+    eManager.update(); //see project::open on why this has to be done in the loop.
     countAdded++;
   }
-  eManager.update();
   
   /* ideally I would do the 'beginInsertRows' call before actually modifing the underlying
    * model data. The problem is, I don't know how many rows are going to be added until I
@@ -442,9 +458,9 @@ void TableModel::parseStringSlot(const QString &textIn)
   
   assert(!eManager.hasFormula(testFormulaName));
   
-  std::ostringstream stream;
-  stream << testFormulaName << "=" << textIn.toStdString();
-  if (sTranslator->parseString(stream.str()) != StringTranslator::ParseSucceeded)
+  std::ostringstream parseStream;
+  parseStream << testFormulaName << "=" << textIn.toStdString();
+  if (sTranslator->parseString(parseStream.str()) != StringTranslator::ParseSucceeded)
   {
     int position = sTranslator->getFailedPosition() - testFormulaName.size() - 1;
     QString string = textIn.left(position) + "?";
@@ -460,8 +476,35 @@ void TableModel::parseStringSlot(const QString &textIn)
       string = QString::number(boost::get<double>(sTranslator->eManager.getFormulaValue(
         sTranslator->getFormulaOutId())));
     }
-    else
-      string = "vector"; //temp
+    else if (sTranslator->eManager.getFormulaValueType(sTranslator->getFormulaOutId()) == expr::ValueType::Vector)
+    {
+      osg::Vec3d vector = boost::get<osg::Vec3d>(sTranslator->eManager.getFormulaValue(
+        sTranslator->getFormulaOutId()));
+      std::ostringstream stream;
+      stream << "["
+        << vector.x() << ", "
+        << vector.y() << ", "
+        << vector.z()
+        << "]";
+      string = QString::fromStdString(stream.str());
+    }
+    else if (sTranslator->eManager.getFormulaValueType(sTranslator->getFormulaOutId()) == expr::ValueType::Quat)
+    {
+      osg::Quat quat = boost::get<osg::Quat>(sTranslator->eManager.getFormulaValue(
+        sTranslator->getFormulaOutId()));
+      osg::Vec3d quatVec;
+      double angle;
+      quat.getRotate(angle, quatVec);
+      std::ostringstream stream;
+      stream << "[["
+        << quatVec.x() << ", "
+        << quatVec.y() << ", "
+        << quatVec.z()
+        << "],"
+        << angle
+        << "]";
+      string = QString::fromStdString(stream.str());
+    }
     Q_EMIT parseSucceededSignal(string);
     Q_EMIT parseSucceededSignal();
   }

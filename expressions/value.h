@@ -38,7 +38,7 @@ namespace expr
     Variant = 0,  //!< might be any.
     Scalar,       //!< double value
     Vector,       //!< osg::Vec3d
-    Orientation,  //!< osg::Quat
+    Quat,         //!< osg::Quat
     CSys          //!< osg::matrixd
   };
   

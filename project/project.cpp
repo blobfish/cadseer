@@ -938,13 +938,28 @@ void Project::open()
     {
       if (sTranslator.parseString(sExpression.stringForm()) != expr::StringTranslator::ParseSucceeded)
       {
-        std::cout << "failed expression parse on load:   " << sExpression.stringForm() << std::endl;
+        std::cout << "failed expression parse on load: \"" << sExpression.stringForm()
+          << "\". Error message: " << sTranslator.getFailureMessage() << std::endl;
         continue;
       }
       expressionManager->setFormulaId(sTranslator.getFormulaOutId(), gu::stringToId(sExpression.id()));
+      
+      /* scenario:
+       * We now have multiple formula types. scalar, vector etc....
+       * The types for the formula nodes are not set until update/calculate are called.
+       * The string parser checks input strings for compatable types.
+       * 
+       * problem:
+       * When we read multiple expressions from the project file that has expressions
+       * linked to each other, the parser fails. It fails because the types of the 
+       * formula nodes are not known yet.
+       * 
+       * To avoid this we are call update after each expression. I don't think this will
+       * be a significant with respect to performance.
+       */
+      expressionManager->update();
     }
     
-    expressionManager->update(); //addFormulaLink requires that everything be up to date.
     if (project->expressionLinks().present())
     {
       for (const auto &sLink : project->expressionLinks().get().array())

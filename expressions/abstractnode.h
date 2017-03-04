@@ -61,7 +61,8 @@ enum class NodeType
   ScalarSqrt,
   ScalarHypot,
   ScalarConditional,
-  VectorConstant
+  VectorConstant,
+  QuatConstant
 };
 
 /*! @brief Abstract. 
@@ -472,7 +473,7 @@ public:
   Type type;
 };
 
-/*! @brief Constant number. No parameters. */
+/*! @brief Vector constant node */
 class VectorConstantNode : public AbstractNode
 {
 public:
@@ -485,6 +486,22 @@ public:
   
   //! Set the value of this vector constant node.
   void setValue(const osg::Vec3d &valueIn){value = valueIn;}
+};
+
+
+/*! @brief Vector constant node */
+class QuatConstantNode : public AbstractNode
+{
+public:
+  QuatConstantNode();
+  virtual ~QuatConstantNode() override {}
+  virtual NodeType getType() const override {return NodeType::QuatConstant;}
+  virtual std::string className() const override {return "QuatConstant";}
+  virtual void calculate(const EdgePropertiesMap &propertyMap);
+  virtual ValueType getOutputType() const override {return ValueType::Quat;}
+  
+  //! Set the value of this vector constant node.
+  void setValue(const osg::Quat &valueIn){value = valueIn;}
 };
 
 }

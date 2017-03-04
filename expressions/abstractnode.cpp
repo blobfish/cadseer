@@ -619,3 +619,23 @@ void VectorConstantNode::calculate(const EdgePropertiesMap& propertyMap)
   );
   this->setClean();
 }
+
+QuatConstantNode::QuatConstantNode() : AbstractNode()
+{
+  
+}
+
+void QuatConstantNode::calculate(const EdgePropertiesMap& propertyMap)
+{
+  assert(propertyMap.size() == 2);
+  assert(propertyMap.count(EdgeProperty::Vector) == 1);
+  assert(propertyMap.count(EdgeProperty::Angle) == 1);
+  assert(propertyMap.at(EdgeProperty::Vector)->getOutputType() == ValueType::Vector);
+  assert(propertyMap.at(EdgeProperty::Angle)->getOutputType() == ValueType::Scalar);
+  value = osg::Quat
+  (
+    boost::get<double>(propertyMap.at(EdgeProperty::Angle)->getValue()),
+    boost::get<osg::Vec3d>(propertyMap.at(EdgeProperty::Vector)->getValue())
+  );
+  this->setClean();
+}

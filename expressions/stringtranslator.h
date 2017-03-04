@@ -41,6 +41,8 @@ namespace expr
       TotalState parseString(const std::string &);
       //! where in the string the parse failed or -1 for success.
       int getFailedPosition() const;
+      //! failure message. hint on why parsing failed
+      std::string getFailureMessage() const;
       //! get the entire string representation of the formula with id.
       std::string buildStringAll(const boost::uuids::uuid &) const;
       //! Build the RHS string. Has no name or equals sign.

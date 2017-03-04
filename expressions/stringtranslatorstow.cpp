@@ -21,9 +21,6 @@
 #include <string>
 #include <stack>
 
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/graph/depth_first_search.hpp>
 #include <boost/graph/filtered_graph.hpp>
 
@@ -349,7 +346,6 @@ public:
 
             itStack.push(temp);
         }
-        
         else if (graph[vertex]->getType() == expr::NodeType::VectorConstant)
         {
           currentPosition = expression.insert(currentPosition, "[");
@@ -359,6 +355,18 @@ public:
           temp.push_back(currentPosition);
           currentPosition++;
           currentPosition = expression.insert(currentPosition, ", ");
+          temp.push_back(currentPosition);
+          currentPosition++;
+          currentPosition = expression.insert(currentPosition, "]");
+          temp.push_back(currentPosition);
+          itStack.push(temp);
+        }
+        else if (graph[vertex]->getType() == expr::NodeType::QuatConstant)
+        {
+          currentPosition = expression.insert(currentPosition, "[");
+          currentPosition++;
+          currentPosition = expression.insert(currentPosition, ", ");
+          StackEntry temp;
           temp.push_back(currentPosition);
           currentPosition++;
           currentPosition = expression.insert(currentPosition, "]");
@@ -388,6 +396,14 @@ public:
         else if(graph[edge] == expr::EdgeProperty::Else)
         {
             currentPosition = itStack.top().at(3);
+        }
+        else if(graph[edge] == expr::EdgeProperty::Vector)
+        {
+            currentPosition = itStack.top().at(0);
+        }
+        else if(graph[edge] == expr::EdgeProperty::Angle)
+        {
+            currentPosition = itStack.top().at(1);
         }
     }
       
@@ -447,11 +463,8 @@ int StringTranslatorStow::parseString(const std::string &formula)
   addedVertices.clear();
   addedEdges.clear();
   failedPosition = -1;
+  failureMessage.clear();
   formulaNodeOut = Graph::null_vertex();
-  
-  using boost::spirit::qi::phrase_parse;
-  using boost::spirit::ascii::space;
-  using boost::spirit::utree;
   
   typedef std::string::iterator strIt;
   
@@ -465,7 +478,7 @@ int StringTranslatorStow::parseString(const std::string &formula)
       first,
       last,
       grammar,
-      space
+      boost::spirit::ascii::space
   );
   if (!r || first != last)
   {
@@ -530,8 +543,11 @@ void StringTranslatorStow::buildFormulaNode(const std::string& stringIn, bool &c
     fVertex = graphWrapper.getFormulaVertex(stringIn);
     if (boost::out_degree(fVertex, graphWrapper.graph) > 0)
     {
-      //TODO error message.
-      std::cout << "out degree in StringTranslatorStow::buildFormulaNode is: " << boost::out_degree(fVertex, graphWrapper.graph) << std::endl;
+      std::ostringstream error;
+      error << "wrong out degree of " << boost::out_degree(fVertex, graphWrapper.graph)
+        << " in " << __PRETTY_FUNCTION__ << std::endl;
+      failureMessage = error.str();
+      
       carryOn = false;
       return;
     }
@@ -585,6 +601,10 @@ void StringTranslatorStow::buildLinkNode(const std::string &stringIn, bool &carr
 {
   if(!graphWrapper.hasFormula(stringIn))
   {
+    std::ostringstream error;
+    error << "No formula for: " << stringIn << " in " << __PRETTY_FUNCTION__ << std::endl;
+    failureMessage = error.str();
+    
     carryOn = false;
     return;
   }
@@ -802,19 +822,41 @@ void StringTranslatorStow::setConditionNotEqual()
   node->type = ScalarConditionalNode::NotEqual;
 }
 
-void StringTranslatorStow::setConditionLhs()
+void StringTranslatorStow::setConditionLhs(bool &carryOn)
 {
   Vertex lhs = vStack.top();
   vStack.pop();
+  
+  if (graphWrapper.graph[lhs]->getOutputType() != ValueType::Scalar)
+  {
+    std::ostringstream error;
+    error << "Not scalar type in " << __PRETTY_FUNCTION__ << std::endl;
+    failureMessage = error.str();
+    
+    carryOn = false;
+    return;
+  }
+  
   Vertex ifNode = vStack.top();
   Edge edge = buildEdgeCommon(ifNode, lhs);
   graphWrapper.graph[edge] = EdgeProperty::Lhs;
 }
 
-void StringTranslatorStow::setConditionRhs()
+void StringTranslatorStow::setConditionRhs(bool &carryOn)
 {
   Vertex rhs = vStack.top();
   vStack.pop();
+  
+  if (graphWrapper.graph[rhs]->getOutputType() != ValueType::Scalar)
+  {
+    std::ostringstream error;
+    error << "Not scalar type in " << __PRETTY_FUNCTION__ << std::endl;
+    failureMessage = error.str();
+    
+    carryOn = false;
+    return;
+  }
+  
   Vertex ifNode = vStack.top();
   Edge edge = buildEdgeCommon(ifNode, rhs);
   graphWrapper.graph[edge] = EdgeProperty::Rhs;
@@ -838,64 +880,114 @@ void StringTranslatorStow::setConditionElse()
   graphWrapper.graph[edge] = EdgeProperty::Else;
 }
 
-void StringTranslatorStow::setParameter1()
+void StringTranslatorStow::setParameter1(bool &carryOn)
 {
   Vertex p1Node = vStack.top();
   vStack.pop();
+  
+  if (graphWrapper.graph[p1Node]->getOutputType() != ValueType::Scalar)
+  {
+    std::ostringstream error;
+    error << "Not scalar type in " << __PRETTY_FUNCTION__ << std::endl;
+    failureMessage = error.str();
+    
+    carryOn = false;
+    return;
+  }
+  
   Vertex functionNode = vStack.top();
   Edge edge = buildEdgeCommon(functionNode, p1Node);
   graphWrapper.graph[edge] = EdgeProperty::Parameter1;
 }
 
-void StringTranslatorStow::setParameter2()
+void StringTranslatorStow::setParameter2(bool &carryOn)
 {
   Vertex p2Node = vStack.top();
   vStack.pop();
+  
+  if (graphWrapper.graph[p2Node]->getOutputType() != ValueType::Scalar)
+  {
+    std::ostringstream error;
+    error << "Not scalar type in " << __PRETTY_FUNCTION__ << std::endl;
+    failureMessage = error.str();
+    
+    carryOn = false;
+    return;
+  }
+  
   Vertex functionNode = vStack.top();
   Edge edge = buildEdgeCommon(functionNode, p2Node);
   graphWrapper.graph[edge] = EdgeProperty::Parameter2;
 }
 
-void StringTranslatorStow::finishFunction1()
+void StringTranslatorStow::finishFunction1(bool &carryOn)
 {
   Vertex child = vStack.top();
   vStack.pop();
+  
+  if (graphWrapper.graph[child]->getOutputType() != ValueType::Scalar)
+  {
+    std::ostringstream error;
+    error << "Not scalar type in " << __PRETTY_FUNCTION__ << std::endl;
+    failureMessage = error.str();
+    
+    carryOn = false;
+    return;
+  }
+  
   Vertex trig = vStack.top();
   buildEdgeNone(trig, child);
 }
 
 void StringTranslatorStow::buildVectorConstantNode()
 {
-  Vertex aNode = graphWrapper.buildVectorConstantNode();
-  vStack.push(aNode);
-  addedVertices.push_back(aNode);
+  Vertex vectorNode = graphWrapper.buildVectorConstantNode();
+  
+  //in reverse
+  {
+    Vertex zNode = vStack.top();
+    vStack.pop();
+    Edge edge = buildEdgeCommon(vectorNode, zNode);
+    graphWrapper.graph[edge] = EdgeProperty::Z;
+  }
+  {
+    Vertex yNode = vStack.top();
+    vStack.pop();
+    Edge edge = buildEdgeCommon(vectorNode, yNode);
+    graphWrapper.graph[edge] = EdgeProperty::Y;
+  }
+  {
+    Vertex xNode = vStack.top();
+    vStack.pop();
+    Edge edge = buildEdgeCommon(vectorNode, xNode);
+    graphWrapper.graph[edge] = EdgeProperty::X;
+  }
+  
+  vStack.push(vectorNode);
+  addedVertices.push_back(vectorNode);
 }
 
-void StringTranslatorStow::setVectorX()
+void StringTranslatorStow::buildQuatConstantNode()
 {
-  Vertex xNode = vStack.top();
-  vStack.pop();
-  Vertex VectorNode = vStack.top();
-  Edge edge = buildEdgeCommon(VectorNode, xNode);
-  graphWrapper.graph[edge] = EdgeProperty::X;
-}
-
-void StringTranslatorStow::setVectorY()
-{
-  Vertex yNode = vStack.top();
-  vStack.pop();
-  Vertex VectorNode = vStack.top();
-  Edge edge = buildEdgeCommon(VectorNode, yNode);
-  graphWrapper.graph[edge] = EdgeProperty::Y;
-}
-
-void StringTranslatorStow::setVectorZ()
-{
-  Vertex zNode = vStack.top();
-  vStack.pop();
-  Vertex VectorNode = vStack.top();
-  Edge edge = buildEdgeCommon(VectorNode, zNode);
-  graphWrapper.graph[edge] = EdgeProperty::Z;
+  Vertex quatNode = graphWrapper.buildQuatConstantNode();
+  
+  //reverse
+  {
+    Vertex angleNode = vStack.top();
+    vStack.pop();
+    Edge edge = buildEdgeCommon(quatNode, angleNode);
+    graphWrapper.graph[edge] = EdgeProperty::Angle;
+  }
+  
+  {
+    Vertex vectorNode = vStack.top();
+    vStack.pop();
+    Edge edge = buildEdgeCommon(quatNode, vectorNode);
+    graphWrapper.graph[edge] = EdgeProperty::Vector;
+  }
+  
+  vStack.push(quatNode);
+  addedVertices.push_back(quatNode);
 }
 
 void StringTranslatorStow::buildEdgeLHS(const Vertex &source, const Vertex &target)
@@ -927,7 +1019,7 @@ Edge StringTranslatorStow::buildEdgeCommon(const Vertex &source, const Vertex &t
   return(anEdge);
 }
 
-void StringTranslatorStow::makeCurrentRHS()
+void StringTranslatorStow::makeCurrentRHS(bool &carryOn)
 {
   assert (vStack.size() > 2);
   
@@ -937,6 +1029,19 @@ void StringTranslatorStow::makeCurrentRHS()
   vStack.pop();
   Vertex lhs = vStack.top();
   vStack.pop();
+  
+  if (graphWrapper.graph[lhs]->getOutputType() != graphWrapper.graph[rhs]->getOutputType())
+  {
+    std::ostringstream error;
+    error << "Type mismatch in " << __PRETTY_FUNCTION__
+      << ". Lhs type is: " <<  static_cast<int>(graphWrapper.graph[lhs]->getOutputType())
+      << ". Rhs type is: " <<  static_cast<int>(graphWrapper.graph[rhs]->getOutputType())
+      << std::endl;
+    failureMessage = error.str();
+    
+    carryOn = false;
+    return;
+  }
   
   buildEdgeLHS(op, lhs);
   buildEdgeRHS(op, rhs);
@@ -955,6 +1060,16 @@ void StringTranslatorStow::finish()
     Vertex formula = vStack.top();
     vStack.pop();
     buildEdgeNone(formula, rhs);
+  }
+  else
+  {
+    std::cout << std::endl << "wrong stack size of: " << vStack.size() << " in: " << __PRETTY_FUNCTION__ << std::endl;
+    std::stack<expr::Vertex> stackCopy = vStack;
+    while (!stackCopy.empty())
+    {
+      std::cout << graphWrapper.graph[stackCopy.top()]->className() << std::endl;
+      stackCopy.pop();
+    }
   }
 }
 

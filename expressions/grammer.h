@@ -20,6 +20,8 @@
 #ifndef EXPR_GRAMMER_H
 #define EXPR_GRAMMER_H
 
+// #define BOOST_SPIRIT_DEBUG
+
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/support_utree.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
@@ -27,17 +29,23 @@
 
 #include <expressions/stringtranslatorstow.h>
 
-using boost::spirit::qi::grammar;
-using boost::spirit::qi::rule;
-using boost::spirit::qi::_val;
-using boost::spirit::qi::_1;
-using boost::spirit::qi::_pass;
-using boost::spirit::utree;
-using boost::spirit::ascii::space_type;
-using boost::spirit::utf8_symbol_range_type;
+
+namespace bp = boost::phoenix;
+namespace bs = boost::spirit;
+
+using bs::qi::grammar;
+using bs::qi::rule;
+using bs::qi::_val;
+using bs::qi::_pass;
+using bs::utree;
+using bs::ascii::space_type;
+using bs::utf8_symbol_range_type;
+
 
 namespace expr
 {
+  typedef StringTranslatorStow Translator;
+  
   /*! @brief Describes boost::spirit parsing grammar
   * 
   * @todo Explain acceptable string format.
@@ -45,80 +53,87 @@ namespace expr
   template <typename Iterator>
   struct ExpressionGrammar : grammar<Iterator, space_type>
   {
-    ExpressionGrammar(StringTranslatorStow &translatorIn) : ExpressionGrammar::base_type(expression), translator(translatorIn)
+    ExpressionGrammar(Translator &translatorIn) : ExpressionGrammar::base_type(expression), translator(translatorIn)
     {
-      using boost::spirit::qi::alpha;
-      using boost::spirit::qi::alnum;
-      using boost::spirit::qi::punct;
-      using boost::spirit::qi::double_;
-      using boost::spirit::qi::char_;
-      using boost::spirit::qi::lit;
+      using bs::qi::alpha;
+      using bs::qi::alnum;
+      using bs::qi::punct;
+      using bs::qi::double_;
+      using bs::qi::char_;
+      using bs::qi::lit;
       
-    expression = formulaName [boost::phoenix::bind(&StringTranslatorStow::buildFormulaNode, &translator, boost::spirit::_1, _pass)] >>
-        '=' >> (scalarRhs [boost::phoenix::bind(&StringTranslatorStow::finish, &translator)] |
-        vectorRhs [boost::phoenix::bind(&StringTranslatorStow::finish, &translator)]);
+    expression = formulaName [bp::bind(&Translator::buildFormulaNode, &translator, bs::_1, _pass)] >>
+        '=' >>
+        (
+          quatRhs [bp::bind(&Translator::finish, &translator)]
+          | vectorRhs [bp::bind(&Translator::finish, &translator)]
+          | scalarRhs [bp::bind(&Translator::finish, &translator)]
+        );
     scalarRhs = term >>
-        *((char_('+') [boost::phoenix::bind(&StringTranslatorStow::buildScalarAdditionNode, &translator)] >>
-        term [boost::phoenix::bind(&StringTranslatorStow::makeCurrentRHS, &translator)]) |
-        (char_('-') [boost::phoenix::bind(&StringTranslatorStow::buildSubractionNode, &translator)] >>
-        term [boost::phoenix::bind(&StringTranslatorStow::makeCurrentRHS, &translator)]));
-    scalarItem = double_ [boost::phoenix::bind(&StringTranslatorStow::buildScalarConstantNode, &translator, boost::spirit::_1)] |
-        linkName [boost::phoenix::bind(&StringTranslatorStow::buildLinkNode, &translator, boost::spirit::_1, _pass)];
-    function1 = (lit("sin(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarSinNode, &translator)] |
-        lit("cos(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarCosNode, &translator)] |
-        lit("tan(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarTanNode, &translator)] |
-        lit("asin(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarAsinNode, &translator)] |
-        lit("acos(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarAcosNode, &translator)] |
-        lit("atan(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarAtanNode, &translator)] |
-        lit("radtodeg(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarRadToDegNode, &translator)] |
-        lit("degtorad(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarDegToRadNode, &translator)] |
-        lit("log(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarLogNode, &translator)] |
-        lit("exp(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarExpNode, &translator)] |
-        lit("sqrt(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarSqrtNode, &translator)] |
-        lit("abs(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarAbsNode, &translator)]) >> scalarRhs >>
-        char_(')') [boost::phoenix::bind(&StringTranslatorStow::finishFunction1, &translator)];
-    function2 = (lit("pow(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarPowNode, &translator)] |
-        lit("atan2(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarAtan2Node, &translator)] |
-        lit("min(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarMinNode, &translator)] |
-        lit("max(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarMaxNode, &translator)] |
-        lit("floor(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarFloorNode, &translator)] |
-        lit("ceil(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarCeilNode, &translator)] |
-        lit("round(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarRoundNode, &translator)] | 
-        lit("hypot(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarHypotNode, &translator)]) >> scalarRhs >>
-        char_(',') [boost::phoenix::bind(&StringTranslatorStow::setParameter1, &translator)] >> scalarRhs >>
-        char_(')') [boost::phoenix::bind(&StringTranslatorStow::setParameter2, &translator)];
+        *((char_('+') [bp::bind(&Translator::buildScalarAdditionNode, &translator)] >>
+        term [bp::bind(&Translator::makeCurrentRHS, &translator, _pass)]) |
+        (char_('-') [bp::bind(&Translator::buildSubractionNode, &translator)] >>
+        term [bp::bind(&Translator::makeCurrentRHS, &translator, _pass)]));
+    scalarItem = double_ [bp::bind(&Translator::buildScalarConstantNode, &translator, bs::_1)] |
+        linkName [bp::bind(&Translator::buildLinkNode, &translator, bs::_1, _pass)];
+    function1 = (lit("sin(") [bp::bind(&Translator::buildScalarSinNode, &translator)] |
+        lit("cos(") [bp::bind(&Translator::buildScalarCosNode, &translator)] |
+        lit("tan(") [bp::bind(&Translator::buildScalarTanNode, &translator)] |
+        lit("asin(") [bp::bind(&Translator::buildScalarAsinNode, &translator)] |
+        lit("acos(") [bp::bind(&Translator::buildScalarAcosNode, &translator)] |
+        lit("atan(") [bp::bind(&Translator::buildScalarAtanNode, &translator)] |
+        lit("radtodeg(") [bp::bind(&Translator::buildScalarRadToDegNode, &translator)] |
+        lit("degtorad(") [bp::bind(&Translator::buildScalarDegToRadNode, &translator)] |
+        lit("log(") [bp::bind(&Translator::buildScalarLogNode, &translator)] |
+        lit("exp(") [bp::bind(&Translator::buildScalarExpNode, &translator)] |
+        lit("sqrt(") [bp::bind(&Translator::buildScalarSqrtNode, &translator)] |
+        lit("abs(") [bp::bind(&Translator::buildScalarAbsNode, &translator)]) >> scalarRhs >>
+        char_(')') [bp::bind(&Translator::finishFunction1, &translator, _pass)];
+    function2 = (lit("pow(") [bp::bind(&Translator::buildScalarPowNode, &translator)] |
+        lit("atan2(") [bp::bind(&Translator::buildScalarAtan2Node, &translator)] |
+        lit("min(") [bp::bind(&Translator::buildScalarMinNode, &translator)] |
+        lit("max(") [bp::bind(&Translator::buildScalarMaxNode, &translator)] |
+        lit("floor(") [bp::bind(&Translator::buildScalarFloorNode, &translator)] |
+        lit("ceil(") [bp::bind(&Translator::buildScalarCeilNode, &translator)] |
+        lit("round(") [bp::bind(&Translator::buildScalarRoundNode, &translator)] | 
+        lit("hypot(") [bp::bind(&Translator::buildScalarHypotNode, &translator)]) >> scalarRhs >>
+        char_(',') [bp::bind(&Translator::setParameter1, &translator, _pass)] >> scalarRhs >>
+        char_(')') [bp::bind(&Translator::setParameter2, &translator, _pass)];
     //when one parser is a subset of another (i.e. '>' and '>=') put the larger first, so it fails before trying the smaller.
-    conditionalOperator = lit(">=") [boost::phoenix::bind(&StringTranslatorStow::setConditionGreaterThanEqual, &translator)] |
-        lit("<=") [boost::phoenix::bind(&StringTranslatorStow::setConditionLessThanEqual, &translator)] |
-        lit(">") [boost::phoenix::bind(&StringTranslatorStow::setConditionGreaterThan, &translator)] |
-        lit("<") [boost::phoenix::bind(&StringTranslatorStow::setConditionLessThan, &translator)] |
-        lit("==") [boost::phoenix::bind(&StringTranslatorStow::setConditionEqual, &translator)] |
-        lit("!=") [boost::phoenix::bind(&StringTranslatorStow::setConditionNotEqual, &translator)];
-    condition = scalarRhs [boost::phoenix::bind(&StringTranslatorStow::setConditionLhs, &translator)] >> conditionalOperator >>
-                    scalarRhs [boost::phoenix::bind(&StringTranslatorStow::setConditionRhs, &translator)];
-    ifCondition = lit("if(") [boost::phoenix::bind(&StringTranslatorStow::buildScalarConditionalNode, &translator)] >>
+    conditionalOperator = lit(">=") [bp::bind(&Translator::setConditionGreaterThanEqual, &translator)] |
+        lit("<=") [bp::bind(&Translator::setConditionLessThanEqual, &translator)] |
+        lit(">") [bp::bind(&Translator::setConditionGreaterThan, &translator)] |
+        lit("<") [bp::bind(&Translator::setConditionLessThan, &translator)] |
+        lit("==") [bp::bind(&Translator::setConditionEqual, &translator)] |
+        lit("!=") [bp::bind(&Translator::setConditionNotEqual, &translator)];
+    condition = scalarRhs [bp::bind(&Translator::setConditionLhs, &translator, _pass)] >> conditionalOperator >>
+        scalarRhs [bp::bind(&Translator::setConditionRhs, &translator, _pass)];
+    ifCondition = lit("if(") [bp::bind(&Translator::buildScalarConditionalNode, &translator)] >>
         condition >> lit(")") >>
-        lit("then(") >> scalarRhs [boost::phoenix::bind(&StringTranslatorStow::setConditionThen, &translator)] >> char_(')') >>
-        lit("else(") >> scalarRhs [boost::phoenix::bind(&StringTranslatorStow::setConditionElse, &translator)] >> char_(')');
+        lit("then(") >> scalarRhs [bp::bind(&Translator::setConditionThen, &translator)] >> char_(')') >>
+        lit("else(") >> scalarRhs [bp::bind(&Translator::setConditionElse, &translator)] >> char_(')');
     keyword = lit("sin(") | lit("cos(") | lit("tan(") | lit("asin(") | lit("acos(") | lit("atan(") | lit("pow(") |
         lit("atan2(") | lit("abs(") | lit("min(") | lit("max(") | lit("floor(") | lit("ceil(") | lit("round(") |
         lit("radtodeg(") | lit("degtorad(") | lit("log(") | lit("exp(") | lit("sqrt(") | lit("hypot(") | lit("if(");
     linkName = (alpha >> *(alnum | char_('_'))) - keyword;
     formulaName = (alpha >> *(alnum | char_('_'))) - keyword;
     factor = scalarItem | function1 | function2 | ifCondition |
-        char_('(') [boost::phoenix::bind(&StringTranslatorStow::startScalarParenthesesNode, &translator)] >> scalarRhs >>
-        char_ (')') [boost::phoenix::bind(&StringTranslatorStow::finishScalarParenthesesNode, &translator)];
+        char_('(') [bp::bind(&Translator::startScalarParenthesesNode, &translator)] >> scalarRhs >>
+        char_ (')') [bp::bind(&Translator::finishScalarParenthesesNode, &translator)];
     term = factor >>
-        *((char_('*') [boost::phoenix::bind(&StringTranslatorStow::buildScalarMultiplicationNode, &translator)] >>
-        factor [boost::phoenix::bind(&StringTranslatorStow::makeCurrentRHS, &translator)]) |
-        (char_('/') [boost::phoenix::bind(&StringTranslatorStow::buildScalarDivisionNode, &translator)] >>
-        factor [boost::phoenix::bind(&StringTranslatorStow::makeCurrentRHS, &translator)]));
-    vector = char_('[') [boost::phoenix::bind(&StringTranslatorStow::buildVectorConstantNode, &translator)]
-      >> scalarItem [boost::phoenix::bind(&StringTranslatorStow::setVectorX, &translator)] >> char_(',')
-      >> scalarItem [boost::phoenix::bind(&StringTranslatorStow::setVectorY, &translator)] >> char_(',')
-      >> scalarItem [boost::phoenix::bind(&StringTranslatorStow::setVectorZ, &translator)] >> char_(']');
-      vectorItem = vector | linkName [boost::phoenix::bind(&StringTranslatorStow::buildLinkNode, &translator, boost::spirit::_1, _pass)];
+        *((char_('*') [bp::bind(&Translator::buildScalarMultiplicationNode, &translator)] >>
+        factor [bp::bind(&Translator::makeCurrentRHS, &translator, _pass)]) |
+        (char_('/') [bp::bind(&Translator::buildScalarDivisionNode, &translator)] >>
+        factor [bp::bind(&Translator::makeCurrentRHS, &translator, _pass)]));
+    vector = char_('[') >> scalarRhs >> char_(',') >> scalarRhs >> char_(',') >> scalarRhs
+      >> char_(']') [bp::bind(&Translator::buildVectorConstantNode, &translator)];
+    vectorItem = vector | linkName [bp::bind(&Translator::buildLinkNode, &translator, bs::_1, _pass)];
     vectorRhs = vectorItem;
+    quat = char_('[')
+      >> vectorItem >> char_(',') >> scalarRhs
+      >> char_(']') [bp::bind(&Translator::buildQuatConstantNode, &translator)];
+    quatItem = quat | linkName [bp::bind(&Translator::buildLinkNode, &translator, bs::_1, _pass)];
+    quatRhs = quatItem;
       
       BOOST_SPIRIT_DEBUG_NODE(expression);
       BOOST_SPIRIT_DEBUG_NODE(scalarRhs);
@@ -136,6 +151,9 @@ namespace expr
       BOOST_SPIRIT_DEBUG_NODE(vector);
       BOOST_SPIRIT_DEBUG_NODE(vectorItem);
       BOOST_SPIRIT_DEBUG_NODE(vectorRhs);
+      BOOST_SPIRIT_DEBUG_NODE(quat);
+      BOOST_SPIRIT_DEBUG_NODE(quatItem);
+      BOOST_SPIRIT_DEBUG_NODE(quatRhs);
     }
     rule<Iterator, space_type> expression;
     rule<Iterator, space_type> scalarRhs;
@@ -150,11 +168,14 @@ namespace expr
     rule<Iterator, space_type> vector;
     rule<Iterator, space_type> vectorItem;
     rule<Iterator, space_type> vectorRhs;
+    rule<Iterator, space_type> quat;
+    rule<Iterator, space_type> quatItem;
+    rule<Iterator, space_type> quatRhs;
     rule<Iterator, space_type, std::string()> keyword;
     rule<Iterator, space_type, std::string()> linkName;
     rule<Iterator, space_type, std::string()> formulaName;
     
-    StringTranslatorStow &translator;
+    Translator &translator;
   };
 }
 

@@ -50,6 +50,11 @@ int StringTranslator::getFailedPosition() const
   return translatorStow->failedPosition;
 }
 
+std::string StringTranslator::getFailureMessage() const
+{
+  return translatorStow->failureMessage;
+}
+
 std::string StringTranslator::buildStringAll(const boost::uuids::uuid& idIn) const
 {
   return translatorStow->buildStringAll(idIn);

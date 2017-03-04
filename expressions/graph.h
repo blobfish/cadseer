@@ -224,6 +224,7 @@ public:
   Vertex buildScalarHypotNode(){return buildNode<ScalarHypotNode>();}
   Vertex buildScalarConditionalNode(){return buildNode<ScalarConditionalNode>();}
   Vertex buildVectorConstantNode(){return buildNode<VectorConstantNode>();}
+  Vertex buildQuatConstantNode(){return buildNode<QuatConstantNode>();}
   //@}
   
   //! @brief Build a graph edge.
@@ -267,7 +268,8 @@ public:
     }
     else
       out << graphVW[vertexW]->className();
-    out  << "   " << graphVW[vertexW]->getValue() << "\\n";
+    if (graphVW[vertexW]->isClean())
+      out  << "   " << graphVW[vertexW]->getValue();
     out << "\"";
     if (graphVW[vertexW]->getType() == NodeType::Formula)
     {
