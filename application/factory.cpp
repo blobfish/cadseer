@@ -23,6 +23,8 @@
 
 #include <QFileDialog>
 #include <QTextStream>
+#include <QUrl>
+#include <QDesktopServices>
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/timer/timer.hpp>
@@ -907,6 +909,8 @@ void Factory::debugShapeGraphDispatched(const msg::Message&)
         QString fileName = fileNameBase + QString::fromStdString(gu::idToString(feature->getId())) + ".dot";
         const ftr::SeerShape &shape = feature->getSeerShape();
         shape.dumpGraph(fileName.toStdString());
+        
+        QDesktopServices::openUrl(QUrl(fileName));
     }
     
     observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));

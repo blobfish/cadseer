@@ -1256,8 +1256,6 @@ void SeerShape::serialIn(const prj::srl::SeerShape &sSeerShapeIn)
   TopExp::MapShapes(getRootOCCTShape(), shapeMap);
   for (const prj::srl::ShapeIdRecord &sRRecord : sSeerShapeIn.shapeIdContainer().shapeIdRecord())
   {
-    ShapeIdRecord record;
-    record.id = gu::stringToId(sRRecord.id());
     updateShapeIdRecord(shapeMap(sRRecord.shapeOffset()), gu::stringToId(sRRecord.id()));
   }
   

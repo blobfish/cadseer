@@ -252,7 +252,12 @@ void BooleanIdMapper::goSplitFaces()
     BOPTools::MapShapes(currentShape, TopAbs_EDGE, edges);
     for (int index = 1; index <= edges.Extent(); ++index)
     {
-      assert(seerShapeOut->hasShapeIdRecord(edges(index)));
+      /* It appears to be possible to have an edge that belongs to
+       * the face that is not in the shapeMap. thinking degenerated edges?
+       */
+//       assert(seerShapeOut->hasShapeIdRecord(edges(index)));
+      if (!seerShapeOut->hasShapeIdRecord(edges(index)))
+        continue;
       uuid tempId = seerShapeOut->findShapeIdRecord(edges(index)).id;
       if (iEdgeCache.count(tempId) == 0)
         continue;

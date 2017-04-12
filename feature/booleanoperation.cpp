@@ -43,6 +43,7 @@ BooleanOperation::BooleanOperation(const TopoDS_Shape &target, const gu::ShapeVe
   
   SetOperation(op);
   SetNonDestructive(Standard_True);
+  SetRunParallel(Standard_True);
 }
 
 BOPAlgo_Builder& BooleanOperation::getBuilder()

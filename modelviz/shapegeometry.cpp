@@ -427,52 +427,92 @@ void ShapeGeometryBuilder::faceConstruct(const TopoDS_Face &faceIn)
 
 void ShapeGeometryBuilder::edgeConstruct(const TopoDS_Edge &edgeIn)
 {
-  TopoDS_Face face = TopoDS::Face(edgeToFace.FindFromKey(edgeIn).First());
-  if (face.IsNull())
-    throw std::runtime_error("face is null in edge construction");
-
-  TopLoc_Location location;
-  Handle(Poly_Triangulation) triangulation;
-  triangulation = BRep_Tool::Triangulation(face, location);
-
-  const Handle(Poly_PolygonOnTriangulation) &segments =
-      BRep_Tool::PolygonOnTriangulation(edgeIn, triangulation, location);
-  if (segments.IsNull())
-    throw std::runtime_error("edge triangulation is null in edge construction");
-
-  gp_Trsf transformation;
-  bool identity = true;
-  if(!location.IsIdentity())
-  {
-    identity = false;
-    transformation = location.Transformation();
-  }
-
-  const TColStd_Array1OfInteger& indexes = segments->Nodes();
-  const TColgp_Array1OfPnt& nodes = triangulation->Nodes();
   osg::Vec3Array *vertices = dynamic_cast<osg::Vec3Array *>(edgeGeometry->getVertexArray());
   osg::Vec4Array *colors = dynamic_cast<osg::Vec4Array *>(edgeGeometry->getColorArray());
-  osg::ref_ptr<osg::DrawElementsUInt> indices = new osg::DrawElementsUInt
-    (GL_LINE_STRIP, indexes.Length());
+  osg::ref_ptr<osg::DrawElementsUInt> indices = new osg::DrawElementsUInt(GL_LINE_STRIP);
   osg::BoundingSphere bSphere;
   
-  for (int index(indexes.Lower()); index < indexes.Upper() + 1; ++index)
+  if (edgeToFace.Contains(edgeIn) && edgeToFace.FindFromKey(edgeIn).Size() > 0)
   {
-    gp_Pnt point = nodes(indexes(index));
-    if(!identity)
-        point.Transform(transformation);
-    vertices->push_back(osg::Vec3(point.X(), point.Y(), point.Z()));
-    colors->push_back(edgeGeometry->getColor());
-    (*indices)[index - 1] = vertices->size() - 1;
-    
-    if (!bSphere.valid()) //for first one.
+    TopoDS_Face face = TopoDS::Face(edgeToFace.FindFromKey(edgeIn).First());
+    if (face.IsNull())
+      throw std::runtime_error("face is null in edge construction");
+
+    TopLoc_Location location;
+    Handle(Poly_Triangulation) triangulation;
+    triangulation = BRep_Tool::Triangulation(face, location);
+
+    const Handle(Poly_PolygonOnTriangulation) &segments =
+        BRep_Tool::PolygonOnTriangulation(edgeIn, triangulation, location);
+    if (segments.IsNull())
+      throw std::runtime_error("edge triangulation is null in edge construction with face");
+
+    gp_Trsf transformation;
+    bool identity = true;
+    if(!location.IsIdentity())
     {
-      bSphere.center() = vertices->back();
-      bSphere.radius() = 0.0;
+      identity = false;
+      transformation = location.Transformation();
     }
-    else
-      bSphere.expandBy(vertices->back());
+    
+    const TColStd_Array1OfInteger& indexes = segments->Nodes();
+    const TColgp_Array1OfPnt& nodes = triangulation->Nodes();
+    indices->resizeElements(indexes.Length());
+    for (int index(indexes.Lower()); index < indexes.Upper() + 1; ++index)
+    {
+      gp_Pnt point = nodes(indexes(index));
+      if(!identity)
+        point.Transform(transformation);
+      vertices->push_back(osg::Vec3(point.X(), point.Y(), point.Z()));
+      colors->push_back(edgeGeometry->getColor());
+      (*indices)[index - 1] = vertices->size() - 1;
+      
+      if (!bSphere.valid()) //for first one.
+      {
+        bSphere.center() = vertices->back();
+        bSphere.radius() = 0.0;
+      }
+      else
+        bSphere.expandBy(vertices->back());
+    }
   }
+  else //no face for edge
+  {
+    TopLoc_Location location;
+    const opencascade::handle<Poly_Polygon3D>& poly = BRep_Tool::Polygon3D(edgeIn, location);
+    if (poly.IsNull())
+      throw std::runtime_error("edge triangulation is null in edge construction without face");
+    
+    gp_Trsf transformation;
+    bool identity = true;
+    if(!location.IsIdentity())
+    {
+      identity = false;
+      transformation = location.Transformation();
+    }
+    
+    const TColgp_Array1OfPnt& nodes = poly->Nodes();
+    indices->resizeElements(nodes.Size());
+    std::size_t tempIndex = 0;
+    for (auto point : nodes)
+    {
+      if (!identity)
+        point.Transform(transformation);
+      vertices->push_back(osg::Vec3(point.X(), point.Y(), point.Z()));
+      colors->push_back(edgeGeometry->getColor());
+      (*indices)[tempIndex] = vertices->size() - 1;
+      tempIndex++;
+      
+      if (!bSphere.valid()) //for first one.
+      {
+        bSphere.center() = vertices->back();
+        bSphere.radius() = 0.0;
+      }
+      else
+        bSphere.expandBy(vertices->back());
+    }
+  }
+  
   edgeGeometry->addPrimitiveSet(indices.get());
   boost::uuids::uuid id = seerShape->findShapeIdRecord(edgeIn).id;
   std::size_t lastPrimitiveIndex = edgeGeometry->getNumPrimitiveSets() - 1;
@@ -490,4 +530,3 @@ void ShapeGeometryBuilder::edgeConstruct(const TopoDS_Edge &edgeIn)
     //for different geometry.
     assert(lastPrimitiveIndex == idPSetWrapperEdge->findPSetFromId(id));
 }
-

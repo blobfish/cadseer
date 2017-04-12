@@ -222,6 +222,9 @@ void Cone::updateResult(const ConeBuilder& coneBuilderIn)
   //helper lamda
   auto updateShapeByTag = [this](const TopoDS_Shape &shapeIn, FeatureTag featureTagIn)
   {
+    //when a radius is set to zero we get null shapes, so skip
+    if (shapeIn.IsNull())
+      return;
     uuid localId = seerShape->featureTagId(featureTagMap.at(featureTagIn));
     seerShape->updateShapeIdRecord(shapeIn, localId);
   };

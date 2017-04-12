@@ -22,6 +22,8 @@
 #include <stack>
 
 #include <QTextStream>
+#include <QUrl>
+#include <QDesktopServices>
 
 #include <boost/graph/topological_sort.hpp>
 #include <boost/graph/filtered_graph.hpp>
@@ -284,7 +286,8 @@ void Project::removeFeature(const uuid& idIn)
   //for now all children get connected to target parent.
   if (!parents.empty())
   {
-    Vertex targetParent = boost::graph_traits<Graph>::null_vertex();
+    //default to first parent.
+    Vertex targetParent = parents.front().first;
     for (const auto &current : parents)
     {
       if (projectGraph[current.second].inputType == ftr::InputTypes::target)
@@ -293,7 +296,6 @@ void Project::removeFeature(const uuid& idIn)
         break;
       }
     }
-    assert(targetParent != boost::graph_traits<Graph>::null_vertex());
     for (const auto &current : children)
       connect(targetParent, current.first, projectGraph[current.second].inputType);
   }
@@ -651,6 +653,8 @@ void Project::dumpProjectGraphDispatched(const msg::Message &)
   fileName += QDir::separator();
   fileName += "project.dot";
   writeGraphViz(fileName.toStdString().c_str());
+  
+  QDesktopServices::openUrl(QUrl(fileName));
 }
 
 void Project::indexVerticesEdges()

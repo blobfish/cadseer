@@ -35,6 +35,8 @@
 #include <QFocusEvent>
 #include <QMenu>
 #include <QTimer>
+#include <QUrl>
+#include <QDesktopServices>
 
 #include <application/application.h>
 #include <project/project.h>
@@ -741,6 +743,8 @@ void Model::dumpDAGViewGraphDispatched(const msg::Message &)
   fileName += QDir::separator();
   fileName += "dagView.dot";
   outputGraphviz<Graph>(graph, fileName.toStdString());
+  
+  QDesktopServices::openUrl(QUrl(fileName));
 }
 
 void Model::removeAllItems()
