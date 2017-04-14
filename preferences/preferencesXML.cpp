@@ -756,6 +756,652 @@ namespace prf
   }
 
 
+  // Blend
+  // 
+
+  const Blend::RadiusType& Blend::
+  radius () const
+  {
+    return this->radius_.get ();
+  }
+
+  Blend::RadiusType& Blend::
+  radius ()
+  {
+    return this->radius_.get ();
+  }
+
+  void Blend::
+  radius (const RadiusType& x)
+  {
+    this->radius_.set (x);
+  }
+
+  Blend::RadiusType Blend::
+  radius_default_value ()
+  {
+    return RadiusType (2.0);
+  }
+
+
+  // Box
+  // 
+
+  const Box::LengthType& Box::
+  length () const
+  {
+    return this->length_.get ();
+  }
+
+  Box::LengthType& Box::
+  length ()
+  {
+    return this->length_.get ();
+  }
+
+  void Box::
+  length (const LengthType& x)
+  {
+    this->length_.set (x);
+  }
+
+  Box::LengthType Box::
+  length_default_value ()
+  {
+    return LengthType (10.0);
+  }
+
+  const Box::WidthType& Box::
+  width () const
+  {
+    return this->width_.get ();
+  }
+
+  Box::WidthType& Box::
+  width ()
+  {
+    return this->width_.get ();
+  }
+
+  void Box::
+  width (const WidthType& x)
+  {
+    this->width_.set (x);
+  }
+
+  Box::WidthType Box::
+  width_default_value ()
+  {
+    return WidthType (10.0);
+  }
+
+  const Box::HeightType& Box::
+  height () const
+  {
+    return this->height_.get ();
+  }
+
+  Box::HeightType& Box::
+  height ()
+  {
+    return this->height_.get ();
+  }
+
+  void Box::
+  height (const HeightType& x)
+  {
+    this->height_.set (x);
+  }
+
+  Box::HeightType Box::
+  height_default_value ()
+  {
+    return HeightType (10.0);
+  }
+
+
+  // Chamfer
+  // 
+
+  const Chamfer::DistanceType& Chamfer::
+  distance () const
+  {
+    return this->distance_.get ();
+  }
+
+  Chamfer::DistanceType& Chamfer::
+  distance ()
+  {
+    return this->distance_.get ();
+  }
+
+  void Chamfer::
+  distance (const DistanceType& x)
+  {
+    this->distance_.set (x);
+  }
+
+  Chamfer::DistanceType Chamfer::
+  distance_default_value ()
+  {
+    return DistanceType (2.0);
+  }
+
+
+  // Cone
+  // 
+
+  const Cone::Radius1Type& Cone::
+  radius1 () const
+  {
+    return this->radius1_.get ();
+  }
+
+  Cone::Radius1Type& Cone::
+  radius1 ()
+  {
+    return this->radius1_.get ();
+  }
+
+  void Cone::
+  radius1 (const Radius1Type& x)
+  {
+    this->radius1_.set (x);
+  }
+
+  Cone::Radius1Type Cone::
+  radius1_default_value ()
+  {
+    return Radius1Type (10.0);
+  }
+
+  const Cone::Radius2Type& Cone::
+  radius2 () const
+  {
+    return this->radius2_.get ();
+  }
+
+  Cone::Radius2Type& Cone::
+  radius2 ()
+  {
+    return this->radius2_.get ();
+  }
+
+  void Cone::
+  radius2 (const Radius2Type& x)
+  {
+    this->radius2_.set (x);
+  }
+
+  Cone::Radius2Type Cone::
+  radius2_default_value ()
+  {
+    return Radius2Type (.0);
+  }
+
+  const Cone::HeightType& Cone::
+  height () const
+  {
+    return this->height_.get ();
+  }
+
+  Cone::HeightType& Cone::
+  height ()
+  {
+    return this->height_.get ();
+  }
+
+  void Cone::
+  height (const HeightType& x)
+  {
+    this->height_.set (x);
+  }
+
+  Cone::HeightType Cone::
+  height_default_value ()
+  {
+    return HeightType (10.0);
+  }
+
+
+  // Cylinder
+  // 
+
+  const Cylinder::RadiusType& Cylinder::
+  radius () const
+  {
+    return this->radius_.get ();
+  }
+
+  Cylinder::RadiusType& Cylinder::
+  radius ()
+  {
+    return this->radius_.get ();
+  }
+
+  void Cylinder::
+  radius (const RadiusType& x)
+  {
+    this->radius_.set (x);
+  }
+
+  Cylinder::RadiusType Cylinder::
+  radius_default_value ()
+  {
+    return RadiusType (5.0);
+  }
+
+  const Cylinder::HeightType& Cylinder::
+  height () const
+  {
+    return this->height_.get ();
+  }
+
+  Cylinder::HeightType& Cylinder::
+  height ()
+  {
+    return this->height_.get ();
+  }
+
+  void Cylinder::
+  height (const HeightType& x)
+  {
+    this->height_.set (x);
+  }
+
+  Cylinder::HeightType Cylinder::
+  height_default_value ()
+  {
+    return HeightType (10.0);
+  }
+
+
+  // DatumPlane
+  // 
+
+  const DatumPlane::OffsetType& DatumPlane::
+  offset () const
+  {
+    return this->offset_.get ();
+  }
+
+  DatumPlane::OffsetType& DatumPlane::
+  offset ()
+  {
+    return this->offset_.get ();
+  }
+
+  void DatumPlane::
+  offset (const OffsetType& x)
+  {
+    this->offset_.set (x);
+  }
+
+  DatumPlane::OffsetType DatumPlane::
+  offset_default_value ()
+  {
+    return OffsetType (1.0);
+  }
+
+
+  // Draft
+  // 
+
+  const Draft::AngleType& Draft::
+  angle () const
+  {
+    return this->angle_.get ();
+  }
+
+  Draft::AngleType& Draft::
+  angle ()
+  {
+    return this->angle_.get ();
+  }
+
+  void Draft::
+  angle (const AngleType& x)
+  {
+    this->angle_.set (x);
+  }
+
+  Draft::AngleType Draft::
+  angle_default_value ()
+  {
+    return AngleType (15.0);
+  }
+
+
+  // Hollow
+  // 
+
+  const Hollow::OffsetType& Hollow::
+  offset () const
+  {
+    return this->offset_.get ();
+  }
+
+  Hollow::OffsetType& Hollow::
+  offset ()
+  {
+    return this->offset_.get ();
+  }
+
+  void Hollow::
+  offset (const OffsetType& x)
+  {
+    this->offset_.set (x);
+  }
+
+  Hollow::OffsetType Hollow::
+  offset_default_value ()
+  {
+    return OffsetType (1.0);
+  }
+
+
+  // Sphere
+  // 
+
+  const Sphere::RadiusType& Sphere::
+  radius () const
+  {
+    return this->radius_.get ();
+  }
+
+  Sphere::RadiusType& Sphere::
+  radius ()
+  {
+    return this->radius_.get ();
+  }
+
+  void Sphere::
+  radius (const RadiusType& x)
+  {
+    this->radius_.set (x);
+  }
+
+  Sphere::RadiusType Sphere::
+  radius_default_value ()
+  {
+    return RadiusType (5.0);
+  }
+
+
+  // Features
+  // 
+
+  const Features::BlendOptional& Features::
+  blend () const
+  {
+    return this->blend_;
+  }
+
+  Features::BlendOptional& Features::
+  blend ()
+  {
+    return this->blend_;
+  }
+
+  void Features::
+  blend (const BlendType& x)
+  {
+    this->blend_.set (x);
+  }
+
+  void Features::
+  blend (const BlendOptional& x)
+  {
+    this->blend_ = x;
+  }
+
+  void Features::
+  blend (::std::unique_ptr< BlendType > x)
+  {
+    this->blend_.set (std::move (x));
+  }
+
+  const Features::BoxOptional& Features::
+  box () const
+  {
+    return this->box_;
+  }
+
+  Features::BoxOptional& Features::
+  box ()
+  {
+    return this->box_;
+  }
+
+  void Features::
+  box (const BoxType& x)
+  {
+    this->box_.set (x);
+  }
+
+  void Features::
+  box (const BoxOptional& x)
+  {
+    this->box_ = x;
+  }
+
+  void Features::
+  box (::std::unique_ptr< BoxType > x)
+  {
+    this->box_.set (std::move (x));
+  }
+
+  const Features::ChamferOptional& Features::
+  chamfer () const
+  {
+    return this->chamfer_;
+  }
+
+  Features::ChamferOptional& Features::
+  chamfer ()
+  {
+    return this->chamfer_;
+  }
+
+  void Features::
+  chamfer (const ChamferType& x)
+  {
+    this->chamfer_.set (x);
+  }
+
+  void Features::
+  chamfer (const ChamferOptional& x)
+  {
+    this->chamfer_ = x;
+  }
+
+  void Features::
+  chamfer (::std::unique_ptr< ChamferType > x)
+  {
+    this->chamfer_.set (std::move (x));
+  }
+
+  const Features::ConeOptional& Features::
+  cone () const
+  {
+    return this->cone_;
+  }
+
+  Features::ConeOptional& Features::
+  cone ()
+  {
+    return this->cone_;
+  }
+
+  void Features::
+  cone (const ConeType& x)
+  {
+    this->cone_.set (x);
+  }
+
+  void Features::
+  cone (const ConeOptional& x)
+  {
+    this->cone_ = x;
+  }
+
+  void Features::
+  cone (::std::unique_ptr< ConeType > x)
+  {
+    this->cone_.set (std::move (x));
+  }
+
+  const Features::CylinderOptional& Features::
+  cylinder () const
+  {
+    return this->cylinder_;
+  }
+
+  Features::CylinderOptional& Features::
+  cylinder ()
+  {
+    return this->cylinder_;
+  }
+
+  void Features::
+  cylinder (const CylinderType& x)
+  {
+    this->cylinder_.set (x);
+  }
+
+  void Features::
+  cylinder (const CylinderOptional& x)
+  {
+    this->cylinder_ = x;
+  }
+
+  void Features::
+  cylinder (::std::unique_ptr< CylinderType > x)
+  {
+    this->cylinder_.set (std::move (x));
+  }
+
+  const Features::DatumPlaneOptional& Features::
+  datumPlane () const
+  {
+    return this->datumPlane_;
+  }
+
+  Features::DatumPlaneOptional& Features::
+  datumPlane ()
+  {
+    return this->datumPlane_;
+  }
+
+  void Features::
+  datumPlane (const DatumPlaneType& x)
+  {
+    this->datumPlane_.set (x);
+  }
+
+  void Features::
+  datumPlane (const DatumPlaneOptional& x)
+  {
+    this->datumPlane_ = x;
+  }
+
+  void Features::
+  datumPlane (::std::unique_ptr< DatumPlaneType > x)
+  {
+    this->datumPlane_.set (std::move (x));
+  }
+
+  const Features::DraftOptional& Features::
+  draft () const
+  {
+    return this->draft_;
+  }
+
+  Features::DraftOptional& Features::
+  draft ()
+  {
+    return this->draft_;
+  }
+
+  void Features::
+  draft (const DraftType& x)
+  {
+    this->draft_.set (x);
+  }
+
+  void Features::
+  draft (const DraftOptional& x)
+  {
+    this->draft_ = x;
+  }
+
+  void Features::
+  draft (::std::unique_ptr< DraftType > x)
+  {
+    this->draft_.set (std::move (x));
+  }
+
+  const Features::HollowOptional& Features::
+  hollow () const
+  {
+    return this->hollow_;
+  }
+
+  Features::HollowOptional& Features::
+  hollow ()
+  {
+    return this->hollow_;
+  }
+
+  void Features::
+  hollow (const HollowType& x)
+  {
+    this->hollow_.set (x);
+  }
+
+  void Features::
+  hollow (const HollowOptional& x)
+  {
+    this->hollow_ = x;
+  }
+
+  void Features::
+  hollow (::std::unique_ptr< HollowType > x)
+  {
+    this->hollow_.set (std::move (x));
+  }
+
+  const Features::SphereOptional& Features::
+  sphere () const
+  {
+    return this->sphere_;
+  }
+
+  Features::SphereOptional& Features::
+  sphere ()
+  {
+    return this->sphere_;
+  }
+
+  void Features::
+  sphere (const SphereType& x)
+  {
+    this->sphere_.set (x);
+  }
+
+  void Features::
+  sphere (const SphereOptional& x)
+  {
+    this->sphere_ = x;
+  }
+
+  void Features::
+  sphere (::std::unique_ptr< SphereType > x)
+  {
+    this->sphere_.set (std::move (x));
+  }
+
+
   // Root
   // 
 
@@ -901,6 +1547,30 @@ namespace prf
   hotKeys (::std::unique_ptr< HotKeysType > x)
   {
     this->hotKeys_.set (std::move (x));
+  }
+
+  const Root::FeaturesType& Root::
+  features () const
+  {
+    return this->features_.get ();
+  }
+
+  Root::FeaturesType& Root::
+  features ()
+  {
+    return this->features_.get ();
+  }
+
+  void Root::
+  features (const FeaturesType& x)
+  {
+    this->features_.set (x);
+  }
+
+  void Root::
+  features (::std::unique_ptr< FeaturesType > x)
+  {
+    this->features_.set (std::move (x));
   }
 }
 
@@ -2355,6 +3025,1151 @@ namespace prf
   {
   }
 
+  // Blend
+  //
+
+  Blend::
+  Blend (const RadiusType& radius)
+  : ::xml_schema::Type (),
+    radius_ (radius, this)
+  {
+  }
+
+  Blend::
+  Blend (const Blend& x,
+         ::xml_schema::Flags f,
+         ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    radius_ (x.radius_, f, this)
+  {
+  }
+
+  Blend::
+  Blend (const ::xercesc::DOMElement& e,
+         ::xml_schema::Flags f,
+         ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    radius_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void Blend::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // radius
+      //
+      if (n.name () == "radius" && n.namespace_ ().empty ())
+      {
+        if (!radius_.present ())
+        {
+          this->radius_.set (RadiusTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!radius_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "radius",
+        "");
+    }
+  }
+
+  Blend* Blend::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class Blend (*this, f, c);
+  }
+
+  Blend& Blend::
+  operator= (const Blend& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->radius_ = x.radius_;
+    }
+
+    return *this;
+  }
+
+  Blend::
+  ~Blend ()
+  {
+  }
+
+  // Box
+  //
+
+  Box::
+  Box (const LengthType& length,
+       const WidthType& width,
+       const HeightType& height)
+  : ::xml_schema::Type (),
+    length_ (length, this),
+    width_ (width, this),
+    height_ (height, this)
+  {
+  }
+
+  Box::
+  Box (const Box& x,
+       ::xml_schema::Flags f,
+       ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    length_ (x.length_, f, this),
+    width_ (x.width_, f, this),
+    height_ (x.height_, f, this)
+  {
+  }
+
+  Box::
+  Box (const ::xercesc::DOMElement& e,
+       ::xml_schema::Flags f,
+       ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    length_ (this),
+    width_ (this),
+    height_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void Box::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // length
+      //
+      if (n.name () == "length" && n.namespace_ ().empty ())
+      {
+        if (!length_.present ())
+        {
+          this->length_.set (LengthTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      // width
+      //
+      if (n.name () == "width" && n.namespace_ ().empty ())
+      {
+        if (!width_.present ())
+        {
+          this->width_.set (WidthTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      // height
+      //
+      if (n.name () == "height" && n.namespace_ ().empty ())
+      {
+        if (!height_.present ())
+        {
+          this->height_.set (HeightTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!length_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "length",
+        "");
+    }
+
+    if (!width_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "width",
+        "");
+    }
+
+    if (!height_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "height",
+        "");
+    }
+  }
+
+  Box* Box::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class Box (*this, f, c);
+  }
+
+  Box& Box::
+  operator= (const Box& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->length_ = x.length_;
+      this->width_ = x.width_;
+      this->height_ = x.height_;
+    }
+
+    return *this;
+  }
+
+  Box::
+  ~Box ()
+  {
+  }
+
+  // Chamfer
+  //
+
+  Chamfer::
+  Chamfer (const DistanceType& distance)
+  : ::xml_schema::Type (),
+    distance_ (distance, this)
+  {
+  }
+
+  Chamfer::
+  Chamfer (const Chamfer& x,
+           ::xml_schema::Flags f,
+           ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    distance_ (x.distance_, f, this)
+  {
+  }
+
+  Chamfer::
+  Chamfer (const ::xercesc::DOMElement& e,
+           ::xml_schema::Flags f,
+           ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    distance_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void Chamfer::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // distance
+      //
+      if (n.name () == "distance" && n.namespace_ ().empty ())
+      {
+        if (!distance_.present ())
+        {
+          this->distance_.set (DistanceTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!distance_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "distance",
+        "");
+    }
+  }
+
+  Chamfer* Chamfer::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class Chamfer (*this, f, c);
+  }
+
+  Chamfer& Chamfer::
+  operator= (const Chamfer& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->distance_ = x.distance_;
+    }
+
+    return *this;
+  }
+
+  Chamfer::
+  ~Chamfer ()
+  {
+  }
+
+  // Cone
+  //
+
+  Cone::
+  Cone (const Radius1Type& radius1,
+        const Radius2Type& radius2,
+        const HeightType& height)
+  : ::xml_schema::Type (),
+    radius1_ (radius1, this),
+    radius2_ (radius2, this),
+    height_ (height, this)
+  {
+  }
+
+  Cone::
+  Cone (const Cone& x,
+        ::xml_schema::Flags f,
+        ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    radius1_ (x.radius1_, f, this),
+    radius2_ (x.radius2_, f, this),
+    height_ (x.height_, f, this)
+  {
+  }
+
+  Cone::
+  Cone (const ::xercesc::DOMElement& e,
+        ::xml_schema::Flags f,
+        ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    radius1_ (this),
+    radius2_ (this),
+    height_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void Cone::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // radius1
+      //
+      if (n.name () == "radius1" && n.namespace_ ().empty ())
+      {
+        if (!radius1_.present ())
+        {
+          this->radius1_.set (Radius1Traits::create (i, f, this));
+          continue;
+        }
+      }
+
+      // radius2
+      //
+      if (n.name () == "radius2" && n.namespace_ ().empty ())
+      {
+        if (!radius2_.present ())
+        {
+          this->radius2_.set (Radius2Traits::create (i, f, this));
+          continue;
+        }
+      }
+
+      // height
+      //
+      if (n.name () == "height" && n.namespace_ ().empty ())
+      {
+        if (!height_.present ())
+        {
+          this->height_.set (HeightTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!radius1_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "radius1",
+        "");
+    }
+
+    if (!radius2_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "radius2",
+        "");
+    }
+
+    if (!height_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "height",
+        "");
+    }
+  }
+
+  Cone* Cone::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class Cone (*this, f, c);
+  }
+
+  Cone& Cone::
+  operator= (const Cone& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->radius1_ = x.radius1_;
+      this->radius2_ = x.radius2_;
+      this->height_ = x.height_;
+    }
+
+    return *this;
+  }
+
+  Cone::
+  ~Cone ()
+  {
+  }
+
+  // Cylinder
+  //
+
+  Cylinder::
+  Cylinder (const RadiusType& radius,
+            const HeightType& height)
+  : ::xml_schema::Type (),
+    radius_ (radius, this),
+    height_ (height, this)
+  {
+  }
+
+  Cylinder::
+  Cylinder (const Cylinder& x,
+            ::xml_schema::Flags f,
+            ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    radius_ (x.radius_, f, this),
+    height_ (x.height_, f, this)
+  {
+  }
+
+  Cylinder::
+  Cylinder (const ::xercesc::DOMElement& e,
+            ::xml_schema::Flags f,
+            ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    radius_ (this),
+    height_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void Cylinder::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // radius
+      //
+      if (n.name () == "radius" && n.namespace_ ().empty ())
+      {
+        if (!radius_.present ())
+        {
+          this->radius_.set (RadiusTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      // height
+      //
+      if (n.name () == "height" && n.namespace_ ().empty ())
+      {
+        if (!height_.present ())
+        {
+          this->height_.set (HeightTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!radius_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "radius",
+        "");
+    }
+
+    if (!height_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "height",
+        "");
+    }
+  }
+
+  Cylinder* Cylinder::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class Cylinder (*this, f, c);
+  }
+
+  Cylinder& Cylinder::
+  operator= (const Cylinder& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->radius_ = x.radius_;
+      this->height_ = x.height_;
+    }
+
+    return *this;
+  }
+
+  Cylinder::
+  ~Cylinder ()
+  {
+  }
+
+  // DatumPlane
+  //
+
+  DatumPlane::
+  DatumPlane (const OffsetType& offset)
+  : ::xml_schema::Type (),
+    offset_ (offset, this)
+  {
+  }
+
+  DatumPlane::
+  DatumPlane (const DatumPlane& x,
+              ::xml_schema::Flags f,
+              ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    offset_ (x.offset_, f, this)
+  {
+  }
+
+  DatumPlane::
+  DatumPlane (const ::xercesc::DOMElement& e,
+              ::xml_schema::Flags f,
+              ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    offset_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void DatumPlane::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // offset
+      //
+      if (n.name () == "offset" && n.namespace_ ().empty ())
+      {
+        if (!offset_.present ())
+        {
+          this->offset_.set (OffsetTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!offset_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "offset",
+        "");
+    }
+  }
+
+  DatumPlane* DatumPlane::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class DatumPlane (*this, f, c);
+  }
+
+  DatumPlane& DatumPlane::
+  operator= (const DatumPlane& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->offset_ = x.offset_;
+    }
+
+    return *this;
+  }
+
+  DatumPlane::
+  ~DatumPlane ()
+  {
+  }
+
+  // Draft
+  //
+
+  Draft::
+  Draft (const AngleType& angle)
+  : ::xml_schema::Type (),
+    angle_ (angle, this)
+  {
+  }
+
+  Draft::
+  Draft (const Draft& x,
+         ::xml_schema::Flags f,
+         ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    angle_ (x.angle_, f, this)
+  {
+  }
+
+  Draft::
+  Draft (const ::xercesc::DOMElement& e,
+         ::xml_schema::Flags f,
+         ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    angle_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void Draft::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // angle
+      //
+      if (n.name () == "angle" && n.namespace_ ().empty ())
+      {
+        if (!angle_.present ())
+        {
+          this->angle_.set (AngleTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!angle_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "angle",
+        "");
+    }
+  }
+
+  Draft* Draft::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class Draft (*this, f, c);
+  }
+
+  Draft& Draft::
+  operator= (const Draft& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->angle_ = x.angle_;
+    }
+
+    return *this;
+  }
+
+  Draft::
+  ~Draft ()
+  {
+  }
+
+  // Hollow
+  //
+
+  Hollow::
+  Hollow (const OffsetType& offset)
+  : ::xml_schema::Type (),
+    offset_ (offset, this)
+  {
+  }
+
+  Hollow::
+  Hollow (const Hollow& x,
+          ::xml_schema::Flags f,
+          ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    offset_ (x.offset_, f, this)
+  {
+  }
+
+  Hollow::
+  Hollow (const ::xercesc::DOMElement& e,
+          ::xml_schema::Flags f,
+          ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    offset_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void Hollow::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // offset
+      //
+      if (n.name () == "offset" && n.namespace_ ().empty ())
+      {
+        if (!offset_.present ())
+        {
+          this->offset_.set (OffsetTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!offset_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "offset",
+        "");
+    }
+  }
+
+  Hollow* Hollow::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class Hollow (*this, f, c);
+  }
+
+  Hollow& Hollow::
+  operator= (const Hollow& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->offset_ = x.offset_;
+    }
+
+    return *this;
+  }
+
+  Hollow::
+  ~Hollow ()
+  {
+  }
+
+  // Sphere
+  //
+
+  Sphere::
+  Sphere (const RadiusType& radius)
+  : ::xml_schema::Type (),
+    radius_ (radius, this)
+  {
+  }
+
+  Sphere::
+  Sphere (const Sphere& x,
+          ::xml_schema::Flags f,
+          ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    radius_ (x.radius_, f, this)
+  {
+  }
+
+  Sphere::
+  Sphere (const ::xercesc::DOMElement& e,
+          ::xml_schema::Flags f,
+          ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    radius_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void Sphere::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // radius
+      //
+      if (n.name () == "radius" && n.namespace_ ().empty ())
+      {
+        if (!radius_.present ())
+        {
+          this->radius_.set (RadiusTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!radius_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "radius",
+        "");
+    }
+  }
+
+  Sphere* Sphere::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class Sphere (*this, f, c);
+  }
+
+  Sphere& Sphere::
+  operator= (const Sphere& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->radius_ = x.radius_;
+    }
+
+    return *this;
+  }
+
+  Sphere::
+  ~Sphere ()
+  {
+  }
+
+  // Features
+  //
+
+  Features::
+  Features ()
+  : ::xml_schema::Type (),
+    blend_ (this),
+    box_ (this),
+    chamfer_ (this),
+    cone_ (this),
+    cylinder_ (this),
+    datumPlane_ (this),
+    draft_ (this),
+    hollow_ (this),
+    sphere_ (this)
+  {
+  }
+
+  Features::
+  Features (const Features& x,
+            ::xml_schema::Flags f,
+            ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    blend_ (x.blend_, f, this),
+    box_ (x.box_, f, this),
+    chamfer_ (x.chamfer_, f, this),
+    cone_ (x.cone_, f, this),
+    cylinder_ (x.cylinder_, f, this),
+    datumPlane_ (x.datumPlane_, f, this),
+    draft_ (x.draft_, f, this),
+    hollow_ (x.hollow_, f, this),
+    sphere_ (x.sphere_, f, this)
+  {
+  }
+
+  Features::
+  Features (const ::xercesc::DOMElement& e,
+            ::xml_schema::Flags f,
+            ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    blend_ (this),
+    box_ (this),
+    chamfer_ (this),
+    cone_ (this),
+    cylinder_ (this),
+    datumPlane_ (this),
+    draft_ (this),
+    hollow_ (this),
+    sphere_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void Features::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // blend
+      //
+      if (n.name () == "blend" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< BlendType > r (
+          BlendTraits::create (i, f, this));
+
+        if (!this->blend_)
+        {
+          this->blend_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      // box
+      //
+      if (n.name () == "box" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< BoxType > r (
+          BoxTraits::create (i, f, this));
+
+        if (!this->box_)
+        {
+          this->box_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      // chamfer
+      //
+      if (n.name () == "chamfer" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< ChamferType > r (
+          ChamferTraits::create (i, f, this));
+
+        if (!this->chamfer_)
+        {
+          this->chamfer_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      // cone
+      //
+      if (n.name () == "cone" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< ConeType > r (
+          ConeTraits::create (i, f, this));
+
+        if (!this->cone_)
+        {
+          this->cone_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      // cylinder
+      //
+      if (n.name () == "cylinder" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< CylinderType > r (
+          CylinderTraits::create (i, f, this));
+
+        if (!this->cylinder_)
+        {
+          this->cylinder_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      // datumPlane
+      //
+      if (n.name () == "datumPlane" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< DatumPlaneType > r (
+          DatumPlaneTraits::create (i, f, this));
+
+        if (!this->datumPlane_)
+        {
+          this->datumPlane_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      // draft
+      //
+      if (n.name () == "draft" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< DraftType > r (
+          DraftTraits::create (i, f, this));
+
+        if (!this->draft_)
+        {
+          this->draft_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      // hollow
+      //
+      if (n.name () == "hollow" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< HollowType > r (
+          HollowTraits::create (i, f, this));
+
+        if (!this->hollow_)
+        {
+          this->hollow_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      // sphere
+      //
+      if (n.name () == "sphere" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< SphereType > r (
+          SphereTraits::create (i, f, this));
+
+        if (!this->sphere_)
+        {
+          this->sphere_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      break;
+    }
+  }
+
+  Features* Features::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class Features (*this, f, c);
+  }
+
+  Features& Features::
+  operator= (const Features& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->blend_ = x.blend_;
+      this->box_ = x.box_;
+      this->chamfer_ = x.chamfer_;
+      this->cone_ = x.cone_;
+      this->cylinder_ = x.cylinder_;
+      this->datumPlane_ = x.datumPlane_;
+      this->draft_ = x.draft_;
+      this->hollow_ = x.hollow_;
+      this->sphere_ = x.sphere_;
+    }
+
+    return *this;
+  }
+
+  Features::
+  ~Features ()
+  {
+  }
+
   // Root
   //
 
@@ -2364,14 +4179,16 @@ namespace prf
         const InteractiveParameterType& interactiveParameter,
         const GestureType& gesture,
         const ProjectType& project,
-        const HotKeysType& hotKeys)
+        const HotKeysType& hotKeys,
+        const FeaturesType& features)
   : ::xml_schema::Type (),
     visual_ (visual, this),
     dragger_ (dragger, this),
     interactiveParameter_ (interactiveParameter, this),
     gesture_ (gesture, this),
     project_ (project, this),
-    hotKeys_ (hotKeys, this)
+    hotKeys_ (hotKeys, this),
+    features_ (features, this)
   {
   }
 
@@ -2381,14 +4198,16 @@ namespace prf
         ::std::unique_ptr< InteractiveParameterType > interactiveParameter,
         ::std::unique_ptr< GestureType > gesture,
         ::std::unique_ptr< ProjectType > project,
-        ::std::unique_ptr< HotKeysType > hotKeys)
+        ::std::unique_ptr< HotKeysType > hotKeys,
+        ::std::unique_ptr< FeaturesType > features)
   : ::xml_schema::Type (),
     visual_ (std::move (visual), this),
     dragger_ (std::move (dragger), this),
     interactiveParameter_ (std::move (interactiveParameter), this),
     gesture_ (std::move (gesture), this),
     project_ (std::move (project), this),
-    hotKeys_ (std::move (hotKeys), this)
+    hotKeys_ (std::move (hotKeys), this),
+    features_ (std::move (features), this)
   {
   }
 
@@ -2402,7 +4221,8 @@ namespace prf
     interactiveParameter_ (x.interactiveParameter_, f, this),
     gesture_ (x.gesture_, f, this),
     project_ (x.project_, f, this),
-    hotKeys_ (x.hotKeys_, f, this)
+    hotKeys_ (x.hotKeys_, f, this),
+    features_ (x.features_, f, this)
   {
   }
 
@@ -2416,7 +4236,8 @@ namespace prf
     interactiveParameter_ (this),
     gesture_ (this),
     project_ (this),
-    hotKeys_ (this)
+    hotKeys_ (this),
+    features_ (this)
   {
     if ((f & ::xml_schema::Flags::base) == 0)
     {
@@ -2519,6 +4340,20 @@ namespace prf
         }
       }
 
+      // features
+      //
+      if (n.name () == "features" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< FeaturesType > r (
+          FeaturesTraits::create (i, f, this));
+
+        if (!features_.present ())
+        {
+          this->features_.set (::std::move (r));
+          continue;
+        }
+      }
+
       break;
     }
 
@@ -2563,6 +4398,13 @@ namespace prf
         "hotKeys",
         "");
     }
+
+    if (!features_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "features",
+        "");
+    }
   }
 
   Root* Root::
@@ -2584,6 +4426,7 @@ namespace prf
       this->gesture_ = x.gesture_;
       this->project_ = x.project_;
       this->hotKeys_ = x.hotKeys_;
+      this->features_ = x.features_;
     }
 
     return *this;
@@ -3252,6 +5095,328 @@ namespace prf
   }
 
   void
+  operator<< (::xercesc::DOMElement& e, const Blend& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // radius
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "radius",
+          e));
+
+      s << ::xml_schema::AsDouble(i.radius ());
+    }
+  }
+
+  void
+  operator<< (::xercesc::DOMElement& e, const Box& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // length
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "length",
+          e));
+
+      s << ::xml_schema::AsDouble(i.length ());
+    }
+
+    // width
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "width",
+          e));
+
+      s << ::xml_schema::AsDouble(i.width ());
+    }
+
+    // height
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "height",
+          e));
+
+      s << ::xml_schema::AsDouble(i.height ());
+    }
+  }
+
+  void
+  operator<< (::xercesc::DOMElement& e, const Chamfer& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // distance
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "distance",
+          e));
+
+      s << ::xml_schema::AsDouble(i.distance ());
+    }
+  }
+
+  void
+  operator<< (::xercesc::DOMElement& e, const Cone& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // radius1
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "radius1",
+          e));
+
+      s << ::xml_schema::AsDouble(i.radius1 ());
+    }
+
+    // radius2
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "radius2",
+          e));
+
+      s << ::xml_schema::AsDouble(i.radius2 ());
+    }
+
+    // height
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "height",
+          e));
+
+      s << ::xml_schema::AsDouble(i.height ());
+    }
+  }
+
+  void
+  operator<< (::xercesc::DOMElement& e, const Cylinder& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // radius
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "radius",
+          e));
+
+      s << ::xml_schema::AsDouble(i.radius ());
+    }
+
+    // height
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "height",
+          e));
+
+      s << ::xml_schema::AsDouble(i.height ());
+    }
+  }
+
+  void
+  operator<< (::xercesc::DOMElement& e, const DatumPlane& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // offset
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "offset",
+          e));
+
+      s << ::xml_schema::AsDouble(i.offset ());
+    }
+  }
+
+  void
+  operator<< (::xercesc::DOMElement& e, const Draft& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // angle
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "angle",
+          e));
+
+      s << ::xml_schema::AsDouble(i.angle ());
+    }
+  }
+
+  void
+  operator<< (::xercesc::DOMElement& e, const Hollow& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // offset
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "offset",
+          e));
+
+      s << ::xml_schema::AsDouble(i.offset ());
+    }
+  }
+
+  void
+  operator<< (::xercesc::DOMElement& e, const Sphere& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // radius
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "radius",
+          e));
+
+      s << ::xml_schema::AsDouble(i.radius ());
+    }
+  }
+
+  void
+  operator<< (::xercesc::DOMElement& e, const Features& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // blend
+    //
+    if (i.blend ())
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "blend",
+          e));
+
+      s << *i.blend ();
+    }
+
+    // box
+    //
+    if (i.box ())
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "box",
+          e));
+
+      s << *i.box ();
+    }
+
+    // chamfer
+    //
+    if (i.chamfer ())
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "chamfer",
+          e));
+
+      s << *i.chamfer ();
+    }
+
+    // cone
+    //
+    if (i.cone ())
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "cone",
+          e));
+
+      s << *i.cone ();
+    }
+
+    // cylinder
+    //
+    if (i.cylinder ())
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "cylinder",
+          e));
+
+      s << *i.cylinder ();
+    }
+
+    // datumPlane
+    //
+    if (i.datumPlane ())
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "datumPlane",
+          e));
+
+      s << *i.datumPlane ();
+    }
+
+    // draft
+    //
+    if (i.draft ())
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "draft",
+          e));
+
+      s << *i.draft ();
+    }
+
+    // hollow
+    //
+    if (i.hollow ())
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "hollow",
+          e));
+
+      s << *i.hollow ();
+    }
+
+    // sphere
+    //
+    if (i.sphere ())
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "sphere",
+          e));
+
+      s << *i.sphere ();
+    }
+  }
+
+  void
   operator<< (::xercesc::DOMElement& e, const Root& i)
   {
     e << static_cast< const ::xml_schema::Type& > (i);
@@ -3320,6 +5485,17 @@ namespace prf
           e));
 
       s << i.hotKeys ();
+    }
+
+    // features
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "features",
+          e));
+
+      s << i.features ();
     }
   }
 

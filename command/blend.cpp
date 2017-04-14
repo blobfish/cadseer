@@ -106,7 +106,6 @@ void Blend::go()
       //simple radius test  
       simpleBlend.picks.push_back(pick);
       auto simpleRadius = ftr::Blend::buildRadiusParameter();
-      simpleRadius->setValue(1.0);
       simpleBlend.radius = simpleRadius;
       
       //variable blend radius test. really shouldn't be in loop.

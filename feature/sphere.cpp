@@ -20,6 +20,8 @@
 #include <BRepPrimAPI_MakeSphere.hxx>
 
 #include <tools/idtools.h>
+#include <preferences/preferencesXML.h>
+#include <preferences/manager.h>
 #include <library/ipgroup.h>
 #include <project/serial/xsdcxxoutput/featuresphere.h>
 #include <feature/seershape.h>
@@ -54,7 +56,7 @@ static const std::map<FeatureTag, std::string> featureTagMap =
 
 QIcon Sphere::icon;
 
-Sphere::Sphere() : CSysBase(), radius(ParameterNames::Radius, 5.0)
+Sphere::Sphere() : CSysBase(), radius(ParameterNames::Radius, prf::manager().rootPtr->features().sphere().get().radius())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionSphere.svg");

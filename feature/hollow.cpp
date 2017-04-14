@@ -27,6 +27,8 @@
 #include <TopoDS_Wire.hxx>
 
 #include <globalutilities.h>
+#include <preferences/preferencesXML.h>
+#include <preferences/manager.h>
 #include <feature/seershape.h>
 #include <feature/shapecheck.h>
 #include <library/plabel.h>
@@ -39,7 +41,7 @@ using boost::uuids::uuid;
 
 QIcon Hollow::icon;
 
-Hollow::Hollow() : Base(), offset(ParameterNames::Offset, 0.1)
+Hollow::Hollow() : Base(), offset(ParameterNames::Offset, prf::manager().rootPtr->features().hollow().get().offset())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionHollow.svg");

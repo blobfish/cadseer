@@ -23,6 +23,8 @@
 
 #include <globalutilities.h>
 #include <tools/idtools.h>
+#include <preferences/preferencesXML.h>
+#include <preferences/manager.h>
 #include <library/ipgroup.h>
 #include <feature/boxbuilder.h>
 #include <feature/seershape.h>
@@ -118,9 +120,9 @@ QIcon Box::icon;
 
 Box::Box() :
   CSysBase(),
-  length(ParameterNames::Length, 10.0),
-  width(ParameterNames::Width, 10.0),
-  height(ParameterNames::Height, 10.0)
+  length(ParameterNames::Length, prf::manager().rootPtr->features().box().get().length()),
+  width(ParameterNames::Width, prf::manager().rootPtr->features().box().get().width()),
+  height(ParameterNames::Height, prf::manager().rootPtr->features().box().get().height())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionBox.svg");

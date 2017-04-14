@@ -36,6 +36,8 @@
 
 #include <tools/infotools.h>
 #include <globalutilities.h>
+#include <preferences/preferencesXML.h>
+#include <preferences/manager.h>
 #include <modelviz/nodemaskdefs.h>
 #include <library/ipgroup.h>
 #include <modelviz/datumplane.h>
@@ -89,7 +91,7 @@ static osg::Matrixd getFaceSystem(const TopoDS_Shape &faceShape)
 };
 
 DatumPlanePlanarOffset::DatumPlanePlanarOffset():
-  offset(new Parameter(ParameterNames::Offset, 1.0))
+  offset(new Parameter(ParameterNames::Offset, prf::manager().rootPtr->features().datumPlane().get().offset()))
 {
   offsetIP = new lbr::IPGroup(offset.get());
   offsetIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(1.0, 0.0, 0.0)));
@@ -197,7 +199,6 @@ DatumPlaneConnections DatumPlanePlanarOffset::setUpFromSelection(const slc::Cont
     (containersIn.at(0).selectionType == slc::Type::Face)
   );
   
-  offset->setValue(2.0);
   faceId = containersIn.at(0).shapeId;
   
   DatumPlaneConnections out;

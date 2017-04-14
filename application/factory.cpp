@@ -59,7 +59,6 @@
 #include <feature/union.h>
 #include <feature/subtract.h>
 #include <feature/intersect.h>
-#include <feature/blend.h>
 #include <feature/chamfer.h>
 #include <feature/draft.h>
 #include <feature/datumplane.h>
@@ -250,7 +249,6 @@ void Factory::newBoxDispatched(const msg::Message &)
   std::shared_ptr<ftr::Box> boxPtr(new ftr::Box());
   boxPtr->setSystem(currentSystem);
   boxPtr->updateDragger();
-  boxPtr->setParameters(20.0, 10.0, 2.0);
   project->addFeature(boxPtr);
   
   observer->out(msg::Mask(msg::Request | msg::Update));
@@ -269,8 +267,6 @@ void Factory::newCylinderDispatched(const msg::Message &)
   const osg::Matrixd &currentSystem = application->getMainWindow()->getViewer()->getCurrentSystem();
   
   std::shared_ptr<ftr::Cylinder> cylinder(new ftr::Cylinder());
-  cylinder->setRadius(2.0);
-  cylinder->setHeight(8.0);
   cylinder->setSystem(currentSystem);
   cylinder->updateDragger();
   project->addFeature(cylinder);
@@ -291,7 +287,6 @@ void Factory::newSphereDispatched(const msg::Message&)
   const osg::Matrixd &currentSystem = application->getMainWindow()->getViewer()->getCurrentSystem();
   
   std::shared_ptr<ftr::Sphere> sphere(new ftr::Sphere());
-  sphere->setRadius(4.0);
   sphere->setSystem(currentSystem);
   sphere->updateDragger();
   project->addFeature(sphere);
@@ -312,9 +307,6 @@ void Factory::newConeDispatched(const msg::Message&)
   const osg::Matrixd &currentSystem = application->getMainWindow()->getViewer()->getCurrentSystem();
   
   std::shared_ptr<ftr::Cone> cone(new ftr::Cone());
-  cone->setRadius1(2.0);
-  cone->setRadius2(0.5);
-  cone->setHeight(8.0);
   cone->setSystem(currentSystem);
   cone->updateDragger();
   project->addFeature(cone);

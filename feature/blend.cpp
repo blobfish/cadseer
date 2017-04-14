@@ -38,6 +38,8 @@
 
 #include <globalutilities.h>
 #include <tools/idtools.h>
+#include <preferences/preferencesXML.h>
+#include <preferences/manager.h>
 #include <project/serial/xsdcxxoutput/featureblend.h>
 #include <feature/shapecheck.h>
 #include <feature/seershape.h>
@@ -62,8 +64,7 @@ Blend::Blend() : Base()
 
 std::shared_ptr< Parameter > Blend::buildRadiusParameter()
 {
-  //some kind of default radius?
-  std::shared_ptr<Parameter> out(new Parameter(ParameterNames::Radius, 1.0));
+  std::shared_ptr<Parameter> out(new Parameter(ParameterNames::Radius, prf::manager().rootPtr->features().blend().get().radius()));
   out->setConstraint(ParameterConstraint::buildZeroPositive());
   return out;
 }

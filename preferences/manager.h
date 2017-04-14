@@ -44,6 +44,7 @@ namespace prf
     bool createDefaultXsd();
     void setup();
     bool readConfig();
+    void ensureDefaults();
     QDir appDirectory;
     QString fileNameXML;
     QString filePathXML;

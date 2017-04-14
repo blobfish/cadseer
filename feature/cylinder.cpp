@@ -71,7 +71,9 @@ static const std::map<FeatureTag, std::string> featureTagMap =
 
 QIcon Cylinder::icon;
 
-Cylinder::Cylinder() : CSysBase(), radius(ParameterNames::Radius, 5.0), height(ParameterNames::Height, 20.0)
+Cylinder::Cylinder() : CSysBase(),
+  radius(ParameterNames::Radius, prf::manager().rootPtr->features().cylinder().get().radius()),
+  height(ParameterNames::Height, prf::manager().rootPtr->features().cylinder().get().height())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionCylinder.svg");

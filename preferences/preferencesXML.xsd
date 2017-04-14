@@ -89,6 +89,79 @@
   </xs:all>
 </xs:complexType>
 
+<xs:complexType name="Blend">
+  <xs:all>
+    <xs:element name="radius" type="xs:double" default="2.0"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="Box">
+  <xs:all>
+    <xs:element name="length" type="xs:double" default="10.0"/>
+    <xs:element name="width" type="xs:double" default="10.0"/>
+    <xs:element name="height" type="xs:double" default="10.0"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="Chamfer">
+  <xs:all>
+    <xs:element name="distance" type="xs:double" default="2.0"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="Cone">
+  <xs:all>
+    <xs:element name="radius1" type="xs:double" default="10.0"/>
+    <xs:element name="radius2" type="xs:double" default="0.0"/>
+    <xs:element name="height" type="xs:double" default="10.0"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="Cylinder">
+  <xs:all>
+    <xs:element name="radius" type="xs:double" default="5.0"/>
+    <xs:element name="height" type="xs:double" default="10.0"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="DatumPlane">
+  <xs:all>
+    <xs:element name="offset" type="xs:double" default="1.0"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="Draft">
+  <xs:all>
+    <xs:element name="angle" type="xs:double" default="15.0"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="Hollow">
+  <xs:all>
+    <xs:element name="offset" type="xs:double" default="1.0"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="Sphere">
+  <xs:all>
+    <xs:element name="radius" type="xs:double" default="5.0"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="Features">
+  <xs:all>
+    <xs:element name="blend" type="Blend"  minOccurs="0" maxOccurs="1"/>
+    <xs:element name="box" type="Box"  minOccurs="0" maxOccurs="1"/>
+    <xs:element name="chamfer" type="Chamfer"  minOccurs="0" maxOccurs="1"/>
+    <xs:element name="cone" type="Cone"  minOccurs="0" maxOccurs="1"/>
+    <xs:element name="cylinder" type="Cylinder"  minOccurs="0" maxOccurs="1"/>
+    <xs:element name="datumPlane" type="DatumPlane"  minOccurs="0" maxOccurs="1"/>
+    <xs:element name="draft" type="Draft"  minOccurs="0" maxOccurs="1"/>
+    <xs:element name="hollow" type="Hollow"  minOccurs="0" maxOccurs="1"/>
+    <xs:element name="sphere" type="Sphere"  minOccurs="0" maxOccurs="1"/>
+  </xs:all>
+</xs:complexType>
+
 <xs:complexType name="Root">
   <xs:all>
     <xs:element name="visual" type="Visual"/>
@@ -97,6 +170,7 @@
     <xs:element name="gesture" type="Gesture"/>
     <xs:element name="project" type="Project"/>
     <xs:element name="hotKeys" type="HotKeys"/>
+    <xs:element name="features" type="Features"/>
   </xs:all>
 </xs:complexType>
 

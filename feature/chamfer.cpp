@@ -32,6 +32,8 @@
 
 #include <globalutilities.h>
 #include <tools/idtools.h>
+#include <preferences/preferencesXML.h>
+#include <preferences/manager.h>
 #include <project/serial/xsdcxxoutput/featurechamfer.h>
 #include <feature/seershape.h>
 #include <feature/shapecheck.h>
@@ -55,8 +57,7 @@ boost::uuids::uuid Chamfer::referenceFaceId(const SeerShape &seerShapeIn, const 
 
 std::shared_ptr< Parameter > Chamfer::buildSymParameter()
 {
-  //some kind of default distance?
-  std::shared_ptr<Parameter> out(new Parameter(ParameterNames::Distance, 1.0));
+  std::shared_ptr<Parameter> out(new Parameter(ParameterNames::Distance, prf::manager().rootPtr->features().chamfer().get().distance()));
   out->setConstraint(ParameterConstraint::buildNonZeroPositive());
   return out;
 }

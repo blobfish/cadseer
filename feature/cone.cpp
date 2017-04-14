@@ -19,6 +19,8 @@
 
 #include <globalutilities.h>
 #include <tools/idtools.h>
+#include <preferences/preferencesXML.h>
+#include <preferences/manager.h>
 #include <library/lineardimension.h>
 #include <library/ipgroup.h>
 #include <project/serial/xsdcxxoutput/featurecone.h>
@@ -70,9 +72,9 @@ QIcon Cone::icon;
 //only complete rotational cone. no partials. because top or bottom radius
 //maybe 0.0, faces and wires might be null and edges maybe degenerate.
 Cone::Cone() : CSysBase(),
-  radius1(ParameterNames::Radius1, 5.0),
-  radius2(ParameterNames::Radius2, 0.0),
-  height(ParameterNames::Height, 10.0)
+  radius1(ParameterNames::Radius1, prf::manager().rootPtr->features().cone().get().radius1()),
+  radius2(ParameterNames::Radius2, prf::manager().rootPtr->features().cone().get().radius2()),
+  height(ParameterNames::Height, prf::manager().rootPtr->features().cone().get().height())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionCone.svg");

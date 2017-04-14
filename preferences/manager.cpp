@@ -82,6 +82,7 @@ Manager::Manager()
   }
     
   assert(rootPtr);
+  ensureDefaults();
   ok = true;
 }
 
@@ -200,4 +201,80 @@ std::string Manager::getSpaceballButton(int number) const
   }
   
   return std::string();
+}
+
+void Manager::ensureDefaults()
+{
+  auto &features = rootPtr->features();
+  
+  if (!features.blend().present())
+  {
+    features.blend() = prf::Blend(prf::Blend::radius_default_value());
+  }
+  
+  if (!features.box().present())
+  {
+    features.box() = prf::Box
+    (
+      prf::Box::length_default_value(),
+      prf::Box::width_default_value(),
+      prf::Box::height_default_value()
+    );
+  }
+  
+  if (!features.chamfer().present())
+  {
+    features.chamfer() = prf::Chamfer(prf::Chamfer::distance_default_value());
+  }
+  
+  if (!features.cone().present())
+  {
+    features.cone() = prf::Cone
+    (
+      prf::Cone::radius1_default_value(),
+      prf::Cone::radius2_default_value(),
+      prf::Cone::height_default_value()
+    );
+  }
+  
+  if (!features.cylinder().present())
+  {
+    features.cylinder() = prf::Cylinder
+    (
+      prf::Cylinder::radius_default_value(),
+      prf::Cylinder::height_default_value()
+    );
+  }
+  
+  if (!features.datumPlane().present())
+  {
+    features.datumPlane() = prf::DatumPlane
+    (
+      prf::DatumPlane::offset_default_value()
+    );
+  }
+  
+  if (!features.draft().present())
+  {
+    features.draft() = prf::Draft
+    (
+      prf::Draft::angle_default_value()
+    );
+  }
+  
+  if (!features.hollow().present())
+  {
+    features.hollow() = prf::Hollow
+    (
+      prf::Hollow::offset_default_value()
+    );
+  }
+  
+  if (!features.sphere().present())
+  {
+    features.sphere() = prf::Sphere
+    (
+      prf::Sphere::radius_default_value()
+    );
+  }
 }

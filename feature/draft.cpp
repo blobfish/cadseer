@@ -32,6 +32,8 @@
 
 #include <globalutilities.h>
 #include <tools/idtools.h>
+#include <preferences/preferencesXML.h>
+#include <preferences/manager.h>
 #include <feature/shapecheck.h>
 #include <library/plabel.h>
 #include <project/serial/xsdcxxoutput/featuredraft.h>
@@ -58,7 +60,7 @@ Draft::~Draft() //for forward declare with osg::ref_ptr
 std::shared_ptr<Parameter> Draft::buildAngleParameter()
 {
    //some kind of default angle?
-  std::shared_ptr<Parameter> out(new Parameter(ParameterNames::Angle, 10.0));
+  std::shared_ptr<Parameter> out(new Parameter(ParameterNames::Angle, prf::manager().rootPtr->features().draft().get().angle()));
   return out;
 }
 

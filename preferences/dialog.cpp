@@ -88,6 +88,21 @@ void Dialog::initialize()
   ui->gestureIncludeAngleEdit->setText(QString().setNum(manager->rootPtr->gesture().includeAngle()));
   ui->gestureSpreadFactorEdit->setText(QString().setNum(manager->rootPtr->gesture().spreadFactor()));
   ui->gestureSprayFactorEdit->setText(QString().setNum(manager->rootPtr->gesture().sprayFactor()));
+  
+  ui->blendRadiusEdit->setText(QString().setNum(manager->rootPtr->features().blend().get().radius()));
+  ui->boxLengthEdit->setText(QString().setNum(manager->rootPtr->features().box().get().length()));
+  ui->boxWidthEdit->setText(QString().setNum(manager->rootPtr->features().box().get().width()));
+  ui->boxHeightEdit->setText(QString().setNum(manager->rootPtr->features().box().get().height()));
+  ui->chamferDistanceEdit->setText(QString().setNum(manager->rootPtr->features().chamfer().get().distance()));
+  ui->coneRadius1Edit->setText(QString().setNum(manager->rootPtr->features().cone().get().radius1()));
+  ui->coneRadius2Edit->setText(QString().setNum(manager->rootPtr->features().cone().get().radius2()));
+  ui->coneHeightEdit->setText(QString().setNum(manager->rootPtr->features().cone().get().height()));
+  ui->cylinderRadiusEdit->setText(QString().setNum(manager->rootPtr->features().cylinder().get().radius()));
+  ui->cylinderHeightEdit->setText(QString().setNum(manager->rootPtr->features().cylinder().get().height()));
+  ui->datumPlaneOffsetEdit->setText(QString().setNum(manager->rootPtr->features().datumPlane().get().offset()));
+  ui->draftAngleEdit->setText(QString().setNum(manager->rootPtr->features().draft().get().angle()));
+  ui->hollowOffsetEdit->setText(QString().setNum(manager->rootPtr->features().hollow().get().offset()));
+  ui->sphereRadiusEdit->setText(QString().setNum(manager->rootPtr->features().sphere().get().radius()));
 }
 
 void Dialog::accept()
@@ -98,6 +113,7 @@ void Dialog::accept()
     updateDragger();
     updateProject();
     updateGesture();
+    updateFeature();
     
     manager->saveConfig();
     QDialog::accept();
@@ -243,6 +259,81 @@ void Dialog::updateGesture()
   sprayFactor = std::max(sprayFactor, 0.01);
   sprayFactor = std::min(sprayFactor, 20.0);
   manager->rootPtr->gesture().sprayFactor() = sprayFactor;
+}
+
+void Dialog::updateFeature()
+{
+  double temp;
+  
+  temp = ui->blendRadiusEdit->text().toDouble();
+  if (temp <= 0.0)
+    temp = prf::Blend::radius_default_value();
+  manager->rootPtr->features().blend().get().radius() = temp;
+  
+  temp = ui->boxLengthEdit->text().toDouble();
+  if (temp <= 0.0)
+    temp = prf::Box::length_default_value();
+  manager->rootPtr->features().box().get().length() = temp;
+  
+  temp = ui->boxWidthEdit->text().toDouble();
+  if (temp <= 0.0)
+    temp = prf::Box::width_default_value();
+  manager->rootPtr->features().box().get().width() = temp;
+  
+  temp = ui->boxHeightEdit->text().toDouble();
+  if (temp <= 0.0)
+    temp = prf::Box::height_default_value();
+  manager->rootPtr->features().box().get().height() = temp;
+  
+  temp = ui->chamferDistanceEdit->text().toDouble();
+  if (temp <= 0.0)
+    temp = prf::Chamfer::distance_default_value();
+  manager->rootPtr->features().chamfer().get().distance() = temp;
+  
+  temp = ui->coneRadius1Edit->text().toDouble();
+  if (temp <= 0.0)
+    temp = prf::Cone::radius1_default_value();
+  manager->rootPtr->features().cone().get().radius1() = temp;
+  
+  temp = ui->coneRadius2Edit->text().toDouble();
+  if (temp <= 0.0)
+    temp = prf::Cone::radius2_default_value();
+  manager->rootPtr->features().cone().get().radius2() = temp;
+  
+  temp = ui->coneHeightEdit->text().toDouble();
+  if (temp <= 0.0)
+    temp = prf::Cone::height_default_value();
+  manager->rootPtr->features().cone().get().height() = temp;
+  
+  temp = ui->cylinderRadiusEdit->text().toDouble();
+  if (temp <= 0.0)
+    temp = prf::Cylinder::radius_default_value();
+  manager->rootPtr->features().cylinder().get().radius() = temp;
+  
+  temp = ui->cylinderHeightEdit->text().toDouble();
+  if (temp <= 0.0)
+    temp = prf::Cylinder::height_default_value();
+  manager->rootPtr->features().cylinder().get().height() = temp;
+  
+  temp = ui->datumPlaneOffsetEdit->text().toDouble();
+  if (temp <= 0.0)
+    temp = prf::DatumPlane::offset_default_value();
+  manager->rootPtr->features().datumPlane().get().offset() = temp;
+  
+  temp = ui->draftAngleEdit->text().toDouble();
+  if (temp <= 0.0)
+    temp = prf::Draft::angle_default_value();
+  manager->rootPtr->features().draft().get().angle() = temp;
+  
+  temp = ui->hollowOffsetEdit->text().toDouble();
+  if (temp <= 0.0)
+    temp = prf::Hollow::offset_default_value();
+  manager->rootPtr->features().hollow().get().offset() = temp;
+  
+  temp = ui->sphereRadiusEdit->text().toDouble();
+  if (temp <= 0.0)
+    temp = prf::Sphere::radius_default_value();
+  manager->rootPtr->features().sphere().get().radius() = temp;
 }
 
 void Dialog::basePathBrowseSlot()
