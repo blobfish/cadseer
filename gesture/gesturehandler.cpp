@@ -451,6 +451,12 @@ void GestureHandler::constructMenu()
     constructionCylinder->setUserValue(attributeStatus, QObject::tr("Cylinder Command").toStdString());
     constructionPrimitives->insertChild(constructionPrimitives->getNumChildren() - 2, constructionCylinder);
     
+    osg::MatrixTransform *constructionOblong = gsn::buildCommandNode(":/resources/images/constructionOblong.svg", iconRadius);
+    constructionOblong->setMatrix(dummy);
+    constructionOblong->setUserValue(attributeMask, (msg::Request | msg::Construct | msg::Oblong).to_string());
+    constructionOblong->setUserValue(attributeStatus, QObject::tr("Oblong Command").toStdString());
+    constructionPrimitives->insertChild(constructionPrimitives->getNumChildren() - 2, constructionOblong);
+    
     //construction finishing base
     osg::MatrixTransform *constructionFinishing;
     constructionFinishing = gsn::buildMenuNode(":/resources/images/constructionFinishing.svg", iconRadius);

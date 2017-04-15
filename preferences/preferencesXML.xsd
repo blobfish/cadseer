@@ -103,6 +103,14 @@
   </xs:all>
 </xs:complexType>
 
+<xs:complexType name="Oblong">
+  <xs:all>
+    <xs:element name="length" type="xs:double" default="10.0"/>
+    <xs:element name="width" type="xs:double" default="4.0"/>
+    <xs:element name="height" type="xs:double" default="2.0"/>
+  </xs:all>
+</xs:complexType>
+
 <xs:complexType name="Chamfer">
   <xs:all>
     <xs:element name="distance" type="xs:double" default="2.0"/>
@@ -152,6 +160,7 @@
   <xs:all>
     <xs:element name="blend" type="Blend"  minOccurs="0" maxOccurs="1"/>
     <xs:element name="box" type="Box"  minOccurs="0" maxOccurs="1"/>
+    <xs:element name="oblong" type="Oblong"  minOccurs="0" maxOccurs="1"/>
     <xs:element name="chamfer" type="Chamfer"  minOccurs="0" maxOccurs="1"/>
     <xs:element name="cone" type="Cone"  minOccurs="0" maxOccurs="1"/>
     <xs:element name="cylinder" type="Cylinder"  minOccurs="0" maxOccurs="1"/>

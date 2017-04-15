@@ -222,6 +222,16 @@ void Manager::ensureDefaults()
     );
   }
   
+  if (!features.oblong().present())
+  {
+    features.oblong() = prf::Oblong
+    (
+      prf::Oblong::length_default_value(),
+      prf::Oblong::width_default_value(),
+      prf::Oblong::height_default_value()
+    );
+  }
+  
   if (!features.chamfer().present())
   {
     features.chamfer() = prf::Chamfer(prf::Chamfer::distance_default_value());

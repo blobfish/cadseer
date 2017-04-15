@@ -132,6 +132,8 @@ SET(FEATURE_SOURCES
     feature/message.cpp
     feature/hollow.cpp
     feature/pick.cpp
+    feature/oblong
+    feature/oblongbuilder.cpp
     )
     
 SET(EXPRESSION_SOURCES
@@ -199,6 +201,7 @@ SET(PROJECT_SOURCES
     project/serial/xsdcxxoutput/featuredraft.cpp
     project/serial/xsdcxxoutput/featuredatumplane.cpp
     project/serial/xsdcxxoutput/featurehollow.cpp
+    project/serial/xsdcxxoutput/featureoblong.cpp
     )
     
 SET(APPLICATION_SOURCES

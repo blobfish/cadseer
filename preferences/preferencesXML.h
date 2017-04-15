@@ -84,6 +84,7 @@ namespace prf
   class HotKeys;
   class Blend;
   class Box;
+  class Oblong;
   class Chamfer;
   class Cone;
   class Cylinder;
@@ -3295,6 +3296,269 @@ namespace prf
   };
 
   /**
+   * @brief Class corresponding to the %Oblong schema type.
+   *
+   * @nosubgrouping
+   */
+  class Oblong: public ::xml_schema::Type
+  {
+    public:
+    /**
+     * @name length
+     *
+     * @brief Accessor and modifier functions for the %length
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::xml_schema::Double LengthType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< LengthType, char, ::xsd::cxx::tree::schema_type::double_ > LengthTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const LengthType&
+    length () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    LengthType&
+    length ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    length (const LengthType& x);
+
+    /**
+     * @brief Return the default value for the element.
+     *
+     * @return The element's default value.
+     */
+    static LengthType
+    length_default_value ();
+
+    //@}
+
+    /**
+     * @name width
+     *
+     * @brief Accessor and modifier functions for the %width
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::xml_schema::Double WidthType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< WidthType, char, ::xsd::cxx::tree::schema_type::double_ > WidthTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const WidthType&
+    width () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    WidthType&
+    width ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    width (const WidthType& x);
+
+    /**
+     * @brief Return the default value for the element.
+     *
+     * @return The element's default value.
+     */
+    static WidthType
+    width_default_value ();
+
+    //@}
+
+    /**
+     * @name height
+     *
+     * @brief Accessor and modifier functions for the %height
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::xml_schema::Double HeightType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< HeightType, char, ::xsd::cxx::tree::schema_type::double_ > HeightTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const HeightType&
+    height () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    HeightType&
+    height ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    height (const HeightType& x);
+
+    /**
+     * @brief Return the default value for the element.
+     *
+     * @return The element's default value.
+     */
+    static HeightType
+    height_default_value ();
+
+    //@}
+
+    /**
+     * @name Constructors
+     */
+    //@{
+
+    /**
+     * @brief Create an instance from the ultimate base and
+     * initializers for required elements and attributes.
+     */
+    Oblong (const LengthType&,
+            const WidthType&,
+            const HeightType&);
+
+    /**
+     * @brief Create an instance from a DOM element.
+     *
+     * @param e A DOM element to extract the data from.
+     * @param f Flags to create the new instance with.
+     * @param c A pointer to the object that will contain the new
+     * instance.
+     */
+    Oblong (const ::xercesc::DOMElement& e,
+            ::xml_schema::Flags f = 0,
+            ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy constructor.
+     *
+     * @param x An instance to make a copy of.
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    Oblong (const Oblong& x,
+            ::xml_schema::Flags f = 0,
+            ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy the instance polymorphically.
+     *
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     * @return A pointer to the dynamically allocated copy.
+     *
+     * This function ensures that the dynamic type of the instance is
+     * used for copying and should be used for polymorphic object
+     * models instead of the copy constructor.
+     */
+    virtual Oblong*
+    _clone (::xml_schema::Flags f = 0,
+            ::xml_schema::Container* c = 0) const;
+
+    /**
+     * @brief Copy assignment operator.
+     *
+     * @param x An instance to make a copy of.
+     * @return A reference to itself.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    Oblong&
+    operator= (const Oblong& x);
+
+    //@}
+
+    /**
+     * @brief Destructor.
+     */
+    virtual 
+    ~Oblong ();
+
+    // Implementation.
+    //
+
+    //@cond
+
+    protected:
+    void
+    parse (::xsd::cxx::xml::dom::parser< char >&,
+           ::xml_schema::Flags);
+
+    protected:
+    ::xsd::cxx::tree::one< LengthType > length_;
+    ::xsd::cxx::tree::one< WidthType > width_;
+    ::xsd::cxx::tree::one< HeightType > height_;
+
+    //@endcond
+  };
+
+  /**
    * @brief Class corresponding to the %Chamfer schema type.
    *
    * @nosubgrouping
@@ -4669,6 +4933,82 @@ namespace prf
     //@}
 
     /**
+     * @name oblong
+     *
+     * @brief Accessor and modifier functions for the %oblong
+     * optional element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::Oblong OblongType;
+
+    /**
+     * @brief Element optional container type.
+     */
+    typedef ::xsd::cxx::tree::optional< OblongType > OblongOptional;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< OblongType, char > OblongTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element
+     * container.
+     *
+     * @return A constant reference to the optional container.
+     */
+    const OblongOptional&
+    oblong () const;
+
+    /**
+     * @brief Return a read-write reference to the element container.
+     *
+     * @return A reference to the optional container.
+     */
+    OblongOptional&
+    oblong ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    oblong (const OblongType& x);
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x An optional container with the new value to set.
+     *
+     * If the value is present in @a x then this function makes a copy 
+     * of this value and sets it as the new value of the element.
+     * Otherwise the element container is set the 'not present' state.
+     */
+    void
+    oblong (const OblongOptional& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly instead
+     * of making a copy.
+     */
+    void
+    oblong (::std::unique_ptr< OblongType > p);
+
+    //@}
+
+    /**
      * @name chamfer
      *
      * @brief Accessor and modifier functions for the %chamfer
@@ -5283,6 +5623,7 @@ namespace prf
     protected:
     BlendOptional blend_;
     BoxOptional box_;
+    OblongOptional oblong_;
     ChamferOptional chamfer_;
     ConeOptional cone_;
     CylinderOptional cylinder_;
@@ -6143,6 +6484,9 @@ namespace prf
 
   void
   operator<< (::xercesc::DOMElement&, const Box&);
+
+  void
+  operator<< (::xercesc::DOMElement&, const Oblong&);
 
   void
   operator<< (::xercesc::DOMElement&, const Chamfer&);

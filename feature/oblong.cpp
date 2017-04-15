@@ -1,6 +1,6 @@
 /*
  * CadSeer. Parametric Solid Modeling.
- * Copyright (C) 2015  Thomas S. Anderson blobfish.at.gmx.com
+ * Copyright (C) 2017  Thomas S. Anderson blobfish.at.gmx.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,27 +17,22 @@
  *
  */
 
-#include <assert.h>
-#include <string>
-#include <map>
-
 #include <globalutilities.h>
 #include <tools/idtools.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
-#include <library/ipgroup.h>
-#include <feature/boxbuilder.h>
 #include <feature/seershape.h>
-#include <project/serial/xsdcxxoutput/featurebox.h>
-#include <feature/box.h>
+#include <library/ipgroup.h>
+#include <project/serial/xsdcxxoutput/featureoblong.h>
+#include <feature/oblongbuilder.h>
+#include <feature/oblong.h>
 
 using namespace ftr;
 using boost::uuids::uuid;
 
-//this is probably overkill for primitives such as box as it
-//would probably be consistent using offsets. but this should
-//be able to be used for all features. so consistency.
+QIcon Oblong::icon;
 
+//duplicated from box.
 enum class FeatureTag
 {
   Root,         //!< compound
@@ -116,18 +111,16 @@ static const std::map<FeatureTag, std::string> featureTagMap =
   {FeatureTag::VertexXNYNZN, "VertexXNYNZN"}
 };
 
-QIcon Box::icon;
-
-Box::Box() :
+Oblong::Oblong() :
   CSysBase(),
-  length(ParameterNames::Length, prf::manager().rootPtr->features().box().get().length()),
-  width(ParameterNames::Width, prf::manager().rootPtr->features().box().get().width()),
-  height(ParameterNames::Height, prf::manager().rootPtr->features().box().get().height())
+  length(ParameterNames::Length, prf::manager().rootPtr->features().oblong().get().length()),
+  width(ParameterNames::Width, prf::manager().rootPtr->features().oblong().get().width()),
+  height(ParameterNames::Height, prf::manager().rootPtr->features().oblong().get().height())
 {
   if (icon.isNull())
-    icon = QIcon(":/resources/images/constructionBox.svg");
+    icon = QIcon(":/resources/images/constructionOblong.svg");
   
-  name = QObject::tr("Box");
+  name = QObject::tr("Oblong");
   mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   initializeMaps();
@@ -140,139 +133,17 @@ Box::Box() :
   parameterVector.push_back(&width);
   parameterVector.push_back(&height);
   
-  length.connectValue(boost::bind(&Box::setModelDirty, this));
-  width.connectValue(boost::bind(&Box::setModelDirty, this));
-  height.connectValue(boost::bind(&Box::setModelDirty, this));
+  length.connectValue(boost::bind(&Oblong::setModelDirty, this));
+  width.connectValue(boost::bind(&Oblong::setModelDirty, this));
+  height.connectValue(boost::bind(&Oblong::setModelDirty, this));
   
   setupIPGroup();
 }
 
-Box::~Box()
-{
+Oblong::~Oblong(){}
 
-}
-
-void Box::setupIPGroup()
-{
-  lengthIP = new lbr::IPGroup(&length);
-  lengthIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 0.0, -1.0)));
-  lengthIP->noAutoRotateDragger();
-  lengthIP->setRotationAxis(osg::Vec3d(1.0, 0.0, 0.0), osg::Vec3d(0.0, 0.0, 1.0));
-  lengthIP->valueHasChanged();
-  lengthIP->constantHasChanged();
-  overlaySwitch->addChild(lengthIP.get());
-  dragger->linkToMatrix(lengthIP.get());
-  
-  widthIP = new lbr::IPGroup(&width);
-//   widthIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 0.0, -1.0)));
-  widthIP->noAutoRotateDragger();
-  widthIP->setRotationAxis(osg::Vec3d(0.0, 1.0, 0.0), osg::Vec3d(0.0, 0.0, -1.0));
-  widthIP->valueHasChanged();
-  widthIP->constantHasChanged();
-  overlaySwitch->addChild(widthIP.get());
-  dragger->linkToMatrix(widthIP.get());
-  
-  heightIP = new lbr::IPGroup(&height);
-  heightIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(1.0, 0.0, 0.0)));
-  heightIP->noAutoRotateDragger();
-  heightIP->setRotationAxis(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(0.0, 1.0, 0.0));
-  heightIP->valueHasChanged();
-  heightIP->constantHasChanged();
-  overlaySwitch->addChild(heightIP.get());
-  dragger->linkToMatrix(heightIP.get());
-  
-  updateIPGroup();
-}
-
-void Box::updateIPGroup()
-{
-  lengthIP->setMatrix(gu::toOsg(system));
-  widthIP->setMatrix(gu::toOsg(system));
-  heightIP->setMatrix(gu::toOsg(system));
-  
-  osg::Matrix lMatrix;
-  lMatrix.setRotate(osg::Quat(osg::PI_2, osg::Vec3d(0.0, 1.0, 0.0)));
-  lMatrix.setTrans(osg::Vec3d(0.0, width / 2.0, height / 2.0));
-  lengthIP->setMatrixDragger(lMatrix);
-  
-  osg::Matrix wMatrix;
-  wMatrix.setRotate(osg::Quat(osg::PI_2, osg::Vec3d(-1.0, 0.0, 0.0)));
-  wMatrix.setTrans(osg::Vec3d(length / 2.0, 0.0, height / 2.0));
-  widthIP->setMatrixDragger(wMatrix);
-  
-  osg::Matrix hMatrix;
-  //no need to rotate
-  hMatrix.setTrans(osg::Vec3d(length / 2.0, width / 2.0, 0.0));
-  heightIP->setMatrixDragger(hMatrix);
-}
-
-void Box::setLength(const double &lengthIn)
-{
-  if (lengthIn == length)
-    return;
-  assert(lengthIn > Precision::Confusion());
-  setModelDirty();
-  length = lengthIn;
-}
-
-void Box::setWidth(const double &widthIn)
-{
-  if (widthIn == width)
-    return;
-  assert(widthIn > Precision::Confusion());
-  setModelDirty();
-  width = widthIn;
-}
-
-void Box::setHeight(const double &heightIn)
-{
-  if (heightIn == height)
-    return;
-  assert(heightIn > Precision::Confusion());
-  setModelDirty();
-  height = heightIn;
-}
-
-void Box::setParameters(const double &lengthIn, const double &widthIn, const double &heightIn)
-{
-  //dirty is called in setters.
-  //asserts called in setters.
-  setLength(lengthIn);
-  setWidth(widthIn);
-  setHeight(heightIn);
-}
-
-void Box::getParameters(double &lengthOut, double &widthOut, double &heightOut) const
-{
-  lengthOut = length;
-  widthOut = width;
-  heightOut = height;
-}
-
-void Box::updateModel(const UpdateMap& mapIn)
-{
-  setFailure();
-  
-  CSysBase::updateModel(mapIn);
-  
-  try
-  {
-    BoxBuilder boxMaker(length, width, height, system);
-    seerShape->setOCCTShape(boxMaker.getSolid());
-    updateResult(boxMaker);
-    setSuccess();
-  }
-  catch (Standard_Failure)
-  {
-    Handle_Standard_Failure e = Standard_Failure::Caught();
-    std::cout << std::endl << "Error in box update. " << e->GetMessageString() << std::endl;
-  }
-  setModelClean();
-  
-  updateIPGroup();
-}
-
-void Box::initializeMaps()
+//duplicate of box.
+void Oblong::initializeMaps()
 {
   //result 
   std::vector<uuid> tempIds; //save ids for later.
@@ -330,14 +201,76 @@ void Box::initializeMaps()
   insertIntoFeatureMap(tempIds.at(32), FeatureTag::VertexXNYPZP);
   insertIntoFeatureMap(tempIds.at(33), FeatureTag::VertexXNYPZN);
   insertIntoFeatureMap(tempIds.at(34), FeatureTag::VertexXNYNZN);
-  
-//   std::cout << std::endl << std::endl <<
-//     "result Container: " << std::endl << resultContainer << std::endl << std::endl <<
-//     "feature Container:" << std::endl << featureContainer << std::endl << std::endl <<
-//     "evolution Container:" << std::endl << evolutionContainer << std::endl << std::endl;
 }
+
+void Oblong::setLength(const double &lengthIn)
+{
+  if (lengthIn == length)
+    return;
+  assert(lengthIn > Precision::Confusion());
+  setModelDirty();
+  length = lengthIn;
+}
+
+void Oblong::setWidth(const double &widthIn)
+{
+  if (widthIn == width)
+    return;
+  assert(widthIn > Precision::Confusion());
+  setModelDirty();
+  width = widthIn;
+}
+
+void Oblong::setHeight(const double &heightIn)
+{
+  if (heightIn == height)
+    return;
+  assert(heightIn > Precision::Confusion());
+  setModelDirty();
+  height = heightIn;
+}
+
+void Oblong::setParameters(const double &lengthIn, const double &widthIn, const double &heightIn)
+{
+  //dirty is called in setters.
+  //asserts called in setters.
+  setLength(lengthIn);
+  setWidth(widthIn);
+  setHeight(heightIn);
+}
+
+void Oblong::updateModel(const UpdateMap& mapIn)
+{
+  setFailure();
   
-void Box::updateResult(const BoxBuilder& boxMakerIn)
+  CSysBase::updateModel(mapIn);
+  
+  try
+  {
+    if (!(length.getValue() > width.getValue()))
+      throw std::runtime_error("length must be greater than width");
+    
+    OblongBuilder oblongMaker(length, width, height, system);
+    seerShape->setOCCTShape(oblongMaker.getSolid());
+    updateResult(oblongMaker);
+    
+    setSuccess();
+  }
+  catch (Standard_Failure)
+  {
+    Handle_Standard_Failure e = Standard_Failure::Caught();
+    std::cout << std::endl << "Error in oblong update. " << e->GetMessageString() << std::endl;
+  }
+  catch (std::exception &e)
+  {
+    std::cout << std::endl << "Error in oblong update: " << e.what() << std::endl;
+  }
+  setModelClean();
+  
+  updateIPGroup();
+}
+
+void Oblong::updateResult(const OblongBuilder& oblongMakerIn)
 {
   //helper lamda
   auto updateShapeByTag = [this](const TopoDS_Shape &shapeIn, FeatureTag featureTagIn)
@@ -347,49 +280,101 @@ void Box::updateResult(const BoxBuilder& boxMakerIn)
   };
   
   updateShapeByTag(seerShape->getRootOCCTShape(), FeatureTag::Root);
-  updateShapeByTag(boxMakerIn.getSolid(), FeatureTag::Solid);
-  updateShapeByTag(boxMakerIn.getShell(), FeatureTag::Shell);
-  updateShapeByTag(boxMakerIn.getFaceXP(), FeatureTag::FaceXP);
-  updateShapeByTag(boxMakerIn.getFaceXN(), FeatureTag::FaceXN);
-  updateShapeByTag(boxMakerIn.getFaceYP(), FeatureTag::FaceYP);
-  updateShapeByTag(boxMakerIn.getFaceYN(), FeatureTag::FaceYN);
-  updateShapeByTag(boxMakerIn.getFaceZP(), FeatureTag::FaceZP);
-  updateShapeByTag(boxMakerIn.getFaceZN(), FeatureTag::FaceZN);
-  updateShapeByTag(boxMakerIn.getWireXP(), FeatureTag::WireXP);
-  updateShapeByTag(boxMakerIn.getWireXN(), FeatureTag::WireXN);
-  updateShapeByTag(boxMakerIn.getWireYP(), FeatureTag::WireYP);
-  updateShapeByTag(boxMakerIn.getWireYN(), FeatureTag::WireYN);
-  updateShapeByTag(boxMakerIn.getWireZP(), FeatureTag::WireZP);
-  updateShapeByTag(boxMakerIn.getWireZN(), FeatureTag::WireZN);
-  updateShapeByTag(boxMakerIn.getEdgeXPYP(), FeatureTag::EdgeXPYP);
-  updateShapeByTag(boxMakerIn.getEdgeXPZP(), FeatureTag::EdgeXPZP);
-  updateShapeByTag(boxMakerIn.getEdgeXPYN(), FeatureTag::EdgeXPYN);
-  updateShapeByTag(boxMakerIn.getEdgeXPZN(), FeatureTag::EdgeXPZN);
-  updateShapeByTag(boxMakerIn.getEdgeXNYN(), FeatureTag::EdgeXNYN);
-  updateShapeByTag(boxMakerIn.getEdgeXNZP(), FeatureTag::EdgeXNZP);
-  updateShapeByTag(boxMakerIn.getEdgeXNYP(), FeatureTag::EdgeXNYP);
-  updateShapeByTag(boxMakerIn.getEdgeXNZN(), FeatureTag::EdgeXNZN);
-  updateShapeByTag(boxMakerIn.getEdgeYPZP(), FeatureTag::EdgeYPZP);
-  updateShapeByTag(boxMakerIn.getEdgeYPZN(), FeatureTag::EdgeYPZN);
-  updateShapeByTag(boxMakerIn.getEdgeYNZP(), FeatureTag::EdgeYNZP);
-  updateShapeByTag(boxMakerIn.getEdgeYNZN(), FeatureTag::EdgeYNZN);
-  updateShapeByTag(boxMakerIn.getVertexXPYPZP(), FeatureTag::VertexXPYPZP);
-  updateShapeByTag(boxMakerIn.getVertexXPYNZP(), FeatureTag::VertexXPYNZP);
-  updateShapeByTag(boxMakerIn.getVertexXPYNZN(), FeatureTag::VertexXPYNZN);
-  updateShapeByTag(boxMakerIn.getVertexXPYPZN(), FeatureTag::VertexXPYPZN);
-  updateShapeByTag(boxMakerIn.getVertexXNYNZP(), FeatureTag::VertexXNYNZP);
-  updateShapeByTag(boxMakerIn.getVertexXNYPZP(), FeatureTag::VertexXNYPZP);
-  updateShapeByTag(boxMakerIn.getVertexXNYPZN(), FeatureTag::VertexXNYPZN);
-  updateShapeByTag(boxMakerIn.getVertexXNYNZN(), FeatureTag::VertexXNYNZN);
+  updateShapeByTag(oblongMakerIn.getSolid(), FeatureTag::Solid);
+  updateShapeByTag(oblongMakerIn.getShell(), FeatureTag::Shell);
+  updateShapeByTag(oblongMakerIn.getFaceXP(), FeatureTag::FaceXP);
+  updateShapeByTag(oblongMakerIn.getFaceXN(), FeatureTag::FaceXN);
+  updateShapeByTag(oblongMakerIn.getFaceYP(), FeatureTag::FaceYP);
+  updateShapeByTag(oblongMakerIn.getFaceYN(), FeatureTag::FaceYN);
+  updateShapeByTag(oblongMakerIn.getFaceZP(), FeatureTag::FaceZP);
+  updateShapeByTag(oblongMakerIn.getFaceZN(), FeatureTag::FaceZN);
+  updateShapeByTag(oblongMakerIn.getWireXP(), FeatureTag::WireXP);
+  updateShapeByTag(oblongMakerIn.getWireXN(), FeatureTag::WireXN);
+  updateShapeByTag(oblongMakerIn.getWireYP(), FeatureTag::WireYP);
+  updateShapeByTag(oblongMakerIn.getWireYN(), FeatureTag::WireYN);
+  updateShapeByTag(oblongMakerIn.getWireZP(), FeatureTag::WireZP);
+  updateShapeByTag(oblongMakerIn.getWireZN(), FeatureTag::WireZN);
+  updateShapeByTag(oblongMakerIn.getEdgeXPYP(), FeatureTag::EdgeXPYP);
+  updateShapeByTag(oblongMakerIn.getEdgeXPZP(), FeatureTag::EdgeXPZP);
+  updateShapeByTag(oblongMakerIn.getEdgeXPYN(), FeatureTag::EdgeXPYN);
+  updateShapeByTag(oblongMakerIn.getEdgeXPZN(), FeatureTag::EdgeXPZN);
+  updateShapeByTag(oblongMakerIn.getEdgeXNYN(), FeatureTag::EdgeXNYN);
+  updateShapeByTag(oblongMakerIn.getEdgeXNZP(), FeatureTag::EdgeXNZP);
+  updateShapeByTag(oblongMakerIn.getEdgeXNYP(), FeatureTag::EdgeXNYP);
+  updateShapeByTag(oblongMakerIn.getEdgeXNZN(), FeatureTag::EdgeXNZN);
+  updateShapeByTag(oblongMakerIn.getEdgeYPZP(), FeatureTag::EdgeYPZP);
+  updateShapeByTag(oblongMakerIn.getEdgeYPZN(), FeatureTag::EdgeYPZN);
+  updateShapeByTag(oblongMakerIn.getEdgeYNZP(), FeatureTag::EdgeYNZP);
+  updateShapeByTag(oblongMakerIn.getEdgeYNZN(), FeatureTag::EdgeYNZN);
+  updateShapeByTag(oblongMakerIn.getVertexXPYPZP(), FeatureTag::VertexXPYPZP);
+  updateShapeByTag(oblongMakerIn.getVertexXPYNZP(), FeatureTag::VertexXPYNZP);
+  updateShapeByTag(oblongMakerIn.getVertexXPYNZN(), FeatureTag::VertexXPYNZN);
+  updateShapeByTag(oblongMakerIn.getVertexXPYPZN(), FeatureTag::VertexXPYPZN);
+  updateShapeByTag(oblongMakerIn.getVertexXNYNZP(), FeatureTag::VertexXNYNZP);
+  updateShapeByTag(oblongMakerIn.getVertexXNYPZP(), FeatureTag::VertexXNYPZP);
+  updateShapeByTag(oblongMakerIn.getVertexXNYPZN(), FeatureTag::VertexXNYPZN);
+  updateShapeByTag(oblongMakerIn.getVertexXNYNZN(), FeatureTag::VertexXNYNZN);
   
   seerShape->setRootShapeId(seerShape->featureTagId(featureTagMap.at(FeatureTag::Root)));
-  
-//   std::cout << std::endl << "update result:" << std::endl << resultContainer << std::endl;
 }
 
-void Box::serialWrite(const QDir &dIn)
+void Oblong::setupIPGroup()
 {
-  prj::srl::FeatureBox boxOut
+  lengthIP = new lbr::IPGroup(&length);
+  lengthIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 0.0, -1.0)));
+  lengthIP->noAutoRotateDragger();
+  lengthIP->setRotationAxis(osg::Vec3d(1.0, 0.0, 0.0), osg::Vec3d(0.0, 0.0, 1.0));
+  lengthIP->valueHasChanged();
+  lengthIP->constantHasChanged();
+  overlaySwitch->addChild(lengthIP.get());
+  dragger->linkToMatrix(lengthIP.get());
+  
+  widthIP = new lbr::IPGroup(&width);
+  //   widthIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 0.0, -1.0)));
+  widthIP->noAutoRotateDragger();
+  widthIP->setRotationAxis(osg::Vec3d(0.0, 1.0, 0.0), osg::Vec3d(0.0, 0.0, -1.0));
+  widthIP->valueHasChanged();
+  widthIP->constantHasChanged();
+  overlaySwitch->addChild(widthIP.get());
+  dragger->linkToMatrix(widthIP.get());
+  
+  heightIP = new lbr::IPGroup(&height);
+  heightIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(1.0, 0.0, 0.0)));
+  heightIP->noAutoRotateDragger();
+  heightIP->setRotationAxis(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(0.0, 1.0, 0.0));
+  heightIP->valueHasChanged();
+  heightIP->constantHasChanged();
+  overlaySwitch->addChild(heightIP.get());
+  dragger->linkToMatrix(heightIP.get());
+  
+  updateIPGroup();
+}
+
+void Oblong::updateIPGroup()
+{
+  lengthIP->setMatrix(gu::toOsg(system));
+  widthIP->setMatrix(gu::toOsg(system));
+  heightIP->setMatrix(gu::toOsg(system));
+  
+  osg::Matrix lMatrix;
+  lMatrix.setRotate(osg::Quat(osg::PI_2, osg::Vec3d(0.0, 1.0, 0.0)));
+  lMatrix.setTrans(osg::Vec3d(0.0, width / 2.0, height / 2.0));
+  lengthIP->setMatrixDragger(lMatrix);
+  
+  osg::Matrix wMatrix;
+  wMatrix.setRotate(osg::Quat(osg::PI_2, osg::Vec3d(-1.0, 0.0, 0.0)));
+  wMatrix.setTrans(osg::Vec3d(length / 2.0, 0.0, height / 2.0));
+  widthIP->setMatrixDragger(wMatrix);
+  
+  osg::Matrix hMatrix;
+  //no need to rotate
+  hMatrix.setTrans(osg::Vec3d(length / 2.0, width / 2.0, 0.0));
+  heightIP->setMatrixDragger(hMatrix);
+}
+
+void Oblong::serialWrite(const QDir &dIn)
+{
+  prj::srl::FeatureOblong oblongOut
   (
     CSysBase::serialOut(),
     length.serialOut(),
@@ -399,13 +384,13 @@ void Box::serialWrite(const QDir &dIn)
   
   xml_schema::NamespaceInfomap infoMap;
   std::ofstream stream(buildFilePathName(dIn).toUtf8().constData());
-  prj::srl::box(stream, boxOut, infoMap);
+  prj::srl::oblong(stream, oblongOut, infoMap);
 }
 
-void Box::serialRead(const prj::srl::FeatureBox& sBox)
+void Oblong::serialRead(const prj::srl::FeatureOblong &sOblong)
 {
-  CSysBase::serialIn(sBox.featureCSysBase());
-  length.serialIn(sBox.length());
-  width.serialIn(sBox.width());
-  height.serialIn(sBox.height());
+  CSysBase::serialIn(sOblong.featureCSysBase());
+  length.serialIn(sOblong.length());
+  width.serialIn(sOblong.width());
+  height.serialIn(sOblong.height());
 }

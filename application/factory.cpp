@@ -53,6 +53,7 @@
 #include <feature/seershape.h>
 #include <feature/types.h>
 #include <feature/box.h>
+#include <feature/oblong.h>
 #include <feature/cylinder.h>
 #include <feature/sphere.h>
 #include <feature/cone.h>
@@ -97,6 +98,9 @@ void Factory::setupDispatcher()
   
   mask = msg::Request | msg::Construct | msg::Box;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newBoxDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Construct | msg::Oblong;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newOblongDispatched, this, _1)));
   
   mask = msg::Request | msg::Construct | msg::Cylinder;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newCylinderDispatched, this, _1)));
@@ -250,6 +254,26 @@ void Factory::newBoxDispatched(const msg::Message &)
   boxPtr->setSystem(currentSystem);
   boxPtr->updateDragger();
   project->addFeature(boxPtr);
+  
+  observer->out(msg::Mask(msg::Request | msg::Update));
+}
+
+void Factory::newOblongDispatched(const msg::Message &)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  assert(project);
+  
+  app::Application *application = dynamic_cast<app::Application *>(qApp);
+  assert(application);
+  const osg::Matrixd &currentSystem = application->getMainWindow()->getViewer()->getCurrentSystem();
+  
+  std::shared_ptr<ftr::Oblong> oblongPtr(new ftr::Oblong());
+  oblongPtr->setSystem(currentSystem);
+  oblongPtr->updateDragger();
+  project->addFeature(oblongPtr);
   
   observer->out(msg::Mask(msg::Request | msg::Update));
 }

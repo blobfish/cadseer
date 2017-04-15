@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="http://www.cadseer.com/prj/srl"
+  xmlns:srl="http://www.cadseer.com/prj/srl"
+>
+  
+<xs:include schemaLocation="featurecsysbase.xsd"/>
+
+<xs:complexType name="FeatureOblong">
+  <xs:all>
+    <xs:element name="featureCSysBase" type="srl:FeatureCSysBase"/>
+    <xs:element name="length" type="srl:Parameter"/>
+    <xs:element name="width" type="srl:Parameter"/>
+    <xs:element name="height" type="srl:Parameter"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:element name="oblong" type="srl:FeatureOblong"/>
+  
+</xs:schema> 

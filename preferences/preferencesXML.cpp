@@ -860,6 +860,82 @@ namespace prf
   }
 
 
+  // Oblong
+  // 
+
+  const Oblong::LengthType& Oblong::
+  length () const
+  {
+    return this->length_.get ();
+  }
+
+  Oblong::LengthType& Oblong::
+  length ()
+  {
+    return this->length_.get ();
+  }
+
+  void Oblong::
+  length (const LengthType& x)
+  {
+    this->length_.set (x);
+  }
+
+  Oblong::LengthType Oblong::
+  length_default_value ()
+  {
+    return LengthType (10.0);
+  }
+
+  const Oblong::WidthType& Oblong::
+  width () const
+  {
+    return this->width_.get ();
+  }
+
+  Oblong::WidthType& Oblong::
+  width ()
+  {
+    return this->width_.get ();
+  }
+
+  void Oblong::
+  width (const WidthType& x)
+  {
+    this->width_.set (x);
+  }
+
+  Oblong::WidthType Oblong::
+  width_default_value ()
+  {
+    return WidthType (4.0);
+  }
+
+  const Oblong::HeightType& Oblong::
+  height () const
+  {
+    return this->height_.get ();
+  }
+
+  Oblong::HeightType& Oblong::
+  height ()
+  {
+    return this->height_.get ();
+  }
+
+  void Oblong::
+  height (const HeightType& x)
+  {
+    this->height_.set (x);
+  }
+
+  Oblong::HeightType Oblong::
+  height_default_value ()
+  {
+    return HeightType (2.0);
+  }
+
+
   // Chamfer
   // 
 
@@ -1189,6 +1265,36 @@ namespace prf
   box (::std::unique_ptr< BoxType > x)
   {
     this->box_.set (std::move (x));
+  }
+
+  const Features::OblongOptional& Features::
+  oblong () const
+  {
+    return this->oblong_;
+  }
+
+  Features::OblongOptional& Features::
+  oblong ()
+  {
+    return this->oblong_;
+  }
+
+  void Features::
+  oblong (const OblongType& x)
+  {
+    this->oblong_.set (x);
+  }
+
+  void Features::
+  oblong (const OblongOptional& x)
+  {
+    this->oblong_ = x;
+  }
+
+  void Features::
+  oblong (::std::unique_ptr< OblongType > x)
+  {
+    this->oblong_.set (std::move (x));
   }
 
   const Features::ChamferOptional& Features::
@@ -3249,6 +3355,141 @@ namespace prf
   {
   }
 
+  // Oblong
+  //
+
+  Oblong::
+  Oblong (const LengthType& length,
+          const WidthType& width,
+          const HeightType& height)
+  : ::xml_schema::Type (),
+    length_ (length, this),
+    width_ (width, this),
+    height_ (height, this)
+  {
+  }
+
+  Oblong::
+  Oblong (const Oblong& x,
+          ::xml_schema::Flags f,
+          ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    length_ (x.length_, f, this),
+    width_ (x.width_, f, this),
+    height_ (x.height_, f, this)
+  {
+  }
+
+  Oblong::
+  Oblong (const ::xercesc::DOMElement& e,
+          ::xml_schema::Flags f,
+          ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    length_ (this),
+    width_ (this),
+    height_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void Oblong::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // length
+      //
+      if (n.name () == "length" && n.namespace_ ().empty ())
+      {
+        if (!length_.present ())
+        {
+          this->length_.set (LengthTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      // width
+      //
+      if (n.name () == "width" && n.namespace_ ().empty ())
+      {
+        if (!width_.present ())
+        {
+          this->width_.set (WidthTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      // height
+      //
+      if (n.name () == "height" && n.namespace_ ().empty ())
+      {
+        if (!height_.present ())
+        {
+          this->height_.set (HeightTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!length_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "length",
+        "");
+    }
+
+    if (!width_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "width",
+        "");
+    }
+
+    if (!height_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "height",
+        "");
+    }
+  }
+
+  Oblong* Oblong::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class Oblong (*this, f, c);
+  }
+
+  Oblong& Oblong::
+  operator= (const Oblong& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->length_ = x.length_;
+      this->width_ = x.width_;
+      this->height_ = x.height_;
+    }
+
+    return *this;
+  }
+
+  Oblong::
+  ~Oblong ()
+  {
+  }
+
   // Chamfer
   //
 
@@ -3949,6 +4190,7 @@ namespace prf
   : ::xml_schema::Type (),
     blend_ (this),
     box_ (this),
+    oblong_ (this),
     chamfer_ (this),
     cone_ (this),
     cylinder_ (this),
@@ -3966,6 +4208,7 @@ namespace prf
   : ::xml_schema::Type (x, f, c),
     blend_ (x.blend_, f, this),
     box_ (x.box_, f, this),
+    oblong_ (x.oblong_, f, this),
     chamfer_ (x.chamfer_, f, this),
     cone_ (x.cone_, f, this),
     cylinder_ (x.cylinder_, f, this),
@@ -3983,6 +4226,7 @@ namespace prf
   : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
     blend_ (this),
     box_ (this),
+    oblong_ (this),
     chamfer_ (this),
     cone_ (this),
     cylinder_ (this),
@@ -4032,6 +4276,20 @@ namespace prf
         if (!this->box_)
         {
           this->box_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      // oblong
+      //
+      if (n.name () == "oblong" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< OblongType > r (
+          OblongTraits::create (i, f, this));
+
+        if (!this->oblong_)
+        {
+          this->oblong_.set (::std::move (r));
           continue;
         }
       }
@@ -4153,6 +4411,7 @@ namespace prf
       static_cast< ::xml_schema::Type& > (*this) = x;
       this->blend_ = x.blend_;
       this->box_ = x.box_;
+      this->oblong_ = x.oblong_;
       this->chamfer_ = x.chamfer_;
       this->cone_ = x.cone_;
       this->cylinder_ = x.cylinder_;
@@ -5151,6 +5410,45 @@ namespace prf
   }
 
   void
+  operator<< (::xercesc::DOMElement& e, const Oblong& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // length
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "length",
+          e));
+
+      s << ::xml_schema::AsDouble(i.length ());
+    }
+
+    // width
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "width",
+          e));
+
+      s << ::xml_schema::AsDouble(i.width ());
+    }
+
+    // height
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "height",
+          e));
+
+      s << ::xml_schema::AsDouble(i.height ());
+    }
+  }
+
+  void
   operator<< (::xercesc::DOMElement& e, const Chamfer& i)
   {
     e << static_cast< const ::xml_schema::Type& > (i);
@@ -5329,6 +5627,18 @@ namespace prf
           e));
 
       s << *i.box ();
+    }
+
+    // oblong
+    //
+    if (i.oblong ())
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "oblong",
+          e));
+
+      s << *i.oblong ();
     }
 
     // chamfer

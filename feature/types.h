@@ -44,7 +44,8 @@ namespace ftr
     Subtract, //!< feature subtract class.
     Intersect, //!< feature intersect class.
     DatumPlane, //!< feature datum plane class.
-    Hollow //!< feature hollow class.
+    Hollow, //!< feature hollow class.
+    Oblong //!< feature hollow class.
   };
   
   inline const static std::string& toString(Type typeIn)
@@ -67,7 +68,8 @@ namespace ftr
       {Type::Subtract, "Subtract"},
       {Type::Intersect, "Intersect"},
       {Type::DatumPlane, "DatumPlane"},
-      {Type::Hollow, "Hollow"}
+      {Type::Hollow, "Hollow"},
+      {Type::Oblong, "Oblong"}
     };
     
     assert(strings.count(typeIn) > 0);

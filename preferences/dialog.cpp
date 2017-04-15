@@ -102,6 +102,9 @@ void Dialog::initialize()
   ui->datumPlaneOffsetEdit->setText(QString().setNum(manager->rootPtr->features().datumPlane().get().offset()));
   ui->draftAngleEdit->setText(QString().setNum(manager->rootPtr->features().draft().get().angle()));
   ui->hollowOffsetEdit->setText(QString().setNum(manager->rootPtr->features().hollow().get().offset()));
+  ui->oblongLengthEdit->setText(QString().setNum(manager->rootPtr->features().oblong().get().length()));
+  ui->oblongWidthEdit->setText(QString().setNum(manager->rootPtr->features().oblong().get().width()));
+  ui->oblongHeightEdit->setText(QString().setNum(manager->rootPtr->features().oblong().get().height()));
   ui->sphereRadiusEdit->setText(QString().setNum(manager->rootPtr->features().sphere().get().radius()));
 }
 
@@ -334,6 +337,21 @@ void Dialog::updateFeature()
   if (temp <= 0.0)
     temp = prf::Sphere::radius_default_value();
   manager->rootPtr->features().sphere().get().radius() = temp;
+  
+  temp = ui->oblongLengthEdit->text().toDouble();
+  if (temp <= 0.0)
+    temp = prf::Oblong::length_default_value();
+  manager->rootPtr->features().oblong().get().length() = temp;
+  
+  temp = ui->oblongWidthEdit->text().toDouble();
+  if (temp <= 0.0)
+    temp = prf::Oblong::width_default_value();
+  manager->rootPtr->features().oblong().get().width() = temp;
+  
+  temp = ui->oblongHeightEdit->text().toDouble();
+  if (temp <= 0.0)
+    temp = prf::Oblong::height_default_value();
+  manager->rootPtr->features().oblong().get().height() = temp;
 }
 
 void Dialog::basePathBrowseSlot()

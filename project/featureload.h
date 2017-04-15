@@ -62,6 +62,7 @@ namespace prj
     std::shared_ptr<ftr::Base> loadDraft(const std::string &, std::size_t);
     std::shared_ptr<ftr::Base> loadDatumPlane(const std::string &, std::size_t);
     std::shared_ptr<ftr::Base> loadHollow(const std::string &, std::size_t);
+    std::shared_ptr<ftr::Base> loadOblong(const std::string &, std::size_t);
   };
 }
 
