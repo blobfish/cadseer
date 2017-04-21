@@ -25,6 +25,8 @@
 
 #include <osg/Vec3d>
 
+#include <feature/shapehistory.h>
+
 class TopoDS_Edge;
 class TopoDS_Face;
 
@@ -40,6 +42,7 @@ namespace ftr
     boost::uuids::uuid id; //!< id of edge or face.
     double u; //!< u parameter on edge or face
     double v;//!< v parameter on face
+    ShapeHistory shapeHistory;
     
     bool operator==(const Pick&) const;
     void setParameter(const TopoDS_Edge&, const osg::Vec3d&);

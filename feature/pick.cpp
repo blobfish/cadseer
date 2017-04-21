@@ -41,12 +41,16 @@ Pick::Pick(const uuid &idIn, double uIn, double vIn) :
 
 prj::srl::Pick Pick::serialOut() const
 {
-  return prj::srl::Pick
+  prj::srl::Pick out
   (
     gu::idToString(id),
     u,
     v
   );
+  
+  out.history().set(shapeHistory.serialOut());
+  
+  return out;
 }
 
 void Pick::serialIn(const prj::srl::Pick &sPickIn)
@@ -54,6 +58,9 @@ void Pick::serialIn(const prj::srl::Pick &sPickIn)
   id = gu::stringToId(sPickIn.id());
   u = sPickIn.u();
   v = sPickIn.v();
+  
+  if (sPickIn.history().present())
+    shapeHistory.serialIn(sPickIn.history().get());
 }
 
 bool Pick::operator==(const Pick &rhs) const

@@ -165,7 +165,7 @@ void CSysBase::updateDragger()
     dragger->setLink();
 }
 
-void CSysBase::updateModel(const UpdateMap &)
+void CSysBase::updateModel(const UpdatePayload&)
 {
   setSystem(gu::toOsg(system) * mainTransform->getMatrix());
   mainTransform->setMatrix(osg::Matrixd::identity());

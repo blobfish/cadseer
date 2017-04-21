@@ -51,15 +51,37 @@ namespace msg{class Message; class Observer;}
 namespace ftr
 {
   class SeerShape;
+  class ShapeHistory;
   class Base;
   
-  //! used during update to pass in const parent features
-  typedef std::multimap<InputTypes, const Base*> UpdateMap;
   /*! used during editing to pass in parent features. 
    * not const because we want to hide and and show etc.
    * parents, but no 'real' change should be done.
    */
   typedef std::multimap<InputTypes, Base*> EditMap;
+  
+  /*! @brief Update information needed by features.
+   * 
+   * had a choice to make. Feature update will need shapeHistory
+   * for resolving references. Features need to fill in shape history
+   * even when the update isn't needed. so shape history passed into update
+   * is const and we have a virtual method to fill in shape history.
+   * 
+   * 
+   */
+  class UpdatePayload
+  {
+  public:
+    typedef std::multimap<InputTypes, const Base*> UpdateMap;
+    
+    UpdatePayload(const UpdateMap &updateMapIn, const ShapeHistory &shapeHistoryIn) :
+    updateMap(updateMapIn),
+    shapeHistory(shapeHistoryIn)
+    {}
+    
+    const UpdateMap &updateMap;
+    const ShapeHistory &shapeHistory;
+  };
   
 class Base
 {
@@ -97,13 +119,14 @@ public:
   ftr::State getState() const {return state;}
   void setColor(const osg::Vec4 &);
   osg::Vec4& getColor(){return color;}
-  virtual void updateModel(const UpdateMap&) = 0;
+  virtual void updateModel(const UpdatePayload&) = 0;
   virtual void updateVisual(); //called after update.
   virtual Type getType() const = 0;
   virtual const std::string& getTypeString() const = 0;
   virtual const QIcon& getIcon() const = 0;
   virtual Descriptor getDescriptor() const = 0;
   virtual void applyColor(); //!< called by set color.
+  virtual void fillInHistory(ShapeHistory &);
   virtual QTextStream& getInfo(QTextStream &) const;
   QTextStream&  getShapeInfo(QTextStream &, const boost::uuids::uuid&) const;
   boost::uuids::uuid getId() const {return id;}

@@ -173,15 +173,15 @@ void Blend::addVariableBlend(const VariableBlend &variableBlendIn)
  * Combining a variable and a constant into the same feature is triggering an occt exception. v7.1.
  */
 
-void Blend::updateModel(const UpdateMap& mapIn)
+void Blend::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
   try
   {
-    if (mapIn.count(InputTypes::target) != 1)
+    if (payloadIn.updateMap.count(InputTypes::target) != 1)
       throw std::runtime_error("no parent for blend");
     
-    const SeerShape &targetSeerShape = mapIn.equal_range(InputTypes::target).first->second->getSeerShape();
+    const SeerShape &targetSeerShape = payloadIn.updateMap.equal_range(InputTypes::target).first->second->getSeerShape();
     
     BRepFilletAPI_MakeFillet blendMaker(targetSeerShape.getRootOCCTShape());
     for (const auto &simpleBlend : simpleBlends)
@@ -293,20 +293,19 @@ void Blend::generatedMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const SeerSha
     std::map<uuid, uuid>::iterator mapItFace;
     bool dummy;
     std::tie(mapItFace, dummy) = shapeMap.insert(std::make_pair(cId, gu::createRandomId()));
-    if (!seerShape->hasEvolveRecordIn(mapItFace->first))
-      seerShape->insertEvolve(mapItFace->first, mapItFace->second);
-    seerShape->updateShapeIdRecord(blendFace, mapItFace->second); //have the id for the face, update the result map.
+    seerShape->updateShapeIdRecord(blendFace, mapItFace->second);
+    if (dummy) //insertion took place.
+      seerShape->insertEvolve(gu::createNilId(), mapItFace->second);
     
     //now look for outerwire for newly generated face.
     //we use the generated face id to map to outer wire.
     std::map<uuid, uuid>::iterator mapItWire;
     std::tie(mapItWire, dummy) = shapeMap.insert(std::make_pair(mapItFace->second, gu::createRandomId()));
-    if (!seerShape->hasEvolveRecordIn(mapItWire->first))
-      seerShape->insertEvolve(mapItWire->first, mapItWire->second);
-    
     //now get the wire and update the result to id.
     const TopoDS_Shape &blendFaceWire = BRepTools::OuterWire(TopoDS::Face(blendFace));
     seerShape->updateShapeIdRecord(blendFaceWire, mapItWire->second);
+    if (dummy) //insertion took place.
+      seerShape->insertEvolve(gu::createNilId(), mapItWire->second);
   }
 }
 

@@ -44,7 +44,7 @@ namespace ftr
     double getWidth() const {return width;}
     double getHeight() const {return height;}
     void getParameters (double &lengthOut, double &widthOut, double &heightOut) const;
-    virtual void updateModel(const UpdateMap&) override;
+    virtual void updateModel(const UpdatePayload&) override;
     virtual Type getType() const override {return Type::Oblong;}
     virtual const std::string& getTypeString() const override {return toString(Type::Oblong);}
     virtual const QIcon& getIcon() const override {return icon;}

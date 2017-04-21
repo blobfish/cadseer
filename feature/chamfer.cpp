@@ -121,15 +121,15 @@ void Chamfer::addSymChamfer(const SymChamfer &chamferIn)
   overlaySwitch->addChild(symChamfers.back().label.get());
 }
 
-void Chamfer::updateModel(const UpdateMap &mapIn)
+void Chamfer::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
   try
   {
-    if (mapIn.count(InputTypes::target) != 1)
+    if (payloadIn.updateMap.count(InputTypes::target) != 1)
       throw std::runtime_error("no parent for chamfer");
     
-    const SeerShape &targetSeerShape = mapIn.equal_range(InputTypes::target).first->second->getSeerShape();
+    const SeerShape &targetSeerShape = payloadIn.updateMap.equal_range(InputTypes::target).first->second->getSeerShape();
     
     BRepFilletAPI_MakeChamfer chamferMaker(targetSeerShape.getRootOCCTShape());
     for (const auto &chamfer : symChamfers)
@@ -214,20 +214,19 @@ void Chamfer::generatedMatch(BRepFilletAPI_MakeChamfer &chamferMakerIn, const Se
     std::map<uuid, uuid>::iterator mapItFace;
     bool dummy;
     std::tie(mapItFace, dummy) = shapeMap.insert(std::make_pair(cId, gu::createRandomId()));
-    if (!seerShape->hasEvolveRecordIn(mapItFace->first))
-      seerShape->insertEvolve(mapItFace->first, mapItFace->second);
     seerShape->updateShapeIdRecord(chamferFace, mapItFace->second);
+    if (dummy) //insertion took place.
+      seerShape->insertEvolve(gu::createNilId(), mapItFace->second);
     
     //now look for outerwire for newly generated face.
     //we use the generated face id to map to outer wire.
     std::map<uuid, uuid>::iterator mapItWire;
     std::tie(mapItWire, dummy) = shapeMap.insert(std::make_pair(mapItFace->second, gu::createRandomId()));
-    if (!seerShape->hasEvolveRecordIn(mapItWire->first))
-      seerShape->insertEvolve(mapItWire->first, mapItWire->second);
-    
     //now get the wire and update the result to id.
     const TopoDS_Shape &chamferedFaceWire = BRepTools::OuterWire(TopoDS::Face(chamferFace));
     seerShape->updateShapeIdRecord(chamferedFaceWire, mapItWire->second);
+    if (dummy) //insertion took place.
+      seerShape->insertEvolve(gu::createNilId(), mapItWire->second);
   }
 }
 

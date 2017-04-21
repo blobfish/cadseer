@@ -43,6 +43,7 @@
 #include <feature/base.h>
 #include <feature/seershape.h>
 #include <feature/inert.h>
+#include <feature/shapehistory.h>
 #include <expressions/manager.h>
 #include <expressions/formulalink.h>
 #include <expressions/stringtranslator.h> //for serialize.
@@ -60,17 +61,14 @@ using namespace prj;
 using namespace prg;
 using boost::uuids::uuid;
 
-Project::Project()
+Project::Project() :
+gitManager(new GitManager()),
+expressionManager(new expr::Manager()),
+shapeHistory(new ftr::ShapeHistory()),
+observer(new msg::Observer())
 {
-  observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
   observer->name = "prj::Project";
   setupDispatcher();
-  
-  std::unique_ptr<GitManager> tempManager(new GitManager());
-  gitManager = std::move(tempManager);
-  
-  std::unique_ptr<expr::Manager> tempEManager(new expr::Manager());
-  expressionManager = std::move(tempEManager);
 }
 
 Project::~Project()
@@ -111,18 +109,24 @@ void Project::updateModel()
   //so we block.
   auto block = observer->createBlocker();
   
+  shapeHistory->clear(); //reset history structure.
+  
   //loop through and update each feature.
   for (auto it = sorted.rbegin(); it != sorted.rend(); ++it)
   {
     Vertex currentVertex = *it;
+    ftr::Base *cFeature = projectGraph[currentVertex].feature.get();
     if
     (
-      (projectGraph[currentVertex].feature->isModelClean()) ||
-      (projectGraph[currentVertex].feature->isInactive())
+      (cFeature->isModelClean()) ||
+      (cFeature->isInactive())
     )
+    {
+      cFeature->fillInHistory(*shapeHistory);
       continue;
+    }
     
-    ftr::UpdateMap updateMap;
+    ftr::UpdatePayload::UpdateMap updateMap;
     InEdgeIterator inEdgeIt, inEdgeItDone;
     boost::tie(inEdgeIt, inEdgeItDone) = boost::in_edges(currentVertex, projectGraph);
     for(;inEdgeIt != inEdgeItDone; ++inEdgeIt)
@@ -130,14 +134,18 @@ void Project::updateModel()
       Vertex source = boost::source(*inEdgeIt, projectGraph);
       updateMap.insert(std::make_pair(projectGraph[*inEdgeIt].inputType, projectGraph[source].feature.get()));
     }
-    projectGraph[currentVertex].feature->updateModel(updateMap);
-    projectGraph[currentVertex].feature->serialWrite(QDir(QString::fromStdString(saveDirectory)));
+    ftr::UpdatePayload payload(updateMap, *shapeHistory);
+    cFeature->updateModel(payload);
+    cFeature->serialWrite(QDir(QString::fromStdString(saveDirectory)));
+    cFeature->fillInHistory(*shapeHistory);
   }
   
   serialWrite();
   gitManager->update();
   
   updateLeafStatus();
+  
+//   shapeHistory->writeGraphViz("/home/tanderson/.CadSeer/ShapeHistory.dot");
   
   observer->out(msg::Message(msg::Response | msg::Post | msg::UpdateModel));
 }
@@ -1017,204 +1025,18 @@ void Project::open()
   isLoading = false;
 }
 
-/* id of selected items is always the 'out' id of the evolution record. this affects
- * the processing of the first graph vertex. When tracking down we don't want to process
- * this vertex but when tracking up we do want to process the first graph vertex
- */
-template < typename VertexT>
-class ShapeTrackVisitorUp : public boost::default_dfs_visitor
+void Project::shapeTrackUp(const uuid& shapeId) const
 {
-  public:
-    ShapeTrackVisitorUp(VertexT &startVertexIn, const boost::uuids::uuid &shapeId,
-                        std::stack<std::vector<boost::uuids::uuid> >&idsStackIn, std::ostringstream &streamIn) :
-      startVertex(startVertexIn), idsStack(idsStackIn), stream(streamIn)
-    {
-      std::vector<boost::uuids::uuid> temp;
-      temp.push_back(shapeId);
-      idsStack.push(temp);
-    }
-  
-    template <typename GraphT >
-    void discover_vertex(VertexT vertexIn, const GraphT & graph) const
-    {
-      stream
-        << "feature: " << std::setw(15) << std::left << graph[vertexIn].feature->getName().toStdString()
-        << "    feature id: " << gu::idToString(graph[vertexIn].feature->getId()) << std::endl;
-      if (!graph[vertexIn].feature->hasSeerShape())
-      {
-        stream << " BREAK: no seer shape" << std::endl;
-        std::vector<boost::uuids::uuid> junkIds;
-        idsStack.push(junkIds);
-        return;
-      }
-      const ftr::SeerShape &shape = graph[vertexIn].feature->getSeerShape();
-      std::vector<boost::uuids::uuid> freshIds;
-      const std::vector<boost::uuids::uuid> &currentIds = idsStack.top();
-      for (const auto &currentId : currentIds)
-      {
-        stream << "    shape id out: " << gu::idToString(currentId);
-        if (!shape.hasEvolveRecordOut(currentId))
-        {
-            stream << "    BREAK: no evolve record out" << std::endl;
-            continue;
-        }
-        stream <<  "    ids in: ";
-        auto ids = shape.devolve(currentId);
-        for (const auto &id : ids)
-        {
-            stream << gu::idToString(id) << " ";
-            freshIds.push_back(id);
-        }
-        stream << std::endl;
-      }
-      idsStack.push(freshIds);
-    }
-    
-    template <typename GraphT >
-    void finish_vertex(VertexT, const GraphT &) const
-    {
-      idsStack.pop();
-    }
-    
-  private:
-    
-    VertexT &startVertex;
-    std::stack<std::vector<boost::uuids::uuid> >&idsStack;
-    std::ostringstream &stream;
-};
-
-template < typename VertexT>
-class ShapeTrackVisitorDown : public boost::default_dfs_visitor
-{
-  public:
-    ShapeTrackVisitorDown(VertexT &startVertexIn, const boost::uuids::uuid &shapeId,
-                          std::stack<std::vector<boost::uuids::uuid> >&idsStackIn, std::ostringstream &streamIn) :
-      startVertex(startVertexIn), idsStack(idsStackIn), stream(streamIn)
-    {
-      std::vector<boost::uuids::uuid> temp;
-      temp.push_back(shapeId);
-      idsStack.push(temp);
-    }
-  
-    template <typename GraphT >
-    void discover_vertex(VertexT vertexIn, const GraphT & graph) const
-    {
-      stream
-        << "feature: " << std::setw(15) << std::left << graph[vertexIn].feature->getName().toStdString()
-        << "    feature id: " << gu::idToString(graph[vertexIn].feature->getId()) << std::endl;
-      if (vertexIn == startVertex) //note constructor pushes to idstack so we are in sync with finish vertex.
-        return;
-
-      if (!graph[vertexIn].feature->hasSeerShape())
-      {
-        stream << " BREAK: no seer shape" << std::endl;
-        std::vector<boost::uuids::uuid> junkIds;
-        idsStack.push(junkIds);
-        return;
-      }
-      const ftr::SeerShape &shape = graph[vertexIn].feature->getSeerShape();
-      std::vector<boost::uuids::uuid> freshIds;
-      const std::vector<boost::uuids::uuid> &currentIds = idsStack.top();
-      for (const auto &currentId : currentIds)
-      {
-        stream << "    shape id in: " << gu::idToString(currentId);
-        if (!shape.hasEvolveRecordIn(currentId))
-        {
-            stream << "    BREAK: no evolve record in" << std::endl;
-            continue;
-        }
-        stream <<  "    ids out: ";
-        auto ids = shape.evolve(currentId);
-        for (const auto &id : ids)
-        {
-            stream << gu::idToString(id) << " ";
-            freshIds.push_back(id);
-        }
-        stream << std::endl;
-      }
-      idsStack.push(freshIds);
-    }
-    
-    template <typename GraphT >
-    void finish_vertex(VertexT, const GraphT &) const
-    {
-      idsStack.pop();
-    }
-    
-  private:
-    
-    VertexT &startVertex;
-    std::stack<std::vector<boost::uuids::uuid> >&idsStack;
-    std::ostringstream &stream;
-};
-
-void Project::shapeTrackUp(const uuid& featureIdIn, const uuid& shapeId)
-{
-  IdVertexMap::const_iterator it = map.find(featureIdIn);
-  assert(it != map.end());
-  prg::Vertex startVertex = it->second;
-  
-  if (!projectGraph[startVertex].feature->hasSeerShape())
-    return;
-  
-  assert(projectGraph[startVertex].feature->getSeerShape().hasShapeIdRecord(shapeId));
-  assert(projectGraph[startVertex].feature->getSeerShape().hasEvolveRecordOut(shapeId));
-  
-  GraphReversed rGraph = boost::make_reverse_graph(projectGraph);
-  
-  std::vector<VertexReversed> limitVertices;
-  gu::BFSLimitVisitor<VertexReversed>limitVisitor(limitVertices);
-  boost::breadth_first_search(rGraph, startVertex, visitor(limitVisitor));
-  
-  gu::SubsetFilter<GraphReversed> filter(rGraph, limitVertices);
-  typedef boost::filtered_graph<GraphReversed, boost::keep_all, gu::SubsetFilter<GraphReversed> > FilteredGraph;
-  typedef boost::graph_traits<FilteredGraph>::vertex_descriptor FilteredVertex;
-  FilteredGraph filteredGraph(rGraph, boost::keep_all(), filter);
-  
-  std::ostringstream stream;
-  stream << "Track shape up:" << std::endl;
-  std::stack<std::vector<boost::uuids::uuid> >idsStack;
-  ShapeTrackVisitorUp<FilteredVertex> shapeVisitor(startVertex, shapeId, idsStack, stream);
-  boost::depth_first_search(filteredGraph, visitor(shapeVisitor).root_vertex(startVertex));
-  
-  msg::Message viewInfoMessage(msg::Request | msg::Info | msg::Text);
-  app::Message appMessage;
-  appMessage.infoMessage = QString::fromStdString(stream.str());
-  viewInfoMessage.payload = appMessage;
-  observer->out(viewInfoMessage);
+  //testing shape history.
+  ftr::ShapeHistory devolve = shapeHistory->createDevolveHistory(shapeId);
+  devolve.writeGraphViz("/home/tanderson/.CadSeer/devolveHistory.dot");
 }
 
-void Project::shapeTrackDown(const uuid& featureIdIn, const uuid& shapeId)
+void Project::shapeTrackDown(const uuid& shapeId) const
 {
-  IdVertexMap::const_iterator it = map.find(featureIdIn);
-  assert(it != map.end());
-  prg::Vertex startVertex = it->second;
-  
-  if (!projectGraph[startVertex].feature->hasSeerShape())
-    return;
-  
-  assert(projectGraph[startVertex].feature->getSeerShape().hasShapeIdRecord(shapeId));
-  
-  std::vector<Vertex> limitVertices;
-  gu::BFSLimitVisitor<Vertex>limitVisitor(limitVertices);
-  boost::breadth_first_search(projectGraph, startVertex, visitor(limitVisitor));
-  
-  gu::SubsetFilter<Graph> filter(projectGraph, limitVertices);
-  typedef boost::filtered_graph<Graph, boost::keep_all, gu::SubsetFilter<Graph> > FilteredGraph;
-  typedef boost::graph_traits<FilteredGraph>::vertex_descriptor FilteredVertex;
-  FilteredGraph filteredGraph(projectGraph, boost::keep_all(), filter);
-  
-  std::ostringstream stream;
-  stream << "Track shape down:" << std::endl;
-  std::stack<std::vector<boost::uuids::uuid> >idsStack;
-  ShapeTrackVisitorDown<FilteredVertex> shapeVisitor(startVertex, shapeId, idsStack, stream);
-  boost::depth_first_search(filteredGraph, visitor(shapeVisitor).root_vertex(startVertex));
-  
-  msg::Message viewInfoMessage(msg::Request | msg::Info | msg::Text);
-  app::Message appMessage;
-  appMessage.infoMessage = QString::fromStdString(stream.str());
-  viewInfoMessage.payload = appMessage;
-  observer->out(viewInfoMessage);
+  //testing shape history.
+  ftr::ShapeHistory evolve = shapeHistory->createEvolveHistory(shapeId);
+  evolve.writeGraphViz("/home/tanderson/.CadSeer/evolveHistory.dot");
 }
 
 ftr::EditMap Project::getParentMap(const boost::uuids::uuid &idIn) const

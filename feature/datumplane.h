@@ -72,7 +72,7 @@ namespace ftr
     DatumPlaneGenre(){};
     virtual ~DatumPlaneGenre(){};
     virtual DatumPlaneType getType() = 0;
-    virtual osg::Matrixd solve(const UpdateMap&) = 0; //throw std::runtime;
+    virtual osg::Matrixd solve(const UpdatePayload::UpdateMap&) = 0; //throw std::runtime;
     virtual lbr::IPGroup* getIPGroup(){return nullptr;}
     virtual void connect(Base *){}
     virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &) = 0;
@@ -86,7 +86,7 @@ namespace ftr
     DatumPlanePlanarOffset();
     virtual ~DatumPlanePlanarOffset() override;
     virtual DatumPlaneType getType() override {return DatumPlaneType::PlanarOffset;}
-    virtual osg::Matrixd solve(const UpdateMap&) override;
+    virtual osg::Matrixd solve(const UpdatePayload::UpdateMap&) override;
     virtual lbr::IPGroup* getIPGroup() override;
     virtual void connect(Base *) override;
     virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &) override;
@@ -105,7 +105,7 @@ namespace ftr
     DatumPlanePlanarCenter();
     virtual ~DatumPlanePlanarCenter() override;
     virtual DatumPlaneType getType() override {return DatumPlaneType::PlanarCenter;}
-    virtual osg::Matrixd solve(const UpdateMap&) override;
+    virtual osg::Matrixd solve(const UpdatePayload::UpdateMap&) override;
     virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &) override;
     virtual void serialOut(prj::srl::SolverChoice &solverChoice) override;
     
@@ -121,7 +121,7 @@ namespace ftr
     DatumPlanePlanarParallelThroughEdge();
     virtual ~DatumPlanePlanarParallelThroughEdge() override;
     virtual DatumPlaneType getType() override {return DatumPlaneType::PlanarParallelThroughEdge;}
-    virtual osg::Matrixd solve(const UpdateMap&) override;
+    virtual osg::Matrixd solve(const UpdatePayload::UpdateMap&) override;
     virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &) override;
     virtual void serialOut(prj::srl::SolverChoice &solverChoice) override;
     
@@ -137,7 +137,7 @@ namespace ftr
     DatumPlane();
     ~DatumPlane();
     
-    virtual void updateModel(const UpdateMap&) override;
+    virtual void updateModel(const UpdatePayload&) override;
     virtual void updateVisual() override;
     virtual Type getType() const override {return Type::DatumPlane;}
     virtual const std::string& getTypeString() const override {return toString(Type::DatumPlane);}

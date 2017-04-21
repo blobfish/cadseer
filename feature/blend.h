@@ -77,7 +77,7 @@ class Blend : public Base
     std::vector<SimpleBlend>& getSimpleBlends(){return simpleBlends;}
     std::vector<VariableBlend>& getVariableBlends(){return variableBlends;}
     
-    virtual void updateModel(const UpdateMap&) override;
+    virtual void updateModel(const UpdatePayload&) override;
     virtual Type getType() const override {return Type::Blend;}
     virtual const std::string& getTypeString() const override {return toString(Type::Blend);}
     virtual const QIcon& getIcon() const override {return icon;}

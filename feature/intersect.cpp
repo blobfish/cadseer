@@ -41,31 +41,31 @@ Intersect::Intersect() : BooleanBase()
   mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
 }
 
-void Intersect::updateModel(const UpdateMap &mapIn)
+void Intersect::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure(); //assume failure until success.
   try
   {
     if
     (
-      mapIn.count(InputTypes::target) != 1 ||
-      mapIn.count(InputTypes::tool) < 1
+      payloadIn.updateMap.count(InputTypes::target) != 1 ||
+      payloadIn.updateMap.count(InputTypes::tool) < 1
     )
     {
       //we should have a status message in the base class.
       std::ostringstream stream;
       stream << "wrong number of arguments.   " <<
-        "target count is: " << mapIn.count(InputTypes::target) << "   " <<
-        "tool count is: " << mapIn.count(InputTypes::tool);
+      "target count is: " << payloadIn.updateMap.count(InputTypes::target) << "   " <<
+      "tool count is: " << payloadIn.updateMap.count(InputTypes::tool);
       throw std::runtime_error(stream.str());
     }
     
     //target
-    const SeerShape &targetSeerShape = mapIn.equal_range(InputTypes::target).first->second->getSeerShape();
+    const SeerShape &targetSeerShape = payloadIn.updateMap.equal_range(InputTypes::target).first->second->getSeerShape();
     assert(!targetSeerShape.isNull());
     //tools
     gu::ShapeVector toolOCCTShapes;
-    for (auto pairIt = mapIn.equal_range(InputTypes::tool); pairIt.first != pairIt.second; ++pairIt.first)
+    for (auto pairIt = payloadIn.updateMap.equal_range(InputTypes::tool); pairIt.first != pairIt.second; ++pairIt.first)
     {
       const SeerShape &toolSeerShape = pairIt.first->second->getSeerShape();
       assert(!toolSeerShape.isNull());
@@ -82,13 +82,13 @@ void Intersect::updateModel(const UpdateMap &mapIn)
     
     seerShape->setOCCTShape(intersector.Shape());
     seerShape->shapeMatch(targetSeerShape);
-    for (auto pairIt = mapIn.equal_range(InputTypes::tool); pairIt.first != pairIt.second; ++pairIt.first)
+    for (auto pairIt = payloadIn.updateMap.equal_range(InputTypes::tool); pairIt.first != pairIt.second; ++pairIt.first)
       seerShape->shapeMatch(pairIt.first->second->getSeerShape());
     seerShape->uniqueTypeMatch(targetSeerShape);
-    BooleanIdMapper idMapper(mapIn, intersector.getBuilder(), iMapWrapper, seerShape.get());
+    BooleanIdMapper idMapper(payloadIn.updateMap, intersector.getBuilder(), iMapWrapper, seerShape.get());
     idMapper.go();
     seerShape->outerWireMatch(targetSeerShape);
-    for (auto pairIt = mapIn.equal_range(InputTypes::tool); pairIt.first != pairIt.second; ++pairIt.first)
+    for (auto pairIt = payloadIn.updateMap.equal_range(InputTypes::tool); pairIt.first != pairIt.second; ++pairIt.first)
       seerShape->outerWireMatch(pairIt.first->second->getSeerShape());
     seerShape->derivedMatch();
     seerShape->dumpNils("intersect feature"); //only if there are shapes with nil ids.

@@ -197,11 +197,11 @@ void Cone::getParameters(double& radius1Out, double& radius2Out, double& heightO
   heightOut = height;
 }
 
-void Cone::updateModel(const UpdateMap& mapIn)
+void Cone::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
   
-  CSysBase::updateModel(mapIn);
+  CSysBase::updateModel(payloadIn);
   
   try
   {

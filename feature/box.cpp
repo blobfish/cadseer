@@ -249,11 +249,11 @@ void Box::getParameters(double &lengthOut, double &widthOut, double &heightOut) 
   heightOut = height;
 }
 
-void Box::updateModel(const UpdateMap& mapIn)
+void Box::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
   
-  CSysBase::updateModel(mapIn);
+  CSysBase::updateModel(payloadIn);
   
   try
   {

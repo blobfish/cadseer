@@ -72,15 +72,15 @@ Hollow::Hollow() : Base(), offset(ParameterNames::Offset, prf::manager().rootPtr
  * and check these results again before trying to get a bug report.
  */
 
-void Hollow::updateModel(const UpdateMap &mapIn)
+void Hollow::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
   try
   {
-    if (mapIn.count(InputTypes::target) != 1)
+    if (payloadIn.updateMap.count(InputTypes::target) != 1)
       throw std::runtime_error("no parent for hollow");
     
-    const SeerShape &targetSeerShape = mapIn.equal_range(InputTypes::target).first->second->getSeerShape();
+    const SeerShape &targetSeerShape = payloadIn.updateMap.equal_range(InputTypes::target).first->second->getSeerShape();
     
     TopTools_ListOfShape closingFaceShapes = resolveClosingFaces(targetSeerShape);
     

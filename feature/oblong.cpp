@@ -239,11 +239,11 @@ void Oblong::setParameters(const double &lengthIn, const double &widthIn, const 
   setHeight(heightIn);
 }
 
-void Oblong::updateModel(const UpdateMap& mapIn)
+void Oblong::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
   
-  CSysBase::updateModel(mapIn);
+  CSysBase::updateModel(payloadIn);
   
   try
   {

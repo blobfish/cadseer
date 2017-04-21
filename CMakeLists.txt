@@ -134,6 +134,7 @@ SET(FEATURE_SOURCES
     feature/pick.cpp
     feature/oblong
     feature/oblongbuilder.cpp
+    feature/shapehistory.cpp
     )
     
 SET(EXPRESSION_SOURCES

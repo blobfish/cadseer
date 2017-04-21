@@ -525,6 +525,7 @@ ftr::Pick Blend::convert(const BlendEntry &entryIn)
   
   ftr::Pick fPick;
   fPick.id = entryIn.pickId;
+  fPick.shapeHistory = static_cast<app::Application*>(qApp)->getProject()->getShapeHistory().createDevolveHistory(fPick.id);
   const ftr::SeerShape &sShape = blendParent->getSeerShape();
   assert(sShape.hasShapeIdRecord(entryIn.pickId));
   const TopoDS_Shape &shape = sShape.getOCCTShape(entryIn.pickId);

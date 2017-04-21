@@ -556,6 +556,7 @@ void Factory::newDraftDispatched(const msg::Message&)
     ftr::Pick pick;
     pick.id = currentSelection.shapeId;
     pick.setParameter(face, currentSelection.pointLocation);
+    pick.shapeHistory = project->getShapeHistory().createDevolveHistory(pick.id);
     convey.targets.push_back(pick);
   }
   if (convey.targets.empty())
@@ -637,6 +638,7 @@ void Factory::newHollowDispatched(const msg::Message&)
       
     ftr::Pick hPick;
     hPick.id = currentSelection.shapeId;
+    hPick.shapeHistory = project->getShapeHistory().createDevolveHistory(hPick.id);
     TopoDS_Face face = TopoDS::Face(targetSeerShape.findShapeIdRecord(currentSelection.shapeId).shape);
     hPick.setParameter(face, currentSelection.pointLocation);
     hollowPicks.push_back(hPick);
@@ -875,9 +877,9 @@ void Factory::debugShapeTrackUpDispatched(const msg::Message&)
   
   for (const auto &container : containers)
   {
-    if (container.featureId.is_nil() || container.shapeId.is_nil())
+    if (container.shapeId.is_nil())
       continue;
-    project->shapeTrackUp(container.featureId, container.shapeId);
+    project->shapeTrackUp(container.shapeId);
   }
   
   observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
@@ -895,9 +897,9 @@ void Factory::debugShapeTrackDownDispatched(const msg::Message&)
   
   for (const auto &container : containers)
   {
-    if (container.featureId.is_nil() || container.shapeId.is_nil())
+    if (container.shapeId.is_nil())
       continue;
-    project->shapeTrackDown(container.featureId, container.shapeId);
+    project->shapeTrackDown(container.shapeId);
   }
   
   observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));

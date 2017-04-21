@@ -42,6 +42,7 @@
 
 #include <tools/idtools.h>
 #include <project/serial/xsdcxxoutput/featurebase.h>
+#include <feature/shapehistory.h>
 #include <feature/seershape.h>
 
 using namespace ftr;
@@ -388,6 +389,28 @@ void SeerShape::insertEvolve(const uuid& idIn, const uuid& idOut)
 void SeerShape::insertEvolve(const EvolveRecord &recordIn)
 {
   evolveContainer.insert(recordIn);
+}
+
+void SeerShape::fillInHistory(ShapeHistory &historyIn, const BID::uuid &featureId) const
+{
+  typedef EvolveContainer::index<EvolveRecord::ByInId>::type List;
+  const List &list = evolveContainer.get<EvolveRecord::ByInId>();
+  for (List::const_iterator it = list.begin(); it != list.end(); ++it)
+  {
+    if (!it->inId.is_nil())
+    {
+//       assert(historyIn.hasShape(it->inId)); //shape should have already been added.
+      if(!historyIn.hasShape(it->inId))
+        std::cout << "warning: shape id: " << gu::idToString(it->inId) << " should be in shape history in: " << __PRETTY_FUNCTION__ << std::endl;
+    }
+    if (!it->outId.is_nil())
+    {
+      assert(!historyIn.hasShape(it->outId)); //shape shouldn't be there.
+      historyIn.addShape(featureId, it->outId);
+    }
+    if (historyIn.hasShape(it->inId) && historyIn.hasShape(it->outId))
+      historyIn.addConnection(it->outId, it->inId); //child points to parent.
+  }
 }
 
 uuid SeerShape::featureTagId(const std::string& tagIn)

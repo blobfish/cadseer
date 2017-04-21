@@ -30,7 +30,7 @@ namespace ftr
   {
   public:
     Subtract();
-    virtual void updateModel(const UpdateMap&) override;
+    virtual void updateModel(const UpdatePayload&) override;
     virtual Type getType() const override {return Type::Subtract;}
     virtual const std::string& getTypeString() const override {return toString(Type::Subtract);}
     virtual const QIcon& getIcon() const override {return icon;}

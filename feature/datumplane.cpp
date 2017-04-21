@@ -104,12 +104,12 @@ DatumPlanePlanarOffset::DatumPlanePlanarOffset():
 DatumPlanePlanarOffset::~DatumPlanePlanarOffset()
 {}
 
-osg::Matrixd DatumPlanePlanarOffset::solve(const UpdateMap &mapIn)
+osg::Matrixd DatumPlanePlanarOffset::solve(const UpdatePayload::UpdateMap &mapIn)
 {
   if (mapIn.size() != 1)
     throw std::runtime_error("DatumPlanePlanarOffset: wrong number of inputs");
   
-  UpdateMap::const_iterator it = mapIn.find(InputTypes::create);
+  UpdatePayload::UpdateMap::const_iterator it = mapIn.find(InputTypes::create);
   if (it == mapIn.end())
     throw std::runtime_error("DatumPlanePlanarOffset: no input feature");
   
@@ -229,7 +229,7 @@ DatumPlanePlanarCenter::DatumPlanePlanarCenter()
 DatumPlanePlanarCenter::~DatumPlanePlanarCenter()
   {}
 
-osg::Matrixd DatumPlanePlanarCenter::solve(const UpdateMap &mapIn)
+osg::Matrixd DatumPlanePlanarCenter::solve(const UpdatePayload::UpdateMap &mapIn)
 {
   osg::Matrixd face1System, face2System;
   face1System = face2System = osg::Matrixd::identity();
@@ -238,7 +238,7 @@ osg::Matrixd DatumPlanePlanarCenter::solve(const UpdateMap &mapIn)
   if (mapIn.size() == 1)
   {
     //note: can't do a center with only 1 datum plane. so we know this condition must be a shape.
-    UpdateMap::const_iterator it = mapIn.find(InputTypes::create);
+    UpdatePayload::UpdateMap::const_iterator it = mapIn.find(InputTypes::create);
     if (it == mapIn.end())
       throw std::runtime_error("DatumPlanePlanarCenter: Conflict between map size and count");
     if (!it->second->hasSeerShape())
@@ -414,7 +414,7 @@ DatumPlanePlanarParallelThroughEdge::DatumPlanePlanarParallelThroughEdge(){}
 
 DatumPlanePlanarParallelThroughEdge::~DatumPlanePlanarParallelThroughEdge(){}
 
-osg::Matrixd DatumPlanePlanarParallelThroughEdge::solve(const UpdateMap &mapIn)
+osg::Matrixd DatumPlanePlanarParallelThroughEdge::solve(const UpdatePayload::UpdateMap &mapIn)
 {
   auto getEdgeVector = [](const TopoDS_Shape &edgeShapeIn)
   {
@@ -451,7 +451,7 @@ osg::Matrixd DatumPlanePlanarParallelThroughEdge::solve(const UpdateMap &mapIn)
   {
     //if only one 'in' connection that means we have a face and an edge belonging to
     //the same object.
-    UpdateMap::const_iterator it = mapIn.find(InputTypes::create);
+    UpdatePayload::UpdateMap::const_iterator it = mapIn.find(InputTypes::create);
     if (it == mapIn.end())
       throw std::runtime_error("DatumPlanarParallelThroughEdge: Conflict between map size and count");
     if (faceId.is_nil() || edgeId.is_nil())
@@ -700,7 +700,7 @@ void DatumPlane::setSolver(std::shared_ptr<DatumPlaneGenre> solverIn)
   solver->connect(this);
 }
 
-void DatumPlane::updateModel(const UpdateMap &mapIn)
+void DatumPlane::updateModel(const UpdatePayload &payloadIn)
 {
   osg::Matrixd matrix(osg::Matrixd::identity());
   osg::Vec3d oldXAxis(1.0, 0.0, 0.0);
@@ -715,7 +715,7 @@ void DatumPlane::updateModel(const UpdateMap &mapIn)
     if (!solver)
       throw std::runtime_error("no solver");
     
-    transform->setMatrix(solver->solve(mapIn));
+    transform->setMatrix(solver->solve(payloadIn.updateMap));
     radius = solver->radius;
     
     setSuccess();

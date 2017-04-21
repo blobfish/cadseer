@@ -47,7 +47,7 @@ namespace ftr
     virtual const std::string& getTypeString() const override {return toString(Type::CSys);}
     virtual const QIcon& getIcon() const override {static QIcon junk; return junk;}
     virtual Descriptor getDescriptor() const override {return Descriptor::None;}
-    virtual void updateModel(const UpdateMap&) override;
+    virtual void updateModel(const UpdatePayload&) override;
     virtual QTextStream& getInfo(QTextStream &) const override;
     void setSystem(const gp_Ax2 &systemIn);
     void setSystem(const osg::Matrixd &systemIn);

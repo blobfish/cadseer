@@ -32,7 +32,7 @@ namespace ftr
   {
   public:
     Union();
-    virtual void updateModel(const UpdateMap&) override;
+    virtual void updateModel(const UpdatePayload&) override;
     virtual Type getType() const override {return Type::Union;}
     virtual const std::string& getTypeString() const override {return toString(Type::Union);}
     virtual const QIcon& getIcon() const override {return icon;}

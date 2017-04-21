@@ -169,11 +169,11 @@ void Cylinder::getParameters(double& radiusOut, double& heightOut) const
   heightOut = height;
 }
 
-void Cylinder::updateModel(const UpdateMap& mapIn)
+void Cylinder::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
   
-  CSysBase::updateModel(mapIn);
+  CSysBase::updateModel(payloadIn);
   
   try
   {

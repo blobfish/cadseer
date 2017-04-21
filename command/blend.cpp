@@ -102,6 +102,7 @@ void Blend::go()
       ftr::Pick pick;
       pick.id = currentSelection.shapeId;
       pick.setParameter(edge, currentSelection.pointLocation);
+      pick.shapeHistory = project->getShapeHistory().createDevolveHistory(pick.id);
       
       //simple radius test  
       simpleBlend.picks.push_back(pick);
@@ -127,7 +128,7 @@ void Blend::go()
       blend->setColor(targetFeature->getColor());
       
       observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
-      observer->out(msg::Mask(msg::Request | msg::Update));
+//       observer->out(msg::Mask(msg::Request | msg::Update)); //finishing the command should update.
       return; 
     }
   }

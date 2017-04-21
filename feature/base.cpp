@@ -37,6 +37,7 @@
 #include <message/message.h>
 #include <message/observer.h>
 #include <feature/seershape.h>
+#include <feature/shapehistory.h>
 #include <feature/seershapeinfo.h>
 #include <project/serial/xsdcxxoutput/featurebase.h>
 #include <feature/base.h>
@@ -212,6 +213,12 @@ void Base::applyColor()
     (lod->getChild(0)->asSwitch()->getChild(0));
   if (shapeViz)
     shapeViz->setColor(color);
+}
+
+void Base::fillInHistory(ShapeHistory &historyIn)
+{
+  if (hasSeerShape())
+    getSeerShape().fillInHistory(historyIn, id);
 }
 
 void Base::show3D()

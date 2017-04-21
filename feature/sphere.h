@@ -37,7 +37,7 @@ namespace ftr
     ~Sphere();
     void setRadius(const double &radiusIn);
     double getRadius() const {return radius;}
-    virtual void updateModel(const UpdateMap&) override;
+    virtual void updateModel(const UpdatePayload&) override;
     virtual Type getType() const override {return Type::Sphere;}
     virtual const std::string& getTypeString() const override {return toString(Type::Sphere);}
     virtual const QIcon& getIcon() const override {return icon;}

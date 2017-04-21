@@ -32,6 +32,7 @@ class TopoDS_Shape;
 
 namespace msg{class Message; class Observer;}
 namespace expr{class Manager;}
+namespace ftr{class ShapeHistory;}
 
 typedef std::map<boost::uuids::uuid, prg::Vertex> IdVertexMap;
 
@@ -66,8 +67,9 @@ public:
     void open(); //!< call setSaveDirectory prior.
     void initializeNew(); //!< call setSaveDirectory prior.
     
-    void shapeTrackUp(const boost::uuids::uuid &featureIdIn, const boost::uuids::uuid &shapeId);
-    void shapeTrackDown(const boost::uuids::uuid &featureIdIn, const boost::uuids::uuid &shapeId);
+    const ftr::ShapeHistory& getShapeHistory(){return *shapeHistory;}
+    void shapeTrackUp(const boost::uuids::uuid &shapeId) const;
+    void shapeTrackDown(const boost::uuids::uuid &shapeId) const;
     ftr::EditMap getParentMap(const boost::uuids::uuid&) const;
     std::vector<boost::uuids::uuid> getLeafChildren(const boost::uuids::uuid&) const;
     
@@ -93,6 +95,7 @@ private:
     void serialWrite();
     std::unique_ptr<GitManager> gitManager;
     std::unique_ptr<expr::Manager> expressionManager;
+    std::unique_ptr<ftr::ShapeHistory> shapeHistory;
     bool isLoading = false;
     
     std::unique_ptr<msg::Observer> observer;

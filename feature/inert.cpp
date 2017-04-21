@@ -47,10 +47,10 @@ Inert::Inert(const TopoDS_Shape &shapeIn) : CSysBase()
   seerShape->ensureNoNils();
 }
 
-void Inert::updateModel(const UpdateMap &mapIn)
+void Inert::updateModel(const UpdatePayload &payloadIn)
 {
   
-  CSysBase::updateModel(mapIn);
+  CSysBase::updateModel(payloadIn);
   
   gp_Ax3 tempAx3(system);
   gp_Trsf tempTrsf; tempTrsf.SetTransformation(tempAx3); tempTrsf.Invert();

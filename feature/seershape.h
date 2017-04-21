@@ -55,7 +55,9 @@ static const std::vector<std::string> shapeStrings
 
 namespace ftr
 {
-  //maping a set of ids to one id. this is for deriving an id from multiple parent shapes.
+  class ShapeHistory;
+  
+  //mapping a set of ids to one id. this is for deriving an id from multiple parent shapes.
   typedef std::set<boost::uuids::uuid> IdSet;
   typedef std::map<IdSet, boost::uuids::uuid> DerivedContainer;
   
@@ -274,6 +276,7 @@ namespace ftr
     std::vector<BID::uuid> devolve(const BID::uuid&) const; //!< reverse evolution. out to in.
     void insertEvolve(const BID::uuid&, const BID::uuid&); //!< add entry into evolve container
     void insertEvolve(const EvolveRecord&); //!< add entry into evolve container
+    void fillInHistory(ShapeHistory &, const BID::uuid&) const;
     //@}
     
     //@{

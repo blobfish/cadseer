@@ -50,7 +50,7 @@ namespace ftr
       Draft();
       ~Draft();
       
-      virtual void updateModel(const UpdateMap&) override;
+      virtual void updateModel(const UpdatePayload&) override;
       virtual Type getType() const override {return Type::Draft;}
       virtual const std::string& getTypeString() const override {return toString(Type::Draft);}
       virtual const QIcon& getIcon() const override {return icon;}

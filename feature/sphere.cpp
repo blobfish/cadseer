@@ -106,11 +106,11 @@ void Sphere::updateIPGroup()
   radiusIP->setMatrix(gu::toOsg(system));
 }
 
-void Sphere::updateModel(const UpdateMap& mapIn)
+void Sphere::updateModel(const UpdatePayload& payloadIn)
 {
   setFailure();
   
-  CSysBase::updateModel(mapIn);
+  CSysBase::updateModel(payloadIn);
   
   try
   {

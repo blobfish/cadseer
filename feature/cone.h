@@ -44,7 +44,7 @@ namespace ftr
     double getRadius2() const {return radius2;}
     double getHeight() const {return height;}
     void getParameters (double &radius1Out, double &radius2Out, double &heightOut) const;
-    virtual void updateModel(const UpdateMap&) override;
+    virtual void updateModel(const UpdatePayload&) override;
     virtual Type getType() const override {return Type::Cone;}
     virtual const std::string& getTypeString() const override {return toString(Type::Cone);}
     virtual const QIcon& getIcon() const override {return icon;}
