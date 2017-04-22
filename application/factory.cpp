@@ -509,9 +509,10 @@ void Factory::newChamferDispatched(const msg::Message&)
       
     TopoDS_Edge edge = TopoDS::Edge(targetSeerShape.findShapeIdRecord(currentSelection.shapeId).shape);  
     ftr::ChamferPick pick;
-    pick.edgeId = currentSelection.shapeId;
-    pick.u = ftr::Chamfer::calculateUParameter(edge, currentSelection.pointLocation);
-    pick.faceId = ftr::Chamfer::referenceFaceId(targetSeerShape, pick.edgeId);
+    pick.edgePick.id = currentSelection.shapeId;
+    pick.edgePick.setParameter(edge, currentSelection.pointLocation);
+    pick.facePick.id = ftr::Chamfer::referenceFaceId(targetSeerShape, pick.edgePick.id);
+    //for now user doesn't specify face so we don't worry about u, v of facePick.
     symChamfer.picks.push_back(pick);
   }
   

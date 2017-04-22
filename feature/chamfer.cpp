@@ -62,42 +62,6 @@ std::shared_ptr< Parameter > Chamfer::buildSymParameter()
   return out;
 }
 
-//duplicated from blend.
-double Chamfer::calculateUParameter(const TopoDS_Edge &edgeIn, const osg::Vec3d &point)
-{
-  TopoDS_Shape aVertex = BRepBuilderAPI_MakeVertex(gp_Pnt(point.x(), point.y(), point.z())).Vertex();
-  BRepExtrema_DistShapeShape dist(edgeIn, aVertex);
-  if (dist.NbSolution() < 1)
-  {
-    std::cout << "Warning: no solution for distshapeshape in Chamfer::calculateU" << std::endl;
-    return 0.0;
-  }
-  if (dist.SupportTypeShape1(1) != BRepExtrema_IsOnEdge)
-  {
-    std::cout << "Warning: wrong support type in Chamfer::calculateU" << std::endl;
-    return 0.0;
-  }
-  
-  double closestParameter;
-  dist.ParOnEdgeS1(1, closestParameter);
-  
-  double firstP, lastP;
-  BRep_Tool::Curve(edgeIn, firstP, lastP);
-  //normalize parameter to 0 to 1.
-  return (closestParameter - firstP) / (lastP - firstP);
-}
-
-//duplicated from blend.
-osg::Vec3d Chamfer::calculateUPoint(const TopoDS_Edge &edgeIn, double parameter)
-{
-  double firstP, lastP;
-  const Handle_Geom_Curve &curve = BRep_Tool::Curve(edgeIn, firstP, lastP);
-  double parameterOut = parameter * (lastP - firstP) + firstP;
-  gp_Pnt occPoint;
-  curve->D0(parameterOut, occPoint);
-  return gu::toOsg(occPoint);
-}
-
 Chamfer::Chamfer() : Base()
 {
   if (icon.isNull())
@@ -138,24 +102,24 @@ void Chamfer::updateModel(const UpdatePayload &payloadIn)
       bool labelDone = false; //set label position to first pick.
       for (const auto &pick : chamfer.picks)
       {
-        if (!targetSeerShape.hasShapeIdRecord(pick.edgeId))
+        if (!targetSeerShape.hasShapeIdRecord(pick.edgePick.id))
         {
-        std::cout << "edge id of: " << gu::idToString(pick.edgeId) << " not found in chamfer" << std::endl;
-        continue;
+          std::cout << "edge id of: " << gu::idToString(pick.edgePick.id) << " not found in chamfer" << std::endl;
+          continue;
         }
-        if (!targetSeerShape.hasShapeIdRecord(pick.faceId))
+        if (!targetSeerShape.hasShapeIdRecord(pick.facePick.id))
         {
-        std::cout << "face id of: " << gu::idToString(pick.faceId) << " not found in chamfer" << std::endl;
-        continue;
+          std::cout << "face id of: " << gu::idToString(pick.facePick.id) << " not found in chamfer" << std::endl;
+          continue;
         }
-        TopoDS_Edge edge = TopoDS::Edge(targetSeerShape.findShapeIdRecord(pick.edgeId).shape);
-        TopoDS_Face face = TopoDS::Face(targetSeerShape.findShapeIdRecord(pick.faceId).shape);
+        TopoDS_Edge edge = TopoDS::Edge(targetSeerShape.findShapeIdRecord(pick.edgePick.id).shape);
+        TopoDS_Face face = TopoDS::Face(targetSeerShape.findShapeIdRecord(pick.facePick.id).shape);
         chamferMaker.Add(chamfer.distance->getValue(), edge, face);
         //update location of parameter label.
         if (!labelDone)
         {
-        labelDone = true;
-        chamfer.label->setMatrix(osg::Matrixd::translate(calculateUPoint(TopoDS::Edge(edge), pick.u)));
+          labelDone = true;
+          chamfer.label->setMatrix(osg::Matrixd::translate(pick.edgePick.getPoint(TopoDS::Edge(edge))));
         }
       }
     }
@@ -251,10 +215,8 @@ void Chamfer::serialWrite(const QDir &dIn)
     {
       prj::srl::ChamferPick cPickOut
       (
-        gu::idToString(cPick.edgeId),
-        cPick.u,
-        cPick.v,
-       gu::idToString(cPick.faceId)
+        cPick.edgePick.serialOut(),
+        cPick.facePick.serialOut()
       );
       cPicksOut.array().push_back(cPickOut);
     }
@@ -297,10 +259,8 @@ void Chamfer::serialRead(const prj::srl::FeatureChamfer &sChamferIn)
     for (const auto &cPickIn : symChamferIn.chamferPicks().array())
     {
       ChamferPick pick;
-      pick.edgeId = gu::stringToId(cPickIn.edgeId());
-      pick.u = cPickIn.u();
-      pick.v = cPickIn.v();
-      pick.faceId = gu::stringToId(cPickIn.faceId());
+      pick.edgePick.serialIn(cPickIn.edgePick());
+      pick.facePick.serialIn(cPickIn.facePick());
       symChamfer.picks.push_back(pick);
     }
     symChamfer.distance = buildSymParameter();

@@ -9,10 +9,8 @@
 
 <xs:complexType name="ChamferPick">
   <xs:all>
-    <xs:element name="edgeId" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
-    <xs:element name="u" type="xs:double" default="NaN"/>
-    <xs:element name="v" type="xs:double" default="NaN"/>
-    <xs:element name="faceId" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+    <xs:element name="edgePick" type="srl:Pick"/>
+    <xs:element name="facePick" type="srl:Pick"/>
   </xs:all>
 </xs:complexType>
 

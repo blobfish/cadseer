@@ -23,6 +23,7 @@
 #include <map>
 
 #include <library/plabel.h>
+#include <feature/pick.h>
 #include <feature/base.h>
 
 class BRepFilletAPI_MakeChamfer;
@@ -33,10 +34,8 @@ namespace ftr
   class SeerShape;
   struct ChamferPick
   {
-    boost::uuids::uuid edgeId; //!< id of picked edge or maybe face?
-    double u; //!< u parameter on picked object
-    double v;//!< v parameter on picked object
-    boost::uuids::uuid faceId; //!< reference face. set with referenceFaceId.
+    Pick edgePick; //!< id of picked edge or maybe face?
+    Pick facePick; //!< reference face. set with referenceFaceId.
   };
   
   struct SymChamfer
@@ -60,8 +59,6 @@ namespace ftr
     
     static std::shared_ptr<Parameter> buildSymParameter();
     static boost::uuids::uuid referenceFaceId(const SeerShape&, const boost::uuids::uuid&);
-    static double calculateUParameter(const TopoDS_Edge&, const osg::Vec3d&);
-    static osg::Vec3d calculateUPoint(const TopoDS_Edge&, double);
     
     void addSymChamfer(const SymChamfer &);
   private:

@@ -47,112 +47,52 @@ namespace prj
     // ChamferPick
     // 
 
-    const ChamferPick::EdgeIdType& ChamferPick::
-    edgeId () const
+    const ChamferPick::EdgePickType& ChamferPick::
+    edgePick () const
     {
-      return this->edgeId_.get ();
+      return this->edgePick_.get ();
     }
 
-    ChamferPick::EdgeIdType& ChamferPick::
-    edgeId ()
+    ChamferPick::EdgePickType& ChamferPick::
+    edgePick ()
     {
-      return this->edgeId_.get ();
-    }
-
-    void ChamferPick::
-    edgeId (const EdgeIdType& x)
-    {
-      this->edgeId_.set (x);
+      return this->edgePick_.get ();
     }
 
     void ChamferPick::
-    edgeId (::std::unique_ptr< EdgeIdType > x)
+    edgePick (const EdgePickType& x)
     {
-      this->edgeId_.set (std::move (x));
-    }
-
-    const ChamferPick::EdgeIdType& ChamferPick::
-    edgeId_default_value ()
-    {
-      return edgeId_default_value_;
-    }
-
-    const ChamferPick::UType& ChamferPick::
-    u () const
-    {
-      return this->u_.get ();
-    }
-
-    ChamferPick::UType& ChamferPick::
-    u ()
-    {
-      return this->u_.get ();
+      this->edgePick_.set (x);
     }
 
     void ChamferPick::
-    u (const UType& x)
+    edgePick (::std::unique_ptr< EdgePickType > x)
     {
-      this->u_.set (x);
+      this->edgePick_.set (std::move (x));
     }
 
-    ChamferPick::UType ChamferPick::
-    u_default_value ()
+    const ChamferPick::FacePickType& ChamferPick::
+    facePick () const
     {
-      return UType (::std::numeric_limits< ::xml_schema::Double >::quiet_NaN ());
+      return this->facePick_.get ();
     }
 
-    const ChamferPick::VType& ChamferPick::
-    v () const
+    ChamferPick::FacePickType& ChamferPick::
+    facePick ()
     {
-      return this->v_.get ();
-    }
-
-    ChamferPick::VType& ChamferPick::
-    v ()
-    {
-      return this->v_.get ();
+      return this->facePick_.get ();
     }
 
     void ChamferPick::
-    v (const VType& x)
+    facePick (const FacePickType& x)
     {
-      this->v_.set (x);
-    }
-
-    ChamferPick::VType ChamferPick::
-    v_default_value ()
-    {
-      return VType (::std::numeric_limits< ::xml_schema::Double >::quiet_NaN ());
-    }
-
-    const ChamferPick::FaceIdType& ChamferPick::
-    faceId () const
-    {
-      return this->faceId_.get ();
-    }
-
-    ChamferPick::FaceIdType& ChamferPick::
-    faceId ()
-    {
-      return this->faceId_.get ();
+      this->facePick_.set (x);
     }
 
     void ChamferPick::
-    faceId (const FaceIdType& x)
+    facePick (::std::unique_ptr< FacePickType > x)
     {
-      this->faceId_.set (x);
-    }
-
-    void ChamferPick::
-    faceId (::std::unique_ptr< FaceIdType > x)
-    {
-      this->faceId_.set (std::move (x));
-    }
-
-    const ChamferPick::FaceIdType& ChamferPick::
-    faceId_default_value ()
-    {
-      return faceId_default_value_;
+      this->facePick_.set (std::move (x));
     }
 
 
@@ -338,22 +278,21 @@ namespace prj
     // ChamferPick
     //
 
-    const ChamferPick::EdgeIdType ChamferPick::edgeId_default_value_ (
-      "00000000-0000-0000-0000-000000000000");
-
-    const ChamferPick::FaceIdType ChamferPick::faceId_default_value_ (
-      "00000000-0000-0000-0000-000000000000");
+    ChamferPick::
+    ChamferPick (const EdgePickType& edgePick,
+                 const FacePickType& facePick)
+    : ::xml_schema::Type (),
+      edgePick_ (edgePick, this),
+      facePick_ (facePick, this)
+    {
+    }
 
     ChamferPick::
-    ChamferPick (const EdgeIdType& edgeId,
-                 const UType& u,
-                 const VType& v,
-                 const FaceIdType& faceId)
+    ChamferPick (::std::unique_ptr< EdgePickType > edgePick,
+                 ::std::unique_ptr< FacePickType > facePick)
     : ::xml_schema::Type (),
-      edgeId_ (edgeId, this),
-      u_ (u, this),
-      v_ (v, this),
-      faceId_ (faceId, this)
+      edgePick_ (std::move (edgePick), this),
+      facePick_ (std::move (facePick), this)
     {
     }
 
@@ -362,10 +301,8 @@ namespace prj
                  ::xml_schema::Flags f,
                  ::xml_schema::Container* c)
     : ::xml_schema::Type (x, f, c),
-      edgeId_ (x.edgeId_, f, this),
-      u_ (x.u_, f, this),
-      v_ (x.v_, f, this),
-      faceId_ (x.faceId_, f, this)
+      edgePick_ (x.edgePick_, f, this),
+      facePick_ (x.facePick_, f, this)
     {
     }
 
@@ -374,10 +311,8 @@ namespace prj
                  ::xml_schema::Flags f,
                  ::xml_schema::Container* c)
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
-      edgeId_ (this),
-      u_ (this),
-      v_ (this),
-      faceId_ (this)
+      edgePick_ (this),
+      facePick_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -396,52 +331,30 @@ namespace prj
         const ::xsd::cxx::xml::qualified_name< char > n (
           ::xsd::cxx::xml::dom::name< char > (i));
 
-        // edgeId
+        // edgePick
         //
-        if (n.name () == "edgeId" && n.namespace_ ().empty ())
+        if (n.name () == "edgePick" && n.namespace_ ().empty ())
         {
-          ::std::unique_ptr< EdgeIdType > r (
-            EdgeIdTraits::create (i, f, this));
+          ::std::unique_ptr< EdgePickType > r (
+            EdgePickTraits::create (i, f, this));
 
-          if (!edgeId_.present ())
+          if (!edgePick_.present ())
           {
-            this->edgeId_.set (::std::move (r));
+            this->edgePick_.set (::std::move (r));
             continue;
           }
         }
 
-        // u
+        // facePick
         //
-        if (n.name () == "u" && n.namespace_ ().empty ())
+        if (n.name () == "facePick" && n.namespace_ ().empty ())
         {
-          if (!u_.present ())
-          {
-            this->u_.set (UTraits::create (i, f, this));
-            continue;
-          }
-        }
+          ::std::unique_ptr< FacePickType > r (
+            FacePickTraits::create (i, f, this));
 
-        // v
-        //
-        if (n.name () == "v" && n.namespace_ ().empty ())
-        {
-          if (!v_.present ())
+          if (!facePick_.present ())
           {
-            this->v_.set (VTraits::create (i, f, this));
-            continue;
-          }
-        }
-
-        // faceId
-        //
-        if (n.name () == "faceId" && n.namespace_ ().empty ())
-        {
-          ::std::unique_ptr< FaceIdType > r (
-            FaceIdTraits::create (i, f, this));
-
-          if (!faceId_.present ())
-          {
-            this->faceId_.set (::std::move (r));
+            this->facePick_.set (::std::move (r));
             continue;
           }
         }
@@ -449,31 +362,17 @@ namespace prj
         break;
       }
 
-      if (!edgeId_.present ())
+      if (!edgePick_.present ())
       {
         throw ::xsd::cxx::tree::expected_element< char > (
-          "edgeId",
+          "edgePick",
           "");
       }
 
-      if (!u_.present ())
+      if (!facePick_.present ())
       {
         throw ::xsd::cxx::tree::expected_element< char > (
-          "u",
-          "");
-      }
-
-      if (!v_.present ())
-      {
-        throw ::xsd::cxx::tree::expected_element< char > (
-          "v",
-          "");
-      }
-
-      if (!faceId_.present ())
-      {
-        throw ::xsd::cxx::tree::expected_element< char > (
-          "faceId",
+          "facePick",
           "");
       }
     }
@@ -491,10 +390,8 @@ namespace prj
       if (this != &x)
       {
         static_cast< ::xml_schema::Type& > (*this) = x;
-        this->edgeId_ = x.edgeId_;
-        this->u_ = x.u_;
-        this->v_ = x.v_;
-        this->faceId_ = x.faceId_;
+        this->edgePick_ = x.edgePick_;
+        this->facePick_ = x.facePick_;
       }
 
       return *this;
@@ -1242,48 +1139,26 @@ namespace prj
     {
       e << static_cast< const ::xml_schema::Type& > (i);
 
-      // edgeId
+      // edgePick
       //
       {
         ::xercesc::DOMElement& s (
           ::xsd::cxx::xml::dom::create_element (
-            "edgeId",
+            "edgePick",
             e));
 
-        s << i.edgeId ();
+        s << i.edgePick ();
       }
 
-      // u
+      // facePick
       //
       {
         ::xercesc::DOMElement& s (
           ::xsd::cxx::xml::dom::create_element (
-            "u",
+            "facePick",
             e));
 
-        s << ::xml_schema::AsDouble(i.u ());
-      }
-
-      // v
-      //
-      {
-        ::xercesc::DOMElement& s (
-          ::xsd::cxx::xml::dom::create_element (
-            "v",
-            e));
-
-        s << ::xml_schema::AsDouble(i.v ());
-      }
-
-      // faceId
-      //
-      {
-        ::xercesc::DOMElement& s (
-          ::xsd::cxx::xml::dom::create_element (
-            "faceId",
-            e));
-
-        s << i.faceId ();
+        s << i.facePick ();
       }
     }
 
