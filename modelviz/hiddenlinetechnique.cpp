@@ -51,6 +51,7 @@ void HiddenLineTechnique::define_passes()
     pass->setAttributeAndModes(stipple);
     osg::Depth *depth = new osg::Depth();
     depth->setFunction(osg::Depth::GREATER);
+    depth->setRange(-0.01, 0.99);
     depth->setWriteMask(false);
     pass->setAttribute(depth);
     addPass(pass);
