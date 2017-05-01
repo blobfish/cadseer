@@ -221,6 +221,12 @@ void Base::fillInHistory(ShapeHistory &historyIn)
     getSeerShape().fillInHistory(historyIn, id);
 }
 
+void Base::replaceId(const boost::uuids::uuid &staleId, const boost::uuids::uuid &freshId, const ShapeHistory &shapeHistory)
+{
+  if (hasSeerShape())
+    seerShape->replaceId(staleId, freshId, shapeHistory);
+}
+
 void Base::show3D()
 {
   assert(mainSwitch->getNumChildren());

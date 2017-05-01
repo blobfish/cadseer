@@ -44,6 +44,8 @@
 #include <application/application.h>
 #include <application/mainwindow.h>
 #include <application/splitterdecorated.h>
+#include <preferences/preferencesXML.h>
+#include <preferences/manager.h>
 #include <project/project.h>
 #include <expressions/manager.h>
 #include <expressions/stringtranslator.h>
@@ -70,7 +72,7 @@ BlendEntry::BlendEntry()
 {
   pickId = gu::createNilId();
   typeString = QString::fromStdString(slc::getNameOfType(slc::Type::None));
-  radius = 1.0; //some kind of default
+  radius = prf::manager().rootPtr->features().blend().get().radius();
   expressionLinkId = gu::createNilId();
 }
 
@@ -79,14 +81,14 @@ BlendEntry::BlendEntry(const slc::Message &sMessageIn)
   pickId = sMessageIn.shapeId;
   typeString = QString::fromStdString(slc::getNameOfType(sMessageIn.type));
   pointLocation = sMessageIn.pointLocation;
-  radius = 1.0; //some kind of default
+  radius = prf::manager().rootPtr->features().blend().get().radius();
   expressionLinkId = gu::createNilId();
 }
 
 ConstantItem::ConstantItem(QListWidget *parent) :
   QListWidgetItem(QObject::tr("Constant"), parent, ConstantItem::itemType)
 {
-  radius = 1.0; //somekind of default.
+  radius = prf::manager().rootPtr->features().blend().get().radius();
   ftrId = gu::createNilId();
   expressionLinkId = gu::createNilId();
 }
@@ -158,11 +160,11 @@ Blend::Blend(ftr::Blend *editBlendIn, QWidget *parent) : QDialog(parent), blend(
     for (const auto &entry : variableBlend.entries)
     {
       BlendEntry bEntry;
-      bEntry.pickId = entry.id;
+      bEntry.pickId = entry.pick.id;
       bEntry.typeString = tr("Vertex"); //only vertices for now.
       bEntry.radius = entry.radius->getValue();
-      bEntry.highlightIds.push_back(entry.id);
-      bEntry.pointLocation = gu::toOsg(TopoDS::Vertex(blendParent->getSeerShape().getOCCTShape(entry.id)));
+      bEntry.highlightIds.push_back(entry.pick.id);
+      bEntry.pointLocation = gu::toOsg(TopoDS::Vertex(blendParent->getSeerShape().getOCCTShape(entry.pick.id)));
       if (entry.radius->isConstant())
       {
         bEntry.expressionLinkId = gu::createNilId();
@@ -400,7 +402,12 @@ void Blend::updateBlendFeature()
       ftr::Pick fPick = convert(vItem->pick);
       if (vItem->ftrId.is_nil()) //new item even in edit mode.
       {
-        ftr::VariableBlend blendCue = ftr::Blend::buildDefaultVariable(blendParent->getSeerShape(), fPick);
+        ftr::VariableBlend blendCue = ftr::Blend::buildDefaultVariable
+        (
+          blendParent->getSeerShape(),
+          fPick,
+          static_cast<app::Application*>(qApp)->getProject()->getShapeHistory()
+        );
         
         for (const auto &constraint : vItem->constraints)
         {
@@ -410,7 +417,7 @@ void Blend::updateBlendFeature()
           auto it = blendCue.entries.begin();
           for (; it != blendCue.entries.end(); ++it)
           {
-            if (it->id != constraintId)
+            if (it->pick.id != constraintId)
               continue;
             it->radius->setValue(constraint.radius);
             if (eManager.hasParameterLink(it->radius->getId()))
@@ -426,7 +433,8 @@ void Blend::updateBlendFeature()
           {
             //not a match so build another one.
             ftr::VariableEntry entry;
-            entry.id = constraint.pickId;
+            entry.pick.id = constraint.pickId;
+            entry.pick.shapeHistory = static_cast<app::Application*>(qApp)->getProject()->getShapeHistory().createDevolveHistory(entry.pick.id);
             entry.radius = ftr::Blend::buildRadiusParameter();
             entry.radius->setValue(constraint.radius);
             if (!constraint.expressionLinkId.is_nil())
@@ -461,8 +469,8 @@ void Blend::updateBlendFeature()
         std::vector<ftr::VariableEntry>::iterator vIt;
         for (vIt = it->entries.begin(); vIt != it->entries.end();)
         {
-          assert(itemConstraintIds.count(vIt->id) < 2); //should be zero or 1.
-          if (itemConstraintIds.count(vIt->id) == 0)
+          assert(itemConstraintIds.count(vIt->pick.id) < 2); //should be zero or 1.
+          if (itemConstraintIds.count(vIt->pick.id) == 0)
           {
             assert(vIt->label->getParents().size() == 1);
             osg::Group *parent = vIt->label->getParent(0);
@@ -478,13 +486,14 @@ void Blend::updateBlendFeature()
           std::vector<ftr::VariableEntry>::iterator fEIt;
           for (fEIt = it->entries.begin(); fEIt != it->entries.end(); ++fEIt)
           {
-            if (fEIt->id == itemEntry.pickId)
+            if (fEIt->pick.id == itemEntry.pickId)
               break;
           }
           if (fEIt == it->entries.end())
           {
             ftr::VariableEntry entry;
-            entry.id = itemEntry.pickId;
+            entry.pick.id = itemEntry.pickId;
+            entry.pick.shapeHistory = static_cast<app::Application*>(qApp)->getProject()->getShapeHistory().createDevolveHistory(entry.pick.id);
             entry.radius = ftr::Blend::buildRadiusParameter();
             entry.radius->setValue(itemEntry.radius);
             entry.radius->connectValue(boost::bind(&ftr::Blend::setModelDirty, blend));
@@ -994,7 +1003,7 @@ void Blend::selectionAdditionDispatched(const msg::Message &messageIn)
       assert(parentShape.hasShapeIdRecord(firstVertex));
       uuid firstId = parentShape.findShapeIdRecord(firstVertex).id;
       BlendEntry firstEntry;
-      firstEntry.radius = 1.0; //some kind of default.
+      firstEntry.radius = prf::manager().rootPtr->features().blend().get().radius();
       firstEntry.typeString = tr("Vertex");
       firstEntry.pickId = firstId;
       firstEntry.pointLocation = gu::toOsg(TopoDS::Vertex(parentShape.getOCCTShape(firstId)));
@@ -1006,7 +1015,7 @@ void Blend::selectionAdditionDispatched(const msg::Message &messageIn)
       assert(parentShape.hasShapeIdRecord(lastVertex));
       uuid lastId = parentShape.findShapeIdRecord(lastVertex).id;
       BlendEntry lastEntry;
-      lastEntry.radius = 1.0; //some kind of default.
+      lastEntry.radius = prf::manager().rootPtr->features().blend().get().radius();
       lastEntry.typeString = tr("Vertex");
       lastEntry.pickId = lastId;
       lastEntry.pointLocation = gu::toOsg(TopoDS::Vertex(parentShape.getOCCTShape(lastId)));
@@ -1020,7 +1029,7 @@ void Blend::selectionAdditionDispatched(const msg::Message &messageIn)
     }
     else
     {
-      double radius = 1.0; //somekind of default
+      double radius = prf::manager().rootPtr->features().blend().get().radius();
       if (!vItem->constraints.empty())
         radius = vItem->constraints.back().radius;
       

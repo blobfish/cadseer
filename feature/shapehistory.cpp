@@ -20,6 +20,7 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/breadth_first_search.hpp>
+#include <boost/graph/topological_sort.hpp>
 #include <boost/graph/filtered_graph.hpp>
 #include <boost/graph/reverse_graph.hpp>
 #include <boost/graph/transpose_graph.hpp>
@@ -129,7 +130,7 @@ namespace ftr
     Graph graph;
     IdMap idMap;
     
-    bool hasShape(const boost::uuids::uuid &shapeIdIn)
+    bool hasShape(const boost::uuids::uuid &shapeIdIn) const
     {
       typedef IdMap::index<ShapeIdRecord::ByShapeId>::type List;
       const List &list = idMap.get<ShapeIdRecord::ByShapeId>();
@@ -137,7 +138,7 @@ namespace ftr
       return (it != list.end());
     }
     
-    Vertex findVertex(const uuid &shapeIdIn)
+    Vertex findVertex(const uuid &shapeIdIn) const
     {
       typedef IdMap::index<ShapeIdRecord::ByShapeId>::type List;
       const List &list = idMap.get<ShapeIdRecord::ByShapeId>();
@@ -145,13 +146,27 @@ namespace ftr
       return it->graphVertex;
     }
     
-    void dumpIdMap()
+    void dumpIdMap() const
     {
       std::cout << std::endl << std::endl << "Shape history id map:" << std::endl;
       for (const auto &entry : idMap)
       {
         std::cout << "shape id: " << gu::idToString(entry.shapeId) << "      vertex: " << entry.graphVertex << std::endl;
       }
+    }
+    
+    //Should I really be sorting this? wouldn't BFS be better if sorting at all? 
+    std::vector<uuid> getAllIds() const
+    {
+      std::vector<Vertex> vertices;
+      std::vector<uuid> out;
+      
+      boost::topological_sort(graph, std::back_inserter(vertices));
+      
+      for (auto rIt = vertices.rbegin(); rIt != vertices.rend(); ++rIt)
+        out.push_back(graph[*rIt].shapeId);
+      
+      return out;
     }
   };
 }
@@ -173,7 +188,7 @@ void ShapeHistory::clear()
   shapeHistoryStow->idMap.clear();
 }
 
-void ShapeHistory::writeGraphViz(const std::string &fileName)
+void ShapeHistory::writeGraphViz(const std::string &fileName) const
 {
   std::ofstream file(fileName.c_str());
   boost::write_graphviz(file, shapeHistoryStow->graph, VertexWriter(shapeHistoryStow->graph));
@@ -301,6 +316,11 @@ ShapeHistory ShapeHistory::createDevolveHistory(const uuid &shapeIdIn) const
     stowOut->idMap.insert(ShapeIdRecord(stowOut->graph[*it].shapeId, *it));
   
   return ShapeHistory(stowOut);
+}
+
+std::vector<boost::uuids::uuid> ShapeHistory::getAllIds() const
+{
+  return shapeHistoryStow->getAllIds();
 }
 
 prj::srl::ShapeHistory ShapeHistory::serialOut() const

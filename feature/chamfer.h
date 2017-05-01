@@ -63,6 +63,11 @@ namespace ftr
     void addSymChamfer(const SymChamfer &);
   private:
     void generatedMatch(BRepFilletAPI_MakeChamfer&, const SeerShape &);
+    
+    /*! now that we are 'resolving' picks we need to update the shapemap to ensure
+     * consistant id output of generated faces. duplicate function in blend.
+     */
+    void updateShapeMap(const boost::uuids::uuid&, const ShapeHistory &);
     std::vector<SymChamfer> symChamfers;
     std::map<boost::uuids::uuid, boost::uuids::uuid> shapeMap; //!< map edges or vertices to faces
     

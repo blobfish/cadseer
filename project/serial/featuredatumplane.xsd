@@ -9,22 +9,22 @@
 
 <xs:complexType name="DatumPlanePlanarOffset">
   <xs:all>
-    <xs:element name="faceId" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+    <xs:element name="facePick" type="srl:Pick"/>
     <xs:element name="offset" type="srl:Parameter"/>
   </xs:all>
 </xs:complexType>
 
 <xs:complexType name="DatumPlanePlanarCenter">
   <xs:all>
-    <xs:element name="faceId1" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
-    <xs:element name="faceId2" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+    <xs:element name="facePick1" type="srl:Pick"/>
+    <xs:element name="facePick2" type="srl:Pick"/>
   </xs:all>
 </xs:complexType>
 
 <xs:complexType name="DatumPlanePlanarParallelThroughEdge">
   <xs:all>
-    <xs:element name="faceId" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
-    <xs:element name="edgeId" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+    <xs:element name="facePick" type="srl:Pick"/>
+    <xs:element name="edgePick" type="srl:Pick"/>
   </xs:all>
 </xs:complexType>
 

@@ -37,6 +37,7 @@ namespace prj{namespace srl{class FeatureBlend;}}
 namespace ftr
 {
   class SeerShape;
+  class ShapeHistory;
 
 struct SimpleBlend
 {
@@ -49,7 +50,7 @@ struct SimpleBlend
 
 struct VariableEntry
 {
-  boost::uuids::uuid id; //!< edge or vertex.
+  Pick pick; //!< edge or vertex.
   std::shared_ptr<Parameter> position; //!< parameter along edge 0 to 1. ignored if vertex. maybe invalid
   std::shared_ptr<Parameter> radius; //!< value of blend.
   osg::ref_ptr<lbr::PLabel> label; //!< graphic icon
@@ -70,7 +71,7 @@ class Blend : public Base
     
     static std::shared_ptr<Parameter> buildRadiusParameter();
     static std::shared_ptr<Parameter> buildPositionParameter();
-    static VariableBlend buildDefaultVariable(const SeerShape&, const Pick &);
+    static VariableBlend buildDefaultVariable(const SeerShape&, const Pick &, const ShapeHistory&);
     
     void addSimpleBlend(const SimpleBlend&);
     void addVariableBlend(const VariableBlend&);
@@ -96,6 +97,11 @@ class Blend : public Base
     
 private:
     void generatedMatch(BRepFilletAPI_MakeFillet&, const SeerShape &);
+    
+    /*! now that we are 'resolving' picks we need to update the shapemap to ensure
+     * consistant id output of generated faces.
+     */
+    void updateShapeMap(const boost::uuids::uuid&, const ShapeHistory &);
     void ensureNoFaceNils();
     void dumpInfo(BRepFilletAPI_MakeFillet&, const SeerShape&);
     

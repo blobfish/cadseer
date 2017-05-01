@@ -87,7 +87,11 @@ void Hollow::updateModel(const UpdatePayload &payloadIn)
     if (closingFaceShapes.IsEmpty())
       throw std::runtime_error("Hollow: no closing faces");
     
-    const TopoDS_Face &firstFace = TopoDS::Face(targetSeerShape.getOCCTShape(hollowPicks.front().id));
+    std::vector<uuid> firstFaceIds = targetSeerShape.resolvePick(hollowPicks.front().shapeHistory);
+    if (firstFaceIds.empty())
+      throw std::runtime_error("Hollow: can't find first face id");
+    assert(firstFaceIds.size() == 1);
+    const TopoDS_Face &firstFace = TopoDS::Face(targetSeerShape.getOCCTShape(firstFaceIds.front()));
     label->setMatrix(osg::Matrixd::translate(hollowPicks.front().getPoint(firstFace)));
     
     BRepOffsetAPI_MakeThickSolid operation;
@@ -162,14 +166,15 @@ TopTools_ListOfShape Hollow::resolveClosingFaces(const SeerShape &seerShapeIn)
   TopTools_ListOfShape out;
   for (const auto &closingFace : hollowPicks)
   {
-    if (!seerShapeIn.hasShapeIdRecord(closingFace.id))
+    std::vector<uuid> ids = seerShapeIn.resolvePick(closingFace.shapeHistory);
+    if (ids.empty())
     {
       std::cout << "feature id: " << gu::idToString(getId()) << "     can't find face: "
         << gu::idToString(closingFace.id) << " of parent" << std::endl;
       continue;
     }
-    
-    const TopoDS_Shape& faceShape = seerShapeIn.getOCCTShape(closingFace.id);
+    assert(ids.size() == 1);
+    const TopoDS_Shape& faceShape = seerShapeIn.getOCCTShape(ids.front());
     if (faceShape.ShapeType() != TopAbs_FACE)
     {
       std::cout << "feature id: " << gu::idToString(getId()) << "      wrong shape type: "

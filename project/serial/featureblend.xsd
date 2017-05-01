@@ -22,7 +22,7 @@
 
 <xs:complexType name="VariableEntry">
   <xs:all>
-    <xs:element name="id" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+    <xs:element name="blendPick" type="srl:Pick"/>
     <xs:element name="position" type="srl:Parameter"/>
     <xs:element name="radius" type="srl:Parameter"/>
   </xs:all>

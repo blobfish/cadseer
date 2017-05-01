@@ -41,6 +41,7 @@
 #include <feature/draft.h>
 
 using namespace ftr;
+using boost::uuids::uuid;
 
 QIcon Draft::icon;
 
@@ -100,7 +101,11 @@ void Draft::updateModel(const UpdatePayload &payloadIn)
     
     BRepOffsetAPI_DraftAngle dMaker(targetSeerShape.getRootOCCTShape());
     
-    TopoDS_Shape neutralShape = targetSeerShape.findShapeIdRecord(neutralPick.id).shape;
+    std::vector<uuid> neutralIds = targetSeerShape.resolvePick(neutralPick.shapeHistory);
+    if (neutralIds.empty())
+      throw std::runtime_error("couldn't resolve neutral pick");
+    assert(neutralIds.size() == 1);
+    TopoDS_Shape neutralShape = targetSeerShape.getOCCTShape(neutralIds.front());
     gp_Pln plane = derivePlaneFromShape(neutralShape);
     
     double localAngle = osg::DegreesToRadians(angle->getValue());
@@ -108,12 +113,14 @@ void Draft::updateModel(const UpdatePayload &payloadIn)
     bool labelDone = false; //set label position to first pick.
     for (const auto &p : targetPicks)
     {
-      if (!targetSeerShape.hasShapeIdRecord(p.id))
+      std::vector<uuid> pickIds = targetSeerShape.resolvePick(p.shapeHistory);
+      if (pickIds.empty())
       {
-        std::cout << gu::idToString(id) << " Draft missing: " << gu::idToString(p.id) << std::endl;
+        std::cout << "Draft can't resolve id: " << gu::idToString(p.id) << std::endl;
         continue;
       }
-      const TopoDS_Face &face = TopoDS::Face(targetSeerShape.findShapeIdRecord(p.id).shape);
+      assert(pickIds.size() == 1);
+      const TopoDS_Face &face = TopoDS::Face(targetSeerShape.getOCCTShape(pickIds.front()));
       dMaker.Add(face, direction, localAngle, plane);
       if (!dMaker.AddDone())
       {

@@ -127,6 +127,7 @@ public:
   virtual Descriptor getDescriptor() const = 0;
   virtual void applyColor(); //!< called by set color.
   virtual void fillInHistory(ShapeHistory &);
+  virtual void replaceId(const boost::uuids::uuid&, const boost::uuids::uuid&, const ShapeHistory&);
   virtual QTextStream& getInfo(QTextStream &) const;
   QTextStream&  getShapeInfo(QTextStream &, const boost::uuids::uuid&) const;
   boost::uuids::uuid getId() const {return id;}

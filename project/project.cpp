@@ -284,6 +284,7 @@ void Project::removeFeature(const uuid& idIn)
   Vertex vertex = findVertex(idIn);
   std::shared_ptr<ftr::Base> feature = projectGraph[vertex].feature;
   
+  //don't block before this dirty call or this won't trigger the dirty children.
   feature->setModelDirty(); //this will make all children dirty.
   
   //shouldn't need anymore messages into project for this function call.
@@ -305,7 +306,20 @@ void Project::removeFeature(const uuid& idIn)
       }
     }
     for (const auto &current : children)
+    {
       connect(targetParent, current.first, projectGraph[current.second].inputType);
+      
+      if (!feature->hasSeerShape())
+        continue;
+      //update ids.
+      for (const uuid &staleId : feature->getSeerShape().getAllShapeIds())
+      {
+        uuid freshId = shapeHistory->devolve(projectGraph[targetParent].feature->getId(), staleId);
+        if (freshId.is_nil())
+          continue;
+        projectGraph[current.first].feature->replaceId(staleId, freshId, *shapeHistory);
+      }
+    }
   }
   
   for (const auto &current : parents)

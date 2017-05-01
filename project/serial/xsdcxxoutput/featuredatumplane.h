@@ -114,9 +114,9 @@ namespace prj
     {
       public:
       /**
-       * @name faceId
+       * @name facePick
        *
-       * @brief Accessor and modifier functions for the %faceId
+       * @brief Accessor and modifier functions for the %facePick
        * required element.
        */
       //@{
@@ -124,28 +124,28 @@ namespace prj
       /**
        * @brief Element type.
        */
-      typedef ::xml_schema::String FaceIdType;
+      typedef ::prj::srl::Pick FacePickType;
 
       /**
        * @brief Element traits type.
        */
-      typedef ::xsd::cxx::tree::traits< FaceIdType, char > FaceIdTraits;
+      typedef ::xsd::cxx::tree::traits< FacePickType, char > FacePickTraits;
 
       /**
        * @brief Return a read-only (constant) reference to the element.
        *
        * @return A constant reference to the element.
        */
-      const FaceIdType&
-      faceId () const;
+      const FacePickType&
+      facePick () const;
 
       /**
        * @brief Return a read-write reference to the element.
        *
        * @return A reference to the element.
        */
-      FaceIdType&
-      faceId ();
+      FacePickType&
+      facePick ();
 
       /**
        * @brief Set the element value.
@@ -156,7 +156,7 @@ namespace prj
        * the new value of the element.
        */
       void
-      faceId (const FaceIdType& x);
+      facePick (const FacePickType& x);
 
       /**
        * @brief Set the element value without copying.
@@ -167,16 +167,7 @@ namespace prj
        * instead of making a copy.
        */
       void
-      faceId (::std::unique_ptr< FaceIdType > p);
-
-      /**
-       * @brief Return the default value for the element.
-       *
-       * @return A read-only (constant) reference to the element's
-       * default value.
-       */
-      static const FaceIdType&
-      faceId_default_value ();
+      facePick (::std::unique_ptr< FacePickType > p);
 
       //@}
 
@@ -247,7 +238,7 @@ namespace prj
        * @brief Create an instance from the ultimate base and
        * initializers for required elements and attributes.
        */
-      DatumPlanePlanarOffset (const FaceIdType&,
+      DatumPlanePlanarOffset (const FacePickType&,
                               const OffsetType&);
 
       /**
@@ -258,7 +249,7 @@ namespace prj
        * This constructor will try to use the passed values directly
        * instead of making copies.
        */
-      DatumPlanePlanarOffset (const FaceIdType&,
+      DatumPlanePlanarOffset (::std::unique_ptr< FacePickType >,
                               ::std::unique_ptr< OffsetType >);
 
       /**
@@ -331,8 +322,7 @@ namespace prj
              ::xml_schema::Flags);
 
       protected:
-      ::xsd::cxx::tree::one< FaceIdType > faceId_;
-      static const FaceIdType faceId_default_value_;
+      ::xsd::cxx::tree::one< FacePickType > facePick_;
       ::xsd::cxx::tree::one< OffsetType > offset_;
 
       //@endcond
@@ -347,9 +337,9 @@ namespace prj
     {
       public:
       /**
-       * @name faceId1
+       * @name facePick1
        *
-       * @brief Accessor and modifier functions for the %faceId1
+       * @brief Accessor and modifier functions for the %facePick1
        * required element.
        */
       //@{
@@ -357,28 +347,28 @@ namespace prj
       /**
        * @brief Element type.
        */
-      typedef ::xml_schema::String FaceId1Type;
+      typedef ::prj::srl::Pick FacePick1Type;
 
       /**
        * @brief Element traits type.
        */
-      typedef ::xsd::cxx::tree::traits< FaceId1Type, char > FaceId1Traits;
+      typedef ::xsd::cxx::tree::traits< FacePick1Type, char > FacePick1Traits;
 
       /**
        * @brief Return a read-only (constant) reference to the element.
        *
        * @return A constant reference to the element.
        */
-      const FaceId1Type&
-      faceId1 () const;
+      const FacePick1Type&
+      facePick1 () const;
 
       /**
        * @brief Return a read-write reference to the element.
        *
        * @return A reference to the element.
        */
-      FaceId1Type&
-      faceId1 ();
+      FacePick1Type&
+      facePick1 ();
 
       /**
        * @brief Set the element value.
@@ -389,7 +379,7 @@ namespace prj
        * the new value of the element.
        */
       void
-      faceId1 (const FaceId1Type& x);
+      facePick1 (const FacePick1Type& x);
 
       /**
        * @brief Set the element value without copying.
@@ -400,23 +390,14 @@ namespace prj
        * instead of making a copy.
        */
       void
-      faceId1 (::std::unique_ptr< FaceId1Type > p);
-
-      /**
-       * @brief Return the default value for the element.
-       *
-       * @return A read-only (constant) reference to the element's
-       * default value.
-       */
-      static const FaceId1Type&
-      faceId1_default_value ();
+      facePick1 (::std::unique_ptr< FacePick1Type > p);
 
       //@}
 
       /**
-       * @name faceId2
+       * @name facePick2
        *
-       * @brief Accessor and modifier functions for the %faceId2
+       * @brief Accessor and modifier functions for the %facePick2
        * required element.
        */
       //@{
@@ -424,28 +405,28 @@ namespace prj
       /**
        * @brief Element type.
        */
-      typedef ::xml_schema::String FaceId2Type;
+      typedef ::prj::srl::Pick FacePick2Type;
 
       /**
        * @brief Element traits type.
        */
-      typedef ::xsd::cxx::tree::traits< FaceId2Type, char > FaceId2Traits;
+      typedef ::xsd::cxx::tree::traits< FacePick2Type, char > FacePick2Traits;
 
       /**
        * @brief Return a read-only (constant) reference to the element.
        *
        * @return A constant reference to the element.
        */
-      const FaceId2Type&
-      faceId2 () const;
+      const FacePick2Type&
+      facePick2 () const;
 
       /**
        * @brief Return a read-write reference to the element.
        *
        * @return A reference to the element.
        */
-      FaceId2Type&
-      faceId2 ();
+      FacePick2Type&
+      facePick2 ();
 
       /**
        * @brief Set the element value.
@@ -456,7 +437,7 @@ namespace prj
        * the new value of the element.
        */
       void
-      faceId2 (const FaceId2Type& x);
+      facePick2 (const FacePick2Type& x);
 
       /**
        * @brief Set the element value without copying.
@@ -467,16 +448,7 @@ namespace prj
        * instead of making a copy.
        */
       void
-      faceId2 (::std::unique_ptr< FaceId2Type > p);
-
-      /**
-       * @brief Return the default value for the element.
-       *
-       * @return A read-only (constant) reference to the element's
-       * default value.
-       */
-      static const FaceId2Type&
-      faceId2_default_value ();
+      facePick2 (::std::unique_ptr< FacePick2Type > p);
 
       //@}
 
@@ -489,8 +461,19 @@ namespace prj
        * @brief Create an instance from the ultimate base and
        * initializers for required elements and attributes.
        */
-      DatumPlanePlanarCenter (const FaceId1Type&,
-                              const FaceId2Type&);
+      DatumPlanePlanarCenter (const FacePick1Type&,
+                              const FacePick2Type&);
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes
+       * (::std::unique_ptr version).
+       *
+       * This constructor will try to use the passed values directly
+       * instead of making copies.
+       */
+      DatumPlanePlanarCenter (::std::unique_ptr< FacePick1Type >,
+                              ::std::unique_ptr< FacePick2Type >);
 
       /**
        * @brief Create an instance from a DOM element.
@@ -562,10 +545,8 @@ namespace prj
              ::xml_schema::Flags);
 
       protected:
-      ::xsd::cxx::tree::one< FaceId1Type > faceId1_;
-      static const FaceId1Type faceId1_default_value_;
-      ::xsd::cxx::tree::one< FaceId2Type > faceId2_;
-      static const FaceId2Type faceId2_default_value_;
+      ::xsd::cxx::tree::one< FacePick1Type > facePick1_;
+      ::xsd::cxx::tree::one< FacePick2Type > facePick2_;
 
       //@endcond
     };
@@ -579,9 +560,9 @@ namespace prj
     {
       public:
       /**
-       * @name faceId
+       * @name facePick
        *
-       * @brief Accessor and modifier functions for the %faceId
+       * @brief Accessor and modifier functions for the %facePick
        * required element.
        */
       //@{
@@ -589,28 +570,28 @@ namespace prj
       /**
        * @brief Element type.
        */
-      typedef ::xml_schema::String FaceIdType;
+      typedef ::prj::srl::Pick FacePickType;
 
       /**
        * @brief Element traits type.
        */
-      typedef ::xsd::cxx::tree::traits< FaceIdType, char > FaceIdTraits;
+      typedef ::xsd::cxx::tree::traits< FacePickType, char > FacePickTraits;
 
       /**
        * @brief Return a read-only (constant) reference to the element.
        *
        * @return A constant reference to the element.
        */
-      const FaceIdType&
-      faceId () const;
+      const FacePickType&
+      facePick () const;
 
       /**
        * @brief Return a read-write reference to the element.
        *
        * @return A reference to the element.
        */
-      FaceIdType&
-      faceId ();
+      FacePickType&
+      facePick ();
 
       /**
        * @brief Set the element value.
@@ -621,7 +602,7 @@ namespace prj
        * the new value of the element.
        */
       void
-      faceId (const FaceIdType& x);
+      facePick (const FacePickType& x);
 
       /**
        * @brief Set the element value without copying.
@@ -632,23 +613,14 @@ namespace prj
        * instead of making a copy.
        */
       void
-      faceId (::std::unique_ptr< FaceIdType > p);
-
-      /**
-       * @brief Return the default value for the element.
-       *
-       * @return A read-only (constant) reference to the element's
-       * default value.
-       */
-      static const FaceIdType&
-      faceId_default_value ();
+      facePick (::std::unique_ptr< FacePickType > p);
 
       //@}
 
       /**
-       * @name edgeId
+       * @name edgePick
        *
-       * @brief Accessor and modifier functions for the %edgeId
+       * @brief Accessor and modifier functions for the %edgePick
        * required element.
        */
       //@{
@@ -656,28 +628,28 @@ namespace prj
       /**
        * @brief Element type.
        */
-      typedef ::xml_schema::String EdgeIdType;
+      typedef ::prj::srl::Pick EdgePickType;
 
       /**
        * @brief Element traits type.
        */
-      typedef ::xsd::cxx::tree::traits< EdgeIdType, char > EdgeIdTraits;
+      typedef ::xsd::cxx::tree::traits< EdgePickType, char > EdgePickTraits;
 
       /**
        * @brief Return a read-only (constant) reference to the element.
        *
        * @return A constant reference to the element.
        */
-      const EdgeIdType&
-      edgeId () const;
+      const EdgePickType&
+      edgePick () const;
 
       /**
        * @brief Return a read-write reference to the element.
        *
        * @return A reference to the element.
        */
-      EdgeIdType&
-      edgeId ();
+      EdgePickType&
+      edgePick ();
 
       /**
        * @brief Set the element value.
@@ -688,7 +660,7 @@ namespace prj
        * the new value of the element.
        */
       void
-      edgeId (const EdgeIdType& x);
+      edgePick (const EdgePickType& x);
 
       /**
        * @brief Set the element value without copying.
@@ -699,16 +671,7 @@ namespace prj
        * instead of making a copy.
        */
       void
-      edgeId (::std::unique_ptr< EdgeIdType > p);
-
-      /**
-       * @brief Return the default value for the element.
-       *
-       * @return A read-only (constant) reference to the element's
-       * default value.
-       */
-      static const EdgeIdType&
-      edgeId_default_value ();
+      edgePick (::std::unique_ptr< EdgePickType > p);
 
       //@}
 
@@ -721,8 +684,19 @@ namespace prj
        * @brief Create an instance from the ultimate base and
        * initializers for required elements and attributes.
        */
-      DatumPlanePlanarParallelThroughEdge (const FaceIdType&,
-                                           const EdgeIdType&);
+      DatumPlanePlanarParallelThroughEdge (const FacePickType&,
+                                           const EdgePickType&);
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes
+       * (::std::unique_ptr version).
+       *
+       * This constructor will try to use the passed values directly
+       * instead of making copies.
+       */
+      DatumPlanePlanarParallelThroughEdge (::std::unique_ptr< FacePickType >,
+                                           ::std::unique_ptr< EdgePickType >);
 
       /**
        * @brief Create an instance from a DOM element.
@@ -794,10 +768,8 @@ namespace prj
              ::xml_schema::Flags);
 
       protected:
-      ::xsd::cxx::tree::one< FaceIdType > faceId_;
-      static const FaceIdType faceId_default_value_;
-      ::xsd::cxx::tree::one< EdgeIdType > edgeId_;
-      static const EdgeIdType edgeId_default_value_;
+      ::xsd::cxx::tree::one< FacePickType > facePick_;
+      ::xsd::cxx::tree::one< EdgePickType > edgePick_;
 
       //@endcond
     };

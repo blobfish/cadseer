@@ -121,34 +121,28 @@ namespace prj
     // VariableEntry
     // 
 
-    const VariableEntry::IdType& VariableEntry::
-    id () const
+    const VariableEntry::BlendPickType& VariableEntry::
+    blendPick () const
     {
-      return this->id_.get ();
+      return this->blendPick_.get ();
     }
 
-    VariableEntry::IdType& VariableEntry::
-    id ()
+    VariableEntry::BlendPickType& VariableEntry::
+    blendPick ()
     {
-      return this->id_.get ();
-    }
-
-    void VariableEntry::
-    id (const IdType& x)
-    {
-      this->id_.set (x);
+      return this->blendPick_.get ();
     }
 
     void VariableEntry::
-    id (::std::unique_ptr< IdType > x)
+    blendPick (const BlendPickType& x)
     {
-      this->id_.set (std::move (x));
+      this->blendPick_.set (x);
     }
 
-    const VariableEntry::IdType& VariableEntry::
-    id_default_value ()
+    void VariableEntry::
+    blendPick (::std::unique_ptr< BlendPickType > x)
     {
-      return id_default_value_;
+      this->blendPick_.set (std::move (x));
     }
 
     const VariableEntry::PositionType& VariableEntry::
@@ -615,26 +609,23 @@ namespace prj
     // VariableEntry
     //
 
-    const VariableEntry::IdType VariableEntry::id_default_value_ (
-      "00000000-0000-0000-0000-000000000000");
-
     VariableEntry::
-    VariableEntry (const IdType& id,
+    VariableEntry (const BlendPickType& blendPick,
                    const PositionType& position,
                    const RadiusType& radius)
     : ::xml_schema::Type (),
-      id_ (id, this),
+      blendPick_ (blendPick, this),
       position_ (position, this),
       radius_ (radius, this)
     {
     }
 
     VariableEntry::
-    VariableEntry (const IdType& id,
+    VariableEntry (::std::unique_ptr< BlendPickType > blendPick,
                    ::std::unique_ptr< PositionType > position,
                    ::std::unique_ptr< RadiusType > radius)
     : ::xml_schema::Type (),
-      id_ (id, this),
+      blendPick_ (std::move (blendPick), this),
       position_ (std::move (position), this),
       radius_ (std::move (radius), this)
     {
@@ -645,7 +636,7 @@ namespace prj
                    ::xml_schema::Flags f,
                    ::xml_schema::Container* c)
     : ::xml_schema::Type (x, f, c),
-      id_ (x.id_, f, this),
+      blendPick_ (x.blendPick_, f, this),
       position_ (x.position_, f, this),
       radius_ (x.radius_, f, this)
     {
@@ -656,7 +647,7 @@ namespace prj
                    ::xml_schema::Flags f,
                    ::xml_schema::Container* c)
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
-      id_ (this),
+      blendPick_ (this),
       position_ (this),
       radius_ (this)
     {
@@ -677,16 +668,16 @@ namespace prj
         const ::xsd::cxx::xml::qualified_name< char > n (
           ::xsd::cxx::xml::dom::name< char > (i));
 
-        // id
+        // blendPick
         //
-        if (n.name () == "id" && n.namespace_ ().empty ())
+        if (n.name () == "blendPick" && n.namespace_ ().empty ())
         {
-          ::std::unique_ptr< IdType > r (
-            IdTraits::create (i, f, this));
+          ::std::unique_ptr< BlendPickType > r (
+            BlendPickTraits::create (i, f, this));
 
-          if (!id_.present ())
+          if (!blendPick_.present ())
           {
-            this->id_.set (::std::move (r));
+            this->blendPick_.set (::std::move (r));
             continue;
           }
         }
@@ -722,10 +713,10 @@ namespace prj
         break;
       }
 
-      if (!id_.present ())
+      if (!blendPick_.present ())
       {
         throw ::xsd::cxx::tree::expected_element< char > (
-          "id",
+          "blendPick",
           "");
       }
 
@@ -757,7 +748,7 @@ namespace prj
       if (this != &x)
       {
         static_cast< ::xml_schema::Type& > (*this) = x;
-        this->id_ = x.id_;
+        this->blendPick_ = x.blendPick_;
         this->position_ = x.position_;
         this->radius_ = x.radius_;
       }
@@ -1583,15 +1574,15 @@ namespace prj
     {
       e << static_cast< const ::xml_schema::Type& > (i);
 
-      // id
+      // blendPick
       //
       {
         ::xercesc::DOMElement& s (
           ::xsd::cxx::xml::dom::create_element (
-            "id",
+            "blendPick",
             e));
 
-        s << i.id ();
+        s << i.blendPick ();
       }
 
       // position

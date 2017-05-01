@@ -24,6 +24,7 @@
 
 #include <tools/idtools.h>
 #include <selection/container.h>
+#include <feature/pick.h>
 #include <feature/base.h>
 
 class QDir;
@@ -34,6 +35,8 @@ namespace prj{namespace srl{class SolverChoice; class FeatureDatumPlane;}}
 
 namespace ftr
 {
+  class ShapeHistory;
+  
   enum class DatumPlaneType
   {
     None = 0,
@@ -75,7 +78,7 @@ namespace ftr
     virtual osg::Matrixd solve(const UpdatePayload::UpdateMap&) = 0; //throw std::runtime;
     virtual lbr::IPGroup* getIPGroup(){return nullptr;}
     virtual void connect(Base *){}
-    virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &) = 0;
+    virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &, const ShapeHistory&) = 0;
     virtual void serialOut(prj::srl::SolverChoice &solverChoice) = 0;
     double radius = 1.0;
   };
@@ -89,10 +92,10 @@ namespace ftr
     virtual osg::Matrixd solve(const UpdatePayload::UpdateMap&) override;
     virtual lbr::IPGroup* getIPGroup() override;
     virtual void connect(Base *) override;
-    virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &) override;
+    virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &, const ShapeHistory&) override;
     virtual void serialOut(prj::srl::SolverChoice &solverChoice) override;
     
-    boost::uuids::uuid faceId = gu::createNilId();
+    Pick facePick;
     std::shared_ptr<Parameter> offset;
     osg::ref_ptr<lbr::IPGroup> offsetIP;
     
@@ -106,11 +109,11 @@ namespace ftr
     virtual ~DatumPlanePlanarCenter() override;
     virtual DatumPlaneType getType() override {return DatumPlaneType::PlanarCenter;}
     virtual osg::Matrixd solve(const UpdatePayload::UpdateMap&) override;
-    virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &) override;
+    virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &, const ShapeHistory&) override;
     virtual void serialOut(prj::srl::SolverChoice &solverChoice) override;
     
-    boost::uuids::uuid faceId1 = gu::createNilId();
-    boost::uuids::uuid faceId2 = gu::createNilId();
+    Pick facePick1;
+    Pick facePick2;
     
     static bool canDoTypes(const slc::Containers &);
   };
@@ -122,11 +125,11 @@ namespace ftr
     virtual ~DatumPlanePlanarParallelThroughEdge() override;
     virtual DatumPlaneType getType() override {return DatumPlaneType::PlanarParallelThroughEdge;}
     virtual osg::Matrixd solve(const UpdatePayload::UpdateMap&) override;
-    virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &) override;
+    virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &, const ShapeHistory&) override;
     virtual void serialOut(prj::srl::SolverChoice &solverChoice) override;
     
-    boost::uuids::uuid faceId = gu::createNilId();
-    boost::uuids::uuid edgeId = gu::createNilId();
+    Pick facePick;
+    Pick edgePick;
     
     static bool canDoTypes(const slc::Containers &);
   };

@@ -413,6 +413,72 @@ void SeerShape::fillInHistory(ShapeHistory &historyIn, const BID::uuid &featureI
   }
 }
 
+void SeerShape::replaceId(const uuid &staleId, const uuid &freshId, const ShapeHistory &)
+{
+  //not sure shape history should be passed into seershape?
+  //don't see using this involving nil ids.
+  assert(!staleId.is_nil());
+  assert(!freshId.is_nil());
+  
+  typedef EvolveContainer::index<EvolveRecord::ByInId>::type ListIn;
+  ListIn &listIn = evolveContainer.get<EvolveRecord::ByInId>();
+  
+  //iterator over equal_range was causing infinite loop. iterator invalidation I suspect.
+  auto it = listIn.find(staleId);
+  while (it != listIn.end())
+  {
+    EvolveRecord replacement = *it;
+    replacement.inId = freshId;
+    listIn.replace(it, replacement);
+    it = listIn.find(staleId);
+  }
+  
+//   auto rangeIn = listIn.equal_range(staleId);
+//   for (; rangeIn.first != rangeIn.second; ++rangeIn.first)
+//   {
+//     EvolveRecord replacement = *(rangeIn.first);
+//     replacement.inId = freshId;
+//     listIn.replace(rangeIn.first, replacement);
+//   }
+  
+  //don't think I need this for output. 
+//   typedef EvolveContainer::index<EvolveRecord::ByOutId>::type ListOut;
+//   ListOut &listOut = evolveContainer.get<EvolveRecord::ByOutId>();
+//   auto rangeOut = listOut.equal_range(staleId);
+//   for (; rangeOut.first != rangeOut.second; ++rangeOut.first)
+//   {
+//     EvolveRecord replacement = *rangeOut.first;
+//     replacement.outId = freshId;
+//     listOut.replace(rangeOut.first, replacement);
+//   }
+  
+  //why would I ever need to replace an id in the feature tag?
+//   typedef FeatureTagContainer::index<FeatureTagRecord::ById>::type TagList;
+//   TagList &tagList = featureTagContainer.get<FeatureTagRecord::ById>();
+//   auto tagRange = tagList.equal_range(staleId);
+//   for (; tagRange.first != tagRange.second; ++tagRange.first)
+//   {
+//     FeatureTagRecord replacement = *tagRange.first;
+//     replacement.id = freshId;
+//     tagList.replace(tagRange.first, replacement);
+//   }
+
+  //I don't think I need to update the IdSet is either?
+}
+
+std::vector<uuid> SeerShape::resolvePick(const ShapeHistory &pickHistory) const
+{
+  std::vector<uuid> out;
+  
+  for (const auto &id : pickHistory.getAllIds())
+  {
+    if (hasShapeIdRecord(id))
+      out.push_back(id);
+  }
+  
+  return out;
+}
+
 uuid SeerShape::featureTagId(const std::string& tagIn)
 {
   typedef FeatureTagContainer::index<FeatureTagRecord::ByTag>::type List;

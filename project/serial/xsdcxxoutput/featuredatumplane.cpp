@@ -47,34 +47,28 @@ namespace prj
     // DatumPlanePlanarOffset
     // 
 
-    const DatumPlanePlanarOffset::FaceIdType& DatumPlanePlanarOffset::
-    faceId () const
+    const DatumPlanePlanarOffset::FacePickType& DatumPlanePlanarOffset::
+    facePick () const
     {
-      return this->faceId_.get ();
+      return this->facePick_.get ();
     }
 
-    DatumPlanePlanarOffset::FaceIdType& DatumPlanePlanarOffset::
-    faceId ()
+    DatumPlanePlanarOffset::FacePickType& DatumPlanePlanarOffset::
+    facePick ()
     {
-      return this->faceId_.get ();
-    }
-
-    void DatumPlanePlanarOffset::
-    faceId (const FaceIdType& x)
-    {
-      this->faceId_.set (x);
+      return this->facePick_.get ();
     }
 
     void DatumPlanePlanarOffset::
-    faceId (::std::unique_ptr< FaceIdType > x)
+    facePick (const FacePickType& x)
     {
-      this->faceId_.set (std::move (x));
+      this->facePick_.set (x);
     }
 
-    const DatumPlanePlanarOffset::FaceIdType& DatumPlanePlanarOffset::
-    faceId_default_value ()
+    void DatumPlanePlanarOffset::
+    facePick (::std::unique_ptr< FacePickType > x)
     {
-      return faceId_default_value_;
+      this->facePick_.set (std::move (x));
     }
 
     const DatumPlanePlanarOffset::OffsetType& DatumPlanePlanarOffset::
@@ -105,128 +99,104 @@ namespace prj
     // DatumPlanePlanarCenter
     // 
 
-    const DatumPlanePlanarCenter::FaceId1Type& DatumPlanePlanarCenter::
-    faceId1 () const
+    const DatumPlanePlanarCenter::FacePick1Type& DatumPlanePlanarCenter::
+    facePick1 () const
     {
-      return this->faceId1_.get ();
+      return this->facePick1_.get ();
     }
 
-    DatumPlanePlanarCenter::FaceId1Type& DatumPlanePlanarCenter::
-    faceId1 ()
+    DatumPlanePlanarCenter::FacePick1Type& DatumPlanePlanarCenter::
+    facePick1 ()
     {
-      return this->faceId1_.get ();
-    }
-
-    void DatumPlanePlanarCenter::
-    faceId1 (const FaceId1Type& x)
-    {
-      this->faceId1_.set (x);
+      return this->facePick1_.get ();
     }
 
     void DatumPlanePlanarCenter::
-    faceId1 (::std::unique_ptr< FaceId1Type > x)
+    facePick1 (const FacePick1Type& x)
     {
-      this->faceId1_.set (std::move (x));
-    }
-
-    const DatumPlanePlanarCenter::FaceId1Type& DatumPlanePlanarCenter::
-    faceId1_default_value ()
-    {
-      return faceId1_default_value_;
-    }
-
-    const DatumPlanePlanarCenter::FaceId2Type& DatumPlanePlanarCenter::
-    faceId2 () const
-    {
-      return this->faceId2_.get ();
-    }
-
-    DatumPlanePlanarCenter::FaceId2Type& DatumPlanePlanarCenter::
-    faceId2 ()
-    {
-      return this->faceId2_.get ();
+      this->facePick1_.set (x);
     }
 
     void DatumPlanePlanarCenter::
-    faceId2 (const FaceId2Type& x)
+    facePick1 (::std::unique_ptr< FacePick1Type > x)
     {
-      this->faceId2_.set (x);
+      this->facePick1_.set (std::move (x));
+    }
+
+    const DatumPlanePlanarCenter::FacePick2Type& DatumPlanePlanarCenter::
+    facePick2 () const
+    {
+      return this->facePick2_.get ();
+    }
+
+    DatumPlanePlanarCenter::FacePick2Type& DatumPlanePlanarCenter::
+    facePick2 ()
+    {
+      return this->facePick2_.get ();
     }
 
     void DatumPlanePlanarCenter::
-    faceId2 (::std::unique_ptr< FaceId2Type > x)
+    facePick2 (const FacePick2Type& x)
     {
-      this->faceId2_.set (std::move (x));
+      this->facePick2_.set (x);
     }
 
-    const DatumPlanePlanarCenter::FaceId2Type& DatumPlanePlanarCenter::
-    faceId2_default_value ()
+    void DatumPlanePlanarCenter::
+    facePick2 (::std::unique_ptr< FacePick2Type > x)
     {
-      return faceId2_default_value_;
+      this->facePick2_.set (std::move (x));
     }
 
 
     // DatumPlanePlanarParallelThroughEdge
     // 
 
-    const DatumPlanePlanarParallelThroughEdge::FaceIdType& DatumPlanePlanarParallelThroughEdge::
-    faceId () const
+    const DatumPlanePlanarParallelThroughEdge::FacePickType& DatumPlanePlanarParallelThroughEdge::
+    facePick () const
     {
-      return this->faceId_.get ();
+      return this->facePick_.get ();
     }
 
-    DatumPlanePlanarParallelThroughEdge::FaceIdType& DatumPlanePlanarParallelThroughEdge::
-    faceId ()
+    DatumPlanePlanarParallelThroughEdge::FacePickType& DatumPlanePlanarParallelThroughEdge::
+    facePick ()
     {
-      return this->faceId_.get ();
-    }
-
-    void DatumPlanePlanarParallelThroughEdge::
-    faceId (const FaceIdType& x)
-    {
-      this->faceId_.set (x);
+      return this->facePick_.get ();
     }
 
     void DatumPlanePlanarParallelThroughEdge::
-    faceId (::std::unique_ptr< FaceIdType > x)
+    facePick (const FacePickType& x)
     {
-      this->faceId_.set (std::move (x));
-    }
-
-    const DatumPlanePlanarParallelThroughEdge::FaceIdType& DatumPlanePlanarParallelThroughEdge::
-    faceId_default_value ()
-    {
-      return faceId_default_value_;
-    }
-
-    const DatumPlanePlanarParallelThroughEdge::EdgeIdType& DatumPlanePlanarParallelThroughEdge::
-    edgeId () const
-    {
-      return this->edgeId_.get ();
-    }
-
-    DatumPlanePlanarParallelThroughEdge::EdgeIdType& DatumPlanePlanarParallelThroughEdge::
-    edgeId ()
-    {
-      return this->edgeId_.get ();
+      this->facePick_.set (x);
     }
 
     void DatumPlanePlanarParallelThroughEdge::
-    edgeId (const EdgeIdType& x)
+    facePick (::std::unique_ptr< FacePickType > x)
     {
-      this->edgeId_.set (x);
+      this->facePick_.set (std::move (x));
+    }
+
+    const DatumPlanePlanarParallelThroughEdge::EdgePickType& DatumPlanePlanarParallelThroughEdge::
+    edgePick () const
+    {
+      return this->edgePick_.get ();
+    }
+
+    DatumPlanePlanarParallelThroughEdge::EdgePickType& DatumPlanePlanarParallelThroughEdge::
+    edgePick ()
+    {
+      return this->edgePick_.get ();
     }
 
     void DatumPlanePlanarParallelThroughEdge::
-    edgeId (::std::unique_ptr< EdgeIdType > x)
+    edgePick (const EdgePickType& x)
     {
-      this->edgeId_.set (std::move (x));
+      this->edgePick_.set (x);
     }
 
-    const DatumPlanePlanarParallelThroughEdge::EdgeIdType& DatumPlanePlanarParallelThroughEdge::
-    edgeId_default_value ()
+    void DatumPlanePlanarParallelThroughEdge::
+    edgePick (::std::unique_ptr< EdgePickType > x)
     {
-      return edgeId_default_value_;
+      this->edgePick_.set (std::move (x));
     }
 
 
@@ -386,23 +356,20 @@ namespace prj
     // DatumPlanePlanarOffset
     //
 
-    const DatumPlanePlanarOffset::FaceIdType DatumPlanePlanarOffset::faceId_default_value_ (
-      "00000000-0000-0000-0000-000000000000");
-
     DatumPlanePlanarOffset::
-    DatumPlanePlanarOffset (const FaceIdType& faceId,
+    DatumPlanePlanarOffset (const FacePickType& facePick,
                             const OffsetType& offset)
     : ::xml_schema::Type (),
-      faceId_ (faceId, this),
+      facePick_ (facePick, this),
       offset_ (offset, this)
     {
     }
 
     DatumPlanePlanarOffset::
-    DatumPlanePlanarOffset (const FaceIdType& faceId,
+    DatumPlanePlanarOffset (::std::unique_ptr< FacePickType > facePick,
                             ::std::unique_ptr< OffsetType > offset)
     : ::xml_schema::Type (),
-      faceId_ (faceId, this),
+      facePick_ (std::move (facePick), this),
       offset_ (std::move (offset), this)
     {
     }
@@ -412,7 +379,7 @@ namespace prj
                             ::xml_schema::Flags f,
                             ::xml_schema::Container* c)
     : ::xml_schema::Type (x, f, c),
-      faceId_ (x.faceId_, f, this),
+      facePick_ (x.facePick_, f, this),
       offset_ (x.offset_, f, this)
     {
     }
@@ -422,7 +389,7 @@ namespace prj
                             ::xml_schema::Flags f,
                             ::xml_schema::Container* c)
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
-      faceId_ (this),
+      facePick_ (this),
       offset_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
@@ -442,16 +409,16 @@ namespace prj
         const ::xsd::cxx::xml::qualified_name< char > n (
           ::xsd::cxx::xml::dom::name< char > (i));
 
-        // faceId
+        // facePick
         //
-        if (n.name () == "faceId" && n.namespace_ ().empty ())
+        if (n.name () == "facePick" && n.namespace_ ().empty ())
         {
-          ::std::unique_ptr< FaceIdType > r (
-            FaceIdTraits::create (i, f, this));
+          ::std::unique_ptr< FacePickType > r (
+            FacePickTraits::create (i, f, this));
 
-          if (!faceId_.present ())
+          if (!facePick_.present ())
           {
-            this->faceId_.set (::std::move (r));
+            this->facePick_.set (::std::move (r));
             continue;
           }
         }
@@ -473,10 +440,10 @@ namespace prj
         break;
       }
 
-      if (!faceId_.present ())
+      if (!facePick_.present ())
       {
         throw ::xsd::cxx::tree::expected_element< char > (
-          "faceId",
+          "facePick",
           "");
       }
 
@@ -501,7 +468,7 @@ namespace prj
       if (this != &x)
       {
         static_cast< ::xml_schema::Type& > (*this) = x;
-        this->faceId_ = x.faceId_;
+        this->facePick_ = x.facePick_;
         this->offset_ = x.offset_;
       }
 
@@ -516,18 +483,21 @@ namespace prj
     // DatumPlanePlanarCenter
     //
 
-    const DatumPlanePlanarCenter::FaceId1Type DatumPlanePlanarCenter::faceId1_default_value_ (
-      "00000000-0000-0000-0000-000000000000");
-
-    const DatumPlanePlanarCenter::FaceId2Type DatumPlanePlanarCenter::faceId2_default_value_ (
-      "00000000-0000-0000-0000-000000000000");
+    DatumPlanePlanarCenter::
+    DatumPlanePlanarCenter (const FacePick1Type& facePick1,
+                            const FacePick2Type& facePick2)
+    : ::xml_schema::Type (),
+      facePick1_ (facePick1, this),
+      facePick2_ (facePick2, this)
+    {
+    }
 
     DatumPlanePlanarCenter::
-    DatumPlanePlanarCenter (const FaceId1Type& faceId1,
-                            const FaceId2Type& faceId2)
+    DatumPlanePlanarCenter (::std::unique_ptr< FacePick1Type > facePick1,
+                            ::std::unique_ptr< FacePick2Type > facePick2)
     : ::xml_schema::Type (),
-      faceId1_ (faceId1, this),
-      faceId2_ (faceId2, this)
+      facePick1_ (std::move (facePick1), this),
+      facePick2_ (std::move (facePick2), this)
     {
     }
 
@@ -536,8 +506,8 @@ namespace prj
                             ::xml_schema::Flags f,
                             ::xml_schema::Container* c)
     : ::xml_schema::Type (x, f, c),
-      faceId1_ (x.faceId1_, f, this),
-      faceId2_ (x.faceId2_, f, this)
+      facePick1_ (x.facePick1_, f, this),
+      facePick2_ (x.facePick2_, f, this)
     {
     }
 
@@ -546,8 +516,8 @@ namespace prj
                             ::xml_schema::Flags f,
                             ::xml_schema::Container* c)
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
-      faceId1_ (this),
-      faceId2_ (this)
+      facePick1_ (this),
+      facePick2_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -566,30 +536,30 @@ namespace prj
         const ::xsd::cxx::xml::qualified_name< char > n (
           ::xsd::cxx::xml::dom::name< char > (i));
 
-        // faceId1
+        // facePick1
         //
-        if (n.name () == "faceId1" && n.namespace_ ().empty ())
+        if (n.name () == "facePick1" && n.namespace_ ().empty ())
         {
-          ::std::unique_ptr< FaceId1Type > r (
-            FaceId1Traits::create (i, f, this));
+          ::std::unique_ptr< FacePick1Type > r (
+            FacePick1Traits::create (i, f, this));
 
-          if (!faceId1_.present ())
+          if (!facePick1_.present ())
           {
-            this->faceId1_.set (::std::move (r));
+            this->facePick1_.set (::std::move (r));
             continue;
           }
         }
 
-        // faceId2
+        // facePick2
         //
-        if (n.name () == "faceId2" && n.namespace_ ().empty ())
+        if (n.name () == "facePick2" && n.namespace_ ().empty ())
         {
-          ::std::unique_ptr< FaceId2Type > r (
-            FaceId2Traits::create (i, f, this));
+          ::std::unique_ptr< FacePick2Type > r (
+            FacePick2Traits::create (i, f, this));
 
-          if (!faceId2_.present ())
+          if (!facePick2_.present ())
           {
-            this->faceId2_.set (::std::move (r));
+            this->facePick2_.set (::std::move (r));
             continue;
           }
         }
@@ -597,17 +567,17 @@ namespace prj
         break;
       }
 
-      if (!faceId1_.present ())
+      if (!facePick1_.present ())
       {
         throw ::xsd::cxx::tree::expected_element< char > (
-          "faceId1",
+          "facePick1",
           "");
       }
 
-      if (!faceId2_.present ())
+      if (!facePick2_.present ())
       {
         throw ::xsd::cxx::tree::expected_element< char > (
-          "faceId2",
+          "facePick2",
           "");
       }
     }
@@ -625,8 +595,8 @@ namespace prj
       if (this != &x)
       {
         static_cast< ::xml_schema::Type& > (*this) = x;
-        this->faceId1_ = x.faceId1_;
-        this->faceId2_ = x.faceId2_;
+        this->facePick1_ = x.facePick1_;
+        this->facePick2_ = x.facePick2_;
       }
 
       return *this;
@@ -640,18 +610,21 @@ namespace prj
     // DatumPlanePlanarParallelThroughEdge
     //
 
-    const DatumPlanePlanarParallelThroughEdge::FaceIdType DatumPlanePlanarParallelThroughEdge::faceId_default_value_ (
-      "00000000-0000-0000-0000-000000000000");
-
-    const DatumPlanePlanarParallelThroughEdge::EdgeIdType DatumPlanePlanarParallelThroughEdge::edgeId_default_value_ (
-      "00000000-0000-0000-0000-000000000000");
+    DatumPlanePlanarParallelThroughEdge::
+    DatumPlanePlanarParallelThroughEdge (const FacePickType& facePick,
+                                         const EdgePickType& edgePick)
+    : ::xml_schema::Type (),
+      facePick_ (facePick, this),
+      edgePick_ (edgePick, this)
+    {
+    }
 
     DatumPlanePlanarParallelThroughEdge::
-    DatumPlanePlanarParallelThroughEdge (const FaceIdType& faceId,
-                                         const EdgeIdType& edgeId)
+    DatumPlanePlanarParallelThroughEdge (::std::unique_ptr< FacePickType > facePick,
+                                         ::std::unique_ptr< EdgePickType > edgePick)
     : ::xml_schema::Type (),
-      faceId_ (faceId, this),
-      edgeId_ (edgeId, this)
+      facePick_ (std::move (facePick), this),
+      edgePick_ (std::move (edgePick), this)
     {
     }
 
@@ -660,8 +633,8 @@ namespace prj
                                          ::xml_schema::Flags f,
                                          ::xml_schema::Container* c)
     : ::xml_schema::Type (x, f, c),
-      faceId_ (x.faceId_, f, this),
-      edgeId_ (x.edgeId_, f, this)
+      facePick_ (x.facePick_, f, this),
+      edgePick_ (x.edgePick_, f, this)
     {
     }
 
@@ -670,8 +643,8 @@ namespace prj
                                          ::xml_schema::Flags f,
                                          ::xml_schema::Container* c)
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
-      faceId_ (this),
-      edgeId_ (this)
+      facePick_ (this),
+      edgePick_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -690,30 +663,30 @@ namespace prj
         const ::xsd::cxx::xml::qualified_name< char > n (
           ::xsd::cxx::xml::dom::name< char > (i));
 
-        // faceId
+        // facePick
         //
-        if (n.name () == "faceId" && n.namespace_ ().empty ())
+        if (n.name () == "facePick" && n.namespace_ ().empty ())
         {
-          ::std::unique_ptr< FaceIdType > r (
-            FaceIdTraits::create (i, f, this));
+          ::std::unique_ptr< FacePickType > r (
+            FacePickTraits::create (i, f, this));
 
-          if (!faceId_.present ())
+          if (!facePick_.present ())
           {
-            this->faceId_.set (::std::move (r));
+            this->facePick_.set (::std::move (r));
             continue;
           }
         }
 
-        // edgeId
+        // edgePick
         //
-        if (n.name () == "edgeId" && n.namespace_ ().empty ())
+        if (n.name () == "edgePick" && n.namespace_ ().empty ())
         {
-          ::std::unique_ptr< EdgeIdType > r (
-            EdgeIdTraits::create (i, f, this));
+          ::std::unique_ptr< EdgePickType > r (
+            EdgePickTraits::create (i, f, this));
 
-          if (!edgeId_.present ())
+          if (!edgePick_.present ())
           {
-            this->edgeId_.set (::std::move (r));
+            this->edgePick_.set (::std::move (r));
             continue;
           }
         }
@@ -721,17 +694,17 @@ namespace prj
         break;
       }
 
-      if (!faceId_.present ())
+      if (!facePick_.present ())
       {
         throw ::xsd::cxx::tree::expected_element< char > (
-          "faceId",
+          "facePick",
           "");
       }
 
-      if (!edgeId_.present ())
+      if (!edgePick_.present ())
       {
         throw ::xsd::cxx::tree::expected_element< char > (
-          "edgeId",
+          "edgePick",
           "");
       }
     }
@@ -749,8 +722,8 @@ namespace prj
       if (this != &x)
       {
         static_cast< ::xml_schema::Type& > (*this) = x;
-        this->faceId_ = x.faceId_;
-        this->edgeId_ = x.edgeId_;
+        this->facePick_ = x.facePick_;
+        this->edgePick_ = x.edgePick_;
       }
 
       return *this;
@@ -1300,15 +1273,15 @@ namespace prj
     {
       e << static_cast< const ::xml_schema::Type& > (i);
 
-      // faceId
+      // facePick
       //
       {
         ::xercesc::DOMElement& s (
           ::xsd::cxx::xml::dom::create_element (
-            "faceId",
+            "facePick",
             e));
 
-        s << i.faceId ();
+        s << i.facePick ();
       }
 
       // offset
@@ -1328,26 +1301,26 @@ namespace prj
     {
       e << static_cast< const ::xml_schema::Type& > (i);
 
-      // faceId1
+      // facePick1
       //
       {
         ::xercesc::DOMElement& s (
           ::xsd::cxx::xml::dom::create_element (
-            "faceId1",
+            "facePick1",
             e));
 
-        s << i.faceId1 ();
+        s << i.facePick1 ();
       }
 
-      // faceId2
+      // facePick2
       //
       {
         ::xercesc::DOMElement& s (
           ::xsd::cxx::xml::dom::create_element (
-            "faceId2",
+            "facePick2",
             e));
 
-        s << i.faceId2 ();
+        s << i.facePick2 ();
       }
     }
 
@@ -1356,26 +1329,26 @@ namespace prj
     {
       e << static_cast< const ::xml_schema::Type& > (i);
 
-      // faceId
+      // facePick
       //
       {
         ::xercesc::DOMElement& s (
           ::xsd::cxx::xml::dom::create_element (
-            "faceId",
+            "facePick",
             e));
 
-        s << i.faceId ();
+        s << i.facePick ();
       }
 
-      // edgeId
+      // edgePick
       //
       {
         ::xercesc::DOMElement& s (
           ::xsd::cxx::xml::dom::create_element (
-            "edgeId",
+            "edgePick",
             e));
 
-        s << i.edgeId ();
+        s << i.edgePick ();
       }
     }
 

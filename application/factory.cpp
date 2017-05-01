@@ -511,8 +511,10 @@ void Factory::newChamferDispatched(const msg::Message&)
     ftr::ChamferPick pick;
     pick.edgePick.id = currentSelection.shapeId;
     pick.edgePick.setParameter(edge, currentSelection.pointLocation);
+    pick.edgePick.shapeHistory = project->getShapeHistory().createDevolveHistory(pick.edgePick.id);
     pick.facePick.id = ftr::Chamfer::referenceFaceId(targetSeerShape, pick.edgePick.id);
     //for now user doesn't specify face so we don't worry about u, v of facePick.
+    pick.facePick.shapeHistory = project->getShapeHistory().createDevolveHistory(pick.facePick.id);
     symChamfer.picks.push_back(pick);
   }
   
@@ -602,7 +604,7 @@ void Factory::newDatumPlaneDispatched(const msg::Message&)
   //just use the first one.
   std::shared_ptr<ftr::DatumPlaneGenre> solver = solvers.front();
   dPlane->setSolver(solver);
-  ftr::DatumPlaneConnections connections = solver->setUpFromSelection(containers);
+  ftr::DatumPlaneConnections connections = solver->setUpFromSelection(containers, project->getShapeHistory());
   
   for (const auto &connection : connections)
     project->connect(connection.parentId, dPlane->getId(), connection.inputType);

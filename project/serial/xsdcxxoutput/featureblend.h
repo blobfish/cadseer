@@ -497,9 +497,9 @@ namespace prj
     {
       public:
       /**
-       * @name id
+       * @name blendPick
        *
-       * @brief Accessor and modifier functions for the %id
+       * @brief Accessor and modifier functions for the %blendPick
        * required element.
        */
       //@{
@@ -507,28 +507,28 @@ namespace prj
       /**
        * @brief Element type.
        */
-      typedef ::xml_schema::String IdType;
+      typedef ::prj::srl::Pick BlendPickType;
 
       /**
        * @brief Element traits type.
        */
-      typedef ::xsd::cxx::tree::traits< IdType, char > IdTraits;
+      typedef ::xsd::cxx::tree::traits< BlendPickType, char > BlendPickTraits;
 
       /**
        * @brief Return a read-only (constant) reference to the element.
        *
        * @return A constant reference to the element.
        */
-      const IdType&
-      id () const;
+      const BlendPickType&
+      blendPick () const;
 
       /**
        * @brief Return a read-write reference to the element.
        *
        * @return A reference to the element.
        */
-      IdType&
-      id ();
+      BlendPickType&
+      blendPick ();
 
       /**
        * @brief Set the element value.
@@ -539,7 +539,7 @@ namespace prj
        * the new value of the element.
        */
       void
-      id (const IdType& x);
+      blendPick (const BlendPickType& x);
 
       /**
        * @brief Set the element value without copying.
@@ -550,16 +550,7 @@ namespace prj
        * instead of making a copy.
        */
       void
-      id (::std::unique_ptr< IdType > p);
-
-      /**
-       * @brief Return the default value for the element.
-       *
-       * @return A read-only (constant) reference to the element's
-       * default value.
-       */
-      static const IdType&
-      id_default_value ();
+      blendPick (::std::unique_ptr< BlendPickType > p);
 
       //@}
 
@@ -688,7 +679,7 @@ namespace prj
        * @brief Create an instance from the ultimate base and
        * initializers for required elements and attributes.
        */
-      VariableEntry (const IdType&,
+      VariableEntry (const BlendPickType&,
                      const PositionType&,
                      const RadiusType&);
 
@@ -700,7 +691,7 @@ namespace prj
        * This constructor will try to use the passed values directly
        * instead of making copies.
        */
-      VariableEntry (const IdType&,
+      VariableEntry (::std::unique_ptr< BlendPickType >,
                      ::std::unique_ptr< PositionType >,
                      ::std::unique_ptr< RadiusType >);
 
@@ -774,8 +765,7 @@ namespace prj
              ::xml_schema::Flags);
 
       protected:
-      ::xsd::cxx::tree::one< IdType > id_;
-      static const IdType id_default_value_;
+      ::xsd::cxx::tree::one< BlendPickType > blendPick_;
       ::xsd::cxx::tree::one< PositionType > position_;
       ::xsd::cxx::tree::one< RadiusType > radius_;
 

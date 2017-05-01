@@ -102,18 +102,26 @@ void Chamfer::updateModel(const UpdatePayload &payloadIn)
       bool labelDone = false; //set label position to first pick.
       for (const auto &pick : chamfer.picks)
       {
-        if (!targetSeerShape.hasShapeIdRecord(pick.edgePick.id))
+        std::vector<uuid> resolvedEdgeIds = targetSeerShape.resolvePick(pick.edgePick.shapeHistory);
+        if (resolvedEdgeIds.empty())
         {
-          std::cout << "edge id of: " << gu::idToString(pick.edgePick.id) << " not found in chamfer" << std::endl;
+          std::cout << "Chamfer: can't find target edge id. Skipping id: " << gu::idToString(pick.edgePick.id) << std::endl;
           continue;
         }
-        if (!targetSeerShape.hasShapeIdRecord(pick.facePick.id))
+        assert(resolvedEdgeIds.size() == 1); //want to examine this condition.
+        
+        std::vector<uuid> resolvedFaceIds = targetSeerShape.resolvePick(pick.facePick.shapeHistory);
+        if (resolvedFaceIds.empty())
         {
-          std::cout << "face id of: " << gu::idToString(pick.facePick.id) << " not found in chamfer" << std::endl;
+          std::cout << "Chamfer: can't find target face id. Skipping id: " << gu::idToString(pick.facePick.id) << std::endl;
           continue;
         }
-        TopoDS_Edge edge = TopoDS::Edge(targetSeerShape.findShapeIdRecord(pick.edgePick.id).shape);
-        TopoDS_Face face = TopoDS::Face(targetSeerShape.findShapeIdRecord(pick.facePick.id).shape);
+        assert(resolvedFaceIds.size() == 1); //want to examine this condition.
+        
+        updateShapeMap(resolvedEdgeIds.front(), pick.edgePick.shapeHistory);
+        updateShapeMap(resolvedFaceIds.front(), pick.facePick.shapeHistory);
+        TopoDS_Edge edge = TopoDS::Edge(targetSeerShape.findShapeIdRecord(resolvedEdgeIds.front()).shape);
+        TopoDS_Face face = TopoDS::Face(targetSeerShape.findShapeIdRecord(resolvedFaceIds.front()).shape);
         chamferMaker.Add(chamfer.distance->getValue(), edge, face);
         //update location of parameter label.
         if (!labelDone)
@@ -191,6 +199,20 @@ void Chamfer::generatedMatch(BRepFilletAPI_MakeChamfer &chamferMakerIn, const Se
     seerShape->updateShapeIdRecord(chamferedFaceWire, mapItWire->second);
     if (dummy) //insertion took place.
       seerShape->insertEvolve(gu::createNilId(), mapItWire->second);
+  }
+}
+
+void Chamfer::updateShapeMap(const boost::uuids::uuid &resolvedId, const ShapeHistory &pick)
+{
+  for (const auto &historyId : pick.getAllIds())
+  {
+    assert(shapeMap.count(historyId) < 2);
+    auto it = shapeMap.find(historyId);
+    if (it == shapeMap.end())
+      continue;
+    auto entry = std::make_pair(resolvedId, it->second);
+    shapeMap.erase(it);
+    shapeMap.insert(entry);
   }
 }
 

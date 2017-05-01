@@ -57,7 +57,7 @@ namespace ftr
     void clear();
     
     //! write out in graphViz format.
-    void writeGraphViz(const std::string &fileName);
+    void writeGraphViz(const std::string &fileName) const;
     
     //@{
     //! construction functions.
@@ -90,6 +90,8 @@ namespace ftr
     
     //! create a 'subset', anscendant graph related to shape id @shapeIdIn. use for picks.
     ShapeHistory createDevolveHistory(const boost::uuids::uuid &shapeIdIn) const;
+    
+    std::vector<boost::uuids::uuid> getAllIds() const;
     
     prj::srl::ShapeHistory serialOut() const;
     void serialIn(const prj::srl::ShapeHistory&);

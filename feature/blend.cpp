@@ -76,7 +76,7 @@ std::shared_ptr< Parameter > Blend::buildPositionParameter()
   return out;
 }
 
-VariableBlend Blend::buildDefaultVariable(const SeerShape &seerShapeIn, const Pick &pickIn)
+VariableBlend Blend::buildDefaultVariable(const SeerShape &seerShapeIn, const Pick &pickIn, const ShapeHistory& historyIn)
 {
   VariableBlend out;
   out.pick = pickIn;
@@ -88,13 +88,15 @@ VariableBlend Blend::buildDefaultVariable(const SeerShape &seerShapeIn, const Pi
   
   //not using position parameter for vertices, but building anyway for consistency
   VariableEntry entry1;
-  entry1.id = seerShapeIn.findShapeIdRecord(blendMaker.FirstVertex(1)).id;
+  entry1.pick.id = seerShapeIn.findShapeIdRecord(blendMaker.FirstVertex(1)).id;
+  entry1.pick.shapeHistory = historyIn.createDevolveHistory(entry1.pick.id);
   entry1.radius = buildRadiusParameter();
   entry1.position = buildPositionParameter();
   out.entries.push_back(entry1);
   
   VariableEntry entry2;
-  entry2.id = seerShapeIn.findShapeIdRecord(blendMaker.LastVertex(1)).id;
+  entry2.pick.id = seerShapeIn.findShapeIdRecord(blendMaker.LastVertex(1)).id;
+  entry2.pick.shapeHistory = historyIn.createDevolveHistory(entry2.pick.id);
   entry2.radius = buildRadiusParameter();
   entry2.radius->setValue(1.5);
   entry2.position = buildPositionParameter();
@@ -181,7 +183,8 @@ void Blend::updateModel(const UpdatePayload &payloadIn)
     if (payloadIn.updateMap.count(InputTypes::target) != 1)
       throw std::runtime_error("no parent for blend");
     
-    const SeerShape &targetSeerShape = payloadIn.updateMap.equal_range(InputTypes::target).first->second->getSeerShape();
+    const Base *targetFeature = payloadIn.updateMap.equal_range(InputTypes::target).first->second;
+    const SeerShape &targetSeerShape = targetFeature->getSeerShape();
     
     BRepFilletAPI_MakeFillet blendMaker(targetSeerShape.getRootOCCTShape());
     for (const auto &simpleBlend : simpleBlends)
@@ -189,38 +192,55 @@ void Blend::updateModel(const UpdatePayload &payloadIn)
       bool labelDone = false; //set label position to first pick.
       for (const auto &pick : simpleBlend.picks)
       {
-        if (!targetSeerShape.hasShapeIdRecord(pick.id))
+        std::vector<uuid> resolvedIds = targetSeerShape.resolvePick(pick.shapeHistory);
+        if (resolvedIds.empty())
         {
-        std::cout << "Blend: can't find target edge id. Skipping id: " << gu::idToString(pick.id) << std::endl;
-        continue;
+          std::cout << "Blend: can't find target edge id. Skipping id: " << gu::idToString(pick.id) << std::endl;
+          continue;
         }
-        TopoDS_Shape tempShape = targetSeerShape.getOCCTShape(pick.id);
-        assert(!tempShape.IsNull());
-        assert(tempShape.ShapeType() == TopAbs_EDGE);
-        blendMaker.Add(simpleBlend.radius->getValue(), TopoDS::Edge(tempShape));
-        //update location of parameter label.
-        if (!labelDone)
+        for (const auto &resolvedId : resolvedIds)
         {
-        labelDone = true;
-        simpleBlend.label->setMatrix(osg::Matrixd::translate(pick.getPoint(TopoDS::Edge(tempShape))));
+          updateShapeMap(resolvedId, pick.shapeHistory);
+          TopoDS_Shape tempShape = targetSeerShape.getOCCTShape(resolvedId);
+          assert(!tempShape.IsNull());
+          assert(tempShape.ShapeType() == TopAbs_EDGE);
+          blendMaker.Add(simpleBlend.radius->getValue(), TopoDS::Edge(tempShape));
+          //update location of parameter label.
+          if (!labelDone)
+          {
+            labelDone = true;
+            simpleBlend.label->setMatrix(osg::Matrixd::translate(pick.getPoint(TopoDS::Edge(tempShape))));
+          }
         }
       }
     }
     std::size_t vBlendIndex = 1;
     for (const auto &vBlend : variableBlends)
     {
-      if (!targetSeerShape.hasShapeIdRecord(vBlend.pick.id))
+      std::vector<uuid> resolvedIds = targetSeerShape.resolvePick(vBlend.pick.shapeHistory);
+      if (resolvedIds.empty())
       {
         std::cout << "Blend: can't find target edge id. Skipping id: " << gu::idToString(vBlend.pick.id) << std::endl;
         continue;
       }
-      TopoDS_Shape tempShape = targetSeerShape.getOCCTShape(vBlend.pick.id);
-      assert(!tempShape.IsNull());
-      assert(tempShape.ShapeType() == TopAbs_EDGE); //TODO faces someday.
-      blendMaker.Add(TopoDS::Edge(tempShape));
+      for (const auto &resolvedId : resolvedIds)
+      {
+        updateShapeMap(resolvedId, vBlend.pick.shapeHistory);
+        TopoDS_Shape tempShape = targetSeerShape.getOCCTShape(resolvedId);
+        assert(!tempShape.IsNull());
+        assert(tempShape.ShapeType() == TopAbs_EDGE); //TODO faces someday.
+        blendMaker.Add(TopoDS::Edge(tempShape));
+      }
       for (auto &e : vBlend.entries)
       {
-        const TopoDS_Shape &blendShape = targetSeerShape.getOCCTShape(e.id);
+        std::vector<uuid> resolvedEntryIds = targetSeerShape.resolvePick(e.pick.shapeHistory);
+        if (resolvedEntryIds.empty())
+        {
+          std::cout << "Blend: can't find target entry id. Skipping id: " << gu::idToString(e.pick.id) << std::endl;
+          continue;
+        }
+        assert(resolvedEntryIds.size() == 1);//don't think an entry should ever result in more than one id.
+        const TopoDS_Shape &blendShape = targetSeerShape.getOCCTShape(resolvedEntryIds.front());
         if (blendShape.ShapeType() == TopAbs_VERTEX)
         {
           const TopoDS_Vertex &v = TopoDS::Vertex(blendShape);
@@ -306,6 +326,20 @@ void Blend::generatedMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const SeerSha
     seerShape->updateShapeIdRecord(blendFaceWire, mapItWire->second);
     if (dummy) //insertion took place.
       seerShape->insertEvolve(gu::createNilId(), mapItWire->second);
+  }
+}
+
+void Blend::updateShapeMap(const boost::uuids::uuid &resolvedId, const ShapeHistory &pick)
+{
+  for (const auto &historyId : pick.getAllIds())
+  {
+    assert(shapeMap.count(historyId) < 2);
+    auto it = shapeMap.find(historyId);
+    if (it == shapeMap.end())
+      continue;
+    auto entry = std::make_pair(resolvedId, it->second);
+    shapeMap.erase(it);
+    shapeMap.insert(entry);
   }
 }
 
@@ -396,7 +430,7 @@ void Blend::serialWrite(const QDir &dIn)
     {
       prj::srl::VariableEntry vEntryOut
       (
-        gu::idToString(vEntry.id),
+        vEntry.pick.serialOut(),
         vEntry.position->serialOut(),
         vEntry.radius->serialOut()
       );
@@ -458,7 +492,7 @@ void Blend::serialRead(const prj::srl::FeatureBlend& sBlendIn)
     for (const auto &entryIn : variableBlendIn.variableEntries().array())
     {
       VariableEntry entry;
-      entry.id = gu::stringToId(entryIn.id());
+      entry.pick.serialIn(entryIn.blendPick());
       entry.position = buildPositionParameter();
       entry.position->serialIn(entryIn.position());
       entry.radius = buildRadiusParameter();
