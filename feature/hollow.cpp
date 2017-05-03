@@ -77,10 +77,10 @@ void Hollow::updateModel(const UpdatePayload &payloadIn)
   setFailure();
   try
   {
-    if (payloadIn.updateMap.count(InputTypes::target) != 1)
+    if (payloadIn.updateMap.count(InputType::target) != 1)
       throw std::runtime_error("no parent for hollow");
     
-    const SeerShape &targetSeerShape = payloadIn.updateMap.equal_range(InputTypes::target).first->second->getSeerShape();
+    const SeerShape &targetSeerShape = payloadIn.updateMap.equal_range(InputType::target).first->second->getSeerShape();
     
     TopTools_ListOfShape closingFaceShapes = resolveClosingFaces(targetSeerShape);
     

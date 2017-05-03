@@ -19,11 +19,17 @@
   </xs:sequence>
 </xs:complexType>
 
+<xs:complexType name="InputTypes">
+  <xs:sequence maxOccurs="unbounded">
+    <xs:element name="array" type="xs:string"/>
+  </xs:sequence>
+</xs:complexType>
+
 <xs:complexType name="Connection">
   <xs:all>
     <xs:element name="sourceId" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
     <xs:element name="targetId" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
-    <xs:element name="inputType" type="xs:string" default="None"/>
+    <xs:element name="inputType" type="srl:InputTypes"/>
   </xs:all>
 </xs:complexType>
 

@@ -180,10 +180,10 @@ void Blend::updateModel(const UpdatePayload &payloadIn)
   setFailure();
   try
   {
-    if (payloadIn.updateMap.count(InputTypes::target) != 1)
+    if (payloadIn.updateMap.count(InputType::target) != 1)
       throw std::runtime_error("no parent for blend");
     
-    const Base *targetFeature = payloadIn.updateMap.equal_range(InputTypes::target).first->second;
+    const Base *targetFeature = payloadIn.updateMap.equal_range(InputType::target).first->second;
     const SeerShape &targetSeerShape = targetFeature->getSeerShape();
     
     BRepFilletAPI_MakeFillet blendMaker(targetSeerShape.getRootOCCTShape());

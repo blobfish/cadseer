@@ -129,7 +129,7 @@ Blend::Blend(ftr::Blend *editBlendIn, QWidget *parent) : QDialog(parent), blend(
   //what if the established feature doesn't have parent??
   ftr::EditMap editMap = project->getParentMap(blend->getId());
   assert(editMap.size() == 1);
-  auto it = editMap.find(ftr::InputTypes::target);
+  auto it = editMap.find(ftr::InputType::target);
   assert(it != editMap.end());
   blendParent = it->second;
   
@@ -262,7 +262,7 @@ void Blend::finishDialog()
     updateBlendFeature();
     
     project->addFeature(blendSmart);
-    project->connect(blendParent->getId(), blendSmart->getId(), ftr::InputTypes::target);
+    project->connect(blendParent->getId(), blendSmart->getId(), ftr::InputType{ftr::InputType::target});
     
     blendParent->hide3D();
     blendParent->hideOverlay();

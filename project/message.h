@@ -23,7 +23,7 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <feature/inputtypes.h>
+#include <feature/inputtype.h>
 
 namespace ftr{class Base;}
 
@@ -35,7 +35,7 @@ namespace prj
     boost::uuids::uuid featureId;
     boost::uuids::uuid featureId2;
     std::shared_ptr<ftr::Base> feature;
-    ftr::InputTypes inputType;
+    ftr::InputType inputType;
     std::string directory;
     std::string gitMessage;
   };

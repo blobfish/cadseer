@@ -29,7 +29,7 @@
 #include <boost/graph/graphviz.hpp>
 
 #include <tools/idtools.h>
-#include <feature/inputtypes.h>
+#include <feature/inputtype.h>
 #include <feature/base.h>
 
 namespace prg
@@ -45,7 +45,7 @@ namespace prg
 
   struct EdgeProperty
   {
-    ftr::InputTypes inputType;
+    ftr::InputType inputType;
   };
   /*! @brief needed to create an internal index for graph edges. needed for setS. Not needed upon implementation*/
   typedef boost::property<boost::edge_index_t, std::size_t, EdgeProperty> edge_prop;
@@ -69,9 +69,10 @@ namespace prg
       template <class EdgeW>
       void operator()(std::ostream& out, const EdgeW& edgeW) const
       {
-        out << "[label=\"" <<
-            ftr::getInputTypeString(graphEW[edgeW].inputType) <<
-            "\"]";
+        out << "[label=\"";
+        for (const auto &input : graphEW[edgeW].inputType.tags)
+          out << input << "\\n";
+        out << "\"]";
       }
     private:
       const GraphEW &graphEW;
@@ -171,7 +172,7 @@ namespace prg
       {
         if (!graph)
           return false;
-        return (*graph)[edgeIn].inputType == ftr::InputTypes::target;
+        return (*graph)[edgeIn].inputType.has(ftr::InputType::target);
       }
       const GraphTypeIn *graph;
     };

@@ -83,10 +83,10 @@ void Draft::updateModel(const UpdatePayload &payloadIn)
   setFailure();
   try
   {
-    if (payloadIn.updateMap.count(InputTypes::target) != 1)
+    if (payloadIn.updateMap.count(InputType::target) != 1)
       throw std::runtime_error("no parent for blend");
     
-    const SeerShape &targetSeerShape = payloadIn.updateMap.equal_range(InputTypes::target).first->second->getSeerShape();
+    const SeerShape &targetSeerShape = payloadIn.updateMap.equal_range(InputType::target).first->second->getSeerShape();
     
     //neutral plane might be outside of target, if so we should have an input with a type of 'tool'
 //     const TopoDS_Shape &tool; //TODO

@@ -53,9 +53,9 @@ updateMap(updateMapIn),
 builder(builderIn),
 iMapWrapper(iMapWrapperIn),
 seerShapeOut(seerShapeOutIn),
-inputTarget(updateMap.find(ftr::InputTypes::target)->second->getSeerShape())
+inputTarget(updateMap.find(ftr::InputType::target)->second->getSeerShape())
 {
-  for (auto pairIt = updateMapIn.equal_range(InputTypes::tool); pairIt.first != pairIt.second; ++pairIt.first)
+  for (auto pairIt = updateMapIn.equal_range(InputType::tool); pairIt.first != pairIt.second; ++pairIt.first)
   {
     const SeerShape &toolSeerShape = pairIt.first->second->getSeerShape();
     assert(!toolSeerShape.isNull());

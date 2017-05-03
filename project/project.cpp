@@ -132,7 +132,8 @@ void Project::updateModel()
     for(;inEdgeIt != inEdgeItDone; ++inEdgeIt)
     {
       Vertex source = boost::source(*inEdgeIt, projectGraph);
-      updateMap.insert(std::make_pair(projectGraph[*inEdgeIt].inputType, projectGraph[source].feature.get()));
+      for (const auto &tag : projectGraph[*inEdgeIt].inputType.tags)
+        updateMap.insert(std::make_pair(tag, projectGraph[source].feature.get()));
     }
     ftr::UpdatePayload payload(updateMap, *shapeHistory);
     cFeature->updateModel(payload);
@@ -299,7 +300,7 @@ void Project::removeFeature(const uuid& idIn)
     Vertex targetParent = parents.front().first;
     for (const auto &current : parents)
     {
-      if (projectGraph[current.second].inputType == ftr::InputTypes::target)
+      if (projectGraph[current.second].inputType.has(ftr::InputType::target))
       {
         targetParent = current.first;
         break;
@@ -466,7 +467,7 @@ void Project::updateLeafStatus()
   }
 }
 
-void Project::connect(const boost::uuids::uuid& parentIn, const boost::uuids::uuid& childIn, ftr::InputTypes type)
+void Project::connect(const boost::uuids::uuid& parentIn, const boost::uuids::uuid& childIn, const ftr::InputType &type)
 {
   Vertex parent = map.at(parentIn);
   Vertex child = map.at(childIn);
@@ -699,7 +700,7 @@ void Project::indexVerticesEdges()
   }
 }
 
-Edge Project::connect(Vertex parentIn, Vertex childIn, ftr::InputTypes type)
+Edge Project::connect(Vertex parentIn, Vertex childIn, const ftr::InputType &type)
 {
   Edge edge = connectVertices(parentIn, childIn, type);
   
@@ -714,7 +715,7 @@ Edge Project::connect(Vertex parentIn, Vertex childIn, ftr::InputTypes type)
   return edge;
 }
 
-Edge Project::connectVertices(Vertex parent, Vertex child, ftr::InputTypes type)
+Edge Project::connectVertices(Vertex parent, Vertex child, const ftr::InputType &type)
 {
   bool results;
   Edge newEdge;
@@ -862,10 +863,12 @@ void Project::serialWrite()
   prj::srl::Connections connections;
   BGL_FORALL_EDGES(currentEdge, projectGraph, Graph)
   {
-    std::string inputTypeString = ftr::getInputTypeString(projectGraph[currentEdge].inputType);
+    prj::srl::InputTypes inputTypes;
+    for (const auto &tag : projectGraph[currentEdge].inputType.tags)
+      inputTypes.array().push_back(tag);
     ftr::Base *s = projectGraph[boost::source(currentEdge, projectGraph)].feature.get();
     ftr::Base *t = projectGraph[boost::target(currentEdge, projectGraph)].feature.get();
-    connections.connection().push_back(prj::srl::Connection(gu::idToString(s->getId()), gu::idToString(t->getId()), inputTypeString));
+    connections.connection().push_back(prj::srl::Connection(gu::idToString(s->getId()), gu::idToString(t->getId()), inputTypes));
   }
   
   expr::StringTranslator sTranslator(*expressionManager);
@@ -955,7 +958,10 @@ void Project::open()
     {
       uuid source = gu::stringToId(fConnection.sourceId());
       uuid target = gu::stringToId(fConnection.targetId());
-      ftr::InputTypes inputType = ftr::getInputFromString(fConnection.inputType());
+      
+      ftr::InputType inputType;
+      for (const auto &sInputType : fConnection.inputType().array())
+        inputType.insert(sInputType);
       connect(source, target, inputType);
     }
     
@@ -1058,8 +1064,11 @@ ftr::EditMap Project::getParentMap(const boost::uuids::uuid &idIn) const
   ftr::EditMap updateMap;
   for (const auto &pair : getParents(findVertex(idIn)))
   {
-    auto temp = std::make_pair(projectGraph[pair.second].inputType, projectGraph[pair.first].feature.get());
-    updateMap.insert(temp);
+    for (const auto &tag : projectGraph[pair.second].inputType.tags)
+    {
+      auto temp = std::make_pair(tag, projectGraph[pair.first].feature.get());
+      updateMap.insert(temp);
+    }
   }
   
   return updateMap;

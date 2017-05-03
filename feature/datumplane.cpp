@@ -111,7 +111,7 @@ osg::Matrixd DatumPlanePlanarOffset::solve(const UpdatePayload::UpdateMap &mapIn
   if (mapIn.size() != 1)
     throw std::runtime_error("DatumPlanePlanarOffset: wrong number of inputs");
   
-  UpdatePayload::UpdateMap::const_iterator it = mapIn.find(InputTypes::create);
+  UpdatePayload::UpdateMap::const_iterator it = mapIn.find(InputType::create);
   if (it == mapIn.end())
     throw std::runtime_error("DatumPlanePlanarOffset: no input feature");
   
@@ -215,7 +215,7 @@ DatumPlaneConnections DatumPlanePlanarOffset::setUpFromSelection(const slc::Cont
   
   DatumPlaneConnections out;
   DatumPlaneConnection connection;
-  connection.inputType = ftr::InputTypes::create;
+  connection.inputType = ftr::InputType{ftr::InputType::create};
   connection.parentId = containersIn.at(0).featureId;
   out.push_back(connection);
   
@@ -250,7 +250,7 @@ osg::Matrixd DatumPlanePlanarCenter::solve(const UpdatePayload::UpdateMap &mapIn
   if (mapIn.size() == 1)
   {
     //note: can't do a center with only 1 datum plane. so we know this condition must be a shape.
-    UpdatePayload::UpdateMap::const_iterator it = mapIn.find(InputTypes::create);
+    UpdatePayload::UpdateMap::const_iterator it = mapIn.find(InputType::create);
     if (it == mapIn.end())
       throw std::runtime_error("DatumPlanePlanarCenter: Conflict between map size and count");
     if (!it->second->hasSeerShape())
@@ -291,7 +291,7 @@ osg::Matrixd DatumPlanePlanarCenter::solve(const UpdatePayload::UpdateMap &mapIn
   {
     //with 2 inputs, either one can be a face or a datum.
     double radius1, radius2;
-    auto it = mapIn.equal_range(InputTypes::create);
+    auto it = mapIn.equal_range(InputType::create);
     assert(std::distance(it.first, it.second) == 2);
     const Base *feature1 = it.first->second;
     it.first++;
@@ -433,16 +433,16 @@ DatumPlaneConnections DatumPlanePlanarCenter::setUpFromSelection(const slc::Cont
   DatumPlaneConnections out;
   if (containersIn.at(0).featureId == containersIn.at(1).featureId)
   {
-    connection.inputType = ftr::InputTypes::create;
+    connection.inputType = ftr::InputType{ftr::InputType::create};
     connection.parentId = containersIn.at(0).featureId;
     out.push_back(connection);
   }
   else
   {
-    connection.inputType = ftr::InputTypes::create;
+    connection.inputType = ftr::InputType{ftr::InputType::create};
     connection.parentId = containersIn.at(0).featureId;
     out.push_back(connection);
-    connection.inputType = ftr::InputTypes::create;
+    connection.inputType = ftr::InputType{ftr::InputType::create};
     connection.parentId = containersIn.at(1).featureId;
     out.push_back(connection);
   }
@@ -502,7 +502,7 @@ osg::Matrixd DatumPlanePlanarParallelThroughEdge::solve(const UpdatePayload::Upd
   {
     //if only one 'in' connection that means we have a face and an edge belonging to
     //the same object.
-    UpdatePayload::UpdateMap::const_iterator it = mapIn.find(InputTypes::create);
+    UpdatePayload::UpdateMap::const_iterator it = mapIn.find(InputType::create);
     if (it == mapIn.end())
       throw std::runtime_error("DatumPlanarParallelThroughEdge: Conflict between map size and count");
     
@@ -547,7 +547,7 @@ osg::Matrixd DatumPlanePlanarParallelThroughEdge::solve(const UpdatePayload::Upd
   {
     bool foundPlane = false;
     bool foundEdge = false;
-    auto it = mapIn.equal_range(InputTypes::create);
+    auto it = mapIn.equal_range(InputType::create);
     assert(std::distance(it.first, it.second) == 2);
     const Base *feature1 = it.first->second;
     it.first++;
@@ -708,7 +708,7 @@ DatumPlaneConnections DatumPlanePlanarParallelThroughEdge::setUpFromSelection(co
   DatumPlaneConnections out;
   if (containersIn.at(0).featureId == containersIn.at(1).featureId)
   {
-    connection.inputType = InputTypes::create;
+    connection.inputType = ftr::InputType{InputType::create};
     connection.parentId = containersIn.at(0).featureId;
     out.push_back(connection);
     
@@ -734,7 +734,7 @@ DatumPlaneConnections DatumPlanePlanarParallelThroughEdge::setUpFromSelection(co
     {
       facePick.id = container.shapeId;
       facePick.shapeHistory = historyIn.createDevolveHistory(facePick.id);
-      connection.inputType = InputTypes::create;
+      connection.inputType = ftr::InputType{InputType::create};
       connection.parentId = container.featureId;
       out.push_back(connection);
     }
@@ -742,7 +742,7 @@ DatumPlaneConnections DatumPlanePlanarParallelThroughEdge::setUpFromSelection(co
     {
       edgePick.id = container.shapeId;
       edgePick.shapeHistory = historyIn.createDevolveHistory(edgePick.id);
-      connection.inputType = InputTypes::create;
+      connection.inputType = ftr::InputType{InputType::create};
       connection.parentId = container.featureId;
       out.push_back(connection);
     }
@@ -750,7 +750,7 @@ DatumPlaneConnections DatumPlanePlanarParallelThroughEdge::setUpFromSelection(co
     {
       facePick.id = container.shapeId; //will be nil
       //no shape history?
-      connection.inputType = InputTypes::create;
+      connection.inputType = ftr::InputType{InputType::create};
       connection.parentId = container.featureId;
       out.push_back(connection);
     }

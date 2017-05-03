@@ -74,6 +74,7 @@ namespace prj
   {
     class Feature;
     class Features;
+    class InputTypes;
     class Connection;
     class Connections;
     class AppVersion;
@@ -559,6 +560,164 @@ namespace prj
     };
 
     /**
+     * @brief Class corresponding to the %InputTypes schema type.
+     *
+     * @nosubgrouping
+     */
+    class InputTypes: public ::xml_schema::Type
+    {
+      public:
+      /**
+       * @name array
+       *
+       * @brief Accessor and modifier functions for the %array
+       * sequence element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::xml_schema::String ArrayType;
+
+      /**
+       * @brief Element sequence container type.
+       */
+      typedef ::xsd::cxx::tree::sequence< ArrayType > ArraySequence;
+
+      /**
+       * @brief Element iterator type.
+       */
+      typedef ArraySequence::iterator ArrayIterator;
+
+      /**
+       * @brief Element constant iterator type.
+       */
+      typedef ArraySequence::const_iterator ArrayConstIterator;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< ArrayType, char > ArrayTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element
+       * sequence.
+       *
+       * @return A constant reference to the sequence container.
+       */
+      const ArraySequence&
+      array () const;
+
+      /**
+       * @brief Return a read-write reference to the element sequence.
+       *
+       * @return A reference to the sequence container.
+       */
+      ArraySequence&
+      array ();
+
+      /**
+       * @brief Copy elements from a given sequence.
+       *
+       * @param s A sequence to copy elements from.
+       *
+       * For each element in @a s this function makes a copy and adds it 
+       * to the sequence. Note that this operation completely changes the 
+       * sequence and all old elements will be lost.
+       */
+      void
+      array (const ArraySequence& s);
+
+      //@}
+
+      /**
+       * @name Constructors
+       */
+      //@{
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes.
+       */
+      InputTypes ();
+
+      /**
+       * @brief Create an instance from a DOM element.
+       *
+       * @param e A DOM element to extract the data from.
+       * @param f Flags to create the new instance with.
+       * @param c A pointer to the object that will contain the new
+       * instance.
+       */
+      InputTypes (const ::xercesc::DOMElement& e,
+                  ::xml_schema::Flags f = 0,
+                  ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy constructor.
+       *
+       * @param x An instance to make a copy of.
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      InputTypes (const InputTypes& x,
+                  ::xml_schema::Flags f = 0,
+                  ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy the instance polymorphically.
+       *
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       * @return A pointer to the dynamically allocated copy.
+       *
+       * This function ensures that the dynamic type of the instance is
+       * used for copying and should be used for polymorphic object
+       * models instead of the copy constructor.
+       */
+      virtual InputTypes*
+      _clone (::xml_schema::Flags f = 0,
+              ::xml_schema::Container* c = 0) const;
+
+      /**
+       * @brief Copy assignment operator.
+       *
+       * @param x An instance to make a copy of.
+       * @return A reference to itself.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      InputTypes&
+      operator= (const InputTypes& x);
+
+      //@}
+
+      /**
+       * @brief Destructor.
+       */
+      virtual 
+      ~InputTypes ();
+
+      // Implementation.
+      //
+
+      //@cond
+
+      protected:
+      void
+      parse (::xsd::cxx::xml::dom::parser< char >&,
+             ::xml_schema::Flags);
+
+      protected:
+      ArraySequence array_;
+
+      //@endcond
+    };
+
+    /**
      * @brief Class corresponding to the %Connection schema type.
      *
      * @nosubgrouping
@@ -711,7 +870,7 @@ namespace prj
       /**
        * @brief Element type.
        */
-      typedef ::xml_schema::String InputTypeType;
+      typedef ::prj::srl::InputTypes InputTypeType;
 
       /**
        * @brief Element traits type.
@@ -756,15 +915,6 @@ namespace prj
       void
       inputType (::std::unique_ptr< InputTypeType > p);
 
-      /**
-       * @brief Return the default value for the element.
-       *
-       * @return A read-only (constant) reference to the element's
-       * default value.
-       */
-      static const InputTypeType&
-      inputType_default_value ();
-
       //@}
 
       /**
@@ -779,6 +929,18 @@ namespace prj
       Connection (const SourceIdType&,
                   const TargetIdType&,
                   const InputTypeType&);
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes
+       * (::std::unique_ptr version).
+       *
+       * This constructor will try to use the passed values directly
+       * instead of making copies.
+       */
+      Connection (const SourceIdType&,
+                  const TargetIdType&,
+                  ::std::unique_ptr< InputTypeType >);
 
       /**
        * @brief Create an instance from a DOM element.
@@ -855,7 +1017,6 @@ namespace prj
       ::xsd::cxx::tree::one< TargetIdType > targetId_;
       static const TargetIdType targetId_default_value_;
       ::xsd::cxx::tree::one< InputTypeType > inputType_;
-      static const InputTypeType inputType_default_value_;
 
       //@endcond
     };
@@ -3532,6 +3693,9 @@ namespace prj
 
     void
     operator<< (::xercesc::DOMElement&, const Features&);
+
+    void
+    operator<< (::xercesc::DOMElement&, const InputTypes&);
 
     void
     operator<< (::xercesc::DOMElement&, const Connection&);

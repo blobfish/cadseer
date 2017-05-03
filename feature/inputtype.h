@@ -17,53 +17,49 @@
  *
  */
 
-#ifndef INPUTTYPES_H
-#define INPUTTYPES_H
+#ifndef INPUTTYPE_H
+#define INPUTTYPE_H
 
 #include <assert.h>
 #include <vector>
+#include <set>
 #include <string>
-#include <map>
+#include <initializer_list>
 
 namespace ftr
 {
-  enum class InputTypes
+  //! information describing connection between features
+  class InputType
   {
-    none = 0,
-    target,
-    tool,
-    create
+  public:
+    //@{
+    //! Convenient string constants that may apply to more than one feature.
+    constexpr static const char *target = "Target";
+    constexpr static const char *tool = "Tool";
+    constexpr static const char *create = "Create";
+    //@}
+    
+    //@{
+    //! Constructors
+    InputType(){}
+    InputType(std::initializer_list<std::string> listIn) : tags(listIn){}
+    InputType(const InputType &other) : tags(other.tags){}
+    //@}
+    
+    //@{
+    //! Convenience wrappers around std::set
+    bool has(const std::string &tagIn) const
+    {
+      return tags.count(tagIn) != 0;
+    }
+    void insert(const std::string &tagIn)
+    {
+      tags.insert(tagIn);
+    }
+    //@}
+    
+    std::set<std::string> tags;
   };
-    
-  inline const static std::string& getInputTypeString(InputTypes typeIn)
-  {
-    const static std::vector<std::string> strings = 
-    {
-      "None",
-      "Target",
-      "Tool",
-      "Create"
-    };
-    
-    std::size_t casted = static_cast<std::size_t>(typeIn);
-    assert(casted < strings.size());
-    return strings.at(casted);
-  }
-  
-  inline const static InputTypes getInputFromString(const std::string &stringIn)
-  {
-    const static std::map<std::string, InputTypes> map
-    {
-      {"None", InputTypes::none},
-      {"Target", InputTypes::target},
-      {"Tool", InputTypes::tool},
-      {"Create", InputTypes::create}
-    };
-    
-    auto it = map.find(stringIn);
-    assert(it != map.end());
-    return it->second;
-  }
   
   enum class Descriptor
   {
@@ -87,4 +83,4 @@ namespace ftr
   }
 }
 
-#endif //INPUTTYPES_H
+#endif //INPUTTYPE_H

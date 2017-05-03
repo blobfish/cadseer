@@ -49,24 +49,24 @@ void Subtract::updateModel(const UpdatePayload &payloadIn)
   {
     if
     (
-      payloadIn.updateMap.count(InputTypes::target) != 1 ||
-      payloadIn.updateMap.count(InputTypes::tool) < 1
+      payloadIn.updateMap.count(InputType::target) != 1 ||
+      payloadIn.updateMap.count(InputType::tool) < 1
     )
     {
       //we should have a status message in the base class.
       std::ostringstream stream;
       stream << "wrong number of arguments.   " <<
-      "target count is: " << payloadIn.updateMap.count(InputTypes::target) << "   " <<
-      "tool count is: " << payloadIn.updateMap.count(InputTypes::tool);
+      "target count is: " << payloadIn.updateMap.count(InputType::target) << "   " <<
+      "tool count is: " << payloadIn.updateMap.count(InputType::tool);
       throw std::runtime_error(stream.str());
     }
     
     //target
-    const SeerShape &targetSeerShape = payloadIn.updateMap.equal_range(InputTypes::target).first->second->getSeerShape();
+    const SeerShape &targetSeerShape = payloadIn.updateMap.equal_range(InputType::target).first->second->getSeerShape();
     assert(!targetSeerShape.isNull());
     //tools
     gu::ShapeVector toolOCCTShapes;
-    for (auto pairIt = payloadIn.updateMap.equal_range(InputTypes::tool); pairIt.first != pairIt.second; ++pairIt.first)
+    for (auto pairIt = payloadIn.updateMap.equal_range(InputType::tool); pairIt.first != pairIt.second; ++pairIt.first)
     {
       const SeerShape &toolSeerShape = pairIt.first->second->getSeerShape();
       assert(!toolSeerShape.isNull());
@@ -83,13 +83,13 @@ void Subtract::updateModel(const UpdatePayload &payloadIn)
     
     seerShape->setOCCTShape(subtracter.Shape());
     seerShape->shapeMatch(targetSeerShape);
-    for (auto pairIt = payloadIn.updateMap.equal_range(InputTypes::tool); pairIt.first != pairIt.second; ++pairIt.first)
+    for (auto pairIt = payloadIn.updateMap.equal_range(InputType::tool); pairIt.first != pairIt.second; ++pairIt.first)
       seerShape->shapeMatch(pairIt.first->second->getSeerShape());
     seerShape->uniqueTypeMatch(targetSeerShape);
     BooleanIdMapper idMapper(payloadIn.updateMap, subtracter.getBuilder(), iMapWrapper, seerShape.get());
     idMapper.go();
     seerShape->outerWireMatch(targetSeerShape);
-    for (auto pairIt = payloadIn.updateMap.equal_range(InputTypes::tool); pairIt.first != pairIt.second; ++pairIt.first)
+    for (auto pairIt = payloadIn.updateMap.equal_range(InputType::tool); pairIt.first != pairIt.second; ++pairIt.first)
       seerShape->outerWireMatch(pairIt.first->second->getSeerShape());
     seerShape->derivedMatch();
     seerShape->dumpNils(getTypeString()); //only if there are shapes with nil ids.

@@ -38,7 +38,7 @@
 #include <osg/LOD>
 
 #include <feature/types.h>
-#include <feature/inputtypes.h>
+#include <feature/inputtype.h>
 #include <feature/states.h>
 #include <feature/parameter.h>
 
@@ -58,7 +58,7 @@ namespace ftr
    * not const because we want to hide and and show etc.
    * parents, but no 'real' change should be done.
    */
-  typedef std::multimap<InputTypes, Base*> EditMap;
+  typedef std::multimap<std::string, Base*> EditMap;
   
   /*! @brief Update information needed by features.
    * 
@@ -72,7 +72,7 @@ namespace ftr
   class UpdatePayload
   {
   public:
-    typedef std::multimap<InputTypes, const Base*> UpdateMap;
+    typedef std::multimap<std::string, const Base*> UpdateMap;
     
     UpdatePayload(const UpdateMap &updateMapIn, const ShapeHistory &shapeHistoryIn) :
     updateMap(updateMapIn),

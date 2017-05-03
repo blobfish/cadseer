@@ -275,7 +275,6 @@ void Model::connectionRemovedDispatched(const msg::Message &messageIn)
   Edge edge;
   std::tie(edge, results) = boost::edge(parentVertex, childVertex, graph);
   assert(results);
-  assert(graph[edge].inputType == message.inputType);
   
   removeEdgeItemsFromScene(edge);
   boost::remove_edge(edge, graph);
@@ -577,7 +576,7 @@ void Model::projectUpdatedDispatched(const msg::Message &)
       GraphReversed::edge_descriptor currentEdge;
       std::tie(currentEdge, results) = boost::edge(currentVertex, *parentIt, rGraph);
       assert(results);
-      if (rGraph[currentEdge].inputType == ftr::InputTypes::target)
+      if (rGraph[currentEdge].inputType.has(ftr::InputType::target))
         targetMask |= rGraph[*parentIt].columnMask; //should only be 1 target parent.
       
       auto parentSortedIndex = rGraph[*parentIt].sortedIndex;

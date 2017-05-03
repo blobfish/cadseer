@@ -64,7 +64,7 @@ namespace ftr
   struct DatumPlaneConnection
   {
     boost::uuids::uuid parentId;
-    InputTypes inputType;
+    InputType inputType;
   };
   typedef std::vector<DatumPlaneConnection> DatumPlaneConnections;
   

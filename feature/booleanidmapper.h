@@ -25,7 +25,7 @@
 
 #include <boost/uuid/uuid.hpp>
 
-#include <feature/inputtypes.h>
+#include <feature/inputtype.h>
 
 class BOPAlgo_Builder;
 class TopoDS_Shape;
@@ -36,7 +36,7 @@ namespace ftr
   class ResultContainerWrapper;
   class IMapWrapper;
   class SeerShape;
-  typedef std::multimap<InputTypes, const Base*> UpdateMap;
+  typedef std::multimap<std::string, const Base*> UpdateMap;
   
   class BooleanIdMapper
   {

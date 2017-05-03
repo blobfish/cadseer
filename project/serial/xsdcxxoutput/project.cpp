@@ -154,6 +154,28 @@ namespace prj
     }
 
 
+    // InputTypes
+    // 
+
+    const InputTypes::ArraySequence& InputTypes::
+    array () const
+    {
+      return this->array_;
+    }
+
+    InputTypes::ArraySequence& InputTypes::
+    array ()
+    {
+      return this->array_;
+    }
+
+    void InputTypes::
+    array (const ArraySequence& s)
+    {
+      this->array_ = s;
+    }
+
+
     // Connection
     // 
 
@@ -239,12 +261,6 @@ namespace prj
     inputType (::std::unique_ptr< InputTypeType > x)
     {
       this->inputType_.set (std::move (x));
-    }
-
-    const Connection::InputTypeType& Connection::
-    inputType_default_value ()
-    {
-      return inputType_default_value_;
     }
 
 
@@ -1076,6 +1092,88 @@ namespace prj
     {
     }
 
+    // InputTypes
+    //
+
+    InputTypes::
+    InputTypes ()
+    : ::xml_schema::Type (),
+      array_ (this)
+    {
+    }
+
+    InputTypes::
+    InputTypes (const InputTypes& x,
+                ::xml_schema::Flags f,
+                ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      array_ (x.array_, f, this)
+    {
+    }
+
+    InputTypes::
+    InputTypes (const ::xercesc::DOMElement& e,
+                ::xml_schema::Flags f,
+                ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      array_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void InputTypes::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // array
+        //
+        if (n.name () == "array" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< ArrayType > r (
+            ArrayTraits::create (i, f, this));
+
+          this->array_.push_back (::std::move (r));
+          continue;
+        }
+
+        break;
+      }
+    }
+
+    InputTypes* InputTypes::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class InputTypes (*this, f, c);
+    }
+
+    InputTypes& InputTypes::
+    operator= (const InputTypes& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->array_ = x.array_;
+      }
+
+      return *this;
+    }
+
+    InputTypes::
+    ~InputTypes ()
+    {
+    }
+
     // Connection
     //
 
@@ -1085,9 +1183,6 @@ namespace prj
     const Connection::TargetIdType Connection::targetId_default_value_ (
       "00000000-0000-0000-0000-000000000000");
 
-    const Connection::InputTypeType Connection::inputType_default_value_ (
-      "None");
-
     Connection::
     Connection (const SourceIdType& sourceId,
                 const TargetIdType& targetId,
@@ -1096,6 +1191,17 @@ namespace prj
       sourceId_ (sourceId, this),
       targetId_ (targetId, this),
       inputType_ (inputType, this)
+    {
+    }
+
+    Connection::
+    Connection (const SourceIdType& sourceId,
+                const TargetIdType& targetId,
+                ::std::unique_ptr< InputTypeType > inputType)
+    : ::xml_schema::Type (),
+      sourceId_ (sourceId, this),
+      targetId_ (targetId, this),
+      inputType_ (std::move (inputType), this)
     {
     }
 
@@ -2771,6 +2877,26 @@ namespace prj
         ::xercesc::DOMElement& s (
           ::xsd::cxx::xml::dom::create_element (
             "feature",
+            e));
+
+        s << *b;
+      }
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const InputTypes& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // array
+      //
+      for (InputTypes::ArrayConstIterator
+           b (i.array ().begin ()), n (i.array ().end ());
+           b != n; ++b)
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "array",
             e));
 
         s << *b;

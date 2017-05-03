@@ -34,7 +34,7 @@
 
 #include <tools/idtools.h>
 #include <feature/base.h>
-#include <feature/inputtypes.h>
+#include <feature/inputtype.h>
 #include <dagview/dagrectitem.h>
 
 using boost::uuids::uuid;
@@ -110,7 +110,7 @@ namespace dag
   {
     EdgeProperty();
     std::shared_ptr <QGraphicsPathItem> connector; //!< line representing link between nodes.
-    ftr::InputTypes inputType;
+    ftr::InputType inputType;
   };
   /*! @brief needed to create an internal index for graph edges. needed for setS. Not needed upon implementation*/
   typedef boost::property<boost::edge_index_t, std::size_t, EdgeProperty> edge_prop;
@@ -133,10 +133,10 @@ namespace dag
     template <class EdgeW>
     void operator()(std::ostream& out, const EdgeW& edgeW) const
     {
-      out << 
-        "[label=\"" <<
-        getInputTypeString(graphEW[edgeW].inputType) <<
-        "\"]";
+      out << "[label=\"";
+      for (const auto &input : graphEW[edgeW].inputType.tags)
+        out << input << "\\n";
+      out << "\"]";
     }
   private:
     const GraphEW &graphEW;

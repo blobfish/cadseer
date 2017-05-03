@@ -59,7 +59,7 @@ public:
     void addFeature(std::shared_ptr<ftr::Base> feature);
     void removeFeature(const boost::uuids::uuid &idIn);
     void setCurrentLeaf(const boost::uuids::uuid &idIn);
-    void connect(const boost::uuids::uuid &parentIn, const boost::uuids::uuid &childIn, ftr::InputTypes type);
+    void connect(const boost::uuids::uuid &parentIn, const boost::uuids::uuid &childIn, const ftr::InputType &type);
     
     void setSaveDirectory(const std::string &directoryIn);
     std::string getSaveDirectory() const {return saveDirectory;}
@@ -80,8 +80,8 @@ public:
 private:
     //! index all the vertices of the graph. needed for algorthims when using listS.
     void indexVerticesEdges();
-    prg::Edge connect(prg::Vertex parentIn, prg::Vertex childIn, ftr::InputTypes type);
-    prg::Edge connectVertices(prg::Vertex parent, prg::Vertex child, ftr::InputTypes type);
+    prg::Edge connect(prg::Vertex parentIn, prg::Vertex childIn, const ftr::InputType &type);
+    prg::Edge connectVertices(prg::Vertex parent, prg::Vertex child, const ftr::InputType &type);
     prg::Vertex findVertex(const boost::uuids::uuid &idIn) const;
     typedef std::pair<prg::Vertex, prg::Edge> VertexEdgePair;
     typedef std::vector<VertexEdgePair> VertexEdgePairs;

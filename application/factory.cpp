@@ -377,9 +377,9 @@ void Factory::newUnionDispatched(const msg::Message&)
   //union keyword. whoops
   std::shared_ptr<ftr::Union> onion(new ftr::Union());
   project->addFeature(onion);
-  project->connect(featureIds.at(0), onion->getId(), ftr::InputTypes::target);
+  project->connect(featureIds.at(0), onion->getId(), ftr::InputType{ftr::InputType::target});
   for (auto it = featureIds.begin() + 1; it != featureIds.end(); ++it)
-    project->connect(*it, onion->getId(), ftr::InputTypes::tool);
+    project->connect(*it, onion->getId(), ftr::InputType{ftr::InputType::tool});
   
   onion->setColor(project->findFeature(featureIds.at(0))->getColor());
   
@@ -425,9 +425,9 @@ void Factory::newSubtractDispatched(const msg::Message&)
   
   std::shared_ptr<ftr::Subtract> subtract(new ftr::Subtract());
   project->addFeature(subtract);
-  project->connect(featureIds.at(0), subtract->getId(), ftr::InputTypes::target);
+  project->connect(featureIds.at(0), subtract->getId(), ftr::InputType{ftr::InputType::target});
   for (auto it = featureIds.begin() + 1; it != featureIds.end(); ++it)
-    project->connect(*it, subtract->getId(), ftr::InputTypes::tool);
+    project->connect(*it, subtract->getId(), ftr::InputType{ftr::InputType::tool});
   
   subtract->setColor(project->findFeature(featureIds.at(0))->getColor());
   
@@ -473,9 +473,9 @@ void Factory::newIntersectDispatched(const msg::Message&)
   
   std::shared_ptr<ftr::Intersect> intersect(new ftr::Intersect());
   project->addFeature(intersect);
-  project->connect(featureIds.at(0), intersect->getId(), ftr::InputTypes::target);
+  project->connect(featureIds.at(0), intersect->getId(), ftr::InputType{ftr::InputType::target});
   for (auto it = featureIds.begin() + 1; it != featureIds.end(); ++it)
-    project->connect(*it, intersect->getId(), ftr::InputTypes::tool);
+    project->connect(*it, intersect->getId(), ftr::InputType{ftr::InputType::tool});
   
   intersect->setColor(project->findFeature(featureIds.at(0))->getColor());
   
@@ -521,7 +521,7 @@ void Factory::newChamferDispatched(const msg::Message&)
   std::shared_ptr<ftr::Chamfer> chamfer(new ftr::Chamfer());
   chamfer->addSymChamfer(symChamfer);
   project->addFeature(chamfer);
-  project->connect(targetFeatureId, chamfer->getId(), ftr::InputTypes::target);
+  project->connect(targetFeatureId, chamfer->getId(), ftr::InputType{ftr::InputType::target});
   
   ftr::Base *targetFeature = project->findFeature(targetFeatureId);
   targetFeature->hide3D();
@@ -572,7 +572,7 @@ void Factory::newDraftDispatched(const msg::Message&)
   std::shared_ptr<ftr::Draft> draft(new ftr::Draft());
   draft->setDraft(convey);
   project->addFeature(draft);
-  project->connect(targetFeatureId, draft->getId(), ftr::InputTypes::target);
+  project->connect(targetFeatureId, draft->getId(), ftr::InputType{ftr::InputType::target});
   
   ftr::Base *targetFeature = project->findFeature(targetFeatureId);
   targetFeature->hide3D();
@@ -652,7 +652,7 @@ void Factory::newHollowDispatched(const msg::Message&)
   std::shared_ptr<ftr::Hollow> hollow(new ftr::Hollow());
   hollow->setHollowPicks(hollowPicks);
   project->addFeature(hollow);
-  project->connect(targetFeatureId, hollow->getId(), ftr::InputTypes::target);
+  project->connect(targetFeatureId, hollow->getId(), ftr::InputType{ftr::InputType::target});
   
   targetFeature->hide3D();
   targetFeature->hideOverlay();

@@ -59,7 +59,7 @@ VertexProperty::VertexProperty() :
   textRaw->setData(qtd::key, qtd::text);
 }
 
-EdgeProperty::EdgeProperty() : connector(new QGraphicsPathItem()), inputType(ftr::InputTypes::none)
+EdgeProperty::EdgeProperty() : connector(new QGraphicsPathItem()), inputType()
 {
   connector->setZValue(0.0);
   
