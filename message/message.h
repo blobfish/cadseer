@@ -66,7 +66,7 @@ namespace msg
     static const Mask Command(Mask().set(                       27));//!< command manager
     static const Mask Status(Mask().set(                        28));//!< display status
     static const Mask Text(Mask().set(                          29));//!< text
-    static const Mask OverlayGeometry(Mask().set(               30));//!< viewer
+    static const Mask Overlay(Mask().set(                       30));//!< visual
     static const Mask Construct(Mask().set(                     31));//!< factory action.
     static const Mask ViewTop(Mask().set(                       32));//!< command
     static const Mask ViewFront(Mask().set(                     33));//!< command
@@ -117,6 +117,10 @@ namespace msg
     static const Mask ExportStep(Mask().set(                    78));//!< command move up someday.
     static const Mask ViewIso(Mask().set(                       79));//!< command move up someday.
     static const Mask Oblong(Mask().set(                        80));//!< command move up someday.
+    static const Mask ThreeD(Mask().set(                        81));//!< visual
+    static const Mask Show(Mask().set(                          82));//!< visual
+    static const Mask Hide(Mask().set(                          83));//!< visual
+    static const Mask Toggle(Mask().set(                        84));//!< visual
   
     typedef boost::variant
     <

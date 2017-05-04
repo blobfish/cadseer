@@ -54,20 +54,12 @@ namespace ftr
   class ShapeHistory;
   class Base;
   
-  /*! used during editing to pass in parent features. 
-   * not const because we want to hide and and show etc.
-   * parents, but no 'real' change should be done.
-   */
-  typedef std::multimap<std::string, Base*> EditMap;
-  
   /*! @brief Update information needed by features.
    * 
    * had a choice to make. Feature update will need shapeHistory
    * for resolving references. Features need to fill in shape history
    * even when the update isn't needed. so shape history passed into update
    * is const and we have a virtual method to fill in shape history.
-   * 
-   * 
    */
   class UpdatePayload
   {
@@ -118,7 +110,7 @@ public:
   QString getName() const {return name;}
   ftr::State getState() const {return state;}
   void setColor(const osg::Vec4 &);
-  osg::Vec4& getColor(){return color;}
+  const osg::Vec4& getColor() const {return color;}
   virtual void updateModel(const UpdatePayload&) = 0;
   virtual void updateVisual(); //called after update.
   virtual Type getType() const = 0;

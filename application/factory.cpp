@@ -1117,7 +1117,7 @@ void Factory::linearMeasureDispatched(const msg::Message&)
     dim->setSpread((point2 - point1).length());
     autoTransform->addChild(dim.get());
     
-    msg::Message message(msg::Request | msg::Add | msg::OverlayGeometry);
+    msg::Message message(msg::Request | msg::Add | msg::Overlay);
     vwr::Message vwrMessage;
     vwrMessage.node = autoTransform;
     message.payload = vwrMessage;

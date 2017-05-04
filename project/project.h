@@ -70,7 +70,7 @@ public:
     const ftr::ShapeHistory& getShapeHistory(){return *shapeHistory;}
     void shapeTrackUp(const boost::uuids::uuid &shapeId) const;
     void shapeTrackDown(const boost::uuids::uuid &shapeId) const;
-    ftr::EditMap getParentMap(const boost::uuids::uuid&) const;
+    ftr::UpdatePayload::UpdateMap getParentMap(const boost::uuids::uuid&) const;
     std::vector<boost::uuids::uuid> getLeafChildren(const boost::uuids::uuid&) const;
     
     expr::Manager& getManager(){return *expressionManager;}
@@ -110,6 +110,12 @@ private:
     void checkShapeIdsDispatched(const msg::Message &);
     void featureStateChangedDispatched(const msg::Message &);
     void dumpProjectGraphDispatched(const msg::Message &);
+    void show3DDispatched(const msg::Message &);
+    void hide3DDispatched(const msg::Message &);
+    void toggle3DDispatched(const msg::Message &);
+    void showOverlayDispatched(const msg::Message &);
+    void hideOverlayDispatched(const msg::Message &);
+    void toggleOverlayDispatched(const msg::Message &);
 };
 }
 

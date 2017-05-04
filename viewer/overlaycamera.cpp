@@ -73,10 +73,10 @@ void OverlayCamera::setupDispatcher()
   mask = msg::Response | msg::Pre | msg::CloseProject;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::closeProjectDispatched, this, _1)));
   
-  mask = msg::Request | msg::Add | msg::OverlayGeometry;
+  mask = msg::Request | msg::Add | msg::Overlay;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::addOverlayGeometryDispatched, this, _1)));
   
-  mask = msg::Request | msg::Clear | msg::OverlayGeometry;
+  mask = msg::Request | msg::Clear | msg::Overlay;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::clearOverlayGeometryDispatched, this, _1)));
 }
 

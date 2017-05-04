@@ -701,7 +701,7 @@ void GestureHandler::constructMenu()
     
     osg::MatrixTransform *inspectMeasureClear = gsn::buildCommandNode(":/resources/images/inspectMeasureClear.svg", iconRadius);
     inspectMeasureClear->setMatrix(dummy);
-    inspectMeasureClear->setUserValue(attributeMask, (msg::Request | msg::Clear | msg::OverlayGeometry).to_string());
+    inspectMeasureClear->setUserValue(attributeMask, (msg::Request | msg::Clear | msg::Overlay).to_string());
     inspectMeasureClear->setUserValue(attributeStatus, QObject::tr("Clear Measure Command").toStdString());
     inspectMeasureBase->insertChild(inspectMeasureBase->getNumChildren() - 2, inspectMeasureClear);
     

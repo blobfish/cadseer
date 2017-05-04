@@ -127,7 +127,7 @@ Blend::Blend(ftr::Blend *editBlendIn, QWidget *parent) : QDialog(parent), blend(
   assert(project);
   
   //what if the established feature doesn't have parent??
-  ftr::EditMap editMap = project->getParentMap(blend->getId());
+  ftr::UpdatePayload::UpdateMap editMap = project->getParentMap(blend->getId());
   assert(editMap.size() == 1);
   auto it = editMap.find(ftr::InputType::target);
   assert(it != editMap.end());
@@ -264,8 +264,17 @@ void Blend::finishDialog()
     project->addFeature(blendSmart);
     project->connect(blendParent->getId(), blendSmart->getId(), ftr::InputType{ftr::InputType::target});
     
-    blendParent->hide3D();
-    blendParent->hideOverlay();
+    /* hide parent. can't use non const viz functions */
+    prj::Message pMessage;
+    pMessage.featureId = blendParent->getId();
+    msg::Message message;
+    message.payload = pMessage;
+    
+    message.mask = msg::Request | msg::Hide | msg::ThreeD;
+    observer->outBlocked(message);
+    message.mask = msg::Request | msg::Hide | msg::Overlay;
+    observer->outBlocked(message);
+    
     blend->setColor(blendParent->getColor());
   }
   

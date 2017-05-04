@@ -516,6 +516,24 @@ void Project::setupDispatcher()
   
   mask = msg::Request | msg::DebugDumpProjectGraph;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::dumpProjectGraphDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Show | msg::ThreeD;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::show3DDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Hide | msg::ThreeD;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::hide3DDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Toggle | msg::ThreeD;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::toggle3DDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Show | msg::Overlay;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::showOverlayDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Hide | msg::Overlay;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::hideOverlayDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Toggle | msg::Overlay;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::toggleOverlayDispatched, this, _1)));
 }
 
 void Project::featureStateChangedDispatched(const msg::Message &messageIn)
@@ -678,6 +696,78 @@ void Project::dumpProjectGraphDispatched(const msg::Message &)
   writeGraphViz(fileName.toStdString().c_str());
   
   QDesktopServices::openUrl(QUrl(fileName));
+}
+
+void Project::show3DDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  prj::Message message = boost::get<prj::Message>(messageIn.payload);
+  ftr::Base *feature = findFeature(message.featureId);
+  assert(feature);
+  feature->show3D();
+}
+
+void Project::hide3DDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  prj::Message message = boost::get<prj::Message>(messageIn.payload);
+  ftr::Base *feature = findFeature(message.featureId);
+  assert(feature);
+  feature->hide3D();
+}
+
+void Project::toggle3DDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  prj::Message message = boost::get<prj::Message>(messageIn.payload);
+  ftr::Base *feature = findFeature(message.featureId);
+  assert(feature);
+  feature->toggle3D();
+}
+
+void Project::showOverlayDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  prj::Message message = boost::get<prj::Message>(messageIn.payload);
+  ftr::Base *feature = findFeature(message.featureId);
+  assert(feature);
+  feature->showOverlay();
+}
+
+void Project::hideOverlayDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  prj::Message message = boost::get<prj::Message>(messageIn.payload);
+  ftr::Base *feature = findFeature(message.featureId);
+  assert(feature);
+  feature->hideOverlay();
+}
+
+void Project::toggleOverlayDispatched(const msg::Message &messageIn)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  prj::Message message = boost::get<prj::Message>(messageIn.payload);
+  ftr::Base *feature = findFeature(message.featureId);
+  assert(feature);
+  feature->toggleOverlay();
 }
 
 void Project::indexVerticesEdges()
@@ -1059,9 +1149,9 @@ void Project::shapeTrackDown(const uuid& shapeId) const
   evolve.writeGraphViz("/home/tanderson/.CadSeer/evolveHistory.dot");
 }
 
-ftr::EditMap Project::getParentMap(const boost::uuids::uuid &idIn) const
+ftr::UpdatePayload::UpdateMap Project::getParentMap(const boost::uuids::uuid &idIn) const
 {
-  ftr::EditMap updateMap;
+  ftr::UpdatePayload::UpdateMap updateMap;
   for (const auto &pair : getParents(findVertex(idIn)))
   {
     for (const auto &tag : projectGraph[pair.second].inputType.tags)

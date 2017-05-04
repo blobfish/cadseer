@@ -94,7 +94,7 @@ namespace dlg
   private:
     std::shared_ptr<ftr::Blend> blendSmart;
     ftr::Blend *blend = nullptr;
-    ftr::Base *blendParent = nullptr;
+    const ftr::Base *blendParent = nullptr;
     std::unique_ptr<msg::Observer> observer;
     QListWidget *blendList;
     QStackedWidget *stackedWidget;
