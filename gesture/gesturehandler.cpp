@@ -22,6 +22,8 @@
 
 #include <QImage>
 #include <QGLWidget>
+#include <QMetaObject>
+#include <QCoreApplication>
 
 #include <osgViewer/View>
 #include <osg/Texture2D>
@@ -162,7 +164,8 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
                     msg::Mask msgMask(msgMaskString);
                     msg::Message messageOut;
                     messageOut.mask = msgMask;
-                    observer->out(messageOut);
+//                     observer->out(messageOut);
+                    QMetaObject::invokeMethod(qApp, "messageSlot", Qt::QueuedConnection, Q_ARG(msg::Message, messageOut));
                 }
                 else
                     assert(0); //gesture node doesn't have msgMask attribute;
@@ -172,91 +175,106 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
 
     if (eventAdapter.getEventType() == osgGA::GUIEventAdapter::DRAG)
     {
-        if (!rightButtonDown) //only right button drag
-            return false;
-        if (!dragStarted)
+      if (!rightButtonDown) //only right button drag
+          return false;
+      if (!dragStarted)
+      {
+          dragStarted = true;
+          startDrag(eventAdapter);
+      }
+
+      osg::Matrixd projection = gestureCamera->getProjectionMatrix();
+      osg::Matrixd window = gestureCamera->getViewport()->computeWindowMatrix();
+      osg::Matrixd transformation = projection * window;
+      transformation = osg::Matrixd::inverse(transformation);
+
+      osg::Vec3 temp(eventAdapter.getX(), eventAdapter.getY(), 0.0);
+      temp = transformation * temp;
+
+      osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector = new osgUtil::LineSegmentIntersector
+              (osgUtil::Intersector::MODEL, temp.x(), temp.y());
+      osgUtil::IntersectionVisitor iv(intersector);
+      iv.setTraversalMask(~mdv::gestureCamera);
+      gestureSwitch->accept(iv);
+      
+      //look for icon intersection, but send message when intersecting lines for user feedback.
+      osg::ref_ptr<osg::Drawable> drawable;
+      osg::ref_ptr<osg::MatrixTransform> node;
+      osg::Vec3 hPoint;
+      for (auto &intersection : intersector->getIntersections())
+      {
+        osg::ref_ptr<osg::Drawable> tempDrawable = intersection.drawable;
+        assert(tempDrawable.valid());
+        osg::ref_ptr<osg::MatrixTransform> tempNode = dynamic_cast<osg::MatrixTransform*>
+          (tempDrawable->getParent(0)->getParent(0)->getParent(0));
+        assert(temp.valid());
+        
+        std::string statusString;
+        if (tempNode->getUserValue(attributeStatus, statusString))
+          observer->out(msg::buildStatusMessage(statusString));
+        
+        if (tempDrawable->getName() != "Line")
         {
-            dragStarted = true;
-            startDrag(eventAdapter);
+          drawable = tempDrawable;
+          node = tempNode;
+          hPoint = intersection.getLocalIntersectPoint();
+          break;
+        }
+      }
+      
+      if (!drawable.valid()) //no icon intersection found.
+      {
+        if (currentNodeLeft == false)
+        {
+          currentNodeLeft = true;
+          if (currentNode->getNodeMask() & mdv::gestureMenu)
+            spraySubNodes(temp);
+        }
+        
+        return false;
+      }
+      
+      lastHitPoint = hPoint;
+      if (node == currentNode)
+      {
+        if (currentNodeLeft == true)
+        {
+          currentNodeLeft = false;
+          if (currentNode->getNodeMask() & mdv::gestureMenu)
+              contractSubNodes();
+        }
+      }
+      else
+      {
+        osg::MatrixTransform *parentNode = currentNode;
+        currentNode = node;
+
+        osg::Switch *geometrySwitch = dynamic_cast<osg::Switch*>(parentNode->getChild(parentNode->getNumChildren() - 1));
+        assert(geometrySwitch);
+        geometrySwitch->setAllChildrenOff();
+
+        unsigned int childIndex = parentNode->getChildIndex(currentNode);
+        for (unsigned int index = 0; index < parentNode->getNumChildren() - 2; ++index)
+        {
+          osg::MatrixTransform *childNode = dynamic_cast<osg::MatrixTransform*>(parentNode->getChild(index));
+          assert(childNode);
+
+          if (index != childIndex)
+          {
+            osg::Switch *childGeometrySwitch = dynamic_cast<osg::Switch*>(childNode->getChild(childNode->getNumChildren() - 1));
+            assert(childGeometrySwitch);
+            childGeometrySwitch->setAllChildrenOff();
+          }
+
+          osg::Switch *childLineSwitch = dynamic_cast<osg::Switch*>(childNode->getChild(childNode->getNumChildren() - 2));
+          assert(childLineSwitch);
+          childLineSwitch->setAllChildrenOff();
         }
 
-        osg::Matrixd projection = gestureCamera->getProjectionMatrix();
-        osg::Matrixd window = gestureCamera->getViewport()->computeWindowMatrix();
-        osg::Matrixd transformation = projection * window;
-        transformation = osg::Matrixd::inverse(transformation);
-
-        osg::Vec3 temp(eventAdapter.getX(), eventAdapter.getY(), 0.0);
-        temp = transformation * temp;
-
-        osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector = new osgUtil::LineSegmentIntersector
-                (osgUtil::Intersector::MODEL, temp.x(), temp.y());
-        osgUtil::IntersectionVisitor iv(intersector);
-        iv.setTraversalMask(~mdv::gestureCamera);
-        gestureSwitch->accept(iv);
-
-        if(intersector->containsIntersections())
-        {
-            osg::ref_ptr<osg::MatrixTransform> node = dynamic_cast<osg::MatrixTransform*>
-                    (intersector->getFirstIntersection().drawable->getParent(0)->getParent(0)->getParent(0));
-            assert(node.valid());
-            lastHitPoint = intersector->getFirstIntersection().getLocalIntersectPoint();
-            if (node == currentNode)
-            {
-                if (currentNodeLeft == true)
-                {
-                    currentNodeLeft = false;
-                    if (currentNode->getNodeMask() & mdv::gestureMenu)
-                        contractSubNodes();
-                }
-            }
-            else
-            {
-                osg::MatrixTransform *parentNode = currentNode;
-                currentNode = node;
-
-                std::string statusString;
-                if (currentNode->getUserValue(attributeStatus, statusString))
-                {
-                  observer->out(msg::buildStatusMessage(statusString));
-                }
-
-                osg::Switch *geometrySwitch = dynamic_cast<osg::Switch*>(parentNode->getChild(parentNode->getNumChildren() - 1));
-                assert(geometrySwitch);
-                geometrySwitch->setAllChildrenOff();
-
-                unsigned int childIndex = parentNode->getChildIndex(currentNode);
-                for (unsigned int index = 0; index < parentNode->getNumChildren() - 2; ++index)
-                {
-                    osg::MatrixTransform *childNode = dynamic_cast<osg::MatrixTransform*>(parentNode->getChild(index));
-                    assert(childNode);
-
-                    if (index != childIndex)
-                    {
-                        osg::Switch *childGeometrySwitch = dynamic_cast<osg::Switch*>(childNode->getChild(childNode->getNumChildren() - 1));
-                        assert(childGeometrySwitch);
-                        childGeometrySwitch->setAllChildrenOff();
-                    }
-
-                    osg::Switch *childLineSwitch = dynamic_cast<osg::Switch*>(childNode->getChild(childNode->getNumChildren() - 2));
-                    assert(childLineSwitch);
-                    childLineSwitch->setAllChildrenOff();
-                }
-
-                currentNodeLeft = false;
-                aggregateMatrix = currentNode->getMatrix() * aggregateMatrix;
-            }
-        }
-        else
-        {
-            if (currentNodeLeft == false)
-            {
-                currentNodeLeft = true;
-                if (currentNode->getNodeMask() & mdv::gestureMenu)
-                    spraySubNodes(temp);
-            }
-        }
+        currentNodeLeft = false;
+        aggregateMatrix = currentNode->getMatrix() * aggregateMatrix;
+      }
     }
-
     return false;
 }
 

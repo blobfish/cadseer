@@ -27,7 +27,6 @@
 #include <QFileDialog>
 #include <QTimer>
 
-#include <osgViewer/ViewerEventHandlers>
 #include <osgGA/OrbitManipulator>
 #include <osgDB/ReadFile>
 #include <osgDB/WriteFile>
@@ -147,7 +146,7 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     systemSwitch->setValue(0, prf::manager().rootPtr->visual().display().showCurrentSystem());
 
     view->setSceneData(root);
-    view->addEventHandler(new osgViewer::StatsHandler);
+    view->addEventHandler(new StatsHandler());
     overlayHandler = new slc::OverlayHandler(oCamera);
     view->addEventHandler(overlayHandler.get());
     selectionHandler = new slc::EventHandler(root);
@@ -533,4 +532,21 @@ void ViewerWidget::viewToggleHiddenLinesDispatched(const msg::Message&)
   //set the hidden line state.
   HiddenLineVisitor v(!oldValue);
   root->accept(v);
+}
+
+void StatsHandler::collectWhichCamerasToRenderStatsFor
+(
+  osgViewer::ViewerBase *viewer,
+  osgViewer::ViewerBase::Cameras &cameras
+)
+{
+  osgViewer::ViewerBase::Cameras tempCams;
+  viewer->getCameras(tempCams);
+  for (auto cam : tempCams)
+  {
+    if (cam->getName() == "main")
+      cameras.push_back(cam);
+    if (cam->getName() == "overlay")
+      cameras.push_back(cam);
+  }
 }

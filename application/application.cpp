@@ -50,6 +50,8 @@ using namespace app;
 Application::Application(int &argc, char **argv) :
     QApplication(argc, argv)
 {
+  qRegisterMetaType<msg::Message>("msg::Message");
+  
     spaceballPresent = false;
     observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
     observer->name = "app::Application";
@@ -121,6 +123,12 @@ void Application::quittingSlot()
     {
 //        std::cout << "couldn't disconnect spaceball" << std::endl;
     }
+}
+
+void Application::messageSlot(msg::Message messageIn)
+{
+  //can't block, message might be open file or something we need to handle here.
+  observer->out(messageIn);
 }
 
 bool Application::x11EventFilter(XEvent *event)

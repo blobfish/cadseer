@@ -26,6 +26,7 @@
 #include <Poly_Triangulation.hxx>
 #include <Poly_Polygon3D.hxx>
 #include <Poly_PolygonOnTriangulation.hxx>
+#include <GeomLib.hxx>
 
 #include <osg/Switch>
 #include <osg/Depth>
@@ -308,8 +309,8 @@ void ShapeGeometryBuilder::recursiveConstruct(const TopoDS_Shape &shapeIn)
 void ShapeGeometryBuilder::faceConstruct(const TopoDS_Face &faceIn)
 {
   TopLoc_Location location;
-  Handle(Poly_Triangulation) triangulation;
-  triangulation = BRep_Tool::Triangulation(faceIn, location);
+  const Handle(Poly_Triangulation) &triangulation = BRep_Tool::Triangulation(faceIn, location);
+  //did a test and triangulation doesn't have normals.
 
   if (triangulation.IsNull())
       throw std::runtime_error("null triangulation in face construction");
@@ -329,7 +330,6 @@ void ShapeGeometryBuilder::faceConstruct(const TopoDS_Face &faceIn)
   //vertices.
   const TColgp_Array1OfPnt& nodes = triangulation->Nodes();
   osg::Vec3Array *vertices = dynamic_cast<osg::Vec3Array *>(faceGeometry->getVertexArray());
-  osg::Vec3Array *normals = dynamic_cast<osg::Vec3Array *>(faceGeometry->getNormalArray());
   osg::Vec4Array *colors = dynamic_cast<osg::Vec4Array *>(faceGeometry->getColorArray());
   std::size_t offset = vertices->size();
   for (int index(nodes.Lower()); index < nodes.Upper() + 1; ++index)
@@ -338,8 +338,28 @@ void ShapeGeometryBuilder::faceConstruct(const TopoDS_Face &faceIn)
     if(!identity)
       point.Transform(transformation);
     vertices->push_back(osg::Vec3(point.X(), point.Y(), point.Z()));
-    normals->push_back(osg::Vec3(0.0, 0.0, 0.0));
     colors->push_back(faceGeometry->getColor());
+  }
+  
+  //normals.
+  //now that we are combining faces into one osg::Geometry, osgUtil SmoothingVisitor
+  //wants to 'average' out normals across faces. so we go back to manual calculation
+  //of surface normals.
+  const TColgp_Array1OfPnt2d &uvNodes = triangulation->UVNodes();
+  assert(nodes.Length() == uvNodes.Length());
+  osg::Vec3Array *normals = dynamic_cast<osg::Vec3Array *>(faceGeometry->getNormalArray());
+  opencascade::handle<Geom_Surface> surface = BRep_Tool::Surface(faceIn);
+  if (surface.IsNull())
+    throw std::runtime_error("null surface in face construction");
+  for (int index(uvNodes.Lower()); index < uvNodes.Upper() + 1; ++index)
+  {
+    gp_Dir direction;
+    GeomLib::NormEstim(surface, uvNodes.Value(index), Precision::Confusion(), direction);
+    if(!identity)
+      direction.Transform(transformation);
+    if (!signalOrientation)
+      direction.Reverse();
+    normals->push_back(osg::Vec3(direction.X(), direction.Y(), direction.Z()));
   }
 
   const Poly_Array1OfTriangle& triangles = triangulation->Triangles();
@@ -377,38 +397,6 @@ void ShapeGeometryBuilder::faceConstruct(const TopoDS_Face &faceIn)
     
     record.vertexIndex = (*indices)[factor + 2];
     pSetTriangleWrapper->pSetVertexContainer.insert(record);
-    
-    //now that we are combining faces into one geometry, osgUtil SmoothingVisitor
-    //wants to 'average' out normals across faces. so we go back to manual calculation
-    //of surface normals.
-
-    osg::Vec3 pointOne(vertices->at((*indices)[factor]));
-    osg::Vec3 pointTwo(vertices->at((*indices)[factor + 1]));
-    osg::Vec3 pointThree(vertices->at((*indices)[factor + 2]));
-
-    osg::Vec3 axisOne(pointTwo - pointOne);
-    osg::Vec3 axisTwo(pointThree - pointOne);
-    osg::Vec3 currentNormal(axisOne ^ axisTwo);
-    if (currentNormal.isNaN())
-        continue;
-    currentNormal.normalize();
-
-    osg::Vec3 tempNormal;
-
-    tempNormal = (*normals)[(*indices)[factor]];
-    tempNormal += currentNormal;
-    tempNormal.normalize();
-    (*normals)[(*indices)[factor]] = tempNormal;
-
-    tempNormal = (*normals)[(*indices)[factor + 1]];
-    tempNormal += currentNormal;
-    tempNormal.normalize();
-    (*normals)[(*indices)[factor + 1]] = tempNormal;
-
-    tempNormal = (*normals)[(*indices)[factor + 2]];
-    tempNormal += currentNormal;
-    tempNormal.normalize();
-    (*normals)[(*indices)[factor + 2]] = tempNormal;
   }
   faceGeometry->addPrimitiveSet(indices.get());
   boost::uuids::uuid id = seerShape->findShapeIdRecord(faceIn).id;

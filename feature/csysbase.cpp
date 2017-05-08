@@ -22,6 +22,8 @@
 #include <cmath>
 #include <limits>
 
+#include <QMetaObject>
+#include <QCoreApplication>
 #include <QTextStream>
 
 #include <gp_Trsf.hxx>
@@ -119,7 +121,8 @@ bool DCallBack::receive(const osgManipulator::MotionCommand &commandIn)
       
       if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
       {
-        observer->out(msg::Mask(msg::Request | msg::Update));
+        msg::Message messageOut(msg::Request | msg::Update);
+        QMetaObject::invokeMethod(qApp, "messageSlot", Qt::QueuedConnection, Q_ARG(msg::Message, messageOut));
       }
     }
   }

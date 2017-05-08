@@ -137,6 +137,7 @@ osg::Geode* gsn::buildIconGeode(const char *resourceName, double radius)
   blendFunc->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   
   osg::Geometry *geometry = new osg::Geometry();
+  geometry->setName("Icon");
   geometry->getOrCreateStateSet()->setTextureAttributeAndModes(0, texture.get());
   geometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
   geometry->getOrCreateStateSet()->setAttributeAndModes(blendFunc);
@@ -182,25 +183,30 @@ osg::Geode* gsn::buildIconGeode(const char *resourceName, double radius)
 */
 }
 
+//line is now actually a quad
 osg::Geode* gsn::buildLineGeode()
 {
     osg::ref_ptr<osg::Geometry> geometryLine = new osg::Geometry();
+    geometryLine->setName("Line");
     osg::ref_ptr<osg::Vec3Array> points = new osg::Vec3Array();
-    points->push_back(osg::Vec3(0.0, 0.0, 0.0));
-    points->push_back(osg::Vec3(100.0, 0.0, 0.0));
+    points->push_back(osg::Vec3(0.0, -1.0, 0.0));
+    points->push_back(osg::Vec3(100.0, -1.0, 0.0));
+    points->push_back(osg::Vec3(100.0, 1.0, 0.0));
+    points->push_back(osg::Vec3(0.0, 1.0, 0.0));
     geometryLine->setVertexArray(points);
 
     osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array();
     colors->push_back(osg::Vec4(0.0, 0.0, 0.0, 1.0));
     colors->push_back(osg::Vec4(0.0, 0.0, 0.0, 1.0));
+    colors->push_back(osg::Vec4(0.0, 0.0, 0.0, 1.0));
+    colors->push_back(osg::Vec4(0.0, 0.0, 0.0, 1.0));
     geometryLine->setColorArray(colors.get());
     geometryLine->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
 
-    geometryLine->getOrCreateStateSet()->setAttribute(new osg::LineWidth(2.0f));
     geometryLine->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
     geometryLine->getOrCreateStateSet()->setMode(GL_DEPTH_TEST,osg::StateAttribute::OFF);
 
-    geometryLine->addPrimitiveSet(new osg::DrawArrays(GL_LINES, 0, 2));
+    geometryLine->addPrimitiveSet(new osg::DrawArrays(GL_QUADS, 0, 4));
 
     osg::Geode *geode = new osg::Geode();
     geode->addDrawable(geometryLine.get());

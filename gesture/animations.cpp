@@ -164,6 +164,7 @@ gsn::GeometryBase::GeometryBase(const osg::Vec3d &sourceIn, const osg::Vec3d &ta
   length = temp.length();
   direction = temp;
   direction.normalize();
+  normal = osg::Quat(osg::PI_2, osg::Vec3d(0.0, 0.0, 1.0)) * direction;
 }
 
 void gsn::GeometryBase::update(osg::NodeVisitor *, osg::Drawable *)
@@ -186,7 +187,7 @@ void gsn::GeometryExpand::update(osg::NodeVisitor *visitor, osg::Drawable *drawa
   assert(geometry);
   Vec3Array *vertices = dynamic_cast<Vec3Array *>(geometry->getVertexArray());
   assert(vertices);
-  assert(vertices->size() == 2);
+  assert(vertices->size() == 4);
   
   double currentTime = visitor->getFrameStamp()->getSimulationTime();
   if(lastTime < 0.0f)
@@ -194,8 +195,10 @@ void gsn::GeometryExpand::update(osg::NodeVisitor *visitor, osg::Drawable *drawa
   motion->update(currentTime - lastTime);
   lastTime = currentTime;
   
-  (*vertices)[0] = osg::Vec3(0.0, 0.0, 0.0);
-  (*vertices)[1] = direction * (length * motion->getValue());
+  (*vertices)[0] = -normal * lineWidth;
+  (*vertices)[1] = (*vertices)[0] + (direction * (length * motion->getValue()));
+  (*vertices)[2] = (*vertices)[1] + (normal * (2.0 * lineWidth));
+  (*vertices)[3] = normal * lineWidth;
   vertices->dirty();
   geometry->dirtyDisplayList();
   geometry->dirtyBound();
@@ -224,7 +227,7 @@ void gsn::GeometryCollapse::update(osg::NodeVisitor *visitor, osg::Drawable *dra
   assert(geometry);
   Vec3Array *vertices = dynamic_cast<Vec3Array *>(geometry->getVertexArray());
   assert(vertices);
-  assert(vertices->size() == 2);
+  assert(vertices->size() == 4);
   
   double currentTime = visitor->getFrameStamp()->getSimulationTime();
   if(lastTime < 0.0f)
@@ -232,8 +235,10 @@ void gsn::GeometryCollapse::update(osg::NodeVisitor *visitor, osg::Drawable *dra
   motion->update(currentTime - lastTime);
   lastTime = currentTime;
   
-  (*vertices)[0] = osg::Vec3(0.0, 0.0, 0.0);
-  (*vertices)[1] = direction * (length * (1.0 - motion->getValue()));
+  (*vertices)[0] = -normal * lineWidth;
+  (*vertices)[1] = (*vertices)[0] + (direction * (length * (1.0 - motion->getValue())));
+  (*vertices)[2] = (*vertices)[1] + (normal * (2.0 * lineWidth));
+  (*vertices)[3] = normal * lineWidth;
   
   vertices->dirty();
   geometry->dirtyDisplayList();

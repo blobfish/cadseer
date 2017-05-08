@@ -126,6 +126,11 @@ void Project::updateModel()
       continue;
     }
     
+    std::ostringstream messageStream;
+    messageStream << "Updating: " << cFeature->getName().toStdString() << "    Id: " << gu::idToString(cFeature->getId());
+    observer->out(msg::buildStatusMessage(messageStream.str()));
+    qApp->processEvents(); //need this or we won't see messages.
+    
     ftr::UpdatePayload::UpdateMap updateMap;
     InEdgeIterator inEdgeIt, inEdgeItDone;
     boost::tie(inEdgeIt, inEdgeItDone) = boost::in_edges(currentVertex, projectGraph);
@@ -149,6 +154,7 @@ void Project::updateModel()
 //   shapeHistory->writeGraphViz("/home/tanderson/.CadSeer/ShapeHistory.dot");
   
   observer->out(msg::Message(msg::Response | msg::Post | msg::UpdateModel));
+  observer->out(msg::buildStatusMessage("Update Complete"));
 }
 
 void Project::updateVisual()
@@ -1039,6 +1045,11 @@ void Project::open()
     FeatureLoad fLoader(saveDirectory + QDir::separator().toLatin1(), masterShape);
     for (const auto &feature : project->features().feature())
     {
+      std::ostringstream messageStream;
+      messageStream << "Loading: " << feature.type() << "    Id: " << feature.id();
+      observer->outBlocked(msg::buildStatusMessage(messageStream.str()));
+      qApp->processEvents(); //need this or we won't see messages.
+      
       std::shared_ptr<ftr::Base> featurePtr = fLoader.load(feature.id(), feature.type(), feature.shapeOffset());
       if (featurePtr)
         addFeature(featurePtr);

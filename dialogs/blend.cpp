@@ -176,6 +176,7 @@ Blend::Blend(ftr::Blend *editBlendIn, QWidget *parent) : QDialog(parent), blend(
         bEntry.expressionLinkId = eManager.getFormulaLink(entry.radius->getId());
       }
       vItem->constraints.push_back(bEntry);
+      runningIds.insert(entry.pick.id);
     }
   }
   
@@ -1087,6 +1088,7 @@ void Blend::selectionAdditionDispatched(const msg::Message &messageIn)
       fresh.pointLocation = gu::toOsg(TopoDS::Vertex(parentShape.getOCCTShape(point)));
       vItem->constraints.push_back(fresh);
       addVariableTableItem(QString::number(fresh.radius, 'f', 12), fresh.typeString, fresh.pickId);
+      runningIds.insert(point);
       
       variableTableWidget->selectionModel()->clearSelection();
       auto block = observer->createBlocker();
@@ -1234,7 +1236,7 @@ void Blend::variableTableRemoveSlot()
     if (it->pickId == pickId)
     {
       eraseMe = it;
-      continue;
+      break;
     }
   }
   assert(eraseMe != vItem->constraints.end());

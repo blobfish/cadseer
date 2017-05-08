@@ -26,6 +26,7 @@
 
 #include <osg/ref_ptr>
 #include <osgViewer/CompositeViewer>
+#include <osgViewer/ViewerEventHandlers> //for subclass of stats handler.
 
 #include <selection/container.h>
 
@@ -91,6 +92,14 @@ protected:
     void systemResetDispatched(const msg::Message &);
     void systemToggleDispatched(const msg::Message &);
 };
+
+class StatsHandler : public osgViewer::StatsHandler
+{
+public:
+  virtual void collectWhichCamerasToRenderStatsFor
+    (osgViewer::ViewerBase *, osgViewer::ViewerBase::Cameras &) override;
+};
+
 }
 
 #endif // VIEWERWIDGET_H

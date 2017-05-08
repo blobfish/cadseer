@@ -25,11 +25,15 @@
 #include <QApplication>
 #include <QDir>
 
+#include <osg/Node> //for viewer message.
+
+#include <message/message.h>
+
 class QSettings;
 
 namespace prf{class Manager;}
 namespace prj{class Project;}
-namespace msg{class Message; class Observer;}
+namespace msg{class Observer;}
 
 namespace app
 {
@@ -52,6 +56,7 @@ public:
 public Q_SLOTS:
     void quittingSlot();
     void appStartSlot();
+    void messageSlot(msg::Message); //for queued connection
 private:
     std::unique_ptr<MainWindow> mainWindow;
     std::unique_ptr<prj::Project> project;
