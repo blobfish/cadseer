@@ -68,7 +68,27 @@ namespace slc
     void setPreHighlight(mdv::ShapeGeometry *sGeometryIn);
     void setHighlight(mdv::ShapeGeometry *sGeometryIn);
     void setRestore(mdv::ShapeGeometry *sGeometryIn);
-  }; 
+  };
+  
+  template<typename T>
+  class TypedAccrueVisitor : public osg::NodeVisitor
+  {
+  public:
+    TypedAccrueVisitor(std::vector<T*> &collectionIn) :
+    NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), collection(collectionIn)
+    {
+    }
+    virtual void apply(osg::Node &nodeIn) override
+    {
+      T* ptr = dynamic_cast<T*>(&nodeIn);
+      if (ptr)
+        collection.push_back(ptr);
+      traverse(nodeIn);
+    }
+    
+  protected:
+    std::vector<T*> &collection;
+  };
 }
 
 #endif // VISITORS_H

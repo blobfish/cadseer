@@ -74,6 +74,7 @@ namespace app
     void viewIsolateDispatched(const msg::Message&);
     
     void messageStressTestDispatched(const msg::Message&); //testing
+    void osgToDotTestDispatched(const msg::Message&); //testing
   };
 }
 

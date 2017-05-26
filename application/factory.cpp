@@ -37,6 +37,8 @@
 #include <STEPControl_Writer.hxx>
 #include <APIHeaderSection_MakeHeader.hxx>
 
+#include <osgDB/WriteFile>
+
 #include <tools/idtools.h>
 #include <message/dispatch.h>
 #include <message/message.h>
@@ -47,7 +49,6 @@
 #include <viewer/viewerwidget.h>
 #include <viewer/message.h>
 #include <preferences/dialog.h>
-#include <application/factory.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <feature/seershape.h>
@@ -65,6 +66,8 @@
 #include <feature/datumplane.h>
 #include <feature/hollow.h>
 #include <library/lineardimension.h>
+#include <selection/visitors.h>
+#include <application/factory.h>
 
 using namespace app;
 using boost::uuids::uuid;
@@ -168,8 +171,8 @@ void Factory::setupDispatcher()
   mask = msg::Request | msg::Construct | msg::Hollow;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newHollowDispatched, this, _1)));
   
-//   mask = msg::Request | msg::DebugInquiry;
-//   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::messageStressTestDispatched, this, _1)));
+  mask = msg::Request | msg::DebugInquiry;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::osgToDotTestDispatched, this, _1)));
 }
 
 void Factory::newProjectDispatched(const msg::Message& /*messageIn*/)
@@ -1214,4 +1217,32 @@ void Factory::messageStressTestDispatched(const msg::Message&)
    This is OK, because the main reason behind this test is for individual feature
    observers, which I don't expect to have any function dispatching.
    */
+}
+
+void Factory::osgToDotTestDispatched(const msg::Message&)
+{
+  assert(project);
+  if (containers.empty())
+    return;
+  
+  ftr::Base *feature = project->findFeature(containers.front().featureId);
+  
+  QString fileName = static_cast<app::Application *>(qApp)->getApplicationDirectory().path();
+  fileName += QDir::separator();
+  fileName += "osg";
+  osgDB::Options options;
+  options.setOptionString("rankdir = TB;");
+  
+  osg::Switch *overlay = feature->getOverlaySwitch();
+  std::vector<lbr::LinearDimension*> dimensions;
+  slc::TypedAccrueVisitor<lbr::LinearDimension> visitor(dimensions);
+  overlay->accept(visitor);
+  
+  for (unsigned int i = 0; i < dimensions.size(); ++i)
+  {
+    QString cFileName = fileName + "_" + QString::number(i) + ".dot";
+    osgDB::writeNodeFile(*(dimensions.at(i)), cFileName.toStdString(), &options);
+  }
+  
+//   QDesktopServices::openUrl(QUrl(fileName));
 }
