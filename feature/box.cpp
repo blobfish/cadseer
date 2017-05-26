@@ -262,10 +262,9 @@ void Box::updateModel(const UpdatePayload &payloadIn)
     updateResult(boxMaker);
     setSuccess();
   }
-  catch (Standard_Failure)
+  catch (const Standard_Failure &e)
   {
-    Handle_Standard_Failure e = Standard_Failure::Caught();
-    std::cout << std::endl << "Error in box update. " << e->GetMessageString() << std::endl;
+    std::cout << std::endl << "Error in box update. " << e.GetMessageString() << std::endl;
   }
   setModelClean();
   

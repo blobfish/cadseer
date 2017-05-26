@@ -22,8 +22,8 @@
 #include <fstream>
 
 #include <QApplication>
-#include <QtGui/QLineEdit>
-#include <QtGui/QHeaderView>
+#include <QLineEdit>
+#include <QHeaderView>
 #include <QAction>
 #include <QShowEvent>
 #include <QMenu>

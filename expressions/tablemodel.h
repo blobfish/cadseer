@@ -26,8 +26,8 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <QtCore/QAbstractTableModel>
-#include <QtGui/QSortFilterProxyModel>
+#include <QAbstractTableModel>
+#include <QSortFilterProxyModel>
 
 #include <selection/container.h>
 

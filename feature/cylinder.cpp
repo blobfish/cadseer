@@ -182,10 +182,9 @@ void Cylinder::updateModel(const UpdatePayload &payloadIn)
     updateResult(cylinderMaker);
     setSuccess();
   }
-  catch (Standard_Failure)
+  catch (const Standard_Failure &e)
   {
-    Handle_Standard_Failure e = Standard_Failure::Caught();
-    std::cout << std::endl << "Error in cylinder update. " << e->GetMessageString() << std::endl;
+    std::cout << std::endl << "Error in cylinder update. " << e.GetMessageString() << std::endl;
   }
   setModelClean();
   

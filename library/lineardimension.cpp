@@ -79,6 +79,7 @@ void DimensionArrow::build()
   osg::Vec3Array *vertexArray = new osg::Vec3Array();
   vertexArray->push_back(osg::Vec3d(0.0, 0.0, 0.0));
   vertexArray->push_back(osg::Vec3d(0.0, lineLength, 0.0));
+  vertexArray->dirty();
   line->setVertexArray(vertexArray);
   line->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, 2));
   this->addChild(line.get());
@@ -110,6 +111,7 @@ void DimensionArrow::updateLine()
   assert(vertexArray);
   assert(vertexArray->size() == 2);
   vertexArray->at(1) = osg::Vec3d(0.0, lineLength, 0.0);
+  vertexArray->dirty();
   line->dirtyDisplayList();
   line->dirtyBound();
 }
@@ -166,6 +168,7 @@ LinearDimension::LinearDimension()
   this->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
   
   setNumChildrenRequiringUpdateTraversal(1);
+  this->setCullingActive(false);
 }
 
 LinearDimension::LinearDimension(const LinearDimension &linearDimIn, const osg::CopyOp& copyOperation) :
@@ -278,17 +281,22 @@ void LinearDimension::build()
   characterSize = iPref.characterSize();
   
   arrow = new DimensionArrow();
+  arrow->setName("arrow");
   extensionLine = buildExtensionLine();
+  extensionLine->setName("extensionLine");
   
   offsetX = new osg::MatrixTransform();
+  offsetX->setName("offsetX");
   offsetX->addChild(arrow.get());
   this->addChild(offsetX.get());
   
   mirrorY = new osg::MatrixTransform();
+  mirrorY->setName("mirrorY");
   mirrorY->setMatrix(osg::Matrixd::scale(osg::Vec3d(1.0, -1.0, 1.0)));
   mirrorY->addChild(offsetX.get());
   
   spreadY = new osg::MatrixTransform();
+  spreadY->setName("spreadY");
   spreadY->addChild(extensionLine.get());
   spreadY->addChild(mirrorY.get());
   this->addChild(spreadY.get());
@@ -296,16 +304,18 @@ void LinearDimension::build()
   this->addChild(extensionLine.get());
   
   textPosition = new osg::AutoTransform();
+  textPosition->setName("textPosition");
   textPosition->setAutoRotateMode(osg::AutoTransform::ROTATE_TO_SCREEN);
   textPosition->setAutoScaleToScreen(true);
   this->addChild(textPosition.get());
   
   textScale = new osg::MatrixTransform();
+  textScale->setName("textScale");
   textScale->setMatrix(osg::Matrixd::scale(75.0, 75.0, 75.0));
   textPosition->addChild(textScale.get());
   
   text = new osgText::Text();
-  text->setName("DimensionText");
+  text->setName("text");
   osg::ref_ptr<osgQt::QFontImplementation> fontImplement(new osgQt::QFontImplementation(qApp->font()));
   osg::ref_ptr<osgText::Font> textFont(new osgText::Font(fontImplement.get()));
   text->setFont(textFont);
@@ -326,6 +336,7 @@ osg::Geometry* LinearDimension::buildExtensionLine()
   vertexArray->push_back(osg::Vec3d(0.1, 0.0, 0.0));
   out->setVertexArray(vertexArray);
   out->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, 2));
+  vertexArray->dirty();
   
   return out;
 }
@@ -339,6 +350,7 @@ void LinearDimension::updateExtensionLine()
   
   double extensionEnd = offset + (cachedTextBound.radius() * flippedFactor / 2.0) ;
   vertexArray->at(1) = osg::Vec3d(extensionEnd, 0.0, 0.0);
+  vertexArray->dirty();
   extensionLine->dirtyDisplayList();
   extensionLine->dirtyBound();
 }

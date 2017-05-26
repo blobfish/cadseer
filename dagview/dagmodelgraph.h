@@ -151,7 +151,7 @@ namespace dag
     {
       out <<
         "[label=\"" <<
-        graphVW[vertexW].textRaw->toPlainText().toAscii().data() << "\\n" <<
+        graphVW[vertexW].textRaw->toPlainText().toUtf8().data() << "\\n" <<
         gu::idToString(graphVW[vertexW].feature.lock()->getId()) <<
         "\"]";
     }

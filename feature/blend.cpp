@@ -273,10 +273,9 @@ void Blend::updateModel(const UpdatePayload &payloadIn)
     
     setSuccess();
   }
-  catch (Standard_Failure)
+  catch (const Standard_Failure &e)
   {
-    Handle_Standard_Failure e = Standard_Failure::Caught();
-    std::cout << std::endl << "Error in blend update. " << e->GetMessageString() << std::endl;
+    std::cout << std::endl << "Error in blend update. " << e.GetMessageString() << std::endl;
   }
   catch (std::exception &e)
   {

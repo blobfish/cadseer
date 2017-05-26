@@ -20,7 +20,7 @@
 #ifndef DIALOG_H
 #define DIALOG_H
 
-#include <qt4/QtGui/QDialog>
+#include <QDialog>
 #include <QDir>
 
 namespace Ui{ class projectDialog; }

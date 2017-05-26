@@ -20,7 +20,6 @@
 #include <iostream>
 #include <memory>
 
-#include <QX11Info>
 #include <QTimer>
 #include <QMessageBox>
 #include <QSettings>
@@ -50,7 +49,7 @@ using namespace app;
 Application::Application(int &argc, char **argv) :
     QApplication(argc, argv)
 {
-  qRegisterMetaType<msg::Message>("msg::Message");
+    qRegisterMetaType<msg::Message>("msg::Message");
   
     spaceballPresent = false;
     observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
@@ -85,6 +84,7 @@ Application::Application(int &argc, char **argv) :
 Application::~Application()
 {
   git_libgit2_shutdown();
+  spnav_close();
 }
 
 void Application::appStartSlot()
@@ -99,11 +99,11 @@ void Application::appStartSlot()
       prj::Dialog::Result r = dialog.getResult();
       if (r == prj::Dialog::Result::Open || r == prj::Dialog::Result::Recent)
       {
-	openProject(dialog.getDirectory().absolutePath().toStdString());
+        openProject(dialog.getDirectory().absolutePath().toStdString());
       }
       if (r == prj::Dialog::Result::New)
       {
-	createNewProject(dialog.getDirectory().absolutePath().toStdString());
+        createNewProject(dialog.getDirectory().absolutePath().toStdString());
       }
     }
     else
@@ -129,40 +129,6 @@ void Application::messageSlot(msg::Message messageIn)
 {
   //can't block, message might be open file or something we need to handle here.
   observer->out(messageIn);
-}
-
-bool Application::x11EventFilter(XEvent *event)
-{
-    spnav_event navEvent;
-    if (!spnav_x11_event(event, &navEvent))
-        return false;
-    
-    QWidget *currentWidget = qApp->focusWidget();
-    if (!currentWidget)
-      return false;
-
-    if (navEvent.type == SPNAV_EVENT_MOTION)
-    {
-        spb::MotionEvent *qEvent = new spb::MotionEvent();
-        qEvent->setTranslations(navEvent.motion.x, navEvent.motion.y, navEvent.motion.z);
-        qEvent->setRotations(navEvent.motion.rx, navEvent.motion.ry, navEvent.motion.rz);
-        this->postEvent(currentWidget, qEvent);
-        return true;
-    }
-
-    if (navEvent.type == SPNAV_EVENT_BUTTON)
-    {
-      spb::ButtonEvent *qEvent = new spb::ButtonEvent();
-      qEvent->setButtonNumber(navEvent.button.bnum);
-      if (navEvent.button.press == 1)
-        qEvent->setButtonStatus(spb::BUTTON_PRESSED);
-      else
-        qEvent->setButtonStatus(spb::BUTTON_RELEASED);
-      this->postEvent(currentWidget, qEvent);
-      return true;
-    }
-    
-    return false;
 }
 
 bool Application::notify(QObject* receiver, QEvent* e)
@@ -225,15 +191,51 @@ void Application::initializeSpaceball()
 
     spb::registerEvents();
 
-    if (spnav_x11_open(QX11Info::display(), mainWindow->winId()) == -1)
+    if (spnav_open() == -1)
     {
-//        std::cout << "No spaceball found" << std::endl;
+      std::cout << "No spaceball found" << std::endl;
     }
     else
     {
-//        std::cout << "Spaceball found" << std::endl;
-        spaceballPresent = true;
+      std::cout << "Spaceball found" << std::endl;
+      spaceballPresent = true;
+      QTimer *spaceballTimer = new QTimer(this);
+      spaceballTimer->setInterval(1000/30); //30 times a second
+      connect(spaceballTimer, &QTimer::timeout, this, &Application::spaceballPollSlot);
+      spaceballTimer->start();
     }
+}
+
+void Application::spaceballPollSlot()
+{
+  spnav_event navEvent;
+  if (!spnav_poll_event(&navEvent))
+    return;
+  
+  QWidget *currentWidget = qApp->focusWidget();
+  if (!currentWidget)
+    return;
+
+  if (navEvent.type == SPNAV_EVENT_MOTION)
+  {
+    spb::MotionEvent *qEvent = new spb::MotionEvent();
+    qEvent->setTranslations(navEvent.motion.x, navEvent.motion.y, navEvent.motion.z);
+    qEvent->setRotations(navEvent.motion.rx, navEvent.motion.ry, navEvent.motion.rz);
+    this->postEvent(currentWidget, qEvent);
+    return;
+  }
+
+  if (navEvent.type == SPNAV_EVENT_BUTTON)
+  {
+    spb::ButtonEvent *qEvent = new spb::ButtonEvent();
+    qEvent->setButtonNumber(navEvent.button.bnum);
+    if (navEvent.button.press == 1)
+      qEvent->setButtonStatus(spb::BUTTON_PRESSED);
+    else
+      qEvent->setButtonStatus(spb::BUTTON_RELEASED);
+    this->postEvent(currentWidget, qEvent);
+    return;
+  }
 }
 
 QDir Application::getApplicationDirectory()

@@ -45,10 +45,9 @@ ShapeCheck::ShapeCheck(const TopoDS_Shape &shapeIn)
     shapeCheckPrivate = std::unique_ptr<ShapeCheckPrivate>(new ShapeCheckPrivate(shapeIn));
     successfulRun = true;
   }
-  catch (Standard_Failure)
+  catch (const Standard_Failure &e)
   {
-    Handle_Standard_Failure e = Standard_Failure::Caught();
-    std::cout << std::endl << "OCCT Exception in ShapeCheck: " << e->GetMessageString() << std::endl;
+    std::cout << std::endl << "OCCT Exception in ShapeCheck: " << e.GetMessageString() << std::endl;
   }
 }
 

@@ -44,18 +44,11 @@ using namespace osg;
 
 ShapeGeometry::ShapeGeometry() : Base()
 {
-  setUseDisplayList(false);
-  setDataVariance(osg::Object::DYNAMIC);
-  setUseVertexBufferObjects(true);
 }
 
 ShapeGeometry::ShapeGeometry(const ShapeGeometry &rhs, const CopyOp& copyOperation) :
   Base(rhs, copyOperation)
 {
-  setUseDisplayList(false);
-  setDataVariance(osg::Object::DYNAMIC);
-  setUseVertexBufferObjects(true);
-  
   if (rhs.idPSetWrapper)
     idPSetWrapper = std::shared_ptr<IdPSetWrapper>(new IdPSetWrapper(*rhs.idPSetWrapper));
 }
@@ -169,11 +162,10 @@ void ShapeGeometryBuilder::go(double deflection, double angle)
     recursiveConstruct(copiedShape);
     success = true;
   }
-  catch(Standard_Failure)
+  catch(const Standard_Failure &error)
   {
-    Handle(Standard_Failure) error = Standard_Failure::Caught();
     std::cout << "OCC Error: failure building model vizualization. Message: " <<
-        error->GetMessageString() << std::endl;
+        error.GetMessageString() << std::endl;
   }
   catch(const std::exception &error)
   {
@@ -198,9 +190,10 @@ void ShapeGeometryBuilder::initialize()
     faceGeometry->setName("faces");
     faceGeometry->getOrCreateStateSet()->setAttribute(faceDepth.get());
     
+    faceGeometry->setDataVariance(osg::Object::DYNAMIC);
     faceGeometry->setVertexArray(new osg::Vec3Array());
     faceGeometry->setUseDisplayList(false);
-    faceGeometry->setUseVertexBufferObjects(true);
+//     faceGeometry->setUseVertexBufferObjects(true);
 
     faceGeometry->setColorArray(new osg::Vec4Array());
     faceGeometry->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
@@ -228,7 +221,10 @@ void ShapeGeometryBuilder::initialize()
     edgeGeometry->getOrCreateStateSet()->setAttribute(lineWidth.get());
     edgeGeometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
     
+    edgeGeometry->setDataVariance(osg::Object::DYNAMIC);
     edgeGeometry->setVertexArray(new osg::Vec3Array());
+    edgeGeometry->setUseDisplayList(false);
+    
     edgeGeometry->setColorArray(new osg::Vec4Array());
     edgeGeometry->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
     
@@ -308,6 +304,9 @@ void ShapeGeometryBuilder::recursiveConstruct(const TopoDS_Shape &shapeIn)
 
 void ShapeGeometryBuilder::faceConstruct(const TopoDS_Face &faceIn)
 {
+  if (!shouldBuildFaces)
+    return;
+  
   TopLoc_Location location;
   const Handle(Poly_Triangulation) &triangulation = BRep_Tool::Triangulation(faceIn, location);
   //did a test and triangulation doesn't have normals.
@@ -415,6 +414,9 @@ void ShapeGeometryBuilder::faceConstruct(const TopoDS_Face &faceIn)
 
 void ShapeGeometryBuilder::edgeConstruct(const TopoDS_Edge &edgeIn)
 {
+  if (!shouldBuildEdges)
+    return;
+  
   osg::Vec3Array *vertices = dynamic_cast<osg::Vec3Array *>(edgeGeometry->getVertexArray());
   osg::Vec4Array *colors = dynamic_cast<osg::Vec4Array *>(edgeGeometry->getColorArray());
   osg::ref_ptr<osg::DrawElementsUInt> indices = new osg::DrawElementsUInt(GL_LINE_STRIP);

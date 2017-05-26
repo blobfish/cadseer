@@ -39,13 +39,13 @@ namespace app
 {
 class MainWindow;
 class Factory;
+
 class Application : public QApplication
 {
     Q_OBJECT
 public:
     explicit Application(int &argc, char **argv);
     ~Application();
-    bool x11EventFilter(XEvent *event);
     bool notify(QObject * receiver, QEvent * e) override;
     void initializeSpaceball();
     prj::Project* getProject(){return project.get();}
@@ -57,6 +57,7 @@ public Q_SLOTS:
     void quittingSlot();
     void appStartSlot();
     void messageSlot(msg::Message); //for queued connection
+    void spaceballPollSlot();
 private:
     std::unique_ptr<MainWindow> mainWindow;
     std::unique_ptr<prj::Project> project;

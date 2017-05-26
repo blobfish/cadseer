@@ -22,7 +22,7 @@
 
 #include <memory>
 
-#include <QtGui/QGraphicsView>
+#include <QGraphicsView>
 
 namespace dag
 {

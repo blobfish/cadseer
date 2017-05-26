@@ -21,7 +21,7 @@
 #include <QVBoxLayout>
 #include <QSortFilterProxyModel>
 #include <QHeaderView>
-#include <QtGui/QToolBar>
+#include <QToolBar>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QFileDialog>
@@ -130,7 +130,7 @@ void Widget::addGroupView(const boost::uuids::uuid& idIn, const QString &name)
   ExpressionDelegate *userDelegate = new ExpressionDelegate(userView);
   userView->setItemDelegateForColumn(1, userDelegate);
   tabWidget->addTab(userView, name);
-  userView->horizontalHeader()->setResizeMode(1, QHeaderView::Stretch);
+  userView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
   connect(userView, SIGNAL(groupRenamedSignal(QWidget*,QString)), this, SLOT(groupRenamedSlot(QWidget*,QString)));
   connect(userView, SIGNAL(groupRemovedSignal(QWidget*)), this, SLOT(removeGroupSlot(QWidget*)));
 }
@@ -295,14 +295,14 @@ void Widget::openNewProjectDispatched(const msg::Message&)
   ExpressionDelegate *expressionDelegate1 = new ExpressionDelegate(tableViewAll);
   tableViewAll->setItemDelegateForColumn(1, expressionDelegate1);
   tabWidget->addTab(tableViewAll, tr("All"));
-  tableViewAll->horizontalHeader()->setResizeMode(1, QHeaderView::Stretch); //has to be done after the model is set.
+  tableViewAll->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch); //has to be done after the model is set.
   connect(tableViewAll, SIGNAL(addGroupSignal()), this, SLOT(addGroupSlot()));
   
   TableViewSelection *selectionView = new TableViewSelection(tableViewAll);
   SelectionProxyModel *selectionModel = new SelectionProxyModel(*eManager, selectionView);
   selectionModel->setSourceModel(mainTable);
   selectionView->setModel(selectionModel);
-  selectionView->horizontalHeader()->setResizeMode(1, QHeaderView::Stretch); //has to be done after the model is set.
+  selectionView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch); //has to be done after the model is set.
   NameDelegate *nameDelegate2 = new NameDelegate(selectionView);
   tableViewAll->setItemDelegateForColumn(0, nameDelegate2);
   ExpressionDelegate *expressionDelegate2 = new ExpressionDelegate(selectionView);

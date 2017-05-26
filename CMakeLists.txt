@@ -1,18 +1,75 @@
 cmake_minimum_required(VERSION 2.8)
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 project(cadseer)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -Wshadow" )
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -Wshadow -fext-numeric-literals" )
 
 add_definitions(-DQT_NO_KEYWORDS) #macros clashing
-find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
-set(QT_USE_QTOPENGL TRUE)
-INCLUDE(${QT_USE_FILE})
-ADD_DEFINITIONS(${QT_DEFINITIONS})
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5OpenGL REQUIRED)
+find_package(Qt5X11Extras REQUIRED)
+SET(QT_LIBRARIES Qt5::Core Qt5::Widgets Qt5::OpenGL Qt5::X11Extras)
+add_definitions(${Qt5Widgets_DEFINITIONS})
 
 find_package(Boost REQUIRED COMPONENTS system graph timer)
 
-find_package(OpenCasCade REQUIRED)
-SET(OCE_LIBRARIES ${OCC_LIBRARIES})
+# OCCT_PROJECT_PATH lets user define cmake variables based on a locally built and
+# non-installed copy of the OCCT source code. assumes standard OCCT path
+# and a 'build' sub directory
+# example:
+# cmake -DOCCT_PROJECT_PATH="/home/tanderson/Programming/occt" ../source
+# don't forget about the library runtime path:
+# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/tanderson/Programming/occt/build/lin64/gcc/libd
+SET(OCCT_PROJECT_PATH "" CACHE PATH "Path to OpenCasCade project path")
+MARK_AS_ADVANCED(OCCT_PROJECT_PATH)
+IF(OCCT_PROJECT_PATH)
+    MESSAGE(STATUS "OCCT_PROJECT_PATH is set to: ${OCCT_PROJECT_PATH}")
+    
+    set(OCCT_BUILD_INCLUDE "${OCCT_PROJECT_PATH}/build/inc")
+    if(NOT EXISTS ${OCCT_BUILD_INCLUDE})
+        message(FATAL_ERROR "build include path not valid. ${OCCT_BUILD_INCLUDE}")
+    endif(NOT EXISTS ${OCCT_BUILD_INCLUDE})
+    set(OCCT_INCLUDE_DIRS ${OCCT_INCLUDE_DIRS} ${OCCT_BUILD_INCLUDE})
+    
+    include_directories(${OCCT_INCLUDE_DIRS})
+    
+    set(OCCT_BUILD_LIB "${OCCT_PROJECT_PATH}/build/lin64/gcc/libd")
+    if(NOT EXISTS ${OCCT_BUILD_LIB})
+        message(FATAL_ERROR "build library path not valid. ${OCCT_BUILD_LIB}")
+    endif(NOT EXISTS ${OCCT_BUILD_LIB})
+    
+    link_directories(${OCCT_BUILD_LIB})
+    
+    SET(OCE_LIBRARIES
+        TKFillet
+        TKMesh
+        TKernel
+        TKG2d
+        TKG3d
+        TKMath
+        TKIGES
+        TKSTL
+        TKShHealing
+        TKXSBase
+        TKBin
+        TKBool
+        TKBO
+        TKBRep
+        TKTopAlgo
+        TKGeomAlgo
+        TKGeomBase
+        TKOffset
+        TKPrim
+        TKSTEP
+        TKSTEPBase
+        TKSTEPAttr
+        TKFeat
+    )
+ELSE(OCCT_PROJECT_PATH)
+    MESSAGE(STATUS "OCCT_PROJECT_PATH is empty. Using find_package for OpenSceneGraph")
+    find_package(OpenCasCade REQUIRED)
+    SET(OCE_LIBRARIES ${OCC_LIBRARIES})
+ENDIF(OCCT_PROJECT_PATH)
 
 # OSG_PROJECT_PATH lets user define cmake variables based on a locally built and
 # non-installed copy of the openscenegraph source code. assumes standard osg path
@@ -26,33 +83,65 @@ MARK_AS_ADVANCED(OSG_PROJECT_PATH)
 IF(OSG_PROJECT_PATH)
     MESSAGE(STATUS "OSG_PROJECT_PATH is set to: ${OSG_PROJECT_PATH}")
     
-    set(SOURCE_INCLUDE "${OSG_PROJECT_PATH}/include")
-    message(STATUS "${SOURCE_INCLUDE}")
-    if(NOT EXISTS ${SOURCE_INCLUDE})
-        message(FATAL_ERROR "include path not valid. ${SOURCE_INCLUDE}")
-    endif(NOT EXISTS ${SOURCE_INCLUDE})
-    set(OPENSCENEGRAPH_INCLUDE_DIRS ${OPENSCENEGRAPH_INCLUDE_DIRS} ${SOURCE_INCLUDE})
+    set(OSG_SOURCE_INCLUDE "${OSG_PROJECT_PATH}/include")
+    message(STATUS "${OSG_SOURCE_INCLUDE}")
+    if(NOT EXISTS ${OSG_SOURCE_INCLUDE})
+        message(FATAL_ERROR "include path not valid. ${OSG_SOURCE_INCLUDE}")
+    endif(NOT EXISTS ${OSG_SOURCE_INCLUDE})
+    set(OPENSCENEGRAPH_INCLUDE_DIRS ${OPENSCENEGRAPH_INCLUDE_DIRS} ${OSG_SOURCE_INCLUDE})
     
-    set(BUILD_INCLUDE "${OSG_PROJECT_PATH}/build/include")
-    if(NOT EXISTS ${BUILD_INCLUDE})
-        message(FATAL_ERROR "build include path not valid. ${BUILD_INCLUDE}")
-    endif(NOT EXISTS ${BUILD_INCLUDE})
-    set(OPENSCENEGRAPH_INCLUDE_DIRS ${OPENSCENEGRAPH_INCLUDE_DIRS} ${BUILD_INCLUDE})
+    set(OSG_BUILD_INCLUDE "${OSG_PROJECT_PATH}/build/include")
+    if(NOT EXISTS ${OSG_BUILD_INCLUDE})
+        message(FATAL_ERROR "build include path not valid. ${OSG_BUILD_INCLUDE}")
+    endif(NOT EXISTS ${OSG_BUILD_INCLUDE})
+    set(OPENSCENEGRAPH_INCLUDE_DIRS ${OPENSCENEGRAPH_INCLUDE_DIRS} ${OSG_BUILD_INCLUDE})
     
     include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
     
-    set(BUILD_LIB "${OSG_PROJECT_PATH}/build/lib")
-    if(NOT EXISTS ${BUILD_LIB})
-        message(FATAL_ERROR "build library path not valid. ${BUILD_LIB}")
-    endif(NOT EXISTS ${BUILD_LIB})
+    set(OSG_BUILD_LIB "${OSG_PROJECT_PATH}/build/lib")
+    if(NOT EXISTS ${OSG_BUILD_LIB})
+        message(FATAL_ERROR "build library path not valid. ${OSG_BUILD_LIB}")
+    endif(NOT EXISTS ${OSG_BUILD_LIB})
     
-    link_directories(${BUILD_LIB})
-    
+    link_directories(${OSG_BUILD_LIB})
 ELSE(OSG_PROJECT_PATH)
     MESSAGE(STATUS "OSG_PROJECT_PATH is empty. Using find_package for OpenSceneGraph")
     FIND_PACKAGE(OpenSceneGraph REQUIRED)
 ENDIF(OSG_PROJECT_PATH)
-SET(OPENSCENEGRAPH_LIBRARIES "OpenThreads;osg;osgDB;osgUtil;osgViewer;osgQt;osgGA;osgText;osgManipulator;osgFX")
+SET(OPENSCENEGRAPH_LIBRARIES "OpenThreads;osg;osgDB;osgUtil;osgViewer;osgGA;osgText;osgManipulator;osgFX")
+
+# OSGQT_PROJECT_PATH lets user define cmake variables based on a locally built and
+# non-installed copy of the osgqt source code. assumes standard osgqt path
+# and a 'build' sub directory
+# example:
+# cmake -DOSGQT_PROJECT_PATH="/home/tanderson/Programming/OpenSceneGraph/osgQt" ../source
+# don't forget about the library runtime path:
+# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/tanderson/Programming/OpenSceneGraph/osgQt/build/lib
+SET(OSGQT_PROJECT_PATH "" CACHE PATH "Path to osgQt project path")
+MARK_AS_ADVANCED(OSGQT_PROJECT_PATH)
+IF(OSGQT_PROJECT_PATH)
+    MESSAGE(STATUS "OSGQT_PROJECT_PATH is set to: ${OSGQT_PROJECT_PATH}")
+    
+    set(OSGQT_SOURCE_INCLUDE "${OSGQT_PROJECT_PATH}/include")
+    message(STATUS "${OSGQT_SOURCE_INCLUDE}")
+    if(NOT EXISTS ${OSGQT_SOURCE_INCLUDE})
+        message(FATAL_ERROR "include path not valid. ${OSGQT_SOURCE_INCLUDE}")
+    endif(NOT EXISTS ${OSGQT_SOURCE_INCLUDE})
+    set(OSGQT_INCLUDE_DIRS ${OSGQT_INCLUDE_DIRS} ${OSGQT_SOURCE_INCLUDE})
+    include_directories(${OSGQT_INCLUDE_DIRS})
+    
+    set(OSGQT_BUILD_LIB "${OSGQT_PROJECT_PATH}/build/lib")
+    if(NOT EXISTS ${OSGQT_BUILD_LIB})
+        message(FATAL_ERROR "build library path not valid. ${OSGQT_BUILD_LIB}")
+    endif(NOT EXISTS ${OSGQT_BUILD_LIB})
+    
+    link_directories(${OSGQT_BUILD_LIB})
+    
+ELSE(OSGQT_PROJECT_PATH)
+    MESSAGE(STATUS "OSGQT_PROJECT_PATH is empty. Using find_package for osgQt")
+    FIND_PACKAGE(OsgQt REQUIRED)
+ENDIF(OSGQT_PROJECT_PATH)
+SET(OSGQT_LIBRARIES "osgQt5")
 
 find_package(Spnav)
 IF(SPNAV_FOUND)
@@ -68,9 +157,11 @@ find_package(XSDCXX REQUIRED)
 add_subdirectory(project/libgit2pp)
 
 SET(LIBRARY_INCLUDE_PATHS
+    ${Qt5Widgets_INCLUDE_DIRS}
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR} #needed to find moc files.
     ${OPENSCENEGRAPH_INCLUDE_DIRS}
+    ${OSGQT_INCLUDE_DIRS}
     ${OCC_INCLUDE_DIR}
     ${EIGEN3_INCLUDE_DIR}
     ${XSDCXX_INCLUDE_DIR}
@@ -307,10 +398,10 @@ SET(CADSEER_LIBRARIES
     ${QT_LIBRARIES}
     ${Boost_LIBRARIES}
     ${OPENSCENEGRAPH_LIBRARIES}
+    ${OSGQT_LIBRARIES}
     ${OCE_LIBRARIES}
     ${XERCESC_LIBRARIES}
     ${SPNAV_LIBRARIES}
-    ${ModelViz}
     git2pp
     )
 
@@ -324,8 +415,8 @@ SET(CADSEER_RESOURCES
     resources.qrc
     )
 
-QT4_ADD_RESOURCES(CADSEER_RESOURCES_RCC ${CADSEER_RESOURCES})
-QT4_WRAP_UI(CADSEER_UIS_WRAPPED ${CADSEER_UIS} )
-QT4_WRAP_CPP(CADSEER_MOC_SRCS ${CADSEER_MOC_HDRS} ${CADSEER_UIS_WRAPPED})
+qt5_add_resources(CADSEER_RESOURCES_RCC ${CADSEER_RESOURCES})
+qt5_wrap_ui(CADSEER_UIS_WRAPPED ${CADSEER_UIS} )
+qt5_wrap_cpp(CADSEER_MOC_SRCS ${CADSEER_MOC_HDRS} ${CADSEER_UIS_WRAPPED})
 add_executable(cadseer ${CADSEER_SOURCES} ${CADSEER_MOC_SRCS} ${CADSEER_RESOURCES_RCC})
 TARGET_LINK_LIBRARIES(cadseer ${CADSEER_LIBRARIES})

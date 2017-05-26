@@ -29,6 +29,7 @@
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QAction>
+#include <QMimeData>
 
 #include <tools/idtools.h>
 #include <dialogs/expressionedit.h>

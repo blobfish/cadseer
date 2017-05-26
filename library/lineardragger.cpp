@@ -36,7 +36,6 @@ LinearDragger::LinearDragger() : Translate1DDragger(osg::Vec3d(0.0,0.0,0.0), osg
   addChild(autoScaleTransform);
   
   scaleTransform = new osg::MatrixTransform();
-  scaleTransform->setMatrix(osg::Matrixd::scale(osg::Vec3d(screenScale, screenScale, screenScale)));
   autoScaleTransform->addChild(scaleTransform);
   setScreenScale(200.0);
   
@@ -52,6 +51,7 @@ LinearDragger::LinearDragger() : Translate1DDragger(osg::Vec3d(0.0,0.0,0.0), osg
   this->addConstraint(incrementConstraint.get());
   
   this->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
+  this->setCullingActive(false);
 }
 
 void LinearDragger::setScreenScale(double scaleIn)

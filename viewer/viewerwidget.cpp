@@ -210,14 +210,16 @@ void ViewerWidget::myUpdate()
   //I am not sure how useful calling optimizer on my generated data is?
   //TODO build large file and run with and without the optimizer to test.
   
+  //commented out for osg upgrade to 3.5.6. screwed up structure
+  //    to the point of selection not working.
   //remove redundant nodes was screwing up hidden line effect.
-  osgUtil::Optimizer opt;
-  opt.optimize
-  (
-    root,
-    osgUtil::Optimizer::DEFAULT_OPTIMIZATIONS
-    & ~osgUtil::Optimizer::REMOVE_REDUNDANT_NODES
-  );
+//   osgUtil::Optimizer opt;
+//   opt.optimize
+//   (
+//     root,
+//     osgUtil::Optimizer::DEFAULT_OPTIMIZATIONS
+//     & ~osgUtil::Optimizer::REMOVE_REDUNDANT_NODES
+//   );
   
   //set the hidden line state.
   HiddenLineVisitor v(prf::Manager().rootPtr->visual().display().showHiddenLines());

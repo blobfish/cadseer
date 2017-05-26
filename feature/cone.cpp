@@ -210,10 +210,9 @@ void Cone::updateModel(const UpdatePayload &payloadIn)
     updateResult(coneBuilder);
     setSuccess();
   }
-  catch (Standard_Failure)
+  catch (const Standard_Failure &e)
   {
-    Handle_Standard_Failure e = Standard_Failure::Caught();
-    std::cout << std::endl << "Error in cone update. " << e->GetMessageString() << std::endl;
+    std::cout << std::endl << "Error in cone update. " << e.GetMessageString() << std::endl;
   }
   setModelClean();
   updateIPGroup();

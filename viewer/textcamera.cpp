@@ -132,10 +132,10 @@ TextCamera::TextCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
   osg::ref_ptr<osgQt::QFontImplementation> fontImplement(new osgQt::QFontImplementation(qApp->font()));
   osg::ref_ptr<osgText::Font> textFont(new osgText::Font(fontImplement.get()));
   selectionLabel->setFont(textFont);
+  selectionLabel->setFontResolution(qApp->font().pointSize(), qApp->font().pointSize());
   selectionLabel->setColor(color);
   selectionLabel->setBackdropType(osgText::Text::OUTLINE);
   selectionLabel->setBackdropColor(osg::Vec4(1.0, 1.0, 1.0, 1.0));
-//   label->setFont("/usr/share/fonts/truetype/msttcorefonts/arial.ttf");
   selectionLabel->setCharacterSize(qApp->font().pointSizeF()); //this is 9.0 here.
   selectionLabel->setPosition(pos);
   selectionLabel->setAlignment(osgText::TextBase::RIGHT_TOP);
@@ -145,6 +145,7 @@ TextCamera::TextCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
   statusLabel = new osgText::Text();
   statusLabel->setName("status");
   statusLabel->setFont(textFont);
+  statusLabel->setFontResolution(qApp->font().pointSize(), qApp->font().pointSize());
   statusLabel->setColor(color);
   statusLabel->setBackdropType(osgText::Text::OUTLINE);
   statusLabel->setBackdropColor(osg::Vec4(1.0, 1.0, 1.0, 1.0));
@@ -157,6 +158,7 @@ TextCamera::TextCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
   commandLabel = new osgText::Text();
   commandLabel->setName("command");
   commandLabel->setFont(textFont);
+  commandLabel->setFontResolution(qApp->font().pointSize(), qApp->font().pointSize());
   commandLabel->setColor(color);
   commandLabel->setBackdropType(osgText::Text::OUTLINE);
   commandLabel->setBackdropColor(osg::Vec4(1.0, 1.0, 1.0, 1.0));
