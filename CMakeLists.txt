@@ -149,8 +149,6 @@ IF(SPNAV_FOUND)
     include_directories(${SPNAV_INCLUDE_DIR})
 ENDIF(SPNAV_FOUND)
 
-find_package(Eigen3 REQUIRED)
-
 find_package(XercesC REQUIRED)
 find_package(XSDCXX REQUIRED)
 
@@ -163,7 +161,6 @@ SET(LIBRARY_INCLUDE_PATHS
     ${OPENSCENEGRAPH_INCLUDE_DIRS}
     ${OSGQT_INCLUDE_DIRS}
     ${OCC_INCLUDE_DIR}
-    ${EIGEN3_INCLUDE_DIR}
     ${XSDCXX_INCLUDE_DIR}
     ${XERCESC_INCLUDE_DIR}
     ${CMAKE_SOURCE_DIR}/project/libgit2pp/libgit2/include/
