@@ -20,15 +20,14 @@
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
 
-#include <osgUtil/LineSegmentIntersector>
-
 #include <selection/container.h>
+#include <selection/intersection.h>
 
 namespace slc
 {
   /*! @brief Interpretation from intersector to event handler.
    *
-   * Converts osgUtil::LineSegment::Intersections(array) to a
+   * Converts osgUtil::Polytope::Intersections(array) to a
    * slc::Containers(array).
    * 
    * When dealing with endpoints, pointLocation member of slc::container should
@@ -39,11 +38,11 @@ namespace slc
   class Interpreter
   {
   public:
-    Interpreter(const osgUtil::LineSegmentIntersector::Intersections &, Mask);
+    Interpreter(const Intersections&, Mask);
     Containers containersOut;
   private:
     void go();
-    const osgUtil::LineSegmentIntersector::Intersections &intersections;
+    const Intersections &intersections;
     Mask selectionMask;
   };
 }

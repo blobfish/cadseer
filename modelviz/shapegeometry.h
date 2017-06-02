@@ -39,7 +39,7 @@ namespace ftr{class SeerShape;}
 namespace mdv
 {
   class IdPSetWrapper;
-  class PSetVertexWrapper;
+  class PSetPrimitiveWrapper;
   
   class ShapeGeometry : public Base
   {
@@ -56,10 +56,9 @@ namespace mdv
     virtual const char* className() const override {return "Geometry";}
     
     void setIdPSetWrapper(std::shared_ptr<IdPSetWrapper> &);
-    void setPSetVertexWrapper(std::shared_ptr<PSetVertexWrapper> &);
-    boost::uuids::uuid getId(std::size_t primitiveIndexIn) const;
-    std::size_t getPSetFromVertex(std::size_t) const;
-    const osg::BoundingSphere& getBSphereFromPSet(std::size_t primitiveIndexIn) const;
+    void setPSetPrimitiveWrapper(std::shared_ptr<PSetPrimitiveWrapper> &);
+    boost::uuids::uuid getId(std::size_t) const;
+    std::size_t getPSetFromPrimitive(std::size_t) const;
     
     virtual void setColor(const osg::Vec4 &colorIn) override;
     
@@ -73,7 +72,7 @@ namespace mdv
     void setColor(const boost::uuids::uuid&, const osg::Vec4&); //set color of primitive index.
     
     std::shared_ptr<IdPSetWrapper> idPSetWrapper;
-    std::shared_ptr<PSetVertexWrapper> pSetVertexWrapper;
+    std::shared_ptr<PSetPrimitiveWrapper> pSetVertexWrapper;
   };
   
   class ShapeGeometryBuilder
@@ -100,7 +99,8 @@ namespace mdv
     TopTools_MapOfShape processed;
     std::shared_ptr<IdPSetWrapper> idPSetWrapperFace; //shared among all generated with this object
     std::shared_ptr<IdPSetWrapper> idPSetWrapperEdge; //shared among all generated with this object
-    std::shared_ptr<PSetVertexWrapper> pSetTriangleWrapper; //unique to each generation.
+    std::shared_ptr<PSetPrimitiveWrapper> pSetPrimitiveWrapperFace; //unique to each generation.
+    std::shared_ptr<PSetPrimitiveWrapper> pSetPrimitiveWrapperEdge; //unique to each generation.
     bool shouldBuildFaces = true;
     bool shouldBuildEdges = true;
     bool shouldBuildVertices = false;
@@ -109,6 +109,8 @@ namespace mdv
     osg::ref_ptr<ShapeGeometry> vertexGeometry;
     osg::ref_ptr<osg::Depth> faceDepth;
     osg::ref_ptr<osg::LineWidth> lineWidth;
+    std::size_t primitiveCountFace;
+    std::size_t primitiveCountEdge;
   };
 }
 

@@ -58,7 +58,7 @@ void ShapeGeometry::setIdPSetWrapper(std::shared_ptr<IdPSetWrapper> &mapIn)
   idPSetWrapper = mapIn;
 }
 
-void ShapeGeometry::setPSetVertexWrapper(std::shared_ptr<PSetVertexWrapper> &wrapperIn)
+void ShapeGeometry::setPSetPrimitiveWrapper(std::shared_ptr<PSetPrimitiveWrapper> &wrapperIn)
 {
   pSetVertexWrapper = wrapperIn;
 }
@@ -106,20 +106,15 @@ void ShapeGeometry::setToHighlight(const boost::uuids::uuid &idIn)
   setColor(idIn, colorHighlight);
 }
 
-boost::uuids::uuid ShapeGeometry::getId(std::size_t primitiveIndexIn) const
+boost::uuids::uuid ShapeGeometry::getId(std::size_t primitiveSetIndexIn) const
 {
-  assert(idPSetWrapper->hasPSet(primitiveIndexIn));
-  return idPSetWrapper->findIdFromPSet(primitiveIndexIn);
+  assert(idPSetWrapper->hasPSet(primitiveSetIndexIn));
+  return idPSetWrapper->findIdFromPSet(primitiveSetIndexIn);
 }
 
-std::size_t ShapeGeometry::getPSetFromVertex(std::size_t vertexIndexIn) const
+std::size_t ShapeGeometry::getPSetFromPrimitive(std::size_t primitiveIndexIn) const
 {
-  return pSetVertexWrapper->findPSetFromVertex(vertexIndexIn);
-}
-
-const osg::BoundingSphere& ShapeGeometry::getBSphereFromPSet(std::size_t primitiveIndexIn) const
-{
-  return idPSetWrapper->findBSphereFromPSet(primitiveIndexIn);
+  return pSetVertexWrapper->findPSetFromPrimitive(primitiveIndexIn);
 }
 
 ShapeGeometryBuilder::ShapeGeometryBuilder(std::shared_ptr<ftr::SeerShape> seerShapeIn) : 
@@ -206,13 +201,14 @@ void ShapeGeometryBuilder::initialize()
     
     faceGeometry->seerShape = seerShape;
     
-    pSetTriangleWrapper = std::shared_ptr<PSetVertexWrapper>(new PSetVertexWrapper());
-    faceGeometry->setPSetVertexWrapper(pSetTriangleWrapper);
+    pSetPrimitiveWrapperFace = std::shared_ptr<PSetPrimitiveWrapper>(new PSetPrimitiveWrapper());
+    faceGeometry->setPSetPrimitiveWrapper(pSetPrimitiveWrapperFace);
+    primitiveCountFace = 0;
     
     out->addChild(faceGeometry.get());
   }
   else
-    faceGeometry = osg::ref_ptr<ShapeGeometry>();
+    faceGeometry.release();
   if (shouldBuildEdges)
   {
     edgeGeometry = new ShapeGeometry();
@@ -233,13 +229,17 @@ void ShapeGeometryBuilder::initialize()
     
     edgeGeometry->seerShape = seerShape;
     
+    pSetPrimitiveWrapperEdge = std::shared_ptr<PSetPrimitiveWrapper>(new PSetPrimitiveWrapper());
+    edgeGeometry->setPSetPrimitiveWrapper(pSetPrimitiveWrapperEdge);
+    primitiveCountEdge = 0;
+    
     HiddenLineEffect *effect = new HiddenLineEffect();
     effect->addChild(edgeGeometry.get());
     
     out->addChild(effect);
   }
   else
-    edgeGeometry = osg::ref_ptr<ShapeGeometry>();
+    edgeGeometry.release();
   if (shouldBuildVertices)
   {
     //not using vertices at time of writing, so has bugs.
@@ -253,7 +253,7 @@ void ShapeGeometryBuilder::initialize()
     out->addChild(vertexGeometry.get());
   }
   else
-    vertexGeometry = osg::ref_ptr<ShapeGeometry>();
+    vertexGeometry.release();
 }
 
 void ShapeGeometryBuilder::recursiveConstruct(const TopoDS_Shape &shapeIn)
@@ -385,17 +385,11 @@ void ShapeGeometryBuilder::faceConstruct(const TopoDS_Face &faceIn)
     }
     
     //store primitiveset index and vertex indes into map.
-    PSetVertexRecord record;
+    PSetPrimitiveRecord record;
     record.primitiveSetIndex = faceGeometry->getNumPrimitiveSets();
-    
-    record.vertexIndex = (*indices)[factor];
-    pSetTriangleWrapper->pSetVertexContainer.insert(record);
-    
-    record.vertexIndex = (*indices)[factor + 1];
-    pSetTriangleWrapper->pSetVertexContainer.insert(record);
-    
-    record.vertexIndex = (*indices)[factor + 2];
-    pSetTriangleWrapper->pSetVertexContainer.insert(record);
+    record.primitiveIndex = primitiveCountFace;
+    pSetPrimitiveWrapperFace->pSetPrimitiveContainer.insert(record);
+    primitiveCountFace++;
   }
   faceGeometry->addPrimitiveSet(indices.get());
   boost::uuids::uuid id = seerShape->findShapeIdRecord(faceIn).id;
@@ -420,7 +414,6 @@ void ShapeGeometryBuilder::edgeConstruct(const TopoDS_Edge &edgeIn)
   osg::Vec3Array *vertices = dynamic_cast<osg::Vec3Array *>(edgeGeometry->getVertexArray());
   osg::Vec4Array *colors = dynamic_cast<osg::Vec4Array *>(edgeGeometry->getColorArray());
   osg::ref_ptr<osg::DrawElementsUInt> indices = new osg::DrawElementsUInt(GL_LINE_STRIP);
-  osg::BoundingSphere bSphere;
   
   if (edgeToFace.Contains(edgeIn) && edgeToFace.FindFromKey(edgeIn).Size() > 0)
   {
@@ -457,13 +450,15 @@ void ShapeGeometryBuilder::edgeConstruct(const TopoDS_Edge &edgeIn)
       colors->push_back(edgeGeometry->getColor());
       (*indices)[index - 1] = vertices->size() - 1;
       
-      if (!bSphere.valid()) //for first one.
+      if (index != indexes.Lower()) //no edge for first point. so skip
       {
-        bSphere.center() = vertices->back();
-        bSphere.radius() = 0.0;
+        //store primitiveset index and vertex indexes into map.
+        PSetPrimitiveRecord record;
+        record.primitiveSetIndex = edgeGeometry->getNumPrimitiveSets();
+        record.primitiveIndex = primitiveCountEdge;
+        pSetPrimitiveWrapperEdge->pSetPrimitiveContainer.insert(record);
+        primitiveCountEdge++;
       }
-      else
-        bSphere.expandBy(vertices->back());
     }
   }
   else //no face for edge
@@ -493,13 +488,12 @@ void ShapeGeometryBuilder::edgeConstruct(const TopoDS_Edge &edgeIn)
       (*indices)[tempIndex] = vertices->size() - 1;
       tempIndex++;
       
-      if (!bSphere.valid()) //for first one.
-      {
-        bSphere.center() = vertices->back();
-        bSphere.radius() = 0.0;
-      }
-      else
-        bSphere.expandBy(vertices->back());
+      //store primitiveset index and vertex indexes into map.
+      PSetPrimitiveRecord record;
+      record.primitiveSetIndex = edgeGeometry->getNumPrimitiveSets();
+      record.primitiveIndex = primitiveCountEdge;
+      pSetPrimitiveWrapperEdge->pSetPrimitiveContainer.insert(record);
+      primitiveCountEdge++;
     }
   }
   
@@ -511,7 +505,6 @@ void ShapeGeometryBuilder::edgeConstruct(const TopoDS_Edge &edgeIn)
     IdPSetRecord record;
     record.id = id;
     record.primitiveSetIndex = lastPrimitiveIndex;
-    record.bSphere = bSphere;
     idPSetWrapperEdge->idPSetContainer.insert(record);
   }
   else

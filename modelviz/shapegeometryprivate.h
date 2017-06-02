@@ -25,20 +25,17 @@
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/composite_key.hpp>
 
-#include <osg/BoundingSphere>
-
 #include <tools/idtools.h>
 
 namespace mdv
 {
   namespace BMI = boost::multi_index;
   
-  //! @brief struct for map record
+  //! @brief Map between geometry identifier and primitive set index.
   struct IdPSetRecord
   {
     boost::uuids::uuid id = gu::createNilId();
     std::size_t primitiveSetIndex = 0; //!< primitiveset index.
-    osg::BoundingSphere bSphere; //!< only used for edges. faces use kdtree
     
     //@{
     //! used as tags.
@@ -116,77 +113,68 @@ namespace mdv
       assert(it != list.end());
       return it->id;
     }
-    
-    const osg::BoundingSphere& findBSphereFromPSet(std::size_t indexIn) const
-    {
-      typedef IdPSetContainer::index<IdPSetRecord::ByPSet>::type List;
-      const List &list = idPSetContainer.get<IdPSetRecord::ByPSet>();
-      List::const_iterator it = list.find(indexIn);
-      assert(it != list.end());
-      return it->bSphere;
-    }
   };
   
-  //! @brief map between primitiveset indexes and triangle indexes
-  struct PSetVertexRecord
+  //! @brief map between primitive set indexes and primitive indexes (triangle or line)
+  struct PSetPrimitiveRecord
   {
     std::size_t primitiveSetIndex = 0; //!< primitiveset index.
-    std::size_t vertexIndex = 0; //!< triangle index.
+    std::size_t primitiveIndex = 0; //!< triangle index.
     
     //@{
     //! used as tags.
     struct ByPSet{};
-    struct ByVertex{};
+    struct ByPrimitive{};
     //@}
   };
-  std::ostream& operator<<(std::ostream& os, const PSetVertexRecord& record)
+  std::ostream& operator<<(std::ostream& os, const PSetPrimitiveRecord& record)
   {
-    os << record.primitiveSetIndex << "      " << record.vertexIndex << std::endl;
+    os << record.primitiveSetIndex << "      " << record.primitiveIndex << std::endl;
     return os;
   }
   
   typedef boost::multi_index_container
   <
-    PSetVertexRecord,
+    PSetPrimitiveRecord,
     BMI::indexed_by
     <
       BMI::ordered_non_unique
       <
-	BMI::tag<PSetVertexRecord::ByPSet>,
-	BMI::member<PSetVertexRecord, std::size_t, &PSetVertexRecord::primitiveSetIndex>
+        BMI::tag<PSetPrimitiveRecord::ByPSet>,
+        BMI::member<PSetPrimitiveRecord, std::size_t, &PSetPrimitiveRecord::primitiveSetIndex>
       >,
       BMI::ordered_unique
       <
-	BMI::tag<PSetVertexRecord::ByVertex>,
-	BMI::member<PSetVertexRecord, std::size_t, &PSetVertexRecord::vertexIndex>
+        BMI::tag<PSetPrimitiveRecord::ByPrimitive>,
+        BMI::member<PSetPrimitiveRecord, std::size_t, &PSetPrimitiveRecord::primitiveIndex>
       >
     >
-  > PSetVertexContainer;
-  std::ostream& operator<<(std::ostream& os, const PSetVertexContainer& container)
+  > PSetPrimitiveContainer;
+  std::ostream& operator<<(std::ostream& os, const PSetPrimitiveContainer& container)
   {
-    typedef PSetVertexContainer::index<PSetVertexRecord::ByPSet>::type List;
-    const List &list = container.get<PSetVertexRecord::ByPSet>();
+    typedef PSetPrimitiveContainer::index<PSetPrimitiveRecord::ByPSet>::type List;
+    const List &list = container.get<PSetPrimitiveRecord::ByPSet>();
     for (List::const_iterator it = list.begin(); it != list.end(); ++it)
       os << *it;
     return os;
   }
   
   //! @brief So I can forward declare.
-  struct PSetVertexWrapper
+  struct PSetPrimitiveWrapper
   {
-    PSetVertexContainer pSetVertexContainer;
+    PSetPrimitiveContainer pSetPrimitiveContainer;
     bool hasPSet(std::size_t indexIn)
     {
-      typedef PSetVertexContainer::index<PSetVertexRecord::ByPSet>::type List;
-      const List &list = pSetVertexContainer.get<PSetVertexRecord::ByPSet>();
+      typedef PSetPrimitiveContainer::index<PSetPrimitiveRecord::ByPSet>::type List;
+      const List &list = pSetPrimitiveContainer.get<PSetPrimitiveRecord::ByPSet>();
       List::const_iterator it = list.find(indexIn);
       return it != list.end();
     }
     
-    std::size_t findPSetFromVertex(std::size_t indexIn)
+    std::size_t findPSetFromPrimitive(std::size_t indexIn)
     {
-      typedef PSetVertexContainer::index<PSetVertexRecord::ByVertex>::type List;
-      const List &list = pSetVertexContainer.get<PSetVertexRecord::ByVertex>();
+      typedef PSetPrimitiveContainer::index<PSetPrimitiveRecord::ByPrimitive>::type List;
+      const List &list = pSetPrimitiveContainer.get<PSetPrimitiveRecord::ByPrimitive>();
       List::const_iterator it = list.find(indexIn);
       assert(it != list.end());
       return it->primitiveSetIndex;

@@ -241,7 +241,6 @@ SET(EXPRESSION_SOURCES
     
 SET(SELECTION_SOURCES
     selection/eventhandler.cpp
-    selection/intersector.cpp
     selection/manager.cpp
     selection/message.cpp
     selection/container.cpp
@@ -249,6 +248,7 @@ SET(SELECTION_SOURCES
     selection/interpreter.cpp
     selection/visitors.cpp
     selection/definitions.cpp
+    selection/intersection.cpp
     )
     
 SET(TOOLS_SOURCES

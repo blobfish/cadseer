@@ -27,11 +27,11 @@
 #include <osg/Point>
 #include <osg/Switch>
 #include <osg/Depth>
+#include <osgUtil/PolytopeIntersector>
 
 #include <selection/eventhandler.h>
 #include <modelviz/nodemaskdefs.h>
 #include <selection/definitions.h>
-#include <selection/intersector.h>
 #include <globalutilities.h>
 #include <application/application.h>
 #include <project/project.h>
@@ -40,10 +40,52 @@
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <selection/interpreter.h>
+#include <selection/intersection.h>
 
 using namespace osg;
 using namespace boost::uuids;
 using namespace slc;
+
+//build polytope at origin. 8 sided.
+static osg::Polytope buildBasePolytope(double radius)
+{
+  //apparently the order of the addition matters. intersector
+  //wants opposites sequenced. This seems to be working.
+  osg::Polytope out;
+  osg::Matrixd rotation = osg::Matrixd::rotate(osg::DegreesToRadians(45.0), osg::Vec3d(0.0, 0.0, 1.0));
+  osg::Vec3d base = osg::Vec3d(1.0, 0.0, 0.0);
+  
+  out.add(osg::Plane(base, radius));
+  out.add(osg::Plane(-base, radius));
+  
+  base = rotation * base;
+  
+  out.add(osg::Plane(base, radius));
+  out.add(osg::Plane(-base, radius));
+  
+  base = rotation * base;
+  
+  out.add(osg::Plane(base, radius));
+  out.add(osg::Plane(-base, radius));
+  
+  base = rotation * base;
+  
+  out.add(osg::Plane(base, radius));
+  out.add(osg::Plane(-base, radius));
+  
+  out.add(osg::Plane(0.0,0.0,1.0, 0.0)); //last has to be 'cap'
+  
+  return out;
+}
+
+static osg::Polytope buildPolytope(double x, double y, double radius)
+{
+  static osg::Polytope base = buildBasePolytope(radius);
+  osg::Polytope out(base);
+  out.transform(osg::Matrixd::translate(x, y, 0.0));
+  
+  return out;
+}
 
 EventHandler::EventHandler(osg::Group *viewerRootIn) : osgGA::GUIEventHandler()
 {
@@ -121,25 +163,50 @@ bool EventHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
       }
     }
   
-    currentIntersections.clear();
     if (eventAdapter.getEventType() == osgGA::GUIEventAdapter::MOVE)
     {
         osg::View* view = actionAdapter.asView();
         if (!view)
             return false;
-
-        osg::ref_ptr<Intersector>picker = new Intersector(
-                    osgUtil::Intersector::WINDOW, eventAdapter.getX(),
-                    eventAdapter.getY());
-        picker->setPickRadius(16.0); //32 x 32 cursor
-
-        osgUtil::IntersectionVisitor iv(picker.get());
-        iv.setTraversalMask(nodeMask);
-        view->getCamera()->accept(iv);
-
-        if (picker->containsIntersections())
+        
+        Intersections currentIntersections;
+        
+        //use poly on just the edges for now.
+        if (nodeMask & mdv::edge)
         {
-            currentIntersections = picker->getMyIntersections();
+          osg::ref_ptr<osgUtil::PolytopeIntersector> polyPicker = new osgUtil::PolytopeIntersector
+          (
+            osgUtil::Intersector::WINDOW,
+            buildPolytope(eventAdapter.getX(), eventAdapter.getY(), 16.0)
+  //           eventAdapter.getX() - 16.0,
+  //           eventAdapter.getY() - 16.0,
+  //           eventAdapter.getX() + 16.0,
+  //           eventAdapter.getY() + 16.0
+          );
+          osgUtil::IntersectionVisitor polyVisitor(polyPicker.get());
+          polyVisitor.setTraversalMask(nodeMask & ~mdv::face);
+          view->getCamera()->accept(polyVisitor);
+          append(currentIntersections, polyPicker->getIntersections());
+        }
+        
+        //use linesegment on just the faces for now.
+        if (nodeMask & mdv::face)
+        {
+          osg::ref_ptr<osgUtil::LineSegmentIntersector> linePicker = new osgUtil::LineSegmentIntersector
+          (
+            osgUtil::Intersector::WINDOW,
+            eventAdapter.getX(),
+            eventAdapter.getY()
+          );
+          osgUtil::IntersectionVisitor lineVisitor(linePicker.get());
+          lineVisitor.setTraversalMask(nodeMask & ~mdv::edge);
+  //         lineVisitor.setUseKdTreeWhenAvailable(false); //temp for testing.
+          view->getCamera()->accept(lineVisitor);
+          append(currentIntersections, linePicker->getIntersections());
+        }
+
+        if (!currentIntersections.empty())
+        {
             Interpreter interpreter(currentIntersections, selectionMask);
 
             slc::Container newContainer;

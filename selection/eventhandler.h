@@ -23,7 +23,6 @@
 #include <memory>
 
 #include <osgGA/GUIEventHandler>
-#include <osgUtil/LineSegmentIntersector>
 
 #include <selection/container.h>
 #include <selection/message.h>
@@ -60,8 +59,6 @@ protected:
     unsigned int nodeMask;
     Mask selectionMask;
 
-    osgUtil::LineSegmentIntersector::Intersections currentIntersections;
-    
     osg::ref_ptr<osg::Group> viewerRoot;
     
     std::unique_ptr<msg::Observer> observer;

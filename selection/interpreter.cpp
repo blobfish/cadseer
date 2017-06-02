@@ -58,7 +58,7 @@ static ftr::Type getFeatureType(osg::Drawable &drawableIn)
 
 Interpreter::Interpreter
 (
-  const osgUtil::LineSegmentIntersector::Intersections& intersectionsIn,
+  const Intersections& intersectionsIn,
   Mask selectionMaskIn
 ) : intersections(intersectionsIn), selectionMask(selectionMaskIn)
 {
@@ -69,10 +69,12 @@ void Interpreter::go()
 {
   for (auto const &intersection : intersections)
   {
+    osg::Vec3d worldPoint = osg::Matrixd::inverse(*intersection.matrix) * intersection.localIntersectionPoint;
+    
     Container container;
     container.featureId = getFeatureId(*intersection.drawable);
     container.featureType = getFeatureType(*intersection.drawable);
-    container.pointLocation = intersection.getWorldIntersectPoint(); //default to intersection world point.
+    container.pointLocation = worldPoint; //default to intersection world point.
     
     int localNodeMask = intersection.nodePath.back()->getNodeMask();
     mdv::ShapeGeometry *shapeGeometry = dynamic_cast<mdv::ShapeGeometry *>(intersection.drawable.get());
@@ -95,13 +97,15 @@ void Interpreter::go()
       }
       continue;
     }
-    uuid selectedId = shapeGeometry->getId(intersection.primitiveIndex);
+    
+    std::size_t pSetIndex = shapeGeometry->getPSetFromPrimitive(intersection.primitiveIndex);
+    uuid selectedId = shapeGeometry->getId(pSetIndex);
     
     if (localNodeMask == mdv::edge)
     {
       if (canSelectPoints(selectionMask))
       {
-        osg::Vec3d iPoint = intersection.getWorldIntersectPoint();
+        osg::Vec3d iPoint = worldPoint;
         osg::Vec3d snapPoint;
         double distance = std::numeric_limits<double>::max();
         slc::Type sType = slc::Type::None;
@@ -164,7 +168,7 @@ void Interpreter::go()
 
         if (canSelectNearestPoints(selectionMask))
         {
-            std::vector<osg::Vec3d> nearestPoints = shapeGeometry->seerShape->useGetNearestPoint(selectedId, intersection.getWorldIntersectPoint());
+            std::vector<osg::Vec3d> nearestPoints = shapeGeometry->seerShape->useGetNearestPoint(selectedId, worldPoint);
             if (updateSnaps(nearestPoints))
             sType = slc::Type::NearestPoint;
         }
@@ -201,7 +205,7 @@ void Interpreter::go()
     {
       if (canSelectWires(selectionMask))
       {
-        uuid wire = shapeGeometry->seerShape->useGetClosestWire(selectedId, intersection.getWorldIntersectPoint());
+        uuid wire = shapeGeometry->seerShape->useGetClosestWire(selectedId, worldPoint);
         if (!wire.is_nil())
         {
             container.selectionIds = shapeGeometry->seerShape->useGetChildrenOfType(wire, TopAbs_EDGE);
