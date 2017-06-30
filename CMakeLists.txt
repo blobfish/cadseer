@@ -66,7 +66,7 @@ IF(OCCT_PROJECT_PATH)
         TKFeat
     )
 ELSE(OCCT_PROJECT_PATH)
-    MESSAGE(STATUS "OCCT_PROJECT_PATH is empty. Using find_package for OpenSceneGraph")
+    MESSAGE(STATUS "OCCT_PROJECT_PATH is empty. Using find_package for OCCT")
     find_package(OpenCasCade REQUIRED)
     SET(OCE_LIBRARIES ${OCC_LIBRARIES})
 ENDIF(OCCT_PROJECT_PATH)
