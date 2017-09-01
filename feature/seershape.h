@@ -32,6 +32,7 @@
 #include <TopoDS_Shape.hxx>
 
 #include <globalutilities.h>
+#include <tools/occtools.h>
 #include <tools/idtools.h>
 
 namespace osg{class Vec3d;}
@@ -264,8 +265,8 @@ namespace ftr
     void updateShapeIdRecord(const Vertex&, const BID::uuid&); //update id by vertex. 
     void updateShapeIdRecord(const Vertex&, const TopoDS_Shape&); //update shape by vertex.
     std::vector<BID::uuid> getAllShapeIds() const; //all the ids in the container.
-    gu::ShapeVector getAllShapes() const; //all the shapes in the container.
-    gu::ShapeVector getAllNilShapes() const; //all the shapes in the container.
+    occt::ShapeVector getAllShapes() const; //all the shapes in the container.
+    occt::ShapeVector getAllNilShapes() const; //all the shapes in the container.
     //@}
     
     //@{
@@ -290,7 +291,7 @@ namespace ftr
     //@{
     //! graph related functions
     std::vector<BID::uuid> useGetParentsOfType(const BID::uuid &, const TopAbs_ShapeEnum &) const;
-    gu::ShapeVector useGetParentsOfType(const TopoDS_Shape &, const TopAbs_ShapeEnum &) const;
+    occt::ShapeVector useGetParentsOfType(const TopoDS_Shape &, const TopAbs_ShapeEnum &) const;
     std::vector<BID::uuid> useGetChildrenOfType(const BID::uuid &, const TopAbs_ShapeEnum &) const;
     std::vector<BID::uuid> useGetChildrenOfType(const TopoDS_Shape &, const TopAbs_ShapeEnum &) const;
     BID::uuid useGetWire(const BID::uuid &, const BID::uuid &) const;

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="http://www.cadseer.com/prj/srl"
+  xmlns:srl="http://www.cadseer.com/prj/srl"
+>
+  
+<xs:include schemaLocation="featurebase.xsd"/>
+
+<xs:complexType name="AccruePick">
+  <xs:all>
+    <xs:element name="picks" type="srl:Picks"/>
+    <xs:element name="accrueType" type="xs:string"/>
+    <xs:element name="parameter" type="srl:Parameter"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="AccruePicks">
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+    <xs:element name="array" type="srl:AccruePick"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="FeatureExtract">
+  <xs:all>
+    <xs:element name="featureBase" type="srl:FeatureBase"/>
+    <xs:element name="accruePicks" type="srl:AccruePicks"/>
+    <xs:element name="picks" type="srl:Picks"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:element name="extract" type="srl:FeatureExtract"/>
+  
+</xs:schema> 

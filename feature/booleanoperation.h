@@ -22,7 +22,7 @@
 
 #include <BRepAlgoAPI_BooleanOperation.hxx>
 
-#include <globalutilities.h>
+#include <tools/occtools.h>
 
 class BOPAlgo_Builder;
 
@@ -42,7 +42,7 @@ namespace ftr
   {
   public:
     BooleanOperation(const TopoDS_Shape &, const TopoDS_Shape &, BOPAlgo_Operation);
-    BooleanOperation(const TopoDS_Shape &, const gu::ShapeVector &, BOPAlgo_Operation);
+    BooleanOperation(const TopoDS_Shape &, const occt::ShapeVector &, BOPAlgo_Operation);
     BOPAlgo_Builder& getBuilder();
   };
 }

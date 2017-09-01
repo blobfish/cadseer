@@ -65,6 +65,7 @@ namespace cmd
     void editColorDispatched(const msg::Message&);
     void featureRenameDispatched(const msg::Message&);
     void constructBlendDispatched(const msg::Message&);
+    void constructExtractDispatched(const msg::Message&);
     void editFeatureDispatched(const msg::Message&);
     
     //editing functions

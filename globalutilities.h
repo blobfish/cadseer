@@ -22,6 +22,7 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include <boost/uuid/uuid.hpp>
 
@@ -61,7 +62,14 @@ osg::Vec3d getXVector(const osg::Matrixd &m);
 osg::Vec3d getYVector(const osg::Matrixd &m);
 osg::Vec3d getZVector(const osg::Matrixd &m);
 osg::Vec3d gleanVector(const TopoDS_Shape &shapeIn, const osg::Vec3d &pickPoint);
-typedef std::vector<TopoDS_Shape, Standard_StdAllocator<TopoDS_Shape> > ShapeVector;
+
+template<typename T>
+void uniquefy(T &t)
+{
+  std::sort(t.begin(), t.end());
+  auto last = std::unique(t.begin(), t.end());
+  t.erase(last, t.end());
+}
 }
 
 std::ostream& operator<<(std::ostream &, const TopoDS_Shape &);

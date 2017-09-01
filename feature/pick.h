@@ -23,6 +23,9 @@
 #include <vector>
 #include <utility>
 
+#include <boost/bimap.hpp>
+#include <boost/assign/list_of.hpp>
+
 #include <osg/Vec3d>
 
 #include <feature/shapehistory.h>
@@ -63,6 +66,17 @@ namespace ftr
   typedef std::vector<Pick> Picks;
   prj::srl::Picks serialOut(const Picks&);
   Picks serialIn(const prj::srl::Picks&);
+  
+  enum class AccrueType
+  {
+    None = 0,
+    Tangent //!< what type edges, faces etc determined by pick.
+  };
+  
+  typedef boost::bimap<AccrueType, std::string> AccrueMap;
+  static const AccrueMap accrueMap = boost::assign::list_of<AccrueMap::relation>
+  (AccrueType::None, "None")
+  (AccrueType::Tangent, "Tangent");
 }
 
 #endif // FTR_PICK_H

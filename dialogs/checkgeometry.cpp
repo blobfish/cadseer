@@ -33,6 +33,7 @@
 #include <BRepCheck_Analyzer.hxx>
 #include <BOPAlgo_ArgumentAnalyzer.hxx>
 #include <TopExp_Explorer.hxx>
+#include <TopExp.hxx>
 #include <BRep_Tool.hxx>
 #include <TopoDS.hxx>
 #include <BRepBndLib.hxx>
@@ -53,6 +54,7 @@
 #include <message/observer.h>
 #include <message/dispatch.h>
 #include <tools/idtools.h>
+#include <tools/occtools.h>
 #include <library/spherebuilder.h>
 #include <dialogs/widgetgeometry.h>
 #include <dialogs/checkgeometry.h>
@@ -847,10 +849,25 @@ ShapesPage::ShapesPage(const ftr::Base &featureIn, QWidget *parent) :
 
 void ShapesPage::buildGui()
 {
+  QVBoxLayout *layout = new QVBoxLayout();
+  
+  QHBoxLayout *bl = new QHBoxLayout();
+  layout->addLayout(bl);
+  boundary = new QPushButton(tr("Show Boundary"), this);
+  boundary->setCheckable(true);
+  bl->addWidget(boundary);
+  bl->addStretch();
+  connect(boundary, &QPushButton::toggled, this, &ShapesPage::goBoundarySlot);
+  
   textEdit = new QTextEdit(this);
   textEdit->setReadOnly(true);
-  QVBoxLayout *layout = new QVBoxLayout();
-  layout->addWidget(textEdit);
+  QHBoxLayout *tl = new QHBoxLayout();
+  tl->addWidget(textEdit);
+  tl->addStretch();
+  layout->addLayout(tl);
+  
+  layout->addStretch();
+  
   this->setLayout(layout);
 }
 
@@ -862,6 +879,59 @@ void ShapesPage::go()
   set.DumpExtent(stream);
   
   textEdit->setText(QString::fromStdString(stream.str()));
+}
+
+void ShapesPage::showEvent(QShowEvent *)
+{
+  if (boundary->isChecked())
+    selectBoundary();
+}
+
+void ShapesPage::hideEvent(QHideEvent *event)
+{
+  observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  QWidget::hideEvent(event);
+}
+
+void ShapesPage::goBoundarySlot(bool checked)
+{
+  if (!checked)
+  {
+    observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
+    return;
+  }
+  selectBoundary();
+}
+
+void ShapesPage::selectBoundary()
+{
+  occt::WireVector wires = occt::getBoundaryWires(seerShape.getRootOCCTShape());
+  //these are wires but not necessarily for the shape. we have to loop and highlight edges.
+  occt::EdgeVector edges;
+  for (const auto &wire : wires)
+  {
+    TopTools_IndexedMapOfShape map;
+    TopExp::MapShapes(wire, TopAbs_EDGE, map);
+    occt::EdgeVector ev = occt::ShapeVectorCast(map);
+    std::copy(ev.begin(), ev.end(), std::back_inserter(edges));
+  }
+  
+  for (const auto &e : edges)
+  {
+    if (!seerShape.hasShapeIdRecord(e))
+    {
+      std::cout << "skipping edge in ShapesPage::selectBoundary()" << std::endl;
+      continue;
+    }
+    slc::Message sMessage;
+    sMessage.type = slc::Type::Edge;
+    sMessage.featureId = feature.getId();
+    sMessage.featureType = feature.getType();
+    sMessage.shapeId = seerShape.findShapeIdRecord(e).id;
+    msg::Message message(msg::Request | msg::Selection | msg::Add);
+    message.payload = sMessage;
+    observer->out(message);
+  }
 }
 
 CheckGeometry::CheckGeometry(const ftr::Base &featureIn, QWidget *parent) :

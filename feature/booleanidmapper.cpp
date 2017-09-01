@@ -108,7 +108,7 @@ void BooleanIdMapper::goIntersectionEdges()
       continue;
     
     IntersectionEdge tempIntersection;
-    gu::ShapeVector parentShapes = seerShapeOut->useGetParentsOfType(shape, TopAbs_FACE);
+    occt::ShapeVector parentShapes = seerShapeOut->useGetParentsOfType(shape, TopAbs_FACE);
     
     for (const auto &cShape : parentShapes)
     {
@@ -216,7 +216,7 @@ void BooleanIdMapper::goSplitFaces()
   const BOPCol_DataMapOfShapeShape &origins = builder.Origins();
   const BOPCol_DataMapOfShapeListOfShape &splits = builder.Splits();
   
-  gu::ShapeVector nilShapes = seerShapeOut->getAllNilShapes();
+  occt::ShapeVector nilShapes = seerShapeOut->getAllNilShapes();
   std::vector<std::pair<SplitFace, TopoDS_Shape> > weakSplits;
   
   for (const auto &currentShape : nilShapes)

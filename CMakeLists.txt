@@ -223,6 +223,7 @@ SET(FEATURE_SOURCES
     feature/oblong
     feature/oblongbuilder.cpp
     feature/shapehistory.cpp
+    feature/extract.cpp
     )
     
 SET(EXPRESSION_SOURCES
@@ -251,6 +252,7 @@ SET(SELECTION_SOURCES
 SET(TOOLS_SOURCES
     tools/idtools.cpp
     tools/infotools.cpp
+    tools/occtools.cpp
     )
     
 SET(DIALOG_SOURCES
@@ -291,6 +293,7 @@ SET(PROJECT_SOURCES
     project/serial/xsdcxxoutput/featuredatumplane.cpp
     project/serial/xsdcxxoutput/featurehollow.cpp
     project/serial/xsdcxxoutput/featureoblong.cpp
+    project/serial/xsdcxxoutput/featureextract.cpp
     )
     
 SET(APPLICATION_SOURCES
@@ -315,6 +318,7 @@ SET(COMMAND_SOURCES
     command/editcolor.cpp
     command/featurerename.cpp
     command/blend.cpp
+    command/extract.cpp
     )
     
 SET(LIBRARY_SOURCES

@@ -318,9 +318,9 @@ std::vector<uuid> SeerShape::getAllShapeIds() const
   return out;
 }
 
-gu::ShapeVector SeerShape::getAllShapes() const
+occt::ShapeVector SeerShape::getAllShapes() const
 {
-  gu::ShapeVector out;
+  occt::ShapeVector out;
   
   typedef ShapeIdContainer::index<ShapeIdRecord::ById>::type List;
   const List &list = shapeIdContainer.get<ShapeIdRecord::ById>();
@@ -329,9 +329,9 @@ gu::ShapeVector SeerShape::getAllShapes() const
   return out;
 }
 
-gu::ShapeVector SeerShape::getAllNilShapes() const
+occt::ShapeVector SeerShape::getAllNilShapes() const
 {
-  gu::ShapeVector out;
+  occt::ShapeVector out;
   typedef ShapeIdContainer::index<ShapeIdRecord::ById>::type List;
   const List &list = shapeIdContainer.get<ShapeIdRecord::ById>();
   auto rangeItPair = list.equal_range(gu::createNilId());
@@ -534,7 +534,7 @@ std::vector<uuid> SeerShape::useGetParentsOfType
   return idsOut;
 }
 
-gu::ShapeVector SeerShape::useGetParentsOfType
+occt::ShapeVector SeerShape::useGetParentsOfType
   (const TopoDS_Shape &shapeIn, const TopAbs_ShapeEnum& shapeTypeIn) const
 {
   assert(hasShapeIdRecord(shapeIn));
@@ -544,7 +544,7 @@ gu::ShapeVector SeerShape::useGetParentsOfType
   boost::breadth_first_search(rGraph, findShapeIdRecord(shapeIn).graphVertex, boost::visitor(vis));
 
   std::vector<Vertex>::const_iterator vit;
-  gu::ShapeVector shapesOut;
+  occt::ShapeVector shapesOut;
   for (const auto &gVertex : vertices)
     shapesOut.push_back(findShapeIdRecord(gVertex).shape);
   return shapesOut;
@@ -965,7 +965,7 @@ void SeerShape::derivedMatch()
 {
   typedef ShapeIdContainer::index<ShapeIdRecord::ById>::type List;
   List &list = shapeIdContainer.get<ShapeIdRecord::ById>();
-  gu::ShapeVector nilShapes;
+  occt::ShapeVector nilShapes;
   auto rangeItPair = list.equal_range(gu::createNilId());
   for (; rangeItPair.first != rangeItPair.second; ++rangeItPair.first)
     nilShapes.push_back(rangeItPair.first->shape);
@@ -979,7 +979,7 @@ void SeerShape::derivedMatch()
       
       bool bail = false;
       ftr::IdSet set;
-      gu::ShapeVector parents = useGetParentsOfType(shape, parentType);
+      occt::ShapeVector parents = useGetParentsOfType(shape, parentType);
       for (const auto &parent : parents)
       {
         assert(hasShapeIdRecord(parent));
@@ -1055,7 +1055,7 @@ void SeerShape::dumpDuplicates(const std::string &headerIn)
 
 void SeerShape::ensureNoNils()
 {
-  gu::ShapeVector nilShapes;
+  occt::ShapeVector nilShapes;
   
   typedef ShapeIdContainer::index<ShapeIdRecord::ById>::type List;
   List &list = shapeIdContainer.get<ShapeIdRecord::ById>();
@@ -1074,7 +1074,7 @@ void SeerShape::ensureNoNils()
 void SeerShape::ensureNoDuplicates()
 {
   std::set<boost::uuids::uuid> processed;
-  gu::ShapeVector shapes;
+  occt::ShapeVector shapes;
   typedef ShapeIdContainer::index<ShapeIdRecord::ById>::type List;
   const List &list = shapeIdContainer.get<ShapeIdRecord::ById>();
   for (const auto &record : list)
@@ -1096,7 +1096,7 @@ void SeerShape::faceEdgeMatch(const SeerShape &source)
 {
   using boost::uuids::uuid;
   
-  gu::ShapeVector nilEdges;
+  occt::ShapeVector nilEdges;
   typedef ShapeIdContainer::index<ShapeIdRecord::ById>::type List;
   List &list = shapeIdContainer.get<ShapeIdRecord::ById>();
   auto rangeItPair = list.equal_range(gu::createNilId());
@@ -1110,7 +1110,7 @@ void SeerShape::faceEdgeMatch(const SeerShape &source)
   for (const auto &nilEdge : nilEdges)
   {
     //get 2 parent face ids. need 2 to make edge unique.
-    gu::ShapeVector parentFaces = useGetParentsOfType(nilEdge, TopAbs_FACE);
+    occt::ShapeVector parentFaces = useGetParentsOfType(nilEdge, TopAbs_FACE);
     if (parentFaces.size() != 2)
       continue;
     std::vector<uuid> parentFacesIds;
@@ -1161,7 +1161,7 @@ void SeerShape::edgeVertexMatch(const SeerShape &source)
 {
   using boost::uuids::uuid;
   
-  gu::ShapeVector nilVertices;
+  occt::ShapeVector nilVertices;
   typedef ShapeIdContainer::index<ShapeIdRecord::ById>::type List;
   List &list = shapeIdContainer.get<ShapeIdRecord::ById>();
   auto rangeItPair = list.equal_range(gu::createNilId());
@@ -1176,7 +1176,7 @@ void SeerShape::edgeVertexMatch(const SeerShape &source)
   {
     bool nilDetected = false;
     bool missingInSource = false;
-    gu::ShapeVector parentEdges = useGetParentsOfType(nilVertex, TopAbs_EDGE);
+    occt::ShapeVector parentEdges = useGetParentsOfType(nilVertex, TopAbs_EDGE);
     std::vector<uuid> parentEdgeIds;
     for (const auto &pEdge : parentEdges)
       parentEdgeIds.push_back(findShapeIdRecord(pEdge).id);

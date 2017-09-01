@@ -34,6 +34,7 @@
 #include <command/editcolor.h>
 #include <command/featurerename.h>
 #include <command/blend.h>
+#include <command/extract.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <selection/message.h>
@@ -101,6 +102,9 @@ void Manager::setupDispatcher()
   
   mask = msg::Request | msg::Construct | msg::Blend;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::constructBlendDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Construct | msg::Extract;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::constructExtractDispatched, this, _1)));
   
   mask = msg::Request | msg::Edit | msg::Feature;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::editFeatureDispatched, this, _1)));
@@ -244,6 +248,12 @@ void Manager::constructBlendDispatched(const msg::Message&)
 {
   std::shared_ptr<Blend> blend(new Blend());
   addCommand(blend);
+}
+
+void Manager::constructExtractDispatched(const msg::Message&)
+{
+  std::shared_ptr<Extract> e(new Extract());
+  addCommand(e);
 }
 
 void Manager::editFeatureDispatched(const msg::Message&)

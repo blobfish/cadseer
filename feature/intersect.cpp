@@ -64,7 +64,7 @@ void Intersect::updateModel(const UpdatePayload &payloadIn)
     const SeerShape &targetSeerShape = payloadIn.updateMap.equal_range(InputType::target).first->second->getSeerShape();
     assert(!targetSeerShape.isNull());
     //tools
-    gu::ShapeVector toolOCCTShapes;
+    occt::ShapeVector toolOCCTShapes;
     for (auto pairIt = payloadIn.updateMap.equal_range(InputType::tool); pairIt.first != pairIt.second; ++pairIt.first)
     {
       const SeerShape &toolSeerShape = pairIt.first->second->getSeerShape();
