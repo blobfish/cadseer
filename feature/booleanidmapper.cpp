@@ -91,8 +91,11 @@ void BooleanIdMapper::go()
 
 void BooleanIdMapper::goIntersectionEdges()
 {
+  //occt v7.2 switched builder origins from a shape to shape map.
+  //to a shape to LISTOFSHAPE map. havent' investigated the implications
+  //of this just made a switch and used First from the list.
   const BOPDS_DS &bopDS = *(builder.PDS());
-  const BOPCol_DataMapOfShapeShape &origins = builder.Origins();
+  const BOPCol_DataMapOfShapeListOfShape &origins = builder.Origins();
   
   std::set<IntersectionEdge> cIEdges; //current intersection edges.
   for (int index = 0; index < bopDS.NbShapes(); ++index)
@@ -116,13 +119,13 @@ void BooleanIdMapper::goIntersectionEdges()
         continue;
       
       uuid sourceFaceId = gu::createNilId();
-      if (inputTarget.hasShapeIdRecord(origins(cShape)))
-        sourceFaceId = inputTarget.findShapeIdRecord(origins(cShape)).id;
+      if (inputTarget.hasShapeIdRecord(origins(cShape).First()))
+        sourceFaceId = inputTarget.findShapeIdRecord(origins(cShape).First()).id;
       for(const auto &tool : inputTools)
       {
-        if (tool->hasShapeIdRecord(origins(cShape)))
+        if (tool->hasShapeIdRecord(origins(cShape).First()))
         {
-        sourceFaceId = tool->findShapeIdRecord(origins(cShape)).id;
+        sourceFaceId = tool->findShapeIdRecord(origins(cShape).First()).id;
         break;
         }
       }
@@ -213,7 +216,8 @@ void BooleanIdMapper::goSingleSplits()
 
 void BooleanIdMapper::goSplitFaces()
 {
-  const BOPCol_DataMapOfShapeShape &origins = builder.Origins();
+  //occt v7.2 switched builder origins from a shape to shape map. see above.
+  const BOPCol_DataMapOfShapeListOfShape &origins = builder.Origins();
   const BOPCol_DataMapOfShapeListOfShape &splits = builder.Splits();
   
   occt::ShapeVector nilShapes = seerShapeOut->getAllNilShapes();
@@ -225,7 +229,7 @@ void BooleanIdMapper::goSplitFaces()
       continue;
     if (!origins.IsBound(currentShape))
       continue;
-    const TopoDS_Shape &origin = origins(currentShape);
+    const TopoDS_Shape &origin = origins(currentShape).First();
     if (!splits.IsBound(origin))
       continue;
     //now we should have proved out current shape is a split.

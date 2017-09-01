@@ -25,7 +25,7 @@ MARK_AS_ADVANCED(OCCT_PROJECT_PATH)
 IF(OCCT_PROJECT_PATH)
     MESSAGE(STATUS "OCCT_PROJECT_PATH is set to: ${OCCT_PROJECT_PATH}")
     
-    set(OCCT_BUILD_INCLUDE "${OCCT_PROJECT_PATH}/build/inc")
+    set(OCCT_BUILD_INCLUDE "${OCCT_PROJECT_PATH}/build/include/opencascade")
     if(NOT EXISTS ${OCCT_BUILD_INCLUDE})
         message(FATAL_ERROR "build include path not valid. ${OCCT_BUILD_INCLUDE}")
     endif(NOT EXISTS ${OCCT_BUILD_INCLUDE})
