@@ -60,6 +60,7 @@ void Inert::updateModel(const UpdatePayload &payloadIn)
   {
     TopoDS_Shape tempShape(seerShape->getRootOCCTShape());
     tempShape.Location(freshLocation);
+    seerShape->setOCCTShape(tempShape);
     seerShape->ensureNoNils(); //TODO have to reconcile reposition items.
   }
   
