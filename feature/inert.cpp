@@ -58,10 +58,38 @@ void Inert::updateModel(const UpdatePayload &payloadIn)
   
   if (gu::toOsg(seerShape->getRootOCCTShape().Location().Transformation()) != gu::toOsg(tempTrsf))
   {
+    //store a map of offset to id for restoration.
+    std::vector<uuid> oldIds;
+    TopTools_IndexedMapOfShape osm; //old shape map
+    TopExp::MapShapes(seerShape->getRootOCCTShape(), osm);
+    for (int i = 1; i < osm.Size() + 1; ++i)
+    {
+      if (seerShape->hasShapeIdRecord(osm(i))) //probably degenerated edge.
+        oldIds.push_back(seerShape->findShapeIdRecord(osm(i)).id);
+      else
+        oldIds.push_back(gu::createNilId()); //place holder will be skipped again.
+    }
+    uuid oldRootId = seerShape->getRootShapeId();
+    
     TopoDS_Shape tempShape(seerShape->getRootOCCTShape());
     tempShape.Location(freshLocation);
     seerShape->setOCCTShape(tempShape);
-    seerShape->ensureNoNils(); //TODO have to reconcile reposition items.
+    
+    seerShape->updateShapeIdRecord(seerShape->getRootOCCTShape(), oldRootId);
+    seerShape->setRootShapeId(oldRootId);
+    TopTools_IndexedMapOfShape nsm; //new shape map
+    TopExp::MapShapes(seerShape->getRootOCCTShape(), nsm);
+    for (int i = 1; i < nsm.Size() + 1; ++i)
+    {
+      if (seerShape->hasShapeIdRecord(nsm(i))) //probably degenerated edge.
+        seerShape->updateShapeIdRecord(nsm(i), oldIds.at(i - 1));
+    }
+    
+    seerShape->dumpNils("inert");
+    seerShape->dumpDuplicates("inert");
+    
+    seerShape->ensureNoNils();
+    seerShape->ensureNoDuplicates();
   }
   
   setSuccess();
