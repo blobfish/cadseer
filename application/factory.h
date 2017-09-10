@@ -60,6 +60,7 @@ namespace app
     void newHollowDispatched(const msg::Message&);
     void importOCCDispatched(const msg::Message&);
     void exportOCCDispatched(const msg::Message&);
+    void importStepDispatched(const msg::Message&);
     void exportStepDispatched(const msg::Message&);
     void preferencesDispatched(const msg::Message&);
     void removeDispatched(const msg::Message&);

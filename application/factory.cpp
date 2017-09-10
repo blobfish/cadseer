@@ -25,6 +25,7 @@
 #include <QTextStream>
 #include <QUrl>
 #include <QDesktopServices>
+#include <QMessageBox>
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/timer/timer.hpp>
@@ -33,8 +34,11 @@
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Vertex.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopoDS_Iterator.hxx>
 #include <TopoDS.hxx>
 #include <STEPControl_Writer.hxx>
+#include <STEPControl_Reader.hxx>
 #include <APIHeaderSection_MakeHeader.hxx>
 
 #include <osgDB/WriteFile>
@@ -65,6 +69,7 @@
 #include <feature/draft.h>
 #include <feature/datumplane.h>
 #include <feature/hollow.h>
+#include <feature/inert.h>
 #include <library/lineardimension.h>
 #include <selection/visitors.h>
 #include <application/factory.h>
@@ -137,6 +142,9 @@ void Factory::setupDispatcher()
   
   mask = msg::Request | msg::ExportOCC;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::exportOCCDispatched, this, _1)));
+  
+  mask = msg::Request | msg::ImportStep;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::importStepDispatched, this, _1)));
   
   mask = msg::Request | msg::ExportStep;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::exportStepDispatched, this, _1)));
@@ -715,6 +723,73 @@ void Factory::exportOCCDispatched(const msg::Message&)
     
   BRepTools::Write(project->findFeature(containers.at(0).featureId)->getShape(), fileName.toStdString().c_str());
   observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
+}
+
+void Factory::importStepDispatched(const msg::Message&)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  //get file name
+  app::Application *application = dynamic_cast<app::Application *>(qApp);
+  assert(application);
+  assert(project);
+  
+  static QString defaultDirectory = QString::fromStdString(project->getSaveDirectory()); 
+  
+  QString fileName = QFileDialog::getOpenFileName
+  (
+    application->getMainWindow(),
+    QObject::tr("Import Step File"), defaultDirectory,
+    QObject::tr("step (*.step *.stp)")
+  );
+  if (fileName.isEmpty())
+    return;
+  defaultDirectory = QFileInfo(fileName).absolutePath();
+  
+  app::WaitCursor wc; //show busy.
+  
+  STEPControl_Reader scr; //step control reader.
+  if (scr.ReadFile(fileName.toUtf8().constData()) != IFSelect_RetDone)
+  {
+    QMessageBox::critical(application->getMainWindow(), QObject::tr("Error"), QObject::tr("failed reading step file"));
+    return;
+  }
+  
+  //todo check units!
+  
+  scr.TransferRoots();
+  
+  int nos = scr.NbShapes(); //number of shapes.
+  if (nos < 1)
+  {
+    QMessageBox::critical(application->getMainWindow(), QObject::tr("Error"), QObject::tr("no shapes in step file"));
+    return;
+  }
+  int si = 0; //shapes imported
+  for (int i = 1; i < nos + 1; ++i)
+  {
+    TopoDS_Shape s = scr.Shape(i);
+    if (s.IsNull())
+      continue;
+    
+    //not sure how the reader is determining what is a 'root' shape.
+    //but the sample I have is 2 independent solids, but is coming through
+    //as 1 root. so iterate and create different features.
+    for (TopoDS_Iterator it(s); it.More(); it.Next())
+    {
+      std::shared_ptr<ftr::Inert> inert(new ftr::Inert(it.Value()));
+      project->addFeature(inert);
+      si++;
+    }
+  }
+  
+  observer->out(msg::Mask(msg::Request | msg::Update));
+  
+  std::ostringstream m;
+  m << si << " shapes imported";
+  observer->out(msg::buildStatusMessage(m.str()));
 }
 
 void Factory::exportStepDispatched(const msg::Message&)

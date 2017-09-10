@@ -636,6 +636,12 @@ void GestureHandler::constructMenu()
     fileImportOCC->setUserValue(attributeStatus, QObject::tr("Import OCC Brep Command").toStdString());
     fileImport->insertChild(fileImport->getNumChildren() - 2, fileImportOCC);
     
+    osg::MatrixTransform *fileImportStep = gsn::buildCommandNode(":/resources/images/fileStep.svg", iconRadius);
+    fileImportStep->setMatrix(dummy);
+    fileImportStep->setUserValue(attributeMask, (msg::Request | msg::ImportStep).to_string());
+    fileImportStep->setUserValue(attributeStatus, QObject::tr("Import Step Command").toStdString());
+    fileImport->insertChild(fileImport->getNumChildren() - 2, fileImportStep);
+    
     osg::MatrixTransform *fileExport;
     fileExport = gsn::buildMenuNode(":/resources/images/fileExport.svg", iconRadius);
     fileExport->setMatrix(dummy);

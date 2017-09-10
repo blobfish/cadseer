@@ -400,3 +400,12 @@ void Application::openProjectRequestDispatched(const msg::Message &messageIn)
   openProject(pMessage.directory);
 }
 
+WaitCursor::WaitCursor()
+{
+  QApplication::setOverrideCursor(Qt::WaitCursor);
+}
+
+WaitCursor::~WaitCursor()
+{
+  QApplication::restoreOverrideCursor();
+}

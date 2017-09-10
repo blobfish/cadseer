@@ -75,6 +75,12 @@ private:
     void openProjectRequestDispatched(const msg::Message &);
     void ProjectDialogRequestDispatched(const msg::Message &);
 };
+
+struct WaitCursor
+{
+  WaitCursor();
+  ~WaitCursor();
+};
 }
 
 #endif // APPLICATION_H
