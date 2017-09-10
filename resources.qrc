@@ -94,6 +94,7 @@
     <file>resources/images/systemToFeature.svg</file>
     <file>resources/images/editDraggerToFeature.svg</file>
     <file>resources/images/editFeatureToDragger.svg</file>
+    <file>resources/images/featureReposition.svg</file>
     <file>resources/images/debugExpressionGraph.svg</file>
     <file>resources/images/loadExpressionExamples.svg</file>
     <file>resources/images/viewExpressionExamples.svg</file>
