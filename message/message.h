@@ -123,6 +123,7 @@ namespace msg
     static const Mask Toggle(Mask().set(                        84));//!< visual
     static const Mask Extract(Mask().set(                       85));//!< command move up someday.
     static const Mask ImportStep(Mask().set(                    86));//!< command move up someday.
+    static const Mask FeatureReposition(Mask().set(             87));//!< command move up someday.
   
     typedef boost::variant
     <

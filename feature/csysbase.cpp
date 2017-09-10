@@ -161,9 +161,14 @@ void CSysBase::setSystem(const osg::Matrixd& systemIn)
 
 void CSysBase::updateDragger()
 {
+  updateDragger(gu::toOsg(system));
+}
+
+void CSysBase::updateDragger(const osg::Matrixd &systemIn)
+{
   bool wasDraggerLinked = dragger->isLinked();
   dragger->setUnlink();
-  dragger->setMatrix(gu::toOsg(system));
+  dragger->setMatrix(systemIn);
   if (wasDraggerLinked)
     dragger->setLink();
 }

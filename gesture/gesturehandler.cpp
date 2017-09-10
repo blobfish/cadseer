@@ -611,6 +611,12 @@ void GestureHandler::constructMenu()
     editDraggerToFeature->setUserValue(attributeStatus, QObject::tr("Dragger To Feature Command").toStdString());
     editSystemBase->insertChild(editSystemBase->getNumChildren() - 2, editDraggerToFeature);
     
+    osg::MatrixTransform *featureReposition = gsn::buildCommandNode(":/resources/images/featureReposition.svg", iconRadius);
+    featureReposition->setMatrix(dummy);
+    featureReposition->setUserValue(attributeMask, (msg::Request | msg::FeatureReposition).to_string());
+    featureReposition->setUserValue(attributeStatus, QObject::tr("Feature From Dragger To Coordinate System Command").toStdString());
+    editSystemBase->insertChild(editSystemBase->getNumChildren() - 2, featureReposition);
+    
     osg::MatrixTransform *preferences = gsn::buildCommandNode(":/resources/images/preferences.svg", iconRadius);
     preferences->setMatrix(dummy);
     preferences->setUserValue(attributeMask, (msg::Request | msg::Preferences).to_string());

@@ -35,6 +35,7 @@
 #include <command/featurerename.h>
 #include <command/blend.h>
 #include <command/extract.h>
+#include <command/featurereposition.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <selection/message.h>
@@ -90,6 +91,9 @@ void Manager::setupDispatcher()
   
   mask = msg::Request | msg::DraggerToFeature;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::draggerToFeatureDispatched, this, _1)));
+  
+  mask = msg::Request | msg::FeatureReposition;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::featureRepositionDispatched, this, _1)));
   
   mask = msg::Request | msg::CheckGeometry;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::checkGeometryDispatched, this, _1)));
@@ -254,6 +258,12 @@ void Manager::constructExtractDispatched(const msg::Message&)
 {
   std::shared_ptr<Extract> e(new Extract());
   addCommand(e);
+}
+
+void Manager::featureRepositionDispatched(const msg::Message&)
+{
+  std::shared_ptr<FeatureReposition> fr(new FeatureReposition());
+  addCommand(fr);
 }
 
 void Manager::editFeatureDispatched(const msg::Message&)

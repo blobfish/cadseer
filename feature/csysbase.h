@@ -51,7 +51,8 @@ namespace ftr
     virtual QTextStream& getInfo(QTextStream &) const override;
     void setSystem(const gp_Ax2 &systemIn);
     void setSystem(const osg::Matrixd &systemIn);
-    void updateDragger(); //!< dragger to match feature system.
+    void updateDragger(); //!< dragger to match feature system ignoring link.
+    void updateDragger(const osg::Matrixd &); //!< update dragger ignoring link.
     const gp_Ax2& getSystem() const {return system;}
     lbr::CSysDragger& getDragger() {return *dragger;}
 

@@ -319,6 +319,7 @@ SET(COMMAND_SOURCES
     command/featurerename.cpp
     command/blend.cpp
     command/extract.cpp
+    command/featurereposition.cpp
     )
     
 SET(LIBRARY_SOURCES
