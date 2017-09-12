@@ -47,6 +47,8 @@
     <file>resources/images/constructionDatumPlane.svg</file>
     <file>resources/images/constructionHollow.svg</file>
     <file>resources/images/constructionExtract.svg</file>
+    <file>resources/images/constructionDie.svg</file>
+    <file>resources/images/constructionSquash.svg</file>
     <file>resources/images/editBase.svg</file>
     <file>resources/images/editRemove.svg</file>
     <file>resources/images/editUpdate.svg</file>
