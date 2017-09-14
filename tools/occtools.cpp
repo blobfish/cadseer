@@ -446,3 +446,18 @@ WireVector occt::getBoundaryWires(const TopoDS_Shape &shapeIn)
 
   return out;
 }
+
+gp_Vec occt::getNormal(const TopoDS_Face& fIn, double u, double v)
+{
+  BRepAdaptor_Surface sa(fIn);
+  
+  double tol = Precision::Confusion();
+  gp_Pnt pp; //projected point
+  gp_Vec d1, d2; //derivatives
+  sa.D1(u, v, pp, d1, d2);
+  gp_Vec n = d1.Crossed(d2);
+  
+  if (sa.Face().Orientation() == TopAbs_REVERSED)
+    n = -n;
+  return n;
+};

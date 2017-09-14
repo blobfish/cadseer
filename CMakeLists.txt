@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 project(cadseer)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -Wshadow -fext-numeric-literals" )
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -Wshadow -fext-numeric-literals -frounding-math" )
 
 add_definitions(-DQT_NO_KEYWORDS) #macros clashing
 find_package(Qt5Core REQUIRED)
@@ -149,8 +149,91 @@ IF(SPNAV_FOUND)
     include_directories(${SPNAV_INCLUDE_DIR})
 ENDIF(SPNAV_FOUND)
 
+find_package(Eigen3 REQUIRED)
+
 find_package(XercesC REQUIRED)
 find_package(XSDCXX REQUIRED)
+
+#begin squash
+find_package(CGAL COMPONENTS CGAL_Core)
+if(CGAL_FOUND)
+  message(STATUS "CGAL found. ${CGAL_INCLUDE_DIRS}")
+  include(${CGAL_USE_FILE})
+else(CGAL_FOUND)
+  message(STATUS "CGAL not found. squash will not be built.")
+endif(CGAL_FOUND)
+
+
+SET(IGL_PROJECT_PATH "" CACHE PATH "Path to IGL project")
+MARK_AS_ADVANCED(IGL_PROJECT_PATH)
+IF(IGL_PROJECT_PATH)
+  MESSAGE(STATUS "IGL_PROJECT_PATH is set to: ${IGL_PROJECT_PATH}")
+
+  set(IGL_INCLUDE "${IGL_PROJECT_PATH}/include")
+  message(STATUS "${IGL_INCLUDE}")
+  if(NOT EXISTS ${IGL_INCLUDE})
+    message(STATUS "igl include path not valid. squash will not be built.")
+  else(NOT EXISTS ${IGL_INCLUDE})
+    message(STATUS "igl include found.")
+    set(IGL_INCLUDE_FOUND true)
+  endif(NOT EXISTS ${IGL_INCLUDE})
+  
+  #assuming 'lib' directory
+  set(IGL_LIB "${IGL_PROJECT_PATH}/lib/libigl.a")
+  if(NOT EXISTS ${IGL_LIB})
+    message(STATUS "igl lib missing. squash will not be built.")
+  else(NOT EXISTS ${IGL_LIB})
+    message(STATUS "igl lib found.")
+    set(IGL_LIB_FOUND true)
+  endif(NOT EXISTS ${IGL_LIB})
+ELSE(IGL_PROJECT_PATH)
+  MESSAGE(STATUS "IGL_PROJECT_PATH is empty. squash will not be built.")
+ENDIF(IGL_PROJECT_PATH)
+
+
+SET(NETGEN_PROJECT_PATH "" CACHE PATH "Path to Netgen project")
+MARK_AS_ADVANCED(NETGEN_PROJECT_PATH)
+IF(NETGEN_PROJECT_PATH)
+  MESSAGE(STATUS "NETGEN_PROJECT_PATH is set to: ${NETGEN_PROJECT_PATH}")
+
+  set(NETGEN_INCLUDE "${NETGEN_PROJECT_PATH}/nglib")
+  message(STATUS "${NETGEN_INCLUDE}")
+  if(NOT EXISTS ${NETGEN_INCLUDE})
+    message(STATUS "netgen include path not valid. squash will not be built.")
+  else(NOT EXISTS ${NETGEN_INCLUDE})
+    message(STATUS "netgen include found.")
+    set(NETGEN_INCLUDE_FOUND true)
+  endif(NOT EXISTS ${NETGEN_INCLUDE})
+  
+  #assuming 'lib' directory
+  set(NETGEN_LIB "${NETGEN_PROJECT_PATH}/build/nglib/libnglib.so")
+  if(NOT EXISTS ${NETGEN_LIB})
+    message(STATUS "netgen lib missing. squash will not be built.")
+  else(NOT EXISTS ${NETGEN_LIB})
+    message(STATUS "netgen lib found.")
+    set(NETGEN_LIB_FOUND true)
+  endif(NOT EXISTS ${NETGEN_LIB})
+ELSE(NETGEN_PROJECT_PATH)
+  MESSAGE(STATUS "NETGEN_PROJECT_PATH is empty. squash will not be built.")
+ENDIF(NETGEN_PROJECT_PATH)
+
+if(IGL_INCLUDE_FOUND AND IGL_LIB_FOUND AND NETGEN_INCLUDE_FOUND AND NETGEN_LIB_FOUND AND CGAL_FOUND)
+  message(STATUS "squash is being built.")
+  set(SQUASH_INCLUDE_DIRS ${CGAL_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} ${IGL_INCLUDE} ${NETGEN_INCLUDE})
+  set(SQUASH_LIBRARIES ${CGAL_LIBRARIES} ${IGL_LIB} ${NETGEN_LIB})
+  add_definitions(-DSQUASH_PRESENT)
+  
+  set (SQUASH_SOURCES
+    squash/squash.cpp
+    squash/igl.cpp
+    squash/netgen.cpp
+    squash/support.cpp
+    squash/tools.cpp
+  )
+else(IGL_INCLUDE_FOUND AND IGL_LIB_FOUND AND NETGEN_INCLUDE_FOUND AND NETGEN_LIB_FOUND AND CGAL_FOUND)
+  message(STATUS "squash is not being built.")
+endif(IGL_INCLUDE_FOUND AND IGL_LIB_FOUND AND NETGEN_INCLUDE_FOUND AND NETGEN_LIB_FOUND AND CGAL_FOUND)
+#end squash
 
 add_subdirectory(project/libgit2pp)
 
@@ -161,9 +244,11 @@ SET(LIBRARY_INCLUDE_PATHS
     ${OPENSCENEGRAPH_INCLUDE_DIRS}
     ${OSGQT_INCLUDE_DIRS}
     ${OCC_INCLUDE_DIR}
+    ${EIGEN3_INCLUDE_DIR}
     ${XSDCXX_INCLUDE_DIR}
     ${XERCESC_INCLUDE_DIR}
     ${CMAKE_SOURCE_DIR}/project/libgit2pp/libgit2/include/
+    ${SQUASH_INCLUDE_DIRS}
     )
 INCLUDE_DIRECTORIES(SYSTEM ${LIBRARY_INCLUDE_PATHS}) #system suppresses warnings for those libraries.
 
@@ -224,6 +309,7 @@ SET(FEATURE_SOURCES
     feature/oblongbuilder.cpp
     feature/shapehistory.cpp
     feature/extract.cpp
+    feature/squash.cpp
     )
     
 SET(EXPRESSION_SOURCES
@@ -294,6 +380,7 @@ SET(PROJECT_SOURCES
     project/serial/xsdcxxoutput/featurehollow.cpp
     project/serial/xsdcxxoutput/featureoblong.cpp
     project/serial/xsdcxxoutput/featureextract.cpp
+    project/serial/xsdcxxoutput/featuresquash.cpp
     )
     
 SET(APPLICATION_SOURCES
@@ -320,6 +407,7 @@ SET(COMMAND_SOURCES
     command/blend.cpp
     command/extract.cpp
     command/featurereposition.cpp
+    command/squash.cpp
     )
     
 SET(LIBRARY_SOURCES
@@ -372,6 +460,7 @@ SET(CADSEER_SOURCES
     ${LIBRARY_SOURCES}
     ${COMMAND_SOURCES}
     ${VIEWER_SOURCES}
+    ${SQUASH_SOURCES}
     )
 
 SET(CADSEER_MOC_HDRS
@@ -404,6 +493,7 @@ SET(CADSEER_LIBRARIES
     ${OCE_LIBRARIES}
     ${XERCESC_LIBRARIES}
     ${SPNAV_LIBRARIES}
+    ${SQUASH_LIBRARIES}
     git2pp
     )
 

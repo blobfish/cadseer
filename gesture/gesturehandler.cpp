@@ -537,6 +537,19 @@ void GestureHandler::constructMenu()
     constructionIntersect->setUserValue(attributeStatus, QObject::tr("Intersection Command").toStdString());
     constructionBoolean->insertChild(constructionBoolean->getNumChildren() - 2, constructionIntersect);
     
+    //die
+    osg::MatrixTransform *constructionDie;
+    constructionDie = gsn::buildMenuNode(":/resources/images/constructionDie.svg", iconRadius);
+    constructionDie->setMatrix(dummy);
+    constructionDie->setUserValue(attributeStatus, QObject::tr("Die Menu").toStdString());
+    constructionBase->insertChild(constructionBase->getNumChildren() - 2, constructionDie);
+    
+    osg::MatrixTransform *constructionSquash = gsn::buildCommandNode(":/resources/images/constructionSquash.svg", iconRadius);
+    constructionSquash->setMatrix(dummy);
+    constructionSquash->setUserValue(attributeMask, (msg::Request | msg::Construct | msg::Squash).to_string());
+    constructionSquash->setUserValue(attributeStatus, QObject::tr("Squash Command").toStdString());
+    constructionDie->insertChild(constructionDie->getNumChildren() - 2, constructionSquash);
+    
     //TODO build datum menu node and move datum plane to it.
     osg::MatrixTransform *constructDatumPlane = gsn::buildCommandNode(":/resources/images/constructionDatumPlane.svg", iconRadius);
     constructDatumPlane->setMatrix(dummy);

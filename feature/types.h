@@ -46,7 +46,8 @@ namespace ftr
     DatumPlane, //!< feature datum plane class.
     Hollow, //!< feature hollow class.
     Oblong, //!< feature oblong class.
-    Extract //!< feature extract class.
+    Extract, //!< feature extract class.
+    Squash //!< feature squash class.
   };
   
   inline const static std::string& toString(Type typeIn)
@@ -71,7 +72,8 @@ namespace ftr
       {Type::DatumPlane, "DatumPlane"},
       {Type::Hollow, "Hollow"},
       {Type::Oblong, "Oblong"},
-      {Type::Extract, "Extract"}
+      {Type::Extract, "Extract"},
+      {Type::Squash, "Squash"}
     };
     
     assert(strings.count(typeIn) > 0);

@@ -116,6 +116,14 @@ namespace occt
    * @return A vector wires. can be empty.
    */
   WireVector getBoundaryWires(const TopoDS_Shape &shapeIn);
+  
+  /*! @brief Get normal of a face
+   * 
+   * @param fIn face for normal calculation
+   * @param u parameter in the u direction
+   * @param v parameter in the v direction
+   */
+  gp_Vec getNormal(const TopoDS_Face &fIn, double u, double v);
 }
 
 #endif // GU_OCCTOOLS_H

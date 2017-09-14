@@ -68,6 +68,7 @@ namespace cmd
     void constructExtractDispatched(const msg::Message&);
     void editFeatureDispatched(const msg::Message&);
     void featureRepositionDispatched(const msg::Message&);
+    void constructSquashDispatched(const msg::Message&);
     
     //editing functions
     typedef std::function<BasePtr (ftr::Base *)> EditFunction;
