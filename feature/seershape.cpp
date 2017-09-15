@@ -767,6 +767,8 @@ std::vector< osg::Vec3d > SeerShape::useGetNearestPoint(const uuid &shapeIn, con
   assert(!shape.IsNull());
   TopAbs_ShapeEnum type = shape.ShapeType();
   assert((type == TopAbs_EDGE) || (type == TopAbs_FACE));
+  if (type != TopAbs_EDGE && type != TopAbs_FACE)
+    throw std::runtime_error("expection edge or face in SeerShape::useGetNearestPoint");
   
   TopoDS_Vertex vertex = BRepBuilderAPI_MakeVertex(gp_Pnt(pointIn.x(), pointIn.y(), pointIn.z()));
   std::vector<osg::Vec3d> out;

@@ -138,6 +138,7 @@ Vertex GraphWrapper::getFormulaVertex(const std::string& nameIn) const
   }
   
   assert(0);
+  throw std::runtime_error("couldn't find graph vertex in GraphWrapper::getFormulaVertex");
 }
 
 void GraphWrapper::setFormulaName(const boost::uuids::uuid &idIn, const std::string& nameIn)
@@ -242,6 +243,7 @@ Vertex GraphWrapper::getFormulaVertex(const boost::uuids::uuid& idIn) const
       return *it;
   }
   assert(0); //has no formual of id.
+  throw std::runtime_error("couldn't find formula with given id in GraphWrapper::getFormulaVertex");
 }
 
 boost::uuids::uuid GraphWrapper::getFormulaId(const Vertex &vertexIn) const

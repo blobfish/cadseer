@@ -1150,13 +1150,16 @@ void Blend::variableTableSelectionChangedSlot(const QItemSelection &current, con
   std::vector<uuid> parentEdges = parentShape.useGetParentsOfType(pickId, TopAbs_EDGE);
   assert(!parentEdges.empty());
   uuid parentEdge = parentEdges.front();
-  slc::Type selectionType;
+  slc::Type selectionType = slc::Type::None;
   if (parentShape.useGetStartVertex(parentEdge) == pickId)
     selectionType = slc::Type::StartPoint;
   else if(parentShape.useGetEndVertex(parentEdge) == pickId)
     selectionType = slc::Type::EndPoint;
   else
+  {
     assert(0);//mis matched edge to pick relationship.
+    throw std::runtime_error("mis matched edge to pick relationship in Blend::variableTableSelectionChangedSlot");
+  }
     
   // highlight.
   msg::Message freshMMessage(msg::Request | msg::Selection | msg::Add);
@@ -1305,6 +1308,8 @@ void Blend::requestVariableLinkSlot(QTableWidgetItem *item, const QString &idIn)
   int row = variableTableWidget->row(item);
   int column = variableTableWidget->column(item);
   assert(column == 0); //always radius column;
+  if (column != 0)
+    throw std::runtime_error("wrong column in Blend::requestVariableLinkSlot");
   
   QModelIndex index = variableTableWidget->model()->index(row, 2);
   assert(index.isValid());

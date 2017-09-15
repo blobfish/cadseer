@@ -227,6 +227,7 @@ boost::uuids::uuid Manager::getUserGroupId(const std::string& groupNameIn) const
     }
   }
   assert(0); //no user group of name.
+  throw std::runtime_error("couldn't find user group with name in Manager::getUserGroupId");
 }
 
 boost::uuids::uuid Manager::getFormulaId(const std::string& nameIn) const
@@ -325,6 +326,7 @@ std::string Manager::getUserGroupName(const boost::uuids::uuid& groupIdIn) const
     }
   }
   assert(0); //no user group of id.
+  throw std::runtime_error("couldn't find user group with id in Manager::getUserGroupName");
 }
 
 void Manager::removeFormula(const std::string& nameIn)
