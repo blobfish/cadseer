@@ -53,18 +53,27 @@ Mesh occCommon(Ng_OCC_Geometry* gIn, const sqs::ntg::Parameters &pIn)
 //   mp.closeedgeenable = 1;
 //   mp.grading = 0.9;
   
-  Ng_Result r;
-  r = Ng_OCC_SetLocalMeshSize(gIn, ngMeshPtr.get(), &mp);
-  if (r != NG_OK)
-    std::cout << "error in Ng_OCC_SetLocalMeshSize. code: " << r << std::endl;
-  r = Ng_OCC_GenerateEdgeMesh(gIn, ngMeshPtr.get(), &mp);
-  if (r != NG_OK)
-    std::cout << "error in Ng_OCC_GenerateEdgeMesh. code: " << r << std::endl;
-  r = Ng_OCC_GenerateSurfaceMesh(gIn, ngMeshPtr.get(), &mp);
-  if (r != NG_OK)
-    std::cout << "error in Ng_OCC_GenerateSurfaceMesh. code: " << r << std::endl;
-  
-//   Ng_OCC_Uniform_Refinement (gIn, ngMeshPtr.get());//refinement
+  try
+  {
+    Ng_Result r;
+    r = Ng_OCC_SetLocalMeshSize(gIn, ngMeshPtr.get(), &mp);
+    if (r != NG_OK)
+      std::cout << "error in Ng_OCC_SetLocalMeshSize. code: " << r << std::endl;
+    r = Ng_OCC_GenerateEdgeMesh(gIn, ngMeshPtr.get(), &mp);
+    if (r != NG_OK)
+      std::cout << "error in Ng_OCC_GenerateEdgeMesh. code: " << r << std::endl;
+    r = Ng_OCC_GenerateSurfaceMesh(gIn, ngMeshPtr.get(), &mp);
+    if (r != NG_OK)
+      std::cout << "error in Ng_OCC_GenerateSurfaceMesh. code: " << r << std::endl;
+    
+  //   Ng_OCC_Uniform_Refinement (gIn, ngMeshPtr.get());//refinement
+  }
+  catch (...)
+  {
+    //netgen is throwing an exception about faces not meshed.
+    //I would like to warn the user, but try and use what has been meshed.
+    std::cout << "Unknown exception in netgen.cpp:occCommon: " << std::endl;
+  }
   
   
   Mesh out;

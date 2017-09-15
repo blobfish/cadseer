@@ -121,7 +121,7 @@ void Squash::updateModel(const UpdatePayload &payloadIn)
         const TopoDS_Face &f = TopoDS::Face(shape);
         static const gp_Vec zAxis(0.0, 0.0, 1.0);
         gp_Vec n = occt::getNormal(f, p.u, p.v);
-        if (!n.IsParallel(zAxis, Precision::Angular()))
+        if (!n.IsParallel(zAxis, Precision::Confusion())) //Precision::Angular was too sensitive.
           throw std::runtime_error("lock face that is not parallel to z axis");
         if (!od)
         {
@@ -180,6 +180,10 @@ void Squash::updateModel(const UpdatePayload &payloadIn)
   catch (std::exception &e)
   {
     std::cout << std::endl << "Error in squash update. " << e.what() << std::endl;
+  }
+  catch (...)
+  {
+    std::cout << std::endl << "Unknown error in squash update. " << std::endl;
   }
   setModelClean();
 }

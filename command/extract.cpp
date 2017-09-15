@@ -66,38 +66,50 @@ void Extract::go()
   const slc::Containers &containers = eventHandler->getSelections();
   for (const auto &container : containers)
   {
-    if (container.selectionType != slc::Type::Face)
-      continue;
     ftr::Base *baseFeature = project->findFeature(container.featureId);
     assert(baseFeature);
     if (!baseFeature->hasSeerShape())
       continue;
     const ftr::SeerShape &targetSeerShape = baseFeature->getSeerShape();
     
-    
-    TopoDS_Face face = TopoDS::Face(targetSeerShape.getOCCTShape(container.shapeId));  
-    ftr::Pick pick;
-    pick.id = container.shapeId;
-    pick.setParameter(face, container.pointLocation);
-    pick.shapeHistory = project->getShapeHistory().createDevolveHistory(pick.id);
-    
-    std::shared_ptr<ftr::Extract> extract(new ftr::Extract());
-    ftr::Extract::AccruePick ap;
-    ap.picks = ftr::Picks({pick});
-    ap.accrueType = ftr::AccrueType::Tangent;
-    ap.parameter = ftr::Extract::buildAngleParameter(10.0);
-    extract->sync(ftr::Extract::AccruePicks({ap}));
-    
-    project->addFeature(extract);
-    project->connect(baseFeature->getId(), extract->getId(), ftr::InputType{ftr::InputType::target});
-    
-    ftr::Base *targetFeature = project->findFeature(baseFeature->getId());
-    targetFeature->hide3D();
-    targetFeature->hideOverlay();
-    extract->setColor(targetFeature->getColor());
-    
-    observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
-    
-    break;
+    if (container.selectionType == slc::Type::Face)
+    {
+      TopoDS_Face face = TopoDS::Face(targetSeerShape.getOCCTShape(container.shapeId));  
+      ftr::Pick pick;
+      pick.id = container.shapeId;
+      pick.setParameter(face, container.pointLocation);
+      pick.shapeHistory = project->getShapeHistory().createDevolveHistory(pick.id);
+      
+      std::shared_ptr<ftr::Extract> extract(new ftr::Extract());
+      ftr::Extract::AccruePick ap;
+      ap.picks = ftr::Picks({pick});
+      ap.accrueType = ftr::AccrueType::Tangent;
+      ap.parameter = ftr::Extract::buildAngleParameter(10.0);
+      extract->sync(ftr::Extract::AccruePicks({ap}));
+      
+      project->addFeature(extract);
+      project->connect(baseFeature->getId(), extract->getId(), ftr::InputType{ftr::InputType::target});
+      
+      baseFeature->hide3D();
+      baseFeature->hideOverlay();
+      extract->setColor(baseFeature->getColor());
+    }
+    else
+    {
+      ftr::Pick pick;
+      pick.id = container.shapeId;
+      pick.shapeHistory = project->getShapeHistory().createDevolveHistory(pick.id);
+      std::shared_ptr<ftr::Extract> extract(new ftr::Extract());
+      ftr::Picks picks({pick});
+      extract->sync(picks);
+      
+      project->addFeature(extract);
+      project->connect(baseFeature->getId(), extract->getId(), ftr::InputType{ftr::InputType::target});
+      
+      baseFeature->hide3D();
+      baseFeature->hideOverlay();
+      extract->setColor(baseFeature->getColor());
+    }
   }
+  observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
 }

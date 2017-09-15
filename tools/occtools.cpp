@@ -24,6 +24,8 @@
 #include <BRep_Tool.hxx>
 #include <BRepBuilderAPI_Copy.hxx>
 #include <BRepAdaptor_Surface.hxx>
+#include <BRepExtrema_ExtPF.hxx>
+#include <BRepBuilderAPI_MakeVertex.hxx>
 #include <TopTools_MapIteratorOfMapOfShape.hxx>
 #include <TopoDS_Iterator.hxx>
 #include <TopoDS.hxx>
@@ -315,25 +317,17 @@ bool TangentFaceVisitor::discoverEdge(const TopoDS_Edge& edgeIn)
     transformation = location.Transformation();
   }
   
-  auto getNormal = [&](const BRepAdaptor_Surface& sa, const gp_Pnt &p) -> gp_Vec
+  auto localGetNormal = [&](const TopoDS_Face& fIn, const gp_Pnt &p) -> gp_Vec
   {
-    double tol = BRep_Tool::Tolerance(edgeIn) * 2.0 + BRep_Tool::Tolerance(sa.Face());
+    BRepExtrema_ExtPF e(BRepBuilderAPI_MakeVertex(p), fIn, Extrema_ExtFlag_MIN);
+    if (!e.IsDone() || e.NbExt() < 1)
+      throw std::runtime_error("extrema failed in TangentFaceVisitor::discoverEdge");
     double u, v;
-    if (!GeomLib_Tool::Parameters(sa.Surface().Surface(), p, tol, u, v))
-      throw std::runtime_error("point on surface out of tolerance");
-    gp_Pnt pp; //projected point
-    gp_Vec d1, d2; //derivatives
-    sa.D1(u, v, pp, d1, d2);
-    gp_Vec n = d1.Crossed(d2);
+    e.Parameter(1, u, v);
     
-    if (sa.Face().Orientation() == TopAbs_REVERSED)
-      n = -n;
-    return n;
+    return occt::getNormal(fIn, u, v);
   };
   
-  BRepAdaptor_Surface sa1(face1);
-  BRepAdaptor_Surface sa2(face2);
-    
   const TColgp_Array1OfPnt& nodes = poly->Nodes();
   bool anyFound = false;
   for (auto point : nodes)
@@ -342,14 +336,17 @@ bool TangentFaceVisitor::discoverEdge(const TopoDS_Edge& edgeIn)
       point.Transform(transformation);
     try
     {
-      gp_Vec d1 = getNormal(sa1, point);
-      gp_Vec d2 = getNormal(sa2, point);
+      gp_Vec d1 = localGetNormal(face1, point);
+      gp_Vec d2 = localGetNormal(face2, point);
       double angle = d1.Angle(d2);
       if (angle > ta)
         return false;
       anyFound = true;
     }
-    catch(std::runtime_error &){}
+    catch(const std::runtime_error &e)
+    {
+//       std::cout << e.what() << std::endl;
+    }
   }
   if (!anyFound)
     return false;
@@ -451,11 +448,10 @@ gp_Vec occt::getNormal(const TopoDS_Face& fIn, double u, double v)
 {
   BRepAdaptor_Surface sa(fIn);
   
-  double tol = Precision::Confusion();
   gp_Pnt pp; //projected point
   gp_Vec d1, d2; //derivatives
   sa.D1(u, v, pp, d1, d2);
-  gp_Vec n = d1.Crossed(d2);
+  gp_Vec n = d1.Crossed(d2).Normalized();
   
   if (sa.Face().Orientation() == TopAbs_REVERSED)
     n = -n;
