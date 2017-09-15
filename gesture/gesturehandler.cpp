@@ -150,7 +150,7 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
                 return false;
             dragStarted = false;
             gestureSwitch->setAllChildrenOff();
-            if (currentNode->getNodeMask() & mdv::gestureCommand)
+            if (currentNode && (currentNode->getNodeMask() & mdv::gestureCommand))
             {
                 std::string msgMaskString;
                 if (currentNode->getUserValue(attributeMask, msgMaskString))
@@ -227,7 +227,7 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
         if (currentNodeLeft == false)
         {
           currentNodeLeft = true;
-          if (currentNode->getNodeMask() & mdv::gestureMenu)
+          if (currentNode && (currentNode->getNodeMask() & mdv::gestureMenu))
             spraySubNodes(temp);
         }
         
