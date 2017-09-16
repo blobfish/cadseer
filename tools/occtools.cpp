@@ -21,6 +21,7 @@
 #include <boost/math/constants/constants.hpp>
 
 #include <BRep_Builder.hxx>
+#include <BRepBndLib.hxx>
 #include <BRep_Tool.hxx>
 #include <BRepBuilderAPI_Copy.hxx>
 #include <BRepAdaptor_Surface.hxx>
@@ -457,3 +458,148 @@ gp_Vec occt::getNormal(const TopoDS_Face& fIn, double u, double v)
     n = -n;
   return n;
 };
+
+BoundingBox::BoundingBox(){}
+
+BoundingBox::BoundingBox(const TopoDS_Shape &sIn) : sv({sIn}) {}
+
+BoundingBox::BoundingBox(const ShapeVector &vIn) : sv(vIn) {}
+
+void BoundingBox::add(const TopoDS_Shape &sIn)
+{
+  dirty = true;
+  sv.push_back(sIn);
+}
+
+void BoundingBox::add(const ShapeVector &vIn)
+{
+  dirty = true;
+  std::copy(vIn.begin(), vIn.end(), std::back_inserter(sv));
+}
+
+void BoundingBox::update()
+{
+  BRepBndLib calc;
+  for (const auto &s : sv)
+    calc.Add(s, occtBox);
+  
+  double xMin, yMin, zMin, xMax, yMax, zMax;
+  occtBox.Get(xMin, yMin, zMin, xMax, yMax, zMax);
+  length = xMax - xMin;
+  width = yMax - yMin;
+  height = zMax - zMin;
+  
+  corners.clear();
+  corners.push_back(gp_Pnt(xMin, yMin, zMin));
+  corners.push_back(gp_Pnt(xMax, yMin, zMin));
+  corners.push_back(gp_Pnt(xMax, yMax, zMin));
+  corners.push_back(gp_Pnt(xMin, yMax, zMin));
+  corners.push_back(gp_Pnt(xMin, yMin, zMax));
+  corners.push_back(gp_Pnt(xMax, yMin, zMax));
+  corners.push_back(gp_Pnt(xMax, yMax, zMax));
+  corners.push_back(gp_Pnt(xMin, yMax, zMax));
+  
+  center = gp_Pnt
+  (
+    xMin + (xMax - xMin) / 2.0,
+    yMin + (yMax - yMin) / 2.0,
+    zMin + (zMax - zMin) / 2.0
+  );
+  
+  dirty = false;
+}
+
+const Bnd_Box& BoundingBox::getOcctBox()
+{
+  if (dirty)
+    update();
+  
+  return occtBox;
+}
+
+double BoundingBox::getLength()
+{
+  if (dirty)
+    update();
+  
+  return length;
+}
+
+double BoundingBox::getWidth()
+{
+  if (dirty)
+    update();
+  
+  return width;
+}
+
+double BoundingBox::getHeight()
+{
+  if (dirty)
+    update();
+  
+  return height;
+}
+
+gp_Pnt BoundingBox::getCenter()
+{
+  if (dirty)
+    update();
+  
+  return center;
+}
+
+const std::vector<gp_Pnt>& BoundingBox::getCorners()
+{
+  if (dirty)
+    update();
+  
+  return corners;
+}
+
+std::vector<int> BoundingBox::getFaceIndexes()
+{
+  if (dirty)
+    update();
+  
+  //should have correct winding.
+  std::vector<int> out;
+  
+  //x- face
+  out.push_back(0);
+  out.push_back(4);
+  out.push_back(7);
+  out.push_back(3);
+  
+  //x+ face
+  out.push_back(1);
+  out.push_back(2);
+  out.push_back(6);
+  out.push_back(5);
+  
+  //y- face
+  out.push_back(0);
+  out.push_back(1);
+  out.push_back(5);
+  out.push_back(4);
+  
+  //y+ face
+  out.push_back(2);
+  out.push_back(3);
+  out.push_back(7);
+  out.push_back(6);
+  
+  //z- face
+  out.push_back(0);
+  out.push_back(3);
+  out.push_back(2);
+  out.push_back(1);
+  
+  //z+ face
+  out.push_back(4);
+  out.push_back(5);
+  out.push_back(6);
+  out.push_back(7);
+  
+  return out;
+}

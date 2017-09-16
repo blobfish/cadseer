@@ -35,6 +35,7 @@
 #include <TopoDS_Vertex.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
+#include <Bnd_Box.hxx>
 
 namespace occt
 {
@@ -124,6 +125,40 @@ namespace occt
    * @param v parameter in the v direction
    */
   gp_Vec getNormal(const TopoDS_Face &fIn, double u, double v);
+  
+  
+  class BoundingBox
+  {
+  public:
+    BoundingBox();
+    BoundingBox(const TopoDS_Shape&);
+    BoundingBox(const ShapeVector&);
+    
+    void add(const TopoDS_Shape&);
+    void add(const ShapeVector&);
+    
+    const Bnd_Box& getOcctBox();
+    double getLength();
+    double getWidth();
+    double getHeight();
+    gp_Pnt getCenter();
+    const std::vector<gp_Pnt>& getCorners();
+    std::vector<int> getFaceIndexes(); //!< 24 referencing corners. Faces: x- x+ y- y+ z- z+
+    
+  private:
+    void update();
+    
+    ShapeVector sv;
+    Bnd_Box occtBox;
+    
+    gp_Pnt center;
+    std::vector<gp_Pnt> corners;//!< 8 points. xMin, yMin, zMin is at(0). then clockwise around z- face.
+    double length = 0.0;
+    double width = 0.0;
+    double height = 0.0;
+    
+    bool dirty = true;
+  };
 }
 
 #endif // GU_OCCTOOLS_H
