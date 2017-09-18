@@ -27,6 +27,7 @@
 #include <osg/Matrixd>
 
 #include <tools/infotools.h>
+#include <tools/occtools.h>
 #include <feature/seershape.h>
 #include <feature/seershapeinfo.h>
 
@@ -65,34 +66,43 @@ QTextStream& SeerShapeInfo::getShapeInfo(QTextStream &streamIn, const boost::uui
     assert(seerShape.hasShapeIdRecord(idIn));
     const TopoDS_Shape &shape = seerShape.findShapeIdRecord(idIn).shape;
     
+    streamIn << endl << "Shape information: " << endl;
     functionMapper->functionMap.at(shape.ShapeType())(streamIn, shape);
     //common to all shapes.
-    streamIn << "orientation: " << ((shape.Orientation() == TopAbs_FORWARD) ? ("Forward") : ("Reversed")) << endl
-        << "hash code: " << ShapeIdKeyHash()(shape) << endl
-        << "shape id: " << QString::fromStdString(gu::idToString(idIn)) << endl;
+    streamIn << "    Orientation: " << ((shape.Orientation() == TopAbs_FORWARD) ? ("Forward") : ("Reversed")) << endl
+        << "    Hash code: " << ShapeIdKeyHash()(shape) << endl
+        << "    Shape id: " << QString::fromStdString(gu::idToString(idIn)) << endl;
+    
+    occt::BoundingBox bb(shape);    
+    streamIn << "    Bounding Box: "
+        << qSetRealNumberPrecision(12) << fixed << endl
+        << "        Center: "; gu::gpPntOut(streamIn, bb.getCenter()); streamIn << endl
+        << "        Length: " << bb.getLength() << endl
+        << "        Width: " << bb.getWidth() << endl
+        << "        Height: " << bb.getHeight() << endl;
     
     return streamIn;
 }
 
 void SeerShapeInfo::compInfo(QTextStream &streamIn, const TopoDS_Shape&)
 {
-    streamIn << "Shape type: compound" << endl;
+    streamIn << "    Shape type: compound" << endl;
 }
 
 void SeerShapeInfo::compSolidInfo(QTextStream &streamIn, const TopoDS_Shape&)
 {
-    streamIn << "Shape type: compound solid" << endl;
+    streamIn << "    Shape type: compound solid" << endl;
 }
 
 void SeerShapeInfo::solidInfo(QTextStream &streamIn, const TopoDS_Shape&)
 {
-    streamIn << "Shape type: solid" << endl;
+    streamIn << "    Shape type: solid" << endl;
 }
 
 void SeerShapeInfo::shellInfo(QTextStream &streamIn, const TopoDS_Shape &shapeIn)
 {
-    streamIn << "Shape type: shell." << endl
-        << "Closed is: " << ((shapeIn.Closed()) ? ("true") : ("false")) << endl;
+    streamIn << "    Shape type: shell." << endl
+        << "    Closed is: " << ((shapeIn.Closed()) ? ("true") : ("false")) << endl;
 }
 
 void SeerShapeInfo::faceInfo(QTextStream &streamIn, const TopoDS_Shape &shapeIn)
@@ -100,14 +110,15 @@ void SeerShapeInfo::faceInfo(QTextStream &streamIn, const TopoDS_Shape &shapeIn)
     assert(shapeIn.ShapeType() == TopAbs_FACE);
     BRepAdaptor_Surface surfaceAdaptor(TopoDS::Face(shapeIn));
     
-    streamIn << qSetRealNumberPrecision(12) << fixed << "Shape type: face" << endl
-        << "Surface type: " << gu::surfaceTypeStrings.at(surfaceAdaptor.GetType()) << endl
-        << "Tolerance: " << BRep_Tool::Tolerance(TopoDS::Face(shapeIn)) << endl;
+    streamIn << qSetRealNumberPrecision(12) << fixed
+    << "    Shape type: face" << endl
+    << "    Surface type: " << gu::surfaceTypeStrings.at(surfaceAdaptor.GetType()) << endl
+    << "    Tolerance: " << BRep_Tool::Tolerance(TopoDS::Face(shapeIn)) << endl;
 }
 
 void SeerShapeInfo::wireInfo(QTextStream &streamIn, const TopoDS_Shape&)
 {
-    streamIn << "Shape type: wire" << endl;
+    streamIn << "    Shape type: wire" << endl;
 }
 
 void SeerShapeInfo::edgeInfo(QTextStream &streamIn, const TopoDS_Shape &shapeIn)
@@ -115,19 +126,18 @@ void SeerShapeInfo::edgeInfo(QTextStream &streamIn, const TopoDS_Shape &shapeIn)
     assert(shapeIn.ShapeType() == TopAbs_EDGE);
     BRepAdaptor_Curve curveAdaptor(TopoDS::Edge(shapeIn));
     
-    streamIn << qSetRealNumberPrecision(12) << fixed << "Shape type: edge" << endl
-        << "Curve type: " << gu::curveTypeStrings.at(curveAdaptor.GetType()) << endl
-        << "Tolerance: " << BRep_Tool::Tolerance(TopoDS::Edge(shapeIn)) << endl;
+    streamIn << qSetRealNumberPrecision(12) << fixed
+    << "    Shape type: edge" << endl
+    << "    Curve type: " << gu::curveTypeStrings.at(curveAdaptor.GetType()) << endl
+    << "    Tolerance: " << BRep_Tool::Tolerance(TopoDS::Edge(shapeIn)) << endl;
 }
 
 void SeerShapeInfo::vertexInfo(QTextStream &streamIn, const TopoDS_Shape &shapeIn)
 {
     assert(shapeIn.ShapeType() == TopAbs_VERTEX);
     gp_Pnt vPoint = BRep_Tool::Pnt(TopoDS::Vertex(shapeIn));
-    forcepoint(streamIn) << qSetRealNumberPrecision(12) << fixed << "Shape type: vertex" << endl
-      << "location: ["
-      << vPoint.X() << ", "
-      << vPoint.Y() << ", "
-      << vPoint.Z() << "]" << endl
-      << "Tolerance: " << BRep_Tool::Tolerance(TopoDS::Vertex(shapeIn)) << endl;
+    forcepoint(streamIn) << qSetRealNumberPrecision(12) << fixed
+    << "    Shape type: vertex" << endl
+      << "    location: "; gu::gpPntOut(streamIn, vPoint); streamIn << endl
+      << "    Tolerance: " << BRep_Tool::Tolerance(TopoDS::Vertex(shapeIn)) << endl;
 }

@@ -501,22 +501,30 @@ QTextStream& Base::getInfo(QTextStream &stream) const
         return out;
     };
     
-    stream << "Feature name: " << name << "        id: " << QString::fromStdString(gu::idToString(id)) << endl
-        << "Feature type: " << QString::fromStdString(getTypeString()) << endl
-        << "Model is clean: " << boolString(isModelClean()) << endl
-        << "Visual is clean: " << boolString(isVisualClean()) << endl
-        << "Update was successful: " << boolString(isSuccess()) << endl
-        << "Feature is active: " << boolString(isActive()) << endl
-        << "Feture is leaf: " << boolString(isLeaf()) << endl;
-        
-    stream << endl << "Parameters:" << endl;
-    for (const auto &p : parameterVector)
+    stream << "Feature info: " << endl
+        << "    Feature name: " << name << endl
+        << "    Feature id: " << QString::fromStdString(gu::idToString(id)) << endl
+        << "    Feature type: " << QString::fromStdString(getTypeString()) << endl
+        << "    Model is clean: " << boolString(isModelClean()) << endl
+        << "    Visual is clean: " << boolString(isVisualClean()) << endl
+        << "    Update was successful: " << boolString(isSuccess()) << endl
+        << "    Feature is active: " << boolString(isActive()) << endl
+        << "    Feture is leaf: " << boolString(isLeaf()) << endl;
+    
+    if (!parameterVector.empty())
     {
-        stream
-            << "    Parameter name: " << p->getName()
-            << "    Value: " << QString::number(p->getValue(), 'f', 12)
-            << "    Is linked: " << boolString(!(p->isConstant())) << endl;
+      stream << endl << "Parameters:" << endl;
+      for (const auto &p : parameterVector)
+      {
+          stream
+              << "    Parameter name: " << p->getName()
+              << "    Value: " << QString::number(p->getValue(), 'f', 12)
+              << "    Is linked: " << boolString(!(p->isConstant())) << endl;
+      }
     }
+    
+    if (hasSeerShape())
+      getShapeInfo(stream, seerShape->getRootShapeId());
     
     return stream;
 }

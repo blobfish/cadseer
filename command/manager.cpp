@@ -37,6 +37,7 @@
 #include <command/extract.h>
 #include <command/featurereposition.h>
 #include <command/squash.h>
+#include <command/strip.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <selection/message.h>
@@ -113,6 +114,9 @@ void Manager::setupDispatcher()
   
   mask = msg::Request | msg::Construct | msg::Squash;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::constructSquashDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Construct | msg::Strip;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::constructStripDispatched, this, _1)));
   
   mask = msg::Request | msg::Edit | msg::Feature;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::editFeatureDispatched, this, _1)));
@@ -267,6 +271,12 @@ void Manager::constructExtractDispatched(const msg::Message&)
 void Manager::constructSquashDispatched(const msg::Message&)
 {
   std::shared_ptr<Squash> s(new Squash());
+  addCommand(s);
+}
+
+void Manager::constructStripDispatched(const msg::Message&)
+{
+  std::shared_ptr<Strip> s(new Strip());
   addCommand(s);
 }
 

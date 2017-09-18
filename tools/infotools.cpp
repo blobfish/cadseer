@@ -25,13 +25,13 @@
 #include <tools/infotools.h>
 
 
+QString ms(const double &number)
+{
+  return QString::number(number, 'f', 12);
+};
+
 QTextStream& gu::osgMatrixOut(QTextStream &streamIn, const osg::Matrixd &m)
 {
-    auto ms = [](const double &number) ->QString
-    {
-        return QString::number(number, 'f', 12);
-    };
-    
     streamIn << "Coordinate system: "
     << "["
     << "["
@@ -54,4 +54,11 @@ QTextStream& gu::osgMatrixOut(QTextStream &streamIn, const osg::Matrixd &m)
     << "]" << endl;
     
     return streamIn;
+}
+
+QTextStream& gu::gpPntOut(QTextStream &sIn, const gp_Pnt &pIn)
+{
+  sIn << "[" << pIn.X() << ", " << pIn.Y() << ", " << pIn.Z() << "]";
+  
+  return sIn;
 }

@@ -310,6 +310,7 @@ SET(FEATURE_SOURCES
     feature/shapehistory.cpp
     feature/extract.cpp
     feature/squash.cpp
+    feature/strip.cpp
     )
     
 SET(EXPRESSION_SOURCES
@@ -408,6 +409,7 @@ SET(COMMAND_SOURCES
     command/extract.cpp
     command/featurereposition.cpp
     command/squash.cpp
+    command/strip.cpp
     )
     
 SET(LIBRARY_SOURCES

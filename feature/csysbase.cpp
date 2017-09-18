@@ -215,6 +215,7 @@ QTextStream& CSysBase::getInfo(QTextStream &streamIn) const
 {
     Inherited::getInfo(streamIn);
     
+    streamIn << endl;
     osg::Matrixd m = gu::toOsg(system);
     gu::osgMatrixOut(streamIn, m);
         

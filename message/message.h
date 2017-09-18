@@ -125,6 +125,7 @@ namespace msg
     static const Mask ImportStep(Mask().set(                    86));//!< command move up someday.
     static const Mask FeatureReposition(Mask().set(             87));//!< command move up someday.
     static const Mask Squash(Mask().set(                        88));//!< command move up someday.
+    static const Mask Strip(Mask().set(                         89));//!< command move up someday.
   
     typedef boost::variant
     <

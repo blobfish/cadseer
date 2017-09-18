@@ -17,49 +17,38 @@
  *
  */
 
-#ifndef FTR_SQUASH_H
-#define FTR_SQUASH_H
+#ifndef FTR_STRIP_H
+#define FTR_STRIP_H
 
-#include <feature/pick.h>
 #include <feature/parameter.h>
 #include <library/plabel.h>
 #include <feature/base.h>
 
-namespace prj{namespace srl{class FeatureSquash;}}
-
 namespace ftr
 {
-  /*! @brief Flattening of a sheet
-   * 
-   * This is usually a slow updating feature.
-   * So user can set the granularity to zero
-   * and that will effectly 'freeze' the update.
-   */
-  class Squash : public Base
+  class Strip : public Base
   {
   public:
-    Squash();
+    constexpr static const char *part = "Part";
+    constexpr static const char *blank = "Blank";
+    
+    Strip();
     
     virtual void updateModel(const UpdatePayload&) override;
-    virtual Type getType() const override {return Type::Squash;}
-    virtual const std::string& getTypeString() const override {return toString(Type::Squash);}
+    virtual Type getType() const override {return Type::Strip;}
+    virtual const std::string& getTypeString() const override {return toString(Type::Strip);}
     virtual const QIcon& getIcon() const override {return icon;}
     virtual Descriptor getDescriptor() const override {return Descriptor::Create;}
     virtual void serialWrite(const QDir&) override;
-    void serialRead(const prj::srl::FeatureSquash &);
+//     void serialRead(const prj::srl::FeatureStrip &);
     
-    void setPicks(const Picks &psIn){picks = psIn;}
+  protected:
+    std::shared_ptr<Parameter> pitch; //!< 0 means auto update.
+    osg::ref_ptr<lbr::PLabel> pitchLabel;
     
-    int getGranularity();
-    void setGranularity(int);
   private:
     static QIcon icon;
-    Picks picks;
-    boost::uuids::uuid faceId; //!< id of the generated face.
-    boost::uuids::uuid wireId; //!< outer wire of face.
-    std::shared_ptr<Parameter> granularity; //!< 0 means no update.
-    osg::ref_ptr<lbr::PLabel> label;
   };
 }
 
-#endif // FTR_SQUASH_H
+#endif // FTR_STRIP_H

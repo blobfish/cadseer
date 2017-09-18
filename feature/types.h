@@ -47,7 +47,8 @@ namespace ftr
     Hollow, //!< feature hollow class.
     Oblong, //!< feature oblong class.
     Extract, //!< feature extract class.
-    Squash //!< feature squash class.
+    Squash, //!< feature squash class.
+    Strip //!< feature squash class.
   };
   
   inline const static std::string& toString(Type typeIn)
@@ -73,7 +74,8 @@ namespace ftr
       {Type::Hollow, "Hollow"},
       {Type::Oblong, "Oblong"},
       {Type::Extract, "Extract"},
-      {Type::Squash, "Squash"}
+      {Type::Squash, "Squash"},
+      {Type::Strip, "Strip"}
     };
     
     assert(strings.count(typeIn) > 0);
