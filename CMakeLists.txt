@@ -11,7 +11,7 @@ find_package(Qt5X11Extras REQUIRED)
 SET(QT_LIBRARIES Qt5::Core Qt5::Widgets Qt5::OpenGL Qt5::X11Extras)
 add_definitions(${Qt5Widgets_DEFINITIONS})
 
-find_package(Boost REQUIRED COMPONENTS system graph timer)
+find_package(Boost REQUIRED COMPONENTS system graph timer filesystem)
 
 # OCCT_PROJECT_PATH lets user define cmake variables based on a locally built and
 # non-installed copy of the OCCT source code. assumes standard OCCT path
@@ -235,6 +235,11 @@ else(IGL_INCLUDE_FOUND AND IGL_LIB_FOUND AND NETGEN_INCLUDE_FOUND AND NETGEN_LIB
 endif(IGL_INCLUDE_FOUND AND IGL_LIB_FOUND AND NETGEN_INCLUDE_FOUND AND NETGEN_LIB_FOUND AND CGAL_FOUND)
 #end squash
 
+#begin spreadsheet
+find_package(ZLIB REQUIRED)
+find_package(LibZip REQUIRED)
+#end spreadsheet
+
 add_subdirectory(project/libgit2pp)
 
 SET(LIBRARY_INCLUDE_PATHS
@@ -249,6 +254,9 @@ SET(LIBRARY_INCLUDE_PATHS
     ${XERCESC_INCLUDE_DIR}
     ${CMAKE_SOURCE_DIR}/project/libgit2pp/libgit2/include/
     ${SQUASH_INCLUDE_DIRS}
+    ${ZLIB_INCLUDE_DIRS}
+    ${LIBZIP_INCLUDE_DIR_ZIP}
+    ${CMAKE_SOURCE_DIR}/libreoffice/libzippp/src/
     )
 INCLUDE_DIRECTORIES(SYSTEM ${LIBRARY_INCLUDE_PATHS}) #system suppresses warnings for those libraries.
 
@@ -440,6 +448,11 @@ SET(VIEWER_SOURCES
     viewer/message.cpp
 )
 
+SET(LIBREOFFICE_SOURCES
+    libreoffice/odshack.cpp
+    libreoffice/libzippp/src/libzippp.cpp
+)
+
 SET(CADSEER_SOURCES
     main.cpp
     dagview/dagview.cpp
@@ -463,6 +476,7 @@ SET(CADSEER_SOURCES
     ${COMMAND_SOURCES}
     ${VIEWER_SOURCES}
     ${SQUASH_SOURCES}
+    ${LIBREOFFICE_SOURCES}
     )
 
 SET(CADSEER_MOC_HDRS
@@ -497,6 +511,8 @@ SET(CADSEER_LIBRARIES
     ${SPNAV_LIBRARIES}
     ${SQUASH_LIBRARIES}
     git2pp
+    ${ZLIB_LIBRARIES}
+    ${LIBZIP_LIBRARY}
     )
 
 SET(CADSEER_UIS

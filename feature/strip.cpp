@@ -17,9 +17,14 @@
  *
  */
 
+#include <boost/filesystem.hpp>
+
 #include <BRepExtrema_DistShapeShape.hxx>
 #include <BRepExtrema_Poly.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
+
+#include <libzippp.h>
+#include <libreoffice/odshack.h>
 
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
@@ -52,6 +57,28 @@ Strip::Strip() : Base()
   pitchLabel = new lbr::PLabel(pitch.get());
   pitchLabel->valueHasChanged();
   overlaySwitch->addChild(pitchLabel.get());
+  
+  
+  stripData.quoteNumber = 69;
+  stripData.customerName = "aCustomer";
+  stripData.customerId = gu::createRandomId();
+  stripData.partName = "Bracket";
+  stripData.partNumber = "C66950";
+  stripData.partSetup = "One Out";
+  stripData.partRevision = "r69";
+  stripData.materialType = "J2340 490X";
+  stripData.materialThickness = 1.2;
+  stripData.processType = "Prog";
+  stripData.annualVolume = 200000;
+  
+  stripData.stations.push_back("Blank");
+  stripData.stations.push_back("Blank");
+  stripData.stations.push_back("Blank");
+  stripData.stations.push_back("Form");
+  stripData.stations.push_back("Form");
+  stripData.stations.push_back("Form");
+  stripData.stations.push_back("Form");
+  stripData.stations.push_back("Form");
 }
 
 TopoDS_Shape instanceShape(const TopoDS_Shape sIn, const gp_Vec &dir, double distance)
@@ -195,10 +222,21 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
     occt::ShapeVector shapes;
     shapes.push_back(ps); //original part shape.
     shapes.push_back(bs); //original blank shape.
+    //find first not blank index
+    std::size_t nb = 0;
+    for (std::size_t index = 0; index < stripData.stations.size(); ++index)
+    {
+      if (stripData.stations.at(index) != "Blank")
+      {
+        nb = index;
+        break;
+      }
+    }
+      
     //for now lets just add 3 blanks and 5 formed parts.
-    for (int i = 1; i < 4; ++i)
+    for (std::size_t i = 1; i < nb + 1; ++i)
       shapes.push_back(instanceShape(bs, -dir, pitchValue * i));
-    for (int i = 1; i < 6; ++i)
+    for (std::size_t i = 1; i < stripData.stations.size() - nb; ++i)
       shapes.push_back(instanceShape(ps, dir, pitchValue * i));
     
     
@@ -211,6 +249,8 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
     //for now, we are only going to have consistent ids for face and outer wire.
     seerShape->setOCCTShape(out);
     seerShape->ensureNoNils();
+    
+    exportSheet();
     
     setSuccess();
   }
@@ -229,6 +269,87 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
   setModelClean();
 }
 
+void Strip::exportSheet()
+{
+  /* we change the entries in a specific sheet and these values are linked into
+   * a customer designed sheet. The links are not updated when we open the sheet in calc by default.
+   * calc menu: /tools/options/libreoffice calc/formula/Recalculation on file load
+   * set that to always.
+   */
+  boost::filesystem::path o("/home/tanderson/Programming/cadseer/QuoteExportTesting/DaveTestTemplate.ods");
+  boost::filesystem::path c("/home/tanderson/temp/DaveTest.ods");
+  
+  boost::filesystem::copy_file(o, c, boost::filesystem::copy_option::overwrite_if_exists);
+  
+  libzippp::ZipArchive zip(c.string());
+  zip.open(libzippp::ZipArchive::WRITE);
+  for(const auto &e : zip.getEntries())
+  {
+    if (e.getName() == "content.xml")
+    {
+      std::string contents = e.readAsText();
+      boost::filesystem::path temp(boost::filesystem::temp_directory_path());
+      temp /= "content.xml";
+      
+      lbo::Map map = 
+      {
+        (std::make_pair(std::make_pair(0, 0), std::to_string(stripData.quoteNumber))),
+        (std::make_pair(std::make_pair(1, 0), stripData.customerName.toStdString())),
+        (std::make_pair(std::make_pair(2, 0), gu::idToString(stripData.customerId))),
+        (std::make_pair(std::make_pair(3, 0), stripData.partName.toStdString())),
+        (std::make_pair(std::make_pair(4, 0), stripData.partNumber.toStdString())),
+        (std::make_pair(std::make_pair(5, 0), stripData.partSetup.toStdString())),
+        (std::make_pair(std::make_pair(6, 0), stripData.partRevision.toStdString())),
+        (std::make_pair(std::make_pair(7, 0), stripData.materialType.toStdString())),
+        (std::make_pair(std::make_pair(8, 0), std::to_string(stripData.materialThickness))),
+        (std::make_pair(std::make_pair(9, 0), stripData.processType.toStdString())),
+        (std::make_pair(std::make_pair(10, 0), std::to_string(stripData.annualVolume))),
+        (std::make_pair(std::make_pair(11, 0), std::to_string(stripData.stations.size()))),
+        (std::make_pair(std::make_pair(12, 0), std::to_string(pitch->getValue()))),
+        (std::make_pair(std::make_pair(13, 0), "200")), //todo. for stock width
+        (std::make_pair(std::make_pair(14, 0), std::to_string(pitch->getValue() * 200))), //todo. update for stock width
+        (std::make_pair(std::make_pair(15, 0), "1500")), //todo. for die length
+        (std::make_pair(std::make_pair(16, 0), "700")), //todo. for die width
+        (std::make_pair(std::make_pair(17, 0), "25")), //todo for upper travel
+        (std::make_pair(std::make_pair(18, 0), "25")) //todo for lower travel
+      };
+      int index = 19;
+      for (const auto &s : stripData.stations)
+      {
+        map.insert(std::make_pair(std::make_pair(index, 0), s.toStdString()));
+        index++;
+      }
+      lbo::replace(contents, map);
+      
+      fstream stream;
+      stream.open(temp.string(), std::ios::out);
+      stream << contents;
+      stream.close();
+      
+      zip.addFile(e.getName(), temp.string());
+      break; //might invalidate, so get out.
+    }
+  }
+  
+  //doing a separate loop to ensure that we don't invalidate with addFile.
+  for(const auto &e : zip.getEntries())
+  {
+//     std::cout << e.getName() << std::endl;
+    
+    boost::filesystem::path cPath = e.getName();
+    
+//     std::cout << "parent path: " << cPath.parent_path()
+//     << "      extension: " << cPath.extension() << std::endl;
+    
+    if (cPath.parent_path() == "Pictures" && cPath.extension() == ".png")
+    {
+      std::cout << e.getName() << std::endl;
+      zip.addFile(e.getName(), "/home/tanderson/temp/picture.png");
+    }
+  }
+  
+  zip.close();
+}
 
 void Strip::serialWrite(const QDir &)
 {

@@ -1,3 +1,6 @@
 [submodule "project/libgit2pp"]
 	path = project/libgit2pp
 	url = https://gitlab.com/blobfish/libgit2pp.git
+[submodule "libreoffice/libzippp"]
+	path = libreoffice/libzippp
+	url = https://github.com/ctabin/libzippp.git

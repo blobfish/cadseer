@@ -26,6 +26,22 @@
 
 namespace ftr
 {
+  struct StripData
+  {
+    int quoteNumber;
+    QString customerName;
+    boost::uuids::uuid customerId; //not used yet.
+    QString partName;
+    QString partNumber;
+    QString partSetup;
+    QString partRevision;
+    QString materialType;
+    double materialThickness;
+    QString processType;
+    int annualVolume;
+    std::vector<QString> stations;
+  };
+  
   class Strip : public Base
   {
   public:
@@ -42,12 +58,15 @@ namespace ftr
     virtual void serialWrite(const QDir&) override;
 //     void serialRead(const prj::srl::FeatureStrip &);
     
+    StripData stripData;
+    
   protected:
     std::shared_ptr<Parameter> pitch; //!< 0 means auto update.
     osg::ref_ptr<lbr::PLabel> pitchLabel;
     
   private:
     static QIcon icon;
+    void exportSheet();
   };
 }
 
