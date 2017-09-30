@@ -338,7 +338,6 @@ void Strip::exportSheet()
     
     if (cPath.parent_path() == "Pictures" && cPath.extension() == ".png")
     {
-      std::cout << e.getName() << std::endl;
       boost::filesystem::path pp = stripData.picturePath.toStdString();
       if (boost::filesystem::exists(pp))
         zip.addFile(e.getName(), pp.string());

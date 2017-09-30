@@ -123,7 +123,7 @@ void lbo::replace(std::string &s, const lbo::Map &mi)
   {
     std::size_t ci = 0; //column index
     lbo::Disect ccell = lbo::Disect::build(s, "<table:table-cell ", "</table:table-cell>", crow.start.toEnd());
-    std::cout << "row: " << ri;
+//     std::cout << "row: " << ri;
     while (ccell.isValid() && (ccell.end.pos < crow.end.pos))
     {
       auto it = mi.find(std::make_pair(ri, ci));
@@ -133,19 +133,19 @@ void lbo::replace(std::string &s, const lbo::Map &mi)
         if (ctext.isValid() && (ctext.end.pos < ccell.end.pos))
         {
           ctext.replace(s, std::get<1>(*it));
-          std::cout << "          " << ctext.start.text << " = " << std::get<1>(*it);
+//           std::cout << "          " << ctext.start.text << " = " << std::get<1>(*it);
         }
         lbo::Disect cvalue = lbo::Disect::build(s, "office:value-type=\"float\" office:value=\"", "\"", ccell.start.toEnd());
         if (cvalue.isValid() && (cvalue.end.pos < ccell.end.pos))
         {
           cvalue.replace(s, std::get<1>(*it));
-          std::cout << "          " << cvalue.start.text << " = " << std::get<1>(*it);
+//           std::cout << "          " << cvalue.start.text << " = " << std::get<1>(*it);
         }
       }
       ccell = lbo::Disect::build(s, "table:table-cell ", "</table:table-cell>", ccell.start.toEnd());
       ci++;
     }
-    std::cout << std::endl;
+//     std::cout << std::endl;
     crow = lbo::Disect::build(s, "<table:table-row ", "</table:table-row>", crow.start.toEnd());
     ri++;
     
