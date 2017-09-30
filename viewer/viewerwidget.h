@@ -55,6 +55,9 @@ public:
     void setCurrentSystem(const osg::Matrixd &mIn);
     const osg::Matrixd& getViewSystem() const;
     
+    //! first is file path without dot and extension. second is extension without the dot
+    void screenCapture(const std::string &, const std::string &);
+    
     QWidget* getGraphicsWidget(); //!< needed to forward spaceball events.
 
 protected:
@@ -71,6 +74,7 @@ protected:
     osg::ref_ptr<osg::Switch> systemSwitch;
     osg::ref_ptr<lbr::CSysDragger> currentSystem;
     osg::ref_ptr<lbr::CSysCallBack> currentSystemCallBack;
+    osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler;
     int glWidgetWidth;
     int glWidgetHeight;
     osgQt::GraphicsWindowQt *windowQt;

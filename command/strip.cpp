@@ -17,10 +17,12 @@
  *
  */
 
+#include <application/mainwindow.h>
 #include <project/project.h>
 #include <message/observer.h>
 #include <selection/eventhandler.h>
 #include <feature/strip.h>
+#include <dialogs/strip.h>
 #include <command/strip.h>
 
 using namespace cmd;
@@ -28,7 +30,11 @@ using boost::uuids::uuid;
 
 Strip::Strip() : Base() {}
 
-Strip::~Strip(){}
+Strip::~Strip()
+{
+  if (dialog)
+    dialog->deleteLater();
+}
 
 std::string Strip::getStatusMessage()
 {
@@ -39,14 +45,19 @@ void Strip::activate()
 {
   isActive = true;
   
-  go();
+  if (!dialog)
+    go();
   
-  sendDone();
+  dialog->show();
+  dialog->raise();
+  dialog->activateWindow();
 }
 
 void Strip::deactivate()
 {
   isActive = false;
+  
+  dialog->hide();
 }
 
 void Strip::go()
@@ -71,12 +82,8 @@ void Strip::go()
   project->addFeature(strip);
   project->connect(pId, strip->getId(), ftr::InputType{ftr::Strip::part});
   project->connect(bId, strip->getId(), ftr::InputType{ftr::Strip::blank});
-//   strip->setColor(f->getColor());
-  
-  project->findFeature(pId)->hide3D();
-  project->findFeature(pId)->hideOverlay();
-  project->findFeature(bId)->hide3D();
-  project->findFeature(bId)->hideOverlay();
   
   observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  
+  dialog = new dlg::Strip(strip.get(), mainWindow);
 }

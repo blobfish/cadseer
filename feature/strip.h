@@ -40,6 +40,7 @@ namespace ftr
     QString processType;
     int annualVolume;
     std::vector<QString> stations;
+    QString picturePath;
   };
   
   class Strip : public Base

@@ -356,6 +356,7 @@ SET(DIALOG_SOURCES
     dialogs/widgetgeometry.cpp
     dialogs/blend.cpp
     dialogs/expressionedit.cpp
+    dialogs/strip.cpp
     )
     
 SET(PREFERENCE_SOURCES
@@ -499,6 +500,7 @@ SET(CADSEER_MOC_HDRS
     expressions/widget.h
     expressions/tablemodel.h
     expressions/tableview.h
+    dialogs/strip.h
     )
 
 SET(CADSEER_LIBRARIES

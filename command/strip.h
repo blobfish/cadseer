@@ -22,6 +22,8 @@
 
 #include <command/base.h>
 
+namespace dlg{class Strip;}
+
 namespace cmd
 {
   class Strip : public Base
@@ -35,6 +37,7 @@ namespace cmd
     virtual void activate() override;
     virtual void deactivate() override;
   private:
+    dlg::Strip *dialog = nullptr;
     void go();
   };
 }

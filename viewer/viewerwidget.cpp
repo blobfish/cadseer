@@ -159,6 +159,10 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     view->addEventHandler(new ResizeEventHandler(infoCamera));
     spaceballManipulator = new vwr::SpaceballManipulator(view->getCamera());
     view->setCameraManipulator(spaceballManipulator);
+    screenCaptureHandler = new osgViewer::ScreenCaptureHandler();
+    screenCaptureHandler->setKeyEventTakeScreenShot(-1); //no keyboard execution
+    screenCaptureHandler->setKeyEventToggleContinuousCapture(-1); //no keyboard execution
+//     view->addEventHandler(screenCaptureHandler); //don't think this needs to be added the way I am using it.
     
     addView(view);
 
@@ -534,6 +538,17 @@ void ViewerWidget::viewToggleHiddenLinesDispatched(const msg::Message&)
   //set the hidden line state.
   HiddenLineVisitor v(!oldValue);
   root->accept(v);
+}
+
+void ViewerWidget::screenCapture(const std::string &fp, const std::string &e)
+{
+  osg::ref_ptr<osgViewer::ScreenCaptureHandler::WriteToFile> wtf = new osgViewer::ScreenCaptureHandler::WriteToFile
+  (
+    fp, e, osgViewer::ScreenCaptureHandler::WriteToFile::OVERWRITE
+  );
+  screenCaptureHandler->setFramesToCapture(1);
+  screenCaptureHandler->setCaptureOperation(wtf.get());
+  screenCaptureHandler->captureNextFrame(*this);
 }
 
 void StatsHandler::collectWhichCamerasToRenderStatsFor

@@ -58,26 +58,21 @@ Strip::Strip() : Base()
   pitchLabel->valueHasChanged();
   overlaySwitch->addChild(pitchLabel.get());
   
-  
-  stripData.quoteNumber = 69;
+  stripData.quoteNumber = 0;
   stripData.customerName = "aCustomer";
   stripData.customerId = gu::createRandomId();
-  stripData.partName = "Bracket";
-  stripData.partNumber = "C66950";
-  stripData.partSetup = "One Out";
-  stripData.partRevision = "r69";
-  stripData.materialType = "J2340 490X";
-  stripData.materialThickness = 1.2;
-  stripData.processType = "Prog";
-  stripData.annualVolume = 200000;
+  stripData.partName = "aName";
+  stripData.partNumber = "aNumber";
+  stripData.partSetup = "aSetup";
+  stripData.partRevision = "aRevision";
+  stripData.materialType = "aMaterialType";
+  stripData.materialThickness = 0.0;
+  stripData.processType = "aProcessType";
+  stripData.annualVolume = 0;
   
   stripData.stations.push_back("Blank");
   stripData.stations.push_back("Blank");
   stripData.stations.push_back("Blank");
-  stripData.stations.push_back("Form");
-  stripData.stations.push_back("Form");
-  stripData.stations.push_back("Form");
-  stripData.stations.push_back("Form");
   stripData.stations.push_back("Form");
 }
 
@@ -344,7 +339,9 @@ void Strip::exportSheet()
     if (cPath.parent_path() == "Pictures" && cPath.extension() == ".png")
     {
       std::cout << e.getName() << std::endl;
-      zip.addFile(e.getName(), "/home/tanderson/temp/picture.png");
+      boost::filesystem::path pp = stripData.picturePath.toStdString();
+      if (boost::filesystem::exists(pp))
+        zip.addFile(e.getName(), pp.string());
     }
   }
   
