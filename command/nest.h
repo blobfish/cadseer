@@ -1,6 +1,6 @@
 /*
- * CadSeer. Parametric Solid Modeling.
- * Copyright (C) 2017  Thomas S. Anderson blobfish.at.gmx.com
+ * <one line to give the program's name and a brief idea of what it does.>
+ * Copyright (C) 2017  tanderson <email>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,32 +14,29 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
 
-#ifndef CMD_STRIP_H
-#define CMD_STRIP_H
+#ifndef CMD_NEST_H
+#define CMD_NEST_H
 
 #include <command/base.h>
 
-namespace dlg{class Strip;}
-
 namespace cmd
 {
-  class Strip : public Base
+  class Nest : public Base
   {
   public:
-    Strip();
-    virtual ~Strip() override;
+    Nest();
+    ~Nest();
     
-    virtual std::string getCommandName() override{return "Strip";}
+    virtual std::string getCommandName() override{return "Nest";}
     virtual std::string getStatusMessage() override;
     virtual void activate() override;
     virtual void deactivate() override;
+    
   private:
-    dlg::Strip *dialog = nullptr;
     void go();
   };
 }
 
-#endif // CMD_STRIP_H
+#endif // CMD_NEST_H

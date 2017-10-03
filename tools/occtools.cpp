@@ -603,3 +603,20 @@ std::vector<int> BoundingBox::getFaceIndexes()
   
   return out;
 }
+
+TopoDS_Shape occt::instanceShape(const TopoDS_Shape sIn, const gp_Vec &dir, double distance)
+{
+  gp_Trsf move;
+  move.SetTranslation(dir * distance);
+  TopLoc_Location movement(move);
+  
+  return sIn.Moved(movement);
+}
+
+void occt::moveShape(TopoDS_Shape &sIn, const gp_Vec &dir, double distance)
+{
+  gp_Trsf move;
+  move.SetTranslation(dir * distance);
+  TopLoc_Location movement(move);
+  sIn.Move(movement);
+}

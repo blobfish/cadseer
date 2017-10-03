@@ -319,6 +319,7 @@ SET(FEATURE_SOURCES
     feature/extract.cpp
     feature/squash.cpp
     feature/strip.cpp
+    feature/nest.cpp
     )
     
 SET(EXPRESSION_SOURCES
@@ -419,6 +420,7 @@ SET(COMMAND_SOURCES
     command/featurereposition.cpp
     command/squash.cpp
     command/strip.cpp
+    command/nest.cpp
     )
     
 SET(LIBRARY_SOURCES

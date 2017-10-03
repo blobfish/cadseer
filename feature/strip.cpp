@@ -85,7 +85,7 @@ TopoDS_Shape instanceShape(const TopoDS_Shape sIn, const gp_Vec &dir, double dis
   return sIn.Moved(movement);
 }
 
-double getDistance(const TopoDS_Shape &sIn1, const TopoDS_Shape &sIn2)
+static double getDistance(const TopoDS_Shape &sIn1, const TopoDS_Shape &sIn2)
 {
   gp_Pnt p1, p2;
   double distance;

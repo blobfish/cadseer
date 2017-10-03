@@ -126,6 +126,21 @@ namespace occt
    */
   gp_Vec getNormal(const TopoDS_Face &fIn, double u, double v);
   
+  /*! @brief Copy shape at distance.
+   * 
+   * @param sIn shape to copy
+   * @param dir unit direction to instance
+   * @param distance distance of instance.
+   */
+  TopoDS_Shape instanceShape(const TopoDS_Shape sIn, const gp_Vec &dir, double distance);
+  
+  /*! @brief Move a shape by distance and direction
+   * 
+   * @param sIn shape to move
+   * @param dir unit direction of movement.
+   * @param distance distance to move.
+   */
+  void moveShape(TopoDS_Shape &sIn, const gp_Vec &dir, double distance);
   
   class BoundingBox
   {
