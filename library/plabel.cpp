@@ -84,8 +84,15 @@ void PLabel::build()
 void PLabel::setText()
 {
   std::ostringstream stream;
+  if (showName)
+    stream << parameter->getName().toStdString() << " = ";
   stream << std::setprecision(3) << std::fixed << parameter->getValue() << std::endl;
   text->setText(stream.str());
+}
+
+void PLabel::setTextColor(const osg::Vec4 &cIn)
+{
+  text->setColor(cIn);
 }
 
 void PLabel::valueHasChanged()

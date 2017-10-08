@@ -56,6 +56,12 @@ namespace ftr
     {
       tags.insert(tagIn);
     }
+    InputType& operator +=(const InputType &other)
+    {
+      for (const auto &t : other.tags)
+        tags.insert(t);
+      return *this;
+    }
     //@}
     
     std::set<std::string> tags;

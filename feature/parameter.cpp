@@ -252,6 +252,17 @@ void Parameter::setValue(double valueIn)
   valueChangedSignal();
 }
 
+void Parameter::setValueQuiet(double valueIn)
+{
+  if (value == valueIn)
+    return;
+  
+  if (!isValidValue(valueIn))
+    return;
+  
+  value = valueIn;
+}
+
 void Parameter::setConstraint(const ParameterConstraint &cIn)
 {
   /* not really worried about the current value conflicting

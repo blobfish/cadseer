@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 project(cadseer)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -Wshadow -fext-numeric-literals -frounding-math" )
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wshadow -fext-numeric-literals -frounding-math" )
+SET(CMAKE_CXX_STANDARD 14)
 
 add_definitions(-DQT_NO_KEYWORDS) #macros clashing
 find_package(Qt5Core REQUIRED)
@@ -358,6 +359,7 @@ SET(DIALOG_SOURCES
     dialogs/blend.cpp
     dialogs/expressionedit.cpp
     dialogs/strip.cpp
+    dialogs/selectionbutton.cpp
     )
     
 SET(PREFERENCE_SOURCES
@@ -503,6 +505,7 @@ SET(CADSEER_MOC_HDRS
     expressions/tablemodel.h
     expressions/tableview.h
     dialogs/strip.h
+    dialogs/selectionbutton.h
     )
 
 SET(CADSEER_LIBRARIES

@@ -86,6 +86,7 @@ namespace ftr
     Parameter(const QString &nameIn, double valueIn);
     double getValue() const {return value;}
     void setValue(double valueIn);
+    void setValueQuiet(double valueIn); //!< don't trigger changed signal. use sparingly!
     QString getName() const {return name;}
     void setName(const QString &nameIn){name = nameIn;}
     bool isConstant() const {return constant;} //!< true = not linked to forumla.

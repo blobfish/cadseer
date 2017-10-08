@@ -62,28 +62,50 @@ void Strip::deactivate()
 
 void Strip::go()
 {
-  //only works with preselection for now.
-  const slc::Containers &containers = eventHandler->getSelections();
-  if (containers.size() < 2)
-  {
-    observer->out(msg::buildStatusMessage("Incorrect preselection for strip feature"));
-    return;
-  }
-  uuid pId = containers.at(0).featureId;
-  uuid bId = containers.at(1).featureId;
-  
-  if (pId == bId)
-  {
-    observer->out(msg::buildStatusMessage("Part and blank can't belong to same feature"));
-    return;
-  }
+  //no preselection.
+  observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
   
   std::shared_ptr<ftr::Strip> strip(new ftr::Strip());
   project->addFeature(strip);
-  project->connect(pId, strip->getId(), ftr::InputType{ftr::Strip::part});
-  project->connect(bId, strip->getId(), ftr::InputType{ftr::Strip::blank});
   
-  observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  //this should trick the dagview into updating so it isn't screwed up
+  //while dialog is running. only dagview responds to this message
+  //as of git hash a530460.
+  observer->outBlocked(msg::Response | msg::Post | msg::UpdateModel);
   
   dialog = new dlg::Strip(strip.get(), mainWindow);
+}
+
+StripEdit::StripEdit(ftr::Base *feature) : Base()
+{
+  strip = dynamic_cast<ftr::Strip*>(feature);
+  assert(strip);
+}
+
+StripEdit::~StripEdit()
+{
+  if (dialog)
+    dialog->deleteLater();
+}
+
+std::string StripEdit::getStatusMessage()
+{
+  return "Editing Strip Feature";
+}
+
+void StripEdit::activate()
+{
+  if (!dialog)
+    dialog = new dlg::Strip(strip, mainWindow);
+  
+  isActive = true;
+  dialog->show();
+  dialog->raise();
+  dialog->activateWindow();
+}
+
+void StripEdit::deactivate()
+{
+  dialog->hide();
+  isActive = false;
 }

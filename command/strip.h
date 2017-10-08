@@ -23,6 +23,7 @@
 #include <command/base.h>
 
 namespace dlg{class Strip;}
+namespace ftr{class Strip;}
 
 namespace cmd
 {
@@ -38,6 +39,22 @@ namespace cmd
     virtual void deactivate() override;
   private:
     dlg::Strip *dialog = nullptr;
+    void go();
+  };
+  
+  class StripEdit : public Base
+  {
+  public:
+    StripEdit(ftr::Base*);
+    virtual ~StripEdit() override;
+    
+    virtual std::string getCommandName() override{return "Strip Edit";}
+    virtual std::string getStatusMessage() override;
+    virtual void activate() override;
+    virtual void deactivate() override;
+  private:
+    dlg::Strip *dialog = nullptr;
+    ftr::Strip *strip = nullptr;
     void go();
   };
 }

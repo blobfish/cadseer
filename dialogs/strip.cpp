@@ -35,6 +35,8 @@
 #include <QDragMoveEvent>
 #include <QDropEvent>
 #include <QDragLeaveEvent>
+#include <QButtonGroup>
+#include <QCheckBox>
 
 #include <application/application.h>
 #include <application/mainwindow.h>
@@ -42,11 +44,13 @@
 #include <viewer/viewerwidget.h>
 #include <message/observer.h>
 #include <feature/strip.h>
+#include <dialogs/widgetgeometry.h>
+#include <dialogs/selectionbutton.h>
 #include <dialogs/strip.h>
 
 using namespace dlg;
 
-
+using boost::uuids::uuid;
 
 TrashCan::TrashCan(QWidget *parent)
   : QLabel(parent)
@@ -79,7 +83,7 @@ void TrashCan::dropEvent(QDropEvent *event)
 
 void TrashCan::dragLeaveEvent(QDragLeaveEvent *event)
 {
-  clear();
+  setBackgroundRole(QPalette::Dark);
   event->accept();
 }
 
@@ -94,6 +98,9 @@ Strip::Strip(ftr::Strip *stripIn, QWidget *parent) : QDialog(parent)
   
   buildGui();
   initGui();
+  
+  WidgetGeometry *filter = new WidgetGeometry(this, "dlg::Strip");
+  this->installEventFilter(filter);
 }
 
 Strip::~Strip()
@@ -118,6 +125,13 @@ void Strip::finishDialog()
 {
   if (isAccepted)
   {
+    strip->setModelDirty();
+    
+    if (acCheckBox->isChecked())
+      strip->setAutoCalc(true);
+    else
+      strip->setAutoCalc(false);
+    
     strip->stripData.partName = pNameEdit->text();
     strip->stripData.partNumber = pNumberEdit->text();
     strip->stripData.partRevision = pRevisionEdit->text();
@@ -132,6 +146,21 @@ void Strip::finishDialog()
     strip->stripData.stations.clear();
     for (int i = 0; i < stationsList->count(); ++i)
       strip->stripData.stations.push_back(stationsList->item(i)->text());
+    
+    //upate graph connections
+    prj::Project *p = static_cast<app::Application *>(qApp)->getProject();
+    
+    auto updateTag = [&](QLabel* label, const std::string &sIn)
+    {
+      p->removeParentTag(strip->getId(), sIn);
+      uuid labelId = gu::stringToId(label->text().toStdString());
+      if(!labelId.is_nil() && p->hasFeature(labelId))
+        p->connect(labelId, strip->getId(), {sIn});
+    };
+    
+    updateTag(partIdLabel, ftr::Strip::part);
+    updateTag(blankIdLabel, ftr::Strip::blank);
+    updateTag(nestIdLabel, ftr::Strip::nest);
   }
   
   static_cast<app::Application *>(qApp)->messageSlot(msg::Mask(msg::Request | msg::Command | msg::Done));
@@ -139,6 +168,10 @@ void Strip::finishDialog()
 
 void Strip::initGui()
 {
+  if (strip->isAutoCalc())
+    acCheckBox->setChecked(true);
+  else
+    acCheckBox->setChecked(false);
   pNameEdit->setText(strip->stripData.partName);
   pNumberEdit->setText(strip->stripData.partNumber);
   pRevisionEdit->setText(strip->stripData.partRevision);
@@ -154,6 +187,23 @@ void Strip::initGui()
     stationsList->addItem(s);
   
   loadLabelPixmapSlot();
+  
+  QString nilText = QString::fromStdString(gu::idToString(gu::createNilId()));
+  partIdLabel->setText(nilText);
+  blankIdLabel->setText(nilText);
+  nestIdLabel->setText(nilText);
+  
+  prj::Project *p = static_cast<app::Application *>(qApp)->getProject();
+  ftr::UpdatePayload::UpdateMap pMap = p->getParentMap(strip->getId());
+  for (const auto &it : pMap)
+  {
+    if (it.first == ftr::Strip::part)
+      partIdLabel->setText(QString::fromStdString(gu::idToString(it.second->getId())));
+    if (it.first == ftr::Strip::blank)
+      blankIdLabel->setText(QString::fromStdString(gu::idToString(it.second->getId())));
+    if (it.first == ftr::Strip::nest)
+      nestIdLabel->setText(QString::fromStdString(gu::idToString(it.second->getId())));
+  }
 }
 
 void Strip::loadLabelPixmapSlot()
@@ -193,6 +243,64 @@ void Strip::buildGui()
 QWidget* Strip::buildInputPage()
 {
   QWidget *out = new QWidget(tabWidget);
+  
+  QHBoxLayout *acLayout = new QHBoxLayout();
+  acCheckBox = new QCheckBox(tr("Auto Calculation"), out);
+  acLayout->addWidget(acCheckBox);
+  acLayout->addStretch();
+  
+  QGridLayout *gl = new QGridLayout();
+  bGroup = new QButtonGroup(out);
+  QString nilString(QString::fromStdString(gu::idToString(gu::createNilId())));
+  QPixmap pmap = QPixmap(":resources/images/cursor.svg").scaled(32, 32, Qt::KeepAspectRatio);
+  
+  QLabel *partLabel = new QLabel(tr("Part:"), out);
+  partButton = new SelectionButton(pmap, QString(), out); //switch to icon
+  partButton->isSingleSelection = true;
+  partButton->mask = ~slc::All | slc::ObjectsEnabled | slc::ObjectsSelectable;
+  partIdLabel = new QLabel(nilString, out);
+  gl->addWidget(partLabel, 0, 0, Qt::AlignVCenter | Qt::AlignRight);
+  gl->addWidget(partButton, 0, 1, Qt::AlignVCenter | Qt::AlignCenter);
+  gl->addWidget(partIdLabel, 0, 2, Qt::AlignVCenter | Qt::AlignLeft);
+  connect(partButton, &SelectionButton::dirty, this, &Strip::updatePartIdSlot);
+  connect(partButton, &SelectionButton::advance, this, &Strip::advanceSlot);
+  bGroup->addButton(partButton);
+  
+  QLabel *blankLabel = new QLabel(tr("Blank:"), out);
+  blankButton = new SelectionButton(pmap, QString(), out);
+  blankButton->isSingleSelection = true;
+  blankButton->mask = ~slc::All | slc::ObjectsEnabled | slc::ObjectsSelectable;
+  blankIdLabel = new QLabel(nilString, out);
+  gl->addWidget(blankLabel, 1, 0, Qt::AlignVCenter | Qt::AlignRight);
+  gl->addWidget(blankButton, 1, 1, Qt::AlignVCenter | Qt::AlignCenter);
+  gl->addWidget(blankIdLabel, 1, 2, Qt::AlignVCenter | Qt::AlignLeft);
+  connect(blankButton, &SelectionButton::dirty, this, &Strip::updateBlankIdSlot);
+  connect(blankButton, &SelectionButton::advance, this, &Strip::advanceSlot);
+  bGroup->addButton(blankButton);
+  
+  QLabel *nestLabel = new QLabel(tr("Nest:"), out);
+  nestButton = new SelectionButton(pmap, QString(), out);
+  nestButton->isSingleSelection = true;
+  nestButton->mask = ~slc::All | slc::ObjectsEnabled | slc::ObjectsSelectable;
+  nestIdLabel = new QLabel(nilString, out);
+  gl->addWidget(nestLabel, 2, 0, Qt::AlignVCenter | Qt::AlignRight);
+  gl->addWidget(nestButton, 2, 1, Qt::AlignVCenter | Qt::AlignCenter);
+  gl->addWidget(nestIdLabel, 2, 2, Qt::AlignVCenter | Qt::AlignLeft);
+  connect(nestButton, &SelectionButton::dirty, this, &Strip::updateNestIdSlot);
+  connect(nestButton, &SelectionButton::advance, this, &Strip::advanceSlot);
+  bGroup->addButton(nestButton);
+  
+  QHBoxLayout *hl = new QHBoxLayout();
+  hl->addLayout(gl);
+  hl->addStretch();
+  
+  QVBoxLayout *vl = new QVBoxLayout();
+  vl->addLayout(acLayout);
+  vl->addSpacing(10);
+  vl->addLayout(hl);
+  vl->addStretch();
+  
+  out->setLayout(vl);
   
   return out;
 }
@@ -362,6 +470,33 @@ QWidget* Strip::buildPicturePage()
   return out;
 }
 
+void Strip::setPartId(const uuid &idIn)
+{
+  slc::Message m;
+  m.type = slc::Type::Object;
+  m.featureId = idIn;
+  
+  partButton->setMessages(m);
+}
+
+void Strip::setBlankId(const uuid &idIn)
+{
+  slc::Message m;
+  m.type = slc::Type::Object;
+  m.featureId = idIn;
+  
+  blankButton->setMessages(m);
+}
+
+void Strip::setNestId(const uuid &idIn)
+{
+  slc::Message m;
+  m.type = slc::Type::Object;
+  m.featureId = idIn;
+  
+  nestButton->setMessages(m);
+}
+
 void Strip::takePictureSlot()
 {
   /* the osg screen capture handler is designed to automatically
@@ -383,4 +518,49 @@ void Strip::takePictureSlot()
   app->getMainWindow()->getViewer()->screenCapture(fp.string(), ext);
   
   QTimer::singleShot(1000, this, SLOT(loadLabelPixmapSlot()));
+}
+
+void Strip::updatePartIdSlot()
+{
+  const slc::Messages &ms = partButton->getMessages();
+  if (ms.empty())
+    partIdLabel->setText(QString::fromStdString(gu::idToString(gu::createNilId())));
+  else
+    partIdLabel->setText(QString::fromStdString(gu::idToString(ms.front().featureId)));
+}
+
+void Strip::updateBlankIdSlot()
+{
+  const slc::Messages &ms = blankButton->getMessages();
+  if (ms.empty())
+    blankIdLabel->setText(QString::fromStdString(gu::idToString(gu::createNilId())));
+  else
+    blankIdLabel->setText(QString::fromStdString(gu::idToString(ms.front().featureId)));
+}
+
+void Strip::updateNestIdSlot()
+{
+  const slc::Messages &ms = nestButton->getMessages();
+  if (ms.empty())
+    nestIdLabel->setText(QString::fromStdString(gu::idToString(gu::createNilId())));
+  else
+    nestIdLabel->setText(QString::fromStdString(gu::idToString(ms.front().featureId)));
+}
+
+void Strip::advanceSlot()
+{
+  QAbstractButton *cb = bGroup->checkedButton();
+  if (!cb)
+    return;
+  if (cb == partButton)
+    blankButton->setChecked(true);
+  else if (cb == blankButton)
+    nestButton->setChecked(true);
+  else if (cb == nestButton)
+    partButton->setChecked(true);
+  else
+  {
+    assert(0); //no button checked.
+    throw std::runtime_error("no button in dlg::Strip::advanceSlot");
+  }
 }

@@ -330,10 +330,17 @@ void Manager::editFeatureDispatched(const msg::Message&)
 void Manager::setupEditFunctionMap()
 {
   editFunctionMap.insert(std::make_pair(ftr::Type::Blend, std::bind(&Manager::editBlend, this, std::placeholders::_1)));
+  editFunctionMap.insert(std::make_pair(ftr::Type::Strip, std::bind(&Manager::editStrip, this, std::placeholders::_1)));
 }
 
 BasePtr Manager::editBlend(ftr::Base *feature)
 {
   std::shared_ptr<Base> command(new BlendEdit(feature));
+  return command;
+}
+
+BasePtr Manager::editStrip(ftr::Base *feature)
+{
+  std::shared_ptr<Base> command(new StripEdit(feature));
   return command;
 }

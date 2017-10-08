@@ -78,6 +78,7 @@ namespace cmd
     EditFunctionMap editFunctionMap;
     void setupEditFunctionMap();
     BasePtr editBlend(ftr::Base *);
+    BasePtr editStrip(ftr::Base *);
     
   };
   

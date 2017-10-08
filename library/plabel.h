@@ -42,6 +42,9 @@ namespace lbr
     void valueHasChanged();
     void constantHasChanged();
     ftr::Parameter* getParameter(){return parameter;}
+    void setTextColor(const osg::Vec4&);
+    
+    bool showName = false;
     
   protected:
     PLabel();

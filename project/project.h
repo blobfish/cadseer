@@ -47,7 +47,6 @@ public:
     ~Project();
     void readOCC(const std::string &fileName);
     void addOCCShape(const TopoDS_Shape &shapeIn);
-    ftr::Base* findFeature(const boost::uuids::uuid &idIn);
     ftr::Parameter* findParameter(const boost::uuids::uuid &idIn) const;
     void updateModel();
     void updateVisual();
@@ -57,9 +56,13 @@ public:
     std::vector<boost::uuids::uuid> getAllFeatureIds() const;
     
     void addFeature(std::shared_ptr<ftr::Base> feature);
+    bool hasFeature(const boost::uuids::uuid &idIn);
+    ftr::Base* findFeature(const boost::uuids::uuid &idIn);
     void removeFeature(const boost::uuids::uuid &idIn);
     void setCurrentLeaf(const boost::uuids::uuid &idIn);
     void connect(const boost::uuids::uuid &parentIn, const boost::uuids::uuid &childIn, const ftr::InputType &type);
+     //!< removes all tags from edges with id as target. removes edge if only tag is parameter.
+    void removeParentTag(const boost::uuids::uuid &, const std::string&);
     
     void setSaveDirectory(const std::string &directoryIn);
     std::string getSaveDirectory() const {return saveDirectory;}

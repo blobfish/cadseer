@@ -47,7 +47,8 @@ namespace ftr
     virtual void serialWrite(const QDir&) override;
 //     void serialRead(const prj::srl::FeatureNest &);
     
-    double getPitch();
+    double getPitch() const;
+    double getGap() const;
     
   protected:
     std::shared_ptr<Parameter> pitch; //!< not really a parameter. just using for convenience.
@@ -55,7 +56,7 @@ namespace ftr
     osg::ref_ptr<lbr::PLabel> gapLabel;
     osg::Vec3d feedDirection; //!< eventually a parameter.
     
-    TopoDS_Shape calcPitch(TopoDS_Shape &bIn, double guess, double round = 1.0);
+    TopoDS_Shape calcPitch(TopoDS_Shape &bIn, double guess);
     double getDistance(const TopoDS_Shape &sIn1, const TopoDS_Shape &sIn2);
     
   private:

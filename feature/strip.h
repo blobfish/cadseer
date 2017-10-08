@@ -48,6 +48,7 @@ namespace ftr
   public:
     constexpr static const char *part = "Part";
     constexpr static const char *blank = "Blank";
+    constexpr static const char *nest = "Nest";
     
     Strip();
     
@@ -59,11 +60,25 @@ namespace ftr
     virtual void serialWrite(const QDir&) override;
 //     void serialRead(const prj::srl::FeatureStrip &);
     
+    void setLabelColors(const osg::Vec4&);
+    void setAutoCalc(bool acIn){autoCalc = acIn;}
+    bool isAutoCalc(){return autoCalc;}
+    
     StripData stripData;
     
   protected:
-    std::shared_ptr<Parameter> pitch; //!< 0 means auto update.
+    std::shared_ptr<Parameter> pitch;
+    std::shared_ptr<Parameter> width;
+    std::shared_ptr<Parameter> widthOffset;
+    std::shared_ptr<Parameter> gap;
     osg::ref_ptr<lbr::PLabel> pitchLabel;
+    osg::ref_ptr<lbr::PLabel> widthLabel;
+    osg::ref_ptr<lbr::PLabel> widthOffsetLabel; //!< centerline of die.
+    osg::ref_ptr<lbr::PLabel> gapLabel;
+    std::vector<osg::ref_ptr<osg::MatrixTransform>> stationLabels;
+    
+    osg::Vec3d feedDirection; //!< eventually a parameter.
+    bool autoCalc = true; //!< eventually a parameter.
     
   private:
     static QIcon icon;

@@ -56,6 +56,7 @@ Nest::Nest() : Base()
   parameterVector.push_back(gap.get());
   
   gapLabel = new lbr::PLabel(gap.get());
+  gapLabel->showName = true;
   gapLabel->valueHasChanged();
   overlaySwitch->addChild(gapLabel.get());
   
@@ -67,9 +68,14 @@ Nest::~Nest()
 
 }
 
-double Nest::getPitch()
+double Nest::getPitch() const
 {
   return pitch->getValue();
+}
+
+double Nest::getGap() const
+{
+  return gap->getValue();
 }
 
 double Nest::getDistance(const TopoDS_Shape &sIn1, const TopoDS_Shape &sIn2)
@@ -101,7 +107,7 @@ double Nest::getDistance(const TopoDS_Shape &sIn1, const TopoDS_Shape &sIn2)
   return dc.Value();
 }
 
-TopoDS_Shape Nest::calcPitch(TopoDS_Shape &bIn, double guess, double round)
+TopoDS_Shape Nest::calcPitch(TopoDS_Shape &bIn, double guess)
 {
   //guess is expected from the bounding box and assumes no overlap.
   //dir is a unit vector.
@@ -149,11 +155,7 @@ TopoDS_Shape Nest::calcPitch(TopoDS_Shape &bIn, double guess, double round)
   gp_Vec pos1 = gp_Vec(bIn.Location().Transformation().TranslationPart());
   gp_Vec pos2 = gp_Vec(other.Location().Transformation().TranslationPart());
   double p = (pos1 - pos2).Magnitude();
-  //round to nearest.
-  int whole = static_cast<int>(p / round);
-  if ((p / round - static_cast<double>(whole)) > 0.5)
-    whole++;
-  pitch->setValue(static_cast<double>(whole * round));
+  pitch->setValue(p);
   
   return other;
 }

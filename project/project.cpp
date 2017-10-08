@@ -232,6 +232,11 @@ void Project::readOCC(const std::string &fileName)
     }
 }
 
+bool Project::hasFeature(const boost::uuids::uuid &idIn)
+{
+  return map.find(idIn) != map.end();
+}
+
 ftr::Base* Project::findFeature(const uuid &idIn)
 {
   return projectGraph[findVertex(idIn)].feature.get();
@@ -477,8 +482,7 @@ void Project::connect(const boost::uuids::uuid& parentIn, const boost::uuids::uu
 {
   Vertex parent = map.at(parentIn);
   Vertex child = map.at(childIn);
-  Edge edge = connectVertices(parent, child, type);
-  projectGraph[edge].inputType = type;
+  connectVertices(parent, child, type);
   
   msg::Message postMessage(msg::Response | msg::Post | msg::Add | msg::Connection);
   prj::Message pMessage;
@@ -487,6 +491,17 @@ void Project::connect(const boost::uuids::uuid& parentIn, const boost::uuids::uu
   pMessage.inputType = type;
   postMessage.payload = pMessage;
   observer->out(postMessage);
+}
+
+void Project::removeParentTag(const uuid &targetIn, const std::string &tagIn)
+{
+  VertexEdgePairs eps = getParents(findVertex(targetIn));
+  for (const auto &ep : eps)
+  {
+    projectGraph[ep.second].inputType.tags.erase(tagIn);
+    if (projectGraph[ep.second].inputType.tags.empty())
+      boost::remove_edge(ep.second, projectGraph);
+  }
 }
 
 void Project::setupDispatcher()
@@ -816,8 +831,7 @@ Edge Project::connectVertices(Vertex parent, Vertex child, const ftr::InputType 
   bool results;
   Edge newEdge;
   boost::tie(newEdge, results) = boost::add_edge(parent, child, projectGraph);
-  assert(results);
-  projectGraph[newEdge].inputType = type;
+  projectGraph[newEdge].inputType += type;
   return newEdge;
 }
 

@@ -77,6 +77,7 @@ Base::Base()
   overlaySwitch->setNodeMask(mdv::overlaySwitch);
   overlaySwitch->setName("overlay");
   overlaySwitch->setUserValue(gu::idAttributeTitle, gu::idToString(id));
+  overlaySwitch->setCullingActive(false);
   
   state.set(ftr::StateOffset::ModelDirty, true);
   state.set(ftr::StateOffset::VisualDirty, true);

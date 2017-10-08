@@ -23,15 +23,21 @@
 #include <BRepExtrema_Poly.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
 
+#include <osg/AutoTransform>
+#include <osgQt/QFontImplementation>
+#include <osgText/Text>
+
 #include <libzippp.h>
 #include <libreoffice/odshack.h>
 
+#include <application/application.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <globalutilities.h>
 #include <tools/occtools.h>
 #include <feature/seershape.h>
 #include <feature/shapecheck.h>
+#include <feature/nest.h>
 #include <feature/strip.h>
 
 using namespace ftr;
@@ -48,15 +54,47 @@ Strip::Strip() : Base()
   name = QObject::tr("Strip");
   mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
-  pitch = std::shared_ptr<Parameter>(new Parameter(QObject::tr("Pitch"), 0.0));
-  pitch->setConstraint(ParameterConstraint::buildZeroPositive());
+  feedDirection = osg::Vec3d(-1.0, 0.0, 0.0);
   
+  pitch = std::shared_ptr<Parameter>(new Parameter(QObject::tr("Pitch"), 1.0));
+  pitch->setConstraint(ParameterConstraint::buildNonZeroPositive());
   pitch->connectValue(boost::bind(&Strip::setModelDirty, this));
   parameterVector.push_back(pitch.get());
   
+  width = std::shared_ptr<Parameter>(new Parameter(QObject::tr("Width"), 1.0));
+  width->setConstraint(ParameterConstraint::buildNonZeroPositive());
+  width->connectValue(boost::bind(&Strip::setModelDirty, this));
+  parameterVector.push_back(width.get());
+  
+  widthOffset = std::shared_ptr<Parameter>(new Parameter(QObject::tr("Width Offset"), 1.0));
+  widthOffset->setConstraint(ParameterConstraint::buildAll());
+  widthOffset->connectValue(boost::bind(&Strip::setModelDirty, this));
+  parameterVector.push_back(widthOffset.get());
+  
+  gap = std::shared_ptr<Parameter>(new Parameter(QObject::tr("Gap"), 6.0));
+  gap->setConstraint(ParameterConstraint::buildNonZeroPositive());
+  gap->connectValue(boost::bind(&Strip::setModelDirty, this));
+  parameterVector.push_back(gap.get());
+  
   pitchLabel = new lbr::PLabel(pitch.get());
+  pitchLabel->showName = true;
   pitchLabel->valueHasChanged();
   overlaySwitch->addChild(pitchLabel.get());
+  
+  widthLabel = new lbr::PLabel(width.get());
+  widthLabel->showName = true;
+  widthLabel->valueHasChanged();
+  overlaySwitch->addChild(widthLabel.get());
+  
+  widthOffsetLabel = new lbr::PLabel(widthOffset.get());
+  widthOffsetLabel->showName = true;
+  widthOffsetLabel->valueHasChanged();
+  overlaySwitch->addChild(widthOffsetLabel.get());
+  
+  gapLabel = new lbr::PLabel(gap.get());
+  gapLabel->showName = true;
+  gapLabel->valueHasChanged();
+  overlaySwitch->addChild(gapLabel.get());
   
   stripData.quoteNumber = 0;
   stripData.customerName = "aCustomer";
@@ -76,95 +114,42 @@ Strip::Strip() : Base()
   stripData.stations.push_back("Form");
 }
 
-TopoDS_Shape instanceShape(const TopoDS_Shape sIn, const gp_Vec &dir, double distance)
+void Strip::setLabelColors(const osg::Vec4 &cIn)
 {
-  gp_Trsf move;
-  move.SetTranslation(dir * distance);
-  TopLoc_Location movement(move);
-  
-  return sIn.Moved(movement);
+  pitchLabel->setTextColor(cIn);
+  widthLabel->setTextColor(cIn);
+  widthOffsetLabel->setTextColor(cIn);
+  gapLabel->setTextColor(cIn);
 }
 
-static double getDistance(const TopoDS_Shape &sIn1, const TopoDS_Shape &sIn2)
+//copied from lbr::PLabel::build
+osg::Node* buildStationLabel(const std::string &sIn)
 {
-  gp_Pnt p1, p2;
-  double distance;
-  if (BRepExtrema_Poly::Distance(sIn1, sIn2, p1, p2, distance))
-    return distance;
+  const prf::InteractiveParameter& iPref = prf::manager().rootPtr->interactiveParameter();
   
-  //this shouldn't ever be run as we ensure the poly/mesh before calling.
-  //adding tolerance didn't make the 1 test I was using any faster.
-  //these parts have nothing but linear edges, so maybe once we have
-  //some non-linear edges this tolerance will be beneficial.
-  double tol = 0.1;
-  BRepExtrema_DistShapeShape dc(sIn1, sIn2, tol, Extrema_ExtFlag_MIN);
-  if (!dc.IsDone())
-    return -1.0;
-  if (dc.NbSolution() < 1)
-    return -1.0;
-  return dc.Value();
-}
-
-void moveShape(TopoDS_Shape &sIn, const gp_Vec &dir, double distance)
-{
-  gp_Trsf move;
-  move.SetTranslation(dir * distance);
-  TopLoc_Location movement(move);
-  sIn.Move(movement);
-}
-
-double getPitch(TopoDS_Shape &bIn, const gp_Vec &dir, double gap, double guess, double round = 5.0)
-{
-  //guess is expected from the bounding box and assumes no overlap.
-  //dir is a unit vector.
-  double tol = gap * 0.1;
-  TopoDS_Shape other = instanceShape(bIn, dir, guess + gap + tol);
+  osg::AutoTransform *autoTransform = new osg::AutoTransform();
+  autoTransform->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+  autoTransform->setAutoRotateMode(osg::AutoTransform::ROTATE_TO_SCREEN);
+  autoTransform->setAutoScaleToScreen(true);
   
-  double dist = getDistance(bIn, other);
-  if (dist == -1.0)
-    throw std::runtime_error("couldn't get start position in getPitch");
+  osg::MatrixTransform *textScale = new osg::MatrixTransform();
+  textScale->setMatrix(osg::Matrixd::scale(75.0, 75.0, 75.0));
+  autoTransform->addChild(textScale);
   
-  int maxIter = 100;
-  int iter = 0;
-  while (dist > gap)
-  {
-    moveShape(other, -dir, gap);
-    dist = getDistance(bIn, other);
-    
-    iter++;
-    if (iter >= maxIter)
-    {
-      //exception ?
-      std::cout << "warning: max iterations reached in Strip::getPitch" << std::endl;
-      break;
-    }
-  }
+  osgText::Text *text = new osgText::Text();
+  text->setName(sIn);
+  text->setText(sIn);
+  osg::ref_ptr<osgQt::QFontImplementation> fontImplement(new osgQt::QFontImplementation(qApp->font()));
+  osg::ref_ptr<osgText::Font> textFont(new osgText::Font(fontImplement.get()));
+  text->setFont(textFont.get());
+  text->setColor(osg::Vec4(1.0, 1.0, 1.0, 1.0));
+  text->setBackdropType(osgText::Text::OUTLINE);
+  text->setBackdropColor(osg::Vec4(0.0, 0.0, 0.0, 1.0));
+  text->setCharacterSize(iPref.characterSize());
+  text->setAlignment(osgText::Text::CENTER_CENTER);
+  textScale->addChild(text);
   
-  iter = 0;
-  while (dist < gap)
-  {
-    moveShape(other, dir, tol); //move back so we are greater than gap.
-    dist = getDistance(bIn, other);
-    
-    iter++;
-    if (iter >= maxIter)
-    {
-      //exception ?
-      std::cout << "warning: max iterations reached in Strip::getPitch" << std::endl;
-      break;
-    }
-  }
-  
-  gp_Vec pos1 = gp_Vec(bIn.Location().Transformation().TranslationPart());
-  gp_Vec pos2 = gp_Vec(other.Location().Transformation().TranslationPart());
-  double pitch = (pos1 - pos2).Magnitude();
-
-  //round to nearest.
-  int whole = static_cast<int>(pitch / round);
-  if ((pitch / round - static_cast<double>(whole)) > 0.5)
-    whole++;
-  
-  return static_cast<double>(whole * round);
+  return autoTransform;
 }
 
 void Strip::updateModel(const UpdatePayload &payloadIn)
@@ -172,46 +157,54 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
   setFailure();
   try
   {
-    if (payloadIn.updateMap.count(Strip::part) != 1)
+    if (payloadIn.updateMap.count(part) != 1)
       throw std::runtime_error("couldn't find 'part' input");
-    const ftr::Base *pbf = payloadIn.updateMap.equal_range(Strip::part).first->second;
+    const ftr::Base *pbf = payloadIn.updateMap.equal_range(part).first->second;
     if(!pbf->hasSeerShape())
       throw std::runtime_error("no seer shape for part");
     const SeerShape &pss = pbf->getSeerShape(); //part seer shape.
     const TopoDS_Shape &ps = pss.getRootOCCTShape(); //part shape.
       
-    if (payloadIn.updateMap.count(Strip::blank) != 1)
+    if (payloadIn.updateMap.count(blank) != 1)
       throw std::runtime_error("couldn't find 'blank' input");
-    const ftr::Base *bbf = payloadIn.updateMap.equal_range(Strip::blank).first->second;
+    const ftr::Base *bbf = payloadIn.updateMap.equal_range(blank).first->second;
     if(!bbf->hasSeerShape())
       throw std::runtime_error("no seer shape for blank");
-    const SeerShape &bss = bbf->getSeerShape(); //part seer shape.
-    TopoDS_Shape bs = bss.getRootOCCTShape(); //blank shape. not const, might mesh.
-    occt::BoundingBox bbox(bs); //use for both pitch calc and label location.
+    const SeerShape &bss = bbf->getSeerShape(); //blank seer shape.
+    const TopoDS_Shape &bs = bss.getRootOCCTShape(); //blank shape.
+      
+    if (payloadIn.updateMap.count(nest) != 1)
+      throw std::runtime_error("couldn't find 'nest' input");
+    const ftr::Base *nbf = payloadIn.updateMap.equal_range(nest).first->second;
+    if(!nbf->hasSeerShape())
+      throw std::runtime_error("no seer shape for nest");
+    const SeerShape &nss = nbf->getSeerShape(); //nest seer shape.
+    const TopoDS_Shape ns = nss.getRootOCCTShape(); //nest shape.
     
-    //update lable location
-    pitchLabel->setMatrix(osg::Matrixd::translate(gu::toOsg(bbox.getCenter())));
+    occt::BoundingBox bbbox(bs); //blank bounding box.
     
-    gp_Vec dir(-1.0, 0.0, 0.0);
-    double pitchValue = pitch->getValue();
-    if (pitchValue == 0.0)
+    if (autoCalc)
     {
-      /* this is a little unusual. For performance reasons, we are using
-       * poly extrema for calculating pitch. There for the shapes need
-       * triangulation done before this or they will fall back onto normal
-       * extrema(slow). When update is called on the project we go through
-       * and calculate all the model and then the viz. Long story short, we
-       * don't have any triangulation in the blank shape. so manually call
-       * update viz on it so we can use the poly extrema.
-       */
-      if (bbf->isVisualDirty())
-      {
-        double linear = prf::manager().rootPtr->visual().mesh().linearDeflection();
-        double angular = prf::manager().rootPtr->visual().mesh().angularDeflection();
-        BRepMesh_IncrementalMesh(bs, linear, Standard_False, angular, Standard_True);
-      }
-      pitchValue = getPitch(bs, dir, 6.0, bbox.getLength(), 2.0); //length vs dir?
-      //todo set pitch parameter quietly to calculated value.
+      setLabelColors(osg::Vec4(1.0, 0.0, 0.0, 1.0));
+      
+      const Nest *nf = dynamic_cast<const Nest *>(nbf);
+      assert(nf);
+      if (!nf)
+        throw std::runtime_error("Bad cast to Nest");
+      pitch->setValueQuiet(nf->getPitch());
+      pitchLabel->valueHasChanged();
+      gap->setValueQuiet(nf->getGap());
+      gapLabel->valueHasChanged();
+      
+      //these assume x feed direction. fix when we change feed direction to a parameter.
+      width->setValueQuiet(bbbox.getWidth() + 2 * gap->getValue());
+      widthLabel->valueHasChanged();
+      widthOffset->setValueQuiet(bbbox.getCenter().X());
+      widthOffsetLabel->valueHasChanged();
+    }
+    else
+    {
+      setLabelColors(osg::Vec4(0.0, 0.0, 1.0, 1.0));
     }
     
     occt::ShapeVector shapes;
@@ -228,12 +221,10 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
       }
     }
       
-    //for now lets just add 3 blanks and 5 formed parts.
     for (std::size_t i = 1; i < nb + 1; ++i)
-      shapes.push_back(instanceShape(bs, -dir, pitchValue * i));
+      shapes.push_back(occt::instanceShape(bs, gu::toOcc(-feedDirection), pitch->getValue() * i));
     for (std::size_t i = 1; i < stripData.stations.size() - nb; ++i)
-      shapes.push_back(instanceShape(ps, dir, pitchValue * i));
-    
+      shapes.push_back(occt::instanceShape(ps, gu::toOcc(feedDirection), pitch->getValue() * i));
     
     TopoDS_Shape out = static_cast<TopoDS_Compound>(occt::ShapeVectorCast(shapes));
     
@@ -244,6 +235,56 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
     //for now, we are only going to have consistent ids for face and outer wire.
     seerShape->setOCCTShape(out);
     seerShape->ensureNoNils();
+    
+    //update label locations
+    osg::Vec3d fNorm = feedDirection * osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 0.0, -1.0));
+    
+    osg::Vec3d plLoc = //pitch label location.
+      gu::toOsg(bbbox.getCenter())
+      + (-feedDirection * pitch->getValue() * 0.5)
+      + (fNorm * bbbox.getWidth() * 0.5);
+    pitchLabel->setMatrix(osg::Matrixd::translate(plLoc));
+    
+    osg::Vec3d glLoc = //gap label location.
+      gu::toOsg(bbbox.getCenter())
+      + (-feedDirection * pitch->getValue() * 0.5)
+      + (-fNorm * bbbox.getWidth() * 0.5);
+    gapLabel->setMatrix(osg::Matrixd::translate(glLoc));
+    
+    osg::Vec3d wolLoc = //width offset location.
+      gu::toOsg(bbbox.getCenter())
+      + (-feedDirection * (pitch->getValue() * (static_cast<double>(nb) + 0.5)));
+    widthOffsetLabel->setMatrix(osg::Matrixd::translate(wolLoc));
+    
+    osg::Vec3d wlLoc = //width location.
+      gu::toOsg(bbbox.getCenter())
+      + (-feedDirection * (pitch->getValue() * (static_cast<double>(nb) + 0.5)))
+      + (fNorm * bbbox.getWidth() * 0.5);
+    widthLabel->setMatrix(osg::Matrixd::translate(wlLoc));
+    
+    for (const auto &l : stationLabels)
+    {
+      for (const auto &pg : l->getParents()) //parent group
+        pg->removeChild(l.get());
+    }
+    stationLabels.clear();
+    bool cv = overlaySwitch->getValue(0); //overlaySwitch always has at least four children.
+    for (std::size_t i = 1; i < nb + 1; ++i)
+    {
+      osg::ref_ptr<osg::MatrixTransform> sl = new osg::MatrixTransform(); // station label
+      sl->setMatrix(osg::Matrixd::translate(gu::toOsg(bbbox.getCenter()) + (-feedDirection * pitch->getValue() * i)));
+      sl->addChild(buildStationLabel("Blank"));
+      stationLabels.push_back(sl);
+      overlaySwitch->addChild(sl.get(), cv);
+    }
+    for (std::size_t i = nb; i < stripData.stations.size(); ++i)
+    {
+      osg::ref_ptr<osg::MatrixTransform> sl = new osg::MatrixTransform(); // station label
+      sl->setMatrix(osg::Matrixd::translate(gu::toOsg(bbbox.getCenter()) + (feedDirection * pitch->getValue() * (i - nb))));
+      sl->addChild(buildStationLabel(stripData.stations.at(i).toStdString()));
+      stationLabels.push_back(sl);
+      overlaySwitch->addChild(sl.get(), cv);
+    }
     
     exportSheet();
     

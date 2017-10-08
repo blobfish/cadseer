@@ -22,6 +22,8 @@
 
 #include <memory>
 
+#include <boost/uuid/uuid.hpp>
+
 #include <QDialog>
 #include <QLabel>
 
@@ -34,9 +36,12 @@ class QDragEnterEvent;
 class QDragMoveEvent;
 class QDragLeaveEvent;
 class QDropEvent;
+class QButtonGroup;
+class QCheckBox;
 
 namespace ftr{class Strip;}
 namespace msg{class Message; class Observer;}
+namespace dlg{class SelectionButton;}
 
 namespace dlg
 {
@@ -64,6 +69,10 @@ namespace dlg
     Strip(ftr::Strip*, QWidget*);
     virtual ~Strip() override;
     
+    void setPartId(const boost::uuids::uuid&);
+    void setBlankId(const boost::uuids::uuid&);
+    void setNestId(const boost::uuids::uuid&);
+    
   public Q_SLOTS:
     virtual void reject() override;
     virtual void accept() override;
@@ -73,6 +82,13 @@ namespace dlg
     ftr::Strip *strip;
     
     QTabWidget *tabWidget;
+    SelectionButton *partButton;
+    SelectionButton *blankButton;
+    SelectionButton *nestButton;
+    QLabel *partIdLabel;
+    QLabel *blankIdLabel;
+    QLabel *nestIdLabel;
+    QButtonGroup *bGroup;
     QLineEdit *pNameEdit;
     QLineEdit *pNumberEdit;
     QLineEdit *pRevisionEdit;
@@ -85,6 +101,7 @@ namespace dlg
     QLineEdit *sAnnualVolumeEdit;
     QListWidget *stationsList;
     QLabel *pLabel;
+    QCheckBox *acCheckBox;
     
     bool isAccepted = false;
     
@@ -100,6 +117,10 @@ namespace dlg
   private Q_SLOTS:
     void takePictureSlot();
     void loadLabelPixmapSlot();
+    void updatePartIdSlot();
+    void updateBlankIdSlot();
+    void updateNestIdSlot();
+    void advanceSlot(); //!< move to next button in selection group.
   };
 }
 
