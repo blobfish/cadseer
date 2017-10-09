@@ -29,6 +29,7 @@
 #include <feature/seershape.h>
 #include <feature/shapecheck.h>
 #include <tools/occtools.h>
+#include <project/serial/xsdcxxoutput/featurenest.h>
 #include <feature/nest.h>
 
 using namespace ftr;
@@ -221,7 +222,23 @@ void Nest::updateModel(const UpdatePayload &payloadIn)
   setModelClean();
 }
 
-void Nest::serialWrite(const QDir &)
+void Nest::serialWrite(const QDir &dIn)
 {
+  prj::srl::FeatureNest so
+  (
+    Base::serialOut(),
+    gap->serialOut(),
+    pitch->getValue()
+  );
+  
+  xml_schema::NamespaceInfomap infoMap;
+  std::ofstream stream(buildFilePathName(dIn).toUtf8().constData());
+  prj::srl::nest(stream, so, infoMap);
+}
 
+void Nest::serialRead(const prj::srl::FeatureNest &sNestIn)
+{
+  Base::serialIn(sNestIn.featureBase());
+  gap->serialIn(sNestIn.gap());
+  pitch->setValueQuiet(sNestIn.pitch());
 }

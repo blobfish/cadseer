@@ -35,6 +35,7 @@
 #include <feature/oblong.h>
 #include <feature/extract.h>
 #include <feature/squash.h>
+#include <feature/nest.h>
 #include <project/serial/xsdcxxoutput/featurebox.h>
 #include <project/serial/xsdcxxoutput/featurecylinder.h>
 #include <project/serial/xsdcxxoutput/featuresphere.h>
@@ -51,6 +52,7 @@
 #include <project/serial/xsdcxxoutput/featureoblong.h>
 #include <project/serial/xsdcxxoutput/featureextract.h>
 #include <project/serial/xsdcxxoutput/featuresquash.h>
+#include <project/serial/xsdcxxoutput/featurenest.h>
 
 #include "featureload.h"
 
@@ -78,6 +80,7 @@ directory(directoryIn), fileExtension(".fetr")
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Oblong), std::bind(&FeatureLoad::loadOblong, this, std::placeholders::_1, std::placeholders::_2)));
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Extract), std::bind(&FeatureLoad::loadExtract, this, std::placeholders::_1, std::placeholders::_2)));
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Squash), std::bind(&FeatureLoad::loadSquash, this, std::placeholders::_1, std::placeholders::_2)));
+  functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Nest), std::bind(&FeatureLoad::loadNest, this, std::placeholders::_1, std::placeholders::_2)));
 }
 
 FeatureLoad::~FeatureLoad()
@@ -302,5 +305,17 @@ std::shared_ptr<ftr::Base> FeatureLoad::loadSquash(const std::string &fileNameIn
   freshSquash->serialRead(*sSquash);
   
   return freshSquash;
+}
+
+std::shared_ptr<ftr::Base> FeatureLoad::loadNest(const std::string &fileNameIn, std::size_t shapeOffsetIn)
+{
+  auto sNest = srl::nest(fileNameIn, ::xml_schema::Flags::dont_validate);
+  assert(sNest);
+  
+  std::shared_ptr<ftr::Nest> freshNest(new ftr::Nest);
+  freshNest->setShape(shapeVector.at(shapeOffsetIn));
+  freshNest->serialRead(*sNest);
+  
+  return freshNest;
 }
 

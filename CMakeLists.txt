@@ -394,6 +394,7 @@ SET(PROJECT_SOURCES
     project/serial/xsdcxxoutput/featureoblong.cpp
     project/serial/xsdcxxoutput/featureextract.cpp
     project/serial/xsdcxxoutput/featuresquash.cpp
+    project/serial/xsdcxxoutput/featurenest.cpp
     )
     
 SET(APPLICATION_SOURCES
