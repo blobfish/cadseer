@@ -562,6 +562,12 @@ void GestureHandler::constructMenu()
     constructionNest->setUserValue(attributeStatus, QObject::tr("Nest Command").toStdString());
     constructionDie->insertChild(constructionDie->getNumChildren() - 2, constructionNest);
     
+    osg::MatrixTransform *constructionDieSet = gsn::buildCommandNode(":/resources/images/constructionDieSet.svg", iconRadius);
+    constructionDieSet->setMatrix(dummy);
+    constructionDieSet->setUserValue(attributeMask, (msg::Request | msg::Construct | msg::DieSet).to_string());
+    constructionDieSet->setUserValue(attributeStatus, QObject::tr("DieSet Command").toStdString());
+    constructionDie->insertChild(constructionDie->getNumChildren() - 2, constructionDieSet);
+    
     //TODO build datum menu node and move datum plane to it.
     osg::MatrixTransform *constructDatumPlane = gsn::buildCommandNode(":/resources/images/constructionDatumPlane.svg", iconRadius);
     constructDatumPlane->setMatrix(dummy);

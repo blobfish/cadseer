@@ -17,20 +17,20 @@
  *
  */
 
-#ifndef CMD_NEST_H
-#define CMD_NEST_H
+#ifndef CMD_DIESET_H
+#define CMD_DIESET_H
 
 #include <command/base.h>
 
 namespace cmd
 {
-  class Nest : public Base
+  class DieSet : public Base
   {
   public:
-    Nest();
-    virtual ~Nest() override;
+    DieSet();
+    virtual ~DieSet() override;
     
-    virtual std::string getCommandName() override{return "Nest";}
+    virtual std::string getCommandName() override{return "DieSet";}
     virtual std::string getStatusMessage() override;
     virtual void activate() override;
     virtual void deactivate() override;
@@ -40,4 +40,4 @@ namespace cmd
   };
 }
 
-#endif // CMD_NEST_H
+#endif // CMD_DIESET_H

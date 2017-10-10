@@ -321,6 +321,7 @@ SET(FEATURE_SOURCES
     feature/squash.cpp
     feature/strip.cpp
     feature/nest.cpp
+    feature/dieset.cpp
     )
     
 SET(EXPRESSION_SOURCES
@@ -424,6 +425,7 @@ SET(COMMAND_SOURCES
     command/squash.cpp
     command/strip.cpp
     command/nest.cpp
+    command/dieset.cpp
     )
     
 SET(LIBRARY_SOURCES

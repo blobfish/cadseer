@@ -39,6 +39,7 @@
 #include <command/squash.h>
 #include <command/strip.h>
 #include <command/nest.h>
+#include <command/dieset.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <selection/message.h>
@@ -121,6 +122,9 @@ void Manager::setupDispatcher()
   
   mask = msg::Request | msg::Construct | msg::Nest;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::constructNestDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Construct | msg::DieSet;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::constructDieSetDispatched, this, _1)));
   
   mask = msg::Request | msg::Edit | msg::Feature;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::editFeatureDispatched, this, _1)));
@@ -286,8 +290,14 @@ void Manager::constructStripDispatched(const msg::Message&)
 
 void Manager::constructNestDispatched(const msg::Message&)
 {
-  std::shared_ptr<Nest> s(new Nest());
-  addCommand(s);
+  std::shared_ptr<Nest> n(new Nest());
+  addCommand(n);
+}
+
+void Manager::constructDieSetDispatched(const msg::Message&)
+{
+  std::shared_ptr<DieSet> d(new DieSet());
+  addCommand(d);
 }
 
 void Manager::featureRepositionDispatched(const msg::Message&)

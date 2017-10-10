@@ -20,54 +20,52 @@
 #include <message/observer.h>
 #include <project/project.h>
 #include <selection/eventhandler.h>
-#include <feature/nest.h>
-#include <command/nest.h>
+#include <feature/dieset.h>
+#include <command/dieset.h>
 
 using namespace cmd;
 
 using boost::uuids::uuid;
 
-Nest::Nest()
+DieSet::DieSet() : Base()
 {
-
 }
 
-Nest::~Nest()
+DieSet::~DieSet()
 {
-
 }
 
-std::string Nest::getStatusMessage()
+std::string DieSet::getStatusMessage()
 {
-  return QObject::tr("Select features for blank").toStdString();
+  return QObject::tr("Select features for strip").toStdString();
 }
 
-void Nest::activate()
+void DieSet::activate()
 {
   isActive = true;
   go();
   sendDone();
 }
 
-void Nest::deactivate()
+void DieSet::deactivate()
 {
   isActive = false;
 }
 
-void Nest::go()
+void DieSet::go()
 {
   //only works with preselection for now.
   const slc::Containers &containers = eventHandler->getSelections();
   if (containers.size() != 1)
   {
-    observer->out(msg::buildStatusMessage("Incorrect preselection for nest feature"));
+    observer->out(msg::buildStatusMessage("Incorrect preselection for DieSet feature"));
     return;
   }
   uuid bId = containers.at(0).featureId;
   
-  std::shared_ptr<ftr::Nest> nest(new ftr::Nest());
-  project->addFeature(nest);
-  project->connect(bId, nest->getId(), ftr::InputType{ftr::Nest::blank});
+  std::shared_ptr<ftr::DieSet> ds(new ftr::DieSet());
+  project->addFeature(ds);
+  project->connect(bId, ds->getId(), ftr::InputType{ftr::DieSet::strip});
   
   observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
 }

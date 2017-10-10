@@ -71,6 +71,7 @@ namespace cmd
     void constructSquashDispatched(const msg::Message&);
     void constructStripDispatched(const msg::Message&);
     void constructNestDispatched(const msg::Message&);
+    void constructDieSetDispatched(const msg::Message&);
     
     //editing functions
     typedef std::function<BasePtr (ftr::Base *)> EditFunction;
