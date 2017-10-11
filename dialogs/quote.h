@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef DLG_STRIP_H
-#define DLG_STRIP_H
+#ifndef DLG_QUOTE_H
+#define DLG_QUOTE_H
 
 #include <memory>
 
@@ -29,47 +29,27 @@
 
 class QTabWidget;
 class QWidget;
-class QListWidget;
-class QDragEnterEvent;
-class QDragMoveEvent;
-class QDragLeaveEvent;
-class QDropEvent;
+class QLineEdit;
+class QComboBox;
 class QButtonGroup;
-class QCheckBox;
+class QLabel;
 
-namespace ftr{class Strip;}
+namespace ftr{class Quote;}
 namespace msg{class Message; class Observer;}
 namespace dlg{class SelectionButton;}
 
 namespace dlg
 {
-  /*! This is a simple QLabel with a picture
-   * to absorb drags.
-   */
-  class TrashCan : public QLabel
+  class Quote : public QDialog
   {
     Q_OBJECT
   public:
-    TrashCan() = delete;
-    TrashCan(QWidget*);
-  protected:
-    void dragEnterEvent(QDragEnterEvent *) override;
-    void dragMoveEvent(QDragMoveEvent *) override;
-    void dragLeaveEvent(QDragLeaveEvent *) override;
-    void dropEvent(QDropEvent *) override;
-  };
-  
-  class Strip : public QDialog
-  {
-    Q_OBJECT
-  public:
-    Strip() = delete;
-    Strip(ftr::Strip*, QWidget*);
-    virtual ~Strip() override;
+    Quote() = delete;
+    Quote(ftr::Quote*, QWidget*);
+    virtual ~Quote() override;
     
-    void setPartId(const boost::uuids::uuid&);
-    void setBlankId(const boost::uuids::uuid&);
-    void setNestId(const boost::uuids::uuid&);
+    void setStripId(const boost::uuids::uuid&);
+    void setDieSetId(const boost::uuids::uuid&);
     
   public Q_SLOTS:
     virtual void reject() override;
@@ -77,33 +57,47 @@ namespace dlg
     
   private:
     std::unique_ptr<msg::Observer> observer;
-    ftr::Strip *strip;
+    ftr::Quote *quote;
     
     QTabWidget *tabWidget;
-    SelectionButton *partButton;
-    SelectionButton *blankButton;
-    SelectionButton *nestButton;
-    QLabel *partIdLabel;
-    QLabel *blankIdLabel;
-    QLabel *nestIdLabel;
+    SelectionButton *stripButton;
+    SelectionButton *diesetButton;
+    QLabel *stripIdLabel;
+    QLabel *diesetIdLabel;
+    QLineEdit *tFileEdit; //!< template sheet in.
+    QLineEdit *oFileEdit; //!< quote sheet out
     QButtonGroup *bGroup;
-    QListWidget *stationsList;
-    QCheckBox *acCheckBox;
+    QLineEdit *pNameEdit;
+    QLineEdit *pNumberEdit;
+    QLineEdit *pRevisionEdit;
+    QLineEdit *pmTypeEdit;
+    QLineEdit *pmThicknessEdit;
+    QLineEdit *sQuoteNumberEdit;
+    QLineEdit *sCustomerNameEdit;
+    QComboBox *sPartSetupCombo;
+    QComboBox *sProcessTypeCombo;
+    QLineEdit *sAnnualVolumeEdit;
+    QLabel *pLabel;
     
     bool isAccepted = false;
     
     void buildGui();
     void initGui();
     QWidget* buildInputPage();
-    QWidget* buildStationPage();
+    QWidget* buildPartPage();
+    QWidget* buildQuotePage();
+    QWidget* buildPicturePage();
     void finishDialog();
     
   private Q_SLOTS:
-    void updatePartIdSlot();
-    void updateBlankIdSlot();
-    void updateNestIdSlot();
+    void takePictureSlot();
+    void loadLabelPixmapSlot();
+    void updateStripIdSlot();
+    void updateDiesetIdSlot();
     void advanceSlot(); //!< move to next button in selection group.
+    void browseForTemplateSlot();
+    void browseForOutputSlot();
   };
 }
 
-#endif // DLG_STRIP_H
+#endif // DLG_QUOTE_H

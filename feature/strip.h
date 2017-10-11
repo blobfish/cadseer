@@ -26,23 +26,6 @@
 
 namespace ftr
 {
-  struct StripData
-  {
-    int quoteNumber;
-    QString customerName;
-    boost::uuids::uuid customerId; //not used yet.
-    QString partName;
-    QString partNumber;
-    QString partSetup;
-    QString partRevision;
-    QString materialType;
-    double materialThickness;
-    QString processType;
-    int annualVolume;
-    std::vector<QString> stations;
-    QString picturePath;
-  };
-  
   class Strip : public Base
   {
   public:
@@ -63,8 +46,11 @@ namespace ftr
     void setLabelColors(const osg::Vec4&);
     void setAutoCalc(bool acIn){autoCalc = acIn;}
     bool isAutoCalc(){return autoCalc;}
+    double getPitch() const {return pitch->getValue();}
+    double getWidth() const {return width->getValue();}
+    double getHeight() const {return stripHeight;}
     
-    StripData stripData;
+    std::vector<QString> stations;
     
   protected:
     std::shared_ptr<Parameter> pitch;
@@ -79,10 +65,10 @@ namespace ftr
     
     osg::Vec3d feedDirection; //!< eventually a parameter.
     bool autoCalc = true; //!< eventually a parameter.
+    double stripHeight; //!< used by quote to get travel.
     
   private:
     static QIcon icon;
-    void exportSheet();
   };
 }
 

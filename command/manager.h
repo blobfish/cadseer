@@ -72,6 +72,7 @@ namespace cmd
     void constructStripDispatched(const msg::Message&);
     void constructNestDispatched(const msg::Message&);
     void constructDieSetDispatched(const msg::Message&);
+    void constructQuoteDispatched(const msg::Message&);
     
     //editing functions
     typedef std::function<BasePtr (ftr::Base *)> EditFunction;
@@ -80,6 +81,7 @@ namespace cmd
     void setupEditFunctionMap();
     BasePtr editBlend(ftr::Base *);
     BasePtr editStrip(ftr::Base *);
+    BasePtr editQuote(ftr::Base *);
     
   };
   

@@ -21,27 +21,28 @@
 #include <project/project.h>
 #include <message/observer.h>
 #include <selection/eventhandler.h>
-#include <feature/strip.h>
-#include <dialogs/strip.h>
-#include <command/strip.h>
+#include <feature/quote.h>
+#include <dialogs/quote.h>
+#include <command/quote.h>
 
 using namespace cmd;
+
 using boost::uuids::uuid;
 
-Strip::Strip() : Base() {}
+Quote::Quote() : Base(){}
 
-Strip::~Strip()
+Quote::~Quote()
 {
   if (dialog)
     dialog->deleteLater();
 }
 
-std::string Strip::getStatusMessage()
+std::string Quote::getStatusMessage()
 {
-  return QObject::tr("Select features for part and blank").toStdString();
+  return QObject::tr("Select features for strip and dieset").toStdString();
 }
 
-void Strip::activate()
+void Quote::activate()
 {
   isActive = true;
   
@@ -53,82 +54,77 @@ void Strip::activate()
   dialog->activateWindow();
 }
 
-void Strip::deactivate()
+void Quote::deactivate()
 {
   isActive = false;
   
   dialog->hide();
 }
 
-void Strip::go()
+void Quote::go()
 {
-  uuid partId = gu::createNilId();
-  uuid blankId = gu::createNilId();
-  uuid nestId = gu::createNilId();
+  uuid stripId = gu::createNilId();
+  uuid diesetId = gu::createNilId();
   
   const slc::Containers &containers = eventHandler->getSelections();
   for (const auto &c : containers)
   {
-    if (c.featureType == ftr::Type::Squash)
-      blankId = c.featureId;
-    else if (c.featureType == ftr::Type::Nest)
-      nestId = c.featureId;
-    else
-      partId = c.featureId;
+    if (c.featureType == ftr::Type::Strip)
+      stripId = c.featureId;
+    else if (c.featureType == ftr::Type::DieSet)
+      diesetId = c.featureId;
   }
   
-  if (blankId.is_nil() || nestId.is_nil())
+  if (stripId.is_nil() || diesetId.is_nil())
   {
     auto ids = project->getAllFeatureIds();
     for (const auto &id : ids)
     {
       ftr::Base *bf = project->findFeature(id);
-      if ((bf->getType() == ftr::Type::Squash) && (blankId.is_nil()))
-        blankId = id;
-      if ((bf->getType() == ftr::Type::Nest) && (nestId.is_nil()))
-        nestId = id;
+      if ((bf->getType() == ftr::Type::Strip) && (stripId.is_nil()))
+        stripId = id;
+      if ((bf->getType() == ftr::Type::DieSet) && (diesetId.is_nil()))
+        diesetId = id;
     }
   }
-  observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
   
-  std::shared_ptr<ftr::Strip> strip(new ftr::Strip());
-  project->addFeature(strip);
+  std::shared_ptr<ftr::Quote> quote(new ftr::Quote());
+  quote->tFile = "/home/tanderson/Programming/cadseer/QuoteExportTesting/DaveTestTemplate.ods";
+  quote->oFile = "/home/tanderson/temp/DaveTest.ods";
+  project->addFeature(quote);
   
   //this should trick the dagview into updating so it isn't screwed up
   //while dialog is running. only dagview responds to this message
   //as of git hash a530460.
   observer->outBlocked(msg::Response | msg::Post | msg::UpdateModel);
   
-  dialog = new dlg::Strip(strip.get(), mainWindow);
-  dialog->setPartId(partId);
-  dialog->setBlankId(blankId);
-  dialog->setNestId(nestId);
+  dialog = new dlg::Quote(quote.get(), mainWindow);
+  dialog->setStripId(stripId);
+  dialog->setDieSetId(diesetId);
+  observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
 }
 
-StripEdit::StripEdit(ftr::Base *feature) : Base()
+QuoteEdit::QuoteEdit(ftr::Base *feature) : Base()
 {
-  strip = dynamic_cast<ftr::Strip*>(feature);
-  assert(strip);
+  quote = dynamic_cast<ftr::Quote*>(feature);
+  assert(quote);
 }
 
-StripEdit::~StripEdit()
+QuoteEdit::~QuoteEdit()
 {
   if (dialog)
     dialog->deleteLater();
 }
 
-std::string StripEdit::getStatusMessage()
+std::string QuoteEdit::getStatusMessage()
 {
-  return "Editing Strip Feature";
+  return "Editing Quote Feature";
 }
 
-void StripEdit::activate()
+void QuoteEdit::activate()
 {
   if (!dialog)
-  {
-    observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
-    dialog = new dlg::Strip(strip, mainWindow);
-  }
+    dialog = new dlg::Quote(quote, mainWindow);
   
   isActive = true;
   dialog->show();
@@ -136,7 +132,7 @@ void StripEdit::activate()
   dialog->activateWindow();
 }
 
-void StripEdit::deactivate()
+void QuoteEdit::deactivate()
 {
   dialog->hide();
   isActive = false;

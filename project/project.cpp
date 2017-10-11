@@ -500,7 +500,17 @@ void Project::removeParentTag(const uuid &targetIn, const std::string &tagIn)
   {
     projectGraph[ep.second].inputType.tags.erase(tagIn);
     if (projectGraph[ep.second].inputType.tags.empty())
+    {
+      msg::Message preMessage(msg::Response | msg::Pre | msg::Remove | msg::Connection);
+      prj::Message pMessage;
+      pMessage.featureId = projectGraph[ep.first].feature->getId();
+      pMessage.featureId2 = targetIn;
+      pMessage.inputType = ftr::InputType({tagIn});
+      preMessage.payload = pMessage;
+      observer->out(preMessage);
+      
       boost::remove_edge(ep.second, projectGraph);
+    }
   }
 }
 

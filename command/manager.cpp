@@ -40,6 +40,7 @@
 #include <command/strip.h>
 #include <command/nest.h>
 #include <command/dieset.h>
+#include <command/quote.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <selection/message.h>
@@ -125,6 +126,9 @@ void Manager::setupDispatcher()
   
   mask = msg::Request | msg::Construct | msg::DieSet;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::constructDieSetDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Construct | msg::Quote;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::constructQuoteDispatched, this, _1)));
   
   mask = msg::Request | msg::Edit | msg::Feature;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::editFeatureDispatched, this, _1)));
@@ -300,6 +304,12 @@ void Manager::constructDieSetDispatched(const msg::Message&)
   addCommand(d);
 }
 
+void Manager::constructQuoteDispatched(const msg::Message&)
+{
+  std::shared_ptr<Quote> q(new Quote());
+  addCommand(q);
+}
+
 void Manager::featureRepositionDispatched(const msg::Message&)
 {
   std::shared_ptr<FeatureReposition> fr(new FeatureReposition());
@@ -341,6 +351,7 @@ void Manager::setupEditFunctionMap()
 {
   editFunctionMap.insert(std::make_pair(ftr::Type::Blend, std::bind(&Manager::editBlend, this, std::placeholders::_1)));
   editFunctionMap.insert(std::make_pair(ftr::Type::Strip, std::bind(&Manager::editStrip, this, std::placeholders::_1)));
+  editFunctionMap.insert(std::make_pair(ftr::Type::Quote, std::bind(&Manager::editQuote, this, std::placeholders::_1)));
 }
 
 BasePtr Manager::editBlend(ftr::Base *feature)
@@ -352,5 +363,11 @@ BasePtr Manager::editBlend(ftr::Base *feature)
 BasePtr Manager::editStrip(ftr::Base *feature)
 {
   std::shared_ptr<Base> command(new StripEdit(feature));
+  return command;
+}
+
+BasePtr Manager::editQuote(ftr::Base *feature)
+{
+  std::shared_ptr<Base> command(new QuoteEdit(feature));
   return command;
 }

@@ -25,8 +25,6 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QLabel>
-#include <QLineEdit>
-#include <QComboBox>
 #include <QListWidget>
 #include <QDialogButtonBox>
 #include <QPushButton>
@@ -125,27 +123,16 @@ void Strip::finishDialog()
 {
   if (isAccepted)
   {
-    strip->setModelDirty();
+    strip->setModelDirty(); // several values are not parameters
     
     if (acCheckBox->isChecked())
       strip->setAutoCalc(true);
     else
       strip->setAutoCalc(false);
     
-    strip->stripData.partName = pNameEdit->text();
-    strip->stripData.partNumber = pNumberEdit->text();
-    strip->stripData.partRevision = pRevisionEdit->text();
-    strip->stripData.materialType = pmTypeEdit->text();
-    strip->stripData.materialThickness = pmThicknessEdit->text().toDouble();
-    strip->stripData.quoteNumber = sQuoteNumberEdit->text().toInt();
-    strip->stripData.customerName = sCustomerNameEdit->text();
-    strip->stripData.partSetup = sPartSetupCombo->currentText();
-    strip->stripData.processType = sProcessTypeCombo->currentText();
-    strip->stripData.annualVolume = sAnnualVolumeEdit->text().toInt();
-    
-    strip->stripData.stations.clear();
+    strip->stations.clear();
     for (int i = 0; i < stationsList->count(); ++i)
-      strip->stripData.stations.push_back(stationsList->item(i)->text());
+      strip->stations.push_back(stationsList->item(i)->text());
     
     //upate graph connections
     prj::Project *p = static_cast<app::Application *>(qApp)->getProject();
@@ -172,21 +159,9 @@ void Strip::initGui()
     acCheckBox->setChecked(true);
   else
     acCheckBox->setChecked(false);
-  pNameEdit->setText(strip->stripData.partName);
-  pNumberEdit->setText(strip->stripData.partNumber);
-  pRevisionEdit->setText(strip->stripData.partRevision);
-  pmTypeEdit->setText(strip->stripData.materialType);
-  pmThicknessEdit->setText(QString::number(strip->stripData.materialThickness));
-  sQuoteNumberEdit->setText(QString::number(strip->stripData.quoteNumber));
-  sCustomerNameEdit->setText(strip->stripData.customerName);
-  sPartSetupCombo->setCurrentText(strip->stripData.partSetup);
-  sProcessTypeCombo->setCurrentText(strip->stripData.processType);
-  sAnnualVolumeEdit->setText(QString::number(strip->stripData.annualVolume));
   
-  for (const auto &s : strip->stripData.stations)
+  for (const auto &s : strip->stations)
     stationsList->addItem(s);
-  
-  loadLabelPixmapSlot();
   
   QString nilText = QString::fromStdString(gu::idToString(gu::createNilId()));
   partIdLabel->setText(nilText);
@@ -198,22 +173,11 @@ void Strip::initGui()
   for (const auto &it : pMap)
   {
     if (it.first == ftr::Strip::part)
-      partIdLabel->setText(QString::fromStdString(gu::idToString(it.second->getId())));
+      setPartId(it.second->getId());
     if (it.first == ftr::Strip::blank)
-      blankIdLabel->setText(QString::fromStdString(gu::idToString(it.second->getId())));
+      setBlankId(it.second->getId());
     if (it.first == ftr::Strip::nest)
-      nestIdLabel->setText(QString::fromStdString(gu::idToString(it.second->getId())));
-  }
-}
-
-void Strip::loadLabelPixmapSlot()
-{
-  pLabel->setText(strip->stripData.picturePath + " not found");
-  QPixmap pMap(strip->stripData.picturePath);
-  if (!pMap.isNull())
-  {
-    QPixmap scaled = pMap.scaledToHeight(pMap.height() / 2.0);
-    pLabel->setPixmap(scaled);
+      setNestId(it.second->getId());
   }
 }
 
@@ -221,10 +185,7 @@ void Strip::buildGui()
 {
   tabWidget = new QTabWidget(this);
   tabWidget->addTab(buildInputPage(), tr("Input"));
-  tabWidget->addTab(buildPartPage(), tr("Part"));
-  tabWidget->addTab(buildStripPage(), tr("Strip"));
-  tabWidget->addTab(buildStationPage(), tr("Station"));
-  tabWidget->addTab(buildPicturePage(), tr("Picture"));
+  tabWidget->addTab(buildStationPage(), tr("Stations"));
   
   QDialogButtonBox *buttons = new QDialogButtonBox
     (QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, this);
@@ -305,105 +266,6 @@ QWidget* Strip::buildInputPage()
   return out;
 }
 
-QWidget* Strip::buildPartPage()
-{
-  QWidget *out = new QWidget(tabWidget);
-  
-  QGridLayout *gl = new QGridLayout();
-  
-  QLabel *pNameLabel = new QLabel(tr("Part Name:"), out);
-  pNameEdit = new QLineEdit(out);
-  gl->addWidget(pNameLabel, 0, 0, Qt::AlignVCenter | Qt::AlignRight);
-  gl->addWidget(pNameEdit, 0, 1, Qt::AlignVCenter | Qt::AlignLeft);
-  
-  QLabel *pNumberLabel = new QLabel(tr("Part Number:"), out);
-  pNumberEdit = new QLineEdit(out);
-  gl->addWidget(pNumberLabel, 1, 0, Qt::AlignVCenter | Qt::AlignRight);
-  gl->addWidget(pNumberEdit, 1, 1, Qt::AlignVCenter | Qt::AlignLeft);
-  
-  QLabel *pRevisionLabel = new QLabel(tr("Part Revision:"), out);
-  pRevisionEdit = new QLineEdit(out);
-  gl->addWidget(pRevisionLabel, 2, 0, Qt::AlignVCenter | Qt::AlignRight);
-  gl->addWidget(pRevisionEdit, 2, 1, Qt::AlignVCenter | Qt::AlignLeft);
-  
-  QLabel *pmTypeLabel = new QLabel(tr("Material Type:"), out);
-  pmTypeEdit = new QLineEdit(out);
-  gl->addWidget(pmTypeLabel, 3, 0, Qt::AlignVCenter | Qt::AlignRight);
-  gl->addWidget(pmTypeEdit, 3, 1, Qt::AlignVCenter | Qt::AlignLeft);
-  
-  QLabel *pmThicknessLabel = new QLabel(tr("Material Thickness:"), out);
-  pmThicknessEdit = new QLineEdit(out);
-  gl->addWidget(pmThicknessLabel, 4, 0, Qt::AlignVCenter | Qt::AlignRight);
-  gl->addWidget(pmThicknessEdit, 4, 1, Qt::AlignVCenter | Qt::AlignLeft);
-  
-  QHBoxLayout *hl = new QHBoxLayout();
-  hl->addLayout(gl);
-  hl->addStretch();
-  
-  QVBoxLayout *vl = new QVBoxLayout();
-  vl->addLayout(hl);
-  vl->addStretch();
-  
-  out->setLayout(vl);
-  
-  return out;
-}
-
-QWidget* Strip::buildStripPage()
-{
-  QWidget *out = new QWidget(tabWidget);
-  
-  QGridLayout *gl = new QGridLayout();
-  
-  QLabel *sQuoteNumberLabel = new QLabel(tr("Quote Number:"), out);
-  sQuoteNumberEdit = new QLineEdit(out);
-  gl->addWidget(sQuoteNumberLabel, 0, 0, Qt::AlignVCenter | Qt::AlignRight);
-  gl->addWidget(sQuoteNumberEdit, 0, 1, Qt::AlignVCenter | Qt::AlignLeft);
-  
-  QLabel *sCustomerNameLabel = new QLabel(tr("Customer Name:"), out);
-  sCustomerNameEdit = new QLineEdit(out);
-  gl->addWidget(sCustomerNameLabel, 1, 0, Qt::AlignVCenter | Qt::AlignRight);
-  gl->addWidget(sCustomerNameEdit, 1, 1, Qt::AlignVCenter | Qt::AlignLeft);
-  
-  QLabel *sPartSetupLabel = new QLabel(tr("Part Setup:"), out);
-  sPartSetupCombo = new QComboBox(out);
-  sPartSetupCombo->setEditable(true);
-  sPartSetupCombo->setInsertPolicy(QComboBox::NoInsert);
-  sPartSetupCombo->addItem(tr("One Out"));
-  sPartSetupCombo->addItem(tr("Two Out"));
-  sPartSetupCombo->addItem(tr("Sym Opposite"));
-  gl->addWidget(sPartSetupLabel, 2, 0, Qt::AlignVCenter | Qt::AlignRight);
-  gl->addWidget(sPartSetupCombo, 2, 1, Qt::AlignVCenter | Qt::AlignLeft);
-  
-  QLabel *sProcessTypeLabel = new QLabel(tr("Process Type:"), out);
-  sProcessTypeCombo = new QComboBox(out);
-  sProcessTypeCombo->setEditable(true);
-  sProcessTypeCombo->setInsertPolicy(QComboBox::NoInsert);
-  sProcessTypeCombo->addItem(tr("Prog"));
-  sProcessTypeCombo->addItem(tr("Prog Partial"));
-  sProcessTypeCombo->addItem(tr("Mech Transfer"));
-  sProcessTypeCombo->addItem(tr("Hand Transfer"));
-  gl->addWidget(sProcessTypeLabel, 3, 0, Qt::AlignVCenter | Qt::AlignRight);
-  gl->addWidget(sProcessTypeCombo, 3, 1, Qt::AlignVCenter | Qt::AlignLeft);
-  
-  QLabel *sAnnualVolumeLabel = new QLabel(tr("Annual Volume:"), out);
-  sAnnualVolumeEdit = new QLineEdit(out);
-  gl->addWidget(sAnnualVolumeLabel, 4, 0, Qt::AlignVCenter | Qt::AlignRight);
-  gl->addWidget(sAnnualVolumeEdit, 4, 1, Qt::AlignVCenter | Qt::AlignLeft);
-  
-  QHBoxLayout *hl = new QHBoxLayout();
-  hl->addLayout(gl);
-  hl->addStretch();
-  
-  QVBoxLayout *vl = new QVBoxLayout();
-  vl->addLayout(hl);
-  vl->addStretch();
-  
-  out->setLayout(vl);
-  
-  return out;
-}
-
 QWidget* Strip::buildStationPage()
 {
   QWidget *out = new QWidget(tabWidget);
@@ -449,29 +311,11 @@ QWidget* Strip::buildStationPage()
   return out;
 }
 
-QWidget* Strip::buildPicturePage()
-{
-  QWidget *out = new QWidget(tabWidget);
-  
-  QVBoxLayout *vl = new QVBoxLayout();
-  out->setLayout(vl);
-  
-  QHBoxLayout *bl = new QHBoxLayout();
-  vl->addLayout(bl);
-  QPushButton *ppb = new QPushButton(tr("Take Picture"), out);
-  bl->addWidget(ppb);
-  bl->addStretch();
-  connect(ppb, &QPushButton::clicked, this, &Strip::takePictureSlot);
-  
-  pLabel = new QLabel(out);
-  pLabel->setScaledContents(true);
-  vl->addWidget(pLabel);
-  
-  return out;
-}
-
 void Strip::setPartId(const uuid &idIn)
 {
+  if (idIn.is_nil())
+    return;
+  
   slc::Message m;
   m.type = slc::Type::Object;
   m.featureId = idIn;
@@ -481,6 +325,9 @@ void Strip::setPartId(const uuid &idIn)
 
 void Strip::setBlankId(const uuid &idIn)
 {
+  if (idIn.is_nil())
+    return;
+  
   slc::Message m;
   m.type = slc::Type::Object;
   m.featureId = idIn;
@@ -490,34 +337,14 @@ void Strip::setBlankId(const uuid &idIn)
 
 void Strip::setNestId(const uuid &idIn)
 {
+  if (idIn.is_nil())
+    return;
+  
   slc::Message m;
   m.type = slc::Type::Object;
   m.featureId = idIn;
   
   nestButton->setMessages(m);
-}
-
-void Strip::takePictureSlot()
-{
-  /* the osg screen capture handler is designed to automatically
-   * add indexes to the file names. We have to work around that here.
-   * it will add '_0' to the filename we give it before the dot and extension
-   */
-  
-  namespace bfs = boost::filesystem;
-  
-  app::Application *app = static_cast<app::Application *>(qApp);
-  bfs::path pp = (app->getProject()->getSaveDirectory());
-  assert(bfs::exists(pp));
-  bfs::path fp = pp /= gu::idToString(strip->getId());
-  std::string ext = "png";
-  bfs::path fullPath = fp.string() + "_0." + ext;
-  
-  strip->stripData.picturePath = QString::fromStdString(fullPath.string());
-  
-  app->getMainWindow()->getViewer()->screenCapture(fp.string(), ext);
-  
-  QTimer::singleShot(1000, this, SLOT(loadLabelPixmapSlot()));
 }
 
 void Strip::updatePartIdSlot()

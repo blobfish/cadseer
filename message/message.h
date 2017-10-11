@@ -128,6 +128,7 @@ namespace msg
     static const Mask Strip(Mask().set(                         89));//!< command move up someday.
     static const Mask Nest(Mask().set(                          90));//!< command move up someday.
     static const Mask DieSet(Mask().set(                        91));//!< command move up someday.
+    static const Mask Quote(Mask().set(                         92));//!< command move up someday.
   
     typedef boost::variant
     <

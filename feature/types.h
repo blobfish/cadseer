@@ -50,7 +50,8 @@ namespace ftr
     Squash, //!< feature squash class.
     Strip, //!< feature strip class.
     Nest, //!< feature nest class.
-    DieSet //!< feature nest class.
+    DieSet, //!< feature dieset class.
+    Quote //!< feature quote class.
   };
   
   inline const static std::string& toString(Type typeIn)
@@ -79,7 +80,8 @@ namespace ftr
       {Type::Squash, "Squash"},
       {Type::Strip, "Strip"},
       {Type::Nest, "Nest"},
-      {Type::DieSet, "DieSet"}
+      {Type::DieSet, "DieSet"},
+      {Type::Quote, "Quote"}
     };
     
     assert(strings.count(typeIn) > 0);

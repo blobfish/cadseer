@@ -322,6 +322,7 @@ SET(FEATURE_SOURCES
     feature/strip.cpp
     feature/nest.cpp
     feature/dieset.cpp
+    feature/quote.cpp
     )
     
 SET(EXPRESSION_SOURCES
@@ -361,6 +362,7 @@ SET(DIALOG_SOURCES
     dialogs/expressionedit.cpp
     dialogs/strip.cpp
     dialogs/selectionbutton.cpp
+    dialogs/quote.cpp
     )
     
 SET(PREFERENCE_SOURCES
@@ -426,6 +428,7 @@ SET(COMMAND_SOURCES
     command/strip.cpp
     command/nest.cpp
     command/dieset.cpp
+    command/quote.cpp
     )
     
 SET(LIBRARY_SOURCES
@@ -509,6 +512,7 @@ SET(CADSEER_MOC_HDRS
     expressions/tableview.h
     dialogs/strip.h
     dialogs/selectionbutton.h
+    dialogs/quote.h
     )
 
 SET(CADSEER_LIBRARIES

@@ -17,6 +17,8 @@
  *
  */
 
+#include <osg/Geometry> //yuck
+
 #include <message/observer.h>
 #include <project/project.h>
 #include <selection/eventhandler.h>
@@ -55,17 +57,42 @@ void DieSet::deactivate()
 void DieSet::go()
 {
   //only works with preselection for now.
+  uuid stripId = gu::createNilId();
+  
+  //grab first selected strip feature.
   const slc::Containers &containers = eventHandler->getSelections();
-  if (containers.size() != 1)
+  for (const auto c : containers)
   {
-    observer->out(msg::buildStatusMessage("Incorrect preselection for DieSet feature"));
+    if (c.featureType == ftr::Type::Strip)
+    {
+      stripId = c.featureId;
+      break;
+    }
+  }
+  
+  if (stripId.is_nil())
+  {
+    auto ids = project->getAllFeatureIds();
+    for (const auto &id : ids)
+    {
+      ftr::Base *bf = project->findFeature(id);
+      if (bf->getType() == ftr::Type::Strip)
+      {
+        stripId = id;
+        break;
+      }
+    }
+  }
+  
+  if (stripId.is_nil())
+  {
+    observer->out(msg::buildStatusMessage("Couldn't infer strip id for DieSet feature"));
     return;
   }
-  uuid bId = containers.at(0).featureId;
   
   std::shared_ptr<ftr::DieSet> ds(new ftr::DieSet());
   project->addFeature(ds);
-  project->connect(bId, ds->getId(), ftr::InputType{ftr::DieSet::strip});
+  project->connect(stripId, ds->getId(), ftr::InputType{ftr::DieSet::strip});
   
   observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
 }
