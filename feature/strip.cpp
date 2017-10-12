@@ -38,6 +38,7 @@
 #include <feature/seershape.h>
 #include <feature/shapecheck.h>
 #include <feature/nest.h>
+#include <project/serial/xsdcxxoutput/featurestrip.h>
 #include <feature/strip.h>
 
 using namespace ftr;
@@ -295,7 +296,39 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
   setModelClean();
 }
 
-void Strip::serialWrite(const QDir &)
+void Strip::serialWrite(const QDir &dIn)
 {
+  prj::srl::FeatureStrip::StationsType so;
+  for (const auto &s : stations)
+    so.array().push_back(s.toStdString());
+  
+  prj::srl::FeatureStrip stripOut
+  (
+    Base::serialOut(),
+    pitch->serialOut(),
+    width->serialOut(),
+    widthOffset->serialOut(),
+    gap->serialOut(),
+    autoCalc,
+    stripHeight,
+    so
+  );
+  
+  xml_schema::NamespaceInfomap infoMap;
+  std::ofstream stream(buildFilePathName(dIn).toUtf8().constData());
+  prj::srl::strip(stream, stripOut, infoMap);
+}
 
+void Strip::serialRead(const prj::srl::FeatureStrip &sIn)
+{
+  Base::serialIn(sIn.featureBase());
+  pitch->serialIn(sIn.pitch());
+  width->serialIn(sIn.width());
+  widthOffset->serialIn(sIn.widthOffset());
+  gap->serialIn(sIn.gap());
+  autoCalc = sIn.autoCalc();
+  stripHeight = sIn.stripHeight();
+  stations.clear();
+  for (const auto &stringIn : sIn.stations().array())
+    stations.push_back(QString::fromStdString(stringIn));
 }

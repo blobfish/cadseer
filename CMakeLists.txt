@@ -399,6 +399,7 @@ SET(PROJECT_SOURCES
     project/serial/xsdcxxoutput/featuresquash.cpp
     project/serial/xsdcxxoutput/featurenest.cpp
     project/serial/xsdcxxoutput/featuredieset.cpp
+    project/serial/xsdcxxoutput/featurestrip.cpp
     )
     
 SET(APPLICATION_SOURCES

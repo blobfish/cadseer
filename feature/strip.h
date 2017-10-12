@@ -24,6 +24,8 @@
 #include <library/plabel.h>
 #include <feature/base.h>
 
+namespace prj{namespace srl{class FeatureStrip;}}
+
 namespace ftr
 {
   class Strip : public Base
@@ -41,7 +43,7 @@ namespace ftr
     virtual const QIcon& getIcon() const override {return icon;}
     virtual Descriptor getDescriptor() const override {return Descriptor::Create;}
     virtual void serialWrite(const QDir&) override;
-//     void serialRead(const prj::srl::FeatureStrip &);
+    void serialRead(const prj::srl::FeatureStrip &);
     
     void setLabelColors(const osg::Vec4&);
     void setAutoCalc(bool acIn){autoCalc = acIn;}
