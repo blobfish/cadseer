@@ -23,6 +23,7 @@
 #include <feature/seershape.h>
 #include <feature/shapecheck.h>
 #include <feature/boxbuilder.h>
+#include <project/serial/xsdcxxoutput/featuredieset.h>
 #include <feature/dieset.h>
 
 using namespace ftr;
@@ -183,8 +184,29 @@ void DieSet::updateModel(const UpdatePayload &payloadIn)
   setModelClean();
 }
 
-
-
-void DieSet::serialWrite(const QDir&)
+void DieSet::serialWrite(const QDir &dIn)
 {
+  prj::srl::FeatureDieSet dso
+  (
+    Base::serialOut(),
+   length->serialOut(),
+   lengthPadding->serialOut(),
+   width->serialOut(),
+   widthPadding->serialOut(),
+   autoCalc
+  );
+  
+  xml_schema::NamespaceInfomap infoMap;
+  std::ofstream stream(buildFilePathName(dIn).toUtf8().constData());
+  prj::srl::dieset(stream, dso, infoMap);
+}
+
+void DieSet::serialRead(const prj::srl::FeatureDieSet &dsIn)
+{
+  Base::serialIn(dsIn.featureBase());
+  length->serialIn(dsIn.length());
+  lengthPadding->serialIn(dsIn.lengthPadding());
+  width->serialIn(dsIn.width());
+  widthPadding->serialIn(dsIn.widthPadding());
+  autoCalc = dsIn.autoCalc();
 }

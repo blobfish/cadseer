@@ -36,6 +36,7 @@
 #include <feature/extract.h>
 #include <feature/squash.h>
 #include <feature/nest.h>
+#include <feature/dieset.h>
 #include <project/serial/xsdcxxoutput/featurebox.h>
 #include <project/serial/xsdcxxoutput/featurecylinder.h>
 #include <project/serial/xsdcxxoutput/featuresphere.h>
@@ -53,6 +54,7 @@
 #include <project/serial/xsdcxxoutput/featureextract.h>
 #include <project/serial/xsdcxxoutput/featuresquash.h>
 #include <project/serial/xsdcxxoutput/featurenest.h>
+#include <project/serial/xsdcxxoutput/featuredieset.h>
 
 #include "featureload.h"
 
@@ -81,6 +83,7 @@ directory(directoryIn), fileExtension(".fetr")
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Extract), std::bind(&FeatureLoad::loadExtract, this, std::placeholders::_1, std::placeholders::_2)));
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Squash), std::bind(&FeatureLoad::loadSquash, this, std::placeholders::_1, std::placeholders::_2)));
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Nest), std::bind(&FeatureLoad::loadNest, this, std::placeholders::_1, std::placeholders::_2)));
+  functionMap.insert(std::make_pair(ftr::toString(ftr::Type::DieSet), std::bind(&FeatureLoad::loadDieSet, this, std::placeholders::_1, std::placeholders::_2)));
 }
 
 FeatureLoad::~FeatureLoad()
@@ -319,3 +322,14 @@ std::shared_ptr<ftr::Base> FeatureLoad::loadNest(const std::string &fileNameIn, 
   return freshNest;
 }
 
+std::shared_ptr<ftr::Base> FeatureLoad::loadDieSet(const std::string &fileNameIn, std::size_t shapeOffsetIn)
+{
+  auto sds = srl::dieset(fileNameIn, ::xml_schema::Flags::dont_validate);
+  assert(sds);
+  
+  std::shared_ptr<ftr::DieSet> freshDieSet(new ftr::DieSet);
+  freshDieSet->setShape(shapeVector.at(shapeOffsetIn));
+  freshDieSet->serialRead(*sds);
+  
+  return freshDieSet;
+}

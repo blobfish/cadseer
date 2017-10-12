@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="http://www.cadseer.com/prj/srl"
+  xmlns:srl="http://www.cadseer.com/prj/srl"
+>
+  
+<xs:include schemaLocation="featurebase.xsd"/>
+
+<xs:complexType name="FeatureDieSet">
+  <xs:all>
+    <xs:element name="featureBase" type="srl:FeatureBase"/>
+    <xs:element name="length" type="srl:Parameter"/>
+    <xs:element name="lengthPadding" type="srl:Parameter"/>
+    <xs:element name="width" type="srl:Parameter"/>
+    <xs:element name="widthPadding" type="srl:Parameter"/>
+    <xs:element name="autoCalc" type="xs:boolean"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:element name="dieset" type="srl:FeatureDieSet"/>
+  
+</xs:schema> 

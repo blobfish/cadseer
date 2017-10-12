@@ -66,6 +66,7 @@ namespace prj
     std::shared_ptr<ftr::Base> loadExtract(const std::string &, std::size_t);
     std::shared_ptr<ftr::Base> loadSquash(const std::string &, std::size_t);
     std::shared_ptr<ftr::Base> loadNest(const std::string &, std::size_t);
+    std::shared_ptr<ftr::Base> loadDieSet(const std::string &, std::size_t);
   };
 }
 
