@@ -26,6 +26,7 @@
 #include <libreoffice/odshack.h>
 #include <feature/strip.h>
 #include <feature/dieset.h>
+#include <project/serial/xsdcxxoutput/featurequote.h>
 #include <feature/quote.h>
 
 using namespace ftr;
@@ -173,6 +174,47 @@ void Quote::updateModel(const UpdatePayload &payloadIn)
   setModelClean();
 }
 
-void Quote::serialWrite(const QDir&)
+void Quote::serialWrite(const QDir &dIn)
 {
+  prj::srl::FeatureQuote qo
+  (
+    Base::serialOut(),
+    tFile.string(),
+    oFile.string(),
+    pFile.string(),
+    quoteData.quoteNumber,
+    quoteData.customerName.toStdString(),
+    gu::idToString(quoteData.customerId),
+    quoteData.partName.toStdString(),
+    quoteData.partNumber.toStdString(),
+    quoteData.partSetup.toStdString(),
+    quoteData.partRevision.toStdString(),
+    quoteData.materialType.toStdString(),
+    quoteData.materialThickness,
+    quoteData.processType.toStdString(),
+    quoteData.annualVolume
+  );
+  
+  xml_schema::NamespaceInfomap infoMap;
+  std::ofstream stream(buildFilePathName(dIn).toUtf8().constData());
+  prj::srl::quote(stream, qo, infoMap);
+}
+
+void Quote::serialRead(const prj::srl::FeatureQuote &qIn)
+{
+  Base::serialIn(qIn.featureBase());
+  tFile = qIn.templateFile();
+  oFile = qIn.outFile();
+  pFile = qIn.pictureFile();
+  quoteData.quoteNumber = qIn.quoteNumber();
+  quoteData.customerName = QString::fromStdString(qIn.customerName());
+  quoteData.customerId = gu::stringToId(qIn.customerId());
+  quoteData.partName = QString::fromStdString(qIn.partName());
+  quoteData.partNumber = QString::fromStdString(qIn.partNumber());
+  quoteData.partSetup = QString::fromStdString(qIn.partSetup());
+  quoteData.partRevision = QString::fromStdString(qIn.partRevision());
+  quoteData.materialType = QString::fromStdString(qIn.materialType());
+  quoteData.materialThickness = qIn.materialThickness();
+  quoteData.processType = QString::fromStdString(qIn.processType());
+  quoteData.annualVolume = qIn.annualVolume();
 }

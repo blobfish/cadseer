@@ -400,6 +400,7 @@ SET(PROJECT_SOURCES
     project/serial/xsdcxxoutput/featurenest.cpp
     project/serial/xsdcxxoutput/featuredieset.cpp
     project/serial/xsdcxxoutput/featurestrip.cpp
+    project/serial/xsdcxxoutput/featurequote.cpp
     )
     
 SET(APPLICATION_SOURCES

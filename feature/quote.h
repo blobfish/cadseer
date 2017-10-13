@@ -24,6 +24,8 @@
 
 #include <feature/base.h>
 
+namespace prj{namespace srl{class FeatureQuote;}}
+
 namespace ftr
 {
   struct QuoteData
@@ -57,7 +59,7 @@ namespace ftr
     virtual const QIcon& getIcon() const override {return icon;}
     virtual Descriptor getDescriptor() const override {return Descriptor::Create;}
     virtual void serialWrite(const QDir&) override;
-//     void serialRead(const prj::srl::FeatureQuote &);
+    void serialRead(const prj::srl::FeatureQuote &);
     
     boost::filesystem::path tFile; //!< template file. eventual parameter
     boost::filesystem::path oFile; //!< output file. eventual parameter

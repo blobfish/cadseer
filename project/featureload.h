@@ -68,6 +68,7 @@ namespace prj
     std::shared_ptr<ftr::Base> loadNest(const std::string &, std::size_t);
     std::shared_ptr<ftr::Base> loadDieSet(const std::string &, std::size_t);
     std::shared_ptr<ftr::Base> loadStrip(const std::string &, std::size_t);
+    std::shared_ptr<ftr::Base> loadQuote(const std::string &, std::size_t);
   };
 }
 
