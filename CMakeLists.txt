@@ -179,8 +179,10 @@ IF(IGL_PROJECT_PATH)
     set(IGL_INCLUDE_FOUND true)
   endif(NOT EXISTS ${IGL_INCLUDE})
   
+  #static lib has problems just go with slow header only for now.
   #assuming 'lib' directory
-  set(IGL_LIB "${IGL_PROJECT_PATH}/lib/libigl.a")
+  set(IGL_LIB "${IGL_PROJECT_PATH}/lib/libigl.a") #not using right now.
+#   add_definitions(-DIGL_STATIC_LIBRARY)
   if(NOT EXISTS ${IGL_LIB})
     message(STATUS "igl lib missing. squash will not be built.")
   else(NOT EXISTS ${IGL_LIB})
