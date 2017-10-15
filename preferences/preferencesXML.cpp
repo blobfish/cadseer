@@ -1148,6 +1148,58 @@ namespace prf
   }
 
 
+  // Dieset
+  // 
+
+  const Dieset::LengthPaddingType& Dieset::
+  lengthPadding () const
+  {
+    return this->lengthPadding_.get ();
+  }
+
+  Dieset::LengthPaddingType& Dieset::
+  lengthPadding ()
+  {
+    return this->lengthPadding_.get ();
+  }
+
+  void Dieset::
+  lengthPadding (const LengthPaddingType& x)
+  {
+    this->lengthPadding_.set (x);
+  }
+
+  Dieset::LengthPaddingType Dieset::
+  lengthPadding_default_value ()
+  {
+    return LengthPaddingType (6.0);
+  }
+
+  const Dieset::WidthPaddingType& Dieset::
+  widthPadding () const
+  {
+    return this->widthPadding_.get ();
+  }
+
+  Dieset::WidthPaddingType& Dieset::
+  widthPadding ()
+  {
+    return this->widthPadding_.get ();
+  }
+
+  void Dieset::
+  widthPadding (const WidthPaddingType& x)
+  {
+    this->widthPadding_.set (x);
+  }
+
+  Dieset::WidthPaddingType Dieset::
+  widthPadding_default_value ()
+  {
+    return WidthPaddingType (200.0);
+  }
+
+
   // Hollow
   // 
 
@@ -1176,6 +1228,68 @@ namespace prf
   }
 
 
+  // Nest
+  // 
+
+  const Nest::GapType& Nest::
+  gap () const
+  {
+    return this->gap_.get ();
+  }
+
+  Nest::GapType& Nest::
+  gap ()
+  {
+    return this->gap_.get ();
+  }
+
+  void Nest::
+  gap (const GapType& x)
+  {
+    this->gap_.set (x);
+  }
+
+  Nest::GapType Nest::
+  gap_default_value ()
+  {
+    return GapType (6.0);
+  }
+
+
+  // Quote
+  // 
+
+  const Quote::TemplateSheetType& Quote::
+  templateSheet () const
+  {
+    return this->templateSheet_.get ();
+  }
+
+  Quote::TemplateSheetType& Quote::
+  templateSheet ()
+  {
+    return this->templateSheet_.get ();
+  }
+
+  void Quote::
+  templateSheet (const TemplateSheetType& x)
+  {
+    this->templateSheet_.set (x);
+  }
+
+  void Quote::
+  templateSheet (::std::unique_ptr< TemplateSheetType > x)
+  {
+    this->templateSheet_.set (std::move (x));
+  }
+
+  const Quote::TemplateSheetType& Quote::
+  templateSheet_default_value ()
+  {
+    return templateSheet_default_value_;
+  }
+
+
   // Sphere
   // 
 
@@ -1201,6 +1315,62 @@ namespace prf
   radius_default_value ()
   {
     return RadiusType (5.0);
+  }
+
+
+  // Squash
+  // 
+
+  const Squash::GranularityType& Squash::
+  granularity () const
+  {
+    return this->granularity_.get ();
+  }
+
+  Squash::GranularityType& Squash::
+  granularity ()
+  {
+    return this->granularity_.get ();
+  }
+
+  void Squash::
+  granularity (const GranularityType& x)
+  {
+    this->granularity_.set (x);
+  }
+
+  Squash::GranularityType Squash::
+  granularity_default_value ()
+  {
+    return GranularityType (3);
+  }
+
+
+  // Strip
+  // 
+
+  const Strip::GapType& Strip::
+  gap () const
+  {
+    return this->gap_.get ();
+  }
+
+  Strip::GapType& Strip::
+  gap ()
+  {
+    return this->gap_.get ();
+  }
+
+  void Strip::
+  gap (const GapType& x)
+  {
+    this->gap_.set (x);
+  }
+
+  Strip::GapType Strip::
+  gap_default_value ()
+  {
+    return GapType (6.0);
   }
 
 
@@ -1417,6 +1587,36 @@ namespace prf
     this->datumPlane_.set (std::move (x));
   }
 
+  const Features::DiesetOptional& Features::
+  dieset () const
+  {
+    return this->dieset_;
+  }
+
+  Features::DiesetOptional& Features::
+  dieset ()
+  {
+    return this->dieset_;
+  }
+
+  void Features::
+  dieset (const DiesetType& x)
+  {
+    this->dieset_.set (x);
+  }
+
+  void Features::
+  dieset (const DiesetOptional& x)
+  {
+    this->dieset_ = x;
+  }
+
+  void Features::
+  dieset (::std::unique_ptr< DiesetType > x)
+  {
+    this->dieset_.set (std::move (x));
+  }
+
   const Features::DraftOptional& Features::
   draft () const
   {
@@ -1477,6 +1677,66 @@ namespace prf
     this->hollow_.set (std::move (x));
   }
 
+  const Features::NestOptional& Features::
+  nest () const
+  {
+    return this->nest_;
+  }
+
+  Features::NestOptional& Features::
+  nest ()
+  {
+    return this->nest_;
+  }
+
+  void Features::
+  nest (const NestType& x)
+  {
+    this->nest_.set (x);
+  }
+
+  void Features::
+  nest (const NestOptional& x)
+  {
+    this->nest_ = x;
+  }
+
+  void Features::
+  nest (::std::unique_ptr< NestType > x)
+  {
+    this->nest_.set (std::move (x));
+  }
+
+  const Features::QuoteOptional& Features::
+  quote () const
+  {
+    return this->quote_;
+  }
+
+  Features::QuoteOptional& Features::
+  quote ()
+  {
+    return this->quote_;
+  }
+
+  void Features::
+  quote (const QuoteType& x)
+  {
+    this->quote_.set (x);
+  }
+
+  void Features::
+  quote (const QuoteOptional& x)
+  {
+    this->quote_ = x;
+  }
+
+  void Features::
+  quote (::std::unique_ptr< QuoteType > x)
+  {
+    this->quote_.set (std::move (x));
+  }
+
   const Features::SphereOptional& Features::
   sphere () const
   {
@@ -1505,6 +1765,66 @@ namespace prf
   sphere (::std::unique_ptr< SphereType > x)
   {
     this->sphere_.set (std::move (x));
+  }
+
+  const Features::SquashOptional& Features::
+  squash () const
+  {
+    return this->squash_;
+  }
+
+  Features::SquashOptional& Features::
+  squash ()
+  {
+    return this->squash_;
+  }
+
+  void Features::
+  squash (const SquashType& x)
+  {
+    this->squash_.set (x);
+  }
+
+  void Features::
+  squash (const SquashOptional& x)
+  {
+    this->squash_ = x;
+  }
+
+  void Features::
+  squash (::std::unique_ptr< SquashType > x)
+  {
+    this->squash_.set (std::move (x));
+  }
+
+  const Features::StripOptional& Features::
+  strip () const
+  {
+    return this->strip_;
+  }
+
+  Features::StripOptional& Features::
+  strip ()
+  {
+    return this->strip_;
+  }
+
+  void Features::
+  strip (const StripType& x)
+  {
+    this->strip_.set (x);
+  }
+
+  void Features::
+  strip (const StripOptional& x)
+  {
+    this->strip_ = x;
+  }
+
+  void Features::
+  strip (::std::unique_ptr< StripType > x)
+  {
+    this->strip_.set (std::move (x));
   }
 
 
@@ -4004,6 +4324,118 @@ namespace prf
   {
   }
 
+  // Dieset
+  //
+
+  Dieset::
+  Dieset (const LengthPaddingType& lengthPadding,
+          const WidthPaddingType& widthPadding)
+  : ::xml_schema::Type (),
+    lengthPadding_ (lengthPadding, this),
+    widthPadding_ (widthPadding, this)
+  {
+  }
+
+  Dieset::
+  Dieset (const Dieset& x,
+          ::xml_schema::Flags f,
+          ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    lengthPadding_ (x.lengthPadding_, f, this),
+    widthPadding_ (x.widthPadding_, f, this)
+  {
+  }
+
+  Dieset::
+  Dieset (const ::xercesc::DOMElement& e,
+          ::xml_schema::Flags f,
+          ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    lengthPadding_ (this),
+    widthPadding_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void Dieset::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // lengthPadding
+      //
+      if (n.name () == "lengthPadding" && n.namespace_ ().empty ())
+      {
+        if (!lengthPadding_.present ())
+        {
+          this->lengthPadding_.set (LengthPaddingTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      // widthPadding
+      //
+      if (n.name () == "widthPadding" && n.namespace_ ().empty ())
+      {
+        if (!widthPadding_.present ())
+        {
+          this->widthPadding_.set (WidthPaddingTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!lengthPadding_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "lengthPadding",
+        "");
+    }
+
+    if (!widthPadding_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "widthPadding",
+        "");
+    }
+  }
+
+  Dieset* Dieset::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class Dieset (*this, f, c);
+  }
+
+  Dieset& Dieset::
+  operator= (const Dieset& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->lengthPadding_ = x.lengthPadding_;
+      this->widthPadding_ = x.widthPadding_;
+    }
+
+    return *this;
+  }
+
+  Dieset::
+  ~Dieset ()
+  {
+  }
+
   // Hollow
   //
 
@@ -4090,6 +4522,190 @@ namespace prf
 
   Hollow::
   ~Hollow ()
+  {
+  }
+
+  // Nest
+  //
+
+  Nest::
+  Nest (const GapType& gap)
+  : ::xml_schema::Type (),
+    gap_ (gap, this)
+  {
+  }
+
+  Nest::
+  Nest (const Nest& x,
+        ::xml_schema::Flags f,
+        ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    gap_ (x.gap_, f, this)
+  {
+  }
+
+  Nest::
+  Nest (const ::xercesc::DOMElement& e,
+        ::xml_schema::Flags f,
+        ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    gap_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void Nest::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // gap
+      //
+      if (n.name () == "gap" && n.namespace_ ().empty ())
+      {
+        if (!gap_.present ())
+        {
+          this->gap_.set (GapTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!gap_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "gap",
+        "");
+    }
+  }
+
+  Nest* Nest::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class Nest (*this, f, c);
+  }
+
+  Nest& Nest::
+  operator= (const Nest& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->gap_ = x.gap_;
+    }
+
+    return *this;
+  }
+
+  Nest::
+  ~Nest ()
+  {
+  }
+
+  // Quote
+  //
+
+  const Quote::TemplateSheetType Quote::templateSheet_default_value_ (
+    "");
+
+  Quote::
+  Quote (const TemplateSheetType& templateSheet)
+  : ::xml_schema::Type (),
+    templateSheet_ (templateSheet, this)
+  {
+  }
+
+  Quote::
+  Quote (const Quote& x,
+         ::xml_schema::Flags f,
+         ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    templateSheet_ (x.templateSheet_, f, this)
+  {
+  }
+
+  Quote::
+  Quote (const ::xercesc::DOMElement& e,
+         ::xml_schema::Flags f,
+         ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    templateSheet_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void Quote::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // templateSheet
+      //
+      if (n.name () == "templateSheet" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< TemplateSheetType > r (
+          TemplateSheetTraits::create (i, f, this));
+
+        if (!templateSheet_.present ())
+        {
+          this->templateSheet_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!templateSheet_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "templateSheet",
+        "");
+    }
+  }
+
+  Quote* Quote::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class Quote (*this, f, c);
+  }
+
+  Quote& Quote::
+  operator= (const Quote& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->templateSheet_ = x.templateSheet_;
+    }
+
+    return *this;
+  }
+
+  Quote::
+  ~Quote ()
   {
   }
 
@@ -4182,6 +4798,184 @@ namespace prf
   {
   }
 
+  // Squash
+  //
+
+  Squash::
+  Squash (const GranularityType& granularity)
+  : ::xml_schema::Type (),
+    granularity_ (granularity, this)
+  {
+  }
+
+  Squash::
+  Squash (const Squash& x,
+          ::xml_schema::Flags f,
+          ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    granularity_ (x.granularity_, f, this)
+  {
+  }
+
+  Squash::
+  Squash (const ::xercesc::DOMElement& e,
+          ::xml_schema::Flags f,
+          ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    granularity_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void Squash::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // granularity
+      //
+      if (n.name () == "granularity" && n.namespace_ ().empty ())
+      {
+        if (!granularity_.present ())
+        {
+          this->granularity_.set (GranularityTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!granularity_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "granularity",
+        "");
+    }
+  }
+
+  Squash* Squash::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class Squash (*this, f, c);
+  }
+
+  Squash& Squash::
+  operator= (const Squash& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->granularity_ = x.granularity_;
+    }
+
+    return *this;
+  }
+
+  Squash::
+  ~Squash ()
+  {
+  }
+
+  // Strip
+  //
+
+  Strip::
+  Strip (const GapType& gap)
+  : ::xml_schema::Type (),
+    gap_ (gap, this)
+  {
+  }
+
+  Strip::
+  Strip (const Strip& x,
+         ::xml_schema::Flags f,
+         ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    gap_ (x.gap_, f, this)
+  {
+  }
+
+  Strip::
+  Strip (const ::xercesc::DOMElement& e,
+         ::xml_schema::Flags f,
+         ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    gap_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void Strip::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // gap
+      //
+      if (n.name () == "gap" && n.namespace_ ().empty ())
+      {
+        if (!gap_.present ())
+        {
+          this->gap_.set (GapTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!gap_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "gap",
+        "");
+    }
+  }
+
+  Strip* Strip::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class Strip (*this, f, c);
+  }
+
+  Strip& Strip::
+  operator= (const Strip& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->gap_ = x.gap_;
+    }
+
+    return *this;
+  }
+
+  Strip::
+  ~Strip ()
+  {
+  }
+
   // Features
   //
 
@@ -4195,9 +4989,14 @@ namespace prf
     cone_ (this),
     cylinder_ (this),
     datumPlane_ (this),
+    dieset_ (this),
     draft_ (this),
     hollow_ (this),
-    sphere_ (this)
+    nest_ (this),
+    quote_ (this),
+    sphere_ (this),
+    squash_ (this),
+    strip_ (this)
   {
   }
 
@@ -4213,9 +5012,14 @@ namespace prf
     cone_ (x.cone_, f, this),
     cylinder_ (x.cylinder_, f, this),
     datumPlane_ (x.datumPlane_, f, this),
+    dieset_ (x.dieset_, f, this),
     draft_ (x.draft_, f, this),
     hollow_ (x.hollow_, f, this),
-    sphere_ (x.sphere_, f, this)
+    nest_ (x.nest_, f, this),
+    quote_ (x.quote_, f, this),
+    sphere_ (x.sphere_, f, this),
+    squash_ (x.squash_, f, this),
+    strip_ (x.strip_, f, this)
   {
   }
 
@@ -4231,9 +5035,14 @@ namespace prf
     cone_ (this),
     cylinder_ (this),
     datumPlane_ (this),
+    dieset_ (this),
     draft_ (this),
     hollow_ (this),
-    sphere_ (this)
+    nest_ (this),
+    quote_ (this),
+    sphere_ (this),
+    squash_ (this),
+    strip_ (this)
   {
     if ((f & ::xml_schema::Flags::base) == 0)
     {
@@ -4350,6 +5159,20 @@ namespace prf
         }
       }
 
+      // dieset
+      //
+      if (n.name () == "dieset" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< DiesetType > r (
+          DiesetTraits::create (i, f, this));
+
+        if (!this->dieset_)
+        {
+          this->dieset_.set (::std::move (r));
+          continue;
+        }
+      }
+
       // draft
       //
       if (n.name () == "draft" && n.namespace_ ().empty ())
@@ -4378,6 +5201,34 @@ namespace prf
         }
       }
 
+      // nest
+      //
+      if (n.name () == "nest" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< NestType > r (
+          NestTraits::create (i, f, this));
+
+        if (!this->nest_)
+        {
+          this->nest_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      // quote
+      //
+      if (n.name () == "quote" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< QuoteType > r (
+          QuoteTraits::create (i, f, this));
+
+        if (!this->quote_)
+        {
+          this->quote_.set (::std::move (r));
+          continue;
+        }
+      }
+
       // sphere
       //
       if (n.name () == "sphere" && n.namespace_ ().empty ())
@@ -4388,6 +5239,34 @@ namespace prf
         if (!this->sphere_)
         {
           this->sphere_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      // squash
+      //
+      if (n.name () == "squash" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< SquashType > r (
+          SquashTraits::create (i, f, this));
+
+        if (!this->squash_)
+        {
+          this->squash_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      // strip
+      //
+      if (n.name () == "strip" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< StripType > r (
+          StripTraits::create (i, f, this));
+
+        if (!this->strip_)
+        {
+          this->strip_.set (::std::move (r));
           continue;
         }
       }
@@ -4416,9 +5295,14 @@ namespace prf
       this->cone_ = x.cone_;
       this->cylinder_ = x.cylinder_;
       this->datumPlane_ = x.datumPlane_;
+      this->dieset_ = x.dieset_;
       this->draft_ = x.draft_;
       this->hollow_ = x.hollow_;
+      this->nest_ = x.nest_;
+      this->quote_ = x.quote_;
       this->sphere_ = x.sphere_;
+      this->squash_ = x.squash_;
+      this->strip_ = x.strip_;
     }
 
     return *this;
@@ -5567,6 +6451,34 @@ namespace prf
   }
 
   void
+  operator<< (::xercesc::DOMElement& e, const Dieset& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // lengthPadding
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "lengthPadding",
+          e));
+
+      s << ::xml_schema::AsDouble(i.lengthPadding ());
+    }
+
+    // widthPadding
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "widthPadding",
+          e));
+
+      s << ::xml_schema::AsDouble(i.widthPadding ());
+    }
+  }
+
+  void
   operator<< (::xercesc::DOMElement& e, const Hollow& i)
   {
     e << static_cast< const ::xml_schema::Type& > (i);
@@ -5584,6 +6496,40 @@ namespace prf
   }
 
   void
+  operator<< (::xercesc::DOMElement& e, const Nest& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // gap
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "gap",
+          e));
+
+      s << ::xml_schema::AsDouble(i.gap ());
+    }
+  }
+
+  void
+  operator<< (::xercesc::DOMElement& e, const Quote& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // templateSheet
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "templateSheet",
+          e));
+
+      s << i.templateSheet ();
+    }
+  }
+
+  void
   operator<< (::xercesc::DOMElement& e, const Sphere& i)
   {
     e << static_cast< const ::xml_schema::Type& > (i);
@@ -5597,6 +6543,40 @@ namespace prf
           e));
 
       s << ::xml_schema::AsDouble(i.radius ());
+    }
+  }
+
+  void
+  operator<< (::xercesc::DOMElement& e, const Squash& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // granularity
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "granularity",
+          e));
+
+      s << i.granularity ();
+    }
+  }
+
+  void
+  operator<< (::xercesc::DOMElement& e, const Strip& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // gap
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "gap",
+          e));
+
+      s << ::xml_schema::AsDouble(i.gap ());
     }
   }
 
@@ -5689,6 +6669,18 @@ namespace prf
       s << *i.datumPlane ();
     }
 
+    // dieset
+    //
+    if (i.dieset ())
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "dieset",
+          e));
+
+      s << *i.dieset ();
+    }
+
     // draft
     //
     if (i.draft ())
@@ -5713,6 +6705,30 @@ namespace prf
       s << *i.hollow ();
     }
 
+    // nest
+    //
+    if (i.nest ())
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "nest",
+          e));
+
+      s << *i.nest ();
+    }
+
+    // quote
+    //
+    if (i.quote ())
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "quote",
+          e));
+
+      s << *i.quote ();
+    }
+
     // sphere
     //
     if (i.sphere ())
@@ -5723,6 +6739,30 @@ namespace prf
           e));
 
       s << *i.sphere ();
+    }
+
+    // squash
+    //
+    if (i.squash ())
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "squash",
+          e));
+
+      s << *i.squash ();
+    }
+
+    // strip
+    //
+    if (i.strip ())
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "strip",
+          e));
+
+      s << *i.strip ();
     }
   }
 

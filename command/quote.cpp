@@ -89,8 +89,6 @@ void Quote::go()
   }
   
   std::shared_ptr<ftr::Quote> quote(new ftr::Quote());
-  quote->tFile = "/home/tanderson/Programming/cadseer/QuoteExportTesting/DaveTestTemplate.ods";
-  quote->oFile = "/home/tanderson/temp/DaveTest.ods";
   project->addFeature(quote);
   
   //this should trick the dagview into updating so it isn't screwed up

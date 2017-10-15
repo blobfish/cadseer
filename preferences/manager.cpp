@@ -287,4 +287,45 @@ void Manager::ensureDefaults()
       prf::Sphere::radius_default_value()
     );
   }
+  
+  if (!features.dieset().present())
+  {
+    features.dieset() = prf::Dieset
+    (
+      prf::Dieset::lengthPadding_default_value(),
+      prf::Dieset::widthPadding_default_value()
+    );
+  }
+  
+  if (!features.nest().present())
+  {
+    features.nest() = prf::Nest
+    (
+      prf::Nest::gap_default_value()
+    );
+  }
+  
+  if (!features.quote().present())
+  {
+    features.quote() = prf::Quote
+    (
+      prf::Quote::templateSheet_default_value()
+    );
+  }
+  
+  if (!features.squash().present())
+  {
+    features.squash() = prf::Squash
+    (
+      prf::Squash::granularity_default_value()
+    );
+  }
+  
+  if (!features.strip().present())
+  {
+    features.strip() = prf::Strip
+    (
+      prf::Strip::gap_default_value()
+    );
+  }
 }

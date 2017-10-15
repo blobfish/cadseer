@@ -23,6 +23,7 @@
 #include <QDialog>
 
 namespace Ui{ class dialog; }
+class SplitterDecorated;
 
 namespace prf
 {
@@ -39,8 +40,10 @@ namespace prf
   public Q_SLOTS:
     virtual void accept() override;
     void basePathBrowseSlot();
+    void quoteTemplateBrowseSlot();
   private:
     void initialize();
+    void setupFeatureSplitter();
     void updateVisual();
     void updateDragger();
     void updateProject();
@@ -50,6 +53,7 @@ namespace prf
     Manager *manager;
     bool visualDirty = false;
     bool hiddenLinesDirty = false;
+    SplitterDecorated *fsSplitter;
   };
 }
 

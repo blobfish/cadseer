@@ -144,15 +144,46 @@
   </xs:all>
 </xs:complexType>
 
+<xs:complexType name="Dieset">
+  <xs:all>
+    <xs:element name="lengthPadding" type="xs:double" default="6.0"/>
+    <xs:element name="widthPadding" type="xs:double" default="200.0"/>
+  </xs:all>
+</xs:complexType>
+
 <xs:complexType name="Hollow">
   <xs:all>
     <xs:element name="offset" type="xs:double" default="1.0"/>
   </xs:all>
 </xs:complexType>
 
+<xs:complexType name="Nest">
+  <xs:all>
+    <xs:element name="gap" type="xs:double" default="6.0"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="Quote">
+  <xs:all>
+    <xs:element name="templateSheet" type="xs:string" default=""/>
+  </xs:all>
+</xs:complexType>
+
 <xs:complexType name="Sphere">
   <xs:all>
     <xs:element name="radius" type="xs:double" default="5.0"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="Squash">
+  <xs:all>
+    <xs:element name="granularity" type="xs:int" default="3"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="Strip">
+  <xs:all>
+    <xs:element name="gap" type="xs:double" default="6.0"/>
   </xs:all>
 </xs:complexType>
 
@@ -165,9 +196,14 @@
     <xs:element name="cone" type="Cone"  minOccurs="0" maxOccurs="1"/>
     <xs:element name="cylinder" type="Cylinder"  minOccurs="0" maxOccurs="1"/>
     <xs:element name="datumPlane" type="DatumPlane"  minOccurs="0" maxOccurs="1"/>
+    <xs:element name="dieset" type="Dieset"  minOccurs="0" maxOccurs="1"/>
     <xs:element name="draft" type="Draft"  minOccurs="0" maxOccurs="1"/>
     <xs:element name="hollow" type="Hollow"  minOccurs="0" maxOccurs="1"/>
+    <xs:element name="nest" type="Nest"  minOccurs="0" maxOccurs="1"/>
+    <xs:element name="quote" type="Quote"  minOccurs="0" maxOccurs="1"/>
     <xs:element name="sphere" type="Sphere"  minOccurs="0" maxOccurs="1"/>
+    <xs:element name="squash" type="Squash"  minOccurs="0" maxOccurs="1"/>
+    <xs:element name="strip" type="Strip"  minOccurs="0" maxOccurs="1"/>
   </xs:all>
 </xs:complexType>
 

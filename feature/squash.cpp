@@ -21,6 +21,8 @@
 #include <BRepTools.hxx>
 
 #include <globalutilities.h>
+#include <preferences/preferencesXML.h>
+#include <preferences/manager.h>
 #include <tools/occtools.h>
 #include <squash/squash.h>
 #include <feature/seershape.h>
@@ -45,7 +47,14 @@ Squash::Squash() : Base()
   faceId = gu::createRandomId();
   wireId = gu::createRandomId();
   
-  granularity = std::shared_ptr<Parameter>(new Parameter(QObject::tr("Granularity"), 1.0));
+  granularity = std::shared_ptr<Parameter>
+  (
+    new Parameter
+    (
+      QObject::tr("Granularity"),
+      static_cast<double>(prf::manager().rootPtr->features().squash().get().granularity())
+    )
+  );
   ParameterBoundary lower(0.0, ParameterBoundary::End::Closed); // 0.0 means no update
   ParameterBoundary upper(5.0, ParameterBoundary::End::Closed);
   ParameterInterval interval(lower, upper);

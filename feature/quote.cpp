@@ -22,6 +22,10 @@
 #include <libzippp.h>
 
 #include <globalutilities.h>
+#include <application/application.h>
+#include <project/project.h>
+#include <preferences/preferencesXML.h>
+#include <preferences/manager.h>
 #include <tools/idtools.h>
 #include <libreoffice/odshack.h>
 #include <feature/strip.h>
@@ -33,7 +37,7 @@ using namespace ftr;
 
 QIcon Quote::icon;
 
-Quote::Quote()
+Quote::Quote() : Base()
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionQuote.svg");
@@ -52,6 +56,10 @@ Quote::Quote()
   quoteData.materialThickness = 0.0;
   quoteData.processType = "aProcessType";
   quoteData.annualVolume = 0;
+  
+  tFile = prf::manager().rootPtr->features().quote().get().templateSheet();
+  oFile = static_cast<app::Application*>(qApp)->getProject()->getSaveDirectory();
+  oFile /= getName().toStdString() + ".ods";
 }
 
 Quote::~Quote()

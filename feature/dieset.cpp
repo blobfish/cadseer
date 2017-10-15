@@ -20,6 +20,8 @@
 #include <globalutilities.h>
 #include <library/plabel.h>
 #include <tools/occtools.h>
+#include <preferences/preferencesXML.h>
+#include <preferences/manager.h>
 #include <feature/seershape.h>
 #include <feature/shapecheck.h>
 #include <feature/boxbuilder.h>
@@ -50,12 +52,26 @@ DieSet::DieSet()
   width->connectValue(boost::bind(&DieSet::setModelDirty, this));
   parameterVector.push_back(width.get());
   
-  lengthPadding = std::shared_ptr<Parameter>(new Parameter(QObject::tr("Length Padding"), 25.0));
+  lengthPadding = std::shared_ptr<Parameter>
+  (
+    new Parameter
+    (
+      QObject::tr("Length Padding"),
+      prf::manager().rootPtr->features().dieset().get().lengthPadding()
+    )
+  );
   lengthPadding->setConstraint(ParameterConstraint::buildZeroPositive());
   lengthPadding->connectValue(boost::bind(&DieSet::setModelDirty, this));
   parameterVector.push_back(lengthPadding.get());
   
-  widthPadding = std::shared_ptr<Parameter>(new Parameter(QObject::tr("Width Padding"), 200.0));
+  widthPadding = std::shared_ptr<Parameter>
+  (
+    new Parameter
+    (
+      QObject::tr("Width Padding"),
+      prf::manager().rootPtr->features().dieset().get().widthPadding()
+    )
+  );
   widthPadding->setConstraint(ParameterConstraint::buildZeroPositive());
   widthPadding->connectValue(boost::bind(&DieSet::setModelDirty, this));
   parameterVector.push_back(widthPadding.get());

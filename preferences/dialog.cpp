@@ -19,10 +19,16 @@
 #include <iostream>
 #include <stdexcept>
 
+#include <boost/filesystem.hpp>
+
 #include <QDoubleValidator>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QTimer>
+#include <QHBoxLayout>
 
+#include <application/application.h>
+#include <application/splitterdecorated.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <dialogs/widgetgeometry.h>
@@ -36,19 +42,43 @@ Dialog::Dialog(Manager *managerIn, QWidget *parent) : QDialog(parent), ui(new Ui
   this->setWindowFlags(this->windowFlags() | Qt::WindowContextHelpButtonHint);
   ui->setupUi(this);
   
+  setupFeatureSplitter();
+  
   initialize();
   
   connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
   connect(ui->buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
   connect(ui->basePathButton, SIGNAL(clicked()), this, SLOT(basePathBrowseSlot()));
+  connect(ui->quoteTSheetButton, SIGNAL(clicked()), this, SLOT(quoteTemplateBrowseSlot()));
   
   dlg::WidgetGeometry *filter = new dlg::WidgetGeometry(this, "prf::PreferencesDialog");
   this->installEventFilter(filter);
+  
+  ui->tabWidget->setCurrentIndex(0);
+  ui->featureListWidget->setCurrentRow(0);
 }
 
 Dialog::~Dialog()
 {
   delete ui;
+}
+
+void Dialog::setupFeatureSplitter()
+{
+  fsSplitter = new SplitterDecorated(ui->featuresTab);
+  QHBoxLayout *mainLayout = new QHBoxLayout();
+  mainLayout->addWidget(fsSplitter);
+  ui->featuresTab->setLayout(mainLayout);
+  
+  QWidget *w1 = new QWidget(fsSplitter);
+  w1->setLayout(ui->featuresLayout01);
+  fsSplitter->addWidget(w1);
+  
+  QWidget *w2 = new QWidget(fsSplitter);
+  w2->setLayout(ui->featuresLayout02);
+  fsSplitter->addWidget(w2);
+  
+  fsSplitter->restoreSettings("prf:dlg:featuresSplitter");
 }
 
 void Dialog::initialize()
@@ -106,6 +136,12 @@ void Dialog::initialize()
   ui->oblongWidthEdit->setText(QString().setNum(manager->rootPtr->features().oblong().get().width()));
   ui->oblongHeightEdit->setText(QString().setNum(manager->rootPtr->features().oblong().get().height()));
   ui->sphereRadiusEdit->setText(QString().setNum(manager->rootPtr->features().sphere().get().radius()));
+  ui->diesetLengthPaddingEdit->setText(QString().setNum(manager->rootPtr->features().dieset().get().lengthPadding()));
+  ui->diesetWidthPaddingEdit->setText(QString().setNum(manager->rootPtr->features().dieset().get().widthPadding()));
+  ui->nestGapEdit->setText(QString().setNum(manager->rootPtr->features().nest().get().gap()));
+  ui->quoteTSheetEdit->setText(QString::fromStdString(manager->rootPtr->features().quote().get().templateSheet()));
+  ui->squashGEdit->setText(QString().setNum(manager->rootPtr->features().squash().get().granularity()));
+  ui->stripGapEdit->setText(QString().setNum(manager->rootPtr->features().strip().get().gap()));
 }
 
 void Dialog::accept()
@@ -352,6 +388,33 @@ void Dialog::updateFeature()
   if (temp <= 0.0)
     temp = prf::Oblong::height_default_value();
   manager->rootPtr->features().oblong().get().height() = temp;
+  
+  temp = ui->diesetLengthPaddingEdit->text().toDouble();
+  if (temp < 0.0)
+    temp = prf::Dieset::lengthPadding_default_value();
+  manager->rootPtr->features().dieset().get().lengthPadding() = temp;
+  
+  temp = ui->diesetWidthPaddingEdit->text().toDouble();
+  if (temp < 0.0)
+    temp = prf::Dieset::widthPadding_default_value();
+  manager->rootPtr->features().dieset().get().widthPadding() = temp;
+  
+  temp = ui->nestGapEdit->text().toDouble();
+  if (temp < 0.0)
+    temp = prf::Nest::gap_default_value();
+  manager->rootPtr->features().nest().get().gap() = temp;
+  
+  manager->rootPtr->features().quote().get().templateSheet() = ui->quoteTSheetEdit->text().toStdString();
+  
+  temp = ui->squashGEdit->text().toDouble();
+  if (temp < 0.0)
+    temp = prf::Squash::granularity_default_value();
+  manager->rootPtr->features().squash().get().granularity() = temp;
+  
+  temp = ui->stripGapEdit->text().toDouble();
+  if (temp < 0.0)
+    temp = prf::Strip::gap_default_value();
+  manager->rootPtr->features().strip().get().gap() = temp;
 }
 
 void Dialog::basePathBrowseSlot()
@@ -363,4 +426,23 @@ void Dialog::basePathBrowseSlot()
   QString freshDirectory = QFileDialog::getExistingDirectory(this, tr("Browse to projects base directory"), browseStart);
   if (!freshDirectory.isEmpty())
     ui->basePathEdit->setText(freshDirectory);
+}
+
+void Dialog::quoteTemplateBrowseSlot()
+{
+  namespace bfs = boost::filesystem;
+  bfs::path t = ui->quoteTSheetEdit->text().toStdString();
+  if (!bfs::exists(t)) //todo use a parameter from preferences.
+    t = static_cast<app::Application*>(qApp)->getApplicationDirectory().canonicalPath().toStdString();
+  
+  QString fileName = QFileDialog::getOpenFileName
+  (
+    this,
+    tr("Browse For Template"),
+    QString::fromStdString(t.string()),
+    tr("SpreadSheet (*.ods)")
+  );
+  
+  if (!fileName.isEmpty())
+    ui->quoteTSheetEdit->setText(fileName);
 }

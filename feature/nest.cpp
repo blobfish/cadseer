@@ -51,7 +51,14 @@ Nest::Nest() : Base()
   parameterVector.push_back(pitch.get());
   //pitch does not get wired up to dirty.
   
-  gap = std::shared_ptr<Parameter>(new Parameter(QObject::tr("Gap"), 6.0));
+  gap = std::shared_ptr<Parameter>
+  (
+    new Parameter
+    (
+      QObject::tr("Gap"),
+      prf::manager().rootPtr->features().nest().get().gap()
+    )
+  );
   gap->setConstraint(ParameterConstraint::buildNonZeroPositive());
   gap->connectValue(boost::bind(&Nest::setModelDirty, this));
   parameterVector.push_back(gap.get());

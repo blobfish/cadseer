@@ -72,7 +72,14 @@ Strip::Strip() : Base()
   widthOffset->connectValue(boost::bind(&Strip::setModelDirty, this));
   parameterVector.push_back(widthOffset.get());
   
-  gap = std::shared_ptr<Parameter>(new Parameter(QObject::tr("Gap"), 6.0));
+  gap = std::shared_ptr<Parameter>
+  (
+    new Parameter
+    (
+      QObject::tr("Gap"),
+      prf::manager().rootPtr->features().strip().get().gap()
+    )
+  );
   gap->setConstraint(ParameterConstraint::buildNonZeroPositive());
   gap->connectValue(boost::bind(&Strip::setModelDirty, this));
   parameterVector.push_back(gap.get());
