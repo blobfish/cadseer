@@ -203,6 +203,36 @@ std::string Manager::getSpaceballButton(int number) const
   return std::string();
 }
 
+void Manager::setHotKey(int number, const std::string &maskString)
+{
+  auto &keys = rootPtr->hotKeys().hotKeyEntries().array();
+  
+  auto it = keys.begin();
+  for (; it != keys.end(); ++it)
+  {
+    if(it->number() == number)
+    {
+      it->mask() = maskString;
+      break;
+    }
+  }
+  if (it == keys.end())
+    keys.push_back(HotKeyEntry(number, maskString));
+}
+
+std::string Manager::getHotKey(int number) const
+{
+  const auto &keys = rootPtr->hotKeys().hotKeyEntries().array();
+  
+  for (const auto &k : keys)
+  {
+    if (k.number() == number)
+      return k.mask();
+  }
+  
+  return std::string();
+}
+
 void Manager::ensureDefaults()
 {
   auto &features = rootPtr->features();

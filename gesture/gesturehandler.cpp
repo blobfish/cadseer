@@ -109,6 +109,38 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
     }
   }
   
+  if (eventAdapter.getEventType() == osgGA::GUIEventAdapter::KEYDOWN)
+  {
+    if (!rightButtonDown)
+      return false;
+    hotKey = eventAdapter.getKey();
+    if (dragStarted)
+    {
+      std::ostringstream stream;
+      stream << QObject::tr("Link to key ").toStdString() << hotKey;
+      observer->out(msg::buildStatusMessage(stream.str()));
+    }
+    else
+    {
+      std::string maskString = prf::manager().getHotKey(hotKey);
+      if (!maskString.empty())
+      {
+        msg::Mask msgMask(maskString);
+        msg::Message messageOut;
+        messageOut.mask = msgMask;
+        observer->out(messageOut);
+      }
+    }
+  }
+  if (eventAdapter.getEventType() == osgGA::GUIEventAdapter::KEYUP)
+  {
+    if (!rightButtonDown)
+      return false;
+    hotKey = -1;
+    observer->out(msg::buildStatusMessage(""));
+    return true;
+  }
+  
     //lambda to clear status.
     auto clearStatus = [&]()
     {
@@ -158,6 +190,11 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
                     if (spaceballButton != -1)
                     {
                       prf::manager().setSpaceballButton(spaceballButton, msgMaskString);
+                      prf::manager().saveConfig();
+                    }
+                    if (hotKey != -1)
+                    {
+                      prf::manager().setHotKey(hotKey, msgMaskString);
                       prf::manager().saveConfig();
                     }
                     

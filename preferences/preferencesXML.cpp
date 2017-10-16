@@ -728,6 +728,74 @@ namespace prf
   }
 
 
+  // HotKeyEntry
+  // 
+
+  const HotKeyEntry::NumberType& HotKeyEntry::
+  number () const
+  {
+    return this->number_.get ();
+  }
+
+  HotKeyEntry::NumberType& HotKeyEntry::
+  number ()
+  {
+    return this->number_.get ();
+  }
+
+  void HotKeyEntry::
+  number (const NumberType& x)
+  {
+    this->number_.set (x);
+  }
+
+  const HotKeyEntry::MaskType& HotKeyEntry::
+  mask () const
+  {
+    return this->mask_.get ();
+  }
+
+  HotKeyEntry::MaskType& HotKeyEntry::
+  mask ()
+  {
+    return this->mask_.get ();
+  }
+
+  void HotKeyEntry::
+  mask (const MaskType& x)
+  {
+    this->mask_.set (x);
+  }
+
+  void HotKeyEntry::
+  mask (::std::unique_ptr< MaskType > x)
+  {
+    this->mask_.set (std::move (x));
+  }
+
+
+  // HotKeyEntries
+  // 
+
+  const HotKeyEntries::ArraySequence& HotKeyEntries::
+  array () const
+  {
+    return this->array_;
+  }
+
+  HotKeyEntries::ArraySequence& HotKeyEntries::
+  array ()
+  {
+    return this->array_;
+  }
+
+  void HotKeyEntries::
+  array (const ArraySequence& s)
+  {
+    this->array_ = s;
+  }
+
+
   // HotKeys
   // 
 
@@ -753,6 +821,30 @@ namespace prf
   spaceballButtons (::std::unique_ptr< SpaceballButtonsType > x)
   {
     this->spaceballButtons_.set (std::move (x));
+  }
+
+  const HotKeys::HotKeyEntriesType& HotKeys::
+  hotKeyEntries () const
+  {
+    return this->hotKeyEntries_.get ();
+  }
+
+  HotKeys::HotKeyEntriesType& HotKeys::
+  hotKeyEntries ()
+  {
+    return this->hotKeyEntries_.get ();
+  }
+
+  void HotKeys::
+  hotKeyEntries (const HotKeyEntriesType& x)
+  {
+    this->hotKeyEntries_.set (x);
+  }
+
+  void HotKeys::
+  hotKeyEntries (::std::unique_ptr< HotKeyEntriesType > x)
+  {
+    this->hotKeyEntries_.set (std::move (x));
   }
 
 
@@ -3352,20 +3444,221 @@ namespace prf
   {
   }
 
+  // HotKeyEntry
+  //
+
+  HotKeyEntry::
+  HotKeyEntry (const NumberType& number,
+               const MaskType& mask)
+  : ::xml_schema::Type (),
+    number_ (number, this),
+    mask_ (mask, this)
+  {
+  }
+
+  HotKeyEntry::
+  HotKeyEntry (const HotKeyEntry& x,
+               ::xml_schema::Flags f,
+               ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    number_ (x.number_, f, this),
+    mask_ (x.mask_, f, this)
+  {
+  }
+
+  HotKeyEntry::
+  HotKeyEntry (const ::xercesc::DOMElement& e,
+               ::xml_schema::Flags f,
+               ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    number_ (this),
+    mask_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void HotKeyEntry::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // number
+      //
+      if (n.name () == "number" && n.namespace_ ().empty ())
+      {
+        if (!number_.present ())
+        {
+          this->number_.set (NumberTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      // mask
+      //
+      if (n.name () == "mask" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< MaskType > r (
+          MaskTraits::create (i, f, this));
+
+        if (!mask_.present ())
+        {
+          this->mask_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!number_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "number",
+        "");
+    }
+
+    if (!mask_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "mask",
+        "");
+    }
+  }
+
+  HotKeyEntry* HotKeyEntry::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class HotKeyEntry (*this, f, c);
+  }
+
+  HotKeyEntry& HotKeyEntry::
+  operator= (const HotKeyEntry& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->number_ = x.number_;
+      this->mask_ = x.mask_;
+    }
+
+    return *this;
+  }
+
+  HotKeyEntry::
+  ~HotKeyEntry ()
+  {
+  }
+
+  // HotKeyEntries
+  //
+
+  HotKeyEntries::
+  HotKeyEntries ()
+  : ::xml_schema::Type (),
+    array_ (this)
+  {
+  }
+
+  HotKeyEntries::
+  HotKeyEntries (const HotKeyEntries& x,
+                 ::xml_schema::Flags f,
+                 ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    array_ (x.array_, f, this)
+  {
+  }
+
+  HotKeyEntries::
+  HotKeyEntries (const ::xercesc::DOMElement& e,
+                 ::xml_schema::Flags f,
+                 ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    array_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void HotKeyEntries::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // array
+      //
+      if (n.name () == "array" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< ArrayType > r (
+          ArrayTraits::create (i, f, this));
+
+        this->array_.push_back (::std::move (r));
+        continue;
+      }
+
+      break;
+    }
+  }
+
+  HotKeyEntries* HotKeyEntries::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class HotKeyEntries (*this, f, c);
+  }
+
+  HotKeyEntries& HotKeyEntries::
+  operator= (const HotKeyEntries& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->array_ = x.array_;
+    }
+
+    return *this;
+  }
+
+  HotKeyEntries::
+  ~HotKeyEntries ()
+  {
+  }
+
   // HotKeys
   //
 
   HotKeys::
-  HotKeys (const SpaceballButtonsType& spaceballButtons)
+  HotKeys (const SpaceballButtonsType& spaceballButtons,
+           const HotKeyEntriesType& hotKeyEntries)
   : ::xml_schema::Type (),
-    spaceballButtons_ (spaceballButtons, this)
+    spaceballButtons_ (spaceballButtons, this),
+    hotKeyEntries_ (hotKeyEntries, this)
   {
   }
 
   HotKeys::
-  HotKeys (::std::unique_ptr< SpaceballButtonsType > spaceballButtons)
+  HotKeys (::std::unique_ptr< SpaceballButtonsType > spaceballButtons,
+           ::std::unique_ptr< HotKeyEntriesType > hotKeyEntries)
   : ::xml_schema::Type (),
-    spaceballButtons_ (std::move (spaceballButtons), this)
+    spaceballButtons_ (std::move (spaceballButtons), this),
+    hotKeyEntries_ (std::move (hotKeyEntries), this)
   {
   }
 
@@ -3374,7 +3667,8 @@ namespace prf
            ::xml_schema::Flags f,
            ::xml_schema::Container* c)
   : ::xml_schema::Type (x, f, c),
-    spaceballButtons_ (x.spaceballButtons_, f, this)
+    spaceballButtons_ (x.spaceballButtons_, f, this),
+    hotKeyEntries_ (x.hotKeyEntries_, f, this)
   {
   }
 
@@ -3383,7 +3677,8 @@ namespace prf
            ::xml_schema::Flags f,
            ::xml_schema::Container* c)
   : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
-    spaceballButtons_ (this)
+    spaceballButtons_ (this),
+    hotKeyEntries_ (this)
   {
     if ((f & ::xml_schema::Flags::base) == 0)
     {
@@ -3416,6 +3711,20 @@ namespace prf
         }
       }
 
+      // hotKeyEntries
+      //
+      if (n.name () == "hotKeyEntries" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< HotKeyEntriesType > r (
+          HotKeyEntriesTraits::create (i, f, this));
+
+        if (!hotKeyEntries_.present ())
+        {
+          this->hotKeyEntries_.set (::std::move (r));
+          continue;
+        }
+      }
+
       break;
     }
 
@@ -3423,6 +3732,13 @@ namespace prf
     {
       throw ::xsd::cxx::tree::expected_element< char > (
         "spaceballButtons",
+        "");
+    }
+
+    if (!hotKeyEntries_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "hotKeyEntries",
         "");
     }
   }
@@ -3441,6 +3757,7 @@ namespace prf
     {
       static_cast< ::xml_schema::Type& > (*this) = x;
       this->spaceballButtons_ = x.spaceballButtons_;
+      this->hotKeyEntries_ = x.hotKeyEntries_;
     }
 
     return *this;
@@ -6221,6 +6538,54 @@ namespace prf
   }
 
   void
+  operator<< (::xercesc::DOMElement& e, const HotKeyEntry& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // number
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "number",
+          e));
+
+      s << i.number ();
+    }
+
+    // mask
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "mask",
+          e));
+
+      s << i.mask ();
+    }
+  }
+
+  void
+  operator<< (::xercesc::DOMElement& e, const HotKeyEntries& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // array
+    //
+    for (HotKeyEntries::ArrayConstIterator
+         b (i.array ().begin ()), n (i.array ().end ());
+         b != n; ++b)
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "array",
+          e));
+
+      s << *b;
+    }
+  }
+
+  void
   operator<< (::xercesc::DOMElement& e, const HotKeys& i)
   {
     e << static_cast< const ::xml_schema::Type& > (i);
@@ -6234,6 +6599,17 @@ namespace prf
           e));
 
       s << i.spaceballButtons ();
+    }
+
+    // hotKeyEntries
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "hotKeyEntries",
+          e));
+
+      s << i.hotKeyEntries ();
     }
   }
 

@@ -81,6 +81,8 @@ namespace prf
   class Project;
   class SpaceballButton;
   class SpaceballButtons;
+  class HotKeyEntry;
+  class HotKeyEntries;
   class HotKeys;
   class Blend;
   class Box;
@@ -2727,6 +2729,365 @@ namespace prf
   };
 
   /**
+   * @brief Class corresponding to the %HotKeyEntry schema type.
+   *
+   * @nosubgrouping
+   */
+  class HotKeyEntry: public ::xml_schema::Type
+  {
+    public:
+    /**
+     * @name number
+     *
+     * @brief Accessor and modifier functions for the %number
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::xml_schema::Int NumberType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< NumberType, char > NumberTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const NumberType&
+    number () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    NumberType&
+    number ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    number (const NumberType& x);
+
+    //@}
+
+    /**
+     * @name mask
+     *
+     * @brief Accessor and modifier functions for the %mask
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::xml_schema::String MaskType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< MaskType, char > MaskTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const MaskType&
+    mask () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    MaskType&
+    mask ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    mask (const MaskType& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly
+     * instead of making a copy.
+     */
+    void
+    mask (::std::unique_ptr< MaskType > p);
+
+    //@}
+
+    /**
+     * @name Constructors
+     */
+    //@{
+
+    /**
+     * @brief Create an instance from the ultimate base and
+     * initializers for required elements and attributes.
+     */
+    HotKeyEntry (const NumberType&,
+                 const MaskType&);
+
+    /**
+     * @brief Create an instance from a DOM element.
+     *
+     * @param e A DOM element to extract the data from.
+     * @param f Flags to create the new instance with.
+     * @param c A pointer to the object that will contain the new
+     * instance.
+     */
+    HotKeyEntry (const ::xercesc::DOMElement& e,
+                 ::xml_schema::Flags f = 0,
+                 ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy constructor.
+     *
+     * @param x An instance to make a copy of.
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    HotKeyEntry (const HotKeyEntry& x,
+                 ::xml_schema::Flags f = 0,
+                 ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy the instance polymorphically.
+     *
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     * @return A pointer to the dynamically allocated copy.
+     *
+     * This function ensures that the dynamic type of the instance is
+     * used for copying and should be used for polymorphic object
+     * models instead of the copy constructor.
+     */
+    virtual HotKeyEntry*
+    _clone (::xml_schema::Flags f = 0,
+            ::xml_schema::Container* c = 0) const;
+
+    /**
+     * @brief Copy assignment operator.
+     *
+     * @param x An instance to make a copy of.
+     * @return A reference to itself.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    HotKeyEntry&
+    operator= (const HotKeyEntry& x);
+
+    //@}
+
+    /**
+     * @brief Destructor.
+     */
+    virtual 
+    ~HotKeyEntry ();
+
+    // Implementation.
+    //
+
+    //@cond
+
+    protected:
+    void
+    parse (::xsd::cxx::xml::dom::parser< char >&,
+           ::xml_schema::Flags);
+
+    protected:
+    ::xsd::cxx::tree::one< NumberType > number_;
+    ::xsd::cxx::tree::one< MaskType > mask_;
+
+    //@endcond
+  };
+
+  /**
+   * @brief Class corresponding to the %HotKeyEntries schema type.
+   *
+   * @nosubgrouping
+   */
+  class HotKeyEntries: public ::xml_schema::Type
+  {
+    public:
+    /**
+     * @name array
+     *
+     * @brief Accessor and modifier functions for the %array
+     * sequence element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::HotKeyEntry ArrayType;
+
+    /**
+     * @brief Element sequence container type.
+     */
+    typedef ::xsd::cxx::tree::sequence< ArrayType > ArraySequence;
+
+    /**
+     * @brief Element iterator type.
+     */
+    typedef ArraySequence::iterator ArrayIterator;
+
+    /**
+     * @brief Element constant iterator type.
+     */
+    typedef ArraySequence::const_iterator ArrayConstIterator;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< ArrayType, char > ArrayTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element
+     * sequence.
+     *
+     * @return A constant reference to the sequence container.
+     */
+    const ArraySequence&
+    array () const;
+
+    /**
+     * @brief Return a read-write reference to the element sequence.
+     *
+     * @return A reference to the sequence container.
+     */
+    ArraySequence&
+    array ();
+
+    /**
+     * @brief Copy elements from a given sequence.
+     *
+     * @param s A sequence to copy elements from.
+     *
+     * For each element in @a s this function makes a copy and adds it 
+     * to the sequence. Note that this operation completely changes the 
+     * sequence and all old elements will be lost.
+     */
+    void
+    array (const ArraySequence& s);
+
+    //@}
+
+    /**
+     * @name Constructors
+     */
+    //@{
+
+    /**
+     * @brief Create an instance from the ultimate base and
+     * initializers for required elements and attributes.
+     */
+    HotKeyEntries ();
+
+    /**
+     * @brief Create an instance from a DOM element.
+     *
+     * @param e A DOM element to extract the data from.
+     * @param f Flags to create the new instance with.
+     * @param c A pointer to the object that will contain the new
+     * instance.
+     */
+    HotKeyEntries (const ::xercesc::DOMElement& e,
+                   ::xml_schema::Flags f = 0,
+                   ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy constructor.
+     *
+     * @param x An instance to make a copy of.
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    HotKeyEntries (const HotKeyEntries& x,
+                   ::xml_schema::Flags f = 0,
+                   ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy the instance polymorphically.
+     *
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     * @return A pointer to the dynamically allocated copy.
+     *
+     * This function ensures that the dynamic type of the instance is
+     * used for copying and should be used for polymorphic object
+     * models instead of the copy constructor.
+     */
+    virtual HotKeyEntries*
+    _clone (::xml_schema::Flags f = 0,
+            ::xml_schema::Container* c = 0) const;
+
+    /**
+     * @brief Copy assignment operator.
+     *
+     * @param x An instance to make a copy of.
+     * @return A reference to itself.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    HotKeyEntries&
+    operator= (const HotKeyEntries& x);
+
+    //@}
+
+    /**
+     * @brief Destructor.
+     */
+    virtual 
+    ~HotKeyEntries ();
+
+    // Implementation.
+    //
+
+    //@cond
+
+    protected:
+    void
+    parse (::xsd::cxx::xml::dom::parser< char >&,
+           ::xml_schema::Flags);
+
+    protected:
+    ArraySequence array_;
+
+    //@endcond
+  };
+
+  /**
    * @brief Class corresponding to the %HotKeys schema type.
    *
    * @nosubgrouping
@@ -2793,6 +3154,64 @@ namespace prf
     //@}
 
     /**
+     * @name hotKeyEntries
+     *
+     * @brief Accessor and modifier functions for the %hotKeyEntries
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::HotKeyEntries HotKeyEntriesType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< HotKeyEntriesType, char > HotKeyEntriesTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const HotKeyEntriesType&
+    hotKeyEntries () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    HotKeyEntriesType&
+    hotKeyEntries ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    hotKeyEntries (const HotKeyEntriesType& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly
+     * instead of making a copy.
+     */
+    void
+    hotKeyEntries (::std::unique_ptr< HotKeyEntriesType > p);
+
+    //@}
+
+    /**
      * @name Constructors
      */
     //@{
@@ -2801,7 +3220,8 @@ namespace prf
      * @brief Create an instance from the ultimate base and
      * initializers for required elements and attributes.
      */
-    HotKeys (const SpaceballButtonsType&);
+    HotKeys (const SpaceballButtonsType&,
+             const HotKeyEntriesType&);
 
     /**
      * @brief Create an instance from the ultimate base and
@@ -2811,7 +3231,8 @@ namespace prf
      * This constructor will try to use the passed values directly
      * instead of making copies.
      */
-    HotKeys (::std::unique_ptr< SpaceballButtonsType >);
+    HotKeys (::std::unique_ptr< SpaceballButtonsType >,
+             ::std::unique_ptr< HotKeyEntriesType >);
 
     /**
      * @brief Create an instance from a DOM element.
@@ -2884,6 +3305,7 @@ namespace prf
 
     protected:
     ::xsd::cxx::tree::one< SpaceballButtonsType > spaceballButtons_;
+    ::xsd::cxx::tree::one< HotKeyEntriesType > hotKeyEntries_;
 
     //@endcond
   };
@@ -7680,6 +8102,12 @@ namespace prf
 
   void
   operator<< (::xercesc::DOMElement&, const SpaceballButtons&);
+
+  void
+  operator<< (::xercesc::DOMElement&, const HotKeyEntry&);
+
+  void
+  operator<< (::xercesc::DOMElement&, const HotKeyEntries&);
 
   void
   operator<< (::xercesc::DOMElement&, const HotKeys&);

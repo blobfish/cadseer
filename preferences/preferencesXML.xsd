@@ -82,10 +82,23 @@
   </xs:sequence>
 </xs:complexType>
 
+<xs:complexType name="HotKeyEntry">
+  <xs:all>
+    <xs:element name="number" type="xs:int"/>
+    <xs:element name="mask" type="xs:string"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="HotKeyEntries">
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+    <xs:element name="array" type="HotKeyEntry"/>
+  </xs:sequence>
+</xs:complexType>
+
 <xs:complexType name="HotKeys">
   <xs:all>
     <xs:element name="spaceballButtons" type="SpaceballButtons"/>
-    <!--    add accelerator keys here    -->
+    <xs:element name="hotKeyEntries" type="HotKeyEntries"/>
   </xs:all>
 </xs:complexType>
 

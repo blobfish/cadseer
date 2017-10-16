@@ -39,6 +39,9 @@ namespace prf
     //spaceball buttons.
     void setSpaceballButton(int, const std::string&);
     std::string getSpaceballButton(int) const; //!< empty string means not assigned.
+    //hot keys
+    void setHotKey(int, const std::string&);
+    std::string getHotKey(int) const; //!< empty string means not assigned.
   private:
     bool createDefaultXml();
     bool createDefaultXsd();
