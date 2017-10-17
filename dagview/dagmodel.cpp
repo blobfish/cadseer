@@ -198,9 +198,21 @@ void Model::featureAddedDispatched(const msg::Message &messageIn)
   graph[virginVertex].feature = message.feature;
   graph[virginVertex].featureId = message.feature->getId();
   
-  //some of these are temp.
-  graph[virginVertex].visibleIconRaw->setPixmap(visiblePixmapEnabled);
-  graph[virginVertex].stateIconRaw->setPixmap(passPixmap);
+  if (message.feature->isVisible3D())
+    graph[virginVertex].visibleIconRaw->setPixmap(visiblePixmapEnabled);
+  else
+    graph[virginVertex].visibleIconRaw->setPixmap(visiblePixmapDisabled);
+  
+  //this is pretty much a duplicate of the state changed 'slot'
+  if (message.feature->isInactive())
+    graph[virginVertex].stateIconRaw->setPixmap(inactivePixmap);
+  else if (message.feature->isModelDirty())
+    graph[virginVertex].stateIconRaw->setPixmap(pendingPixmap);
+  else if (message.feature->isFailure())
+    graph[virginVertex].stateIconRaw->setPixmap(failPixmap);
+  else
+    graph[virginVertex].stateIconRaw->setPixmap(passPixmap);
+  
   graph[virginVertex].featureIconRaw->setPixmap(message.feature->getIcon().pixmap(iconSize, iconSize));
   graph[virginVertex].textRaw->setPlainText(message.feature->getName());
   graph[virginVertex].textRaw->setFont(this->font());

@@ -401,7 +401,9 @@ prj::srl::FeatureBase Base::serialOut()
     color.b(),
     color.a()
   );
-  out.color()= colorOut;
+  out.color() = colorOut;
+  
+  out.state() = state.to_string();
   
   return out;
 }
@@ -424,6 +426,19 @@ void Base::serialIn(const prj::srl::FeatureBase& sBaseIn)
     color.b() = sBaseIn.color().get().b();
     color.a() = sBaseIn.color().get().a();
   }
+  
+  if (sBaseIn.state().present())
+    state = State(sBaseIn.state().get());
+  
+  if (isVisible3D())
+    mainSwitch->setAllChildrenOn();
+  else
+    mainSwitch->setAllChildrenOff();
+  
+  if (isVisibleOverlay())
+    overlaySwitch->setAllChildrenOn();
+  else
+    overlaySwitch->setAllChildrenOff();
 }
 
 const TopoDS_Shape& Base::getShape() const

@@ -104,6 +104,7 @@
     <xs:element name="id" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
     <xs:element name="seerShape" type="srl:SeerShape"  minOccurs="0" maxOccurs="1"/>
     <xs:element name="color" type="srl:Color"  minOccurs="0" maxOccurs="1"/>
+    <xs:element name="state" type="xs:string"  minOccurs="0" maxOccurs="1"/>
   </xs:all>
 </xs:complexType>
 

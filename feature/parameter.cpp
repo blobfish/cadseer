@@ -285,7 +285,7 @@ prj::srl::Parameter Parameter::serialOut() const
 void Parameter::serialIn(const prj::srl::Parameter& sParameterIn)
 {
   name = QString::fromStdString(sParameterIn.name());
-  setConstant(sParameterIn.constant());
-  setValue(sParameterIn.value());
+  constant = sParameterIn.constant();
+  value = sParameterIn.value();
   id = gu::stringToId(sParameterIn.id());
 }

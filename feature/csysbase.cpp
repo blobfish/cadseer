@@ -207,7 +207,7 @@ void CSysBase::serialIn(const prj::srl::FeatureCSysBase& sCSysBaseIn)
   m(2,0) = s.i2j0(); m(2,1) = s.i2j1(); m(2,2) = s.i2j2(); m(2,3) = s.i2j3();
   m(3,0) = s.i3j0(); m(3,1) = s.i3j1(); m(3,2) = s.i3j2(); m(3,3) = s.i3j3();
 
-  this->setSystem(m);
+  system = gu::toOcc(m);
   updateDragger();
 }
 
