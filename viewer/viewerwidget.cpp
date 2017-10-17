@@ -26,6 +26,7 @@
 #include <QString>
 #include <QFileDialog>
 #include <QTimer>
+#include <QTextStream>
 
 #include <osgGA/OrbitManipulator>
 #include <osgDB/ReadFile>
@@ -47,6 +48,7 @@
 #include <testing/plotter.h>
 #include <gesture/gesturehandler.h>
 #include <globalutilities.h>
+#include <tools/infotools.h>
 #include <library/csysdragger.h>
 #include <selection/eventhandler.h>
 #include <selection/overlayhandler.h>
@@ -549,6 +551,14 @@ void ViewerWidget::screenCapture(const std::string &fp, const std::string &e)
   screenCaptureHandler->setFramesToCapture(1);
   screenCaptureHandler->setCaptureOperation(wtf.get());
   screenCaptureHandler->captureNextFrame(*this);
+}
+
+QTextStream& ViewerWidget::getInfo(QTextStream &stream) const
+{
+  stream << endl << QObject::tr("Current System: ");
+  gu::osgMatrixOut(stream, getCurrentSystem());
+  
+  return stream;
 }
 
 void StatsHandler::collectWhichCamerasToRenderStatsFor

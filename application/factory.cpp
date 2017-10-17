@@ -1034,6 +1034,7 @@ void Factory::viewInfoDispatched(const msg::Message &)
       //nothing selected so get app and project information.
       //TODO get git hash for application version.
       project->getInfo(stream);
+      static_cast<app::Application*>(qApp)->getMainWindow()->getViewer()->getInfo(stream);
     }
     else
     {

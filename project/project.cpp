@@ -617,6 +617,7 @@ void Project::updateDispatched(const msg::Message&)
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
   msg::dispatch().dumpString(debug.str());
   
+  app::WaitCursor waitCursor;
   updateModel();
   updateVisual();
 }
@@ -632,6 +633,7 @@ void Project::forceUpdateDispatched(const msg::Message&)
     projectGraph[currentVertex].feature->setModelDirty();
   }
   
+  app::WaitCursor waitCursor;
   updateModel();
   updateVisual();
 }
@@ -1048,6 +1050,8 @@ void Project::initializeNew()
 
 void Project::open()
 {
+  app::WaitCursor waitCursor;
+  
   isLoading = true;
   gitManager->appendGitMessage("Project Open");
   observer->out(msg::Message(msg::Request | msg::Git | msg::Freeze));
@@ -1140,6 +1144,11 @@ void Project::open()
         expressionManager->userDefinedGroups.push_back(eGroup);
       }
     }
+    
+    //this should trick the dagview into updating so it isn't screwed up
+    //while update is running. only dagview responds to this message
+    //as of git hash a530460.
+    observer->outBlocked(msg::Response | msg::Post | msg::UpdateModel);
     
     updateModel();
     updateVisual();

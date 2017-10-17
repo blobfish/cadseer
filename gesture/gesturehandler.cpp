@@ -47,7 +47,7 @@ static const std::string attributeMask = "CommandAttributeTitle";
 static const std::string attributeStatus = "CommandAttributeStatus";
 
 GestureHandler::GestureHandler(osg::Camera *cameraIn) : osgGA::GUIEventHandler(), rightButtonDown(false),
-    currentNodeLeft(false), iconRadius(32.0), includedAngle(90.0)
+    dragStarted(false), currentNodeLeft(false), iconRadius(32.0), includedAngle(90.0)
 {
     observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
     observer->name = "GestureHandler";
@@ -131,6 +131,7 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
         observer->out(messageOut);
       }
     }
+    return true;
   }
   if (eventAdapter.getEventType() == osgGA::GUIEventAdapter::KEYUP)
   {
@@ -162,7 +163,10 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
     }
   
     if (!gestureSwitch.valid())
-        return false;
+    {
+      std::cout << "gestureSwitch is invalid in GestureHandler::handle" << std::endl;
+      return false;
+    }
 
     if (eventAdapter.getButton() == osgGA::GUIEventAdapter::RIGHT_MOUSE_BUTTON)
     {

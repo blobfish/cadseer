@@ -27,50 +27,12 @@
 
 int main( int argc, char** argv )
 {
-//    osg::ArgumentParser arguments(&argc, argv);
+  app::Application app(argc, argv);
+  QObject::connect(&app, SIGNAL(aboutToQuit()), &app, SLOT(quittingSlot()));
 
-//    osgViewer::ViewerBase::ThreadingModel threadingModel = osgViewer::ViewerBase::CullDrawThreadPerContext;
-//    while (arguments.read("--SingleThreaded")) threadingModel = osgViewer::ViewerBase::SingleThreaded;
-//    while (arguments.read("--CullDrawThreadPerContext")) threadingModel = osgViewer::ViewerBase::CullDrawThreadPerContext;
-//    while (arguments.read("--DrawThreadPerContext")) threadingModel = osgViewer::ViewerBase::DrawThreadPerContext;
-//    while (arguments.read("--CullThreadPerCameraDrawThreadPerContext")) threadingModel = osgViewer::ViewerBase::CullThreadPerCameraDrawThreadPerContext;
-
-    app::Application app(argc, argv);
-    QObject::connect(&app, SIGNAL(aboutToQuit()), &app, SLOT(quittingSlot()));
-
-    app.initializeSpaceball();
-
-    app.getMainWindow()->showMaximized();
-    
-    msg::Message messageOut;
-    
-//     messageOut.mask = msg::Request | msg::NewProject;
-//     msg::dispatch().messageInSlot(messageOut);
-//     prj::Project *project = app.getProject();
-//     project->setSaveDirectory("/home/tanderson/Programming/cadseer/test/project");
-    
-    QTimer::singleShot(0, &app, SLOT(appStartSlot()));
-    
-//     messageOut.mask = msg::Request | msg::OpenProject;
-//     msg::dispatch().messageInSlot(messageOut);
-//     
-//     messageOut.mask = msg::Request | msg::ForceUpdate;
-//     msg::dispatch().messageInSlot(messageOut);
-    
-//     messageOut.mask = msg::Request | msg::Construct | msg::Box;
-//     msg::dispatch().messageInSlot(messageOut);
-//     
-//     messageOut.mask = msg::Request | msg::Construct | msg::Cylinder;
-//     msg::dispatch().messageInSlot(messageOut);
-    
-//     messageOut.mask = msg::Request | msg::Construct | msg::Cone;
-//     msg::dispatch().messageInSlot(messageOut);
-//     
-//     messageOut.mask = msg::Request | msg::Construct | msg::Sphere;
-//     msg::dispatch().messageInSlot(messageOut);
-    
-//     messageOut.mask = msg::Request | msg::ViewFit;
-//     msg::dispatch().messageInSlot(messageOut);
-    
-    return app.exec();
+  app.initializeSpaceball();
+  app.getMainWindow()->showMaximized();
+  QTimer::singleShot(0, &app, SLOT(appStartSlot()));
+  
+  return app.exec();
 }

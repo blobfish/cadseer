@@ -108,21 +108,24 @@ bool DCallBack::receive(const osgManipulator::MotionCommand &commandIn)
   //so copy it back to gp_Ax2 and mark the feature dirty.
   if (commandIn.getStage() == osgManipulator::MotionCommand::FINISH)
   {
-    if (lastTranslation != 0.0 || lastRotation != 0.0)
+    if (csysBase->getDragger().isLinked())
     {
-      assert(csysBase);
-      csysBase->setModelDirty();
-      
-      //add git message.
-      std::ostringstream gitStream;
-      gitStream << QObject::tr("Reposition feature: ").toStdString() << csysBase->getName().toStdString() <<
-        " id: " << gu::idToString(csysBase->getId());
-      observer->out(msg::buildGitMessage(gitStream.str()));
-      
-      if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
+      if (lastTranslation != 0.0 || lastRotation != 0.0)
       {
-        msg::Message messageOut(msg::Request | msg::Update);
-        QMetaObject::invokeMethod(qApp, "messageSlot", Qt::QueuedConnection, Q_ARG(msg::Message, messageOut));
+        assert(csysBase);
+        csysBase->setModelDirty();
+        
+        //add git message.
+        std::ostringstream gitStream;
+        gitStream << QObject::tr("Reposition feature: ").toStdString() << csysBase->getName().toStdString() <<
+          " id: " << gu::idToString(csysBase->getId());
+        observer->out(msg::buildGitMessage(gitStream.str()));
+        
+        if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
+        {
+          msg::Message messageOut(msg::Request | msg::Update);
+          QMetaObject::invokeMethod(qApp, "messageSlot", Qt::QueuedConnection, Q_ARG(msg::Message, messageOut));
+        }
       }
     }
   }

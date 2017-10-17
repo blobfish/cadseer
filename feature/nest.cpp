@@ -179,7 +179,7 @@ void Nest::updateModel(const UpdatePayload &payloadIn)
     if(!bbf->hasSeerShape())
       throw std::runtime_error("no seer shape for blank");
     const SeerShape &bss = bbf->getSeerShape(); //part seer shape.
-    TopoDS_Shape bs = bss.getRootOCCTShape(); //blank shape. not const, might mesh.
+    TopoDS_Shape bs = occt::getFirstNonCompound(bss.getRootOCCTShape()); //blank shape. not const, might mesh.
     
     /* this is a little unusual. For performance reasons, we are using
      * poly extrema for calculating pitch. Therefore the shapes need

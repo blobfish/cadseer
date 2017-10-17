@@ -39,6 +39,8 @@
 #include <QDesktopServices>
 
 #include <application/application.h>
+#include <preferences/preferencesXML.h>
+#include <preferences/manager.h>
 #include <project/project.h>
 #include <globalutilities.h>
 #include <tools/idtools.h>
@@ -1021,6 +1023,10 @@ void Model::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     
     contextMenu.addSeparator();
     
+    static QIcon infoFeatureIcon(":/resources/images/inspectInfo.svg");
+    QAction* infoFeatureAction = contextMenu.addAction(infoFeatureIcon, tr("Info Feature"));
+    connect(infoFeatureAction, SIGNAL(triggered()), this, SLOT(infoFeatureSlot()));
+    
     static QIcon editFeatureIcon(":/resources/images/dagViewEditFeature.svg");
     QAction* editFeatureAction = contextMenu.addAction(editFeatureIcon, tr("Edit Feature"));
     connect(editFeatureAction, SIGNAL(triggered()), this, SLOT(editFeatureSlot()));
@@ -1062,12 +1068,14 @@ void Model::setCurrentLeafSlot()
   auto currentSelections = getAllSelected();
   assert(currentSelections.size() == 1);
   
-  //temp for testing
   prj::Message prjMessageOut;
   prjMessageOut.featureId = graph[currentSelections.front()].featureId;
   msg::Message messageOut(msg::Request | msg::SetCurrentLeaf);
   messageOut.payload = prjMessageOut;
   observer->out(messageOut);
+  
+  if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
+    observer->out(msg::Mask(msg::Request | msg::Update));
 }
 
 void Model::removeFeatureSlot()
@@ -1122,6 +1130,11 @@ void Model::editRenameSlot()
 void Model::editFeatureSlot()
 {
   observer->out(msg::Message(msg::Request | msg::Edit | msg::Feature));
+}
+
+void Model::infoFeatureSlot()
+{
+  observer->out(msg::Message(msg::Request | msg::ViewInfo));
 }
 
 void Model::renameAcceptedSlot()

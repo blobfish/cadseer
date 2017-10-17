@@ -159,7 +159,7 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
     if(!pbf->hasSeerShape())
       throw std::runtime_error("no seer shape for part");
     const SeerShape &pss = pbf->getSeerShape(); //part seer shape.
-    const TopoDS_Shape &ps = pss.getRootOCCTShape(); //part shape.
+    const TopoDS_Shape &ps = occt::getFirstNonCompound(pss.getRootOCCTShape()); //part shape.
       
     if (payloadIn.updateMap.count(blank) != 1)
       throw std::runtime_error("couldn't find 'blank' input");
@@ -167,15 +167,11 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
     if(!bbf->hasSeerShape())
       throw std::runtime_error("no seer shape for blank");
     const SeerShape &bss = bbf->getSeerShape(); //blank seer shape.
-    const TopoDS_Shape &bs = bss.getRootOCCTShape(); //blank shape.
+    const TopoDS_Shape &bs = occt::getFirstNonCompound(bss.getRootOCCTShape()); //blank shape.
       
     if (payloadIn.updateMap.count(nest) != 1)
       throw std::runtime_error("couldn't find 'nest' input");
     const ftr::Base *nbf = payloadIn.updateMap.equal_range(nest).first->second;
-    if(!nbf->hasSeerShape())
-      throw std::runtime_error("no seer shape for nest");
-    const SeerShape &nss = nbf->getSeerShape(); //nest seer shape.
-    const TopoDS_Shape ns = nss.getRootOCCTShape(); //nest shape.
     
     occt::BoundingBox bbbox(bs); //blank bounding box.
     

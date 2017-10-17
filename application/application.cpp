@@ -111,6 +111,8 @@ void Application::appStartSlot()
       this->quit();
     }
   }
+  
+  getMainWindow()->getViewer()->getGraphicsWidget()->setFocus();
 }
 
 void Application::quittingSlot()

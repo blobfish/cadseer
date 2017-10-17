@@ -22,11 +22,13 @@
 
 #include <BRep_Builder.hxx>
 #include <TopoDS_Compound.hxx>
+#include <TopoDS_Iterator.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopExp.hxx>
 #include <Standard_StdAllocator.hxx>
 
 #include <osg/KdTree>
+#include <osg/LightModel>
 
 #include <tools/idtools.h>
 #include <preferences/preferencesXML.h>
@@ -192,6 +194,31 @@ void Base::updateVisual()
   lod->accept(*kdTreeBuilder);
   
   applyColor();
+  
+  //if the root compound contains a face or shell, turn on 2 sided lighting.
+  auto add2Sided = [&]()
+  {
+    osg::LightModel *lm = new osg::LightModel();
+    lm->setTwoSided(true);
+    lod->getOrCreateStateSet()->setAttributeAndModes(lm);
+  };
+  for (TopoDS_Iterator it(seerShape->getRootOCCTShape()); it.More(); it.Next())
+  {
+    if
+    (
+      (it.Value().ShapeType() == TopAbs_SHELL) &&
+      (!it.Value().Closed())
+    )
+    {
+      add2Sided();
+      break;
+    }
+    if (it.Value().ShapeType() == TopAbs_FACE)
+    {
+      add2Sided();
+      break;
+    }
+  }
   
   setVisualClean();
 }

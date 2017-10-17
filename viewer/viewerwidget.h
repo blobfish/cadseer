@@ -30,6 +30,7 @@
 
 #include <selection/container.h>
 
+class QTextStream;
 namespace osgQt{class GraphicsWindowQt;}
 namespace vwr{class SpaceballManipulator;}
 namespace slc{class EventHandler; class OverlayHandler;}
@@ -54,6 +55,7 @@ public:
     const osg::Matrixd& getCurrentSystem() const;
     void setCurrentSystem(const osg::Matrixd &mIn);
     const osg::Matrixd& getViewSystem() const;
+    QTextStream& getInfo(QTextStream &stream) const;
     
     //! first is file path without dot and extension. second is extension without the dot
     void screenCapture(const std::string &, const std::string &);

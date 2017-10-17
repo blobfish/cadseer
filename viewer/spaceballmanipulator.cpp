@@ -217,7 +217,7 @@ bool SpaceballManipulator::handleMouse(const osgGA::GUIEventAdapter& ea, osgGA::
   
   //control key is going to have to be down before dragging occurs.
   //if a drag followed by the control key won't work.
-  if (ea.getKey() & EA::KEY_Control_L)
+  if (ea.getKey() == EA::KEY_Control_L)
   {
     if (ea.getEventType() == EA::KEYDOWN)
     {
