@@ -17,6 +17,7 @@
     <file>resources/images/viewLine.svg</file>
     <file>resources/images/viewIsolate.svg</file>
     <file>resources/images/viewHiddenLines.svg</file>
+    <file>resources/images/renderStyleToggle.svg</file>
     <file>resources/images/selectFeatures.svg</file>
     <file>resources/images/selectObjects.svg</file>
     <file>resources/images/selectShells.svg</file>
