@@ -253,13 +253,13 @@ void Widget::setupDispatcher()
 {
   msg::Mask mask;
   
-  mask = msg::Response | msg::Pre | msg::CloseProject;
+  mask = msg::Response | msg::Pre | msg::Close | msg::Project;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::closeProjectDispatched, this, boost::placeholders::_1)));
   
-  mask = msg::Response | msg::Post | msg::OpenProject;
+  mask = msg::Response | msg::Post | msg::Open | msg::Project;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::openNewProjectDispatched, this, boost::placeholders::_1)));
   
-  mask = msg::Response | msg::Post | msg::NewProject;
+  mask = msg::Response | msg::Post | msg::New | msg::Project;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::openNewProjectDispatched, this, boost::placeholders::_1)));
 }
 

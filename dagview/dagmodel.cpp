@@ -325,7 +325,7 @@ void Model::setupDispatcher()
   mask = msg::Response | msg::Pre | msg::Selection | msg::Remove;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::selectionSubtractionDispatched, this, _1)));
   
-  mask = msg::Response | msg::Pre | msg::CloseProject;;
+  mask = msg::Response | msg::Pre | msg::Close | msg::Project;;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::closeProjectDispatched, this, _1)));
   
   mask = msg::Response | msg::Feature | msg::Status;
@@ -1097,7 +1097,7 @@ void Model::toggleOverlaySlot()
 
 void Model::viewIsolateSlot()
 {
-  observer->out(msg::Message(msg::Request | msg::ViewIsolate));
+  observer->out(msg::Message(msg::Request | msg::View | msg::Isolate));
 }
 
 void Model::editColorSlot()
@@ -1134,7 +1134,7 @@ void Model::editFeatureSlot()
 
 void Model::infoFeatureSlot()
 {
-  observer->out(msg::Message(msg::Request | msg::ViewInfo));
+  observer->out(msg::Message(msg::Request | msg::Info));
 }
 
 void Model::renameAcceptedSlot()

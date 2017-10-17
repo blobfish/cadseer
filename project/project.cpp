@@ -536,7 +536,7 @@ void Project::setupDispatcher()
   mask = msg::Request | msg::UpdateVisual;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::updateVisualDispatched, this, _1)));
   
-  mask = msg::Request | msg::SaveProject;
+  mask = msg::Request | msg::Save | msg::Project;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::saveProjectRequestDispatched, this, _1)));
   
   mask = msg::Request | msg::CheckShapeIds;
@@ -1035,11 +1035,11 @@ void Project::serialWrite()
 
 void Project::save()
 {
-  observer->out(msg::Message(msg::Response | msg::Pre | msg::SaveProject));
+  observer->out(msg::Message(msg::Response | msg::Pre | msg::Save | msg::Project));
   
   gitManager->save();
   
-  observer->out(msg::Message(msg::Response | msg::Post | msg::SaveProject));
+  observer->out(msg::Message(msg::Response | msg::Post | msg::Save | msg::Project));
 }
 
 void Project::initializeNew()

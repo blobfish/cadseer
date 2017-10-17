@@ -265,7 +265,7 @@ QSettings& Application::getUserSettings()
 void Application::createNewProject(const std::string &directoryIn)
 {
   msg::Message preMessage;
-  preMessage.mask = msg::Response | msg::Pre | msg::NewProject;
+  preMessage.mask = msg::Response | msg::Pre | msg::New | msg::Project;
   observer->out(preMessage);
   
   //directoryIn has been verified to exist before this call.
@@ -277,14 +277,14 @@ void Application::createNewProject(const std::string &directoryIn)
   updateTitle();
   
   msg::Message postMessage;
-  postMessage.mask = msg::Response | msg::Post | msg::NewProject;
+  postMessage.mask = msg::Response | msg::Post | msg::New | msg::Project;
   observer->out(postMessage);
 }
 
 void Application::openProject(const std::string &directoryIn)
 {
   msg::Message preMessage;
-  preMessage.mask = msg::Response | msg::Pre | msg::OpenProject;
+  preMessage.mask = msg::Response | msg::Pre | msg::Open | msg::Project;
   observer->out(preMessage);
   
   assert(!project);
@@ -297,11 +297,11 @@ void Application::openProject(const std::string &directoryIn)
   updateTitle();
   
   msg::Message postMessage;
-  postMessage.mask = msg::Response | msg::Post | msg::OpenProject;
+  postMessage.mask = msg::Response | msg::Post | msg::Open | msg::Project;
   observer->out(postMessage);
   
   msg::Message viewFitMessage;
-  viewFitMessage.mask = msg::Request | msg::ViewFit;
+  viewFitMessage.mask = msg::Request | msg::View | msg::Fit;
   observer->out(viewFitMessage);
 }
 
@@ -310,7 +310,7 @@ void Application::closeProject()
   //something here for modified project.
   
   msg::Message preMessage;
-  preMessage.mask = msg::Response | msg::Pre | msg::CloseProject;
+  preMessage.mask = msg::Response | msg::Pre | msg::Close | msg::Project;
   observer->out(preMessage);
  
   if (project)
@@ -320,7 +320,7 @@ void Application::closeProject()
   }
   
   msg::Message postMessage;
-  postMessage.mask = msg::Response | msg::Post | msg::CloseProject;
+  postMessage.mask = msg::Response | msg::Post | msg::Close | msg::Project;
   observer->out(postMessage);
 }
 
@@ -337,11 +337,11 @@ void Application::updateTitle()
 void Application::setupDispatcher()
 {
   msg::Mask mask;
-  mask = msg::Request | msg::NewProject;
+  mask = msg::Request | msg::New | msg::Project;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Application::newProjectRequestDispatched, this, _1)));
-  mask = msg::Request | msg::OpenProject;
+  mask = msg::Request | msg::Open | msg::Project;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Application::openProjectRequestDispatched, this, _1)));
-  mask = msg::Request | msg::ProjectDialog;
+  mask = msg::Request | msg::Project | msg::Dialog;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Application::ProjectDialogRequestDispatched, this, _1)));
 }
 

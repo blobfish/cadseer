@@ -468,34 +468,34 @@ void ViewerWidget::setupDispatcher()
   mask = msg::Response | msg::Post | msg::UpdateVisual;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::visualUpdatedDispatched, this, _1)));
   
-  mask = msg::Request | msg::ViewTop;
+  mask = msg::Request | msg::View | msg::Top;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewTopDispatched, this, _1)));
   
-  mask = msg::Request | msg::ViewFront;
+  mask = msg::Request | msg::View | msg::Front;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewFrontDispatched, this, _1)));
   
-  mask = msg::Request | msg::ViewRight;
+  mask = msg::Request | msg::View | msg::Right;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewRightDispatched, this, _1)));
   
-  mask = msg::Request | msg::ViewIso;
+  mask = msg::Request | msg::View | msg::Iso;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewIsoDispatched, this, _1)));
   
-  mask = msg::Request | msg::ViewFit;
+  mask = msg::Request | msg::View | msg::Fit;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewFitDispatched, this, _1)));
   
-  mask = msg::Request | msg::ViewFill;
+  mask = msg::Request | msg::View | msg::Fill;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewFillDispatched, this, _1)));
   
-  mask = msg::Request | msg::ViewTriangulation;
+  mask = msg::Request | msg::View | msg::Triangulation;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewTriangulationDispatched, this, _1)));
   
   mask = msg::Request | msg::View | msg::RenderStyle | msg::Toggle;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::renderStyleToggleDispatched, this, _1)));
   
-  mask = msg::Request | msg::ExportOSG;
+  mask = msg::Request | msg::Export | msg::OSG;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::exportOSGDispatched, this, _1)));
   
-  mask = msg::Response | msg::Pre | msg::CloseProject;;
+  mask = msg::Response | msg::Pre | msg::Close | msg::Project;;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::closeProjectDispatched, this, _1)));
   
   mask = msg::Request | msg::SystemReset;
@@ -504,7 +504,7 @@ void ViewerWidget::setupDispatcher()
   mask = msg::Request | msg::SystemToggle;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::systemToggleDispatched, this, _1)));
   
-  mask = msg::Request | msg::ViewToggleHiddenLine;
+  mask = msg::Request | msg::View | msg::Toggle | msg::HiddenLine;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewToggleHiddenLinesDispatched, this, _1)));
 }
 

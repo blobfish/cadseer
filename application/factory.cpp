@@ -89,13 +89,13 @@ void Factory::setupDispatcher()
   msg::Mask mask;
   
   //main dispatcher.
-  mask = msg::Response | msg::Post | msg::NewProject;
+  mask = msg::Response | msg::Post | msg::New | msg::Project;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newProjectDispatched, this, _1)));
   
-  mask = msg::Response | msg::Post | msg::OpenProject;
+  mask = msg::Response | msg::Post | msg::Open | msg::Project;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::openProjectDispatched, this, _1)));
   
-  mask = msg::Response | msg::Pre | msg::CloseProject;
+  mask = msg::Response | msg::Pre | msg::Close | msg::Project;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::closeProjectDispatched, this, _1)));
   
   mask = msg::Response | msg::Post | msg::Selection | msg::Add;
@@ -137,16 +137,16 @@ void Factory::setupDispatcher()
   mask = msg::Request | msg::Construct | msg::DatumPlane;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newDatumPlaneDispatched, this, _1)));
   
-  mask = msg::Request | msg::ImportOCC;
+  mask = msg::Request | msg::Import | msg::OCC;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::importOCCDispatched, this, _1)));
   
-  mask = msg::Request | msg::ExportOCC;
+  mask = msg::Request | msg::Export | msg::OCC;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::exportOCCDispatched, this, _1)));
   
-  mask = msg::Request | msg::ImportStep;
+  mask = msg::Request | msg::Import | msg::Step;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::importStepDispatched, this, _1)));
   
-  mask = msg::Request | msg::ExportStep;
+  mask = msg::Request | msg::Export | msg::Step;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::exportStepDispatched, this, _1)));
   
   mask = msg::Request | msg::Preferences;
@@ -167,13 +167,13 @@ void Factory::setupDispatcher()
   mask = msg::Request | msg::DebugShapeGraph;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::debugShapeGraphDispatched, this, _1)));
   
-  mask = msg::Request | msg::ViewInfo;
+  mask = msg::Request | msg::Info;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::viewInfoDispatched, this, _1)));
   
   mask = msg::Request | msg::LinearMeasure;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::linearMeasureDispatched, this, _1)));
   
-  mask = msg::Request | msg::ViewIsolate;
+  mask = msg::Request | msg::View | msg::Isolate;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::viewIsolateDispatched, this, _1)));
   
   mask = msg::Request | msg::Construct | msg::Hollow;
@@ -1228,7 +1228,7 @@ void Factory::viewIsolateDispatched(const msg::Message&)
       feature->show3D();
   }
   
-  observer->out(msg::Message(msg::Request | msg::ViewFit));
+  observer->out(msg::Message(msg::Request | msg::View | msg::Fit));
   observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
 }
 

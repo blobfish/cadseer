@@ -421,43 +421,43 @@ void GestureHandler::constructMenu()
 
     osg::MatrixTransform *viewTop = gsn::buildCommandNode(":/resources/images/viewTop.svg", iconRadius);
     viewTop->setMatrix(dummy);
-    viewTop->setUserValue(attributeMask, (msg::Request | msg::ViewTop).to_string());
+    viewTop->setUserValue(attributeMask, (msg::Request | msg::View | msg::Top).to_string());
     viewTop->setUserValue(attributeStatus, QObject::tr("Top View Command").toStdString());
     viewStandard->insertChild(viewStandard->getNumChildren() - 2, viewTop);
 
     osg::MatrixTransform *viewFront = gsn::buildCommandNode(":/resources/images/viewFront.svg", iconRadius);
     viewFront->setMatrix(dummy);
-    viewFront->setUserValue(attributeMask, (msg::Request | msg::ViewFront).to_string());
+    viewFront->setUserValue(attributeMask, (msg::Request | msg::View | msg::Front).to_string());
     viewFront->setUserValue(attributeStatus, QObject::tr("View Front Command").toStdString());
     viewStandard->insertChild(viewStandard->getNumChildren() - 2, viewFront);
 
     osg::MatrixTransform *viewRight = gsn::buildCommandNode(":/resources/images/viewRight.svg", iconRadius);
     viewRight->setMatrix(dummy);
-    viewRight->setUserValue(attributeMask, (msg::Request | msg::ViewRight).to_string());
+    viewRight->setUserValue(attributeMask, (msg::Request | msg::View | msg::Right).to_string());
     viewRight->setUserValue(attributeStatus, QObject::tr("View Right Command").toStdString());
     viewStandard->insertChild(viewStandard->getNumChildren() - 2, viewRight);
 
     osg::MatrixTransform *viewIso = gsn::buildCommandNode(":/resources/images/viewIso.svg", iconRadius);
     viewIso->setMatrix(dummy);
-    viewIso->setUserValue(attributeMask, (msg::Request | msg::ViewIso).to_string());
+    viewIso->setUserValue(attributeMask, (msg::Request | msg::View | msg::Iso).to_string());
     viewIso->setUserValue(attributeStatus, QObject::tr("View Iso Command").toStdString());
     viewStandard->insertChild(viewStandard->getNumChildren() - 2, viewIso);
 
     osg::MatrixTransform *viewFit = gsn::buildCommandNode(":/resources/images/viewFit.svg", iconRadius);
     viewFit->setMatrix(dummy);
-    viewFit->setUserValue(attributeMask, (msg::Request | msg::ViewFit).to_string());
+    viewFit->setUserValue(attributeMask, (msg::Request | msg::View | msg::Fit).to_string());
     viewFit->setUserValue(attributeStatus, QObject::tr("View Fit Command").toStdString());
     viewBase->insertChild(viewBase->getNumChildren() - 2, viewFit);
     
     osg::MatrixTransform *viewFill = gsn::buildCommandNode(":/resources/images/viewFill.svg", iconRadius);
     viewFill->setMatrix(dummy);
-    viewFill->setUserValue(attributeMask, (msg::Request | msg::ViewFill).to_string());
+    viewFill->setUserValue(attributeMask, (msg::Request | msg::View | msg::Fill).to_string());
     viewFill->setUserValue(attributeStatus, QObject::tr("View Fill Command").toStdString());
     viewBase->insertChild(viewBase->getNumChildren() - 2, viewFill);
     
     osg::MatrixTransform *viewTriangulation = gsn::buildCommandNode(":/resources/images/viewTriangulation.svg", iconRadius);
     viewTriangulation->setMatrix(dummy);
-    viewTriangulation->setUserValue(attributeMask, (msg::Request | msg::ViewTriangulation).to_string());
+    viewTriangulation->setUserValue(attributeMask, (msg::Request | msg::View | msg::Triangulation).to_string());
     viewTriangulation->setUserValue(attributeStatus, QObject::tr("View Triangulation Command").toStdString());
     viewBase->insertChild(viewBase->getNumChildren() - 2, viewTriangulation);
     
@@ -469,13 +469,13 @@ void GestureHandler::constructMenu()
     
     osg::MatrixTransform *viewToggleHiddenLines = gsn::buildCommandNode(":/resources/images/viewHiddenLines.svg", iconRadius);
     viewToggleHiddenLines->setMatrix(dummy);
-    viewToggleHiddenLines->setUserValue(attributeMask, (msg::Request | msg::ViewToggleHiddenLine).to_string());
+    viewToggleHiddenLines->setUserValue(attributeMask, (msg::Request | msg::View | msg::Toggle | msg::HiddenLine).to_string());
     viewToggleHiddenLines->setUserValue(attributeStatus, QObject::tr("Toggle hidden lines Command").toStdString());
     viewBase->insertChild(viewBase->getNumChildren() - 2, viewToggleHiddenLines);
     
     osg::MatrixTransform *viewIsolate = gsn::buildCommandNode(":/resources/images/viewIsolate.svg", iconRadius);
     viewIsolate->setMatrix(dummy);
-    viewIsolate->setUserValue(attributeMask, (msg::Request | msg::ViewIsolate).to_string());
+    viewIsolate->setUserValue(attributeMask, (msg::Request | msg::View | msg::Isolate).to_string());
     viewIsolate->setUserValue(attributeStatus, QObject::tr("View Only Selected").toStdString());
     viewBase->insertChild(viewBase->getNumChildren() - 2, viewIsolate);
     
@@ -722,13 +722,13 @@ void GestureHandler::constructMenu()
     
     osg::MatrixTransform *fileImportOCC = gsn::buildCommandNode(":/resources/images/fileOCC.svg", iconRadius);
     fileImportOCC->setMatrix(dummy);
-    fileImportOCC->setUserValue(attributeMask, (msg::Request | msg::ImportOCC).to_string());
+    fileImportOCC->setUserValue(attributeMask, (msg::Request | msg::Import | msg::OCC).to_string());
     fileImportOCC->setUserValue(attributeStatus, QObject::tr("Import OCC Brep Command").toStdString());
     fileImport->insertChild(fileImport->getNumChildren() - 2, fileImportOCC);
     
     osg::MatrixTransform *fileImportStep = gsn::buildCommandNode(":/resources/images/fileStep.svg", iconRadius);
     fileImportStep->setMatrix(dummy);
-    fileImportStep->setUserValue(attributeMask, (msg::Request | msg::ImportStep).to_string());
+    fileImportStep->setUserValue(attributeMask, (msg::Request | msg::Import | msg::Step).to_string());
     fileImportStep->setUserValue(attributeStatus, QObject::tr("Import Step Command").toStdString());
     fileImport->insertChild(fileImport->getNumChildren() - 2, fileImportStep);
     
@@ -740,31 +740,31 @@ void GestureHandler::constructMenu()
     
     osg::MatrixTransform *fileExportOSG = gsn::buildCommandNode(":/resources/images/fileOSG.svg", iconRadius);
     fileExportOSG->setMatrix(dummy);
-    fileExportOSG->setUserValue(attributeMask, (msg::Request | msg::ExportOSG).to_string());
+    fileExportOSG->setUserValue(attributeMask, (msg::Request | msg::Export | msg::OSG).to_string());
     fileExportOSG->setUserValue(attributeStatus, QObject::tr("Export Open Scene Graph Command").toStdString());
     fileExport->insertChild(fileExport->getNumChildren() - 2, fileExportOSG);
     
     osg::MatrixTransform *fileExportOCC = gsn::buildCommandNode(":/resources/images/fileOCC.svg", iconRadius);
     fileExportOCC->setMatrix(dummy);
-    fileExportOCC->setUserValue(attributeMask, (msg::Request | msg::ExportOCC).to_string());
+    fileExportOCC->setUserValue(attributeMask, (msg::Request | msg::Export | msg::OCC).to_string());
     fileExportOCC->setUserValue(attributeStatus, QObject::tr("Export OCC Brep Command").toStdString());
     fileExport->insertChild(fileExport->getNumChildren() - 2, fileExportOCC);
     
     osg::MatrixTransform *fileExportStep = gsn::buildCommandNode(":/resources/images/fileStep.svg", iconRadius);
     fileExportStep->setMatrix(dummy);
-    fileExportStep->setUserValue(attributeMask, (msg::Request | msg::ExportStep).to_string());
+    fileExportStep->setUserValue(attributeMask, (msg::Request | msg::Export | msg::Step).to_string());
     fileExportStep->setUserValue(attributeStatus, QObject::tr("Export Step Command").toStdString());
     fileExport->insertChild(fileExport->getNumChildren() - 2, fileExportStep);
     
     osg::MatrixTransform *fileOpen = gsn::buildCommandNode(":/resources/images/fileOpen.svg", iconRadius);
     fileOpen->setMatrix(dummy);
-    fileOpen->setUserValue(attributeMask, (msg::Request | msg::ProjectDialog).to_string());
+    fileOpen->setUserValue(attributeMask, (msg::Request | msg::Project | msg::Dialog).to_string());
     fileOpen->setUserValue(attributeStatus, QObject::tr("Open Project Command").toStdString());
     fileBase->insertChild(fileBase->getNumChildren() - 2, fileOpen);
     
     osg::MatrixTransform *fileSave = gsn::buildCommandNode(":/resources/images/fileSave.svg", iconRadius);
     fileSave->setMatrix(dummy);
-    fileSave->setUserValue(attributeMask, (msg::Request | msg::SaveProject).to_string());
+    fileSave->setUserValue(attributeMask, (msg::Request | msg::Save | msg::Project).to_string());
     fileSave->setUserValue(attributeStatus, QObject::tr("Save Project Command").toStdString());
     fileBase->insertChild(fileBase->getNumChildren() - 2, fileSave);
     
@@ -802,7 +802,7 @@ void GestureHandler::constructMenu()
     
     osg::MatrixTransform *inpsectInfo = gsn::buildCommandNode(":/resources/images/inspectInfo.svg", iconRadius);
     inpsectInfo->setMatrix(dummy);
-    inpsectInfo->setUserValue(attributeMask, (msg::Request | msg::ViewInfo).to_string());
+    inpsectInfo->setUserValue(attributeMask, (msg::Request | msg::Info).to_string());
     inpsectInfo->setUserValue(attributeStatus, QObject::tr("View Info Command").toStdString());
     inspectBase->insertChild(inspectBase->getNumChildren() - 2, inpsectInfo);
     
