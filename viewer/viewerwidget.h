@@ -91,12 +91,13 @@ protected:
     void viewIsoDispatched(const msg::Message &);
     void viewFitDispatched(const msg::Message &);
     void viewFillDispatched(const msg::Message &);
-    void viewLineDispatched(const msg::Message &);
+    void viewTriangulationDispatched(const msg::Message &);
     void viewToggleHiddenLinesDispatched(const msg::Message&);
     void exportOSGDispatched(const msg::Message &);
     void closeProjectDispatched(const msg::Message &);
     void systemResetDispatched(const msg::Message &);
     void systemToggleDispatched(const msg::Message &);
+    void renderStyleToggleDispatched(const msg::Message &);
 };
 
 class StatsHandler : public osgViewer::StatsHandler

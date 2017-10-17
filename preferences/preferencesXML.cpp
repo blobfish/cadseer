@@ -110,6 +110,51 @@ namespace prf
   }
 
 
+  // RenderStyle
+  // 
+
+  RenderStyle::
+  RenderStyle (Value v)
+  : ::xml_schema::String (_xsd_RenderStyle_literals_[v])
+  {
+  }
+
+  RenderStyle::
+  RenderStyle (const char* v)
+  : ::xml_schema::String (v)
+  {
+  }
+
+  RenderStyle::
+  RenderStyle (const ::std::string& v)
+  : ::xml_schema::String (v)
+  {
+  }
+
+  RenderStyle::
+  RenderStyle (const ::xml_schema::String& v)
+  : ::xml_schema::String (v)
+  {
+  }
+
+  RenderStyle::
+  RenderStyle (const RenderStyle& v,
+               ::xml_schema::Flags f,
+               ::xml_schema::Container* c)
+  : ::xml_schema::String (v, f, c)
+  {
+  }
+
+  RenderStyle& RenderStyle::
+  operator= (Value v)
+  {
+    static_cast< ::xml_schema::String& > (*this) = 
+    ::xml_schema::String (_xsd_RenderStyle_literals_[v]);
+
+    return *this;
+  }
+
+
   // Display
   // 
 
@@ -159,6 +204,42 @@ namespace prf
   showCurrentSystem_default_value ()
   {
     return ShowCurrentSystemType (true);
+  }
+
+  const Display::RenderStyleOptional& Display::
+  renderStyle () const
+  {
+    return this->renderStyle_;
+  }
+
+  Display::RenderStyleOptional& Display::
+  renderStyle ()
+  {
+    return this->renderStyle_;
+  }
+
+  void Display::
+  renderStyle (const RenderStyleType& x)
+  {
+    this->renderStyle_.set (x);
+  }
+
+  void Display::
+  renderStyle (const RenderStyleOptional& x)
+  {
+    this->renderStyle_ = x;
+  }
+
+  void Display::
+  renderStyle (::std::unique_ptr< RenderStyleType > x)
+  {
+    this->renderStyle_.set (std::move (x));
+  }
+
+  const Display::RenderStyleType& Display::
+  renderStyle_default_value ()
+  {
+    return renderStyle_default_value_;
   }
 
 
@@ -2268,15 +2349,91 @@ namespace prf
   {
   }
 
+  // RenderStyle
+  //
+
+  RenderStyle::
+  RenderStyle (const ::xercesc::DOMElement& e,
+               ::xml_schema::Flags f,
+               ::xml_schema::Container* c)
+  : ::xml_schema::String (e, f, c)
+  {
+    _xsd_RenderStyle_convert ();
+  }
+
+  RenderStyle::
+  RenderStyle (const ::xercesc::DOMAttr& a,
+               ::xml_schema::Flags f,
+               ::xml_schema::Container* c)
+  : ::xml_schema::String (a, f, c)
+  {
+    _xsd_RenderStyle_convert ();
+  }
+
+  RenderStyle::
+  RenderStyle (const ::std::string& s,
+               const ::xercesc::DOMElement* e,
+               ::xml_schema::Flags f,
+               ::xml_schema::Container* c)
+  : ::xml_schema::String (s, e, f, c)
+  {
+    _xsd_RenderStyle_convert ();
+  }
+
+  RenderStyle* RenderStyle::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class RenderStyle (*this, f, c);
+  }
+
+  RenderStyle::Value RenderStyle::
+  _xsd_RenderStyle_convert () const
+  {
+    ::xsd::cxx::tree::enum_comparator< char > c (_xsd_RenderStyle_literals_);
+    const Value* i (::std::lower_bound (
+                      _xsd_RenderStyle_indexes_,
+                      _xsd_RenderStyle_indexes_ + 3,
+                      *this,
+                      c));
+
+    if (i == _xsd_RenderStyle_indexes_ + 3 || _xsd_RenderStyle_literals_[*i] != *this)
+    {
+      throw ::xsd::cxx::tree::unexpected_enumerator < char > (*this);
+    }
+
+    return *i;
+  }
+
+  const char* const RenderStyle::
+  _xsd_RenderStyle_literals_[3] =
+  {
+    "fill",
+    "triangulation",
+    "wireframe"
+  };
+
+  const RenderStyle::Value RenderStyle::
+  _xsd_RenderStyle_indexes_[3] =
+  {
+    ::prf::RenderStyle::fill,
+    ::prf::RenderStyle::triangulation,
+    ::prf::RenderStyle::wireframe
+  };
+
   // Display
   //
+
+  const Display::RenderStyleType Display::renderStyle_default_value_ (
+    "fill");
 
   Display::
   Display (const ShowHiddenLinesType& showHiddenLines,
            const ShowCurrentSystemType& showCurrentSystem)
   : ::xml_schema::Type (),
     showHiddenLines_ (showHiddenLines, this),
-    showCurrentSystem_ (showCurrentSystem, this)
+    showCurrentSystem_ (showCurrentSystem, this),
+    renderStyle_ (this)
   {
   }
 
@@ -2286,7 +2443,8 @@ namespace prf
            ::xml_schema::Container* c)
   : ::xml_schema::Type (x, f, c),
     showHiddenLines_ (x.showHiddenLines_, f, this),
-    showCurrentSystem_ (x.showCurrentSystem_, f, this)
+    showCurrentSystem_ (x.showCurrentSystem_, f, this),
+    renderStyle_ (x.renderStyle_, f, this)
   {
   }
 
@@ -2296,7 +2454,8 @@ namespace prf
            ::xml_schema::Container* c)
   : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
     showHiddenLines_ (this),
-    showCurrentSystem_ (this)
+    showCurrentSystem_ (this),
+    renderStyle_ (this)
   {
     if ((f & ::xml_schema::Flags::base) == 0)
     {
@@ -2337,6 +2496,20 @@ namespace prf
         }
       }
 
+      // renderStyle
+      //
+      if (n.name () == "renderStyle" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< RenderStyleType > r (
+          RenderStyleTraits::create (i, f, this));
+
+        if (!this->renderStyle_)
+        {
+          this->renderStyle_.set (::std::move (r));
+          continue;
+        }
+      }
+
       break;
     }
 
@@ -2370,6 +2543,7 @@ namespace prf
       static_cast< ::xml_schema::Type& > (*this) = x;
       this->showHiddenLines_ = x.showHiddenLines_;
       this->showCurrentSystem_ = x.showCurrentSystem_;
+      this->renderStyle_ = x.renderStyle_;
     }
 
     return *this;
@@ -6225,6 +6399,25 @@ namespace prf
   }
 
   void
+  operator<< (::xercesc::DOMElement& e, const RenderStyle& i)
+  {
+    e << static_cast< const ::xml_schema::String& > (i);
+  }
+
+  void
+  operator<< (::xercesc::DOMAttr& a, const RenderStyle& i)
+  {
+    a << static_cast< const ::xml_schema::String& > (i);
+  }
+
+  void
+  operator<< (::xml_schema::ListStream& l,
+              const RenderStyle& i)
+  {
+    l << static_cast< const ::xml_schema::String& > (i);
+  }
+
+  void
   operator<< (::xercesc::DOMElement& e, const Display& i)
   {
     e << static_cast< const ::xml_schema::Type& > (i);
@@ -6249,6 +6442,18 @@ namespace prf
           e));
 
       s << i.showCurrentSystem ();
+    }
+
+    // renderStyle
+    //
+    if (i.renderStyle ())
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "renderStyle",
+          e));
+
+      s << *i.renderStyle ();
     }
   }
 

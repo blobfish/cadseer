@@ -14,10 +14,19 @@
   </xs:all>
 </xs:complexType>
 
+<xs:simpleType name="RenderStyle">
+  <xs:restriction base="xs:string">
+    <xs:enumeration value="fill"/>
+    <xs:enumeration value="triangulation"/>
+    <xs:enumeration value="wireframe"/>
+  </xs:restriction>
+</xs:simpleType>
+
 <xs:complexType name="Display">
   <xs:all>
     <xs:element name="showHiddenLines" type="xs:boolean" default="false"/>
     <xs:element name="showCurrentSystem" type="xs:boolean" default="true"/>
+    <xs:element name="renderStyle" type="RenderStyle" default="fill" minOccurs="0" maxOccurs="1"/>
   </xs:all>
 </xs:complexType>
 

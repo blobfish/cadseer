@@ -455,11 +455,17 @@ void GestureHandler::constructMenu()
     viewFill->setUserValue(attributeStatus, QObject::tr("View Fill Command").toStdString());
     viewBase->insertChild(viewBase->getNumChildren() - 2, viewFill);
     
-    osg::MatrixTransform *viewLine = gsn::buildCommandNode(":/resources/images/viewLine.svg", iconRadius);
-    viewLine->setMatrix(dummy);
-    viewLine->setUserValue(attributeMask, (msg::Request | msg::ViewLine).to_string());
-    viewLine->setUserValue(attributeStatus, QObject::tr("View Lines Command").toStdString());
-    viewBase->insertChild(viewBase->getNumChildren() - 2, viewLine);
+    osg::MatrixTransform *viewTriangulation = gsn::buildCommandNode(":/resources/images/viewTriangulation.svg", iconRadius);
+    viewTriangulation->setMatrix(dummy);
+    viewTriangulation->setUserValue(attributeMask, (msg::Request | msg::ViewTriangulation).to_string());
+    viewTriangulation->setUserValue(attributeStatus, QObject::tr("View Triangulation Command").toStdString());
+    viewBase->insertChild(viewBase->getNumChildren() - 2, viewTriangulation);
+    
+    osg::MatrixTransform *viewRenderStyleToggle = gsn::buildCommandNode(":/resources/images/renderStyleToggle.svg", iconRadius);
+    viewRenderStyleToggle->setMatrix(dummy);
+    viewRenderStyleToggle->setUserValue(attributeMask, (msg::Request | msg::View | msg::RenderStyle | msg::Toggle).to_string());
+    viewRenderStyleToggle->setUserValue(attributeStatus, QObject::tr("View Lines Command").toStdString());
+    viewBase->insertChild(viewBase->getNumChildren() - 2, viewRenderStyleToggle);
     
     osg::MatrixTransform *viewToggleHiddenLines = gsn::buildCommandNode(":/resources/images/viewHiddenLines.svg", iconRadius);
     viewToggleHiddenLines->setMatrix(dummy);

@@ -358,4 +358,7 @@ void Manager::ensureDefaults()
       prf::Strip::gap_default_value()
     );
   }
+  
+  if (!rootPtr->visual().display().renderStyle().present())
+    rootPtr->visual().display().renderStyle() = prf::Display::renderStyle_default_value();
 }

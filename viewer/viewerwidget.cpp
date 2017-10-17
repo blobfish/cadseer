@@ -94,7 +94,12 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     
     osg::ref_ptr<osg::PolygonMode> pm = new osg::PolygonMode;
     root->getOrCreateStateSet()->setAttribute(pm.get());
-    viewFillDispatched(msg::Message());
+    prf::RenderStyle::Value renderStyle = prf::Manager().rootPtr->visual().display().renderStyle().get();
+    if (renderStyle == prf::RenderStyle::fill)
+      viewFillDispatched(msg::Message());
+    else if (renderStyle == prf::RenderStyle::triangulation)
+      viewTriangulationDispatched(msg::Message());
+    //nothing for wireframe yet.
     
     osg::ShadeModel *shadeModel = new osg::ShadeModel(osg::ShadeModel::SMOOTH);
     root->getOrCreateStateSet()->setAttribute(shadeModel);
@@ -398,14 +403,32 @@ void ViewerWidget::viewFillDispatched(const msg::Message&)
     (root->getOrCreateStateSet()->getAttribute(osg::StateAttribute::POLYGONMODE));
   assert(pMode);
   pMode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL);
+  
+  //update preferences.
+  prf::manager().rootPtr->visual().display().renderStyle() = prf::RenderStyle::fill;
+  prf::manager().saveConfig();
 }
 
-void ViewerWidget::viewLineDispatched(const msg::Message&)
+void ViewerWidget::viewTriangulationDispatched(const msg::Message&)
 {
   osg::PolygonMode *pMode = dynamic_cast<osg::PolygonMode*>
     (root->getOrCreateStateSet()->getAttribute(osg::StateAttribute::POLYGONMODE));
   assert(pMode);
   pMode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
+  
+  //update preferences.
+  prf::manager().rootPtr->visual().display().renderStyle() = prf::RenderStyle::triangulation;
+  prf::manager().saveConfig();
+}
+
+void ViewerWidget::renderStyleToggleDispatched(const msg::Message &)
+{
+  prf::RenderStyle::Value cStyle = prf::Manager().rootPtr->visual().display().renderStyle().get();
+  if (cStyle == prf::RenderStyle::fill)
+    viewTriangulationDispatched(msg::Message());
+  else if (cStyle == prf::RenderStyle::triangulation)
+    viewFillDispatched(msg::Message());
+  //wireframe some day.
 }
 
 void ViewerWidget::exportOSGDispatched(const msg::Message&)
@@ -463,8 +486,11 @@ void ViewerWidget::setupDispatcher()
   mask = msg::Request | msg::ViewFill;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewFillDispatched, this, _1)));
   
-  mask = msg::Request | msg::ViewLine;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewLineDispatched, this, _1)));
+  mask = msg::Request | msg::ViewTriangulation;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewTriangulationDispatched, this, _1)));
+  
+  mask = msg::Request | msg::View | msg::RenderStyle | msg::Toggle;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::renderStyleToggleDispatched, this, _1)));
   
   mask = msg::Request | msg::ExportOSG;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::exportOSGDispatched, this, _1)));

@@ -73,7 +73,7 @@ namespace msg
     static const Mask ViewRight(Mask().set(                     34));//!< command
     static const Mask ViewFit(Mask().set(                       35));//!< command
     static const Mask ViewFill(Mask().set(                      36));//!< command
-    static const Mask ViewLine(Mask().set(                      37));//!< command
+    static const Mask ViewTriangulation(Mask().set(             37));//!< command
     static const Mask Box(Mask().set(                           38));//!< command
     static const Mask Sphere(Mask().set(                        39));//!< command
     static const Mask Cone(Mask().set(                          40));//!< command
@@ -129,6 +129,8 @@ namespace msg
     static const Mask Nest(Mask().set(                          90));//!< command move up someday.
     static const Mask DieSet(Mask().set(                        91));//!< command move up someday.
     static const Mask Quote(Mask().set(                         92));//!< command move up someday.
+    static const Mask View(Mask().set(                          93));//!< command move up someday.
+    static const Mask RenderStyle(Mask().set(                   94));//!< command move up someday.
   
     typedef boost::variant
     <
