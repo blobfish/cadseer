@@ -21,6 +21,8 @@
 #include <sstream>
 #include <assert.h>
 
+#include <boost/variant.hpp>
+
 #include <osgViewer/GraphicsWindow>
 
 #include <modelviz/nodemaskdefs.h>

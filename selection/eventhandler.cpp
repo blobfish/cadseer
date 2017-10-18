@@ -20,6 +20,8 @@
 #include <iostream>
 #include <assert.h>
 
+#include <boost/variant.hpp>
+
 #include <osg/Geometry>
 #include <osg/View>
 #include <osgViewer/View>

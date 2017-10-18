@@ -20,6 +20,8 @@
 #include <iostream>
 #include <memory>
 
+#include <boost/variant.hpp>
+
 #include <QTimer>
 #include <QMessageBox>
 #include <QSettings>

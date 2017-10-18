@@ -21,6 +21,8 @@
 #include <sstream>
 #include <assert.h>
 
+#include <boost/variant.hpp>
+
 #include <QApplication>
 
 #include <osg/Switch>

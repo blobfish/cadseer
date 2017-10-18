@@ -19,6 +19,8 @@
 
 #include <sstream>
 
+#include <boost/variant.hpp>
+
 #include <QAction>
 
 #include <osg/Node>

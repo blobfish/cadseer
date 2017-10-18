@@ -30,6 +30,8 @@
 #include <QLabel>
 #include <QPushButton>
 
+#include <boost/variant.hpp>
+
 #include <BRepCheck_Analyzer.hxx>
 #include <BOPAlgo_ArgumentAnalyzer.hxx>
 #include <TopExp_Explorer.hxx>

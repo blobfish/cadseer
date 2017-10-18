@@ -19,6 +19,8 @@
 
 #include <functional>
 
+#include <boost/variant.hpp>
+
 #include <osg/Geometry> //need this for containers.
 
 #include <application/application.h>

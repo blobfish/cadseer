@@ -19,6 +19,8 @@
 
 #include <cassert>
 
+#include <boost/variant.hpp>
+
 #include <project/libgit2pp/src/index.hpp>
 #include <project/libgit2pp/src/commit.hpp>
 #include <project/libgit2pp/src/branch.hpp>

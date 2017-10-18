@@ -20,6 +20,7 @@
 #include <cassert>
 
 #include <boost/signals2/shared_connection_block.hpp>
+#include <boost/variant.hpp>
 
 #include <globalutilities.h>
 #include <library/csysdragger.h>

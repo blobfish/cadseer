@@ -17,12 +17,17 @@
  *
  */
 
+#include <boost/variant/variant.hpp>
+
 #include <osg/Node>
 
 #include <message/message.h>
 
 using namespace msg;
 
+Message::Message() : mask(0){}
+
+Message::Message(const Mask &maskIn) : mask(maskIn){}
 
 msg::Message msg::buildGitMessage(const std::string &messageIn)
 {

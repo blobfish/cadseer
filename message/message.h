@@ -24,7 +24,7 @@
 #include <functional>
 #include <unordered_map>
 
-#include <boost/variant.hpp>
+#include <boost/variant/variant_fwd.hpp>
 
 #include <project/message.h>
 #include <selection/message.h>
@@ -143,10 +143,10 @@ namespace msg
   
     struct Message
     {
-    Message(){}
-    Message(const Mask &maskIn) : mask(maskIn){}
-    Mask mask = 0;
-    Payload payload;
+      Message();
+      Message(const Mask &maskIn);
+      Mask mask;
+      Payload payload;
     };
 
     typedef std::function< void (const Message&) > MessageHandler;

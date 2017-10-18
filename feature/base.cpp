@@ -20,6 +20,8 @@
 #include <QDir>
 #include <QTextStream>
 
+#include <boost/variant/variant.hpp>
+
 #include <BRep_Builder.hxx>
 #include <TopoDS_Compound.hxx>
 #include <TopoDS_Iterator.hxx>

@@ -19,6 +19,8 @@
 
 #include <iostream>
 
+#include <boost/variant.hpp>
+
 #include <QString>
 #include <QTextStream>
 #include <QGraphicsTextItem>

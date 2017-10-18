@@ -21,6 +21,8 @@
 #include <QHideEvent>
 #include <QTimer>
 
+#include <boost/variant.hpp>
+
 #include <message/message.h>
 #include <message/observer.h>
 #include <selection/message.h>

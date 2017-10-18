@@ -20,6 +20,8 @@
 #include <iostream>
 #include <iomanip>
 
+#include <boost/variant.hpp>
+
 #include <QHBoxLayout>
 #include <QApplication>
 #include <QDir>

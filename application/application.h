@@ -27,6 +27,8 @@
 
 #include <osg/Node> //for viewer message.
 
+#include <boost/variant/variant.hpp>
+
 #include <message/message.h>
 
 class QSettings;

@@ -17,6 +17,8 @@
  *
  */
 
+#include <boost/variant.hpp>
+
 #include <QHBoxLayout>
 #include <QSettings>
 #include <QShowEvent>

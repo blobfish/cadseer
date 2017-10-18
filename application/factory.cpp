@@ -29,6 +29,7 @@
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/timer/timer.hpp>
+#include <boost/variant.hpp>
 
 #include <BRepTools.hxx>
 #include <TopoDS_Edge.hxx>
