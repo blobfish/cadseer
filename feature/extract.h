@@ -40,12 +40,12 @@ namespace ftr
       boost::uuids::uuid id = gu::createRandomId(); //!< just used for runtime sync with dialog. no serial etc...
       Picks picks; //!< seeds for accrue
       AccrueType accrueType;
-      std::shared_ptr<Parameter> parameter; //!< degrees for tangent tolerance.
+      std::shared_ptr<prm::Parameter> parameter; //!< degrees for tangent tolerance.
       osg::ref_ptr<lbr::PLabel> label; //!< graphic icon
     };
     typedef std::vector<AccruePick> AccruePicks;
     
-    static std::shared_ptr<Parameter> buildAngleParameter(double deg = 0.0); //set up default.
+    static std::shared_ptr<prm::Parameter> buildAngleParameter(double deg = 0.0); //set up default.
     
     Extract();
     virtual void updateModel(const UpdatePayload&) override;

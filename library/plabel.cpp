@@ -36,6 +36,44 @@
 
 using namespace lbr;
 
+class TextVisitor : public boost::static_visitor<std::string>
+{
+public:
+  std::string operator()(double d) const
+  {
+    std::ostringstream stream;
+    stream << std::setprecision(3) << std::fixed << d << std::endl;
+    return stream.str();
+  }
+  std::string operator()(int i) const {return std::to_string(i);}
+  std::string operator()(bool b) const
+  {
+    if (b)
+      return "True";
+    return "False";
+  }
+  std::string operator()(const std::string &s) const {return s;}
+  std::string operator()(const boost::filesystem::path &p) const {return p.string();}
+  std::string operator()(const osg::Vec3d &vIn) const
+  {
+    std::ostringstream stream;
+    stream << std::setprecision(3) << std::fixed
+    << vIn.x() << ", " << vIn.y() << ", " << vIn.z();
+    return stream.str();
+  }
+  std::string operator()(const osg::Quat &qIn) const
+  {
+    std::ostringstream stream;
+    stream << std::setprecision(3) << std::fixed
+    << qIn.x() << ", " << qIn.y() << ", " << qIn.z() << ", " << qIn.w();
+    return stream.str();
+  }
+  std::string operator()(const osg::Matrixd&) const
+  {
+    return "some matrix";
+  }
+};
+
 PLabel::PLabel() : osg::MatrixTransform()
 {
   assert(0); //don't use default constructor.
@@ -46,7 +84,7 @@ PLabel::PLabel(const PLabel& copy, const osg::CopyOp& copyOp) : osg::MatrixTrans
   assert(0); //don't use copy.
 }
 
-PLabel::PLabel(ftr::Parameter* parameterIn) : osg::MatrixTransform(), parameter(parameterIn)
+PLabel::PLabel(ftr::prm::Parameter* parameterIn) : osg::MatrixTransform(), parameter(parameterIn)
 {
   getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
   build();
@@ -85,8 +123,8 @@ void PLabel::setText()
 {
   std::ostringstream stream;
   if (showName)
-    stream << parameter->getName().toStdString() << " = ";
-  stream << std::setprecision(3) << std::fixed << parameter->getValue() << std::endl;
+    stream << parameter->getName().toStdString() << " = "
+    << boost::apply_visitor(TextVisitor(), parameter->getVariant());
   text->setText(stream.str());
 }
 

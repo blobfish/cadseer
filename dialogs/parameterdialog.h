@@ -37,20 +37,25 @@ class QLabel;
 
 namespace boost{namespace uuids{class uuid;}}
 
-namespace ftr{class Parameter; class Base;}
+namespace ftr{class Base;}
+namespace ftr{namespace prm{class Parameter;}}
 namespace msg{class Message; class Observer;}
 
 namespace dlg
 {
-  class ExpressionEdit;
   class ParameterDialog : public QDialog
   {
     Q_OBJECT
   public:
-    ParameterDialog(ftr::Parameter *parameterIn, const boost::uuids::uuid &idIn);
+    ParameterDialog(ftr::prm::Parameter *parameterIn, const boost::uuids::uuid &idIn);
     virtual ~ParameterDialog() override;
-    ftr::Parameter *parameter = nullptr;
+    ftr::prm::Parameter *parameter = nullptr;
+    QWidget *editWidget;
 
+    void valueHasChangedDouble();
+    void valueHasChangedBool();
+    
+    void constantHasChangedDouble();
   private:
     void buildGui();
     void valueHasChanged();
@@ -60,13 +65,15 @@ namespace dlg
     std::unique_ptr<msg::Observer> observer;
     void featureRemovedDispatched(const msg::Message &);
     ftr::Base *feature;
-    ExpressionEdit *editLine;
     double lastValue;
   private Q_SLOTS:
-    void updateSlot();
-    void textEditedSlot(const QString &);
     void requestLinkSlot(const QString &);
     void requestUnlinkSlot();
+    
+    void updateDoubleSlot();
+    void textEditedDoubleSlot(const QString &);
+    
+    void boolChangedSlot(int);
   };
 }
 

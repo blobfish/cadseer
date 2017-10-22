@@ -5,12 +5,65 @@
   xmlns:srl="http://www.cadseer.com/prj/srl"
 >
   
+<xs:complexType name="Vec3d">
+  <xs:all>
+    <xs:element name="x" type="xs:double" default="NaN"/>
+    <xs:element name="y" type="xs:double" default="NaN"/>
+    <xs:element name="z" type="xs:double" default="NaN"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="Quat">
+  <xs:all>
+    <xs:element name="x" type="xs:double" default="NaN"/>
+    <xs:element name="y" type="xs:double" default="NaN"/>
+    <xs:element name="z" type="xs:double" default="NaN"/>
+    <xs:element name="w" type="xs:double" default="NaN"/>
+  </xs:all>
+</xs:complexType>
+
+<!-- this is duplicate of csysbase CSys type -->
+<xs:complexType name="Matrixd">
+  <xs:all>
+    <xs:element name="i0j0" type="xs:double" default="1.0"/>
+    <xs:element name="i0j1" type="xs:double" default="0.0"/>
+    <xs:element name="i0j2" type="xs:double" default="0.0"/>
+    <xs:element name="i0j3" type="xs:double" default="0.0"/>
+    <xs:element name="i1j0" type="xs:double" default="0.0"/>
+    <xs:element name="i1j1" type="xs:double" default="1.0"/>
+    <xs:element name="i1j2" type="xs:double" default="0.0"/>
+    <xs:element name="i1j3" type="xs:double" default="0.0"/>
+    <xs:element name="i2j0" type="xs:double" default="0.0"/>
+    <xs:element name="i2j1" type="xs:double" default="0.0"/>
+    <xs:element name="i2j2" type="xs:double" default="1.0"/>
+    <xs:element name="i2j3" type="xs:double" default="0.0"/>
+    <xs:element name="i3j0" type="xs:double" default="0.0"/>
+    <xs:element name="i3j1" type="xs:double" default="0.0"/>
+    <xs:element name="i3j2" type="xs:double" default="0.0"/>
+    <xs:element name="i3j3" type="xs:double" default="1.0"/>
+  </xs:all>
+</xs:complexType>
+  
+<xs:complexType name="ParameterValue">
+  <xs:choice>
+    <xs:element name="aDouble" type="xs:double" default="NaN"/>
+    <xs:element name="anInteger" type="xs:int" default="0"/>
+    <xs:element name="aBool" type="xs:boolean" default="false"/>
+    <xs:element name="aString" type="xs:string"/>
+    <xs:element name="aPath" type="xs:anyURI"/>
+    <xs:element name="aVec3d" type="srl:Vec3d"/>
+    <xs:element name="aQuat" type="srl:Quat"/>
+    <xs:element name="aMatrixd" type="srl:Matrixd"/>
+  </xs:choice>
+</xs:complexType>  
+  
 <xs:complexType name="Parameter">
   <xs:all>
     <xs:element name="name" type="xs:string" default="Name"/>
     <xs:element name="constant" type="xs:boolean" default="true"/>
-    <xs:element name="value" type="xs:double" default="NaN"/>
+    <xs:element name="value" type="xs:double" default="NaN" minOccurs="0" maxOccurs="1"/>
     <xs:element name="id" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+    <xs:element name="pValue" type="srl:ParameterValue" minOccurs="0" maxOccurs="1"/>
   </xs:all>
 </xs:complexType>
 

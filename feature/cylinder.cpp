@@ -72,8 +72,8 @@ static const std::map<FeatureTag, std::string> featureTagMap =
 QIcon Cylinder::icon;
 
 Cylinder::Cylinder() : CSysBase(),
-  radius(ParameterNames::Radius, prf::manager().rootPtr->features().cylinder().get().radius()),
-  height(ParameterNames::Height, prf::manager().rootPtr->features().cylinder().get().height())
+  radius(prm::Names::Radius, prf::manager().rootPtr->features().cylinder().get().radius()),
+  height(prm::Names::Height, prf::manager().rootPtr->features().cylinder().get().height())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionCylinder.svg");
@@ -83,8 +83,8 @@ Cylinder::Cylinder() : CSysBase(),
   
   initializeMaps();
   
-  radius.setConstraint(ParameterConstraint::buildNonZeroPositive());
-  height.setConstraint(ParameterConstraint::buildNonZeroPositive());
+  radius.setConstraint(prm::Constraint::buildNonZeroPositive());
+  height.setConstraint(prm::Constraint::buildNonZeroPositive());
   
   parameterVector.push_back(&radius);
   parameterVector.push_back(&height);
@@ -128,33 +128,27 @@ void Cylinder::updateIPGroup()
   //height of radius dragger
   osg::Matrixd freshMatrix;
   freshMatrix.setRotate(osg::Quat(osg::PI_2, osg::Vec3d(-1.0, 0.0, 0.0)));
-  freshMatrix.setTrans(osg::Vec3d (0.0, 0.0, height / 2.0));
+  freshMatrix.setTrans(osg::Vec3d (0.0, 0.0, static_cast<double>(height) / 2.0));
   radiusIP->setMatrixDragger(freshMatrix);
   
   heightIP->setMatrix(gu::toOsg(system));
   radiusIP->setMatrix(gu::toOsg(system));
   
-  heightIP->mainDim->setSqueeze(radius);
-  heightIP->mainDim->setExtensionOffset(radius);
+  heightIP->mainDim->setSqueeze(static_cast<double>(radius));
+  heightIP->mainDim->setExtensionOffset(static_cast<double>(radius));
   
-  radiusIP->mainDim->setSqueeze(height/2.0);
-  radiusIP->mainDim->setExtensionOffset(height/2.0);
+  radiusIP->mainDim->setSqueeze(static_cast<double>(height) / 2.0);
+  radiusIP->mainDim->setExtensionOffset(static_cast<double>(height) / 2.0);
 }
 
 void Cylinder::setRadius(const double& radiusIn)
 {
-  if (radius == radiusIn)
-    return;
-  assert(radiusIn > Precision::Confusion());
-  radius = radiusIn;
+  radius.setValue(radiusIn);
 }
 
 void Cylinder::setHeight(const double& heightIn)
 {
-  if (height == heightIn)
-    return;
-  assert(heightIn > Precision::Confusion());
-  height = heightIn;
+  height.setValue(heightIn);
 }
 
 void Cylinder::setParameters(const double& radiusIn, const double& heightIn)
@@ -165,8 +159,8 @@ void Cylinder::setParameters(const double& radiusIn, const double& heightIn)
 
 void Cylinder::getParameters(double& radiusOut, double& heightOut) const
 {
-  radiusOut = radius;
-  heightOut = height;
+  radiusOut = static_cast<double>(radius);
+  heightOut = static_cast<double>(height);
 }
 
 void Cylinder::updateModel(const UpdatePayload &payloadIn)
@@ -177,7 +171,7 @@ void Cylinder::updateModel(const UpdatePayload &payloadIn)
   
   try
   {
-    CylinderBuilder cylinderMaker(radius, height, system);
+    CylinderBuilder cylinderMaker(static_cast<double>(radius), static_cast<double>(height), system);
     seerShape->setOCCTShape(cylinderMaker.getSolid());
     updateResult(cylinderMaker);
     setSuccess();

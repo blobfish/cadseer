@@ -55,10 +55,10 @@ boost::uuids::uuid Chamfer::referenceFaceId(const SeerShape &seerShapeIn, const 
   return faceIds.front();
 }
 
-std::shared_ptr< Parameter > Chamfer::buildSymParameter()
+std::shared_ptr< prm::Parameter > Chamfer::buildSymParameter()
 {
-  std::shared_ptr<Parameter> out(new Parameter(ParameterNames::Distance, prf::manager().rootPtr->features().chamfer().get().distance()));
-  out->setConstraint(ParameterConstraint::buildNonZeroPositive());
+  std::shared_ptr<prm::Parameter> out(new prm::Parameter(prm::Names::Distance, prf::manager().rootPtr->features().chamfer().get().distance()));
+  out->setConstraint(prm::Constraint::buildNonZeroPositive());
   return out;
 }
 

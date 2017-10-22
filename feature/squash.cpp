@@ -47,18 +47,18 @@ Squash::Squash() : Base()
   faceId = gu::createRandomId();
   wireId = gu::createRandomId();
   
-  granularity = std::shared_ptr<Parameter>
+  granularity = std::shared_ptr<prm::Parameter>
   (
-    new Parameter
+    new prm::Parameter
     (
       QObject::tr("Granularity"),
       static_cast<double>(prf::manager().rootPtr->features().squash().get().granularity())
     )
   );
-  ParameterBoundary lower(0.0, ParameterBoundary::End::Closed); // 0.0 means no update
-  ParameterBoundary upper(5.0, ParameterBoundary::End::Closed);
-  ParameterInterval interval(lower, upper);
-  ParameterConstraint c;
+  prm::Boundary lower(0.0, prm::Boundary::End::Closed); // 0.0 means no update
+  prm::Boundary upper(5.0, prm::Boundary::End::Closed);
+  prm::Interval interval(lower, upper);
+  prm::Constraint c;
   c.intervals.push_back(interval);
   granularity->setConstraint(c);
   

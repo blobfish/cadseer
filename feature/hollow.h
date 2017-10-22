@@ -51,7 +51,7 @@ namespace ftr
     void removeHollowPick(const Pick&);
   private:
     static QIcon icon;
-    Parameter offset;
+    prm::Parameter offset;
     osg::ref_ptr<lbr::PLabel> label; //!< graphic icon
     Picks hollowPicks;
     

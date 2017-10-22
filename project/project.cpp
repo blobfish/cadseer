@@ -242,7 +242,7 @@ ftr::Base* Project::findFeature(const uuid &idIn)
   return projectGraph[findVertex(idIn)].feature.get();
 }
 
-ftr::Parameter* Project::findParameter(const uuid &idIn) const
+ftr::prm::Parameter* Project::findParameter(const uuid &idIn) const
 {
   BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
   {
@@ -1125,7 +1125,7 @@ void Project::open()
     {
       for (const auto &sLink : project->expressionLinks().get().array())
       {
-        ftr::Parameter *parameter = findParameter(gu::stringToId(sLink.parameterId()));
+        ftr::prm::Parameter *parameter = findParameter(gu::stringToId(sLink.parameterId()));
         expressionManager->addLink(parameter, gu::stringToId(sLink.expressionId()));
       }
     }

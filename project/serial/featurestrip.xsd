@@ -20,7 +20,7 @@
     <xs:element name="width" type="srl:Parameter"/>
     <xs:element name="widthOffset" type="srl:Parameter"/>
     <xs:element name="gap" type="srl:Parameter"/>
-    <xs:element name="autoCalc" type="xs:boolean"/>
+    <xs:element name="autoCalc" type="srl:Parameter"/>
     <xs:element name="stripHeight" type="xs:double"/>
     <xs:element name="stations" type="srl:Stations"/>
   </xs:all>

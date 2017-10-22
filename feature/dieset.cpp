@@ -42,37 +42,37 @@ DieSet::DieSet()
   name = QObject::tr("DieSet");
   mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
-  length = std::shared_ptr<Parameter>(new Parameter(ParameterNames::Length, 1.0));
-  length->setConstraint(ParameterConstraint::buildNonZeroPositive());
+  length = std::shared_ptr<prm::Parameter>(new prm::Parameter(prm::Names::Length, 1.0));
+  length->setConstraint(prm::Constraint::buildNonZeroPositive());
   length->connectValue(boost::bind(&DieSet::setModelDirty, this));
   parameterVector.push_back(length.get());
   
-  width = std::shared_ptr<Parameter>(new Parameter(ParameterNames::Width, 1.0));
-  width->setConstraint(ParameterConstraint::buildNonZeroPositive());
+  width = std::shared_ptr<prm::Parameter>(new prm::Parameter(prm::Names::Width, 1.0));
+  width->setConstraint(prm::Constraint::buildNonZeroPositive());
   width->connectValue(boost::bind(&DieSet::setModelDirty, this));
   parameterVector.push_back(width.get());
   
-  lengthPadding = std::shared_ptr<Parameter>
+  lengthPadding = std::shared_ptr<prm::Parameter>
   (
-    new Parameter
+    new prm::Parameter
     (
       QObject::tr("Length Padding"),
       prf::manager().rootPtr->features().dieset().get().lengthPadding()
     )
   );
-  lengthPadding->setConstraint(ParameterConstraint::buildZeroPositive());
+  lengthPadding->setConstraint(prm::Constraint::buildZeroPositive());
   lengthPadding->connectValue(boost::bind(&DieSet::setModelDirty, this));
   parameterVector.push_back(lengthPadding.get());
   
-  widthPadding = std::shared_ptr<Parameter>
+  widthPadding = std::shared_ptr<prm::Parameter>
   (
-    new Parameter
+    new prm::Parameter
     (
       QObject::tr("Width Padding"),
       prf::manager().rootPtr->features().dieset().get().widthPadding()
     )
   );
-  widthPadding->setConstraint(ParameterConstraint::buildZeroPositive());
+  widthPadding->setConstraint(prm::Constraint::buildZeroPositive());
   widthPadding->connectValue(boost::bind(&DieSet::setModelDirty, this));
   parameterVector.push_back(widthPadding.get());
   

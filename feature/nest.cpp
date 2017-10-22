@@ -46,20 +46,20 @@ Nest::Nest() : Base()
   name = QObject::tr("Nest");
   mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
-  pitch = std::shared_ptr<Parameter>(new Parameter(QObject::tr("Pitch"), 1.0));
-  pitch->setConstraint(ParameterConstraint::buildNonZeroPositive());
+  pitch = std::shared_ptr<prm::Parameter>(new prm::Parameter(QObject::tr("Pitch"), 1.0));
+  pitch->setConstraint(prm::Constraint::buildNonZeroPositive());
   parameterVector.push_back(pitch.get());
   //pitch does not get wired up to dirty.
   
-  gap = std::shared_ptr<Parameter>
+  gap = std::shared_ptr<prm::Parameter>
   (
-    new Parameter
+    new prm::Parameter
     (
       QObject::tr("Gap"),
       prf::manager().rootPtr->features().nest().get().gap()
     )
   );
-  gap->setConstraint(ParameterConstraint::buildNonZeroPositive());
+  gap->setConstraint(prm::Constraint::buildNonZeroPositive());
   gap->connectValue(boost::bind(&Nest::setModelDirty, this));
   parameterVector.push_back(gap.get());
   

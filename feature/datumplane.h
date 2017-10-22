@@ -96,7 +96,7 @@ namespace ftr
     virtual void serialOut(prj::srl::SolverChoice &solverChoice) override;
     
     Pick facePick;
-    std::shared_ptr<Parameter> offset;
+    std::shared_ptr<prm::Parameter> offset;
     osg::ref_ptr<lbr::IPGroup> offsetIP;
     
     static bool canDoTypes(const slc::Containers &);

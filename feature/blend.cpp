@@ -62,17 +62,17 @@ Blend::Blend() : Base()
   mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
 }
 
-std::shared_ptr< Parameter > Blend::buildRadiusParameter()
+std::shared_ptr< prm::Parameter > Blend::buildRadiusParameter()
 {
-  std::shared_ptr<Parameter> out(new Parameter(ParameterNames::Radius, prf::manager().rootPtr->features().blend().get().radius()));
-  out->setConstraint(ParameterConstraint::buildZeroPositive());
+  std::shared_ptr<prm::Parameter> out(new prm::Parameter(prm::Names::Radius, prf::manager().rootPtr->features().blend().get().radius()));
+  out->setConstraint(prm::Constraint::buildZeroPositive());
   return out;
 }
 
-std::shared_ptr< Parameter > Blend::buildPositionParameter()
+std::shared_ptr< prm::Parameter > Blend::buildPositionParameter()
 {
-  std::shared_ptr<Parameter> out(new Parameter(ParameterNames::Position, 0.0));
-  out->setConstraint(ParameterConstraint::buildUnit());
+  std::shared_ptr<prm::Parameter> out(new prm::Parameter(prm::Names::Position, 0.0));
+  out->setConstraint(prm::Constraint::buildUnit());
   return out;
 }
 

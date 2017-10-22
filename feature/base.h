@@ -132,10 +132,10 @@ public:
   bool hasSeerShape() const {return static_cast<bool>(seerShape);}
   const SeerShape& getSeerShape() const {assert(seerShape); return *seerShape;}
   bool hasParameter(const QString &nameIn) const; //!< parameter names are not unique.
-  Parameter* getParameter(const QString &nameIn) const; //!< parameter names are not unique.
+  prm::Parameter* getParameter(const QString &nameIn) const; //!< parameter names are not unique.
   bool hasParameter(const boost::uuids::uuid &idIn) const;
-  Parameter* getParameter(const boost::uuids::uuid &idin) const;
-  const ParameterVector& getParameterVector() const{return parameterVector;}
+  prm::Parameter* getParameter(const boost::uuids::uuid &idin) const;
+  const prm::Vector& getParameterVector() const{return parameterVector;}
   
   virtual void serialWrite(const QDir &); //!< override in leaf classes only.
   std::string getFileName() const; //!< used by git.
@@ -153,7 +153,7 @@ protected:
   void serialIn(const prj::srl::FeatureBase& sBaseIn);
   
   QString name;
-  ParameterVector parameterVector;
+  prm::Vector parameterVector;
   
   std::unique_ptr<msg::Observer> observer;
   

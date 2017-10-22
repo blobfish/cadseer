@@ -56,7 +56,7 @@ static const std::map<FeatureTag, std::string> featureTagMap =
 
 QIcon Sphere::icon;
 
-Sphere::Sphere() : CSysBase(), radius(ParameterNames::Radius, prf::manager().rootPtr->features().sphere().get().radius())
+Sphere::Sphere() : CSysBase(), radius(prm::Names::Radius, prf::manager().rootPtr->features().sphere().get().radius())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionSphere.svg");
@@ -66,7 +66,7 @@ Sphere::Sphere() : CSysBase(), radius(ParameterNames::Radius, prf::manager().roo
   
   initializeMaps();
   
-  radius.setConstraint(ParameterConstraint::buildNonZeroPositive());
+  radius.setConstraint(prm::Constraint::buildNonZeroPositive());
   
   parameterVector.push_back(&radius);
   radius.connectValue(boost::bind(&Sphere::setModelDirty, this));
@@ -81,11 +81,7 @@ Sphere::~Sphere()
 
 void Sphere::setRadius(const double& radiusIn)
 {
-  if (radius == radiusIn)
-    return;
-  assert(radiusIn > Precision::Confusion());
-  setModelDirty();
-  radius = radiusIn;
+  radius.setValue(radiusIn);
 }
 
 void Sphere::setupIPGroup()
@@ -114,7 +110,7 @@ void Sphere::updateModel(const UpdatePayload& payloadIn)
   
   try
   {
-    BRepPrimAPI_MakeSphere sphereMaker(system, radius);
+    BRepPrimAPI_MakeSphere sphereMaker(system, static_cast<double>(radius));
     sphereMaker.Build();
     assert(sphereMaker.IsDone());
     seerShape->setOCCTShape(sphereMaker.Shape());

@@ -22,9 +22,12 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QPushButton>
+#include <QComboBox>
 #include <QTimer>
+#include <QTextStream>
 
 #include <tools/idtools.h>
+#include <tools/infotools.h>
 #include <expressions/manager.h>
 #include <expressions/stringtranslator.h>
 #include <expressions/value.h>
@@ -44,7 +47,168 @@
 
 using namespace dlg;
 
-ParameterDialog::ParameterDialog(ftr::Parameter *parameterIn, const boost::uuids::uuid &idIn):
+//build the appropriate widget editor.
+class WidgetFactoryVisitor : public boost::static_visitor<QWidget*>
+{
+public:
+  WidgetFactoryVisitor() = delete;
+  WidgetFactoryVisitor(ParameterDialog *dialogIn) : dialog(dialogIn){assert(dialog);}
+  QWidget* operator()(double) const {return buildExpressionEdit();}
+  QWidget* operator()(int) const {return buildExpressionEdit();}
+  QWidget* operator()(bool) const {return buildBool();}
+  QWidget* operator()(const std::string&) const {return buildString();}
+  QWidget* operator()(const boost::filesystem::path&) const {return buildPath();}
+  QWidget* operator()(const osg::Vec3d&) const {return buildVec3d();}
+  QWidget* operator()(const osg::Quat&) const {return buildQuat();}
+  QWidget* operator()(const osg::Matrixd&) const {return buildMatrix();}
+  
+private:
+  ParameterDialog *dialog;
+  
+  QWidget* buildExpressionEdit() const //!< might used for more than just doubles.
+  {
+    ExpressionEdit *editLine = new ExpressionEdit(dialog);
+    if (dialog->parameter->isConstant())
+      QTimer::singleShot(0, editLine->trafficLabel, SLOT(setTrafficGreenSlot()));
+    else
+      QTimer::singleShot(0, editLine->trafficLabel, SLOT(setLinkSlot()));
+    
+    //this might be needed for other types with some changes
+    ExpressionEditFilter *filter = new ExpressionEditFilter(dialog);
+    editLine->lineEdit->installEventFilter(filter);
+    QObject::connect(filter, SIGNAL(requestLinkSignal(QString)), dialog, SLOT(requestLinkSlot(QString)));
+    
+    QObject::connect(editLine->lineEdit, SIGNAL(textEdited(QString)), dialog, SLOT(textEditedDoubleSlot(QString)));
+    QObject::connect(editLine->lineEdit, SIGNAL(returnPressed()), dialog, SLOT(updateDoubleSlot()));
+    QObject::connect(editLine->trafficLabel, SIGNAL(requestUnlinkSignal()), dialog, SLOT(requestUnlinkSlot()));
+    
+    return editLine;
+  }
+  
+  QWidget* buildBool() const
+  {
+    QComboBox *out = new QComboBox(dialog);
+    out->addItem(QObject::tr("True"), QVariant(true));
+    out->addItem(QObject::tr("False"), QVariant(false));
+    
+    if (static_cast<bool>(*(dialog->parameter)))
+      out->setCurrentIndex(0);
+    else
+      out->setCurrentIndex(1);
+    
+    QObject::connect(out, SIGNAL(currentIndexChanged(int)), dialog, SLOT(boolChangedSlot(int)));
+    
+    return out;
+  }
+  
+  QWidget* buildString() const
+  {
+    QLineEdit* out = new QLineEdit(dialog);
+    out->setText(QString::fromStdString(static_cast<std::string>(*(dialog->parameter))));
+    
+    //connect to dialog slots
+    
+    return out;
+  }
+  
+  QWidget* buildPath() const
+  {
+    QLineEdit* out = new QLineEdit(dialog);
+    out->setText(QString::fromStdString(static_cast<boost::filesystem::path>(*(dialog->parameter)).string()));
+    
+    //more elaborate control with browse button etc.
+    
+    //connect to dialog slots
+    
+    return out;
+  }
+  
+  QWidget* buildVec3d() const
+  {
+    QLineEdit* out = new QLineEdit(dialog);
+    
+    QString buffer;
+    QTextStream stream(&buffer);
+    gu::osgVectorOut(stream, static_cast<osg::Vec3d>(*(dialog->parameter)));
+    out->setText(buffer);
+    
+    //more elaborate control with vector selection?
+    
+    //connect to dialog slots
+    
+    return out;
+  }
+  
+  QWidget* buildQuat() const
+  {
+    QLineEdit* out = new QLineEdit(dialog);
+    
+    QString buffer;
+    QTextStream stream(&buffer);
+    gu::osgQuatOut(stream, static_cast<osg::Quat>(*(dialog->parameter)));
+    out->setText(buffer);
+    
+    //more elaborate control with quat selection?
+    
+    //connect to dialog slots
+    
+    return out;
+  }
+  
+  QWidget* buildMatrix() const
+  {
+    QLineEdit* out = new QLineEdit(dialog);
+    
+    QString buffer;
+    QTextStream stream(&buffer);
+    gu::osgMatrixOut(stream, static_cast<osg::Matrixd>(*(dialog->parameter)));
+    out->setText(buffer);
+    
+    //more elaborate control with matrix selection?
+    
+    //connect to dialog slots
+    
+    return out;
+  }
+};
+
+//react to value has changed based upon type.
+class ValueChangedVisitor : public boost::static_visitor<>
+{
+public:
+  ValueChangedVisitor() = delete;
+  ValueChangedVisitor(ParameterDialog *dialogIn) : dialog(dialogIn){assert(dialog);}
+  void operator()(double) const {dialog->valueHasChangedDouble();}
+  void operator()(int) const {}
+  void operator()(bool) const {dialog->valueHasChangedBool();}
+  void operator()(const std::string&) const {}
+  void operator()(const boost::filesystem::path&) const {}
+  void operator()(const osg::Vec3d&) const {}
+  void operator()(const osg::Quat&) const {}
+  void operator()(const osg::Matrixd&) const {}
+private:
+  ParameterDialog *dialog;
+};
+
+//react to constant has changed based upon type.
+class ConstantChangedVisitor : public boost::static_visitor<>
+{
+public:
+  ConstantChangedVisitor() = delete;
+  ConstantChangedVisitor(ParameterDialog *dialogIn) : dialog(dialogIn){assert(dialog);}
+  void operator()(double) const {dialog->constantHasChangedDouble();}
+  void operator()(int) const {}
+  void operator()(bool) const {} //don't think bool should be anything other than constant?
+  void operator()(const std::string&) const {}
+  void operator()(const boost::filesystem::path&) const {}
+  void operator()(const osg::Vec3d&) const {}
+  void operator()(const osg::Quat&) const {}
+  void operator()(const osg::Matrixd&) const {}
+private:
+  ParameterDialog *dialog;
+};
+
+ParameterDialog::ParameterDialog(ftr::prm::Parameter *parameterIn, const boost::uuids::uuid &idIn):
   QDialog(static_cast<app::Application*>(qApp)->getMainWindow()),
   parameter(parameterIn)
 {
@@ -78,33 +242,26 @@ ParameterDialog::~ParameterDialog()
 
 void ParameterDialog::buildGui()
 {
-  this->setWindowTitle(feature->getName());
+  QString title = feature->getName() + ": ";
+  title += QString::fromStdString(parameter->getValueTypeString());
+  this->setWindowTitle(title);
   
   QVBoxLayout *mainLayout = new QVBoxLayout(this);
   
-  QLabel *nameLabel = new QLabel(parameter->getName(), this);
-  editLine = new ExpressionEdit(this);
-  if (parameter->isConstant())
-    QTimer::singleShot(0, editLine->trafficLabel, SLOT(setTrafficGreenSlot()));
-  else
-    QTimer::singleShot(0, editLine->trafficLabel, SLOT(setLinkSlot()));
   QHBoxLayout *editLayout = new QHBoxLayout();
+  QLabel *nameLabel = new QLabel(parameter->getName(), this);
   editLayout->addWidget(nameLabel);
-  editLayout->addWidget(editLine);
+  
+  WidgetFactoryVisitor fv(this);
+  editWidget = boost::apply_visitor(fv, parameter->getVariant());
+  editLayout->addWidget(editWidget);
   
   mainLayout->addLayout(editLayout);
-  
-  ExpressionEditFilter *filter = new ExpressionEditFilter(this);
-  editLine->lineEdit->installEventFilter(filter);
-  
-  connect(editLine->lineEdit, SIGNAL(textEdited(QString)), this, SLOT(textEditedSlot(QString)));
-  connect(editLine->lineEdit, SIGNAL(returnPressed()), this, SLOT(updateSlot()));
-  connect(editLine->trafficLabel, SIGNAL(requestUnlinkSignal()), SLOT(requestUnlinkSlot()));
-  connect(filter, SIGNAL(requestLinkSignal(QString)), this, SLOT(requestLinkSlot(QString)));
 }
 
 void ParameterDialog::requestLinkSlot(const QString &stringIn)
 {
+  //for now we only get here if we have a double. because connect inside double condition.
   boost::uuids::uuid id = gu::stringToId(stringIn.toStdString());
   assert(!id.is_nil());
   
@@ -133,6 +290,7 @@ void ParameterDialog::requestLinkSlot(const QString &stringIn)
 
 void ParameterDialog::requestUnlinkSlot()
 {
+  //for now we only get here if we have a double. because connect inside double condition.
   expr::Manager &eManager = static_cast<app::Application *>(qApp)->getProject()->getManager();
   assert(eManager.hasParameterLink(parameter->getId()));
   boost::uuids::uuid fId = eManager.getFormulaLink(parameter->getId());
@@ -150,22 +308,59 @@ void ParameterDialog::requestUnlinkSlot()
 
 void ParameterDialog::valueHasChanged()
 {
-  lastValue = parameter->getValue();
+  ValueChangedVisitor v(this);
+  boost::apply_visitor(v, parameter->getVariant());
+}
+
+void ParameterDialog::valueHasChangedDouble()
+{
+  ExpressionEdit *eEdit = dynamic_cast<ExpressionEdit*>(editWidget);
+  assert(eEdit);
+  
+  lastValue = static_cast<double>(*parameter);
   if (parameter->isConstant())
   {
-    editLine->lineEdit->setText(QString::number(parameter->getValue(), 'f', 12));
-    editLine->lineEdit->selectAll();
+    eEdit->lineEdit->setText(QString::number(lastValue, 'f', 12));
+    eEdit->lineEdit->selectAll();
   }
   //if it is linked we shouldn't need to change.
 }
 
+void ParameterDialog::valueHasChangedBool()
+{
+  QComboBox *cBox = dynamic_cast<QComboBox*>(editWidget);
+  assert(cBox);
+  
+  bool cwv = cBox->currentData().toBool(); //current widget value
+  bool cpv = static_cast<bool>(*parameter); //current parameter value
+  if (cwv != cpv)
+  {
+    if (cpv)
+      cBox->setCurrentIndex(0);
+    else
+      cBox->setCurrentIndex(1);
+    //setting this will trigger this' changed slot, but at that
+    //point combo box value and parameter value will be equal,
+    //so, no recurse.
+  }
+}
+
 void ParameterDialog::constantHasChanged()
 {
+  ConstantChangedVisitor v(this);
+  boost::apply_visitor(v, parameter->getVariant());
+}
+
+void ParameterDialog::constantHasChangedDouble()
+{
+  ExpressionEdit *eEdit = dynamic_cast<ExpressionEdit*>(editWidget);
+  assert(eEdit);
+  
   if (parameter->isConstant())
   {
-    editLine->trafficLabel->setTrafficGreenSlot();
-    editLine->lineEdit->setReadOnly(false);
-    editLine->setFocus();
+    eEdit->trafficLabel->setTrafficGreenSlot();
+    eEdit->lineEdit->setReadOnly(false);
+    eEdit->setFocus();
   }
   else
   {
@@ -173,36 +368,38 @@ void ParameterDialog::constantHasChanged()
     assert(eManager.hasParameterLink(parameter->getId()));
     std::string formulaName = eManager.getFormulaName(eManager.getFormulaLink(parameter->getId()));
     
-    editLine->trafficLabel->setLinkSlot();
-    editLine->lineEdit->setText(QString::fromStdString(formulaName));
-    editLine->clearFocus();
-    editLine->lineEdit->deselect();
-    editLine->lineEdit->setReadOnly(true);
+    eEdit->trafficLabel->setLinkSlot();
+    eEdit->lineEdit->setText(QString::fromStdString(formulaName));
+    eEdit->clearFocus();
+    eEdit->lineEdit->deselect();
+    eEdit->lineEdit->setReadOnly(true);
   }
-  valueHasChanged();
+  valueHasChangedDouble();
 }
 
 void ParameterDialog::featureRemovedDispatched(const msg::Message &messageIn)
 {
-  if (messageIn.mask == (msg::Response | msg::Pre | msg::Remove | msg::Feature))
-  {
-    prj::Message pMessage = boost::get<prj::Message>(messageIn.payload);
-    if(pMessage.feature->getId() == feature->getId())
-      this->reject();
-  }
+  prj::Message pMessage = boost::get<prj::Message>(messageIn.payload);
+  if(pMessage.feature->getId() == feature->getId())
+    this->reject();
 }
 
-void ParameterDialog::updateSlot()
+void ParameterDialog::updateDoubleSlot()
 {
+  //for now we only get here if we have a double. because connect inside double condition.
+  
   //if we are linked, we shouldn't need to do anything.
   if (!parameter->isConstant())
     return;
+  
+  ExpressionEdit *eEdit = dynamic_cast<ExpressionEdit*>(editWidget);
+  assert(eEdit);
 
   auto fail = [&]()
   {
-    editLine->lineEdit->setText(QString::number(lastValue, 'f', 12));
-    editLine->lineEdit->selectAll();
-    editLine->trafficLabel->setTrafficGreenSlot();
+    eEdit->lineEdit->setText(QString::number(lastValue, 'f', 12));
+    eEdit->lineEdit->selectAll();
+    eEdit->trafficLabel->setTrafficGreenSlot();
   };
 
   std::ostringstream gitStream;
@@ -214,7 +411,7 @@ void ParameterDialog::updateSlot()
   expr::Manager localManager;
   expr::StringTranslator translator(localManager);
   std::string formula("temp = ");
-  formula += editLine->lineEdit->text().toStdString();
+  formula += eEdit->lineEdit->text().toStdString();
   if (translator.parseString(formula) == expr::StringTranslator::ParseSucceeded)
   {
     localManager.update();
@@ -243,9 +440,12 @@ void ParameterDialog::updateSlot()
   }
 }
 
-void ParameterDialog::textEditedSlot(const QString &textIn)
+void ParameterDialog::textEditedDoubleSlot(const QString &textIn)
 {
-  editLine->trafficLabel->setTrafficYellowSlot();
+  ExpressionEdit *eEdit = dynamic_cast<ExpressionEdit*>(editWidget);
+  assert(eEdit);
+  
+  eEdit->trafficLabel->setTrafficYellowSlot();
   qApp->processEvents(); //need this or we never see yellow signal.
   
   expr::Manager localManager;
@@ -255,15 +455,31 @@ void ParameterDialog::textEditedSlot(const QString &textIn)
   if (translator.parseString(formula) == expr::StringTranslator::ParseSucceeded)
   {
     localManager.update();
-    editLine->trafficLabel->setTrafficGreenSlot();
+    eEdit->trafficLabel->setTrafficGreenSlot();
     assert(localManager.getFormulaValueType(translator.getFormulaOutId()) == expr::ValueType::Scalar);
     double value = boost::get<double>(localManager.getFormulaValue(translator.getFormulaOutId()));
-    editLine->goToolTipSlot(QString::number(value));
+    eEdit->goToolTipSlot(QString::number(value));
   }
   else
   {
-    editLine->trafficLabel->setTrafficRedSlot();
+    eEdit->trafficLabel->setTrafficRedSlot();
     int position = translator.getFailedPosition() - 8; // 7 chars for 'temp = ' + 1
-    editLine->goToolTipSlot(textIn.left(position) + "?");
+    eEdit->goToolTipSlot(textIn.left(position) + "?");
+  }
+}
+
+void ParameterDialog::boolChangedSlot(int i)
+{
+  bool cwv = static_cast<QComboBox*>(QObject::sender())->itemData(i).toBool(); //current widget value
+  if(parameter->setValue(cwv))
+  {
+    std::ostringstream gitStream;
+    gitStream
+    << QObject::tr("Feature: ").toStdString() << feature->getName().toStdString()
+    << QObject::tr("    Parameter ").toStdString() << parameter->getName().toStdString();
+    gitStream  << QObject::tr("    changed to: ").toStdString() << static_cast<bool>(parameter);
+    observer->out(msg::buildGitMessage(gitStream.str()));
+    if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
+      observer->out(msg::Mask(msg::Request | msg::Update));
   }
 }

@@ -36,7 +36,7 @@ namespace ftr
     Sphere();
     ~Sphere();
     void setRadius(const double &radiusIn);
-    double getRadius() const {return radius;}
+    double getRadius() const {return static_cast<double>(radius);}
     virtual void updateModel(const UpdatePayload&) override;
     virtual Type getType() const override {return Type::Sphere;}
     virtual const std::string& getTypeString() const override {return toString(Type::Sphere);}
@@ -46,7 +46,7 @@ namespace ftr
     void serialRead(const prj::srl::FeatureSphere &sSphere); //!<initializes this from sBox. not virtual, type already known.
     
   protected:
-    Parameter radius;
+    prm::Parameter radius;
     
     osg::ref_ptr<lbr::IPGroup> radiusIP;
     

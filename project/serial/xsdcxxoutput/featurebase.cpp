@@ -44,6 +44,814 @@ namespace prj
 {
   namespace srl
   {
+    // Vec3d
+    // 
+
+    const Vec3d::XType& Vec3d::
+    x () const
+    {
+      return this->x_.get ();
+    }
+
+    Vec3d::XType& Vec3d::
+    x ()
+    {
+      return this->x_.get ();
+    }
+
+    void Vec3d::
+    x (const XType& x)
+    {
+      this->x_.set (x);
+    }
+
+    Vec3d::XType Vec3d::
+    x_default_value ()
+    {
+      return XType (::std::numeric_limits< ::xml_schema::Double >::quiet_NaN ());
+    }
+
+    const Vec3d::YType& Vec3d::
+    y () const
+    {
+      return this->y_.get ();
+    }
+
+    Vec3d::YType& Vec3d::
+    y ()
+    {
+      return this->y_.get ();
+    }
+
+    void Vec3d::
+    y (const YType& x)
+    {
+      this->y_.set (x);
+    }
+
+    Vec3d::YType Vec3d::
+    y_default_value ()
+    {
+      return YType (::std::numeric_limits< ::xml_schema::Double >::quiet_NaN ());
+    }
+
+    const Vec3d::ZType& Vec3d::
+    z () const
+    {
+      return this->z_.get ();
+    }
+
+    Vec3d::ZType& Vec3d::
+    z ()
+    {
+      return this->z_.get ();
+    }
+
+    void Vec3d::
+    z (const ZType& x)
+    {
+      this->z_.set (x);
+    }
+
+    Vec3d::ZType Vec3d::
+    z_default_value ()
+    {
+      return ZType (::std::numeric_limits< ::xml_schema::Double >::quiet_NaN ());
+    }
+
+
+    // Quat
+    // 
+
+    const Quat::XType& Quat::
+    x () const
+    {
+      return this->x_.get ();
+    }
+
+    Quat::XType& Quat::
+    x ()
+    {
+      return this->x_.get ();
+    }
+
+    void Quat::
+    x (const XType& x)
+    {
+      this->x_.set (x);
+    }
+
+    Quat::XType Quat::
+    x_default_value ()
+    {
+      return XType (::std::numeric_limits< ::xml_schema::Double >::quiet_NaN ());
+    }
+
+    const Quat::YType& Quat::
+    y () const
+    {
+      return this->y_.get ();
+    }
+
+    Quat::YType& Quat::
+    y ()
+    {
+      return this->y_.get ();
+    }
+
+    void Quat::
+    y (const YType& x)
+    {
+      this->y_.set (x);
+    }
+
+    Quat::YType Quat::
+    y_default_value ()
+    {
+      return YType (::std::numeric_limits< ::xml_schema::Double >::quiet_NaN ());
+    }
+
+    const Quat::ZType& Quat::
+    z () const
+    {
+      return this->z_.get ();
+    }
+
+    Quat::ZType& Quat::
+    z ()
+    {
+      return this->z_.get ();
+    }
+
+    void Quat::
+    z (const ZType& x)
+    {
+      this->z_.set (x);
+    }
+
+    Quat::ZType Quat::
+    z_default_value ()
+    {
+      return ZType (::std::numeric_limits< ::xml_schema::Double >::quiet_NaN ());
+    }
+
+    const Quat::WType& Quat::
+    w () const
+    {
+      return this->w_.get ();
+    }
+
+    Quat::WType& Quat::
+    w ()
+    {
+      return this->w_.get ();
+    }
+
+    void Quat::
+    w (const WType& x)
+    {
+      this->w_.set (x);
+    }
+
+    Quat::WType Quat::
+    w_default_value ()
+    {
+      return WType (::std::numeric_limits< ::xml_schema::Double >::quiet_NaN ());
+    }
+
+
+    // Matrixd
+    // 
+
+    const Matrixd::I0j0Type& Matrixd::
+    i0j0 () const
+    {
+      return this->i0j0_.get ();
+    }
+
+    Matrixd::I0j0Type& Matrixd::
+    i0j0 ()
+    {
+      return this->i0j0_.get ();
+    }
+
+    void Matrixd::
+    i0j0 (const I0j0Type& x)
+    {
+      this->i0j0_.set (x);
+    }
+
+    Matrixd::I0j0Type Matrixd::
+    i0j0_default_value ()
+    {
+      return I0j0Type (1.0);
+    }
+
+    const Matrixd::I0j1Type& Matrixd::
+    i0j1 () const
+    {
+      return this->i0j1_.get ();
+    }
+
+    Matrixd::I0j1Type& Matrixd::
+    i0j1 ()
+    {
+      return this->i0j1_.get ();
+    }
+
+    void Matrixd::
+    i0j1 (const I0j1Type& x)
+    {
+      this->i0j1_.set (x);
+    }
+
+    Matrixd::I0j1Type Matrixd::
+    i0j1_default_value ()
+    {
+      return I0j1Type (.0);
+    }
+
+    const Matrixd::I0j2Type& Matrixd::
+    i0j2 () const
+    {
+      return this->i0j2_.get ();
+    }
+
+    Matrixd::I0j2Type& Matrixd::
+    i0j2 ()
+    {
+      return this->i0j2_.get ();
+    }
+
+    void Matrixd::
+    i0j2 (const I0j2Type& x)
+    {
+      this->i0j2_.set (x);
+    }
+
+    Matrixd::I0j2Type Matrixd::
+    i0j2_default_value ()
+    {
+      return I0j2Type (.0);
+    }
+
+    const Matrixd::I0j3Type& Matrixd::
+    i0j3 () const
+    {
+      return this->i0j3_.get ();
+    }
+
+    Matrixd::I0j3Type& Matrixd::
+    i0j3 ()
+    {
+      return this->i0j3_.get ();
+    }
+
+    void Matrixd::
+    i0j3 (const I0j3Type& x)
+    {
+      this->i0j3_.set (x);
+    }
+
+    Matrixd::I0j3Type Matrixd::
+    i0j3_default_value ()
+    {
+      return I0j3Type (.0);
+    }
+
+    const Matrixd::I1j0Type& Matrixd::
+    i1j0 () const
+    {
+      return this->i1j0_.get ();
+    }
+
+    Matrixd::I1j0Type& Matrixd::
+    i1j0 ()
+    {
+      return this->i1j0_.get ();
+    }
+
+    void Matrixd::
+    i1j0 (const I1j0Type& x)
+    {
+      this->i1j0_.set (x);
+    }
+
+    Matrixd::I1j0Type Matrixd::
+    i1j0_default_value ()
+    {
+      return I1j0Type (.0);
+    }
+
+    const Matrixd::I1j1Type& Matrixd::
+    i1j1 () const
+    {
+      return this->i1j1_.get ();
+    }
+
+    Matrixd::I1j1Type& Matrixd::
+    i1j1 ()
+    {
+      return this->i1j1_.get ();
+    }
+
+    void Matrixd::
+    i1j1 (const I1j1Type& x)
+    {
+      this->i1j1_.set (x);
+    }
+
+    Matrixd::I1j1Type Matrixd::
+    i1j1_default_value ()
+    {
+      return I1j1Type (1.0);
+    }
+
+    const Matrixd::I1j2Type& Matrixd::
+    i1j2 () const
+    {
+      return this->i1j2_.get ();
+    }
+
+    Matrixd::I1j2Type& Matrixd::
+    i1j2 ()
+    {
+      return this->i1j2_.get ();
+    }
+
+    void Matrixd::
+    i1j2 (const I1j2Type& x)
+    {
+      this->i1j2_.set (x);
+    }
+
+    Matrixd::I1j2Type Matrixd::
+    i1j2_default_value ()
+    {
+      return I1j2Type (.0);
+    }
+
+    const Matrixd::I1j3Type& Matrixd::
+    i1j3 () const
+    {
+      return this->i1j3_.get ();
+    }
+
+    Matrixd::I1j3Type& Matrixd::
+    i1j3 ()
+    {
+      return this->i1j3_.get ();
+    }
+
+    void Matrixd::
+    i1j3 (const I1j3Type& x)
+    {
+      this->i1j3_.set (x);
+    }
+
+    Matrixd::I1j3Type Matrixd::
+    i1j3_default_value ()
+    {
+      return I1j3Type (.0);
+    }
+
+    const Matrixd::I2j0Type& Matrixd::
+    i2j0 () const
+    {
+      return this->i2j0_.get ();
+    }
+
+    Matrixd::I2j0Type& Matrixd::
+    i2j0 ()
+    {
+      return this->i2j0_.get ();
+    }
+
+    void Matrixd::
+    i2j0 (const I2j0Type& x)
+    {
+      this->i2j0_.set (x);
+    }
+
+    Matrixd::I2j0Type Matrixd::
+    i2j0_default_value ()
+    {
+      return I2j0Type (.0);
+    }
+
+    const Matrixd::I2j1Type& Matrixd::
+    i2j1 () const
+    {
+      return this->i2j1_.get ();
+    }
+
+    Matrixd::I2j1Type& Matrixd::
+    i2j1 ()
+    {
+      return this->i2j1_.get ();
+    }
+
+    void Matrixd::
+    i2j1 (const I2j1Type& x)
+    {
+      this->i2j1_.set (x);
+    }
+
+    Matrixd::I2j1Type Matrixd::
+    i2j1_default_value ()
+    {
+      return I2j1Type (.0);
+    }
+
+    const Matrixd::I2j2Type& Matrixd::
+    i2j2 () const
+    {
+      return this->i2j2_.get ();
+    }
+
+    Matrixd::I2j2Type& Matrixd::
+    i2j2 ()
+    {
+      return this->i2j2_.get ();
+    }
+
+    void Matrixd::
+    i2j2 (const I2j2Type& x)
+    {
+      this->i2j2_.set (x);
+    }
+
+    Matrixd::I2j2Type Matrixd::
+    i2j2_default_value ()
+    {
+      return I2j2Type (1.0);
+    }
+
+    const Matrixd::I2j3Type& Matrixd::
+    i2j3 () const
+    {
+      return this->i2j3_.get ();
+    }
+
+    Matrixd::I2j3Type& Matrixd::
+    i2j3 ()
+    {
+      return this->i2j3_.get ();
+    }
+
+    void Matrixd::
+    i2j3 (const I2j3Type& x)
+    {
+      this->i2j3_.set (x);
+    }
+
+    Matrixd::I2j3Type Matrixd::
+    i2j3_default_value ()
+    {
+      return I2j3Type (.0);
+    }
+
+    const Matrixd::I3j0Type& Matrixd::
+    i3j0 () const
+    {
+      return this->i3j0_.get ();
+    }
+
+    Matrixd::I3j0Type& Matrixd::
+    i3j0 ()
+    {
+      return this->i3j0_.get ();
+    }
+
+    void Matrixd::
+    i3j0 (const I3j0Type& x)
+    {
+      this->i3j0_.set (x);
+    }
+
+    Matrixd::I3j0Type Matrixd::
+    i3j0_default_value ()
+    {
+      return I3j0Type (.0);
+    }
+
+    const Matrixd::I3j1Type& Matrixd::
+    i3j1 () const
+    {
+      return this->i3j1_.get ();
+    }
+
+    Matrixd::I3j1Type& Matrixd::
+    i3j1 ()
+    {
+      return this->i3j1_.get ();
+    }
+
+    void Matrixd::
+    i3j1 (const I3j1Type& x)
+    {
+      this->i3j1_.set (x);
+    }
+
+    Matrixd::I3j1Type Matrixd::
+    i3j1_default_value ()
+    {
+      return I3j1Type (.0);
+    }
+
+    const Matrixd::I3j2Type& Matrixd::
+    i3j2 () const
+    {
+      return this->i3j2_.get ();
+    }
+
+    Matrixd::I3j2Type& Matrixd::
+    i3j2 ()
+    {
+      return this->i3j2_.get ();
+    }
+
+    void Matrixd::
+    i3j2 (const I3j2Type& x)
+    {
+      this->i3j2_.set (x);
+    }
+
+    Matrixd::I3j2Type Matrixd::
+    i3j2_default_value ()
+    {
+      return I3j2Type (.0);
+    }
+
+    const Matrixd::I3j3Type& Matrixd::
+    i3j3 () const
+    {
+      return this->i3j3_.get ();
+    }
+
+    Matrixd::I3j3Type& Matrixd::
+    i3j3 ()
+    {
+      return this->i3j3_.get ();
+    }
+
+    void Matrixd::
+    i3j3 (const I3j3Type& x)
+    {
+      this->i3j3_.set (x);
+    }
+
+    Matrixd::I3j3Type Matrixd::
+    i3j3_default_value ()
+    {
+      return I3j3Type (1.0);
+    }
+
+
+    // ParameterValue
+    // 
+
+    const ParameterValue::ADoubleOptional& ParameterValue::
+    aDouble () const
+    {
+      return this->aDouble_;
+    }
+
+    ParameterValue::ADoubleOptional& ParameterValue::
+    aDouble ()
+    {
+      return this->aDouble_;
+    }
+
+    void ParameterValue::
+    aDouble (const ADoubleType& x)
+    {
+      this->aDouble_.set (x);
+    }
+
+    void ParameterValue::
+    aDouble (const ADoubleOptional& x)
+    {
+      this->aDouble_ = x;
+    }
+
+    ParameterValue::ADoubleType ParameterValue::
+    aDouble_default_value ()
+    {
+      return ADoubleType (::std::numeric_limits< ::xml_schema::Double >::quiet_NaN ());
+    }
+
+    const ParameterValue::AnIntegerOptional& ParameterValue::
+    anInteger () const
+    {
+      return this->anInteger_;
+    }
+
+    ParameterValue::AnIntegerOptional& ParameterValue::
+    anInteger ()
+    {
+      return this->anInteger_;
+    }
+
+    void ParameterValue::
+    anInteger (const AnIntegerType& x)
+    {
+      this->anInteger_.set (x);
+    }
+
+    void ParameterValue::
+    anInteger (const AnIntegerOptional& x)
+    {
+      this->anInteger_ = x;
+    }
+
+    ParameterValue::AnIntegerType ParameterValue::
+    anInteger_default_value ()
+    {
+      return AnIntegerType (0);
+    }
+
+    const ParameterValue::ABoolOptional& ParameterValue::
+    aBool () const
+    {
+      return this->aBool_;
+    }
+
+    ParameterValue::ABoolOptional& ParameterValue::
+    aBool ()
+    {
+      return this->aBool_;
+    }
+
+    void ParameterValue::
+    aBool (const ABoolType& x)
+    {
+      this->aBool_.set (x);
+    }
+
+    void ParameterValue::
+    aBool (const ABoolOptional& x)
+    {
+      this->aBool_ = x;
+    }
+
+    ParameterValue::ABoolType ParameterValue::
+    aBool_default_value ()
+    {
+      return ABoolType (false);
+    }
+
+    const ParameterValue::AStringOptional& ParameterValue::
+    aString () const
+    {
+      return this->aString_;
+    }
+
+    ParameterValue::AStringOptional& ParameterValue::
+    aString ()
+    {
+      return this->aString_;
+    }
+
+    void ParameterValue::
+    aString (const AStringType& x)
+    {
+      this->aString_.set (x);
+    }
+
+    void ParameterValue::
+    aString (const AStringOptional& x)
+    {
+      this->aString_ = x;
+    }
+
+    void ParameterValue::
+    aString (::std::unique_ptr< AStringType > x)
+    {
+      this->aString_.set (std::move (x));
+    }
+
+    const ParameterValue::APathOptional& ParameterValue::
+    aPath () const
+    {
+      return this->aPath_;
+    }
+
+    ParameterValue::APathOptional& ParameterValue::
+    aPath ()
+    {
+      return this->aPath_;
+    }
+
+    void ParameterValue::
+    aPath (const APathType& x)
+    {
+      this->aPath_.set (x);
+    }
+
+    void ParameterValue::
+    aPath (const APathOptional& x)
+    {
+      this->aPath_ = x;
+    }
+
+    void ParameterValue::
+    aPath (::std::unique_ptr< APathType > x)
+    {
+      this->aPath_.set (std::move (x));
+    }
+
+    const ParameterValue::AVec3dOptional& ParameterValue::
+    aVec3d () const
+    {
+      return this->aVec3d_;
+    }
+
+    ParameterValue::AVec3dOptional& ParameterValue::
+    aVec3d ()
+    {
+      return this->aVec3d_;
+    }
+
+    void ParameterValue::
+    aVec3d (const AVec3dType& x)
+    {
+      this->aVec3d_.set (x);
+    }
+
+    void ParameterValue::
+    aVec3d (const AVec3dOptional& x)
+    {
+      this->aVec3d_ = x;
+    }
+
+    void ParameterValue::
+    aVec3d (::std::unique_ptr< AVec3dType > x)
+    {
+      this->aVec3d_.set (std::move (x));
+    }
+
+    const ParameterValue::AQuatOptional& ParameterValue::
+    aQuat () const
+    {
+      return this->aQuat_;
+    }
+
+    ParameterValue::AQuatOptional& ParameterValue::
+    aQuat ()
+    {
+      return this->aQuat_;
+    }
+
+    void ParameterValue::
+    aQuat (const AQuatType& x)
+    {
+      this->aQuat_.set (x);
+    }
+
+    void ParameterValue::
+    aQuat (const AQuatOptional& x)
+    {
+      this->aQuat_ = x;
+    }
+
+    void ParameterValue::
+    aQuat (::std::unique_ptr< AQuatType > x)
+    {
+      this->aQuat_.set (std::move (x));
+    }
+
+    const ParameterValue::AMatrixdOptional& ParameterValue::
+    aMatrixd () const
+    {
+      return this->aMatrixd_;
+    }
+
+    ParameterValue::AMatrixdOptional& ParameterValue::
+    aMatrixd ()
+    {
+      return this->aMatrixd_;
+    }
+
+    void ParameterValue::
+    aMatrixd (const AMatrixdType& x)
+    {
+      this->aMatrixd_.set (x);
+    }
+
+    void ParameterValue::
+    aMatrixd (const AMatrixdOptional& x)
+    {
+      this->aMatrixd_ = x;
+    }
+
+    void ParameterValue::
+    aMatrixd (::std::unique_ptr< AMatrixdType > x)
+    {
+      this->aMatrixd_.set (std::move (x));
+    }
+
+
     // Parameter
     // 
 
@@ -101,22 +909,28 @@ namespace prj
       return ConstantType (true);
     }
 
-    const Parameter::ValueType& Parameter::
+    const Parameter::ValueOptional& Parameter::
     value () const
     {
-      return this->value_.get ();
+      return this->value_;
     }
 
-    Parameter::ValueType& Parameter::
+    Parameter::ValueOptional& Parameter::
     value ()
     {
-      return this->value_.get ();
+      return this->value_;
     }
 
     void Parameter::
     value (const ValueType& x)
     {
       this->value_.set (x);
+    }
+
+    void Parameter::
+    value (const ValueOptional& x)
+    {
+      this->value_ = x;
     }
 
     Parameter::ValueType Parameter::
@@ -153,6 +967,36 @@ namespace prj
     id_default_value ()
     {
       return id_default_value_;
+    }
+
+    const Parameter::PValueOptional& Parameter::
+    pValue () const
+    {
+      return this->pValue_;
+    }
+
+    Parameter::PValueOptional& Parameter::
+    pValue ()
+    {
+      return this->pValue_;
+    }
+
+    void Parameter::
+    pValue (const PValueType& x)
+    {
+      this->pValue_.set (x);
+    }
+
+    void Parameter::
+    pValue (const PValueOptional& x)
+    {
+      this->pValue_ = x;
+    }
+
+    void Parameter::
+    pValue (::std::unique_ptr< PValueType > x)
+    {
+      this->pValue_.set (std::move (x));
     }
 
 
@@ -1269,6 +2113,935 @@ namespace prj
 {
   namespace srl
   {
+    // Vec3d
+    //
+
+    Vec3d::
+    Vec3d (const XType& x,
+           const YType& y,
+           const ZType& z)
+    : ::xml_schema::Type (),
+      x_ (x, this),
+      y_ (y, this),
+      z_ (z, this)
+    {
+    }
+
+    Vec3d::
+    Vec3d (const Vec3d& x,
+           ::xml_schema::Flags f,
+           ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      x_ (x.x_, f, this),
+      y_ (x.y_, f, this),
+      z_ (x.z_, f, this)
+    {
+    }
+
+    Vec3d::
+    Vec3d (const ::xercesc::DOMElement& e,
+           ::xml_schema::Flags f,
+           ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      x_ (this),
+      y_ (this),
+      z_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void Vec3d::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // x
+        //
+        if (n.name () == "x" && n.namespace_ ().empty ())
+        {
+          if (!x_.present ())
+          {
+            this->x_.set (XTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // y
+        //
+        if (n.name () == "y" && n.namespace_ ().empty ())
+        {
+          if (!y_.present ())
+          {
+            this->y_.set (YTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // z
+        //
+        if (n.name () == "z" && n.namespace_ ().empty ())
+        {
+          if (!z_.present ())
+          {
+            this->z_.set (ZTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        break;
+      }
+
+      if (!x_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "x",
+          "");
+      }
+
+      if (!y_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "y",
+          "");
+      }
+
+      if (!z_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "z",
+          "");
+      }
+    }
+
+    Vec3d* Vec3d::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class Vec3d (*this, f, c);
+    }
+
+    Vec3d& Vec3d::
+    operator= (const Vec3d& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->x_ = x.x_;
+        this->y_ = x.y_;
+        this->z_ = x.z_;
+      }
+
+      return *this;
+    }
+
+    Vec3d::
+    ~Vec3d ()
+    {
+    }
+
+    // Quat
+    //
+
+    Quat::
+    Quat (const XType& x,
+          const YType& y,
+          const ZType& z,
+          const WType& w)
+    : ::xml_schema::Type (),
+      x_ (x, this),
+      y_ (y, this),
+      z_ (z, this),
+      w_ (w, this)
+    {
+    }
+
+    Quat::
+    Quat (const Quat& x,
+          ::xml_schema::Flags f,
+          ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      x_ (x.x_, f, this),
+      y_ (x.y_, f, this),
+      z_ (x.z_, f, this),
+      w_ (x.w_, f, this)
+    {
+    }
+
+    Quat::
+    Quat (const ::xercesc::DOMElement& e,
+          ::xml_schema::Flags f,
+          ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      x_ (this),
+      y_ (this),
+      z_ (this),
+      w_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void Quat::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // x
+        //
+        if (n.name () == "x" && n.namespace_ ().empty ())
+        {
+          if (!x_.present ())
+          {
+            this->x_.set (XTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // y
+        //
+        if (n.name () == "y" && n.namespace_ ().empty ())
+        {
+          if (!y_.present ())
+          {
+            this->y_.set (YTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // z
+        //
+        if (n.name () == "z" && n.namespace_ ().empty ())
+        {
+          if (!z_.present ())
+          {
+            this->z_.set (ZTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // w
+        //
+        if (n.name () == "w" && n.namespace_ ().empty ())
+        {
+          if (!w_.present ())
+          {
+            this->w_.set (WTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        break;
+      }
+
+      if (!x_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "x",
+          "");
+      }
+
+      if (!y_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "y",
+          "");
+      }
+
+      if (!z_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "z",
+          "");
+      }
+
+      if (!w_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "w",
+          "");
+      }
+    }
+
+    Quat* Quat::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class Quat (*this, f, c);
+    }
+
+    Quat& Quat::
+    operator= (const Quat& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->x_ = x.x_;
+        this->y_ = x.y_;
+        this->z_ = x.z_;
+        this->w_ = x.w_;
+      }
+
+      return *this;
+    }
+
+    Quat::
+    ~Quat ()
+    {
+    }
+
+    // Matrixd
+    //
+
+    Matrixd::
+    Matrixd (const I0j0Type& i0j0,
+             const I0j1Type& i0j1,
+             const I0j2Type& i0j2,
+             const I0j3Type& i0j3,
+             const I1j0Type& i1j0,
+             const I1j1Type& i1j1,
+             const I1j2Type& i1j2,
+             const I1j3Type& i1j3,
+             const I2j0Type& i2j0,
+             const I2j1Type& i2j1,
+             const I2j2Type& i2j2,
+             const I2j3Type& i2j3,
+             const I3j0Type& i3j0,
+             const I3j1Type& i3j1,
+             const I3j2Type& i3j2,
+             const I3j3Type& i3j3)
+    : ::xml_schema::Type (),
+      i0j0_ (i0j0, this),
+      i0j1_ (i0j1, this),
+      i0j2_ (i0j2, this),
+      i0j3_ (i0j3, this),
+      i1j0_ (i1j0, this),
+      i1j1_ (i1j1, this),
+      i1j2_ (i1j2, this),
+      i1j3_ (i1j3, this),
+      i2j0_ (i2j0, this),
+      i2j1_ (i2j1, this),
+      i2j2_ (i2j2, this),
+      i2j3_ (i2j3, this),
+      i3j0_ (i3j0, this),
+      i3j1_ (i3j1, this),
+      i3j2_ (i3j2, this),
+      i3j3_ (i3j3, this)
+    {
+    }
+
+    Matrixd::
+    Matrixd (const Matrixd& x,
+             ::xml_schema::Flags f,
+             ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      i0j0_ (x.i0j0_, f, this),
+      i0j1_ (x.i0j1_, f, this),
+      i0j2_ (x.i0j2_, f, this),
+      i0j3_ (x.i0j3_, f, this),
+      i1j0_ (x.i1j0_, f, this),
+      i1j1_ (x.i1j1_, f, this),
+      i1j2_ (x.i1j2_, f, this),
+      i1j3_ (x.i1j3_, f, this),
+      i2j0_ (x.i2j0_, f, this),
+      i2j1_ (x.i2j1_, f, this),
+      i2j2_ (x.i2j2_, f, this),
+      i2j3_ (x.i2j3_, f, this),
+      i3j0_ (x.i3j0_, f, this),
+      i3j1_ (x.i3j1_, f, this),
+      i3j2_ (x.i3j2_, f, this),
+      i3j3_ (x.i3j3_, f, this)
+    {
+    }
+
+    Matrixd::
+    Matrixd (const ::xercesc::DOMElement& e,
+             ::xml_schema::Flags f,
+             ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      i0j0_ (this),
+      i0j1_ (this),
+      i0j2_ (this),
+      i0j3_ (this),
+      i1j0_ (this),
+      i1j1_ (this),
+      i1j2_ (this),
+      i1j3_ (this),
+      i2j0_ (this),
+      i2j1_ (this),
+      i2j2_ (this),
+      i2j3_ (this),
+      i3j0_ (this),
+      i3j1_ (this),
+      i3j2_ (this),
+      i3j3_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void Matrixd::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // i0j0
+        //
+        if (n.name () == "i0j0" && n.namespace_ ().empty ())
+        {
+          if (!i0j0_.present ())
+          {
+            this->i0j0_.set (I0j0Traits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // i0j1
+        //
+        if (n.name () == "i0j1" && n.namespace_ ().empty ())
+        {
+          if (!i0j1_.present ())
+          {
+            this->i0j1_.set (I0j1Traits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // i0j2
+        //
+        if (n.name () == "i0j2" && n.namespace_ ().empty ())
+        {
+          if (!i0j2_.present ())
+          {
+            this->i0j2_.set (I0j2Traits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // i0j3
+        //
+        if (n.name () == "i0j3" && n.namespace_ ().empty ())
+        {
+          if (!i0j3_.present ())
+          {
+            this->i0j3_.set (I0j3Traits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // i1j0
+        //
+        if (n.name () == "i1j0" && n.namespace_ ().empty ())
+        {
+          if (!i1j0_.present ())
+          {
+            this->i1j0_.set (I1j0Traits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // i1j1
+        //
+        if (n.name () == "i1j1" && n.namespace_ ().empty ())
+        {
+          if (!i1j1_.present ())
+          {
+            this->i1j1_.set (I1j1Traits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // i1j2
+        //
+        if (n.name () == "i1j2" && n.namespace_ ().empty ())
+        {
+          if (!i1j2_.present ())
+          {
+            this->i1j2_.set (I1j2Traits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // i1j3
+        //
+        if (n.name () == "i1j3" && n.namespace_ ().empty ())
+        {
+          if (!i1j3_.present ())
+          {
+            this->i1j3_.set (I1j3Traits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // i2j0
+        //
+        if (n.name () == "i2j0" && n.namespace_ ().empty ())
+        {
+          if (!i2j0_.present ())
+          {
+            this->i2j0_.set (I2j0Traits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // i2j1
+        //
+        if (n.name () == "i2j1" && n.namespace_ ().empty ())
+        {
+          if (!i2j1_.present ())
+          {
+            this->i2j1_.set (I2j1Traits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // i2j2
+        //
+        if (n.name () == "i2j2" && n.namespace_ ().empty ())
+        {
+          if (!i2j2_.present ())
+          {
+            this->i2j2_.set (I2j2Traits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // i2j3
+        //
+        if (n.name () == "i2j3" && n.namespace_ ().empty ())
+        {
+          if (!i2j3_.present ())
+          {
+            this->i2j3_.set (I2j3Traits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // i3j0
+        //
+        if (n.name () == "i3j0" && n.namespace_ ().empty ())
+        {
+          if (!i3j0_.present ())
+          {
+            this->i3j0_.set (I3j0Traits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // i3j1
+        //
+        if (n.name () == "i3j1" && n.namespace_ ().empty ())
+        {
+          if (!i3j1_.present ())
+          {
+            this->i3j1_.set (I3j1Traits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // i3j2
+        //
+        if (n.name () == "i3j2" && n.namespace_ ().empty ())
+        {
+          if (!i3j2_.present ())
+          {
+            this->i3j2_.set (I3j2Traits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // i3j3
+        //
+        if (n.name () == "i3j3" && n.namespace_ ().empty ())
+        {
+          if (!i3j3_.present ())
+          {
+            this->i3j3_.set (I3j3Traits::create (i, f, this));
+            continue;
+          }
+        }
+
+        break;
+      }
+
+      if (!i0j0_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "i0j0",
+          "");
+      }
+
+      if (!i0j1_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "i0j1",
+          "");
+      }
+
+      if (!i0j2_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "i0j2",
+          "");
+      }
+
+      if (!i0j3_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "i0j3",
+          "");
+      }
+
+      if (!i1j0_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "i1j0",
+          "");
+      }
+
+      if (!i1j1_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "i1j1",
+          "");
+      }
+
+      if (!i1j2_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "i1j2",
+          "");
+      }
+
+      if (!i1j3_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "i1j3",
+          "");
+      }
+
+      if (!i2j0_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "i2j0",
+          "");
+      }
+
+      if (!i2j1_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "i2j1",
+          "");
+      }
+
+      if (!i2j2_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "i2j2",
+          "");
+      }
+
+      if (!i2j3_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "i2j3",
+          "");
+      }
+
+      if (!i3j0_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "i3j0",
+          "");
+      }
+
+      if (!i3j1_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "i3j1",
+          "");
+      }
+
+      if (!i3j2_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "i3j2",
+          "");
+      }
+
+      if (!i3j3_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "i3j3",
+          "");
+      }
+    }
+
+    Matrixd* Matrixd::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class Matrixd (*this, f, c);
+    }
+
+    Matrixd& Matrixd::
+    operator= (const Matrixd& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->i0j0_ = x.i0j0_;
+        this->i0j1_ = x.i0j1_;
+        this->i0j2_ = x.i0j2_;
+        this->i0j3_ = x.i0j3_;
+        this->i1j0_ = x.i1j0_;
+        this->i1j1_ = x.i1j1_;
+        this->i1j2_ = x.i1j2_;
+        this->i1j3_ = x.i1j3_;
+        this->i2j0_ = x.i2j0_;
+        this->i2j1_ = x.i2j1_;
+        this->i2j2_ = x.i2j2_;
+        this->i2j3_ = x.i2j3_;
+        this->i3j0_ = x.i3j0_;
+        this->i3j1_ = x.i3j1_;
+        this->i3j2_ = x.i3j2_;
+        this->i3j3_ = x.i3j3_;
+      }
+
+      return *this;
+    }
+
+    Matrixd::
+    ~Matrixd ()
+    {
+    }
+
+    // ParameterValue
+    //
+
+    ParameterValue::
+    ParameterValue ()
+    : ::xml_schema::Type (),
+      aDouble_ (this),
+      anInteger_ (this),
+      aBool_ (this),
+      aString_ (this),
+      aPath_ (this),
+      aVec3d_ (this),
+      aQuat_ (this),
+      aMatrixd_ (this)
+    {
+    }
+
+    ParameterValue::
+    ParameterValue (const ParameterValue& x,
+                    ::xml_schema::Flags f,
+                    ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      aDouble_ (x.aDouble_, f, this),
+      anInteger_ (x.anInteger_, f, this),
+      aBool_ (x.aBool_, f, this),
+      aString_ (x.aString_, f, this),
+      aPath_ (x.aPath_, f, this),
+      aVec3d_ (x.aVec3d_, f, this),
+      aQuat_ (x.aQuat_, f, this),
+      aMatrixd_ (x.aMatrixd_, f, this)
+    {
+    }
+
+    ParameterValue::
+    ParameterValue (const ::xercesc::DOMElement& e,
+                    ::xml_schema::Flags f,
+                    ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      aDouble_ (this),
+      anInteger_ (this),
+      aBool_ (this),
+      aString_ (this),
+      aPath_ (this),
+      aVec3d_ (this),
+      aQuat_ (this),
+      aMatrixd_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void ParameterValue::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // aDouble
+        //
+        if (n.name () == "aDouble" && n.namespace_ ().empty ())
+        {
+          if (!this->aDouble_)
+          {
+            this->aDouble_.set (ADoubleTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // anInteger
+        //
+        if (n.name () == "anInteger" && n.namespace_ ().empty ())
+        {
+          if (!this->anInteger_)
+          {
+            this->anInteger_.set (AnIntegerTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // aBool
+        //
+        if (n.name () == "aBool" && n.namespace_ ().empty ())
+        {
+          if (!this->aBool_)
+          {
+            this->aBool_.set (ABoolTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // aString
+        //
+        if (n.name () == "aString" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< AStringType > r (
+            AStringTraits::create (i, f, this));
+
+          if (!this->aString_)
+          {
+            this->aString_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // aPath
+        //
+        if (n.name () == "aPath" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< APathType > r (
+            APathTraits::create (i, f, this));
+
+          if (!this->aPath_)
+          {
+            this->aPath_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // aVec3d
+        //
+        if (n.name () == "aVec3d" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< AVec3dType > r (
+            AVec3dTraits::create (i, f, this));
+
+          if (!this->aVec3d_)
+          {
+            this->aVec3d_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // aQuat
+        //
+        if (n.name () == "aQuat" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< AQuatType > r (
+            AQuatTraits::create (i, f, this));
+
+          if (!this->aQuat_)
+          {
+            this->aQuat_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // aMatrixd
+        //
+        if (n.name () == "aMatrixd" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< AMatrixdType > r (
+            AMatrixdTraits::create (i, f, this));
+
+          if (!this->aMatrixd_)
+          {
+            this->aMatrixd_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        break;
+      }
+    }
+
+    ParameterValue* ParameterValue::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class ParameterValue (*this, f, c);
+    }
+
+    ParameterValue& ParameterValue::
+    operator= (const ParameterValue& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->aDouble_ = x.aDouble_;
+        this->anInteger_ = x.anInteger_;
+        this->aBool_ = x.aBool_;
+        this->aString_ = x.aString_;
+        this->aPath_ = x.aPath_;
+        this->aVec3d_ = x.aVec3d_;
+        this->aQuat_ = x.aQuat_;
+        this->aMatrixd_ = x.aMatrixd_;
+      }
+
+      return *this;
+    }
+
+    ParameterValue::
+    ~ParameterValue ()
+    {
+    }
+
     // Parameter
     //
 
@@ -1281,13 +3054,13 @@ namespace prj
     Parameter::
     Parameter (const NameType& name,
                const ConstantType& constant,
-               const ValueType& value,
                const IdType& id)
     : ::xml_schema::Type (),
       name_ (name, this),
       constant_ (constant, this),
-      value_ (value, this),
-      id_ (id, this)
+      value_ (this),
+      id_ (id, this),
+      pValue_ (this)
     {
     }
 
@@ -1299,7 +3072,8 @@ namespace prj
       name_ (x.name_, f, this),
       constant_ (x.constant_, f, this),
       value_ (x.value_, f, this),
-      id_ (x.id_, f, this)
+      id_ (x.id_, f, this),
+      pValue_ (x.pValue_, f, this)
     {
     }
 
@@ -1311,7 +3085,8 @@ namespace prj
       name_ (this),
       constant_ (this),
       value_ (this),
-      id_ (this)
+      id_ (this),
+      pValue_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -1359,7 +3134,7 @@ namespace prj
         //
         if (n.name () == "value" && n.namespace_ ().empty ())
         {
-          if (!value_.present ())
+          if (!this->value_)
           {
             this->value_.set (ValueTraits::create (i, f, this));
             continue;
@@ -1380,6 +3155,20 @@ namespace prj
           }
         }
 
+        // pValue
+        //
+        if (n.name () == "pValue" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< PValueType > r (
+            PValueTraits::create (i, f, this));
+
+          if (!this->pValue_)
+          {
+            this->pValue_.set (::std::move (r));
+            continue;
+          }
+        }
+
         break;
       }
 
@@ -1394,13 +3183,6 @@ namespace prj
       {
         throw ::xsd::cxx::tree::expected_element< char > (
           "constant",
-          "");
-      }
-
-      if (!value_.present ())
-      {
-        throw ::xsd::cxx::tree::expected_element< char > (
-          "value",
           "");
       }
 
@@ -1429,6 +3211,7 @@ namespace prj
         this->constant_ = x.constant_;
         this->value_ = x.value_;
         this->id_ = x.id_;
+        this->pValue_ = x.pValue_;
       }
 
       return *this;
@@ -3766,6 +5549,379 @@ namespace prj
   namespace srl
   {
     void
+    operator<< (::xercesc::DOMElement& e, const Vec3d& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // x
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "x",
+            e));
+
+        s << ::xml_schema::AsDouble(i.x ());
+      }
+
+      // y
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "y",
+            e));
+
+        s << ::xml_schema::AsDouble(i.y ());
+      }
+
+      // z
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "z",
+            e));
+
+        s << ::xml_schema::AsDouble(i.z ());
+      }
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const Quat& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // x
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "x",
+            e));
+
+        s << ::xml_schema::AsDouble(i.x ());
+      }
+
+      // y
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "y",
+            e));
+
+        s << ::xml_schema::AsDouble(i.y ());
+      }
+
+      // z
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "z",
+            e));
+
+        s << ::xml_schema::AsDouble(i.z ());
+      }
+
+      // w
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "w",
+            e));
+
+        s << ::xml_schema::AsDouble(i.w ());
+      }
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const Matrixd& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // i0j0
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "i0j0",
+            e));
+
+        s << ::xml_schema::AsDouble(i.i0j0 ());
+      }
+
+      // i0j1
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "i0j1",
+            e));
+
+        s << ::xml_schema::AsDouble(i.i0j1 ());
+      }
+
+      // i0j2
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "i0j2",
+            e));
+
+        s << ::xml_schema::AsDouble(i.i0j2 ());
+      }
+
+      // i0j3
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "i0j3",
+            e));
+
+        s << ::xml_schema::AsDouble(i.i0j3 ());
+      }
+
+      // i1j0
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "i1j0",
+            e));
+
+        s << ::xml_schema::AsDouble(i.i1j0 ());
+      }
+
+      // i1j1
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "i1j1",
+            e));
+
+        s << ::xml_schema::AsDouble(i.i1j1 ());
+      }
+
+      // i1j2
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "i1j2",
+            e));
+
+        s << ::xml_schema::AsDouble(i.i1j2 ());
+      }
+
+      // i1j3
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "i1j3",
+            e));
+
+        s << ::xml_schema::AsDouble(i.i1j3 ());
+      }
+
+      // i2j0
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "i2j0",
+            e));
+
+        s << ::xml_schema::AsDouble(i.i2j0 ());
+      }
+
+      // i2j1
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "i2j1",
+            e));
+
+        s << ::xml_schema::AsDouble(i.i2j1 ());
+      }
+
+      // i2j2
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "i2j2",
+            e));
+
+        s << ::xml_schema::AsDouble(i.i2j2 ());
+      }
+
+      // i2j3
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "i2j3",
+            e));
+
+        s << ::xml_schema::AsDouble(i.i2j3 ());
+      }
+
+      // i3j0
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "i3j0",
+            e));
+
+        s << ::xml_schema::AsDouble(i.i3j0 ());
+      }
+
+      // i3j1
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "i3j1",
+            e));
+
+        s << ::xml_schema::AsDouble(i.i3j1 ());
+      }
+
+      // i3j2
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "i3j2",
+            e));
+
+        s << ::xml_schema::AsDouble(i.i3j2 ());
+      }
+
+      // i3j3
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "i3j3",
+            e));
+
+        s << ::xml_schema::AsDouble(i.i3j3 ());
+      }
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const ParameterValue& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // aDouble
+      //
+      if (i.aDouble ())
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "aDouble",
+            e));
+
+        s << ::xml_schema::AsDouble(*i.aDouble ());
+      }
+
+      // anInteger
+      //
+      if (i.anInteger ())
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "anInteger",
+            e));
+
+        s << *i.anInteger ();
+      }
+
+      // aBool
+      //
+      if (i.aBool ())
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "aBool",
+            e));
+
+        s << *i.aBool ();
+      }
+
+      // aString
+      //
+      if (i.aString ())
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "aString",
+            e));
+
+        s << *i.aString ();
+      }
+
+      // aPath
+      //
+      if (i.aPath ())
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "aPath",
+            e));
+
+        s << *i.aPath ();
+      }
+
+      // aVec3d
+      //
+      if (i.aVec3d ())
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "aVec3d",
+            e));
+
+        s << *i.aVec3d ();
+      }
+
+      // aQuat
+      //
+      if (i.aQuat ())
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "aQuat",
+            e));
+
+        s << *i.aQuat ();
+      }
+
+      // aMatrixd
+      //
+      if (i.aMatrixd ())
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "aMatrixd",
+            e));
+
+        s << *i.aMatrixd ();
+      }
+    }
+
+    void
     operator<< (::xercesc::DOMElement& e, const Parameter& i)
     {
       e << static_cast< const ::xml_schema::Type& > (i);
@@ -3794,13 +5950,14 @@ namespace prj
 
       // value
       //
+      if (i.value ())
       {
         ::xercesc::DOMElement& s (
           ::xsd::cxx::xml::dom::create_element (
             "value",
             e));
 
-        s << ::xml_schema::AsDouble(i.value ());
+        s << ::xml_schema::AsDouble(*i.value ());
       }
 
       // id
@@ -3812,6 +5969,18 @@ namespace prj
             e));
 
         s << i.id ();
+      }
+
+      // pValue
+      //
+      if (i.pValue ())
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "pValue",
+            e));
+
+        s << *i.pValue ();
       }
     }
 

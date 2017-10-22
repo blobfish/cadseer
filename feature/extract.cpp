@@ -44,16 +44,16 @@ Extract::Extract() : Base()
   mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
 }
 
-std::shared_ptr<Parameter> Extract::buildAngleParameter(double deg)
+std::shared_ptr<prm::Parameter> Extract::buildAngleParameter(double deg)
 {
-  std::shared_ptr<Parameter> out(new Parameter(ParameterNames::Angle, 0.0));
+  std::shared_ptr<prm::Parameter> out(new prm::Parameter(prm::Names::Angle, 0.0));
   //set the value after constraints have been set.
   
-  ParameterBoundary lower(0.0, ParameterBoundary::End::Closed);
-  ParameterBoundary upper(180.0, ParameterBoundary::End::Open);
-  ParameterInterval interval(lower, upper);
+  prm::Boundary lower(0.0, prm::Boundary::End::Closed);
+  prm::Boundary upper(180.0, prm::Boundary::End::Open);
+  prm::Interval interval(lower, upper);
   
-  ParameterConstraint c;
+  prm::Constraint c;
   c.intervals.push_back(interval);
   out->setConstraint(c);
   

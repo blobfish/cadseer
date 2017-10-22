@@ -44,15 +44,15 @@ struct SimpleBlend
   SimpleBlend();
   boost::uuids::uuid id; //!< just used for runtime sync with dialog. no serial etc...
   Picks picks; //!< vector of picked objects
-  std::shared_ptr<Parameter> radius; //!< parameter containing blend radius.
+  std::shared_ptr<prm::Parameter> radius; //!< parameter containing blend radius.
   osg::ref_ptr<lbr::PLabel> label; //!< graphic icon
 };
 
 struct VariableEntry
 {
   Pick pick; //!< edge or vertex.
-  std::shared_ptr<Parameter> position; //!< parameter along edge 0 to 1. ignored if vertex. maybe invalid
-  std::shared_ptr<Parameter> radius; //!< value of blend.
+  std::shared_ptr<prm::Parameter> position; //!< parameter along edge 0 to 1. ignored if vertex. maybe invalid
+  std::shared_ptr<prm::Parameter> radius; //!< value of blend.
   osg::ref_ptr<lbr::PLabel> label; //!< graphic icon
 };
 
@@ -69,8 +69,8 @@ class Blend : public Base
   public:
     Blend();
     
-    static std::shared_ptr<Parameter> buildRadiusParameter();
-    static std::shared_ptr<Parameter> buildPositionParameter();
+    static std::shared_ptr<prm::Parameter> buildRadiusParameter();
+    static std::shared_ptr<prm::Parameter> buildPositionParameter();
     static VariableBlend buildDefaultVariable(const SeerShape&, const Pick &, const ShapeHistory&);
     
     void addSimpleBlend(const SimpleBlend&);

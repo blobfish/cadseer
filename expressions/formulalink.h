@@ -36,7 +36,7 @@ namespace expr
   {
     boost::uuids::uuid parameterId;
     boost::uuids::uuid formulaId;
-    ftr::Parameter *parameter = nullptr;
+    ftr::prm::Parameter *parameter = nullptr;
     
     //@{
     //! used as tags.

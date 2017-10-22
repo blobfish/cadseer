@@ -40,7 +40,7 @@ namespace ftr
   {
     Picks targets;
     Pick neutralPlane;
-    std::shared_ptr<Parameter> angle; //!< parameter containing angle.
+    std::shared_ptr<prm::Parameter> angle; //!< parameter containing angle.
     osg::ref_ptr<lbr::PLabel> label; //!< graphic icon
   };
   
@@ -60,12 +60,12 @@ namespace ftr
       
       void setDraft(const DraftConvey &);
       
-      static std::shared_ptr<Parameter> buildAngleParameter();
+      static std::shared_ptr<prm::Parameter> buildAngleParameter();
     protected:
       Picks targetPicks;
       Pick neutralPick;
       
-      std::shared_ptr<Parameter> angle; //!< parameter containing draft angle.
+      std::shared_ptr<prm::Parameter> angle; //!< parameter containing draft angle.
       osg::ref_ptr<lbr::PLabel> label; //!< graphic icon
       
     private:

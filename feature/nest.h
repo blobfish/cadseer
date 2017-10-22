@@ -52,8 +52,8 @@ namespace ftr
     double getGap() const;
     
   protected:
-    std::shared_ptr<Parameter> pitch; //!< not really a parameter. just using for convenience.
-    std::shared_ptr<Parameter> gap;
+    std::shared_ptr<prm::Parameter> pitch; //!< not really a parameter. just using for convenience.
+    std::shared_ptr<prm::Parameter> gap;
     osg::ref_ptr<lbr::PLabel> gapLabel;
     osg::Vec3d feedDirection; //!< eventually a parameter.
     

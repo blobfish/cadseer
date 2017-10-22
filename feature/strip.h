@@ -46,8 +46,8 @@ namespace ftr
     void serialRead(const prj::srl::FeatureStrip &);
     
     void setLabelColors(const osg::Vec4&);
-    void setAutoCalc(bool acIn){autoCalc = acIn;}
-    bool isAutoCalc(){return autoCalc;}
+    void setAutoCalc(bool acIn){autoCalc->setValue(acIn);}
+    bool isAutoCalc(){return static_cast<bool>(autoCalc);}
     double getPitch() const {return pitch->getValue();}
     double getWidth() const {return width->getValue();}
     double getHeight() const {return stripHeight;}
@@ -55,18 +55,19 @@ namespace ftr
     std::vector<QString> stations;
     
   protected:
-    std::shared_ptr<Parameter> pitch;
-    std::shared_ptr<Parameter> width;
-    std::shared_ptr<Parameter> widthOffset;
-    std::shared_ptr<Parameter> gap;
+    std::shared_ptr<prm::Parameter> pitch;
+    std::shared_ptr<prm::Parameter> width;
+    std::shared_ptr<prm::Parameter> widthOffset;
+    std::shared_ptr<prm::Parameter> gap;
+    std::shared_ptr<prm::Parameter> autoCalc;
     osg::ref_ptr<lbr::PLabel> pitchLabel;
     osg::ref_ptr<lbr::PLabel> widthLabel;
     osg::ref_ptr<lbr::PLabel> widthOffsetLabel; //!< centerline of die.
     osg::ref_ptr<lbr::PLabel> gapLabel;
+    osg::ref_ptr<lbr::PLabel> autoCalcLabel;
     std::vector<osg::ref_ptr<osg::MatrixTransform>> stationLabels;
     
     osg::Vec3d feedDirection; //!< eventually a parameter.
-    bool autoCalc = true; //!< eventually a parameter.
     double stripHeight; //!< used by quote to get travel.
     
   private:

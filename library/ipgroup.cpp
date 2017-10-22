@@ -46,7 +46,7 @@ IPGroup::IPGroup()
   assert(0);
 }
 
-IPGroup::IPGroup(ftr::Parameter *parameterIn) :
+IPGroup::IPGroup(ftr::prm::Parameter *parameterIn) :
 osg::MatrixTransform(),
 mainDim(),
 differenceDim(),

@@ -207,6 +207,12 @@ namespace prj
       this->autoCalc_.set (x);
     }
 
+    void FeatureStrip::
+    autoCalc (::std::unique_ptr< AutoCalcType > x)
+    {
+      this->autoCalc_.set (std::move (x));
+    }
+
     const FeatureStrip::StripHeightType& FeatureStrip::
     stripHeight () const
     {
@@ -369,7 +375,7 @@ namespace prj
                   ::std::unique_ptr< WidthType > width,
                   ::std::unique_ptr< WidthOffsetType > widthOffset,
                   ::std::unique_ptr< GapType > gap,
-                  const AutoCalcType& autoCalc,
+                  ::std::unique_ptr< AutoCalcType > autoCalc,
                   const StripHeightType& stripHeight,
                   ::std::unique_ptr< StationsType > stations)
     : ::xml_schema::Type (),
@@ -378,7 +384,7 @@ namespace prj
       width_ (std::move (width), this),
       widthOffset_ (std::move (widthOffset), this),
       gap_ (std::move (gap), this),
-      autoCalc_ (autoCalc, this),
+      autoCalc_ (std::move (autoCalc), this),
       stripHeight_ (stripHeight, this),
       stations_ (std::move (stations), this)
     {
@@ -505,9 +511,12 @@ namespace prj
         //
         if (n.name () == "autoCalc" && n.namespace_ ().empty ())
         {
+          ::std::unique_ptr< AutoCalcType > r (
+            AutoCalcTraits::create (i, f, this));
+
           if (!autoCalc_.present ())
           {
-            this->autoCalc_.set (AutoCalcTraits::create (i, f, this));
+            this->autoCalc_.set (::std::move (r));
             continue;
           }
         }

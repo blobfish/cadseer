@@ -30,7 +30,7 @@
 
 class QTextStream;
 
-namespace ftr{class Parameter;}
+namespace ftr{namespace prm{class Parameter;}}
 namespace msg{class Message; class Observer;}
 
 namespace expr{
@@ -158,7 +158,7 @@ public:
   //@}
   
   //! Link parameter to formula. first is parameter ptr. last is formula id.
-  void addLink(ftr::Parameter *, const boost::uuids::uuid &);
+  void addLink(ftr::prm::Parameter *, const boost::uuids::uuid &);
   //! erase link by parameter id.
   void removeParameterLink(const boost::uuids::uuid &);
   //! checks if parameter is linked by parameter id. 

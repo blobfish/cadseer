@@ -28,20 +28,20 @@
 namespace osg{class AutoTransform;}
 namespace osgText{class Text;}
 
-namespace ftr{class Parameter;}
+namespace ftr{namespace prm{class Parameter;}}
 
 namespace lbr
 {
   class PLabel : public osg::MatrixTransform
   {
   public:
-    PLabel(ftr::Parameter *parameterIn);
+    PLabel(ftr::prm::Parameter *parameterIn);
     PLabel(const PLabel &copy, const osg::CopyOp& copyOp=osg::CopyOp::SHALLOW_COPY);
     META_Node(osg, PLabel);
     
     void valueHasChanged();
     void constantHasChanged();
-    ftr::Parameter* getParameter(){return parameter;}
+    ftr::prm::Parameter* getParameter(){return parameter;}
     void setTextColor(const osg::Vec4&);
     
     bool showName = false;
@@ -50,7 +50,7 @@ namespace lbr
     PLabel();
     void build();
     void setText(); //sets the text from the parameter value
-    ftr::Parameter *parameter = nullptr;
+    ftr::prm::Parameter *parameter = nullptr;
     osg::ref_ptr<osg::AutoTransform> autoTransform;
     osg::ref_ptr<osgText::Text> text;
     

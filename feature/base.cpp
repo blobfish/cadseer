@@ -507,7 +507,7 @@ bool Base::hasParameter(const QString &nameIn) const
   return false;
 }
 
-Parameter* Base::getParameter(const QString &nameIn) const
+prm::Parameter* Base::getParameter(const QString &nameIn) const
 {
   for (const auto &p : parameterVector)
     if (p->getName() == nameIn)
@@ -525,7 +525,7 @@ bool Base::hasParameter(const boost::uuids::uuid &idIn) const
   return false;
 }
 
-Parameter* Base::getParameter(const boost::uuids::uuid &idIn) const
+prm::Parameter* Base::getParameter(const boost::uuids::uuid &idIn) const
 {
   for (const auto &p : parameterVector)
     if (p->getId() == idIn)

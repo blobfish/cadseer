@@ -41,7 +41,7 @@ using boost::uuids::uuid;
 
 QIcon Hollow::icon;
 
-Hollow::Hollow() : Base(), offset(ParameterNames::Offset, prf::manager().rootPtr->features().hollow().get().offset())
+Hollow::Hollow() : Base(), offset(prm::Names::Offset, prf::manager().rootPtr->features().hollow().get().offset())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionHollow.svg");
@@ -49,7 +49,7 @@ Hollow::Hollow() : Base(), offset(ParameterNames::Offset, prf::manager().rootPtr
   name = QObject::tr("Hollow");
   mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
-  offset.setConstraint(ParameterConstraint::buildNonZero());
+  offset.setConstraint(prm::Constraint::buildNonZero());
   offset.connectValue(boost::bind(&Hollow::setModelDirty, this));
   
   label = new lbr::PLabel(&offset);

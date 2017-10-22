@@ -40,9 +40,9 @@ namespace ftr
     void setWidth(const double &widthIn);
     void setHeight(const double &heightIn);
     void setParameters(const double &lengthIn, const double &widthIn, const double &heightIn);
-    double getLength() const {return length;}
-    double getWidth() const {return width;}
-    double getHeight() const {return height;}
+    double getLength() const {return static_cast<double>(length);}
+    double getWidth() const {return static_cast<double>(width);}
+    double getHeight() const {return static_cast<double>(height);}
     void getParameters (double &lengthOut, double &widthOut, double &heightOut) const;
     virtual void updateModel(const UpdatePayload&) override;
     virtual Type getType() const override {return Type::Oblong;}
@@ -52,9 +52,9 @@ namespace ftr
     virtual void serialWrite(const QDir&) override; //!< write xml file. not const, might reset a modified flag.
     void serialRead(const prj::srl::FeatureOblong &sOblong);
   protected:
-    Parameter length;
-    Parameter width;
-    Parameter height;
+    prm::Parameter length;
+    prm::Parameter width;
+    prm::Parameter height;
     
     osg::ref_ptr<lbr::IPGroup> lengthIP;
     osg::ref_ptr<lbr::IPGroup> widthIP;

@@ -113,9 +113,9 @@ static const std::map<FeatureTag, std::string> featureTagMap =
 
 Oblong::Oblong() :
   CSysBase(),
-  length(ParameterNames::Length, prf::manager().rootPtr->features().oblong().get().length()),
-  width(ParameterNames::Width, prf::manager().rootPtr->features().oblong().get().width()),
-  height(ParameterNames::Height, prf::manager().rootPtr->features().oblong().get().height())
+  length(prm::Names::Length, prf::manager().rootPtr->features().oblong().get().length()),
+  width(prm::Names::Width, prf::manager().rootPtr->features().oblong().get().width()),
+  height(prm::Names::Height, prf::manager().rootPtr->features().oblong().get().height())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionOblong.svg");
@@ -125,9 +125,9 @@ Oblong::Oblong() :
   
   initializeMaps();
   
-  length.setConstraint(ParameterConstraint::buildNonZeroPositive());
-  width.setConstraint(ParameterConstraint::buildNonZeroPositive());
-  height.setConstraint(ParameterConstraint::buildNonZeroPositive());
+  length.setConstraint(prm::Constraint::buildNonZeroPositive());
+  width.setConstraint(prm::Constraint::buildNonZeroPositive());
+  height.setConstraint(prm::Constraint::buildNonZeroPositive());
   
   parameterVector.push_back(&length);
   parameterVector.push_back(&width);
@@ -205,35 +205,21 @@ void Oblong::initializeMaps()
 
 void Oblong::setLength(const double &lengthIn)
 {
-  if (lengthIn == length)
-    return;
-  assert(lengthIn > Precision::Confusion());
-  setModelDirty();
-  length = lengthIn;
+  length.setValue(lengthIn);
 }
 
 void Oblong::setWidth(const double &widthIn)
 {
-  if (widthIn == width)
-    return;
-  assert(widthIn > Precision::Confusion());
-  setModelDirty();
-  width = widthIn;
+  width.setValue(widthIn);
 }
 
 void Oblong::setHeight(const double &heightIn)
 {
-  if (heightIn == height)
-    return;
-  assert(heightIn > Precision::Confusion());
-  setModelDirty();
-  height = heightIn;
+  height.setValue(heightIn);
 }
 
 void Oblong::setParameters(const double &lengthIn, const double &widthIn, const double &heightIn)
 {
-  //dirty is called in setters.
-  //asserts called in setters.
   setLength(lengthIn);
   setWidth(widthIn);
   setHeight(heightIn);
@@ -250,7 +236,7 @@ void Oblong::updateModel(const UpdatePayload &payloadIn)
     if (!(length.getValue() > width.getValue()))
       throw std::runtime_error("length must be greater than width");
     
-    OblongBuilder oblongMaker(length, width, height, system);
+    OblongBuilder oblongMaker(static_cast<double>(length), static_cast<double>(width), static_cast<double>(height), system);
     seerShape->setOCCTShape(oblongMaker.getSolid());
     updateResult(oblongMaker);
     
@@ -357,17 +343,17 @@ void Oblong::updateIPGroup()
   
   osg::Matrix lMatrix;
   lMatrix.setRotate(osg::Quat(osg::PI_2, osg::Vec3d(0.0, 1.0, 0.0)));
-  lMatrix.setTrans(osg::Vec3d(0.0, width / 2.0, height / 2.0));
+  lMatrix.setTrans(osg::Vec3d(0.0, static_cast<double>(width) / 2.0, static_cast<double>(height) / 2.0));
   lengthIP->setMatrixDragger(lMatrix);
   
   osg::Matrix wMatrix;
   wMatrix.setRotate(osg::Quat(osg::PI_2, osg::Vec3d(-1.0, 0.0, 0.0)));
-  wMatrix.setTrans(osg::Vec3d(length / 2.0, 0.0, height / 2.0));
+  wMatrix.setTrans(osg::Vec3d(static_cast<double>(length) / 2.0, 0.0, static_cast<double>(height) / 2.0));
   widthIP->setMatrixDragger(wMatrix);
   
   osg::Matrix hMatrix;
   //no need to rotate
-  hMatrix.setTrans(osg::Vec3d(length / 2.0, width / 2.0, 0.0));
+  hMatrix.setTrans(osg::Vec3d(static_cast<double>(length) / 2.0, static_cast<double>(width) / 2.0, 0.0));
   heightIP->setMatrixDragger(hMatrix);
 }
 

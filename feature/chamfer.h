@@ -41,7 +41,7 @@ namespace ftr
   struct SymChamfer
   {
     std::vector<ChamferPick> picks;
-    std::shared_ptr<Parameter> distance; //!< parameter containing distance.
+    std::shared_ptr<prm::Parameter> distance; //!< parameter containing distance.
     osg::ref_ptr<lbr::PLabel> label; //!< graphic icon
   };
 
@@ -57,7 +57,7 @@ namespace ftr
     virtual void serialWrite(const QDir&) override;
     void serialRead(const prj::srl::FeatureChamfer &);
     
-    static std::shared_ptr<Parameter> buildSymParameter();
+    static std::shared_ptr<prm::Parameter> buildSymParameter();
     static boost::uuids::uuid referenceFaceId(const SeerShape&, const boost::uuids::uuid&);
     
     void addSymChamfer(const SymChamfer &);

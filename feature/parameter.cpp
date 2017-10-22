@@ -19,42 +19,44 @@
 
 #include <limits>
 
+#include <boost/variant.hpp>
+
 #include <tools/idtools.h>
 #include <project/serial/xsdcxxoutput/featurebase.h>
 #include <feature/parameter.h>
 
-using namespace ftr;
+using namespace ftr::prm;
 
-ParameterBoundary::ParameterBoundary(double valueIn, End endIn) :
+Boundary::Boundary(double valueIn, Boundary::End endIn) :
   value(valueIn), end(endIn)
 {}
 
-ParameterInterval::ParameterInterval(const ParameterBoundary &lowerIn, const ParameterBoundary &upperIn) :
+Interval::Interval(const Boundary &lowerIn, const Boundary &upperIn) :
   lower(lowerIn), upper(upperIn)
 {}
 
-bool ParameterInterval::test(double testValue) const
+bool Interval::test(double testValue) const
 {
-  assert(lower.end != ParameterBoundary::End::None);
-  assert(upper.end != ParameterBoundary::End::None);
+  assert(lower.end != Boundary::End::None);
+  assert(upper.end != Boundary::End::None);
   
-  if (lower.end == ParameterBoundary::End::Open)
+  if (lower.end == Boundary::End::Open)
   {
     if (!(testValue > lower.value))
       return false;
   }
-  else //lower.end == ParameterBoundary::End::Closed
+  else //lower.end == Boundary::End::Closed
   {
     if (!(testValue >= lower.value))
       return false;
   }
   
-  if (upper.end == ParameterBoundary::End::Open)
+  if (upper.end == Boundary::End::Open)
   {
     if (!(testValue < upper.value))
       return false;
   }
-  else //upper.end == ParameterBoundary::End::Closed
+  else //upper.end == Boundary::End::Closed
   {
     if (!(testValue <= upper.value))
       return false;
@@ -63,133 +65,133 @@ bool ParameterInterval::test(double testValue) const
   return true;
 }
 
-ParameterConstraint ParameterConstraint::buildAll()
+Constraint Constraint::buildAll()
 {
-  ParameterBoundary lower(std::numeric_limits<double>::lowest(), ParameterBoundary::End::Closed);
-  ParameterBoundary upper(std::numeric_limits<double>::max(), ParameterBoundary::End::Closed);
-  ParameterInterval interval(lower, upper);
+  Boundary lower(std::numeric_limits<double>::lowest(), Boundary::End::Closed);
+  Boundary upper(std::numeric_limits<double>::max(), Boundary::End::Closed);
+  Interval interval(lower, upper);
   
-  ParameterConstraint out;
+  Constraint out;
   out.intervals.push_back(interval);
   return out;
 }
 
-ParameterConstraint ParameterConstraint::buildNonZeroPositive()
+Constraint Constraint::buildNonZeroPositive()
 {
-  ParameterBoundary lower(0.0, ParameterBoundary::End::Open);
-  ParameterBoundary upper(std::numeric_limits<double>::max(), ParameterBoundary::End::Closed);
-  ParameterInterval interval(lower, upper);
+  Boundary lower(0.0, Boundary::End::Open);
+  Boundary upper(std::numeric_limits<double>::max(), Boundary::End::Closed);
+  Interval interval(lower, upper);
   
-  ParameterConstraint out;
+  Constraint out;
   out.intervals.push_back(interval);
   return out;
 }
 
-ParameterConstraint ParameterConstraint::buildZeroPositive()
+Constraint Constraint::buildZeroPositive()
 {
-  ParameterBoundary lower(0.0, ParameterBoundary::End::Closed);
-  ParameterBoundary upper(std::numeric_limits<double>::max(), ParameterBoundary::End::Closed);
-  ParameterInterval interval(lower, upper);
+  Boundary lower(0.0, Boundary::End::Closed);
+  Boundary upper(std::numeric_limits<double>::max(), Boundary::End::Closed);
+  Interval interval(lower, upper);
   
-  ParameterConstraint out;
+  Constraint out;
   out.intervals.push_back(interval);
   return out;
 }
 
-ParameterConstraint ParameterConstraint::buildNonZeroNegative()
+Constraint Constraint::buildNonZeroNegative()
 {
-  ParameterBoundary lower(std::numeric_limits<double>::lowest(), ParameterBoundary::End::Closed);
-  ParameterBoundary upper(0.0, ParameterBoundary::End::Open);
-  ParameterInterval interval(lower, upper);
+  Boundary lower(std::numeric_limits<double>::lowest(), Boundary::End::Closed);
+  Boundary upper(0.0, Boundary::End::Open);
+  Interval interval(lower, upper);
   
-  ParameterConstraint out;
+  Constraint out;
   out.intervals.push_back(interval);
   return out;
 }
 
-ParameterConstraint ParameterConstraint::buildZeroNegative()
+Constraint Constraint::buildZeroNegative()
 {
-  ParameterBoundary lower(std::numeric_limits<double>::lowest(), ParameterBoundary::End::Closed);
-  ParameterBoundary upper(0.0, ParameterBoundary::End::Closed);
-  ParameterInterval interval(lower, upper);
+  Boundary lower(std::numeric_limits<double>::lowest(), Boundary::End::Closed);
+  Boundary upper(0.0, Boundary::End::Closed);
+  Interval interval(lower, upper);
   
-  ParameterConstraint out;
+  Constraint out;
   out.intervals.push_back(interval);
   return out;
 }
 
-ParameterConstraint ParameterConstraint::buildNonZero()
+Constraint Constraint::buildNonZero()
 {
-  ParameterBoundary lower1(std::numeric_limits<double>::lowest(), ParameterBoundary::End::Closed);
-  ParameterBoundary upper1(0.0, ParameterBoundary::End::Open);
-  ParameterInterval interval1(lower1, upper1);
+  Boundary lower1(std::numeric_limits<double>::lowest(), Boundary::End::Closed);
+  Boundary upper1(0.0, Boundary::End::Open);
+  Interval interval1(lower1, upper1);
   
-  ParameterBoundary lower2(0.0, ParameterBoundary::End::Open);
-  ParameterBoundary upper2(std::numeric_limits<double>::max(), ParameterBoundary::End::Closed);
-  ParameterInterval interval2(lower2, upper2);
+  Boundary lower2(0.0, Boundary::End::Open);
+  Boundary upper2(std::numeric_limits<double>::max(), Boundary::End::Closed);
+  Interval interval2(lower2, upper2);
   
-  ParameterConstraint out;
+  Constraint out;
   out.intervals.push_back(interval1);
   out.intervals.push_back(interval2);
   return out;
 }
 
-ParameterConstraint ParameterConstraint::buildUnit()
+Constraint Constraint::buildUnit()
 {
-  ParameterBoundary lower(0.0, ParameterBoundary::End::Closed);
-  ParameterBoundary upper(1.0, ParameterBoundary::End::Closed);
-  ParameterInterval interval(lower, upper);
+  Boundary lower(0.0, Boundary::End::Closed);
+  Boundary upper(1.0, Boundary::End::Closed);
+  Interval interval(lower, upper);
   
-  ParameterConstraint out;
+  Constraint out;
   out.intervals.push_back(interval);
   return out;
 }
 
-void ParameterConstraint::unitTest()
+void Constraint::unitTest()
 {
-  ParameterConstraint all = ParameterConstraint::buildAll();
+  Constraint all = Constraint::buildAll();
   assert(all.test(-1200.345) == true);
   assert(all.test(-234) == true);
   assert(all.test(13456.987) == true);
   assert(all.test(593) == true);
   assert(all.test(0) == true);
   
-  ParameterConstraint nonZeroPositive = ParameterConstraint::buildNonZeroPositive();
+  Constraint nonZeroPositive = Constraint::buildNonZeroPositive();
   assert(nonZeroPositive.test(-231.432) == false);
   assert(nonZeroPositive.test(-562) == false);
   assert(nonZeroPositive.test(0) == false);
   assert(nonZeroPositive.test(74321) == true);
   assert(nonZeroPositive.test(984.3587) == true);
   
-  ParameterConstraint zeroPositive = ParameterConstraint::buildZeroPositive();
+  Constraint zeroPositive = Constraint::buildZeroPositive();
   assert(zeroPositive.test(-231.432) == false);
   assert(zeroPositive.test(-562) == false);
   assert(zeroPositive.test(0) == true);
   assert(zeroPositive.test(74321) == true);
   assert(zeroPositive.test(984.3587) == true);
   
-  ParameterConstraint nonZeroNegative = ParameterConstraint::buildNonZeroNegative();
+  Constraint nonZeroNegative = Constraint::buildNonZeroNegative();
   assert(nonZeroNegative.test(-231.432) == true);
   assert(nonZeroNegative.test(-562) == true);
   assert(nonZeroNegative.test(0) == false);
   assert(nonZeroNegative.test(74321) == false);
   assert(nonZeroNegative.test(984.3587) == false);
   
-  ParameterConstraint zeroNegative = ParameterConstraint::buildZeroNegative();
+  Constraint zeroNegative = Constraint::buildZeroNegative();
   assert(zeroNegative.test(-231.432) == true);
   assert(zeroNegative.test(-562) == true);
   assert(zeroNegative.test(0) == true);
   assert(zeroNegative.test(74321) == false);
   assert(zeroNegative.test(984.3587) == false);
   
-  ParameterConstraint nonZero = ParameterConstraint::buildNonZero();
+  Constraint nonZero = Constraint::buildNonZero();
   assert(nonZero.test(-231.432) == true);
   assert(nonZero.test(-562) == true);
   assert(nonZero.test(0) == false);
   assert(nonZero.test(74321) == true);
   assert(nonZero.test(984.3587) == true);
   
-  ParameterConstraint unit = ParameterConstraint::buildUnit();
+  Constraint unit = Constraint::buildUnit();
   assert(unit.test(-100) == false);
   assert(unit.test(-0.125) == false);
   assert(unit.test(0) == true);
@@ -199,37 +201,151 @@ void ParameterConstraint::unitTest()
   assert(unit.test(100) == false);
 }
 
-bool ParameterConstraint::test(double testValue) const
+bool Constraint::test(double testValue) const
 {
-  assert(!intervals.empty());
+  if(intervals.empty())
+    return true;
   
   bool out = intervals.at(0).test(testValue);
   for (auto it = intervals.begin() + 1; it != intervals.end(); ++it)
-    out |= it->test(testValue);
+    out &= it->test(testValue);
   
   return out;
 }
 
-Parameter::Parameter() :
-  name("no name"),
-  value(1.0),
-  id(gu::createRandomId()),
-  constraint(ParameterConstraint::buildAll())
+class DoubleVisitor : public boost::static_visitor<double>
 {
-}
+public:
+  double operator()(double d) const {return d;}
+  double operator()(int) const {assert(0); return 0.0;}
+  double operator()(bool) const {assert(0); return 0.0;}
+  double operator()(const std::string&) const {assert(0); return 0.0;}
+  double operator()(const boost::filesystem::path&) const {assert(0); return 0.0;}
+  double operator()(const osg::Vec3d&) const {assert(0); return 0.0;}
+  double operator()(const osg::Quat&) const {assert(0); return 0.0;}
+  double operator()(const osg::Matrixd&) const {assert(0); return 0.0;}
+};
+
+class IntVisitor : public boost::static_visitor<int>
+{
+public:
+  int operator()(double) const {assert(0); return 0;}
+  int operator()(int i) const {return i;}
+  int operator()(bool) const {assert(0); return 0;}
+  int operator()(const std::string&) const {assert(0); return 0;}
+  int operator()(const boost::filesystem::path&) const {assert(0); return 0;}
+  int operator()(const osg::Vec3d&) const {assert(0); return 0;}
+  int operator()(const osg::Quat&) const {assert(0); return 0;}
+  int operator()(const osg::Matrixd&) const {assert(0); return 0;}
+};
+
+class BoolVisitor : public boost::static_visitor<bool>
+{
+public:
+  bool operator()(double) const {assert(0); return false;}
+  bool operator()(int) const {assert(0); return false;}
+  bool operator()(bool b) const {return b;}
+  bool operator()(const std::string&) const {assert(0); return false;}
+  bool operator()(const boost::filesystem::path&) const {assert(0); return false;}
+  bool operator()(const osg::Vec3d&) const {assert(0); return false;}
+  bool operator()(const osg::Quat&) const {assert(0); return false;}
+  bool operator()(const osg::Matrixd&) const {assert(0); return false;}
+};
+
+class TypeStringVisitor : public boost::static_visitor<std::string>
+{
+public:
+  std::string operator()(double) const {return "Double";}
+  std::string operator()(int) const {return "Int";}
+  std::string operator()(bool) const {return "Bool";}
+  std::string operator()(const std::string&) const {return "String";}
+  std::string operator()(const boost::filesystem::path&) const {return "Path";}
+  std::string operator()(const osg::Vec3d&) const {return "Vec3d";}
+  std::string operator()(const osg::Quat&) const {return "Quat";}
+  std::string operator()(const osg::Matrixd&) const {return "Matrixd";}
+};
+
+class SrlVisitor : public boost::static_visitor<prj::srl::ParameterValue>
+{
+public:
+  prj::srl::ParameterValue operator()(double d) const
+  {
+    prj::srl::ParameterValue out;
+    out.aDouble() = d;
+    return out;
+  }
+  prj::srl::ParameterValue operator()(int i) const
+  {
+    prj::srl::ParameterValue out;
+    out.anInteger() = i;
+    return out;
+  }
+  prj::srl::ParameterValue operator()(bool b) const
+  {
+    prj::srl::ParameterValue out;
+    out.aBool() = b;
+    return out;
+  }
+  prj::srl::ParameterValue operator()(const std::string &s) const
+  {
+    prj::srl::ParameterValue out;
+    out.aString() = s;
+    return out;
+  }
+  prj::srl::ParameterValue operator()(const boost::filesystem::path &p) const
+  {
+    prj::srl::ParameterValue out;
+    out.aPath() = p.string();
+    return out;
+  }
+  prj::srl::ParameterValue operator()(const osg::Vec3d &v) const
+  {
+    prj::srl::ParameterValue out;
+    out.aVec3d() = prj::srl::Vec3d(v.x(), v.y(), v.z());
+    return out;
+  }
+  prj::srl::ParameterValue operator()(const osg::Quat &q) const
+  {
+    prj::srl::ParameterValue out;
+    out.aQuat() = prj::srl::Quat(q.x(), q.y(), q.z(), q.z());
+    return out;
+  }
+  prj::srl::ParameterValue operator()(const osg::Matrixd &m) const
+  {
+    prj::srl::ParameterValue out;
+    out.aMatrixd() = prj::srl::Matrixd
+    (
+      m(0,0), m(0,1), m(0,2), m(0,3),
+      m(1,0), m(1,1), m(1,2), m(1,3),
+      m(2,0), m(2,1), m(2,2), m(2,3),
+      m(3,0), m(3,1), m(3,2), m(3,3)
+    );
+    return out;
+  }
+};
 
 Parameter::Parameter(const QString& nameIn, double valueIn) :
   name(nameIn),
   value(valueIn),
   id(gu::createRandomId()),
-  constraint(ParameterConstraint::buildAll())
+  constraint(Constraint::buildAll())
 {
 }
 
-Parameter& Parameter::operator=(double valueIn)
+Parameter::Parameter(const QString& nameIn, int valueIn) :
+  name(nameIn),
+  value(valueIn),
+  id(gu::createRandomId()),
+  constraint(Constraint::buildAll())
 {
-  setValue(valueIn);
-  return *this;
+}
+
+Parameter::Parameter(const QString& nameIn, bool valueIn) :
+  name(nameIn),
+  value(valueIn),
+  id(gu::createRandomId()),
+  constraint()
+{
 }
 
 void Parameter::setConstant(bool constantIn)
@@ -240,30 +356,55 @@ void Parameter::setConstant(bool constantIn)
   constantChangedSignal();
 }
 
-void Parameter::setValue(double valueIn)
+const std::type_info& Parameter::getValueType() const
 {
-  if (value == valueIn)
-    return;
-  
-  if (!isValidValue(valueIn))
-    return;
-  
-  value = valueIn;
-  valueChangedSignal();
+  return value.type();
 }
 
-void Parameter::setValueQuiet(double valueIn)
+std::string Parameter::getValueTypeString() const
 {
-  if (value == valueIn)
-    return;
-  
-  if (!isValidValue(valueIn))
-    return;
-  
-  value = valueIn;
+  return boost::apply_visitor(TypeStringVisitor(), value);
 }
 
-void Parameter::setConstraint(const ParameterConstraint &cIn)
+bool Parameter::setValue(double valueIn)
+{
+  if (setValueQuiet(valueIn))
+  {
+    valueChangedSignal();
+    return true;
+  }
+  
+  return false;
+}
+
+bool Parameter::setValueQuiet(double valueIn)
+{
+  if (boost::apply_visitor(DoubleVisitor(), value) == valueIn)
+    return false;
+  
+  if (!isValidValue(valueIn))
+    return false;
+  
+  value = valueIn;
+  return true;
+}
+
+double Parameter::getValue() const
+{
+  return boost::apply_visitor(DoubleVisitor(), value);
+}
+
+Parameter::operator double() const
+{
+  return boost::apply_visitor(DoubleVisitor(), value);
+}
+
+bool Parameter::isValidValue(const double &valueIn) const
+{
+  return constraint.test(valueIn);
+}
+
+void Parameter::setConstraint(const Constraint &cIn)
 {
   /* not really worried about the current value conflicting
    * with new constraint. Constraints should be set at construction
@@ -272,20 +413,122 @@ void Parameter::setConstraint(const ParameterConstraint &cIn)
   constraint = cIn;
 }
 
-bool Parameter::isValidValue(const double &valueIn)
+bool Parameter::setValue(int valueIn)
 {
-  return constraint.test(valueIn);
+  if (setValueQuiet(valueIn))
+  {
+    valueChangedSignal();
+    return true;
+  }
+  
+  return false;
 }
+
+bool Parameter::setValueQuiet(int valueIn)
+{
+  if (boost::apply_visitor(IntVisitor(), value) == valueIn)
+    return false;
+  
+  if (!isValidValue(valueIn))
+    return false;
+  
+  value = valueIn;
+  return true;
+}
+
+bool Parameter::isValidValue(const int &valueIn) const
+{
+  return constraint.test(static_cast<double>(valueIn));
+}
+
+Parameter::operator int() const
+{
+  return boost::apply_visitor(IntVisitor(), value);
+}
+
+bool Parameter::setValue(bool valueIn)
+{
+  if (setValueQuiet(valueIn))
+  {
+    valueChangedSignal();
+    return true;
+  }
+  
+  return false;
+}
+
+bool Parameter::setValueQuiet(bool valueIn)
+{
+  if (boost::apply_visitor(BoolVisitor(), value) == valueIn)
+    return false;
+  
+  value = valueIn;
+  return true;
+}
+
+Parameter::operator bool() const
+{
+  return boost::apply_visitor(BoolVisitor(), value);
+}
+
+//todo
+Parameter::operator std::string() const{return std::string();}
+Parameter::operator boost::filesystem::path() const{return boost::filesystem::path();}
+Parameter::operator osg::Vec3d() const{return osg::Vec3d();}
+Parameter::operator osg::Quat() const{return osg::Quat();}
+Parameter::operator osg::Matrixd() const{return osg::Matrixd();}
+
+
+
+
 
 prj::srl::Parameter Parameter::serialOut() const
 {
-  return prj::srl::Parameter(name.toStdString(), constant, value, gu::idToString(id)); 
+  prj::srl::Parameter out(name.toStdString(), constant, gu::idToString(id));
+  out.pValue() = boost::apply_visitor(SrlVisitor(), value);
+  
+  return out;
 }
 
 void Parameter::serialIn(const prj::srl::Parameter& sParameterIn)
 {
   name = QString::fromStdString(sParameterIn.name());
   constant = sParameterIn.constant();
-  value = sParameterIn.value();
   id = gu::stringToId(sParameterIn.id());
+  
+  if (sParameterIn.pValue().present())
+  {
+    const auto &vIn = sParameterIn.pValue().get();
+    if (vIn.aDouble().present())
+      value = vIn.aDouble().get();
+    else if (vIn.anInteger().present())
+      value = vIn.anInteger().get();
+    else if (vIn.aBool().present())
+      value = vIn.aBool().get();
+    else if (vIn.aString().present())
+      value = vIn.aString().get();
+    else if (vIn.aPath().present())
+      value = boost::filesystem::path(vIn.aPath().get());
+    else if (vIn.aVec3d().present())
+      value = osg::Vec3d(vIn.aVec3d().get().x(), vIn.aVec3d().get().y(), vIn.aVec3d().get().z());
+    else if (vIn.aQuat().present())
+      value = osg::Quat(vIn.aQuat().get().x(), vIn.aQuat().get().y(), vIn.aQuat().get().z(), vIn.aQuat().get().w());
+    else if (vIn.aMatrixd().present())
+    {
+      const auto &mIn = vIn.aMatrixd().get();
+      value = osg::Matrixd
+      (
+        mIn.i0j0(), mIn.i0j1(), mIn.i0j2(), mIn.i0j3(),
+        mIn.i1j0(), mIn.i1j1(), mIn.i1j2(), mIn.i1j3(),
+        mIn.i2j0(), mIn.i2j1(), mIn.i2j2(), mIn.i2j3(),
+        mIn.i3j0(), mIn.i3j1(), mIn.i3j2(), mIn.i3j3()
+      );
+    }
+  }
+  else if (sParameterIn.value().present())
+  {
+    value = sParameterIn.value().get();
+  }
+  else
+    assert(0);
 }

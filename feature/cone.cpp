@@ -72,9 +72,9 @@ QIcon Cone::icon;
 //only complete rotational cone. no partials. because top or bottom radius
 //maybe 0.0, faces and wires might be null and edges maybe degenerate.
 Cone::Cone() : CSysBase(),
-  radius1(ParameterNames::Radius1, prf::manager().rootPtr->features().cone().get().radius1()),
-  radius2(ParameterNames::Radius2, prf::manager().rootPtr->features().cone().get().radius2()),
-  height(ParameterNames::Height, prf::manager().rootPtr->features().cone().get().height())
+  radius1(prm::Names::Radius1, prf::manager().rootPtr->features().cone().get().radius1()),
+  radius2(prm::Names::Radius2, prf::manager().rootPtr->features().cone().get().radius2()),
+  height(prm::Names::Height, prf::manager().rootPtr->features().cone().get().height())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionCone.svg");
@@ -84,9 +84,9 @@ Cone::Cone() : CSysBase(),
   
   initializeMaps();
   
-  radius1.setConstraint(ParameterConstraint::buildZeroPositive());
-  radius2.setConstraint(ParameterConstraint::buildZeroPositive());
-  height.setConstraint(ParameterConstraint::buildNonZeroPositive());
+  radius1.setConstraint(prm::Constraint::buildZeroPositive());
+  radius2.setConstraint(prm::Constraint::buildZeroPositive());
+  height.setConstraint(prm::Constraint::buildNonZeroPositive());
   
   parameterVector.push_back(&radius1);
   parameterVector.push_back(&radius2);
@@ -142,49 +142,36 @@ void Cone::updateIPGroup()
   //height of radius2 dragger
   osg::Matrixd freshMatrix;
   freshMatrix.setRotate(osg::Quat(osg::PI_2, osg::Vec3d(-1.0, 0.0, 0.0)));
-  freshMatrix.setTrans(osg::Vec3d (0.0, 0.0, height));
+  freshMatrix.setTrans(osg::Vec3d (0.0, 0.0, static_cast<double>(height)));
   radius2IP->setMatrixDragger(freshMatrix);
-  radius2IP->mainDim->setSqueeze(height);
-  radius2IP->mainDim->setExtensionOffset(height);
+  radius2IP->mainDim->setSqueeze(static_cast<double>(height));
+  radius2IP->mainDim->setExtensionOffset(static_cast<double>(height));
   
   heightIP->setMatrix(gu::toOsg(system));
   radius1IP->setMatrix(gu::toOsg(system));
   radius2IP->setMatrix(gu::toOsg(system));
   
-  heightIP->mainDim->setSqueeze(radius1);
-  heightIP->mainDim->setExtensionOffset(radius1);
+  heightIP->mainDim->setSqueeze(static_cast<double>(radius1));
+  heightIP->mainDim->setExtensionOffset(static_cast<double>(radius1));
 }
 
 void Cone::setRadius1(const double& radius1In)
 {
-  if (radius1 == radius1In)
-    return;
-  assert(radius1In > Precision::Confusion());
-  setModelDirty();
-  radius1 = radius1In;
+  radius1.setValue(radius1In);
 }
 
 void Cone::setRadius2(const double& radius2In)
 {
-  if (radius2 == radius2In)
-    return;
-  assert(radius2In >= 0.0); //radius2 can be zero. a point.
-  setModelDirty();
-  radius2 = radius2In;
+  radius2.setValue(radius2In);
 }
 
 void Cone::setHeight(const double& heightIn)
 {
-  if (height == heightIn)
-    return;
-  assert(heightIn > Precision::Confusion());
-  setModelDirty();
-  height = heightIn;
+  height.setValue(heightIn);
 }
 
 void Cone::setParameters(const double& radius1In, const double& radius2In, const double& heightIn)
 {
-  //asserts and dirty in setters.
   setRadius1(radius1In);
   setRadius2(radius2In);
   setHeight(heightIn);
@@ -192,9 +179,9 @@ void Cone::setParameters(const double& radius1In, const double& radius2In, const
 
 void Cone::getParameters(double& radius1Out, double& radius2Out, double& heightOut) const
 {
-  radius1Out = radius1;
-  radius2Out = radius2;
-  heightOut = height;
+  radius1Out = static_cast<double>(radius1);
+  radius2Out = static_cast<double>(radius2);
+  heightOut = static_cast<double>(height);
 }
 
 void Cone::updateModel(const UpdatePayload &payloadIn)
@@ -205,7 +192,7 @@ void Cone::updateModel(const UpdatePayload &payloadIn)
   
   try
   {
-    ConeBuilder coneBuilder(radius1, radius2, height, system);
+    ConeBuilder coneBuilder(static_cast<double>(radius1), static_cast<double>(radius2), static_cast<double>(height), system);
     seerShape->setOCCTShape(coneBuilder.getSolid());
     updateResult(coneBuilder);
     setSuccess();

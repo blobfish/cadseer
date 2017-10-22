@@ -57,32 +57,43 @@ Strip::Strip() : Base()
   
   feedDirection = osg::Vec3d(-1.0, 0.0, 0.0);
   
-  pitch = std::shared_ptr<Parameter>(new Parameter(QObject::tr("Pitch"), 1.0));
-  pitch->setConstraint(ParameterConstraint::buildNonZeroPositive());
+  pitch = std::shared_ptr<prm::Parameter>(new prm::Parameter(QObject::tr("Pitch"), 1.0));
+  pitch->setConstraint(prm::Constraint::buildNonZeroPositive());
   pitch->connectValue(boost::bind(&Strip::setModelDirty, this));
   parameterVector.push_back(pitch.get());
   
-  width = std::shared_ptr<Parameter>(new Parameter(QObject::tr("Width"), 1.0));
-  width->setConstraint(ParameterConstraint::buildNonZeroPositive());
+  width = std::shared_ptr<prm::Parameter>(new prm::Parameter(QObject::tr("Width"), 1.0));
+  width->setConstraint(prm::Constraint::buildNonZeroPositive());
   width->connectValue(boost::bind(&Strip::setModelDirty, this));
   parameterVector.push_back(width.get());
   
-  widthOffset = std::shared_ptr<Parameter>(new Parameter(QObject::tr("Width Offset"), 1.0));
-  widthOffset->setConstraint(ParameterConstraint::buildAll());
+  widthOffset = std::shared_ptr<prm::Parameter>(new prm::Parameter(QObject::tr("Width Offset"), 1.0));
+  widthOffset->setConstraint(prm::Constraint::buildAll());
   widthOffset->connectValue(boost::bind(&Strip::setModelDirty, this));
   parameterVector.push_back(widthOffset.get());
   
-  gap = std::shared_ptr<Parameter>
+  gap = std::shared_ptr<prm::Parameter>
   (
-    new Parameter
+    new prm::Parameter
     (
       QObject::tr("Gap"),
       prf::manager().rootPtr->features().strip().get().gap()
     )
   );
-  gap->setConstraint(ParameterConstraint::buildNonZeroPositive());
+  gap->setConstraint(prm::Constraint::buildNonZeroPositive());
   gap->connectValue(boost::bind(&Strip::setModelDirty, this));
   parameterVector.push_back(gap.get());
+  
+  autoCalc = std::shared_ptr<prm::Parameter>
+  (
+    new prm::Parameter
+    (
+      QObject::tr("Auto Calc"),
+      true
+    )
+  );
+  autoCalc->connectValue(boost::bind(&Strip::setModelDirty, this));
+  parameterVector.push_back(autoCalc.get());
   
   pitchLabel = new lbr::PLabel(pitch.get());
   pitchLabel->showName = true;
@@ -103,6 +114,11 @@ Strip::Strip() : Base()
   gapLabel->showName = true;
   gapLabel->valueHasChanged();
   overlaySwitch->addChild(gapLabel.get());
+  
+  autoCalcLabel = new lbr::PLabel(autoCalc.get());
+  autoCalcLabel->showName = true;
+  autoCalcLabel->valueHasChanged();
+  overlaySwitch->addChild(autoCalcLabel.get());
   
   stations.push_back("Blank");
   stations.push_back("Blank");
@@ -175,7 +191,7 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
     
     occt::BoundingBox bbbox(bs); //blank bounding box.
     
-    if (autoCalc)
+    if (static_cast<bool>(*autoCalc))
     {
       setLabelColors(osg::Vec4(1.0, 0.0, 0.0, 1.0));
       
@@ -254,6 +270,9 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
       + (fNorm * bbbox.getWidth() * 0.5);
     widthLabel->setMatrix(osg::Matrixd::translate(wlLoc));
     
+    osg::Vec3d acLoc = gu::toOsg(bbbox.getCenter()); //autocalc label location
+    autoCalcLabel->setMatrix(osg::Matrixd::translate(acLoc + osg::Vec3d(0.0, bbbox.getWidth(), 0.0)));
+    
     for (const auto &l : stationLabels)
     {
       for (const auto &pg : l->getParents()) //parent group
@@ -312,7 +331,7 @@ void Strip::serialWrite(const QDir &dIn)
     width->serialOut(),
     widthOffset->serialOut(),
     gap->serialOut(),
-    autoCalc,
+    autoCalc->serialOut(),
     stripHeight,
     so
   );
@@ -329,7 +348,7 @@ void Strip::serialRead(const prj::srl::FeatureStrip &sIn)
   width->serialIn(sIn.width());
   widthOffset->serialIn(sIn.widthOffset());
   gap->serialIn(sIn.gap());
-  autoCalc = sIn.autoCalc();
+  autoCalc->serialIn(sIn.autoCalc());
   stripHeight = sIn.stripHeight();
   stations.clear();
   for (const auto &stringIn : sIn.stations().array())

@@ -57,7 +57,7 @@ namespace ftr
     Picks picks;
     boost::uuids::uuid faceId; //!< id of the generated face.
     boost::uuids::uuid wireId; //!< outer wire of face.
-    std::shared_ptr<Parameter> granularity; //!< 0 means no update.
+    std::shared_ptr<prm::Parameter> granularity; //!< 0 means no update.
     osg::ref_ptr<lbr::PLabel> label;
   };
 }

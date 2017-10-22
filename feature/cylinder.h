@@ -39,8 +39,8 @@ namespace ftr
     void setRadius(const double &radiusIn);
     void setHeight(const double &heightIn);
     void setParameters(const double &radiusIn, const double &heightIn);
-    double getRadius() const {return radius;}
-    double getHeight() const {return height;}
+    double getRadius() const {return static_cast<double>(radius);}
+    double getHeight() const {return static_cast<double>(height);}
     void getParameters (double &radiusOut, double &heightOut) const;
     
     virtual void updateModel(const UpdatePayload&) override;
@@ -52,8 +52,8 @@ namespace ftr
     void serialRead(const prj::srl::FeatureCylinder &sCylinderIn); //!<initializes this from sBox. not virtual, type already known.
   
   protected:
-    Parameter radius;
-    Parameter height;
+    prm::Parameter radius;
+    prm::Parameter height;
     
     osg::ref_ptr<lbr::IPGroup> heightIP;
     osg::ref_ptr<lbr::IPGroup> radiusIP;

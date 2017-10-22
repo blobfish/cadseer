@@ -362,7 +362,7 @@ void Manager::removeFormula(const boost::uuids::uuid& idIn)
   formulaLinksPtr->container.get<FormulaLink::ByFormulaId>().erase(it2, itEnd);
 }
 
-void Manager::addLink(ftr::Parameter *parameterIn, const uuid &formulaIdIn)
+void Manager::addLink(ftr::prm::Parameter *parameterIn, const uuid &formulaIdIn)
 {
   FormulaLink virginLink;
   virginLink.parameterId = parameterIn->getId();
@@ -468,7 +468,7 @@ void Manager::featureRemovedDispatched(const msg::Message &messageIn)
   prj::Message message = boost::get<prj::Message>(messageIn.payload);
   uuid featureId = message.feature->getId();
   
-  const ftr::ParameterVector &pVector = static_cast<app::Application*>(qApp)->getProject()->findFeature(featureId)->getParameterVector();
+  const ftr::prm::Vector &pVector = static_cast<app::Application*>(qApp)->getProject()->findFeature(featureId)->getParameterVector();
   
   for (const auto &p : pVector)
   {

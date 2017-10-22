@@ -22,12 +22,14 @@
 
 class QTextStream;
 
-namespace osg{class Matrixd;}
+namespace osg{class Matrixd; class Vec3d; class Quat;}
 class gp_Pnt;
 
 namespace gu
 {
     QTextStream& osgMatrixOut(QTextStream&, const osg::Matrixd&);
+    QTextStream& osgQuatOut(QTextStream&, const osg::Quat&);
+    QTextStream& osgVectorOut(QTextStream&, const osg::Vec3d&);
     QTextStream& gpPntOut(QTextStream&, const gp_Pnt&);
     
     static const std::vector<QString> surfaceTypeStrings = 

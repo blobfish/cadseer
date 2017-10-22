@@ -569,7 +569,7 @@ namespace prj
       /**
        * @brief Element type.
        */
-      typedef ::xml_schema::Boolean AutoCalcType;
+      typedef ::prj::srl::Parameter AutoCalcType;
 
       /**
        * @brief Element traits type.
@@ -602,6 +602,17 @@ namespace prj
        */
       void
       autoCalc (const AutoCalcType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      autoCalc (::std::unique_ptr< AutoCalcType > p);
 
       //@}
 
@@ -741,7 +752,7 @@ namespace prj
                     ::std::unique_ptr< WidthType >,
                     ::std::unique_ptr< WidthOffsetType >,
                     ::std::unique_ptr< GapType >,
-                    const AutoCalcType&,
+                    ::std::unique_ptr< AutoCalcType >,
                     const StripHeightType&,
                     ::std::unique_ptr< StationsType >);
 

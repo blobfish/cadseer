@@ -55,10 +55,10 @@ namespace ftr
     double getWidth() const;
     
   protected:
-    std::shared_ptr<Parameter> length; //!< only used if autoCalc is false.
-    std::shared_ptr<Parameter> width; //!< only used if autoCalc is false.
-    std::shared_ptr<Parameter> lengthPadding; //!< only used if autoCalc is true.
-    std::shared_ptr<Parameter> widthPadding; //!< only used if autoCalc is true.
+    std::shared_ptr<prm::Parameter> length; //!< only used if autoCalc is false.
+    std::shared_ptr<prm::Parameter> width; //!< only used if autoCalc is false.
+    std::shared_ptr<prm::Parameter> lengthPadding; //!< only used if autoCalc is true.
+    std::shared_ptr<prm::Parameter> widthPadding; //!< only used if autoCalc is true.
     bool autoCalc = true; //!< eventually a parameter.
     
     osg::ref_ptr<lbr::PLabel> lengthLabel;
