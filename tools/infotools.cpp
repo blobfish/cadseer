@@ -59,11 +59,13 @@ QTextStream& gu::osgMatrixOut(QTextStream &streamIn, const osg::Matrixd &m)
 QTextStream& gu::osgQuatOut(QTextStream &s, const osg::Quat &qIn)
 {
   s << "[" << ms(qIn.x()) << ", " << ms(qIn.y()) << ", " << ms(qIn.z()) << ", " << ms(qIn.w()) << "]";
+  return s;
 }
 
 QTextStream& gu::osgVectorOut(QTextStream &s, const osg::Vec3d &vIn)
 {
   s << "[" << ms(vIn.x()) << ", " << ms(vIn.y()) << ", " << ms(vIn.z()) << "]";
+  return s;
 }
 
 QTextStream& gu::gpPntOut(QTextStream &sIn, const gp_Pnt &pIn)
