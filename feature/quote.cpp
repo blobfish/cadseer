@@ -22,6 +22,7 @@
 #include <libzippp.h>
 
 #include <globalutilities.h>
+#include <tools/occtools.h>
 #include <application/application.h>
 #include <project/project.h>
 #include <preferences/preferencesXML.h>
@@ -30,14 +31,18 @@
 #include <libreoffice/odshack.h>
 #include <feature/strip.h>
 #include <feature/dieset.h>
+#include <feature/seershape.h>
 #include <project/serial/xsdcxxoutput/featurequote.h>
 #include <feature/quote.h>
 
 using namespace ftr;
+using boost::filesystem::path;
 
 QIcon Quote::icon;
 
-Quote::Quote() : Base()
+Quote::Quote() : Base(),
+tFile("Template File", prf::manager().rootPtr->features().quote().get().templateSheet(), prm::PathType::Read),
+oFile("Output File",  path(static_cast<app::Application*>(qApp)->getProject()->getSaveDirectory()) /= "Quote.ods", prm::PathType::Write)
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionQuote.svg");
@@ -57,9 +62,18 @@ Quote::Quote() : Base()
   quoteData.processType = "aProcessType";
   quoteData.annualVolume = 0;
   
-  tFile = prf::manager().rootPtr->features().quote().get().templateSheet();
-  oFile = static_cast<app::Application*>(qApp)->getProject()->getSaveDirectory();
-  oFile /= getName().toStdString() + ".ods";
+  parameterVector.push_back(&tFile);
+  parameterVector.push_back(&oFile);
+  
+  tLabel = new lbr::PLabel(&tFile);
+  tLabel->showName = true;
+  tLabel->valueHasChanged();
+  overlaySwitch->addChild(tLabel.get());
+  
+  oLabel = new lbr::PLabel(&oFile);
+  oLabel->showName = true;
+  oLabel->valueHasChanged();
+  overlaySwitch->addChild(oLabel.get());
 }
 
 Quote::~Quote()
@@ -86,17 +100,30 @@ void Quote::updateModel(const UpdatePayload &payloadIn)
     if (!dsf)
       throw std::runtime_error("can not cast to dieset feature");
     
+    //place labels
+    const SeerShape &dss = dsf->getSeerShape(); //part seer shape.
+    const TopoDS_Shape &ds = dss.getRootOCCTShape(); //part shape.
+    occt::BoundingBox sbbox(ds); //blank bounding box.
+    osg::Vec3d tLoc = gu::toOsg(sbbox.getCenter()) + osg::Vec3d(0.0, 50.0, 0.0);
+    tLabel->setMatrix(osg::Matrixd::translate(tLoc));
+    osg::Vec3d oLoc = gu::toOsg(sbbox.getCenter()) + osg::Vec3d(0.0, -50.0, 0.0);
+    oLabel->setMatrix(osg::Matrixd::translate(oLoc));
     
-    if (!boost::filesystem::exists(tFile))
+    if (!boost::filesystem::exists(static_cast<path>(tFile)))
       throw std::runtime_error("template file doesn't exist");
     /* we change the entries in a specific sheet and these values are linked into
     * a customer designed sheet. The links are not updated when we open the sheet in calc by default.
     * calc menu: /tools/options/libreoffice calc/formula/Recalculation on file load
     * set that to always.
     */
-    boost::filesystem::copy_file(tFile, oFile, boost::filesystem::copy_option::overwrite_if_exists);
+    boost::filesystem::copy_file
+    (
+      static_cast<path>(tFile),
+      static_cast<path>(oFile),
+      boost::filesystem::copy_option::overwrite_if_exists
+    );
     
-    libzippp::ZipArchive zip(oFile.string());
+    libzippp::ZipArchive zip(static_cast<path>(oFile).string());
     zip.open(libzippp::ZipArchive::WRITE);
     for(const auto &e : zip.getEntries())
     {
@@ -187,8 +214,8 @@ void Quote::serialWrite(const QDir &dIn)
   prj::srl::FeatureQuote qo
   (
     Base::serialOut(),
-    tFile.string(),
-    oFile.string(),
+    tFile.serialOut(),
+    oFile.serialOut(),
     pFile.string(),
     quoteData.quoteNumber,
     quoteData.customerName.toStdString(),
@@ -211,8 +238,8 @@ void Quote::serialWrite(const QDir &dIn)
 void Quote::serialRead(const prj::srl::FeatureQuote &qIn)
 {
   Base::serialIn(qIn.featureBase());
-  tFile = qIn.templateFile();
-  oFile = qIn.outFile();
+  tFile.serialIn(qIn.templateFile());
+  oFile.serialIn(qIn.outFile());
   pFile = qIn.pictureFile();
   quoteData.quoteNumber = qIn.quoteNumber();
   quoteData.customerName = QString::fromStdString(qIn.customerName());

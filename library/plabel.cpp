@@ -53,7 +53,13 @@ public:
     return "False";
   }
   std::string operator()(const std::string &s) const {return s;}
-  std::string operator()(const boost::filesystem::path &p) const {return p.string();}
+  std::string operator()(const boost::filesystem::path &p) const
+  {
+    if (p.has_filename())
+      return p.filename().string();
+    else
+      return p.end()->string();
+  }
   std::string operator()(const osg::Vec3d &vIn) const
   {
     std::ostringstream stream;

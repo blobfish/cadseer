@@ -17,6 +17,8 @@
  *
  */
 
+#include <boost/filesystem.hpp>
+
 #include <QLabel>
 #include <QKeyEvent>
 #include <QHBoxLayout>
@@ -25,6 +27,7 @@
 #include <QComboBox>
 #include <QTimer>
 #include <QTextStream>
+#include <QFileDialog>
 
 #include <tools/idtools.h>
 #include <tools/infotools.h>
@@ -113,14 +116,21 @@ private:
   
   QWidget* buildPath() const
   {
-    QLineEdit* out = new QLineEdit(dialog);
-    out->setText(QString::fromStdString(static_cast<boost::filesystem::path>(*(dialog->parameter)).string()));
+    QWidget *ww = new QWidget(dialog); //widget wrapper.
+    QHBoxLayout *hl = new QHBoxLayout();
+    hl->setContentsMargins(0, 0, 0, 0);
+    ww->setLayout(hl);
     
-    //more elaborate control with browse button etc.
+    QLineEdit *le = new QLineEdit(ww);
+    le->setObjectName(QString("TheLineEdit")); //we use this to search in the slot.
+    le->setText(QString::fromStdString(static_cast<boost::filesystem::path>(*(dialog->parameter)).string()));
+    hl->addWidget(le);
     
-    //connect to dialog slots
+    QPushButton *bb = new QPushButton(QObject::tr("Browse"), ww);
+    hl->addWidget(bb);
+    QObject::connect(bb, SIGNAL(clicked()), dialog, SLOT(browseForPathSlot()));
     
-    return out;
+    return ww;
   }
   
   QWidget* buildVec3d() const
@@ -481,5 +491,60 @@ void ParameterDialog::boolChangedSlot(int i)
     observer->out(msg::buildGitMessage(gitStream.str()));
     if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
       observer->out(msg::Mask(msg::Request | msg::Update));
+  }
+}
+
+void ParameterDialog::browseForPathSlot()
+{
+  //find the line edit child widget and get text.
+  QLineEdit *lineEdit = editWidget->findChild<QLineEdit*>(QString("TheLineEdit"));
+  assert(lineEdit);
+  if (!lineEdit)
+    return;
+  
+  namespace bfs = boost::filesystem;
+  bfs::path t = lineEdit->text().toStdString();
+  std::string extension = "(*";
+  if (t.has_extension())
+    extension += t.extension().string();
+  else
+    extension += ".*";
+  extension += ")";
+  
+  if (parameter->getPathType() == ftr::prm::PathType::Read)
+  {
+    //read expects the file to exist. start browse from project directory if doesn't exist.
+    if (!bfs::exists(t))
+      t = static_cast<app::Application*>(qApp)->getProject()->getSaveDirectory();
+    
+    QString fileName = QFileDialog::getOpenFileName
+    (
+      this,
+      tr("Browse For Read"),
+      QString::fromStdString(t.string()),
+      QString::fromStdString(extension)
+    );
+    
+    if (!fileName.isEmpty())
+      lineEdit->setText(fileName);
+  }
+  else if (parameter->getPathType() == ftr::prm::PathType::Write)
+  {
+    if (!bfs::exists(t.parent_path()))
+    {
+      t = static_cast<app::Application*>(qApp)->getProject()->getSaveDirectory();
+      t /= "file" + extension;
+    }
+    
+    QString fileName = QFileDialog::getSaveFileName
+    (
+      this,
+      tr("Browse For Write"),
+      QString::fromStdString(t.string()),
+      QString::fromStdString(extension)
+    );
+    
+    if (!fileName.isEmpty())
+      lineEdit->setText(fileName);
   }
 }

@@ -437,8 +437,8 @@ namespace prj
 
     FeatureQuote::
     FeatureQuote (::std::unique_ptr< FeatureBaseType > featureBase,
-                  const TemplateFileType& templateFile,
-                  const OutFileType& outFile,
+                  ::std::unique_ptr< TemplateFileType > templateFile,
+                  ::std::unique_ptr< OutFileType > outFile,
                   const PictureFileType& pictureFile,
                   const QuoteNumberType& quoteNumber,
                   const CustomerNameType& customerName,
@@ -453,8 +453,8 @@ namespace prj
                   const AnnualVolumeType& annualVolume)
     : ::xml_schema::Type (),
       featureBase_ (std::move (featureBase), this),
-      templateFile_ (templateFile, this),
-      outFile_ (outFile, this),
+      templateFile_ (std::move (templateFile), this),
+      outFile_ (std::move (outFile), this),
       pictureFile_ (pictureFile, this),
       quoteNumber_ (quoteNumber, this),
       customerName_ (customerName, this),

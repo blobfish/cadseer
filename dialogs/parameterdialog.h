@@ -74,6 +74,8 @@ namespace dlg
     void textEditedDoubleSlot(const QString &);
     
     void boolChangedSlot(int);
+    
+    void browseForPathSlot();
   };
 }
 

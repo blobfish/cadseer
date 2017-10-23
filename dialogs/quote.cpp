@@ -96,8 +96,8 @@ void Quote::finishDialog()
     quote->quoteData.processType = sProcessTypeCombo->currentText();
     quote->quoteData.annualVolume = sAnnualVolumeEdit->text().toInt();
     
-    quote->tFile = tFileEdit->text().toStdString();
-    quote->oFile = oFileEdit->text().toStdString();
+    quote->tFile.setValue(boost::filesystem::path(tFileEdit->text().toStdString()));
+    quote->oFile.setValue(boost::filesystem::path(oFileEdit->text().toStdString()));
     
     //upate graph connections
     prj::Project *p = static_cast<app::Application *>(qApp)->getProject();
@@ -132,8 +132,8 @@ void Quote::initGui()
   
   loadLabelPixmapSlot();
   
-  tFileEdit->setText(QString::fromStdString(quote->tFile.string()));
-  oFileEdit->setText(QString::fromStdString(quote->oFile.string()));
+  tFileEdit->setText(QString::fromStdString(static_cast<boost::filesystem::path>(quote->tFile).string()));
+  oFileEdit->setText(QString::fromStdString(static_cast<boost::filesystem::path>(quote->oFile).string()));
   
   prj::Project *p = static_cast<app::Application *>(qApp)->getProject();
   ftr::UpdatePayload::UpdateMap pMap = p->getParentMap(quote->getId());

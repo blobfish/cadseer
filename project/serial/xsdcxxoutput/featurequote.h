@@ -178,7 +178,7 @@ namespace prj
       /**
        * @brief Element type.
        */
-      typedef ::xml_schema::String TemplateFileType;
+      typedef ::prj::srl::Parameter TemplateFileType;
 
       /**
        * @brief Element traits type.
@@ -236,7 +236,7 @@ namespace prj
       /**
        * @brief Element type.
        */
-      typedef ::xml_schema::String OutFileType;
+      typedef ::prj::srl::Parameter OutFileType;
 
       /**
        * @brief Element traits type.
@@ -980,8 +980,8 @@ namespace prj
        * instead of making copies.
        */
       FeatureQuote (::std::unique_ptr< FeatureBaseType >,
-                    const TemplateFileType&,
-                    const OutFileType&,
+                    ::std::unique_ptr< TemplateFileType >,
+                    ::std::unique_ptr< OutFileType >,
                     const PictureFileType&,
                     const QuoteNumberType&,
                     const CustomerNameType&,

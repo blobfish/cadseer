@@ -22,8 +22,11 @@
 
 #include <boost/filesystem/path.hpp>
 
+#include <osg/ref_ptr>
+
 #include <feature/base.h>
 
+namespace lbr{class PLabel;}
 namespace prj{namespace srl{class FeatureQuote;}}
 
 namespace ftr
@@ -61,9 +64,12 @@ namespace ftr
     virtual void serialWrite(const QDir&) override;
     void serialRead(const prj::srl::FeatureQuote &);
     
-    boost::filesystem::path tFile; //!< template file. eventual parameter
-    boost::filesystem::path oFile; //!< output file. eventual parameter
+    prm::Parameter tFile; //!< template file.
+    prm::Parameter oFile; //!< output file.
     boost::filesystem::path pFile; //!< picture file.
+    
+    osg::ref_ptr<lbr::PLabel> tLabel;
+    osg::ref_ptr<lbr::PLabel> oLabel;
     
     QuoteData quoteData;
     

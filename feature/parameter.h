@@ -51,6 +51,15 @@ namespace ftr
       static const QString Offset = "Offset"; //!< datum plane
     }
     
+    /*! Descriptor for path parameters.*/
+    enum class PathType
+    {
+      None, //!< shouldn't be used.
+      Directory, //!< future?
+      Read, //!< think file open.
+      Write, //!< think file save as.
+    };
+    
     typedef boost::variant
     <
       double,
@@ -119,6 +128,7 @@ namespace ftr
       Parameter(const QString &nameIn, double valueIn);
       Parameter(const QString &nameIn, int valueIn);
       Parameter(const QString &nameIn, bool valueIn);
+      Parameter(const QString &nameIn, const boost::filesystem::path &valueIn, PathType);
       
       QString getName() const {return name;}
       void setName(const QString &nameIn){name = nameIn;}
@@ -128,6 +138,7 @@ namespace ftr
       const std::type_info& getValueType() const; //!< compare return by: "getValueType() == typeid(std::string)"
       std::string getValueTypeString() const;
       const Variant& getVariant() const {return value;}
+      PathType getPathType() const {return pathType;}
       
       //@{
       //! original functions from when only doubles supported.
@@ -148,8 +159,6 @@ namespace ftr
       //maybe setConstraint
       //@}
       
-      
-      
       //@{
       //! bool support functions.
       bool setValue(bool); //<! true = value was changed.
@@ -164,6 +173,8 @@ namespace ftr
       
       //@{
       //! boost::filesystem::path support functions.
+      bool setValue(const boost::filesystem::path&); //<! true = value was changed.
+      bool setValueQuiet(const boost::filesystem::path&);
       explicit operator boost::filesystem::path() const;
       //@}
       
@@ -204,6 +215,7 @@ namespace ftr
       Variant value;
       boost::uuids::uuid id;
       Constraint constraint;
+      PathType pathType;
       
       //mutable allows us to connect to the signal through a const object.
       mutable ValueChangedSignal valueChangedSignal;

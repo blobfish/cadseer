@@ -10,8 +10,8 @@
 <xs:complexType name="FeatureQuote">
   <xs:all>
     <xs:element name="featureBase" type="srl:FeatureBase"/>
-    <xs:element name="templateFile" type="xs:string"/>
-    <xs:element name="outFile" type="xs:string"/>
+    <xs:element name="templateFile" type="srl:Parameter"/>
+    <xs:element name="outFile" type="srl:Parameter"/>
     <xs:element name="pictureFile" type="xs:string"/>
     <xs:element name="quoteNumber" type="xs:int"/>
     <xs:element name="customerName" type="xs:string"/>

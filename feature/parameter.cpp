@@ -26,6 +26,7 @@
 #include <feature/parameter.h>
 
 using namespace ftr::prm;
+using boost::filesystem::path;
 
 Boundary::Boundary(double valueIn, Boundary::End endIn) :
   value(valueIn), end(endIn)
@@ -252,6 +253,19 @@ public:
   bool operator()(const osg::Matrixd&) const {assert(0); return false;}
 };
 
+class PathVisitor : public boost::static_visitor<path>
+{
+public:
+  path operator()(double) const {assert(0); return path();}
+  path operator()(int) const {assert(0); return path();}
+  path operator()(bool) const {assert(0); return path();}
+  path operator()(const std::string&) const {assert(0); return path();}
+  path operator()(const boost::filesystem::path &p) const {return p;}
+  path operator()(const osg::Vec3d&) const {assert(0); return path();}
+  path operator()(const osg::Quat&) const {assert(0); return path();}
+  path operator()(const osg::Matrixd&) const {assert(0); return path();}
+};
+
 class TypeStringVisitor : public boost::static_visitor<std::string>
 {
 public:
@@ -345,6 +359,15 @@ Parameter::Parameter(const QString& nameIn, bool valueIn) :
   value(valueIn),
   id(gu::createRandomId()),
   constraint()
+{
+}
+
+Parameter::Parameter(const QString &nameIn, const boost::filesystem::path &valueIn, PathType ptIn) :
+  name(nameIn),
+  value(valueIn),
+  id(gu::createRandomId()),
+  constraint(),
+  pathType(ptIn)
 {
 }
 
@@ -471,9 +494,34 @@ Parameter::operator bool() const
   return boost::apply_visitor(BoolVisitor(), value);
 }
 
+bool Parameter::setValue(const path &valueIn)
+{
+  if (setValueQuiet(valueIn))
+  {
+    valueChangedSignal();
+    return true;
+  }
+  
+  return false;
+}
+
+bool Parameter::setValueQuiet(const path &valueIn)
+{
+  if (boost::apply_visitor(PathVisitor(), value) == valueIn)
+    return false;
+  
+  value = valueIn;
+  return true;
+}
+
+Parameter::operator boost::filesystem::path() const
+{
+  return boost::apply_visitor(PathVisitor(), value);
+}
+
+
 //todo
 Parameter::operator std::string() const{return std::string();}
-Parameter::operator boost::filesystem::path() const{return boost::filesystem::path();}
 Parameter::operator osg::Vec3d() const{return osg::Vec3d();}
 Parameter::operator osg::Quat() const{return osg::Quat();}
 Parameter::operator osg::Matrixd() const{return osg::Matrixd();}
