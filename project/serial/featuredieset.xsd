@@ -14,7 +14,8 @@
     <xs:element name="lengthPadding" type="srl:Parameter"/>
     <xs:element name="width" type="srl:Parameter"/>
     <xs:element name="widthPadding" type="srl:Parameter"/>
-    <xs:element name="autoCalc" type="xs:boolean"/>
+    <xs:element name="origin" type="srl:Parameter"/>
+    <xs:element name="autoCalc" type="srl:Parameter"/>
   </xs:all>
 </xs:complexType>
 

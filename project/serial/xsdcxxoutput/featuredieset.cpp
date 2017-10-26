@@ -167,6 +167,30 @@ namespace prj
       this->widthPadding_.set (std::move (x));
     }
 
+    const FeatureDieSet::OriginType& FeatureDieSet::
+    origin () const
+    {
+      return this->origin_.get ();
+    }
+
+    FeatureDieSet::OriginType& FeatureDieSet::
+    origin ()
+    {
+      return this->origin_.get ();
+    }
+
+    void FeatureDieSet::
+    origin (const OriginType& x)
+    {
+      this->origin_.set (x);
+    }
+
+    void FeatureDieSet::
+    origin (::std::unique_ptr< OriginType > x)
+    {
+      this->origin_.set (std::move (x));
+    }
+
     const FeatureDieSet::AutoCalcType& FeatureDieSet::
     autoCalc () const
     {
@@ -183,6 +207,12 @@ namespace prj
     autoCalc (const AutoCalcType& x)
     {
       this->autoCalc_.set (x);
+    }
+
+    void FeatureDieSet::
+    autoCalc (::std::unique_ptr< AutoCalcType > x)
+    {
+      this->autoCalc_.set (std::move (x));
     }
   }
 }
@@ -202,6 +232,7 @@ namespace prj
                    const LengthPaddingType& lengthPadding,
                    const WidthType& width,
                    const WidthPaddingType& widthPadding,
+                   const OriginType& origin,
                    const AutoCalcType& autoCalc)
     : ::xml_schema::Type (),
       featureBase_ (featureBase, this),
@@ -209,6 +240,7 @@ namespace prj
       lengthPadding_ (lengthPadding, this),
       width_ (width, this),
       widthPadding_ (widthPadding, this),
+      origin_ (origin, this),
       autoCalc_ (autoCalc, this)
     {
     }
@@ -219,14 +251,16 @@ namespace prj
                    ::std::unique_ptr< LengthPaddingType > lengthPadding,
                    ::std::unique_ptr< WidthType > width,
                    ::std::unique_ptr< WidthPaddingType > widthPadding,
-                   const AutoCalcType& autoCalc)
+                   ::std::unique_ptr< OriginType > origin,
+                   ::std::unique_ptr< AutoCalcType > autoCalc)
     : ::xml_schema::Type (),
       featureBase_ (std::move (featureBase), this),
       length_ (std::move (length), this),
       lengthPadding_ (std::move (lengthPadding), this),
       width_ (std::move (width), this),
       widthPadding_ (std::move (widthPadding), this),
-      autoCalc_ (autoCalc, this)
+      origin_ (std::move (origin), this),
+      autoCalc_ (std::move (autoCalc), this)
     {
     }
 
@@ -240,6 +274,7 @@ namespace prj
       lengthPadding_ (x.lengthPadding_, f, this),
       width_ (x.width_, f, this),
       widthPadding_ (x.widthPadding_, f, this),
+      origin_ (x.origin_, f, this),
       autoCalc_ (x.autoCalc_, f, this)
     {
     }
@@ -254,6 +289,7 @@ namespace prj
       lengthPadding_ (this),
       width_ (this),
       widthPadding_ (this),
+      origin_ (this),
       autoCalc_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
@@ -343,13 +379,30 @@ namespace prj
           }
         }
 
+        // origin
+        //
+        if (n.name () == "origin" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< OriginType > r (
+            OriginTraits::create (i, f, this));
+
+          if (!origin_.present ())
+          {
+            this->origin_.set (::std::move (r));
+            continue;
+          }
+        }
+
         // autoCalc
         //
         if (n.name () == "autoCalc" && n.namespace_ ().empty ())
         {
+          ::std::unique_ptr< AutoCalcType > r (
+            AutoCalcTraits::create (i, f, this));
+
           if (!autoCalc_.present ())
           {
-            this->autoCalc_.set (AutoCalcTraits::create (i, f, this));
+            this->autoCalc_.set (::std::move (r));
             continue;
           }
         }
@@ -392,6 +445,13 @@ namespace prj
           "");
       }
 
+      if (!origin_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "origin",
+          "");
+      }
+
       if (!autoCalc_.present ())
       {
         throw ::xsd::cxx::tree::expected_element< char > (
@@ -418,6 +478,7 @@ namespace prj
         this->lengthPadding_ = x.lengthPadding_;
         this->width_ = x.width_;
         this->widthPadding_ = x.widthPadding_;
+        this->origin_ = x.origin_;
         this->autoCalc_ = x.autoCalc_;
       }
 
@@ -773,6 +834,17 @@ namespace prj
             e));
 
         s << i.widthPadding ();
+      }
+
+      // origin
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "origin",
+            e));
+
+        s << i.origin ();
       }
 
       // autoCalc

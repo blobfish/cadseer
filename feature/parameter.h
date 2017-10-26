@@ -129,6 +129,7 @@ namespace ftr
       Parameter(const QString &nameIn, int valueIn);
       Parameter(const QString &nameIn, bool valueIn);
       Parameter(const QString &nameIn, const boost::filesystem::path &valueIn, PathType);
+      Parameter(const QString &nameIn, const osg::Vec3d &valueIn);
       
       QString getName() const {return name;}
       void setName(const QString &nameIn){name = nameIn;}
@@ -180,6 +181,8 @@ namespace ftr
       
       //@{
       //! osg::Vec3d support functions.
+      bool setValue(const osg::Vec3d&); //<! true = value was changed.
+      bool setValueQuiet(const osg::Vec3d&);
       explicit operator osg::Vec3d() const;
       //@}
       

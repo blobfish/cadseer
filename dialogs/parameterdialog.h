@@ -52,8 +52,12 @@ namespace dlg
     ftr::prm::Parameter *parameter = nullptr;
     QWidget *editWidget;
 
+    //triggered from parameter being changed. Source can be either internal or external.
+    //called from the visitor, so need public access.
     void valueHasChangedDouble();
     void valueHasChangedBool();
+    void valueHasChangedPath();
+    void valueHasChangedVector();
     
     void constantHasChangedDouble();
   private:
@@ -74,8 +78,8 @@ namespace dlg
     void textEditedDoubleSlot(const QString &);
     
     void boolChangedSlot(int);
-    
     void browseForPathSlot();
+    void vectorChangedSlot();
   };
 }
 

@@ -266,6 +266,19 @@ public:
   path operator()(const osg::Matrixd&) const {assert(0); return path();}
 };
 
+class Vec3dVisitor : public boost::static_visitor<osg::Vec3d>
+{
+public:
+  osg::Vec3d operator()(double) const {assert(0); return osg::Vec3d();}
+  osg::Vec3d operator()(int) const {assert(0); return osg::Vec3d();}
+  osg::Vec3d operator()(bool) const {assert(0); return osg::Vec3d();}
+  osg::Vec3d operator()(const std::string&) const {assert(0); return osg::Vec3d();}
+  osg::Vec3d operator()(const boost::filesystem::path) const {assert(0); return osg::Vec3d();}
+  osg::Vec3d operator()(const osg::Vec3d &v) const {return v;}
+  osg::Vec3d operator()(const osg::Quat&) const {assert(0); return osg::Vec3d();}
+  osg::Vec3d operator()(const osg::Matrixd&) const {assert(0); return osg::Vec3d();}
+};
+
 class TypeStringVisitor : public boost::static_visitor<std::string>
 {
 public:
@@ -368,6 +381,14 @@ Parameter::Parameter(const QString &nameIn, const boost::filesystem::path &value
   id(gu::createRandomId()),
   constraint(),
   pathType(ptIn)
+{
+}
+
+Parameter::Parameter(const QString &nameIn, const osg::Vec3d &valueIn) :
+  name(nameIn),
+  value(valueIn),
+  id(gu::createRandomId()),
+  constraint()
 {
 }
 
@@ -519,10 +540,33 @@ Parameter::operator boost::filesystem::path() const
   return boost::apply_visitor(PathVisitor(), value);
 }
 
+bool Parameter::setValue(const osg::Vec3d &vIn)
+{
+  if (setValueQuiet(vIn))
+  {
+    valueChangedSignal();
+    return true;
+  }
+  
+  return false;
+}
+
+bool Parameter::setValueQuiet(const osg::Vec3d &vIn)
+{
+  if (boost::apply_visitor(Vec3dVisitor(), value) == vIn)
+    return false;
+  
+  value = vIn;
+  return true;
+}
+
+Parameter::operator osg::Vec3d() const
+{
+  return boost::apply_visitor(Vec3dVisitor(), value);
+}
 
 //todo
 Parameter::operator std::string() const{return std::string();}
-Parameter::operator osg::Vec3d() const{return osg::Vec3d();}
 Parameter::operator osg::Quat() const{return osg::Quat();}
 Parameter::operator osg::Matrixd() const{return osg::Matrixd();}
 

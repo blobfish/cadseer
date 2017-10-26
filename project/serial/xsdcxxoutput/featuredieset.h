@@ -400,6 +400,64 @@ namespace prj
       //@}
 
       /**
+       * @name origin
+       *
+       * @brief Accessor and modifier functions for the %origin
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::Parameter OriginType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< OriginType, char > OriginTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const OriginType&
+      origin () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      OriginType&
+      origin ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      origin (const OriginType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      origin (::std::unique_ptr< OriginType > p);
+
+      //@}
+
+      /**
        * @name autoCalc
        *
        * @brief Accessor and modifier functions for the %autoCalc
@@ -410,7 +468,7 @@ namespace prj
       /**
        * @brief Element type.
        */
-      typedef ::xml_schema::Boolean AutoCalcType;
+      typedef ::prj::srl::Parameter AutoCalcType;
 
       /**
        * @brief Element traits type.
@@ -444,6 +502,17 @@ namespace prj
       void
       autoCalc (const AutoCalcType& x);
 
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      autoCalc (::std::unique_ptr< AutoCalcType > p);
+
       //@}
 
       /**
@@ -460,6 +529,7 @@ namespace prj
                      const LengthPaddingType&,
                      const WidthType&,
                      const WidthPaddingType&,
+                     const OriginType&,
                      const AutoCalcType&);
 
       /**
@@ -475,7 +545,8 @@ namespace prj
                      ::std::unique_ptr< LengthPaddingType >,
                      ::std::unique_ptr< WidthType >,
                      ::std::unique_ptr< WidthPaddingType >,
-                     const AutoCalcType&);
+                     ::std::unique_ptr< OriginType >,
+                     ::std::unique_ptr< AutoCalcType >);
 
       /**
        * @brief Create an instance from a DOM element.
@@ -552,6 +623,7 @@ namespace prj
       ::xsd::cxx::tree::one< LengthPaddingType > lengthPadding_;
       ::xsd::cxx::tree::one< WidthType > width_;
       ::xsd::cxx::tree::one< WidthPaddingType > widthPadding_;
+      ::xsd::cxx::tree::one< OriginType > origin_;
       ::xsd::cxx::tree::one< AutoCalcType > autoCalc_;
 
       //@endcond

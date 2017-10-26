@@ -22,6 +22,7 @@
 #include <tools/occtools.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
+#include <feature/parameter.h>
 #include <feature/seershape.h>
 #include <feature/shapecheck.h>
 #include <feature/boxbuilder.h>
@@ -76,6 +77,28 @@ DieSet::DieSet()
   widthPadding->connectValue(boost::bind(&DieSet::setModelDirty, this));
   parameterVector.push_back(widthPadding.get());
   
+  origin = std::shared_ptr<prm::Parameter>
+  (
+    new prm::Parameter
+    (
+      QObject::tr("Origin"),
+      osg::Vec3d(-1.0, -1.0, -1.0)
+    )
+  );
+  origin->connectValue(boost::bind(&DieSet::setModelDirty, this));
+  parameterVector.push_back(origin.get());
+  
+  autoCalc = std::shared_ptr<prm::Parameter>
+  (
+    new prm::Parameter
+    (
+      QObject::tr("Auto Calc"),
+      true
+    )
+  );
+  autoCalc->connectValue(boost::bind(&DieSet::setModelDirty, this));
+  parameterVector.push_back(autoCalc.get());
+  
   lengthLabel = new lbr::PLabel(length.get());
   lengthLabel->showName = true;
   lengthLabel->valueHasChanged();
@@ -95,6 +118,16 @@ DieSet::DieSet()
   widthPaddingLabel->showName = true;
   widthPaddingLabel->valueHasChanged();
   overlaySwitch->addChild(widthPaddingLabel.get());
+  
+  originLabel = new lbr::PLabel(origin.get());
+  originLabel->showName = true;
+  originLabel->valueHasChanged();
+  overlaySwitch->addChild(originLabel.get());
+  
+  autoCalcLabel = new lbr::PLabel(autoCalc.get());
+  autoCalcLabel->showName = true;
+  autoCalcLabel->valueHasChanged();
+  overlaySwitch->addChild(autoCalcLabel.get());
 }
 
 DieSet::~DieSet()
@@ -116,36 +149,40 @@ void DieSet::updateModel(const UpdatePayload &payloadIn)
   setFailure();
   try
   {
-    if (payloadIn.updateMap.count(strip) != 1)
-      throw std::runtime_error("couldn't find 'strip' input");
-    const ftr::Base *sbf = payloadIn.updateMap.equal_range(strip).first->second;
-    if(!sbf->hasSeerShape())
-      throw std::runtime_error("no seer shape for strip");
-    const SeerShape &sss = sbf->getSeerShape(); //part seer shape.
-    const TopoDS_Shape &ss = sss.getRootOCCTShape(); //part shape.
-    
-    occt::BoundingBox sbbox(ss); //blank bounding box.
-    
-    //assumptions on orientation.
-    //always auto calc for now.
     double h = 50.0; //height
     double zPadding = 50.0; //distance from bottom of bounding box to top of set.
-    gp_Pnt bbc = sbbox.getCorners().front();
-    gp_Vec xVec(-lengthPadding->getValue(), 0.0, 0.0);
-    gp_Vec yVec(0.0, -widthPadding->getValue(), 0.0);
-    gp_Vec zVec(0.0, 0.0, -zPadding - h);
+    if (static_cast<bool>(*autoCalc))
+    {
+      if (payloadIn.updateMap.count(strip) != 1)
+        throw std::runtime_error("couldn't find 'strip' input");
+      const ftr::Base *sbf = payloadIn.updateMap.equal_range(strip).first->second;
+      if(!sbf->hasSeerShape())
+        throw std::runtime_error("no seer shape for strip");
+      const SeerShape &sss = sbf->getSeerShape(); //part seer shape.
+      const TopoDS_Shape &ss = sss.getRootOCCTShape(); //part shape.
+      
+      occt::BoundingBox sbbox(ss); //blank bounding box.
+      
+      gp_Pnt bbc = sbbox.getCorners().front();
+      gp_Vec xVec(-lengthPadding->getValue(), 0.0, 0.0);
+      gp_Vec yVec(0.0, -widthPadding->getValue(), 0.0);
+      gp_Vec zVec(0.0, 0.0, -zPadding - h);
+      
+      gp_Pnt corner = bbc.Translated(xVec).Translated(yVec).Translated(zVec);
+      origin->setValueQuiet(osg::Vec3d(corner.X(), corner.Y(), corner.Z()));
+      originLabel->valueHasChanged();
+      double l = sbbox.getLength() + 2 * lengthPadding->getValue();
+      double w = sbbox.getWidth() + 2 * widthPadding->getValue();
+      length->setValueQuiet(l);
+      lengthLabel->valueHasChanged();
+      width->setValueQuiet(w);
+      widthLabel->valueHasChanged();
+    }
     
-    gp_Pnt corner = bbc.Translated(xVec).Translated(yVec).Translated(zVec);
-    double l = sbbox.getLength() + 2 * lengthPadding->getValue();
-    double w = sbbox.getWidth() + 2 * widthPadding->getValue();
-    length->setValueQuiet(l);
-    lengthLabel->valueHasChanged();
-    lengthLabel->setTextColor(osg::Vec4(1.0, 0.0, 0.0, 1.0)); //red while always autocalc.
-    width->setValueQuiet(w);
-    widthLabel->valueHasChanged();
-    widthLabel->setTextColor(osg::Vec4(1.0, 0.0, 0.0, 1.0)); //red while always autocalc.
-    gp_Ax2 sys(corner, gp_Dir(0.0, 0.0, 1.0), gp_Dir(1.0, 0.0, 0.0));
-    BoxBuilder b(l, w, h, sys);
+    //assumptions on orientation.
+    osg::Vec3d to = static_cast<osg::Vec3d>(*origin); //temp origin.
+    gp_Ax2 sys(gp_Pnt(to.x(), to.y(), to.z()), gp_Dir(0.0, 0.0, 1.0), gp_Dir(1.0, 0.0, 0.0));
+    BoxBuilder b(static_cast<double>(*length), static_cast<double>(*width), h, sys);
     TopoDS_Shape out = b.getSolid();
     ShapeCheck check(out);
     if (!check.isValid())
@@ -157,31 +194,40 @@ void DieSet::updateModel(const UpdatePayload &payloadIn)
     
     //update label locations
     osg::Vec3d lLoc = //length label location.
-      gu::toOsg(corner)
-      + osg::Vec3d(1.0, 0.0, 0.0) * l / 2.0
+      static_cast<osg::Vec3d>(*origin)
+      + osg::Vec3d(1.0, 0.0, 0.0) * static_cast<double>(*length) / 2.0
       + osg::Vec3d(0.0, 0.0, 1.0) * h;
     lengthLabel->setMatrix(osg::Matrixd::translate(lLoc));
     
     osg::Vec3d wLoc = //length label location.
-      gu::toOsg(corner)
-      + osg::Vec3d(1.0, 0.0, 0.0) * l
-      + osg::Vec3d(0.0, 1.0, 0.0) * w / 2.0
+      static_cast<osg::Vec3d>(*origin)
+      + osg::Vec3d(1.0, 0.0, 0.0) * static_cast<double>(*length)
+      + osg::Vec3d(0.0, 1.0, 0.0) * static_cast<double>(*width) / 2.0
       + osg::Vec3d(0.0, 0.0, 1.0) * h;
     widthLabel->setMatrix(osg::Matrixd::translate(wLoc));
     
     osg::Vec3d lpLoc = //length padding label location.
-      gu::toOsg(corner)
-      + osg::Vec3d(0.0, 1.0, 0.0) * w / 2.0
+      static_cast<osg::Vec3d>(*origin)
+      + osg::Vec3d(0.0, 1.0, 0.0) * static_cast<double>(*width) / 2.0
       + osg::Vec3d(0.0, 0.0, 1.0) * h;
     lengthPaddingLabel->setMatrix(osg::Matrixd::translate(lpLoc));
     
     osg::Vec3d wpLoc = //width padding label location.
-      gu::toOsg(corner)
-      + osg::Vec3d(1.0, 0.0, 0.0) * l / 2.0
-      + osg::Vec3d(0.0, 1.0, 0.0) * w
+      static_cast<osg::Vec3d>(*origin)
+      + osg::Vec3d(1.0, 0.0, 0.0) * static_cast<double>(*length) / 2.0
+      + osg::Vec3d(0.0, 1.0, 0.0) * static_cast<double>(*width)
       + osg::Vec3d(0.0, 0.0, 1.0) * h;
     widthPaddingLabel->setMatrix(osg::Matrixd::translate(wpLoc));
     
+    originLabel->setMatrix(osg::Matrixd::translate(static_cast<osg::Vec3d>(*origin)));
+    
+    osg::Vec3d acLoc = //auto calc label location
+      static_cast<osg::Vec3d>(*origin)
+      + osg::Vec3d(static_cast<double>(*length) / 2.0, 0.0, 0.0)
+      + osg::Vec3d(0.0, static_cast<double>(*width) / 2.0, 0.0);
+    autoCalcLabel->setMatrix(osg::Matrixd::translate(acLoc));
+    
+    updateLabelColors();
     
     setSuccess();
   }
@@ -200,6 +246,30 @@ void DieSet::updateModel(const UpdatePayload &payloadIn)
   setModelClean();
 }
 
+void DieSet::updateLabelColors()
+{
+  if (static_cast<bool>(*autoCalc))
+  {
+    //red while auto calculation.
+    lengthLabel->setTextColor(osg::Vec4(1.0, 0.0, 0.0, 1.0));
+    widthLabel->setTextColor(osg::Vec4(1.0, 0.0, 0.0, 1.0));
+    originLabel->setTextColor(osg::Vec4(1.0, 0.0, 0.0, 1.0));
+    
+    lengthPaddingLabel->setTextColor(osg::Vec4(0.0, 0.0, 1.0, 1.0));
+    widthPaddingLabel->setTextColor(osg::Vec4(0.0, 0.0, 1.0, 1.0));
+    
+  }
+  else
+  {
+    lengthLabel->setTextColor(osg::Vec4(0.0, 0.0, 1.0, 1.0));
+    widthLabel->setTextColor(osg::Vec4(0.0, 0.0, 1.0, 1.0));
+    originLabel->setTextColor(osg::Vec4(0.0, 0.0, 1.0, 1.0));
+    
+    lengthPaddingLabel->setTextColor(osg::Vec4(1.0, 0.0, 0.0, 1.0));
+    widthPaddingLabel->setTextColor(osg::Vec4(1.0, 0.0, 0.0, 1.0));
+  }
+}
+
 void DieSet::serialWrite(const QDir &dIn)
 {
   prj::srl::FeatureDieSet dso
@@ -209,7 +279,8 @@ void DieSet::serialWrite(const QDir &dIn)
    lengthPadding->serialOut(),
    width->serialOut(),
    widthPadding->serialOut(),
-   autoCalc
+   origin->serialOut(),
+   autoCalc->serialOut()
   );
   
   xml_schema::NamespaceInfomap infoMap;
@@ -224,5 +295,16 @@ void DieSet::serialRead(const prj::srl::FeatureDieSet &dsIn)
   lengthPadding->serialIn(dsIn.lengthPadding());
   width->serialIn(dsIn.width());
   widthPadding->serialIn(dsIn.widthPadding());
-  autoCalc = dsIn.autoCalc();
+  origin->serialIn(dsIn.origin());
+  autoCalc->serialIn(dsIn.autoCalc());
+  
+  //make sure labels are updated.
+  lengthLabel->valueHasChanged();
+  lengthPaddingLabel->valueHasChanged();
+  widthLabel->valueHasChanged();
+  widthPaddingLabel->valueHasChanged();
+  originLabel->valueHasChanged();
+  autoCalcLabel->valueHasChanged();
+  
+  updateLabelColors();
 }

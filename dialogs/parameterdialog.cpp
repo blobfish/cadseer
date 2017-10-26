@@ -18,6 +18,7 @@
  */
 
 #include <boost/filesystem.hpp>
+#include <boost/signals2/shared_connection_block.hpp>
 
 #include <QLabel>
 #include <QKeyEvent>
@@ -135,18 +136,46 @@ private:
   
   QWidget* buildVec3d() const
   {
-    QLineEdit* out = new QLineEdit(dialog);
+    osg::Vec3d theVec = static_cast<osg::Vec3d>(*(dialog->parameter));
     
-    QString buffer;
-    QTextStream stream(&buffer);
-    gu::osgVectorOut(stream, static_cast<osg::Vec3d>(*(dialog->parameter)));
-    out->setText(buffer);
+    QWidget *ww = new QWidget(dialog); //widget wrapper.
+    QVBoxLayout *vl = new QVBoxLayout();
+    vl->setContentsMargins(0, 0, 0, 0);
+    ww->setLayout(vl);
     
-    //more elaborate control with vector selection?
+    QHBoxLayout *xLayout = new QHBoxLayout();
+    QLabel *xLabel = new QLabel(QObject::tr("X:"), ww);
+    xLayout->addWidget(xLabel);
+    QLineEdit *xLineEdit = new QLineEdit(ww);
+    xLineEdit->setObjectName("XLineEdit");
+    xLineEdit->setText(QString::number(theVec.x(), 'f', 12));
+    xLayout->addWidget(xLineEdit);
+    vl->addLayout(xLayout);
+    QObject::connect(xLineEdit, SIGNAL(editingFinished()), dialog, SLOT(vectorChangedSlot()));
     
-    //connect to dialog slots
+    QHBoxLayout *yLayout = new QHBoxLayout();
+    QLabel *yLabel = new QLabel(QObject::tr("Y:"), ww);
+    yLayout->addWidget(yLabel);
+    QLineEdit *yLineEdit = new QLineEdit(ww);
+    yLineEdit->setObjectName("YLineEdit");
+    yLineEdit->setText(QString::number(theVec.y(), 'f', 12));
+    yLayout->addWidget(yLineEdit);
+    vl->addLayout(yLayout);
+    QObject::connect(yLineEdit, SIGNAL(editingFinished()), dialog, SLOT(vectorChangedSlot()));
     
-    return out;
+    QHBoxLayout *zLayout = new QHBoxLayout();
+    QLabel *zLabel = new QLabel(QObject::tr("Z:"), ww);
+    zLayout->addWidget(zLabel);
+    QLineEdit *zLineEdit = new QLineEdit(ww);
+    zLineEdit->setObjectName("ZLineEdit");
+    zLineEdit->setText(QString::number(theVec.z(), 'f', 12));
+    zLayout->addWidget(zLineEdit);
+    vl->addLayout(zLayout);
+    QObject::connect(zLineEdit, SIGNAL(editingFinished()), dialog, SLOT(vectorChangedSlot()));
+    
+    return ww;
+    
+    //maybe more elaborate control with vector selection?
   }
   
   QWidget* buildQuat() const
@@ -192,8 +221,8 @@ public:
   void operator()(int) const {}
   void operator()(bool) const {dialog->valueHasChangedBool();}
   void operator()(const std::string&) const {}
-  void operator()(const boost::filesystem::path&) const {}
-  void operator()(const osg::Vec3d&) const {}
+  void operator()(const boost::filesystem::path&) const {dialog->valueHasChangedPath();}
+  void operator()(const osg::Vec3d&) const {dialog->valueHasChangedVector();}
   void operator()(const osg::Quat&) const {}
   void operator()(const osg::Matrixd&) const {}
 private:
@@ -355,6 +384,35 @@ void ParameterDialog::valueHasChangedBool()
   }
 }
 
+void ParameterDialog::valueHasChangedPath()
+{
+  //find the line edit child widget and get text.
+  QLineEdit *lineEdit = editWidget->findChild<QLineEdit*>(QString("TheLineEdit"));
+  assert(lineEdit);
+  if (!lineEdit)
+    return;
+  
+  lineEdit->setText(QString::fromStdString(static_cast<boost::filesystem::path>(*parameter).string()));
+}
+
+void ParameterDialog::valueHasChangedVector()
+{
+  QLineEdit *xLineEdit = editWidget->findChild<QLineEdit*>(QString("XLineEdit"));
+  assert(xLineEdit); if (!xLineEdit) return;
+  
+  QLineEdit *yLineEdit = editWidget->findChild<QLineEdit*>(QString("YLineEdit"));
+  assert(yLineEdit); if (!yLineEdit) return;
+  
+  QLineEdit *zLineEdit = editWidget->findChild<QLineEdit*>(QString("ZLineEdit"));
+  assert(zLineEdit); if (!zLineEdit) return;
+  
+  osg::Vec3d theVec = static_cast<osg::Vec3d>(*parameter);
+  
+  xLineEdit->setText(QString::number(theVec.x(), 'f', 12));
+  yLineEdit->setText(QString::number(theVec.y(), 'f', 12));
+  zLineEdit->setText(QString::number(theVec.z(), 'f', 12));
+}
+
 void ParameterDialog::constantHasChanged()
 {
   ConstantChangedVisitor v(this);
@@ -480,6 +538,9 @@ void ParameterDialog::textEditedDoubleSlot(const QString &textIn)
 
 void ParameterDialog::boolChangedSlot(int i)
 {
+  //we don't need to respond to this value change, so block.
+  boost::signals2::shared_connection_block block(valueConnection);
+  
   bool cwv = static_cast<QComboBox*>(QObject::sender())->itemData(i).toBool(); //current widget value
   if(parameter->setValue(cwv))
   {
@@ -487,7 +548,7 @@ void ParameterDialog::boolChangedSlot(int i)
     gitStream
     << QObject::tr("Feature: ").toStdString() << feature->getName().toStdString()
     << QObject::tr("    Parameter ").toStdString() << parameter->getName().toStdString();
-    gitStream  << QObject::tr("    changed to: ").toStdString() << static_cast<bool>(parameter);
+    gitStream  << QObject::tr("    changed to: ").toStdString() << static_cast<bool>(*parameter);
     observer->out(msg::buildGitMessage(gitStream.str()));
     if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
       observer->out(msg::Mask(msg::Request | msg::Update));
@@ -496,6 +557,9 @@ void ParameterDialog::boolChangedSlot(int i)
 
 void ParameterDialog::browseForPathSlot()
 {
+  //we are manually setting the lineEdit so we can block value signal.
+  boost::signals2::shared_connection_block block(valueConnection);
+  
   //find the line edit child widget and get text.
   QLineEdit *lineEdit = editWidget->findChild<QLineEdit*>(QString("TheLineEdit"));
   assert(lineEdit);
@@ -546,5 +610,43 @@ void ParameterDialog::browseForPathSlot()
     
     if (!fileName.isEmpty())
       lineEdit->setText(fileName);
+  }
+}
+
+void ParameterDialog::vectorChangedSlot()
+{
+  //block value signal.
+  boost::signals2::shared_connection_block block(valueConnection);
+  
+  QLineEdit *xLineEdit = editWidget->findChild<QLineEdit*>(QString("XLineEdit"));
+  assert(xLineEdit); if (!xLineEdit) return;
+  
+  QLineEdit *yLineEdit = editWidget->findChild<QLineEdit*>(QString("YLineEdit"));
+  assert(yLineEdit); if (!yLineEdit) return;
+  
+  QLineEdit *zLineEdit = editWidget->findChild<QLineEdit*>(QString("ZLineEdit"));
+  assert(zLineEdit); if (!zLineEdit) return;
+  
+  osg::Vec3d out
+  (
+    xLineEdit->text().toDouble(),
+    yLineEdit->text().toDouble(),
+    zLineEdit->text().toDouble()
+  );
+  
+  if(parameter->setValue(out))
+  {
+    QString buffer;
+    QTextStream vStream(&buffer);
+    gu::osgVectorOut(vStream, static_cast<osg::Vec3d>(*parameter));
+    
+    std::ostringstream gitStream;
+    gitStream
+    << QObject::tr("Feature: ").toStdString() << feature->getName().toStdString()
+    << QObject::tr("    Parameter ").toStdString() << parameter->getName().toStdString();
+    gitStream  << QObject::tr("    changed to: ").toStdString() << buffer.toStdString();
+    observer->out(msg::buildGitMessage(gitStream.str()));
+    if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
+      observer->out(msg::Mask(msg::Request | msg::Update));
   }
 }

@@ -24,9 +24,9 @@
 
 #include <osg/ref_ptr>
 
-#include <feature/parameter.h>
 #include <feature/base.h>
 
+namespace ftr{namespace prm{class Parameter;}}
 namespace lbr{class PLabel;}
 namespace prj{namespace srl{class FeatureDieSet;}}
 
@@ -59,12 +59,17 @@ namespace ftr
     std::shared_ptr<prm::Parameter> width; //!< only used if autoCalc is false.
     std::shared_ptr<prm::Parameter> lengthPadding; //!< only used if autoCalc is true.
     std::shared_ptr<prm::Parameter> widthPadding; //!< only used if autoCalc is true.
-    bool autoCalc = true; //!< eventually a parameter.
+    std::shared_ptr<prm::Parameter> origin; //!< only used if autoCalc is true.
+    std::shared_ptr<prm::Parameter> autoCalc;
     
     osg::ref_ptr<lbr::PLabel> lengthLabel;
     osg::ref_ptr<lbr::PLabel> widthLabel;
     osg::ref_ptr<lbr::PLabel> lengthPaddingLabel;
     osg::ref_ptr<lbr::PLabel> widthPaddingLabel;
+    osg::ref_ptr<lbr::PLabel> originLabel;
+    osg::ref_ptr<lbr::PLabel> autoCalcLabel;
+    
+    void updateLabelColors();
     
   private:
     static QIcon icon;
