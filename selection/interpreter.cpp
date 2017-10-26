@@ -50,7 +50,7 @@ static ftr::Type getFeatureType(osg::Drawable &drawableIn)
   drawableIn.accept(visitor);
   osg::Node *featureRoot = visitor.out;
   assert(featureRoot);
-  int featureTypeInteger;
+  int featureTypeInteger = 0;
   if (!featureRoot->getUserValue(gu::featureTypeAttributeTitle, featureTypeInteger))
       assert(0);
   return static_cast<ftr::Type>(featureTypeInteger);
