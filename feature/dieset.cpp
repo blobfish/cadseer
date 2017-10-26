@@ -136,12 +136,12 @@ DieSet::~DieSet()
 
 double DieSet::getLength() const
 {
-  return length->getValue();
+  return static_cast<double>(*length);
 }
 
 double DieSet::getWidth() const
 {
-  return width->getValue();
+  return static_cast<double>(*width);
 }
 
 void DieSet::updateModel(const UpdatePayload &payloadIn)
@@ -164,15 +164,15 @@ void DieSet::updateModel(const UpdatePayload &payloadIn)
       occt::BoundingBox sbbox(ss); //blank bounding box.
       
       gp_Pnt bbc = sbbox.getCorners().front();
-      gp_Vec xVec(-lengthPadding->getValue(), 0.0, 0.0);
-      gp_Vec yVec(0.0, -widthPadding->getValue(), 0.0);
+      gp_Vec xVec(-static_cast<double>(*lengthPadding), 0.0, 0.0);
+      gp_Vec yVec(0.0, -static_cast<double>(*widthPadding), 0.0);
       gp_Vec zVec(0.0, 0.0, -zPadding - h);
       
       gp_Pnt corner = bbc.Translated(xVec).Translated(yVec).Translated(zVec);
       origin->setValueQuiet(osg::Vec3d(corner.X(), corner.Y(), corner.Z()));
       originLabel->valueHasChanged();
-      double l = sbbox.getLength() + 2 * lengthPadding->getValue();
-      double w = sbbox.getWidth() + 2 * widthPadding->getValue();
+      double l = sbbox.getLength() + 2 * static_cast<double>(*lengthPadding);
+      double w = sbbox.getWidth() + 2 * static_cast<double>(*widthPadding);
       length->setValueQuiet(l);
       lengthLabel->valueHasChanged();
       width->setValueQuiet(w);

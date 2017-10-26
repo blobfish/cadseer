@@ -145,7 +145,6 @@ namespace ftr
       //! original functions from when only doubles supported.
       bool setValue(double valueIn);
       bool setValueQuiet(double valueIn); //!< don't trigger changed signal. use sparingly!
-      double getValue() const;
       explicit operator double() const;
       bool isValidValue(const double &valueIn) const;
       void setConstraint(const Constraint &); //!< only for doubles ..maybe ints?

@@ -205,7 +205,7 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
       gapLabel->valueHasChanged();
       
       //these assume x feed direction. fix when we change feed direction to a parameter.
-      width->setValueQuiet(bbbox.getWidth() + 2 * gap->getValue());
+      width->setValueQuiet(bbbox.getWidth() + 2 * static_cast<double>(*gap));
       widthLabel->valueHasChanged();
       widthOffset->setValueQuiet(bbbox.getCenter().X());
       widthOffsetLabel->valueHasChanged();
@@ -230,9 +230,9 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
     }
       
     for (std::size_t i = 1; i < nb + 1; ++i)
-      shapes.push_back(occt::instanceShape(bs, gu::toOcc(-feedDirection), pitch->getValue() * i));
+      shapes.push_back(occt::instanceShape(bs, gu::toOcc(-feedDirection), static_cast<double>(*pitch) * i));
     for (std::size_t i = 1; i < stations.size() - nb; ++i)
-      shapes.push_back(occt::instanceShape(ps, gu::toOcc(feedDirection), pitch->getValue() * i));
+      shapes.push_back(occt::instanceShape(ps, gu::toOcc(feedDirection), static_cast<double>(*pitch) * i));
     
     TopoDS_Shape out = static_cast<TopoDS_Compound>(occt::ShapeVectorCast(shapes));
     
@@ -249,24 +249,24 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
     
     osg::Vec3d plLoc = //pitch label location.
       gu::toOsg(bbbox.getCenter())
-      + (-feedDirection * pitch->getValue() * 0.5)
+      + (-feedDirection * static_cast<double>(*pitch) * 0.5)
       + (fNorm * bbbox.getWidth() * 0.5);
     pitchLabel->setMatrix(osg::Matrixd::translate(plLoc));
     
     osg::Vec3d glLoc = //gap label location.
       gu::toOsg(bbbox.getCenter())
-      + (-feedDirection * pitch->getValue() * 0.5)
+      + (-feedDirection * static_cast<double>(*pitch) * 0.5)
       + (-fNorm * bbbox.getWidth() * 0.5);
     gapLabel->setMatrix(osg::Matrixd::translate(glLoc));
     
     osg::Vec3d wolLoc = //width offset location.
       gu::toOsg(bbbox.getCenter())
-      + (-feedDirection * (pitch->getValue() * (static_cast<double>(nb) + 0.5)));
+      + (-feedDirection * (static_cast<double>(*pitch) * (static_cast<double>(nb) + 0.5)));
     widthOffsetLabel->setMatrix(osg::Matrixd::translate(wolLoc));
     
     osg::Vec3d wlLoc = //width location.
       gu::toOsg(bbbox.getCenter())
-      + (-feedDirection * (pitch->getValue() * (static_cast<double>(nb) + 0.5)))
+      + (-feedDirection * (static_cast<double>(*pitch) * (static_cast<double>(nb) + 0.5)))
       + (fNorm * bbbox.getWidth() * 0.5);
     widthLabel->setMatrix(osg::Matrixd::translate(wlLoc));
     
@@ -283,7 +283,7 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
     for (std::size_t i = 1; i < nb + 1; ++i)
     {
       osg::ref_ptr<osg::MatrixTransform> sl = new osg::MatrixTransform(); // station label
-      sl->setMatrix(osg::Matrixd::translate(gu::toOsg(bbbox.getCenter()) + (-feedDirection * pitch->getValue() * i)));
+      sl->setMatrix(osg::Matrixd::translate(gu::toOsg(bbbox.getCenter()) + (-feedDirection * static_cast<double>(*pitch) * i)));
       sl->addChild(buildStationLabel("Blank"));
       stationLabels.push_back(sl);
       overlaySwitch->addChild(sl.get(), cv);
@@ -291,7 +291,7 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
     for (std::size_t i = nb; i < stations.size(); ++i)
     {
       osg::ref_ptr<osg::MatrixTransform> sl = new osg::MatrixTransform(); // station label
-      sl->setMatrix(osg::Matrixd::translate(gu::toOsg(bbbox.getCenter()) + (feedDirection * pitch->getValue() * (i - nb))));
+      sl->setMatrix(osg::Matrixd::translate(gu::toOsg(bbbox.getCenter()) + (feedDirection * static_cast<double>(*pitch) * (i - nb))));
       sl->addChild(buildStationLabel(stations.at(i).toStdString()));
       stationLabels.push_back(sl);
       overlaySwitch->addChild(sl.get(), cv);

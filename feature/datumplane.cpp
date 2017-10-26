@@ -171,7 +171,7 @@ osg::Matrixd DatumPlanePlanarOffset::solve(const UpdatePayload::UpdateMap &mapIn
     radius = offsetVec.x() + tempRadius;
   }
   datumSystem = faceSystem;
-  osg::Vec3d normal = gu::getZVector(faceSystem) * offset->getValue();
+  osg::Vec3d normal = gu::getZVector(faceSystem) * static_cast<double>(*offset);
   datumSystem.setTrans(faceSystem.getTrans() + normal);
   offsetIP->setMatrix(faceSystem); //update the interactive parameter.
   return datumSystem;

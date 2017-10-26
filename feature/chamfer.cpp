@@ -122,7 +122,7 @@ void Chamfer::updateModel(const UpdatePayload &payloadIn)
         updateShapeMap(resolvedFaceIds.front(), pick.facePick.shapeHistory);
         TopoDS_Edge edge = TopoDS::Edge(targetSeerShape.findShapeIdRecord(resolvedEdgeIds.front()).shape);
         TopoDS_Face face = TopoDS::Face(targetSeerShape.findShapeIdRecord(resolvedFaceIds.front()).shape);
-        chamferMaker.Add(chamfer.distance->getValue(), edge, face);
+        chamferMaker.Add(static_cast<double>(*(chamfer.distance)), edge, face);
         //update location of parameter label.
         if (!labelDone)
         {

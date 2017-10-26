@@ -108,7 +108,7 @@ void Draft::updateModel(const UpdatePayload &payloadIn)
     TopoDS_Shape neutralShape = targetSeerShape.getOCCTShape(neutralIds.front());
     gp_Pln plane = derivePlaneFromShape(neutralShape);
     
-    double localAngle = osg::DegreesToRadians(angle->getValue());
+    double localAngle = osg::DegreesToRadians(static_cast<double>(*angle));
     gp_Dir direction = plane.Axis().Direction();
     bool labelDone = false; //set label position to first pick.
     for (const auto &p : targetPicks)

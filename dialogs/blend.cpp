@@ -138,7 +138,7 @@ Blend::Blend(ftr::Blend *editBlendIn, QWidget *parent) : QDialog(parent), blend(
   {
     ConstantItem *cItem = new ConstantItem(blendList);
     cItem->ftrId = simpleBlend.id;
-    cItem->radius = simpleBlend.radius->getValue();
+    cItem->radius = static_cast<double>(*(simpleBlend.radius));
     if (simpleBlend.radius->isConstant())
     {
       cItem->expressionLinkId = gu::createNilId();
@@ -163,7 +163,7 @@ Blend::Blend(ftr::Blend *editBlendIn, QWidget *parent) : QDialog(parent), blend(
       BlendEntry bEntry;
       bEntry.pickId = entry.pick.id;
       bEntry.typeString = tr("Vertex"); //only vertices for now.
-      bEntry.radius = entry.radius->getValue();
+      bEntry.radius = static_cast<double>(*(entry.radius));
       bEntry.highlightIds.push_back(entry.pick.id);
       bEntry.pointLocation = gu::toOsg(TopoDS::Vertex(blendParent->getSeerShape().getOCCTShape(entry.pick.id)));
       if (entry.radius->isConstant())

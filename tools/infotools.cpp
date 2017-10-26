@@ -74,3 +74,39 @@ QTextStream& gu::gpPntOut(QTextStream &sIn, const gp_Pnt &pIn)
   
   return sIn;
 }
+
+QString gu::osgMatrixOut(const osg::Matrixd &mIn)
+{
+  QString buffer;
+  QTextStream stream(&buffer);
+  gu::osgMatrixOut(stream, mIn);
+  
+  return buffer;
+}
+
+QString gu::osgQuatOut(const osg::Quat &qIn)
+{
+  QString buffer;
+  QTextStream stream(&buffer);
+  gu::osgQuatOut(stream, qIn);
+  
+  return buffer;
+}
+
+QString gu::osgVectorOut(const osg::Vec3d &vIn)
+{
+  QString buffer;
+  QTextStream stream(&buffer);
+  gu::osgVectorOut(stream, vIn);
+  
+  return buffer;
+}
+
+QString gu::gpPntOut(const gp_Pnt &pIn)
+{
+  QString buffer;
+  QTextStream stream(&buffer);
+  gu::gpPntOut(stream, pIn);
+  
+  return buffer;
+}

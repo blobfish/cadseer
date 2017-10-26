@@ -508,7 +508,7 @@ void ParameterDialog::updateDoubleSlot()
       parameter->setValue(value);
       if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
       {
-        gitStream  << QObject::tr("    changed to: ").toStdString() << parameter->getValue();
+        gitStream  << QObject::tr("    changed to: ").toStdString() << static_cast<double>(*parameter);
         observer->out(msg::buildGitMessage(gitStream.str()));
         observer->out(msg::Mask(msg::Request | msg::Update));
       }

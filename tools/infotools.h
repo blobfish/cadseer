@@ -21,6 +21,7 @@
 #define GU_INFOTOOLS_H
 
 class QTextStream;
+class QString;
 
 namespace osg{class Matrixd; class Vec3d; class Quat;}
 class gp_Pnt;
@@ -31,6 +32,11 @@ namespace gu
     QTextStream& osgQuatOut(QTextStream&, const osg::Quat&);
     QTextStream& osgVectorOut(QTextStream&, const osg::Vec3d&);
     QTextStream& gpPntOut(QTextStream&, const gp_Pnt&);
+    
+    QString osgMatrixOut(const osg::Matrixd&);
+    QString osgQuatOut(const osg::Quat&);
+    QString osgVectorOut(const osg::Vec3d&);
+    QString gpPntOut(const gp_Pnt&);
     
     static const std::vector<QString> surfaceTypeStrings = 
     {

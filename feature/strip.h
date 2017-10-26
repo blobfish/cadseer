@@ -47,9 +47,9 @@ namespace ftr
     
     void setLabelColors(const osg::Vec4&);
     void setAutoCalc(bool acIn){autoCalc->setValue(acIn);}
-    bool isAutoCalc(){return static_cast<bool>(autoCalc);}
-    double getPitch() const {return pitch->getValue();}
-    double getWidth() const {return width->getValue();}
+    bool isAutoCalc(){return static_cast<bool>(*autoCalc);}
+    double getPitch() const {return static_cast<double>(*pitch);}
+    double getWidth() const {return static_cast<double>(*width);}
     double getHeight() const {return stripHeight;}
     
     std::vector<QString> stations;

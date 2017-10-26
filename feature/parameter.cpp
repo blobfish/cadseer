@@ -433,11 +433,6 @@ bool Parameter::setValueQuiet(double valueIn)
   return true;
 }
 
-double Parameter::getValue() const
-{
-  return boost::apply_visitor(DoubleVisitor(), value);
-}
-
 Parameter::operator double() const
 {
   return boost::apply_visitor(DoubleVisitor(), value);

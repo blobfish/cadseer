@@ -33,6 +33,7 @@
 #include <osg/LightModel>
 
 #include <tools/idtools.h>
+#include <tools/infotools.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <modelviz/nodemaskdefs.h>
@@ -50,6 +51,21 @@
 using namespace ftr;
 
 std::size_t Base::nextConstructionIndex = 0;
+
+
+//used to display value info.
+class InfoVisitor : public boost::static_visitor<QString>
+{
+public:
+  QString operator()(double d) const {return QString::number(d, 'f', 12);}
+  QString operator()(int i) const {return QString::number(i);}
+  QString operator()(bool b) const {return (b) ? (QObject::tr("True")) : (QObject::tr("False"));}
+  QString operator()(const std::string &s) const {return QString::fromStdString(s);}
+  QString operator()(const boost::filesystem::path &p) const {return QString::fromStdString(p.string());}
+  QString operator()(const osg::Vec3d &vIn) const {return gu::osgVectorOut(vIn);}
+  QString operator()(const osg::Quat &qIn) const {return gu::osgQuatOut(qIn);}
+  QString operator()(const osg::Matrixd &mIn) const {return gu::osgMatrixOut(mIn);}
+};
 
 Base::Base()
 {
@@ -563,7 +579,7 @@ QTextStream& Base::getInfo(QTextStream &stream) const
       {
           stream
               << "    Parameter name: " << p->getName()
-              << "    Value: " << QString::number(p->getValue(), 'f', 12)
+              << "    Value: " << boost::apply_visitor(InfoVisitor(), p->getVariant())
               << "    Is linked: " << boolString(!(p->isConstant())) << endl;
       }
     }

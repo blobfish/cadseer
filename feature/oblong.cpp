@@ -233,7 +233,7 @@ void Oblong::updateModel(const UpdatePayload &payloadIn)
   
   try
   {
-    if (!(length.getValue() > width.getValue()))
+    if (!(static_cast<double>(length) > static_cast<double>(width)))
       throw std::runtime_error("length must be greater than width");
     
     OblongBuilder oblongMaker(static_cast<double>(length), static_cast<double>(width), static_cast<double>(height), system);

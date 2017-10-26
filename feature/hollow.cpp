@@ -99,7 +99,7 @@ void Hollow::updateModel(const UpdatePayload &payloadIn)
     (
       targetSeerShape.getRootOCCTShape(),
       closingFaceShapes,
-      -offset.getValue(), //default direction sucks.
+      -static_cast<double>(offset), //default direction sucks.
       Precision::Confusion(),
       BRepOffset_Skin,
       Standard_False,

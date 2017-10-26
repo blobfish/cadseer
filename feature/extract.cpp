@@ -224,7 +224,7 @@ void Extract::updateModel(const UpdatePayload &payloadIn)
           {
             TopoDS_Face f = TopoDS::Face(shape);
             if (ap.accrueType == AccrueType::Tangent)
-              faces = occt::walkTangentFaces(targetSeerShape.getRootOCCTShape(), f, ap.parameter->getValue());
+              faces = occt::walkTangentFaces(targetSeerShape.getRootOCCTShape(), f, static_cast<double>(*(ap.parameter)));
             else if (ap.accrueType == AccrueType::None)
               faces.push_back(f);
             

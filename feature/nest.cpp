@@ -78,12 +78,12 @@ Nest::~Nest()
 
 double Nest::getPitch() const
 {
-  return pitch->getValue();
+  return static_cast<double>(*pitch);
 }
 
 double Nest::getGap() const
 {
-  return gap->getValue();
+  return static_cast<double>(*gap);
 }
 
 double Nest::getDistance(const TopoDS_Shape &sIn1, const TopoDS_Shape &sIn2)
@@ -120,7 +120,7 @@ TopoDS_Shape Nest::calcPitch(TopoDS_Shape &bIn, double guess)
   //guess is expected from the bounding box and assumes no overlap.
   //dir is a unit vector.
   gp_Vec dir = gu::toOcc(feedDirection);
-  double localGap = gap->getValue();
+  double localGap = static_cast<double>(*gap);
   double tol = localGap * 0.1;
   TopoDS_Shape other = occt::instanceShape(bIn, dir, guess + localGap + tol);
   
@@ -235,7 +235,7 @@ void Nest::serialWrite(const QDir &dIn)
   (
     Base::serialOut(),
     gap->serialOut(),
-    pitch->getValue()
+    static_cast<double>(*pitch)
   );
   
   xml_schema::NamespaceInfomap infoMap;

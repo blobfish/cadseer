@@ -204,7 +204,7 @@ void Blend::updateModel(const UpdatePayload &payloadIn)
           TopoDS_Shape tempShape = targetSeerShape.getOCCTShape(resolvedId);
           assert(!tempShape.IsNull());
           assert(tempShape.ShapeType() == TopAbs_EDGE);
-          blendMaker.Add(simpleBlend.radius->getValue(), TopoDS::Edge(tempShape));
+          blendMaker.Add(static_cast<double>(*(simpleBlend.radius)), TopoDS::Edge(tempShape));
           //update location of parameter label.
           if (!labelDone)
           {
@@ -244,7 +244,7 @@ void Blend::updateModel(const UpdatePayload &payloadIn)
         if (blendShape.ShapeType() == TopAbs_VERTEX)
         {
           const TopoDS_Vertex &v = TopoDS::Vertex(blendShape);
-          blendMaker.SetRadius(e.radius->getValue(), vBlendIndex, v);
+          blendMaker.SetRadius(static_cast<double>(*e.radius), vBlendIndex, v);
           e.label->setMatrix(osg::Matrixd::translate(gu::toOsg(v)));
         }
         //TODO deal with edges.
