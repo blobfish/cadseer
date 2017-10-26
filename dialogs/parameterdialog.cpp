@@ -57,8 +57,8 @@ class WidgetFactoryVisitor : public boost::static_visitor<QWidget*>
 public:
   WidgetFactoryVisitor() = delete;
   WidgetFactoryVisitor(ParameterDialog *dialogIn) : dialog(dialogIn){assert(dialog);}
-  QWidget* operator()(double) const {return buildExpressionEdit();}
-  QWidget* operator()(int) const {return buildExpressionEdit();}
+  QWidget* operator()(double) const {return buildDouble();}
+  QWidget* operator()(int) const {return buildInt();}
   QWidget* operator()(bool) const {return buildBool();}
   QWidget* operator()(const std::string&) const {return buildString();}
   QWidget* operator()(const boost::filesystem::path&) const {return buildPath();}
@@ -69,7 +69,7 @@ public:
 private:
   ParameterDialog *dialog;
   
-  QWidget* buildExpressionEdit() const //!< might used for more than just doubles.
+  QWidget* buildDouble() const //!< might used for more than just doubles.
   {
     ExpressionEdit *editLine = new ExpressionEdit(dialog);
     if (dialog->parameter->isConstant())
@@ -87,6 +87,15 @@ private:
     QObject::connect(editLine->trafficLabel, SIGNAL(requestUnlinkSignal()), dialog, SLOT(requestUnlinkSlot()));
     
     return editLine;
+  }
+    
+  QWidget* buildInt() const
+  {
+    QLineEdit* out = new QLineEdit(dialog);
+    out->setText(QString::number(static_cast<int>(*(dialog->parameter))));
+    QObject::connect(out, SIGNAL(editingFinished()), dialog, SLOT(intChangedSlot()));
+    
+    return out;
   }
   
   QWidget* buildBool() const
@@ -218,7 +227,7 @@ public:
   ValueChangedVisitor() = delete;
   ValueChangedVisitor(ParameterDialog *dialogIn) : dialog(dialogIn){assert(dialog);}
   void operator()(double) const {dialog->valueHasChangedDouble();}
-  void operator()(int) const {}
+  void operator()(int) const {dialog->valueHasChangedInt();}
   void operator()(bool) const {dialog->valueHasChangedBool();}
   void operator()(const std::string&) const {}
   void operator()(const boost::filesystem::path&) const {dialog->valueHasChangedPath();}
@@ -363,6 +372,15 @@ void ParameterDialog::valueHasChangedDouble()
     eEdit->lineEdit->selectAll();
   }
   //if it is linked we shouldn't need to change.
+}
+
+void ParameterDialog::valueHasChangedInt()
+{
+  QLineEdit *lineEdit = dynamic_cast<QLineEdit*>(editWidget);
+  assert(lineEdit);
+  
+  if (parameter->isConstant())
+    lineEdit->setText(QString::number(static_cast<int>(*parameter)));
 }
 
 void ParameterDialog::valueHasChangedBool()
@@ -649,4 +667,35 @@ void ParameterDialog::vectorChangedSlot()
     if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
       observer->out(msg::Mask(msg::Request | msg::Update));
   }
+}
+
+void ParameterDialog::intChangedSlot()
+{
+  //block value signal.
+  boost::signals2::shared_connection_block block(valueConnection);
+  
+  QLineEdit *lineEdit = dynamic_cast<QLineEdit*>(editWidget);
+  assert(lineEdit);
+  if (!lineEdit)
+    return;
+  
+  int tv = lineEdit->text().toInt(); //temp value;
+  if (parameter->isValidValue(tv))
+  {
+    if (parameter->setValue(tv))
+    {
+      std::ostringstream gitStream;
+      gitStream
+      << QObject::tr("Feature: ").toStdString() << feature->getName().toStdString()
+      << QObject::tr("    Parameter ").toStdString() << parameter->getName().toStdString();
+      gitStream  << QObject::tr("    changed to: ").toStdString() << tv;
+      observer->out(msg::buildGitMessage(gitStream.str()));
+      if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
+        observer->out(msg::Mask(msg::Request | msg::Update));
+    }
+  }
+  
+  //make sure the edit line matches the parameter.
+  lineEdit->setText(QString::number(static_cast<int>(*parameter)));
+  lineEdit->selectAll();
 }

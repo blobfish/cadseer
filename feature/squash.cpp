@@ -52,9 +52,10 @@ Squash::Squash() : Base()
     new prm::Parameter
     (
       QObject::tr("Granularity"),
-      static_cast<double>(prf::manager().rootPtr->features().squash().get().granularity())
+      prf::manager().rootPtr->features().squash().get().granularity()
     )
   );
+  
   prm::Boundary lower(0.0, prm::Boundary::End::Closed); // 0.0 means no update
   prm::Boundary upper(5.0, prm::Boundary::End::Closed);
   prm::Interval interval(lower, upper);
@@ -66,23 +67,24 @@ Squash::Squash() : Base()
   parameterVector.push_back(granularity.get());
   
   label = new lbr::PLabel(granularity.get());
+  label->showName = true;
   label->valueHasChanged();
   overlaySwitch->addChild(label.get());
 }
 
 int Squash::getGranularity()
 {
-  return static_cast<int>(granularity->getValue());
+  return static_cast<int>(*granularity);
 }
 
 void Squash::setGranularity(int vIn)
 {
-  granularity->setValue(static_cast<double>(vIn));
+  granularity->setValue(vIn);
 }
 
 void Squash::updateModel(const UpdatePayload &payloadIn)
 {
-  if (granularity->getValue() == 0.0)
+  if (static_cast<int>(*granularity) == 0)
   {
     setSuccess();
     setModelClean();
@@ -150,7 +152,7 @@ void Squash::updateModel(const UpdatePayload &payloadIn)
       s.Reverse();
     
     sqs::Parameters ps(s, fs);
-    ps.granularity = static_cast<int>(granularity->getValue());
+    ps.granularity = static_cast<int>(*granularity);
     sqs::squash(ps);
     TopoDS_Face out = ps.ff;
     if(ps.mesh3d)
@@ -220,4 +222,6 @@ void Squash::serialRead(const prj::srl::FeatureSquash &sSquashIn)
   faceId = gu::stringToId(sSquashIn.faceId());
   wireId = gu::stringToId(sSquashIn.wireId());
   granularity->serialIn(sSquashIn.granularity());
+  
+  label->valueHasChanged();
 }

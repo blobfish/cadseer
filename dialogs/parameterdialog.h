@@ -55,6 +55,7 @@ namespace dlg
     //triggered from parameter being changed. Source can be either internal or external.
     //called from the visitor, so need public access.
     void valueHasChangedDouble();
+    void valueHasChangedInt();
     void valueHasChangedBool();
     void valueHasChangedPath();
     void valueHasChangedVector();
@@ -80,6 +81,7 @@ namespace dlg
     void boolChangedSlot(int);
     void browseForPathSlot();
     void vectorChangedSlot();
+    void intChangedSlot();
   };
 }
 
