@@ -95,6 +95,30 @@ namespace prj
       this->gap_.set (std::move (x));
     }
 
+    const FeatureNest::GapLabelType& FeatureNest::
+    gapLabel () const
+    {
+      return this->gapLabel_.get ();
+    }
+
+    FeatureNest::GapLabelType& FeatureNest::
+    gapLabel ()
+    {
+      return this->gapLabel_.get ();
+    }
+
+    void FeatureNest::
+    gapLabel (const GapLabelType& x)
+    {
+      this->gapLabel_.set (x);
+    }
+
+    void FeatureNest::
+    gapLabel (::std::unique_ptr< GapLabelType > x)
+    {
+      this->gapLabel_.set (std::move (x));
+    }
+
     const FeatureNest::PitchType& FeatureNest::
     pitch () const
     {
@@ -127,10 +151,12 @@ namespace prj
     FeatureNest::
     FeatureNest (const FeatureBaseType& featureBase,
                  const GapType& gap,
+                 const GapLabelType& gapLabel,
                  const PitchType& pitch)
     : ::xml_schema::Type (),
       featureBase_ (featureBase, this),
       gap_ (gap, this),
+      gapLabel_ (gapLabel, this),
       pitch_ (pitch, this)
     {
     }
@@ -138,10 +164,12 @@ namespace prj
     FeatureNest::
     FeatureNest (::std::unique_ptr< FeatureBaseType > featureBase,
                  ::std::unique_ptr< GapType > gap,
+                 ::std::unique_ptr< GapLabelType > gapLabel,
                  const PitchType& pitch)
     : ::xml_schema::Type (),
       featureBase_ (std::move (featureBase), this),
       gap_ (std::move (gap), this),
+      gapLabel_ (std::move (gapLabel), this),
       pitch_ (pitch, this)
     {
     }
@@ -153,6 +181,7 @@ namespace prj
     : ::xml_schema::Type (x, f, c),
       featureBase_ (x.featureBase_, f, this),
       gap_ (x.gap_, f, this),
+      gapLabel_ (x.gapLabel_, f, this),
       pitch_ (x.pitch_, f, this)
     {
     }
@@ -164,6 +193,7 @@ namespace prj
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
       featureBase_ (this),
       gap_ (this),
+      gapLabel_ (this),
       pitch_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
@@ -211,6 +241,20 @@ namespace prj
           }
         }
 
+        // gapLabel
+        //
+        if (n.name () == "gapLabel" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< GapLabelType > r (
+            GapLabelTraits::create (i, f, this));
+
+          if (!gapLabel_.present ())
+          {
+            this->gapLabel_.set (::std::move (r));
+            continue;
+          }
+        }
+
         // pitch
         //
         if (n.name () == "pitch" && n.namespace_ ().empty ())
@@ -239,6 +283,13 @@ namespace prj
           "");
       }
 
+      if (!gapLabel_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "gapLabel",
+          "");
+      }
+
       if (!pitch_.present ())
       {
         throw ::xsd::cxx::tree::expected_element< char > (
@@ -262,6 +313,7 @@ namespace prj
         static_cast< ::xml_schema::Type& > (*this) = x;
         this->featureBase_ = x.featureBase_;
         this->gap_ = x.gap_;
+        this->gapLabel_ = x.gapLabel_;
         this->pitch_ = x.pitch_;
       }
 
@@ -584,6 +636,17 @@ namespace prj
             e));
 
         s << i.gap ();
+      }
+
+      // gapLabel
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "gapLabel",
+            e));
+
+        s << i.gapLabel ();
       }
 
       // pitch

@@ -169,6 +169,30 @@ namespace prj
       this->distance_.set (std::move (x));
     }
 
+    const SymChamfer::PlabelType& SymChamfer::
+    plabel () const
+    {
+      return this->plabel_.get ();
+    }
+
+    SymChamfer::PlabelType& SymChamfer::
+    plabel ()
+    {
+      return this->plabel_.get ();
+    }
+
+    void SymChamfer::
+    plabel (const PlabelType& x)
+    {
+      this->plabel_.set (x);
+    }
+
+    void SymChamfer::
+    plabel (::std::unique_ptr< PlabelType > x)
+    {
+      this->plabel_.set (std::move (x));
+    }
+
 
     // SymChamfers
     // 
@@ -489,19 +513,23 @@ namespace prj
 
     SymChamfer::
     SymChamfer (const ChamferPicksType& chamferPicks,
-                const DistanceType& distance)
+                const DistanceType& distance,
+                const PlabelType& plabel)
     : ::xml_schema::Type (),
       chamferPicks_ (chamferPicks, this),
-      distance_ (distance, this)
+      distance_ (distance, this),
+      plabel_ (plabel, this)
     {
     }
 
     SymChamfer::
     SymChamfer (::std::unique_ptr< ChamferPicksType > chamferPicks,
-                ::std::unique_ptr< DistanceType > distance)
+                ::std::unique_ptr< DistanceType > distance,
+                ::std::unique_ptr< PlabelType > plabel)
     : ::xml_schema::Type (),
       chamferPicks_ (std::move (chamferPicks), this),
-      distance_ (std::move (distance), this)
+      distance_ (std::move (distance), this),
+      plabel_ (std::move (plabel), this)
     {
     }
 
@@ -511,7 +539,8 @@ namespace prj
                 ::xml_schema::Container* c)
     : ::xml_schema::Type (x, f, c),
       chamferPicks_ (x.chamferPicks_, f, this),
-      distance_ (x.distance_, f, this)
+      distance_ (x.distance_, f, this),
+      plabel_ (x.plabel_, f, this)
     {
     }
 
@@ -521,7 +550,8 @@ namespace prj
                 ::xml_schema::Container* c)
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
       chamferPicks_ (this),
-      distance_ (this)
+      distance_ (this),
+      plabel_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -568,6 +598,20 @@ namespace prj
           }
         }
 
+        // plabel
+        //
+        if (n.name () == "plabel" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< PlabelType > r (
+            PlabelTraits::create (i, f, this));
+
+          if (!plabel_.present ())
+          {
+            this->plabel_.set (::std::move (r));
+            continue;
+          }
+        }
+
         break;
       }
 
@@ -582,6 +626,13 @@ namespace prj
       {
         throw ::xsd::cxx::tree::expected_element< char > (
           "distance",
+          "");
+      }
+
+      if (!plabel_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "plabel",
           "");
       }
     }
@@ -601,6 +652,7 @@ namespace prj
         static_cast< ::xml_schema::Type& > (*this) = x;
         this->chamferPicks_ = x.chamferPicks_;
         this->distance_ = x.distance_;
+        this->plabel_ = x.plabel_;
       }
 
       return *this;
@@ -1207,6 +1259,17 @@ namespace prj
             e));
 
         s << i.distance ();
+      }
+
+      // plabel
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "plabel",
+            e));
+
+        s << i.plabel ();
       }
     }
 

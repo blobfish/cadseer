@@ -779,6 +779,14 @@ DatumPlane::DatumPlane() : Base()
   name = QObject::tr("Datum Plane");
   mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
+  radius = std::make_unique<prm::Parameter>(QObject::tr("Radius"), 1.0);
+  radius->connectValue(boost::bind(&DatumPlane::setVisualDirty, this));
+  parameterVector.push_back(radius.get());
+  
+  autoSize = std::make_unique<prm::Parameter>(QObject::tr("Auto Size"), true);
+  autoSize->connectValue(boost::bind(&DatumPlane::setVisualDirty, this));
+  parameterVector.push_back(autoSize.get());
+  
   display = new mdv::DatumPlane();
   
   transform = new osg::MatrixTransform();
@@ -823,7 +831,7 @@ void DatumPlane::updateModel(const UpdatePayload &payloadIn)
       throw std::runtime_error("no solver");
     
     transform->setMatrix(solver->solve(payloadIn.updateMap));
-    radius = solver->radius;
+    radius->setValue(solver->radius);
     
     setSuccess();
   }
@@ -837,7 +845,7 @@ void DatumPlane::updateModel(const UpdatePayload &payloadIn)
 
 void DatumPlane::updateVisual()
 {
-  if (autoSize)
+  if (static_cast<bool>(*autoSize))
     updateGeometry();
   setVisualClean();
 }
@@ -845,12 +853,24 @@ void DatumPlane::updateVisual()
 //serial support for datum plane needs to be done.
 void DatumPlane::serialWrite(const QDir &dIn)
 {
+  osg::Matrixd m = transform->getMatrix();
+  prj::srl::Matrixd matrixOut
+  (
+    m(0,0), m(0,1), m(0,2), m(0,3),
+    m(1,0), m(1,1), m(1,2), m(1,3),
+    m(2,0), m(2,1), m(2,2), m(2,3),
+    m(3,0), m(3,1), m(3,2), m(3,3)
+  );
+  
   prj::srl::SolverChoice solverChoice;
   solver->serialOut(solverChoice);
   
   prj::srl::FeatureDatumPlane datumPlaneOut
   (
     Base::serialOut(),
+    radius->serialOut(),
+    autoSize->serialOut(),
+    matrixOut,
     solverChoice
   );
   
@@ -862,12 +882,30 @@ void DatumPlane::serialWrite(const QDir &dIn)
 void DatumPlane::serialRead(const prj::srl::FeatureDatumPlane &datumPlaneIn)
 {
   Base::serialIn(datumPlaneIn.featureBase());
+  radius->serialIn(datumPlaneIn.radius());
+  autoSize->serialIn(datumPlaneIn.autoSize());
+  
+  const prj::srl::Matrixd &s = datumPlaneIn.matrix();
+  osg::Matrixd m;
+  m(0,0) = s.i0j0(); m(0,1) = s.i0j1(); m(0,2) = s.i0j2(); m(0,3) = s.i0j3();
+  m(1,0) = s.i1j0(); m(1,1) = s.i1j1(); m(1,2) = s.i1j2(); m(1,3) = s.i1j3();
+  m(2,0) = s.i2j0(); m(2,1) = s.i2j1(); m(2,2) = s.i2j2(); m(2,3) = s.i2j3();
+  m(3,0) = s.i3j0(); m(3,1) = s.i3j1(); m(3,2) = s.i3j2(); m(3,3) = s.i3j3();
+  
   if (datumPlaneIn.solverChoice().offset().present())
   {
     std::shared_ptr<DatumPlanePlanarOffset> offsetSolver(new DatumPlanePlanarOffset);
     offsetSolver->facePick.serialIn(datumPlaneIn.solverChoice().offset().get().facePick());
     offsetSolver->offset->serialIn(datumPlaneIn.solverChoice().offset().get().offset());
     setSolver(offsetSolver);
+    
+    //update the interactive parameter.
+    osg::Matrixd base(m);
+    osg::Vec3d normal = -gu::getZVector(m) * static_cast<double>(*(offsetSolver->offset));
+    base.setTrans(m.getTrans() + normal);
+    offsetSolver->offsetIP->setMatrix(base);
+    offsetSolver->offsetIP->valueHasChanged();
+    offsetSolver->offsetIP->constantHasChanged();
   }
   else if(datumPlaneIn.solverChoice().center().present())
   {
@@ -883,11 +921,15 @@ void DatumPlane::serialRead(const prj::srl::FeatureDatumPlane &datumPlaneIn)
     parallelSolver->edgePick.serialIn(datumPlaneIn.solverChoice().parallelThroughEdge().get().edgePick());
     setSolver(parallelSolver);
   }
+  
+  transform->setMatrix(m);
+  updateGeometry();
 }
 
 void DatumPlane::updateGeometry()
 {
-  display->setParameters(-radius, radius, -radius, radius);
+  double r = static_cast<double>(*radius);
+  display->setParameters(-r, r, -r, r);
 }
 
 std::vector<std::shared_ptr<DatumPlaneGenre> > DatumPlane::solversFromSelection(const slc::Containers &containersIn)

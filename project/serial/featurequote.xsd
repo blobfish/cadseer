@@ -24,6 +24,8 @@
     <xs:element name="materialThickness" type="xs:double"/>
     <xs:element name="processType" type="xs:string"/>
     <xs:element name="annualVolume" type="xs:int"/>
+    <xs:element name="tLabel" type="srl:PLabel"/>
+    <xs:element name="oLabel" type="srl:PLabel"/>
   </xs:all>
 </xs:complexType>
 

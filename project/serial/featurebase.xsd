@@ -211,4 +211,11 @@
   </xs:sequence>
 </xs:complexType>
 
+<xs:complexType name="PLabel">
+  <xs:all>
+    <xs:element name="matrix" type="srl:Matrixd"/>
+    <xs:element name="color" type="srl:Color"/>
+  </xs:all>
+</xs:complexType>
+
 </xs:schema> 

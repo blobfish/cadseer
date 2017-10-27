@@ -24,6 +24,7 @@
   <xs:all>
     <xs:element name="chamferPicks" type="srl:ChamferPicks"/>
     <xs:element name="distance" type="srl:Parameter"/>
+    <xs:element name="plabel" type="srl:PLabel"/>
   </xs:all>
 </xs:complexType>
 

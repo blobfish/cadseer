@@ -244,7 +244,8 @@ void Hollow::serialWrite(const QDir &dIn)
   (
     Base::serialOut(),
     hPicksOut,
-    offset.serialOut()
+    offset.serialOut(),
+    label->serialOut()
   );
   
   xml_schema::NamespaceInfomap infoMap;
@@ -258,7 +259,6 @@ void Hollow::serialRead(const prj::srl::FeatureHollow &sHollowIn)
   hollowPicks = ::ftr::serialIn(sHollowIn.hollowPicks());
   offset.serialIn(sHollowIn.offset());
   offset.connectValue(boost::bind(&Hollow::setModelDirty, this));
-  
-  label->valueHasChanged();
+  label->serialIn(sHollowIn.plabel());
 }
 

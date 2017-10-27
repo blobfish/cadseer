@@ -29,6 +29,7 @@ namespace osg{class AutoTransform;}
 namespace osgText{class Text;}
 
 namespace ftr{namespace prm{class Parameter;}}
+namespace prj{namespace srl{class PLabel;}}
 
 namespace lbr
 {
@@ -46,8 +47,11 @@ namespace lbr
     
     bool showName = false;
     
+    prj::srl::PLabel serialOut() const;
+    void serialIn(const prj::srl::PLabel&);
+    
   protected:
-    PLabel();
+    PLabel(); //needed for META_Node
     void build();
     void setText(); //sets the text from the parameter value
     ftr::prm::Parameter *parameter = nullptr;

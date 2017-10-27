@@ -95,6 +95,30 @@ namespace prj
       this->radius_.set (std::move (x));
     }
 
+    const SimpleBlend::PlabelType& SimpleBlend::
+    plabel () const
+    {
+      return this->plabel_.get ();
+    }
+
+    SimpleBlend::PlabelType& SimpleBlend::
+    plabel ()
+    {
+      return this->plabel_.get ();
+    }
+
+    void SimpleBlend::
+    plabel (const PlabelType& x)
+    {
+      this->plabel_.set (x);
+    }
+
+    void SimpleBlend::
+    plabel (::std::unique_ptr< PlabelType > x)
+    {
+      this->plabel_.set (std::move (x));
+    }
+
 
     // SimpleBlends
     // 
@@ -191,6 +215,30 @@ namespace prj
     radius (::std::unique_ptr< RadiusType > x)
     {
       this->radius_.set (std::move (x));
+    }
+
+    const VariableEntry::PlabelType& VariableEntry::
+    plabel () const
+    {
+      return this->plabel_.get ();
+    }
+
+    VariableEntry::PlabelType& VariableEntry::
+    plabel ()
+    {
+      return this->plabel_.get ();
+    }
+
+    void VariableEntry::
+    plabel (const PlabelType& x)
+    {
+      this->plabel_.set (x);
+    }
+
+    void VariableEntry::
+    plabel (::std::unique_ptr< PlabelType > x)
+    {
+      this->plabel_.set (std::move (x));
     }
 
 
@@ -402,19 +450,23 @@ namespace prj
 
     SimpleBlend::
     SimpleBlend (const BlendPicksType& blendPicks,
-                 const RadiusType& radius)
+                 const RadiusType& radius,
+                 const PlabelType& plabel)
     : ::xml_schema::Type (),
       blendPicks_ (blendPicks, this),
-      radius_ (radius, this)
+      radius_ (radius, this),
+      plabel_ (plabel, this)
     {
     }
 
     SimpleBlend::
     SimpleBlend (::std::unique_ptr< BlendPicksType > blendPicks,
-                 ::std::unique_ptr< RadiusType > radius)
+                 ::std::unique_ptr< RadiusType > radius,
+                 ::std::unique_ptr< PlabelType > plabel)
     : ::xml_schema::Type (),
       blendPicks_ (std::move (blendPicks), this),
-      radius_ (std::move (radius), this)
+      radius_ (std::move (radius), this),
+      plabel_ (std::move (plabel), this)
     {
     }
 
@@ -424,7 +476,8 @@ namespace prj
                  ::xml_schema::Container* c)
     : ::xml_schema::Type (x, f, c),
       blendPicks_ (x.blendPicks_, f, this),
-      radius_ (x.radius_, f, this)
+      radius_ (x.radius_, f, this),
+      plabel_ (x.plabel_, f, this)
     {
     }
 
@@ -434,7 +487,8 @@ namespace prj
                  ::xml_schema::Container* c)
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
       blendPicks_ (this),
-      radius_ (this)
+      radius_ (this),
+      plabel_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -481,6 +535,20 @@ namespace prj
           }
         }
 
+        // plabel
+        //
+        if (n.name () == "plabel" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< PlabelType > r (
+            PlabelTraits::create (i, f, this));
+
+          if (!plabel_.present ())
+          {
+            this->plabel_.set (::std::move (r));
+            continue;
+          }
+        }
+
         break;
       }
 
@@ -495,6 +563,13 @@ namespace prj
       {
         throw ::xsd::cxx::tree::expected_element< char > (
           "radius",
+          "");
+      }
+
+      if (!plabel_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "plabel",
           "");
       }
     }
@@ -514,6 +589,7 @@ namespace prj
         static_cast< ::xml_schema::Type& > (*this) = x;
         this->blendPicks_ = x.blendPicks_;
         this->radius_ = x.radius_;
+        this->plabel_ = x.plabel_;
       }
 
       return *this;
@@ -612,22 +688,26 @@ namespace prj
     VariableEntry::
     VariableEntry (const BlendPickType& blendPick,
                    const PositionType& position,
-                   const RadiusType& radius)
+                   const RadiusType& radius,
+                   const PlabelType& plabel)
     : ::xml_schema::Type (),
       blendPick_ (blendPick, this),
       position_ (position, this),
-      radius_ (radius, this)
+      radius_ (radius, this),
+      plabel_ (plabel, this)
     {
     }
 
     VariableEntry::
     VariableEntry (::std::unique_ptr< BlendPickType > blendPick,
                    ::std::unique_ptr< PositionType > position,
-                   ::std::unique_ptr< RadiusType > radius)
+                   ::std::unique_ptr< RadiusType > radius,
+                   ::std::unique_ptr< PlabelType > plabel)
     : ::xml_schema::Type (),
       blendPick_ (std::move (blendPick), this),
       position_ (std::move (position), this),
-      radius_ (std::move (radius), this)
+      radius_ (std::move (radius), this),
+      plabel_ (std::move (plabel), this)
     {
     }
 
@@ -638,7 +718,8 @@ namespace prj
     : ::xml_schema::Type (x, f, c),
       blendPick_ (x.blendPick_, f, this),
       position_ (x.position_, f, this),
-      radius_ (x.radius_, f, this)
+      radius_ (x.radius_, f, this),
+      plabel_ (x.plabel_, f, this)
     {
     }
 
@@ -649,7 +730,8 @@ namespace prj
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
       blendPick_ (this),
       position_ (this),
-      radius_ (this)
+      radius_ (this),
+      plabel_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -710,6 +792,20 @@ namespace prj
           }
         }
 
+        // plabel
+        //
+        if (n.name () == "plabel" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< PlabelType > r (
+            PlabelTraits::create (i, f, this));
+
+          if (!plabel_.present ())
+          {
+            this->plabel_.set (::std::move (r));
+            continue;
+          }
+        }
+
         break;
       }
 
@@ -733,6 +829,13 @@ namespace prj
           "radius",
           "");
       }
+
+      if (!plabel_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "plabel",
+          "");
+      }
     }
 
     VariableEntry* VariableEntry::
@@ -751,6 +854,7 @@ namespace prj
         this->blendPick_ = x.blendPick_;
         this->position_ = x.position_;
         this->radius_ = x.radius_;
+        this->plabel_ = x.plabel_;
       }
 
       return *this;
@@ -1547,6 +1651,17 @@ namespace prj
 
         s << i.radius ();
       }
+
+      // plabel
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "plabel",
+            e));
+
+        s << i.plabel ();
+      }
     }
 
     void
@@ -1605,6 +1720,17 @@ namespace prj
             e));
 
         s << i.radius ();
+      }
+
+      // plabel
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "plabel",
+            e));
+
+        s << i.plabel ();
       }
     }
 

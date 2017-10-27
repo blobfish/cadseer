@@ -142,6 +142,30 @@ namespace prj
     {
       this->angle_.set (std::move (x));
     }
+
+    const FeatureDraft::PlabelType& FeatureDraft::
+    plabel () const
+    {
+      return this->plabel_.get ();
+    }
+
+    FeatureDraft::PlabelType& FeatureDraft::
+    plabel ()
+    {
+      return this->plabel_.get ();
+    }
+
+    void FeatureDraft::
+    plabel (const PlabelType& x)
+    {
+      this->plabel_.set (x);
+    }
+
+    void FeatureDraft::
+    plabel (::std::unique_ptr< PlabelType > x)
+    {
+      this->plabel_.set (std::move (x));
+    }
   }
 }
 
@@ -158,12 +182,14 @@ namespace prj
     FeatureDraft (const FeatureBaseType& featureBase,
                   const TargetPicksType& targetPicks,
                   const NeutralPickType& neutralPick,
-                  const AngleType& angle)
+                  const AngleType& angle,
+                  const PlabelType& plabel)
     : ::xml_schema::Type (),
       featureBase_ (featureBase, this),
       targetPicks_ (targetPicks, this),
       neutralPick_ (neutralPick, this),
-      angle_ (angle, this)
+      angle_ (angle, this),
+      plabel_ (plabel, this)
     {
     }
 
@@ -171,12 +197,14 @@ namespace prj
     FeatureDraft (::std::unique_ptr< FeatureBaseType > featureBase,
                   ::std::unique_ptr< TargetPicksType > targetPicks,
                   ::std::unique_ptr< NeutralPickType > neutralPick,
-                  ::std::unique_ptr< AngleType > angle)
+                  ::std::unique_ptr< AngleType > angle,
+                  ::std::unique_ptr< PlabelType > plabel)
     : ::xml_schema::Type (),
       featureBase_ (std::move (featureBase), this),
       targetPicks_ (std::move (targetPicks), this),
       neutralPick_ (std::move (neutralPick), this),
-      angle_ (std::move (angle), this)
+      angle_ (std::move (angle), this),
+      plabel_ (std::move (plabel), this)
     {
     }
 
@@ -188,7 +216,8 @@ namespace prj
       featureBase_ (x.featureBase_, f, this),
       targetPicks_ (x.targetPicks_, f, this),
       neutralPick_ (x.neutralPick_, f, this),
-      angle_ (x.angle_, f, this)
+      angle_ (x.angle_, f, this),
+      plabel_ (x.plabel_, f, this)
     {
     }
 
@@ -200,7 +229,8 @@ namespace prj
       featureBase_ (this),
       targetPicks_ (this),
       neutralPick_ (this),
-      angle_ (this)
+      angle_ (this),
+      plabel_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -275,6 +305,20 @@ namespace prj
           }
         }
 
+        // plabel
+        //
+        if (n.name () == "plabel" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< PlabelType > r (
+            PlabelTraits::create (i, f, this));
+
+          if (!plabel_.present ())
+          {
+            this->plabel_.set (::std::move (r));
+            continue;
+          }
+        }
+
         break;
       }
 
@@ -305,6 +349,13 @@ namespace prj
           "angle",
           "");
       }
+
+      if (!plabel_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "plabel",
+          "");
+      }
     }
 
     FeatureDraft* FeatureDraft::
@@ -324,6 +375,7 @@ namespace prj
         this->targetPicks_ = x.targetPicks_;
         this->neutralPick_ = x.neutralPick_;
         this->angle_ = x.angle_;
+        this->plabel_ = x.plabel_;
       }
 
       return *this;
@@ -667,6 +719,17 @@ namespace prj
             e));
 
         s << i.angle ();
+      }
+
+      // plabel
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "plabel",
+            e));
+
+        s << i.plabel ();
       }
     }
 

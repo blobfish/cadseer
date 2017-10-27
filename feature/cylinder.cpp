@@ -105,8 +105,7 @@ void Cylinder::setupIPGroup()
   heightIP = new lbr::IPGroup(&height);
   heightIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(1.0, 0.0, 0.0)));
   heightIP->setRotationAxis(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(0.0, -1.0, 0.0));
-  heightIP->valueHasChanged();
-  heightIP->constantHasChanged();
+  
   overlaySwitch->addChild(heightIP.get());
   dragger->linkToMatrix(heightIP.get());
   
@@ -115,8 +114,6 @@ void Cylinder::setupIPGroup()
   radiusIP->setMatrixDragger(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(-1.0, 0.0, 0.0)));
   radiusIP->setDimsFlipped(true);
   radiusIP->setRotationAxis(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(-1.0, 0.0, 0.0));
-  radiusIP->valueHasChanged();
-  radiusIP->constantHasChanged();
   overlaySwitch->addChild(radiusIP.get());
   dragger->linkToMatrix(radiusIP.get());
   
@@ -139,6 +136,11 @@ void Cylinder::updateIPGroup()
   
   radiusIP->mainDim->setSqueeze(static_cast<double>(height) / 2.0);
   radiusIP->mainDim->setExtensionOffset(static_cast<double>(height) / 2.0);
+  
+  heightIP->valueHasChanged();
+  heightIP->constantHasChanged();
+  radiusIP->valueHasChanged();
+  radiusIP->constantHasChanged();
 }
 
 void Cylinder::setRadius(const double& radiusIn)
@@ -279,4 +281,6 @@ void Cylinder::serialRead(const prj::srl::FeatureCylinder& sCylinderIn)
   CSysBase::serialIn(sCylinderIn.featureCSysBase());
   radius.serialIn(sCylinderIn.radius());
   height.serialIn(sCylinderIn.height());
+  
+  updateIPGroup();
 }

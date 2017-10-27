@@ -80,7 +80,10 @@ void Chamfer::addSymChamfer(const SymChamfer &chamferIn)
   symChamfers.back().distance->connectValue(boost::bind(&Chamfer::setModelDirty, this));
   
   if (!symChamfers.back().label)
+  {
     symChamfers.back().label = new lbr::PLabel(symChamfers.back().distance.get());
+    symChamfers.back().label->showName = true;
+  }
   symChamfers.back().label->valueHasChanged();
   overlaySwitch->addChild(symChamfers.back().label.get());
 }
@@ -244,7 +247,8 @@ void Chamfer::serialWrite(const QDir &dIn)
     prj::srl::SymChamfer sChamferOut
     (
       cPicksOut,
-      sSymChamfer.distance->serialOut()
+      sSymChamfer.distance->serialOut(),
+      sSymChamfer.label->serialOut()
     );
     sSymChamfersOut.array().push_back(sChamferOut);
   }
@@ -286,6 +290,9 @@ void Chamfer::serialRead(const prj::srl::FeatureChamfer &sChamferIn)
     }
     symChamfer.distance = buildSymParameter();
     symChamfer.distance->serialIn(symChamferIn.distance());
+    symChamfer.label = new lbr::PLabel(symChamfer.distance.get());
+    symChamfer.label->showName = true;
+    symChamfer.label->serialIn(symChamferIn.plabel());
     addSymChamfer(symChamfer);
   }
 }

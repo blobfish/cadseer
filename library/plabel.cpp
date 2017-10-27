@@ -32,6 +32,7 @@
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <feature/parameter.h>
+#include <project/serial/xsdcxxoutput/featurebase.h>
 #include <library/plabel.h>
 
 using namespace lbr;
@@ -129,8 +130,8 @@ void PLabel::setText()
 {
   std::ostringstream stream;
   if (showName)
-    stream << parameter->getName().toStdString() << " = "
-    << boost::apply_visitor(TextVisitor(), parameter->getVariant());
+    stream << parameter->getName().toStdString() << " = ";
+  stream << boost::apply_visitor(TextVisitor(), parameter->getVariant());
   text->setText(stream.str());
 }
 
@@ -151,3 +152,41 @@ void PLabel::constantHasChanged()
   //maybe color reflects linked status?
   assert(parameter);
 }
+
+prj::srl::PLabel PLabel::serialOut() const
+{
+  const osg::Matrixd &m = this->getMatrix();
+  prj::srl::Matrixd mOut
+  (
+    m(0,0), m(0,1), m(0,2), m(0,3),
+    m(1,0), m(1,1), m(1,2), m(1,3),
+    m(2,0), m(2,1), m(2,2), m(2,3),
+    m(3,0), m(3,1), m(3,2), m(3,3)
+  );
+  
+  const osg::Vec4 &c = text->getColor();
+  prj::srl::Color cOut(c.x(), c.y(), c.z(), c.w());
+  
+  return prj::srl::PLabel(mOut, cOut);
+}
+
+void PLabel::serialIn(const prj::srl::PLabel &sIn)
+{
+  const auto &mIn = sIn.matrix();
+  osg::Matrixd m
+  (
+    mIn.i0j0(), mIn.i0j1(), mIn.i0j2(), mIn.i0j3(),
+    mIn.i1j0(), mIn.i1j1(), mIn.i1j2(), mIn.i1j3(),
+    mIn.i2j0(), mIn.i2j1(), mIn.i2j2(), mIn.i2j3(),
+    mIn.i3j0(), mIn.i3j1(), mIn.i3j2(), mIn.i3j3()
+  );
+  this->setMatrix(m);
+  
+  const auto &cIn = sIn.color();
+  osg::Vec4 c(cIn.r(), cIn.g(), cIn.b(), cIn.a());
+  setTextColor(c);
+  
+  constantHasChanged();
+  valueHasChanged();
+}
+    

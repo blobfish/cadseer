@@ -109,8 +109,6 @@ void Cone::setupIPGroup()
   heightIP = new lbr::IPGroup(&height);
   heightIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(1.0, 0.0, 0.0)));
   heightIP->setRotationAxis(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(0.0, -1.0, 0.0));
-  heightIP->valueHasChanged();
-  heightIP->constantHasChanged();
   overlaySwitch->addChild(heightIP.get());
   dragger->linkToMatrix(heightIP.get());
   
@@ -119,8 +117,6 @@ void Cone::setupIPGroup()
   radius1IP->setMatrixDragger(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(-1.0, 0.0, 0.0)));
   radius1IP->setDimsFlipped(true);
   radius1IP->setRotationAxis(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(-1.0, 0.0, 0.0));
-  radius1IP->valueHasChanged();
-  radius1IP->constantHasChanged();
   overlaySwitch->addChild(radius1IP.get());
   dragger->linkToMatrix(radius1IP.get());
   
@@ -129,8 +125,6 @@ void Cone::setupIPGroup()
   radius2IP->setMatrixDragger(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(-1.0, 0.0, 0.0)));
   radius2IP->setDimsFlipped(true);
   radius2IP->setRotationAxis(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(-1.0, 0.0, 0.0));
-  radius2IP->valueHasChanged();
-  radius2IP->constantHasChanged();
   overlaySwitch->addChild(radius2IP.get());
   dragger->linkToMatrix(radius2IP.get());
   
@@ -153,6 +147,13 @@ void Cone::updateIPGroup()
   
   heightIP->mainDim->setSqueeze(static_cast<double>(radius1));
   heightIP->mainDim->setExtensionOffset(static_cast<double>(radius1));
+  
+  heightIP->valueHasChanged();
+  heightIP->constantHasChanged();
+  radius1IP->valueHasChanged();
+  radius1IP->constantHasChanged();
+  radius2IP->valueHasChanged();
+  radius2IP->constantHasChanged();
 }
 
 void Cone::setRadius1(const double& radius1In)
@@ -304,4 +305,6 @@ void Cone::serialRead(const prj::srl::FeatureCone& sCone)
   radius1.serialIn(sCone.radius1());
   radius2.serialIn(sCone.radius2());
   height.serialIn(sCone.height());
+  
+  updateIPGroup();
 }

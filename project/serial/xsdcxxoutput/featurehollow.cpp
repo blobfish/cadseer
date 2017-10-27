@@ -118,6 +118,30 @@ namespace prj
     {
       this->offset_.set (std::move (x));
     }
+
+    const FeatureHollow::PlabelType& FeatureHollow::
+    plabel () const
+    {
+      return this->plabel_.get ();
+    }
+
+    FeatureHollow::PlabelType& FeatureHollow::
+    plabel ()
+    {
+      return this->plabel_.get ();
+    }
+
+    void FeatureHollow::
+    plabel (const PlabelType& x)
+    {
+      this->plabel_.set (x);
+    }
+
+    void FeatureHollow::
+    plabel (::std::unique_ptr< PlabelType > x)
+    {
+      this->plabel_.set (std::move (x));
+    }
   }
 }
 
@@ -133,22 +157,26 @@ namespace prj
     FeatureHollow::
     FeatureHollow (const FeatureBaseType& featureBase,
                    const HollowPicksType& hollowPicks,
-                   const OffsetType& offset)
+                   const OffsetType& offset,
+                   const PlabelType& plabel)
     : ::xml_schema::Type (),
       featureBase_ (featureBase, this),
       hollowPicks_ (hollowPicks, this),
-      offset_ (offset, this)
+      offset_ (offset, this),
+      plabel_ (plabel, this)
     {
     }
 
     FeatureHollow::
     FeatureHollow (::std::unique_ptr< FeatureBaseType > featureBase,
                    ::std::unique_ptr< HollowPicksType > hollowPicks,
-                   ::std::unique_ptr< OffsetType > offset)
+                   ::std::unique_ptr< OffsetType > offset,
+                   ::std::unique_ptr< PlabelType > plabel)
     : ::xml_schema::Type (),
       featureBase_ (std::move (featureBase), this),
       hollowPicks_ (std::move (hollowPicks), this),
-      offset_ (std::move (offset), this)
+      offset_ (std::move (offset), this),
+      plabel_ (std::move (plabel), this)
     {
     }
 
@@ -159,7 +187,8 @@ namespace prj
     : ::xml_schema::Type (x, f, c),
       featureBase_ (x.featureBase_, f, this),
       hollowPicks_ (x.hollowPicks_, f, this),
-      offset_ (x.offset_, f, this)
+      offset_ (x.offset_, f, this),
+      plabel_ (x.plabel_, f, this)
     {
     }
 
@@ -170,7 +199,8 @@ namespace prj
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
       featureBase_ (this),
       hollowPicks_ (this),
-      offset_ (this)
+      offset_ (this),
+      plabel_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -231,6 +261,20 @@ namespace prj
           }
         }
 
+        // plabel
+        //
+        if (n.name () == "plabel" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< PlabelType > r (
+            PlabelTraits::create (i, f, this));
+
+          if (!plabel_.present ())
+          {
+            this->plabel_.set (::std::move (r));
+            continue;
+          }
+        }
+
         break;
       }
 
@@ -254,6 +298,13 @@ namespace prj
           "offset",
           "");
       }
+
+      if (!plabel_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "plabel",
+          "");
+      }
     }
 
     FeatureHollow* FeatureHollow::
@@ -272,6 +323,7 @@ namespace prj
         this->featureBase_ = x.featureBase_;
         this->hollowPicks_ = x.hollowPicks_;
         this->offset_ = x.offset_;
+        this->plabel_ = x.plabel_;
       }
 
       return *this;
@@ -604,6 +656,17 @@ namespace prj
             e));
 
         s << i.offset ();
+      }
+
+      // plabel
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "plabel",
+            e));
+
+        s << i.plabel ();
       }
     }
 

@@ -11,6 +11,7 @@
   <xs:all>
     <xs:element name="blendPicks" type="srl:Picks"/>
     <xs:element name="radius" type="srl:Parameter"/>
+    <xs:element name="plabel" type="srl:PLabel"/>
   </xs:all>
 </xs:complexType>
 
@@ -25,6 +26,7 @@
     <xs:element name="blendPick" type="srl:Pick"/>
     <xs:element name="position" type="srl:Parameter"/>
     <xs:element name="radius" type="srl:Parameter"/>
+    <xs:element name="plabel" type="srl:PLabel"/>
   </xs:all>
 </xs:complexType>
 

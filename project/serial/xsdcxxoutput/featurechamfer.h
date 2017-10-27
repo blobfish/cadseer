@@ -611,6 +611,64 @@ namespace prj
       //@}
 
       /**
+       * @name plabel
+       *
+       * @brief Accessor and modifier functions for the %plabel
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::PLabel PlabelType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< PlabelType, char > PlabelTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const PlabelType&
+      plabel () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      PlabelType&
+      plabel ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      plabel (const PlabelType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      plabel (::std::unique_ptr< PlabelType > p);
+
+      //@}
+
+      /**
        * @name Constructors
        */
       //@{
@@ -620,7 +678,8 @@ namespace prj
        * initializers for required elements and attributes.
        */
       SymChamfer (const ChamferPicksType&,
-                  const DistanceType&);
+                  const DistanceType&,
+                  const PlabelType&);
 
       /**
        * @brief Create an instance from the ultimate base and
@@ -631,7 +690,8 @@ namespace prj
        * instead of making copies.
        */
       SymChamfer (::std::unique_ptr< ChamferPicksType >,
-                  ::std::unique_ptr< DistanceType >);
+                  ::std::unique_ptr< DistanceType >,
+                  ::std::unique_ptr< PlabelType >);
 
       /**
        * @brief Create an instance from a DOM element.
@@ -705,6 +765,7 @@ namespace prj
       protected:
       ::xsd::cxx::tree::one< ChamferPicksType > chamferPicks_;
       ::xsd::cxx::tree::one< DistanceType > distance_;
+      ::xsd::cxx::tree::one< PlabelType > plabel_;
 
       //@endcond
     };

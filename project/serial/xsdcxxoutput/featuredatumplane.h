@@ -1165,6 +1165,180 @@ namespace prj
       //@}
 
       /**
+       * @name radius
+       *
+       * @brief Accessor and modifier functions for the %radius
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::Parameter RadiusType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< RadiusType, char > RadiusTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const RadiusType&
+      radius () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      RadiusType&
+      radius ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      radius (const RadiusType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      radius (::std::unique_ptr< RadiusType > p);
+
+      //@}
+
+      /**
+       * @name autoSize
+       *
+       * @brief Accessor and modifier functions for the %autoSize
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::Parameter AutoSizeType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< AutoSizeType, char > AutoSizeTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const AutoSizeType&
+      autoSize () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      AutoSizeType&
+      autoSize ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      autoSize (const AutoSizeType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      autoSize (::std::unique_ptr< AutoSizeType > p);
+
+      //@}
+
+      /**
+       * @name matrix
+       *
+       * @brief Accessor and modifier functions for the %matrix
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::Matrixd MatrixType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< MatrixType, char > MatrixTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const MatrixType&
+      matrix () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      MatrixType&
+      matrix ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      matrix (const MatrixType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      matrix (::std::unique_ptr< MatrixType > p);
+
+      //@}
+
+      /**
        * @name solverChoice
        *
        * @brief Accessor and modifier functions for the %solverChoice
@@ -1232,6 +1406,9 @@ namespace prj
        * initializers for required elements and attributes.
        */
       FeatureDatumPlane (const FeatureBaseType&,
+                         const RadiusType&,
+                         const AutoSizeType&,
+                         const MatrixType&,
                          const SolverChoiceType&);
 
       /**
@@ -1243,6 +1420,9 @@ namespace prj
        * instead of making copies.
        */
       FeatureDatumPlane (::std::unique_ptr< FeatureBaseType >,
+                         ::std::unique_ptr< RadiusType >,
+                         ::std::unique_ptr< AutoSizeType >,
+                         ::std::unique_ptr< MatrixType >,
                          ::std::unique_ptr< SolverChoiceType >);
 
       /**
@@ -1316,6 +1496,9 @@ namespace prj
 
       protected:
       ::xsd::cxx::tree::one< FeatureBaseType > featureBase_;
+      ::xsd::cxx::tree::one< RadiusType > radius_;
+      ::xsd::cxx::tree::one< AutoSizeType > autoSize_;
+      ::xsd::cxx::tree::one< MatrixType > matrix_;
       ::xsd::cxx::tree::one< SolverChoiceType > solverChoice_;
 
       //@endcond

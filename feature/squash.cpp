@@ -207,7 +207,8 @@ void Squash::serialWrite(const QDir &dIn)
     ::ftr::serialOut(picks),
     gu::idToString(faceId),
     gu::idToString(wireId),
-    granularity->serialOut()
+    granularity->serialOut(),
+    label->serialOut()
   );
   
   xml_schema::NamespaceInfomap infoMap;
@@ -222,6 +223,5 @@ void Squash::serialRead(const prj::srl::FeatureSquash &sSquashIn)
   faceId = gu::stringToId(sSquashIn.faceId());
   wireId = gu::stringToId(sSquashIn.wireId());
   granularity->serialIn(sSquashIn.granularity());
-  
-  label->valueHasChanged();
+  label->serialIn(sSquashIn.label());
 }

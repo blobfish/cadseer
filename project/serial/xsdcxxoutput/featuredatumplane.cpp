@@ -321,6 +321,78 @@ namespace prj
       this->featureBase_.set (std::move (x));
     }
 
+    const FeatureDatumPlane::RadiusType& FeatureDatumPlane::
+    radius () const
+    {
+      return this->radius_.get ();
+    }
+
+    FeatureDatumPlane::RadiusType& FeatureDatumPlane::
+    radius ()
+    {
+      return this->radius_.get ();
+    }
+
+    void FeatureDatumPlane::
+    radius (const RadiusType& x)
+    {
+      this->radius_.set (x);
+    }
+
+    void FeatureDatumPlane::
+    radius (::std::unique_ptr< RadiusType > x)
+    {
+      this->radius_.set (std::move (x));
+    }
+
+    const FeatureDatumPlane::AutoSizeType& FeatureDatumPlane::
+    autoSize () const
+    {
+      return this->autoSize_.get ();
+    }
+
+    FeatureDatumPlane::AutoSizeType& FeatureDatumPlane::
+    autoSize ()
+    {
+      return this->autoSize_.get ();
+    }
+
+    void FeatureDatumPlane::
+    autoSize (const AutoSizeType& x)
+    {
+      this->autoSize_.set (x);
+    }
+
+    void FeatureDatumPlane::
+    autoSize (::std::unique_ptr< AutoSizeType > x)
+    {
+      this->autoSize_.set (std::move (x));
+    }
+
+    const FeatureDatumPlane::MatrixType& FeatureDatumPlane::
+    matrix () const
+    {
+      return this->matrix_.get ();
+    }
+
+    FeatureDatumPlane::MatrixType& FeatureDatumPlane::
+    matrix ()
+    {
+      return this->matrix_.get ();
+    }
+
+    void FeatureDatumPlane::
+    matrix (const MatrixType& x)
+    {
+      this->matrix_.set (x);
+    }
+
+    void FeatureDatumPlane::
+    matrix (::std::unique_ptr< MatrixType > x)
+    {
+      this->matrix_.set (std::move (x));
+    }
+
     const FeatureDatumPlane::SolverChoiceType& FeatureDatumPlane::
     solverChoice () const
     {
@@ -860,18 +932,30 @@ namespace prj
 
     FeatureDatumPlane::
     FeatureDatumPlane (const FeatureBaseType& featureBase,
+                       const RadiusType& radius,
+                       const AutoSizeType& autoSize,
+                       const MatrixType& matrix,
                        const SolverChoiceType& solverChoice)
     : ::xml_schema::Type (),
       featureBase_ (featureBase, this),
+      radius_ (radius, this),
+      autoSize_ (autoSize, this),
+      matrix_ (matrix, this),
       solverChoice_ (solverChoice, this)
     {
     }
 
     FeatureDatumPlane::
     FeatureDatumPlane (::std::unique_ptr< FeatureBaseType > featureBase,
+                       ::std::unique_ptr< RadiusType > radius,
+                       ::std::unique_ptr< AutoSizeType > autoSize,
+                       ::std::unique_ptr< MatrixType > matrix,
                        ::std::unique_ptr< SolverChoiceType > solverChoice)
     : ::xml_schema::Type (),
       featureBase_ (std::move (featureBase), this),
+      radius_ (std::move (radius), this),
+      autoSize_ (std::move (autoSize), this),
+      matrix_ (std::move (matrix), this),
       solverChoice_ (std::move (solverChoice), this)
     {
     }
@@ -882,6 +966,9 @@ namespace prj
                        ::xml_schema::Container* c)
     : ::xml_schema::Type (x, f, c),
       featureBase_ (x.featureBase_, f, this),
+      radius_ (x.radius_, f, this),
+      autoSize_ (x.autoSize_, f, this),
+      matrix_ (x.matrix_, f, this),
       solverChoice_ (x.solverChoice_, f, this)
     {
     }
@@ -892,6 +979,9 @@ namespace prj
                        ::xml_schema::Container* c)
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
       featureBase_ (this),
+      radius_ (this),
+      autoSize_ (this),
+      matrix_ (this),
       solverChoice_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
@@ -925,6 +1015,48 @@ namespace prj
           }
         }
 
+        // radius
+        //
+        if (n.name () == "radius" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< RadiusType > r (
+            RadiusTraits::create (i, f, this));
+
+          if (!radius_.present ())
+          {
+            this->radius_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // autoSize
+        //
+        if (n.name () == "autoSize" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< AutoSizeType > r (
+            AutoSizeTraits::create (i, f, this));
+
+          if (!autoSize_.present ())
+          {
+            this->autoSize_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // matrix
+        //
+        if (n.name () == "matrix" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< MatrixType > r (
+            MatrixTraits::create (i, f, this));
+
+          if (!matrix_.present ())
+          {
+            this->matrix_.set (::std::move (r));
+            continue;
+          }
+        }
+
         // solverChoice
         //
         if (n.name () == "solverChoice" && n.namespace_ ().empty ())
@@ -946,6 +1078,27 @@ namespace prj
       {
         throw ::xsd::cxx::tree::expected_element< char > (
           "featureBase",
+          "");
+      }
+
+      if (!radius_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "radius",
+          "");
+      }
+
+      if (!autoSize_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "autoSize",
+          "");
+      }
+
+      if (!matrix_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "matrix",
           "");
       }
 
@@ -971,6 +1124,9 @@ namespace prj
       {
         static_cast< ::xml_schema::Type& > (*this) = x;
         this->featureBase_ = x.featureBase_;
+        this->radius_ = x.radius_;
+        this->autoSize_ = x.autoSize_;
+        this->matrix_ = x.matrix_;
         this->solverChoice_ = x.solverChoice_;
       }
 
@@ -1408,6 +1564,39 @@ namespace prj
             e));
 
         s << i.featureBase ();
+      }
+
+      // radius
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "radius",
+            e));
+
+        s << i.radius ();
+      }
+
+      // autoSize
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "autoSize",
+            e));
+
+        s << i.autoSize ();
+      }
+
+      // matrix
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "matrix",
+            e));
+
+        s << i.matrix ();
       }
 
       // solverChoice

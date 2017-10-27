@@ -107,6 +107,12 @@ VariableBlend Blend::buildDefaultVariable(const SeerShape &seerShapeIn, const Pi
 
 void Blend::addSimpleBlend(const SimpleBlend &simpleBlendIn)
 {
+  addSimpleBlendQuiet(simpleBlendIn);
+  setModelDirty();
+}
+
+void Blend::addSimpleBlendQuiet(const SimpleBlend &simpleBlendIn)
+{
   if (simpleBlendIn.radius)
     simpleBlends.push_back(simpleBlendIn);
   else
@@ -117,16 +123,23 @@ void Blend::addSimpleBlend(const SimpleBlend &simpleBlendIn)
   }
   simpleBlends.back().radius->connectValue(boost::bind(&Blend::setModelDirty, this));
   if (!simpleBlends.back().label)
+  {
     simpleBlends.back().label = new lbr::PLabel(simpleBlends.back().radius.get());
+    simpleBlends.back().label->showName = true;
+  }
   simpleBlends.back().label->valueHasChanged();
   overlaySwitch->addChild(simpleBlends.back().label.get());
   
   parameterVector.push_back(simpleBlends.back().radius.get());
-  
-  setModelDirty();
 }
 
 void Blend::addVariableBlend(const VariableBlend &variableBlendIn)
+{
+  addVariableBlendQuiet(variableBlendIn);
+  setModelDirty();
+}
+
+void Blend::addVariableBlendQuiet(const VariableBlend &variableBlendIn)
 {
   variableBlends.push_back(variableBlendIn);
   for (auto &e : variableBlends.back().entries)
@@ -135,14 +148,15 @@ void Blend::addVariableBlend(const VariableBlend &variableBlendIn)
     e.radius->connectValue(boost::bind(&Blend::setModelDirty, this));
     
     if (!e.label)
+    {
       e.label = new lbr::PLabel(e.radius.get());
+      e.label->showName = true;
+    }
     e.label->valueHasChanged();
     overlaySwitch->addChild(e.label.get());
     
     parameterVector.push_back(e.radius.get());
     parameterVector.push_back(e.position.get());
-    
-    setModelDirty();
   }
 }
 
@@ -415,7 +429,8 @@ void Blend::serialWrite(const QDir &dIn)
     prj::srl::SimpleBlend sBlendOut
     (
       bPicksOut,
-      sBlend.radius->serialOut()
+      sBlend.radius->serialOut(),
+      sBlend.label->serialOut()
     );
     sBlendsOut.array().push_back(sBlendOut);
   }
@@ -431,7 +446,8 @@ void Blend::serialWrite(const QDir &dIn)
       (
         vEntry.pick.serialOut(),
         vEntry.position->serialOut(),
-        vEntry.radius->serialOut()
+        vEntry.radius->serialOut(),
+        vEntry.label->serialOut()
       );
       vEntriesOut.array().push_back(vEntryOut);
     }
@@ -481,7 +497,10 @@ void Blend::serialRead(const prj::srl::FeatureBlend& sBlendIn)
     }
     simpleBlend.radius = buildRadiusParameter();
     simpleBlend.radius->serialIn(simpleBlendIn.radius());
-    addSimpleBlend(simpleBlend);
+    simpleBlend.label = new lbr::PLabel(simpleBlend.radius.get());
+    simpleBlend.label->showName = true;
+    simpleBlend.label->serialIn(simpleBlendIn.plabel());
+    addSimpleBlendQuiet(simpleBlend);
   }
   
   for (const auto &variableBlendIn : sBlendIn.variableBlends().array())
@@ -496,8 +515,11 @@ void Blend::serialRead(const prj::srl::FeatureBlend& sBlendIn)
       entry.position->serialIn(entryIn.position());
       entry.radius = buildRadiusParameter();
       entry.radius->serialIn(entryIn.radius());
+      entry.label = new lbr::PLabel(entry.radius.get());
+      entry.label->showName = true;
+      entry.label->serialIn(entryIn.plabel());
       vBlend.entries.push_back(entry);
     }
-    addVariableBlend(vBlend);
+    addVariableBlendQuiet(vBlend);
   }
 }

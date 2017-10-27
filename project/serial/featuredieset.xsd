@@ -16,6 +16,12 @@
     <xs:element name="widthPadding" type="srl:Parameter"/>
     <xs:element name="origin" type="srl:Parameter"/>
     <xs:element name="autoCalc" type="srl:Parameter"/>
+    <xs:element name="lengthPLabel" type="srl:PLabel"/>
+    <xs:element name="widthPLabel" type="srl:PLabel"/>
+    <xs:element name="lengthPaddingPLabel" type="srl:PLabel"/>
+    <xs:element name="widthPaddingPLabel" type="srl:PLabel"/>
+    <xs:element name="originPLabel" type="srl:PLabel"/>
+    <xs:element name="autoCalcPLabel" type="srl:PLabel"/>
   </xs:all>
 </xs:complexType>
 

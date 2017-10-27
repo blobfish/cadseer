@@ -275,12 +275,18 @@ void DieSet::serialWrite(const QDir &dIn)
   prj::srl::FeatureDieSet dso
   (
     Base::serialOut(),
-   length->serialOut(),
-   lengthPadding->serialOut(),
-   width->serialOut(),
-   widthPadding->serialOut(),
-   origin->serialOut(),
-   autoCalc->serialOut()
+    length->serialOut(),
+    lengthPadding->serialOut(),
+    width->serialOut(),
+    widthPadding->serialOut(),
+    origin->serialOut(),
+    autoCalc->serialOut(),
+    lengthLabel->serialOut(),
+    widthLabel->serialOut(),
+    lengthPaddingLabel->serialOut(),
+    widthPaddingLabel->serialOut(),
+    originLabel->serialOut(),
+    autoCalcLabel->serialOut()
   );
   
   xml_schema::NamespaceInfomap infoMap;
@@ -298,13 +304,10 @@ void DieSet::serialRead(const prj::srl::FeatureDieSet &dsIn)
   origin->serialIn(dsIn.origin());
   autoCalc->serialIn(dsIn.autoCalc());
   
-  //make sure labels are updated.
-  lengthLabel->valueHasChanged();
-  lengthPaddingLabel->valueHasChanged();
-  widthLabel->valueHasChanged();
-  widthPaddingLabel->valueHasChanged();
-  originLabel->valueHasChanged();
-  autoCalcLabel->valueHasChanged();
-  
-  updateLabelColors();
+  lengthLabel->serialIn(dsIn.lengthPLabel());
+  lengthPaddingLabel->serialIn(dsIn.lengthPaddingPLabel());
+  widthLabel->serialIn(dsIn.widthPLabel());
+  widthPaddingLabel->serialIn(dsIn.widthPaddingPLabel());
+  originLabel->serialIn(dsIn.originPLabel());
+  autoCalcLabel->serialIn(dsIn.autoCalcPLabel());
 }

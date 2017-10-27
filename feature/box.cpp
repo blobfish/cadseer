@@ -158,8 +158,6 @@ void Box::setupIPGroup()
   lengthIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 0.0, -1.0)));
   lengthIP->noAutoRotateDragger();
   lengthIP->setRotationAxis(osg::Vec3d(1.0, 0.0, 0.0), osg::Vec3d(0.0, 0.0, 1.0));
-  lengthIP->valueHasChanged();
-  lengthIP->constantHasChanged();
   overlaySwitch->addChild(lengthIP.get());
   dragger->linkToMatrix(lengthIP.get());
   
@@ -167,8 +165,6 @@ void Box::setupIPGroup()
 //   widthIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 0.0, -1.0)));
   widthIP->noAutoRotateDragger();
   widthIP->setRotationAxis(osg::Vec3d(0.0, 1.0, 0.0), osg::Vec3d(0.0, 0.0, -1.0));
-  widthIP->valueHasChanged();
-  widthIP->constantHasChanged();
   overlaySwitch->addChild(widthIP.get());
   dragger->linkToMatrix(widthIP.get());
   
@@ -176,8 +172,6 @@ void Box::setupIPGroup()
   heightIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(1.0, 0.0, 0.0)));
   heightIP->noAutoRotateDragger();
   heightIP->setRotationAxis(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(0.0, 1.0, 0.0));
-  heightIP->valueHasChanged();
-  heightIP->constantHasChanged();
   overlaySwitch->addChild(heightIP.get());
   dragger->linkToMatrix(heightIP.get());
   
@@ -204,6 +198,13 @@ void Box::updateIPGroup()
   //no need to rotate
   hMatrix.setTrans(osg::Vec3d(static_cast<double>(length) / 2.0, static_cast<double>(width) / 2.0, 0.0));
   heightIP->setMatrixDragger(hMatrix);
+  
+  lengthIP->valueHasChanged();
+  lengthIP->constantHasChanged();
+  widthIP->valueHasChanged();
+  widthIP->constantHasChanged();
+  heightIP->valueHasChanged();
+  heightIP->constantHasChanged();
 }
 
 void Box::setLength(const double &lengthIn)
@@ -393,4 +394,6 @@ void Box::serialRead(const prj::srl::FeatureBox& sBox)
   length.serialIn(sBox.length());
   width.serialIn(sBox.width());
   height.serialIn(sBox.height());
+  
+  updateIPGroup();
 }

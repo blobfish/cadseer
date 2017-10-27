@@ -214,6 +214,150 @@ namespace prj
     {
       this->autoCalc_.set (std::move (x));
     }
+
+    const FeatureDieSet::LengthPLabelType& FeatureDieSet::
+    lengthPLabel () const
+    {
+      return this->lengthPLabel_.get ();
+    }
+
+    FeatureDieSet::LengthPLabelType& FeatureDieSet::
+    lengthPLabel ()
+    {
+      return this->lengthPLabel_.get ();
+    }
+
+    void FeatureDieSet::
+    lengthPLabel (const LengthPLabelType& x)
+    {
+      this->lengthPLabel_.set (x);
+    }
+
+    void FeatureDieSet::
+    lengthPLabel (::std::unique_ptr< LengthPLabelType > x)
+    {
+      this->lengthPLabel_.set (std::move (x));
+    }
+
+    const FeatureDieSet::WidthPLabelType& FeatureDieSet::
+    widthPLabel () const
+    {
+      return this->widthPLabel_.get ();
+    }
+
+    FeatureDieSet::WidthPLabelType& FeatureDieSet::
+    widthPLabel ()
+    {
+      return this->widthPLabel_.get ();
+    }
+
+    void FeatureDieSet::
+    widthPLabel (const WidthPLabelType& x)
+    {
+      this->widthPLabel_.set (x);
+    }
+
+    void FeatureDieSet::
+    widthPLabel (::std::unique_ptr< WidthPLabelType > x)
+    {
+      this->widthPLabel_.set (std::move (x));
+    }
+
+    const FeatureDieSet::LengthPaddingPLabelType& FeatureDieSet::
+    lengthPaddingPLabel () const
+    {
+      return this->lengthPaddingPLabel_.get ();
+    }
+
+    FeatureDieSet::LengthPaddingPLabelType& FeatureDieSet::
+    lengthPaddingPLabel ()
+    {
+      return this->lengthPaddingPLabel_.get ();
+    }
+
+    void FeatureDieSet::
+    lengthPaddingPLabel (const LengthPaddingPLabelType& x)
+    {
+      this->lengthPaddingPLabel_.set (x);
+    }
+
+    void FeatureDieSet::
+    lengthPaddingPLabel (::std::unique_ptr< LengthPaddingPLabelType > x)
+    {
+      this->lengthPaddingPLabel_.set (std::move (x));
+    }
+
+    const FeatureDieSet::WidthPaddingPLabelType& FeatureDieSet::
+    widthPaddingPLabel () const
+    {
+      return this->widthPaddingPLabel_.get ();
+    }
+
+    FeatureDieSet::WidthPaddingPLabelType& FeatureDieSet::
+    widthPaddingPLabel ()
+    {
+      return this->widthPaddingPLabel_.get ();
+    }
+
+    void FeatureDieSet::
+    widthPaddingPLabel (const WidthPaddingPLabelType& x)
+    {
+      this->widthPaddingPLabel_.set (x);
+    }
+
+    void FeatureDieSet::
+    widthPaddingPLabel (::std::unique_ptr< WidthPaddingPLabelType > x)
+    {
+      this->widthPaddingPLabel_.set (std::move (x));
+    }
+
+    const FeatureDieSet::OriginPLabelType& FeatureDieSet::
+    originPLabel () const
+    {
+      return this->originPLabel_.get ();
+    }
+
+    FeatureDieSet::OriginPLabelType& FeatureDieSet::
+    originPLabel ()
+    {
+      return this->originPLabel_.get ();
+    }
+
+    void FeatureDieSet::
+    originPLabel (const OriginPLabelType& x)
+    {
+      this->originPLabel_.set (x);
+    }
+
+    void FeatureDieSet::
+    originPLabel (::std::unique_ptr< OriginPLabelType > x)
+    {
+      this->originPLabel_.set (std::move (x));
+    }
+
+    const FeatureDieSet::AutoCalcPLabelType& FeatureDieSet::
+    autoCalcPLabel () const
+    {
+      return this->autoCalcPLabel_.get ();
+    }
+
+    FeatureDieSet::AutoCalcPLabelType& FeatureDieSet::
+    autoCalcPLabel ()
+    {
+      return this->autoCalcPLabel_.get ();
+    }
+
+    void FeatureDieSet::
+    autoCalcPLabel (const AutoCalcPLabelType& x)
+    {
+      this->autoCalcPLabel_.set (x);
+    }
+
+    void FeatureDieSet::
+    autoCalcPLabel (::std::unique_ptr< AutoCalcPLabelType > x)
+    {
+      this->autoCalcPLabel_.set (std::move (x));
+    }
   }
 }
 
@@ -233,7 +377,13 @@ namespace prj
                    const WidthType& width,
                    const WidthPaddingType& widthPadding,
                    const OriginType& origin,
-                   const AutoCalcType& autoCalc)
+                   const AutoCalcType& autoCalc,
+                   const LengthPLabelType& lengthPLabel,
+                   const WidthPLabelType& widthPLabel,
+                   const LengthPaddingPLabelType& lengthPaddingPLabel,
+                   const WidthPaddingPLabelType& widthPaddingPLabel,
+                   const OriginPLabelType& originPLabel,
+                   const AutoCalcPLabelType& autoCalcPLabel)
     : ::xml_schema::Type (),
       featureBase_ (featureBase, this),
       length_ (length, this),
@@ -241,7 +391,13 @@ namespace prj
       width_ (width, this),
       widthPadding_ (widthPadding, this),
       origin_ (origin, this),
-      autoCalc_ (autoCalc, this)
+      autoCalc_ (autoCalc, this),
+      lengthPLabel_ (lengthPLabel, this),
+      widthPLabel_ (widthPLabel, this),
+      lengthPaddingPLabel_ (lengthPaddingPLabel, this),
+      widthPaddingPLabel_ (widthPaddingPLabel, this),
+      originPLabel_ (originPLabel, this),
+      autoCalcPLabel_ (autoCalcPLabel, this)
     {
     }
 
@@ -252,7 +408,13 @@ namespace prj
                    ::std::unique_ptr< WidthType > width,
                    ::std::unique_ptr< WidthPaddingType > widthPadding,
                    ::std::unique_ptr< OriginType > origin,
-                   ::std::unique_ptr< AutoCalcType > autoCalc)
+                   ::std::unique_ptr< AutoCalcType > autoCalc,
+                   ::std::unique_ptr< LengthPLabelType > lengthPLabel,
+                   ::std::unique_ptr< WidthPLabelType > widthPLabel,
+                   ::std::unique_ptr< LengthPaddingPLabelType > lengthPaddingPLabel,
+                   ::std::unique_ptr< WidthPaddingPLabelType > widthPaddingPLabel,
+                   ::std::unique_ptr< OriginPLabelType > originPLabel,
+                   ::std::unique_ptr< AutoCalcPLabelType > autoCalcPLabel)
     : ::xml_schema::Type (),
       featureBase_ (std::move (featureBase), this),
       length_ (std::move (length), this),
@@ -260,7 +422,13 @@ namespace prj
       width_ (std::move (width), this),
       widthPadding_ (std::move (widthPadding), this),
       origin_ (std::move (origin), this),
-      autoCalc_ (std::move (autoCalc), this)
+      autoCalc_ (std::move (autoCalc), this),
+      lengthPLabel_ (std::move (lengthPLabel), this),
+      widthPLabel_ (std::move (widthPLabel), this),
+      lengthPaddingPLabel_ (std::move (lengthPaddingPLabel), this),
+      widthPaddingPLabel_ (std::move (widthPaddingPLabel), this),
+      originPLabel_ (std::move (originPLabel), this),
+      autoCalcPLabel_ (std::move (autoCalcPLabel), this)
     {
     }
 
@@ -275,7 +443,13 @@ namespace prj
       width_ (x.width_, f, this),
       widthPadding_ (x.widthPadding_, f, this),
       origin_ (x.origin_, f, this),
-      autoCalc_ (x.autoCalc_, f, this)
+      autoCalc_ (x.autoCalc_, f, this),
+      lengthPLabel_ (x.lengthPLabel_, f, this),
+      widthPLabel_ (x.widthPLabel_, f, this),
+      lengthPaddingPLabel_ (x.lengthPaddingPLabel_, f, this),
+      widthPaddingPLabel_ (x.widthPaddingPLabel_, f, this),
+      originPLabel_ (x.originPLabel_, f, this),
+      autoCalcPLabel_ (x.autoCalcPLabel_, f, this)
     {
     }
 
@@ -290,7 +464,13 @@ namespace prj
       width_ (this),
       widthPadding_ (this),
       origin_ (this),
-      autoCalc_ (this)
+      autoCalc_ (this),
+      lengthPLabel_ (this),
+      widthPLabel_ (this),
+      lengthPaddingPLabel_ (this),
+      widthPaddingPLabel_ (this),
+      originPLabel_ (this),
+      autoCalcPLabel_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -407,6 +587,90 @@ namespace prj
           }
         }
 
+        // lengthPLabel
+        //
+        if (n.name () == "lengthPLabel" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< LengthPLabelType > r (
+            LengthPLabelTraits::create (i, f, this));
+
+          if (!lengthPLabel_.present ())
+          {
+            this->lengthPLabel_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // widthPLabel
+        //
+        if (n.name () == "widthPLabel" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< WidthPLabelType > r (
+            WidthPLabelTraits::create (i, f, this));
+
+          if (!widthPLabel_.present ())
+          {
+            this->widthPLabel_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // lengthPaddingPLabel
+        //
+        if (n.name () == "lengthPaddingPLabel" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< LengthPaddingPLabelType > r (
+            LengthPaddingPLabelTraits::create (i, f, this));
+
+          if (!lengthPaddingPLabel_.present ())
+          {
+            this->lengthPaddingPLabel_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // widthPaddingPLabel
+        //
+        if (n.name () == "widthPaddingPLabel" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< WidthPaddingPLabelType > r (
+            WidthPaddingPLabelTraits::create (i, f, this));
+
+          if (!widthPaddingPLabel_.present ())
+          {
+            this->widthPaddingPLabel_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // originPLabel
+        //
+        if (n.name () == "originPLabel" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< OriginPLabelType > r (
+            OriginPLabelTraits::create (i, f, this));
+
+          if (!originPLabel_.present ())
+          {
+            this->originPLabel_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // autoCalcPLabel
+        //
+        if (n.name () == "autoCalcPLabel" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< AutoCalcPLabelType > r (
+            AutoCalcPLabelTraits::create (i, f, this));
+
+          if (!autoCalcPLabel_.present ())
+          {
+            this->autoCalcPLabel_.set (::std::move (r));
+            continue;
+          }
+        }
+
         break;
       }
 
@@ -458,6 +722,48 @@ namespace prj
           "autoCalc",
           "");
       }
+
+      if (!lengthPLabel_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "lengthPLabel",
+          "");
+      }
+
+      if (!widthPLabel_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "widthPLabel",
+          "");
+      }
+
+      if (!lengthPaddingPLabel_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "lengthPaddingPLabel",
+          "");
+      }
+
+      if (!widthPaddingPLabel_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "widthPaddingPLabel",
+          "");
+      }
+
+      if (!originPLabel_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "originPLabel",
+          "");
+      }
+
+      if (!autoCalcPLabel_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "autoCalcPLabel",
+          "");
+      }
     }
 
     FeatureDieSet* FeatureDieSet::
@@ -480,6 +786,12 @@ namespace prj
         this->widthPadding_ = x.widthPadding_;
         this->origin_ = x.origin_;
         this->autoCalc_ = x.autoCalc_;
+        this->lengthPLabel_ = x.lengthPLabel_;
+        this->widthPLabel_ = x.widthPLabel_;
+        this->lengthPaddingPLabel_ = x.lengthPaddingPLabel_;
+        this->widthPaddingPLabel_ = x.widthPaddingPLabel_;
+        this->originPLabel_ = x.originPLabel_;
+        this->autoCalcPLabel_ = x.autoCalcPLabel_;
       }
 
       return *this;
@@ -856,6 +1168,72 @@ namespace prj
             e));
 
         s << i.autoCalc ();
+      }
+
+      // lengthPLabel
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "lengthPLabel",
+            e));
+
+        s << i.lengthPLabel ();
+      }
+
+      // widthPLabel
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "widthPLabel",
+            e));
+
+        s << i.widthPLabel ();
+      }
+
+      // lengthPaddingPLabel
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "lengthPaddingPLabel",
+            e));
+
+        s << i.lengthPaddingPLabel ();
+      }
+
+      // widthPaddingPLabel
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "widthPaddingPLabel",
+            e));
+
+        s << i.widthPaddingPLabel ();
+      }
+
+      // originPLabel
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "originPLabel",
+            e));
+
+        s << i.originPLabel ();
+      }
+
+      // autoCalcPLabel
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "autoCalcPLabel",
+            e));
+
+        s << i.autoCalcPLabel ();
       }
     }
 

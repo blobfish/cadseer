@@ -14,6 +14,7 @@
     <xs:element name="faceId" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
     <xs:element name="wireId" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
     <xs:element name="granularity" type="srl:Parameter"/>
+    <xs:element name="label" type="srl:PLabel"/>
   </xs:all>
 </xs:complexType>
 

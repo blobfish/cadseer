@@ -13,6 +13,7 @@
     <xs:element name="targetPicks" type="srl:Picks"/>
     <xs:element name="neutralPick" type="srl:Pick"/>
     <xs:element name="angle" type="srl:Parameter"/>
+    <xs:element name="plabel" type="srl:PLabel"/>
   </xs:all>
 </xs:complexType>
 

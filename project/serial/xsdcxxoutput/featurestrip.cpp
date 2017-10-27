@@ -44,6 +44,58 @@ namespace prj
 {
   namespace srl
   {
+    // Station
+    // 
+
+    const Station::TextType& Station::
+    text () const
+    {
+      return this->text_.get ();
+    }
+
+    Station::TextType& Station::
+    text ()
+    {
+      return this->text_.get ();
+    }
+
+    void Station::
+    text (const TextType& x)
+    {
+      this->text_.set (x);
+    }
+
+    void Station::
+    text (::std::unique_ptr< TextType > x)
+    {
+      this->text_.set (std::move (x));
+    }
+
+    const Station::MatrixType& Station::
+    matrix () const
+    {
+      return this->matrix_.get ();
+    }
+
+    Station::MatrixType& Station::
+    matrix ()
+    {
+      return this->matrix_.get ();
+    }
+
+    void Station::
+    matrix (const MatrixType& x)
+    {
+      this->matrix_.set (x);
+    }
+
+    void Station::
+    matrix (::std::unique_ptr< MatrixType > x)
+    {
+      this->matrix_.set (std::move (x));
+    }
+
+
     // Stations
     // 
 
@@ -231,6 +283,126 @@ namespace prj
       this->stripHeight_.set (x);
     }
 
+    const FeatureStrip::PitchLabelType& FeatureStrip::
+    pitchLabel () const
+    {
+      return this->pitchLabel_.get ();
+    }
+
+    FeatureStrip::PitchLabelType& FeatureStrip::
+    pitchLabel ()
+    {
+      return this->pitchLabel_.get ();
+    }
+
+    void FeatureStrip::
+    pitchLabel (const PitchLabelType& x)
+    {
+      this->pitchLabel_.set (x);
+    }
+
+    void FeatureStrip::
+    pitchLabel (::std::unique_ptr< PitchLabelType > x)
+    {
+      this->pitchLabel_.set (std::move (x));
+    }
+
+    const FeatureStrip::WidthLabelType& FeatureStrip::
+    widthLabel () const
+    {
+      return this->widthLabel_.get ();
+    }
+
+    FeatureStrip::WidthLabelType& FeatureStrip::
+    widthLabel ()
+    {
+      return this->widthLabel_.get ();
+    }
+
+    void FeatureStrip::
+    widthLabel (const WidthLabelType& x)
+    {
+      this->widthLabel_.set (x);
+    }
+
+    void FeatureStrip::
+    widthLabel (::std::unique_ptr< WidthLabelType > x)
+    {
+      this->widthLabel_.set (std::move (x));
+    }
+
+    const FeatureStrip::WidthOffsetLabelType& FeatureStrip::
+    widthOffsetLabel () const
+    {
+      return this->widthOffsetLabel_.get ();
+    }
+
+    FeatureStrip::WidthOffsetLabelType& FeatureStrip::
+    widthOffsetLabel ()
+    {
+      return this->widthOffsetLabel_.get ();
+    }
+
+    void FeatureStrip::
+    widthOffsetLabel (const WidthOffsetLabelType& x)
+    {
+      this->widthOffsetLabel_.set (x);
+    }
+
+    void FeatureStrip::
+    widthOffsetLabel (::std::unique_ptr< WidthOffsetLabelType > x)
+    {
+      this->widthOffsetLabel_.set (std::move (x));
+    }
+
+    const FeatureStrip::GapLabelType& FeatureStrip::
+    gapLabel () const
+    {
+      return this->gapLabel_.get ();
+    }
+
+    FeatureStrip::GapLabelType& FeatureStrip::
+    gapLabel ()
+    {
+      return this->gapLabel_.get ();
+    }
+
+    void FeatureStrip::
+    gapLabel (const GapLabelType& x)
+    {
+      this->gapLabel_.set (x);
+    }
+
+    void FeatureStrip::
+    gapLabel (::std::unique_ptr< GapLabelType > x)
+    {
+      this->gapLabel_.set (std::move (x));
+    }
+
+    const FeatureStrip::AutoCalcLabelType& FeatureStrip::
+    autoCalcLabel () const
+    {
+      return this->autoCalcLabel_.get ();
+    }
+
+    FeatureStrip::AutoCalcLabelType& FeatureStrip::
+    autoCalcLabel ()
+    {
+      return this->autoCalcLabel_.get ();
+    }
+
+    void FeatureStrip::
+    autoCalcLabel (const AutoCalcLabelType& x)
+    {
+      this->autoCalcLabel_.set (x);
+    }
+
+    void FeatureStrip::
+    autoCalcLabel (::std::unique_ptr< AutoCalcLabelType > x)
+    {
+      this->autoCalcLabel_.set (std::move (x));
+    }
+
     const FeatureStrip::StationsType& FeatureStrip::
     stations () const
     {
@@ -263,6 +435,133 @@ namespace prj
 {
   namespace srl
   {
+    // Station
+    //
+
+    Station::
+    Station (const TextType& text,
+             const MatrixType& matrix)
+    : ::xml_schema::Type (),
+      text_ (text, this),
+      matrix_ (matrix, this)
+    {
+    }
+
+    Station::
+    Station (const TextType& text,
+             ::std::unique_ptr< MatrixType > matrix)
+    : ::xml_schema::Type (),
+      text_ (text, this),
+      matrix_ (std::move (matrix), this)
+    {
+    }
+
+    Station::
+    Station (const Station& x,
+             ::xml_schema::Flags f,
+             ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      text_ (x.text_, f, this),
+      matrix_ (x.matrix_, f, this)
+    {
+    }
+
+    Station::
+    Station (const ::xercesc::DOMElement& e,
+             ::xml_schema::Flags f,
+             ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      text_ (this),
+      matrix_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void Station::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // text
+        //
+        if (n.name () == "text" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< TextType > r (
+            TextTraits::create (i, f, this));
+
+          if (!text_.present ())
+          {
+            this->text_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // matrix
+        //
+        if (n.name () == "matrix" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< MatrixType > r (
+            MatrixTraits::create (i, f, this));
+
+          if (!matrix_.present ())
+          {
+            this->matrix_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        break;
+      }
+
+      if (!text_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "text",
+          "");
+      }
+
+      if (!matrix_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "matrix",
+          "");
+      }
+    }
+
+    Station* Station::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class Station (*this, f, c);
+    }
+
+    Station& Station::
+    operator= (const Station& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->text_ = x.text_;
+        this->matrix_ = x.matrix_;
+      }
+
+      return *this;
+    }
+
+    Station::
+    ~Station ()
+    {
+    }
+
     // Stations
     //
 
@@ -356,6 +655,11 @@ namespace prj
                   const GapType& gap,
                   const AutoCalcType& autoCalc,
                   const StripHeightType& stripHeight,
+                  const PitchLabelType& pitchLabel,
+                  const WidthLabelType& widthLabel,
+                  const WidthOffsetLabelType& widthOffsetLabel,
+                  const GapLabelType& gapLabel,
+                  const AutoCalcLabelType& autoCalcLabel,
                   const StationsType& stations)
     : ::xml_schema::Type (),
       featureBase_ (featureBase, this),
@@ -365,6 +669,11 @@ namespace prj
       gap_ (gap, this),
       autoCalc_ (autoCalc, this),
       stripHeight_ (stripHeight, this),
+      pitchLabel_ (pitchLabel, this),
+      widthLabel_ (widthLabel, this),
+      widthOffsetLabel_ (widthOffsetLabel, this),
+      gapLabel_ (gapLabel, this),
+      autoCalcLabel_ (autoCalcLabel, this),
       stations_ (stations, this)
     {
     }
@@ -377,6 +686,11 @@ namespace prj
                   ::std::unique_ptr< GapType > gap,
                   ::std::unique_ptr< AutoCalcType > autoCalc,
                   const StripHeightType& stripHeight,
+                  ::std::unique_ptr< PitchLabelType > pitchLabel,
+                  ::std::unique_ptr< WidthLabelType > widthLabel,
+                  ::std::unique_ptr< WidthOffsetLabelType > widthOffsetLabel,
+                  ::std::unique_ptr< GapLabelType > gapLabel,
+                  ::std::unique_ptr< AutoCalcLabelType > autoCalcLabel,
                   ::std::unique_ptr< StationsType > stations)
     : ::xml_schema::Type (),
       featureBase_ (std::move (featureBase), this),
@@ -386,6 +700,11 @@ namespace prj
       gap_ (std::move (gap), this),
       autoCalc_ (std::move (autoCalc), this),
       stripHeight_ (stripHeight, this),
+      pitchLabel_ (std::move (pitchLabel), this),
+      widthLabel_ (std::move (widthLabel), this),
+      widthOffsetLabel_ (std::move (widthOffsetLabel), this),
+      gapLabel_ (std::move (gapLabel), this),
+      autoCalcLabel_ (std::move (autoCalcLabel), this),
       stations_ (std::move (stations), this)
     {
     }
@@ -402,6 +721,11 @@ namespace prj
       gap_ (x.gap_, f, this),
       autoCalc_ (x.autoCalc_, f, this),
       stripHeight_ (x.stripHeight_, f, this),
+      pitchLabel_ (x.pitchLabel_, f, this),
+      widthLabel_ (x.widthLabel_, f, this),
+      widthOffsetLabel_ (x.widthOffsetLabel_, f, this),
+      gapLabel_ (x.gapLabel_, f, this),
+      autoCalcLabel_ (x.autoCalcLabel_, f, this),
       stations_ (x.stations_, f, this)
     {
     }
@@ -418,6 +742,11 @@ namespace prj
       gap_ (this),
       autoCalc_ (this),
       stripHeight_ (this),
+      pitchLabel_ (this),
+      widthLabel_ (this),
+      widthOffsetLabel_ (this),
+      gapLabel_ (this),
+      autoCalcLabel_ (this),
       stations_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
@@ -532,6 +861,76 @@ namespace prj
           }
         }
 
+        // pitchLabel
+        //
+        if (n.name () == "pitchLabel" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< PitchLabelType > r (
+            PitchLabelTraits::create (i, f, this));
+
+          if (!pitchLabel_.present ())
+          {
+            this->pitchLabel_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // widthLabel
+        //
+        if (n.name () == "widthLabel" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< WidthLabelType > r (
+            WidthLabelTraits::create (i, f, this));
+
+          if (!widthLabel_.present ())
+          {
+            this->widthLabel_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // widthOffsetLabel
+        //
+        if (n.name () == "widthOffsetLabel" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< WidthOffsetLabelType > r (
+            WidthOffsetLabelTraits::create (i, f, this));
+
+          if (!widthOffsetLabel_.present ())
+          {
+            this->widthOffsetLabel_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // gapLabel
+        //
+        if (n.name () == "gapLabel" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< GapLabelType > r (
+            GapLabelTraits::create (i, f, this));
+
+          if (!gapLabel_.present ())
+          {
+            this->gapLabel_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // autoCalcLabel
+        //
+        if (n.name () == "autoCalcLabel" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< AutoCalcLabelType > r (
+            AutoCalcLabelTraits::create (i, f, this));
+
+          if (!autoCalcLabel_.present ())
+          {
+            this->autoCalcLabel_.set (::std::move (r));
+            continue;
+          }
+        }
+
         // stations
         //
         if (n.name () == "stations" && n.namespace_ ().empty ())
@@ -598,6 +997,41 @@ namespace prj
           "");
       }
 
+      if (!pitchLabel_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "pitchLabel",
+          "");
+      }
+
+      if (!widthLabel_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "widthLabel",
+          "");
+      }
+
+      if (!widthOffsetLabel_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "widthOffsetLabel",
+          "");
+      }
+
+      if (!gapLabel_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "gapLabel",
+          "");
+      }
+
+      if (!autoCalcLabel_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "autoCalcLabel",
+          "");
+      }
+
       if (!stations_.present ())
       {
         throw ::xsd::cxx::tree::expected_element< char > (
@@ -626,6 +1060,11 @@ namespace prj
         this->gap_ = x.gap_;
         this->autoCalc_ = x.autoCalc_;
         this->stripHeight_ = x.stripHeight_;
+        this->pitchLabel_ = x.pitchLabel_;
+        this->widthLabel_ = x.widthLabel_;
+        this->widthOffsetLabel_ = x.widthOffsetLabel_;
+        this->gapLabel_ = x.gapLabel_;
+        this->autoCalcLabel_ = x.autoCalcLabel_;
         this->stations_ = x.stations_;
       }
 
@@ -924,6 +1363,34 @@ namespace prj
   namespace srl
   {
     void
+    operator<< (::xercesc::DOMElement& e, const Station& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // text
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "text",
+            e));
+
+        s << i.text ();
+      }
+
+      // matrix
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "matrix",
+            e));
+
+        s << i.matrix ();
+      }
+    }
+
+    void
     operator<< (::xercesc::DOMElement& e, const Stations& i)
     {
       e << static_cast< const ::xml_schema::Type& > (i);
@@ -1023,6 +1490,61 @@ namespace prj
             e));
 
         s << ::xml_schema::AsDouble(i.stripHeight ());
+      }
+
+      // pitchLabel
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "pitchLabel",
+            e));
+
+        s << i.pitchLabel ();
+      }
+
+      // widthLabel
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "widthLabel",
+            e));
+
+        s << i.widthLabel ();
+      }
+
+      // widthOffsetLabel
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "widthOffsetLabel",
+            e));
+
+        s << i.widthOffsetLabel ();
+      }
+
+      // gapLabel
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "gapLabel",
+            e));
+
+        s << i.gapLabel ();
+      }
+
+      // autoCalcLabel
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "autoCalcLabel",
+            e));
+
+        s << i.autoCalcLabel ();
       }
 
       // stations

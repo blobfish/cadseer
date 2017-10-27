@@ -152,7 +152,7 @@ namespace ftr
     
     void setSolver(std::shared_ptr<DatumPlaneGenre> solverIn);
     osg::Matrixd getSystem() const {return transform->getMatrix();}
-    double getRadius() const {return radius;}
+    double getRadius() const {return static_cast<double>(*radius);}
     
     static std::vector<std::shared_ptr<DatumPlaneGenre> > solversFromSelection(const slc::Containers &);
     
@@ -163,8 +163,11 @@ namespace ftr
     osg::ref_ptr<osg::MatrixTransform> transform;
     std::shared_ptr<DatumPlaneGenre> solver;
     
-    double radius = 1.0; //!< boundary size of plane.
-    bool autoSize = true; //!< whether the plane sizes itself.
+    std::unique_ptr<prm::Parameter> radius; //!< double. distance to edges.
+    std::unique_ptr<prm::Parameter> autoSize; //!< bool. auto calculate radius.
+    
+//     double radius = 1.0; //!< boundary size of plane.
+//     bool autoSize = true; //!< whether the plane sizes itself.
     
     void updateGeometry();
   };

@@ -320,9 +320,26 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
 
 void Strip::serialWrite(const QDir &dIn)
 {
+  assert(stations.size() == stationLabels.size());
   prj::srl::FeatureStrip::StationsType so;
-  for (const auto &s : stations)
-    so.array().push_back(s.toStdString());
+  for (std::size_t index = 0; index < stations.size(); ++index)
+  {
+    const osg::Matrixd &m = stationLabels.at(index)->getMatrix();
+    prj::srl::Matrixd mOut
+    (
+      m(0,0), m(0,1), m(0,2), m(0,3),
+      m(1,0), m(1,1), m(1,2), m(1,3),
+      m(2,0), m(2,1), m(2,2), m(2,3),
+      m(3,0), m(3,1), m(3,2), m(3,3)
+    );
+    
+    prj::srl::Station stationOut
+    (
+      stations.at(index).toStdString(),
+      mOut
+    );
+    so.array().push_back(stationOut);
+  }
   
   prj::srl::FeatureStrip stripOut
   (
@@ -333,6 +350,11 @@ void Strip::serialWrite(const QDir &dIn)
     gap->serialOut(),
     autoCalc->serialOut(),
     stripHeight,
+    pitchLabel->serialOut(),
+    widthLabel->serialOut(),
+    widthOffsetLabel->serialOut(),
+    gapLabel->serialOut(),
+    autoCalcLabel->serialOut(),
     so
   );
   
@@ -350,7 +372,30 @@ void Strip::serialRead(const prj::srl::FeatureStrip &sIn)
   gap->serialIn(sIn.gap());
   autoCalc->serialIn(sIn.autoCalc());
   stripHeight = sIn.stripHeight();
+  pitchLabel->serialIn(sIn.pitchLabel());
+  widthLabel->serialIn(sIn.widthLabel());
+  widthOffsetLabel->serialIn(sIn.widthOffsetLabel());
+  gapLabel->serialIn(sIn.gapLabel());
+  autoCalcLabel->serialIn(sIn.autoCalcLabel());
+  
   stations.clear();
-  for (const auto &stringIn : sIn.stations().array())
-    stations.push_back(QString::fromStdString(stringIn));
+  stationLabels.clear();
+  for (const auto &stationIn : sIn.stations().array())
+  {
+    stations.push_back(QString::fromStdString(stationIn.text()));
+    
+    osg::ref_ptr<osg::MatrixTransform> sl = new osg::MatrixTransform();
+    const auto &mIn = stationIn.matrix();
+    osg::Matrixd position
+    (
+      mIn.i0j0(), mIn.i0j1(), mIn.i0j2(), mIn.i0j3(),
+      mIn.i1j0(), mIn.i1j1(), mIn.i1j2(), mIn.i1j3(),
+      mIn.i2j0(), mIn.i2j1(), mIn.i2j2(), mIn.i2j3(),
+      mIn.i3j0(), mIn.i3j1(), mIn.i3j2(), mIn.i3j3()
+    );
+    sl->setMatrix(position);
+    sl->addChild(buildStationLabel(stationIn.text()));
+    stationLabels.push_back(sl);
+    overlaySwitch->addChild(sl.get(), overlaySwitch->getValue(0));
+  }
 }

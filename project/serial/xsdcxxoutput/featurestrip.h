@@ -72,6 +72,7 @@ namespace prj
 {
   namespace srl
   {
+    class Station;
     class Stations;
     class FeatureStrip;
   }
@@ -103,6 +104,229 @@ namespace prj
   namespace srl
   {
     /**
+     * @brief Class corresponding to the %Station schema type.
+     *
+     * @nosubgrouping
+     */
+    class Station: public ::xml_schema::Type
+    {
+      public:
+      /**
+       * @name text
+       *
+       * @brief Accessor and modifier functions for the %text
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::xml_schema::String TextType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< TextType, char > TextTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const TextType&
+      text () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      TextType&
+      text ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      text (const TextType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      text (::std::unique_ptr< TextType > p);
+
+      //@}
+
+      /**
+       * @name matrix
+       *
+       * @brief Accessor and modifier functions for the %matrix
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::Matrixd MatrixType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< MatrixType, char > MatrixTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const MatrixType&
+      matrix () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      MatrixType&
+      matrix ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      matrix (const MatrixType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      matrix (::std::unique_ptr< MatrixType > p);
+
+      //@}
+
+      /**
+       * @name Constructors
+       */
+      //@{
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes.
+       */
+      Station (const TextType&,
+               const MatrixType&);
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes
+       * (::std::unique_ptr version).
+       *
+       * This constructor will try to use the passed values directly
+       * instead of making copies.
+       */
+      Station (const TextType&,
+               ::std::unique_ptr< MatrixType >);
+
+      /**
+       * @brief Create an instance from a DOM element.
+       *
+       * @param e A DOM element to extract the data from.
+       * @param f Flags to create the new instance with.
+       * @param c A pointer to the object that will contain the new
+       * instance.
+       */
+      Station (const ::xercesc::DOMElement& e,
+               ::xml_schema::Flags f = 0,
+               ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy constructor.
+       *
+       * @param x An instance to make a copy of.
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      Station (const Station& x,
+               ::xml_schema::Flags f = 0,
+               ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy the instance polymorphically.
+       *
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       * @return A pointer to the dynamically allocated copy.
+       *
+       * This function ensures that the dynamic type of the instance is
+       * used for copying and should be used for polymorphic object
+       * models instead of the copy constructor.
+       */
+      virtual Station*
+      _clone (::xml_schema::Flags f = 0,
+              ::xml_schema::Container* c = 0) const;
+
+      /**
+       * @brief Copy assignment operator.
+       *
+       * @param x An instance to make a copy of.
+       * @return A reference to itself.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      Station&
+      operator= (const Station& x);
+
+      //@}
+
+      /**
+       * @brief Destructor.
+       */
+      virtual 
+      ~Station ();
+
+      // Implementation.
+      //
+
+      //@cond
+
+      protected:
+      void
+      parse (::xsd::cxx::xml::dom::parser< char >&,
+             ::xml_schema::Flags);
+
+      protected:
+      ::xsd::cxx::tree::one< TextType > text_;
+      ::xsd::cxx::tree::one< MatrixType > matrix_;
+
+      //@endcond
+    };
+
+    /**
      * @brief Class corresponding to the %Stations schema type.
      *
      * @nosubgrouping
@@ -121,7 +345,7 @@ namespace prj
       /**
        * @brief Element type.
        */
-      typedef ::xml_schema::String ArrayType;
+      typedef ::prj::srl::Station ArrayType;
 
       /**
        * @brief Element sequence container type.
@@ -664,6 +888,296 @@ namespace prj
       //@}
 
       /**
+       * @name pitchLabel
+       *
+       * @brief Accessor and modifier functions for the %pitchLabel
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::PLabel PitchLabelType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< PitchLabelType, char > PitchLabelTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const PitchLabelType&
+      pitchLabel () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      PitchLabelType&
+      pitchLabel ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      pitchLabel (const PitchLabelType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      pitchLabel (::std::unique_ptr< PitchLabelType > p);
+
+      //@}
+
+      /**
+       * @name widthLabel
+       *
+       * @brief Accessor and modifier functions for the %widthLabel
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::PLabel WidthLabelType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< WidthLabelType, char > WidthLabelTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const WidthLabelType&
+      widthLabel () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      WidthLabelType&
+      widthLabel ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      widthLabel (const WidthLabelType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      widthLabel (::std::unique_ptr< WidthLabelType > p);
+
+      //@}
+
+      /**
+       * @name widthOffsetLabel
+       *
+       * @brief Accessor and modifier functions for the %widthOffsetLabel
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::PLabel WidthOffsetLabelType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< WidthOffsetLabelType, char > WidthOffsetLabelTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const WidthOffsetLabelType&
+      widthOffsetLabel () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      WidthOffsetLabelType&
+      widthOffsetLabel ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      widthOffsetLabel (const WidthOffsetLabelType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      widthOffsetLabel (::std::unique_ptr< WidthOffsetLabelType > p);
+
+      //@}
+
+      /**
+       * @name gapLabel
+       *
+       * @brief Accessor and modifier functions for the %gapLabel
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::PLabel GapLabelType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< GapLabelType, char > GapLabelTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const GapLabelType&
+      gapLabel () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      GapLabelType&
+      gapLabel ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      gapLabel (const GapLabelType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      gapLabel (::std::unique_ptr< GapLabelType > p);
+
+      //@}
+
+      /**
+       * @name autoCalcLabel
+       *
+       * @brief Accessor and modifier functions for the %autoCalcLabel
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::PLabel AutoCalcLabelType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< AutoCalcLabelType, char > AutoCalcLabelTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const AutoCalcLabelType&
+      autoCalcLabel () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      AutoCalcLabelType&
+      autoCalcLabel ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      autoCalcLabel (const AutoCalcLabelType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      autoCalcLabel (::std::unique_ptr< AutoCalcLabelType > p);
+
+      //@}
+
+      /**
        * @name stations
        *
        * @brief Accessor and modifier functions for the %stations
@@ -737,6 +1251,11 @@ namespace prj
                     const GapType&,
                     const AutoCalcType&,
                     const StripHeightType&,
+                    const PitchLabelType&,
+                    const WidthLabelType&,
+                    const WidthOffsetLabelType&,
+                    const GapLabelType&,
+                    const AutoCalcLabelType&,
                     const StationsType&);
 
       /**
@@ -754,6 +1273,11 @@ namespace prj
                     ::std::unique_ptr< GapType >,
                     ::std::unique_ptr< AutoCalcType >,
                     const StripHeightType&,
+                    ::std::unique_ptr< PitchLabelType >,
+                    ::std::unique_ptr< WidthLabelType >,
+                    ::std::unique_ptr< WidthOffsetLabelType >,
+                    ::std::unique_ptr< GapLabelType >,
+                    ::std::unique_ptr< AutoCalcLabelType >,
                     ::std::unique_ptr< StationsType >);
 
       /**
@@ -833,6 +1357,11 @@ namespace prj
       ::xsd::cxx::tree::one< GapType > gap_;
       ::xsd::cxx::tree::one< AutoCalcType > autoCalc_;
       ::xsd::cxx::tree::one< StripHeightType > stripHeight_;
+      ::xsd::cxx::tree::one< PitchLabelType > pitchLabel_;
+      ::xsd::cxx::tree::one< WidthLabelType > widthLabel_;
+      ::xsd::cxx::tree::one< WidthOffsetLabelType > widthOffsetLabel_;
+      ::xsd::cxx::tree::one< GapLabelType > gapLabel_;
+      ::xsd::cxx::tree::one< AutoCalcLabelType > autoCalcLabel_;
       ::xsd::cxx::tree::one< StationsType > stations_;
 
       //@endcond
@@ -1117,6 +1646,9 @@ namespace prj
 {
   namespace srl
   {
+    void
+    operator<< (::xercesc::DOMElement&, const Station&);
+
     void
     operator<< (::xercesc::DOMElement&, const Stations&);
 

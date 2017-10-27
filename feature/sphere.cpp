@@ -91,15 +91,17 @@ void Sphere::setupIPGroup()
   radiusIP->setMatrixDragger(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(-1.0, 0.0, 0.0)));
   radiusIP->setDimsFlipped(true);
   radiusIP->setRotationAxis(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(-1.0, 0.0, 0.0));
-  radiusIP->valueHasChanged();
-  radiusIP->constantHasChanged();
   overlaySwitch->addChild(radiusIP.get());
   dragger->linkToMatrix(radiusIP.get());
+  
+  updateIPGroup();
 }
 
 void Sphere::updateIPGroup()
 {
   radiusIP->setMatrix(gu::toOsg(system));
+  radiusIP->valueHasChanged();
+  radiusIP->constantHasChanged();
 }
 
 void Sphere::updateModel(const UpdatePayload& payloadIn)
@@ -205,4 +207,6 @@ void Sphere::serialRead(const prj::srl::FeatureSphere& sSphereIn)
 {
   CSysBase::serialIn(sSphereIn.featureCSysBase());
   radius.serialIn(sSphereIn.radius());
+  
+  updateIPGroup();
 }

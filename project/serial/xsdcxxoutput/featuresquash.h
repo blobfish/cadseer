@@ -418,6 +418,64 @@ namespace prj
       //@}
 
       /**
+       * @name label
+       *
+       * @brief Accessor and modifier functions for the %label
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::PLabel LabelType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< LabelType, char > LabelTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const LabelType&
+      label () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      LabelType&
+      label ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      label (const LabelType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      label (::std::unique_ptr< LabelType > p);
+
+      //@}
+
+      /**
        * @name Constructors
        */
       //@{
@@ -430,7 +488,8 @@ namespace prj
                      const PicksType&,
                      const FaceIdType&,
                      const WireIdType&,
-                     const GranularityType&);
+                     const GranularityType&,
+                     const LabelType&);
 
       /**
        * @brief Create an instance from the ultimate base and
@@ -444,7 +503,8 @@ namespace prj
                      ::std::unique_ptr< PicksType >,
                      const FaceIdType&,
                      const WireIdType&,
-                     ::std::unique_ptr< GranularityType >);
+                     ::std::unique_ptr< GranularityType >,
+                     ::std::unique_ptr< LabelType >);
 
       /**
        * @brief Create an instance from a DOM element.
@@ -523,6 +583,7 @@ namespace prj
       ::xsd::cxx::tree::one< WireIdType > wireId_;
       static const WireIdType wireId_default_value_;
       ::xsd::cxx::tree::one< GranularityType > granularity_;
+      ::xsd::cxx::tree::one< LabelType > label_;
 
       //@endcond
     };

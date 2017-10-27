@@ -207,9 +207,10 @@ bool Constraint::test(double testValue) const
   if(intervals.empty())
     return true;
   
-  bool out = intervals.at(0).test(testValue);
-  for (auto it = intervals.begin() + 1; it != intervals.end(); ++it)
-    out &= it->test(testValue);
+  //value needs to be in only one interval.
+  bool out = false;
+  for (auto it = intervals.begin(); it != intervals.end(); ++it)
+    out |= it->test(testValue);
   
   return out;
 }

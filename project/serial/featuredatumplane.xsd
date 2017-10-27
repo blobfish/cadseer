@@ -39,6 +39,9 @@
 <xs:complexType name="FeatureDatumPlane">
   <xs:all>
     <xs:element name="featureBase" type="srl:FeatureBase"/>
+    <xs:element name="radius" type="srl:Parameter"/>
+    <xs:element name="autoSize" type="srl:Parameter"/>
+    <xs:element name="matrix" type="srl:Matrixd"/>
     <xs:element name="solverChoice" type="srl:SolverChoice"/>
   </xs:all>
 </xs:complexType>

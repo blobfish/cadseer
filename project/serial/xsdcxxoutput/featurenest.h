@@ -226,6 +226,64 @@ namespace prj
       //@}
 
       /**
+       * @name gapLabel
+       *
+       * @brief Accessor and modifier functions for the %gapLabel
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::PLabel GapLabelType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< GapLabelType, char > GapLabelTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const GapLabelType&
+      gapLabel () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      GapLabelType&
+      gapLabel ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      gapLabel (const GapLabelType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      gapLabel (::std::unique_ptr< GapLabelType > p);
+
+      //@}
+
+      /**
        * @name pitch
        *
        * @brief Accessor and modifier functions for the %pitch
@@ -283,6 +341,7 @@ namespace prj
        */
       FeatureNest (const FeatureBaseType&,
                    const GapType&,
+                   const GapLabelType&,
                    const PitchType&);
 
       /**
@@ -295,6 +354,7 @@ namespace prj
        */
       FeatureNest (::std::unique_ptr< FeatureBaseType >,
                    ::std::unique_ptr< GapType >,
+                   ::std::unique_ptr< GapLabelType >,
                    const PitchType&);
 
       /**
@@ -369,6 +429,7 @@ namespace prj
       protected:
       ::xsd::cxx::tree::one< FeatureBaseType > featureBase_;
       ::xsd::cxx::tree::one< GapType > gap_;
+      ::xsd::cxx::tree::one< GapLabelType > gapLabel_;
       ::xsd::cxx::tree::one< PitchType > pitch_;
 
       //@endcond

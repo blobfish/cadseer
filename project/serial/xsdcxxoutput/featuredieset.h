@@ -516,6 +516,354 @@ namespace prj
       //@}
 
       /**
+       * @name lengthPLabel
+       *
+       * @brief Accessor and modifier functions for the %lengthPLabel
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::PLabel LengthPLabelType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< LengthPLabelType, char > LengthPLabelTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const LengthPLabelType&
+      lengthPLabel () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      LengthPLabelType&
+      lengthPLabel ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      lengthPLabel (const LengthPLabelType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      lengthPLabel (::std::unique_ptr< LengthPLabelType > p);
+
+      //@}
+
+      /**
+       * @name widthPLabel
+       *
+       * @brief Accessor and modifier functions for the %widthPLabel
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::PLabel WidthPLabelType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< WidthPLabelType, char > WidthPLabelTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const WidthPLabelType&
+      widthPLabel () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      WidthPLabelType&
+      widthPLabel ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      widthPLabel (const WidthPLabelType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      widthPLabel (::std::unique_ptr< WidthPLabelType > p);
+
+      //@}
+
+      /**
+       * @name lengthPaddingPLabel
+       *
+       * @brief Accessor and modifier functions for the %lengthPaddingPLabel
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::PLabel LengthPaddingPLabelType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< LengthPaddingPLabelType, char > LengthPaddingPLabelTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const LengthPaddingPLabelType&
+      lengthPaddingPLabel () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      LengthPaddingPLabelType&
+      lengthPaddingPLabel ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      lengthPaddingPLabel (const LengthPaddingPLabelType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      lengthPaddingPLabel (::std::unique_ptr< LengthPaddingPLabelType > p);
+
+      //@}
+
+      /**
+       * @name widthPaddingPLabel
+       *
+       * @brief Accessor and modifier functions for the %widthPaddingPLabel
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::PLabel WidthPaddingPLabelType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< WidthPaddingPLabelType, char > WidthPaddingPLabelTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const WidthPaddingPLabelType&
+      widthPaddingPLabel () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      WidthPaddingPLabelType&
+      widthPaddingPLabel ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      widthPaddingPLabel (const WidthPaddingPLabelType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      widthPaddingPLabel (::std::unique_ptr< WidthPaddingPLabelType > p);
+
+      //@}
+
+      /**
+       * @name originPLabel
+       *
+       * @brief Accessor and modifier functions for the %originPLabel
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::PLabel OriginPLabelType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< OriginPLabelType, char > OriginPLabelTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const OriginPLabelType&
+      originPLabel () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      OriginPLabelType&
+      originPLabel ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      originPLabel (const OriginPLabelType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      originPLabel (::std::unique_ptr< OriginPLabelType > p);
+
+      //@}
+
+      /**
+       * @name autoCalcPLabel
+       *
+       * @brief Accessor and modifier functions for the %autoCalcPLabel
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::PLabel AutoCalcPLabelType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< AutoCalcPLabelType, char > AutoCalcPLabelTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const AutoCalcPLabelType&
+      autoCalcPLabel () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      AutoCalcPLabelType&
+      autoCalcPLabel ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      autoCalcPLabel (const AutoCalcPLabelType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      autoCalcPLabel (::std::unique_ptr< AutoCalcPLabelType > p);
+
+      //@}
+
+      /**
        * @name Constructors
        */
       //@{
@@ -530,7 +878,13 @@ namespace prj
                      const WidthType&,
                      const WidthPaddingType&,
                      const OriginType&,
-                     const AutoCalcType&);
+                     const AutoCalcType&,
+                     const LengthPLabelType&,
+                     const WidthPLabelType&,
+                     const LengthPaddingPLabelType&,
+                     const WidthPaddingPLabelType&,
+                     const OriginPLabelType&,
+                     const AutoCalcPLabelType&);
 
       /**
        * @brief Create an instance from the ultimate base and
@@ -546,7 +900,13 @@ namespace prj
                      ::std::unique_ptr< WidthType >,
                      ::std::unique_ptr< WidthPaddingType >,
                      ::std::unique_ptr< OriginType >,
-                     ::std::unique_ptr< AutoCalcType >);
+                     ::std::unique_ptr< AutoCalcType >,
+                     ::std::unique_ptr< LengthPLabelType >,
+                     ::std::unique_ptr< WidthPLabelType >,
+                     ::std::unique_ptr< LengthPaddingPLabelType >,
+                     ::std::unique_ptr< WidthPaddingPLabelType >,
+                     ::std::unique_ptr< OriginPLabelType >,
+                     ::std::unique_ptr< AutoCalcPLabelType >);
 
       /**
        * @brief Create an instance from a DOM element.
@@ -625,6 +985,12 @@ namespace prj
       ::xsd::cxx::tree::one< WidthPaddingType > widthPadding_;
       ::xsd::cxx::tree::one< OriginType > origin_;
       ::xsd::cxx::tree::one< AutoCalcType > autoCalc_;
+      ::xsd::cxx::tree::one< LengthPLabelType > lengthPLabel_;
+      ::xsd::cxx::tree::one< WidthPLabelType > widthPLabel_;
+      ::xsd::cxx::tree::one< LengthPaddingPLabelType > lengthPaddingPLabel_;
+      ::xsd::cxx::tree::one< WidthPaddingPLabelType > widthPaddingPLabel_;
+      ::xsd::cxx::tree::one< OriginPLabelType > originPLabel_;
+      ::xsd::cxx::tree::one< AutoCalcPLabelType > autoCalcPLabel_;
 
       //@endcond
     };

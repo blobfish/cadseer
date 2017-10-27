@@ -2104,6 +2104,58 @@ namespace prj
     {
       this->array_ = s;
     }
+
+
+    // PLabel
+    // 
+
+    const PLabel::MatrixType& PLabel::
+    matrix () const
+    {
+      return this->matrix_.get ();
+    }
+
+    PLabel::MatrixType& PLabel::
+    matrix ()
+    {
+      return this->matrix_.get ();
+    }
+
+    void PLabel::
+    matrix (const MatrixType& x)
+    {
+      this->matrix_.set (x);
+    }
+
+    void PLabel::
+    matrix (::std::unique_ptr< MatrixType > x)
+    {
+      this->matrix_.set (std::move (x));
+    }
+
+    const PLabel::ColorType& PLabel::
+    color () const
+    {
+      return this->color_.get ();
+    }
+
+    PLabel::ColorType& PLabel::
+    color ()
+    {
+      return this->color_.get ();
+    }
+
+    void PLabel::
+    color (const ColorType& x)
+    {
+      this->color_.set (x);
+    }
+
+    void PLabel::
+    color (::std::unique_ptr< ColorType > x)
+    {
+      this->color_.set (std::move (x));
+    }
   }
 }
 
@@ -5526,6 +5578,133 @@ namespace prj
     ~Picks ()
     {
     }
+
+    // PLabel
+    //
+
+    PLabel::
+    PLabel (const MatrixType& matrix,
+            const ColorType& color)
+    : ::xml_schema::Type (),
+      matrix_ (matrix, this),
+      color_ (color, this)
+    {
+    }
+
+    PLabel::
+    PLabel (::std::unique_ptr< MatrixType > matrix,
+            ::std::unique_ptr< ColorType > color)
+    : ::xml_schema::Type (),
+      matrix_ (std::move (matrix), this),
+      color_ (std::move (color), this)
+    {
+    }
+
+    PLabel::
+    PLabel (const PLabel& x,
+            ::xml_schema::Flags f,
+            ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      matrix_ (x.matrix_, f, this),
+      color_ (x.color_, f, this)
+    {
+    }
+
+    PLabel::
+    PLabel (const ::xercesc::DOMElement& e,
+            ::xml_schema::Flags f,
+            ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      matrix_ (this),
+      color_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void PLabel::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // matrix
+        //
+        if (n.name () == "matrix" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< MatrixType > r (
+            MatrixTraits::create (i, f, this));
+
+          if (!matrix_.present ())
+          {
+            this->matrix_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // color
+        //
+        if (n.name () == "color" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< ColorType > r (
+            ColorTraits::create (i, f, this));
+
+          if (!color_.present ())
+          {
+            this->color_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        break;
+      }
+
+      if (!matrix_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "matrix",
+          "");
+      }
+
+      if (!color_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "color",
+          "");
+      }
+    }
+
+    PLabel* PLabel::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class PLabel (*this, f, c);
+    }
+
+    PLabel& PLabel::
+    operator= (const PLabel& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->matrix_ = x.matrix_;
+        this->color_ = x.color_;
+      }
+
+      return *this;
+    }
+
+    PLabel::
+    ~PLabel ()
+    {
+    }
   }
 }
 
@@ -6582,6 +6761,34 @@ namespace prj
             e));
 
         s << *b;
+      }
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const PLabel& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // matrix
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "matrix",
+            e));
+
+        s << i.matrix ();
+      }
+
+      // color
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "color",
+            e));
+
+        s << i.color ();
       }
     }
   }

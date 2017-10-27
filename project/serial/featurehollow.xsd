@@ -12,6 +12,7 @@
     <xs:element name="featureBase" type="srl:FeatureBase"/>
     <xs:element name="hollowPicks" type="srl:Picks"/>
     <xs:element name="offset" type="srl:Parameter"/>
+    <xs:element name="plabel" type="srl:PLabel"/>
   </xs:all>
 </xs:complexType>
 

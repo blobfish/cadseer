@@ -388,6 +388,54 @@ namespace prj
     {
       this->annualVolume_.set (x);
     }
+
+    const FeatureQuote::TLabelType& FeatureQuote::
+    tLabel () const
+    {
+      return this->tLabel_.get ();
+    }
+
+    FeatureQuote::TLabelType& FeatureQuote::
+    tLabel ()
+    {
+      return this->tLabel_.get ();
+    }
+
+    void FeatureQuote::
+    tLabel (const TLabelType& x)
+    {
+      this->tLabel_.set (x);
+    }
+
+    void FeatureQuote::
+    tLabel (::std::unique_ptr< TLabelType > x)
+    {
+      this->tLabel_.set (std::move (x));
+    }
+
+    const FeatureQuote::OLabelType& FeatureQuote::
+    oLabel () const
+    {
+      return this->oLabel_.get ();
+    }
+
+    FeatureQuote::OLabelType& FeatureQuote::
+    oLabel ()
+    {
+      return this->oLabel_.get ();
+    }
+
+    void FeatureQuote::
+    oLabel (const OLabelType& x)
+    {
+      this->oLabel_.set (x);
+    }
+
+    void FeatureQuote::
+    oLabel (::std::unique_ptr< OLabelType > x)
+    {
+      this->oLabel_.set (std::move (x));
+    }
   }
 }
 
@@ -415,7 +463,9 @@ namespace prj
                   const MaterialTypeType& materialType,
                   const MaterialThicknessType& materialThickness,
                   const ProcessTypeType& processType,
-                  const AnnualVolumeType& annualVolume)
+                  const AnnualVolumeType& annualVolume,
+                  const TLabelType& tLabel,
+                  const OLabelType& oLabel)
     : ::xml_schema::Type (),
       featureBase_ (featureBase, this),
       templateFile_ (templateFile, this),
@@ -431,7 +481,9 @@ namespace prj
       materialType_ (materialType, this),
       materialThickness_ (materialThickness, this),
       processType_ (processType, this),
-      annualVolume_ (annualVolume, this)
+      annualVolume_ (annualVolume, this),
+      tLabel_ (tLabel, this),
+      oLabel_ (oLabel, this)
     {
     }
 
@@ -450,7 +502,9 @@ namespace prj
                   const MaterialTypeType& materialType,
                   const MaterialThicknessType& materialThickness,
                   const ProcessTypeType& processType,
-                  const AnnualVolumeType& annualVolume)
+                  const AnnualVolumeType& annualVolume,
+                  ::std::unique_ptr< TLabelType > tLabel,
+                  ::std::unique_ptr< OLabelType > oLabel)
     : ::xml_schema::Type (),
       featureBase_ (std::move (featureBase), this),
       templateFile_ (std::move (templateFile), this),
@@ -466,7 +520,9 @@ namespace prj
       materialType_ (materialType, this),
       materialThickness_ (materialThickness, this),
       processType_ (processType, this),
-      annualVolume_ (annualVolume, this)
+      annualVolume_ (annualVolume, this),
+      tLabel_ (std::move (tLabel), this),
+      oLabel_ (std::move (oLabel), this)
     {
     }
 
@@ -489,7 +545,9 @@ namespace prj
       materialType_ (x.materialType_, f, this),
       materialThickness_ (x.materialThickness_, f, this),
       processType_ (x.processType_, f, this),
-      annualVolume_ (x.annualVolume_, f, this)
+      annualVolume_ (x.annualVolume_, f, this),
+      tLabel_ (x.tLabel_, f, this),
+      oLabel_ (x.oLabel_, f, this)
     {
     }
 
@@ -512,7 +570,9 @@ namespace prj
       materialType_ (this),
       materialThickness_ (this),
       processType_ (this),
-      annualVolume_ (this)
+      annualVolume_ (this),
+      tLabel_ (this),
+      oLabel_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -732,6 +792,34 @@ namespace prj
           }
         }
 
+        // tLabel
+        //
+        if (n.name () == "tLabel" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< TLabelType > r (
+            TLabelTraits::create (i, f, this));
+
+          if (!tLabel_.present ())
+          {
+            this->tLabel_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // oLabel
+        //
+        if (n.name () == "oLabel" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< OLabelType > r (
+            OLabelTraits::create (i, f, this));
+
+          if (!oLabel_.present ())
+          {
+            this->oLabel_.set (::std::move (r));
+            continue;
+          }
+        }
+
         break;
       }
 
@@ -839,6 +927,20 @@ namespace prj
           "annualVolume",
           "");
       }
+
+      if (!tLabel_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "tLabel",
+          "");
+      }
+
+      if (!oLabel_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "oLabel",
+          "");
+      }
     }
 
     FeatureQuote* FeatureQuote::
@@ -869,6 +971,8 @@ namespace prj
         this->materialThickness_ = x.materialThickness_;
         this->processType_ = x.processType_;
         this->annualVolume_ = x.annualVolume_;
+        this->tLabel_ = x.tLabel_;
+        this->oLabel_ = x.oLabel_;
       }
 
       return *this;
@@ -1333,6 +1437,28 @@ namespace prj
             e));
 
         s << i.annualVolume ();
+      }
+
+      // tLabel
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "tLabel",
+            e));
+
+        s << i.tLabel ();
+      }
+
+      // oLabel
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "oLabel",
+            e));
+
+        s << i.oLabel ();
       }
     }
 

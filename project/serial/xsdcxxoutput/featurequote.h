@@ -947,6 +947,122 @@ namespace prj
       //@}
 
       /**
+       * @name tLabel
+       *
+       * @brief Accessor and modifier functions for the %tLabel
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::PLabel TLabelType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< TLabelType, char > TLabelTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const TLabelType&
+      tLabel () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      TLabelType&
+      tLabel ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      tLabel (const TLabelType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      tLabel (::std::unique_ptr< TLabelType > p);
+
+      //@}
+
+      /**
+       * @name oLabel
+       *
+       * @brief Accessor and modifier functions for the %oLabel
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::PLabel OLabelType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< OLabelType, char > OLabelTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const OLabelType&
+      oLabel () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      OLabelType&
+      oLabel ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      oLabel (const OLabelType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      oLabel (::std::unique_ptr< OLabelType > p);
+
+      //@}
+
+      /**
        * @name Constructors
        */
       //@{
@@ -969,7 +1085,9 @@ namespace prj
                     const MaterialTypeType&,
                     const MaterialThicknessType&,
                     const ProcessTypeType&,
-                    const AnnualVolumeType&);
+                    const AnnualVolumeType&,
+                    const TLabelType&,
+                    const OLabelType&);
 
       /**
        * @brief Create an instance from the ultimate base and
@@ -993,7 +1111,9 @@ namespace prj
                     const MaterialTypeType&,
                     const MaterialThicknessType&,
                     const ProcessTypeType&,
-                    const AnnualVolumeType&);
+                    const AnnualVolumeType&,
+                    ::std::unique_ptr< TLabelType >,
+                    ::std::unique_ptr< OLabelType >);
 
       /**
        * @brief Create an instance from a DOM element.
@@ -1080,6 +1200,8 @@ namespace prj
       ::xsd::cxx::tree::one< MaterialThicknessType > materialThickness_;
       ::xsd::cxx::tree::one< ProcessTypeType > processType_;
       ::xsd::cxx::tree::one< AnnualVolumeType > annualVolume_;
+      ::xsd::cxx::tree::one< TLabelType > tLabel_;
+      ::xsd::cxx::tree::one< OLabelType > oLabel_;
 
       //@endcond
     };

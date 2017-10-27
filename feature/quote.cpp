@@ -227,7 +227,9 @@ void Quote::serialWrite(const QDir &dIn)
     quoteData.materialType.toStdString(),
     quoteData.materialThickness,
     quoteData.processType.toStdString(),
-    quoteData.annualVolume
+    quoteData.annualVolume,
+    tLabel->serialOut(),
+    oLabel->serialOut()
   );
   
   xml_schema::NamespaceInfomap infoMap;
@@ -252,4 +254,6 @@ void Quote::serialRead(const prj::srl::FeatureQuote &qIn)
   quoteData.materialThickness = qIn.materialThickness();
   quoteData.processType = QString::fromStdString(qIn.processType());
   quoteData.annualVolume = qIn.annualVolume();
+  tLabel->serialIn(qIn.tLabel());
+  oLabel->serialIn(qIn.oLabel());
 }

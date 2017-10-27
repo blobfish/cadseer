@@ -206,7 +206,8 @@ void Draft::serialWrite(const QDir &dIn)
     Base::serialOut(),
     targetPicksOut,
     neutralPickOut,
-    angle->serialOut()
+    angle->serialOut(),
+    label->serialOut()
   );
   
   xml_schema::NamespaceInfomap infoMap;
@@ -226,6 +227,6 @@ void Draft::serialRead(const prj::srl::FeatureDraft &sDraftIn)
   angle->connectValue(boost::bind(&Draft::setModelDirty, this));
   
   label = new lbr::PLabel(angle.get());
-  label->valueHasChanged();
+  label->serialIn(sDraftIn.plabel());
   overlaySwitch->addChild(label.get());
 }

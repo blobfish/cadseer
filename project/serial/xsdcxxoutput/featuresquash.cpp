@@ -178,6 +178,30 @@ namespace prj
     {
       this->granularity_.set (std::move (x));
     }
+
+    const FeatureSquash::LabelType& FeatureSquash::
+    label () const
+    {
+      return this->label_.get ();
+    }
+
+    FeatureSquash::LabelType& FeatureSquash::
+    label ()
+    {
+      return this->label_.get ();
+    }
+
+    void FeatureSquash::
+    label (const LabelType& x)
+    {
+      this->label_.set (x);
+    }
+
+    void FeatureSquash::
+    label (::std::unique_ptr< LabelType > x)
+    {
+      this->label_.set (std::move (x));
+    }
   }
 }
 
@@ -201,13 +225,15 @@ namespace prj
                    const PicksType& picks,
                    const FaceIdType& faceId,
                    const WireIdType& wireId,
-                   const GranularityType& granularity)
+                   const GranularityType& granularity,
+                   const LabelType& label)
     : ::xml_schema::Type (),
       featureBase_ (featureBase, this),
       picks_ (picks, this),
       faceId_ (faceId, this),
       wireId_ (wireId, this),
-      granularity_ (granularity, this)
+      granularity_ (granularity, this),
+      label_ (label, this)
     {
     }
 
@@ -216,13 +242,15 @@ namespace prj
                    ::std::unique_ptr< PicksType > picks,
                    const FaceIdType& faceId,
                    const WireIdType& wireId,
-                   ::std::unique_ptr< GranularityType > granularity)
+                   ::std::unique_ptr< GranularityType > granularity,
+                   ::std::unique_ptr< LabelType > label)
     : ::xml_schema::Type (),
       featureBase_ (std::move (featureBase), this),
       picks_ (std::move (picks), this),
       faceId_ (faceId, this),
       wireId_ (wireId, this),
-      granularity_ (std::move (granularity), this)
+      granularity_ (std::move (granularity), this),
+      label_ (std::move (label), this)
     {
     }
 
@@ -235,7 +263,8 @@ namespace prj
       picks_ (x.picks_, f, this),
       faceId_ (x.faceId_, f, this),
       wireId_ (x.wireId_, f, this),
-      granularity_ (x.granularity_, f, this)
+      granularity_ (x.granularity_, f, this),
+      label_ (x.label_, f, this)
     {
     }
 
@@ -248,7 +277,8 @@ namespace prj
       picks_ (this),
       faceId_ (this),
       wireId_ (this),
-      granularity_ (this)
+      granularity_ (this),
+      label_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -337,6 +367,20 @@ namespace prj
           }
         }
 
+        // label
+        //
+        if (n.name () == "label" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< LabelType > r (
+            LabelTraits::create (i, f, this));
+
+          if (!label_.present ())
+          {
+            this->label_.set (::std::move (r));
+            continue;
+          }
+        }
+
         break;
       }
 
@@ -374,6 +418,13 @@ namespace prj
           "granularity",
           "");
       }
+
+      if (!label_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "label",
+          "");
+      }
     }
 
     FeatureSquash* FeatureSquash::
@@ -394,6 +445,7 @@ namespace prj
         this->faceId_ = x.faceId_;
         this->wireId_ = x.wireId_;
         this->granularity_ = x.granularity_;
+        this->label_ = x.label_;
       }
 
       return *this;
@@ -748,6 +800,17 @@ namespace prj
             e));
 
         s << i.granularity ();
+      }
+
+      // label
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "label",
+            e));
+
+        s << i.label ();
       }
     }
 

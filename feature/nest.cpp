@@ -235,6 +235,7 @@ void Nest::serialWrite(const QDir &dIn)
   (
     Base::serialOut(),
     gap->serialOut(),
+    gapLabel->serialOut(),
     static_cast<double>(*pitch)
   );
   
@@ -247,5 +248,6 @@ void Nest::serialRead(const prj::srl::FeatureNest &sNestIn)
 {
   Base::serialIn(sNestIn.featureBase());
   gap->serialIn(sNestIn.gap());
+  gapLabel->serialIn(sNestIn.gapLabel());
   pitch->setValueQuiet(sNestIn.pitch());
 }

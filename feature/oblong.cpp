@@ -309,8 +309,6 @@ void Oblong::setupIPGroup()
   lengthIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 0.0, -1.0)));
   lengthIP->noAutoRotateDragger();
   lengthIP->setRotationAxis(osg::Vec3d(1.0, 0.0, 0.0), osg::Vec3d(0.0, 0.0, 1.0));
-  lengthIP->valueHasChanged();
-  lengthIP->constantHasChanged();
   overlaySwitch->addChild(lengthIP.get());
   dragger->linkToMatrix(lengthIP.get());
   
@@ -318,8 +316,6 @@ void Oblong::setupIPGroup()
   //   widthIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 0.0, -1.0)));
   widthIP->noAutoRotateDragger();
   widthIP->setRotationAxis(osg::Vec3d(0.0, 1.0, 0.0), osg::Vec3d(0.0, 0.0, -1.0));
-  widthIP->valueHasChanged();
-  widthIP->constantHasChanged();
   overlaySwitch->addChild(widthIP.get());
   dragger->linkToMatrix(widthIP.get());
   
@@ -327,8 +323,6 @@ void Oblong::setupIPGroup()
   heightIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(1.0, 0.0, 0.0)));
   heightIP->noAutoRotateDragger();
   heightIP->setRotationAxis(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(0.0, 1.0, 0.0));
-  heightIP->valueHasChanged();
-  heightIP->constantHasChanged();
   overlaySwitch->addChild(heightIP.get());
   dragger->linkToMatrix(heightIP.get());
   
@@ -355,6 +349,13 @@ void Oblong::updateIPGroup()
   //no need to rotate
   hMatrix.setTrans(osg::Vec3d(static_cast<double>(length) / 2.0, static_cast<double>(width) / 2.0, 0.0));
   heightIP->setMatrixDragger(hMatrix);
+  
+  lengthIP->valueHasChanged();
+  lengthIP->constantHasChanged();
+  widthIP->valueHasChanged();
+  widthIP->constantHasChanged();
+  heightIP->valueHasChanged();
+  heightIP->constantHasChanged();
 }
 
 void Oblong::serialWrite(const QDir &dIn)
@@ -378,4 +379,6 @@ void Oblong::serialRead(const prj::srl::FeatureOblong &sOblong)
   length.serialIn(sOblong.length());
   width.serialIn(sOblong.width());
   height.serialIn(sOblong.height());
+  
+  updateIPGroup();
 }

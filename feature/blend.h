@@ -105,6 +105,10 @@ private:
     void ensureNoFaceNils();
     void dumpInfo(BRepFilletAPI_MakeFillet&, const SeerShape&);
     
+    //needed for serial in.
+    void addSimpleBlendQuiet(const SimpleBlend&);
+    void addVariableBlendQuiet(const VariableBlend&);
+    
     static QIcon icon;
 };
 }
