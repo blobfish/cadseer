@@ -17,24 +17,25 @@
  *
  */
 
-#ifndef DIALOG_H
-#define DIALOG_H
+#ifndef DLG_PREFERENCES_H
+#define DLG_PREFERENCES_H
 
 #include <QDialog>
 
 namespace Ui{ class dialog; }
+namespace prf{class Manager;}
 class SplitterDecorated;
 
-namespace prf
+namespace dlg
 {
   class Manager;
   
-  class Dialog : public QDialog
+  class Preferences : public QDialog
   {
       Q_OBJECT
   public:
-    Dialog(Manager *, QWidget* = 0);
-    ~Dialog();
+    Preferences(prf::Manager *, QWidget* = 0);
+    ~Preferences();
     bool isVisualDirty(){return visualDirty;}
     bool isHiddenLinesDirty(){return hiddenLinesDirty;}
   public Q_SLOTS:
@@ -50,11 +51,11 @@ namespace prf
     void updateGesture();
     void updateFeature();
     Ui::dialog* ui;
-    Manager *manager;
+    prf::Manager *manager;
     bool visualDirty = false;
     bool hiddenLinesDirty = false;
     SplitterDecorated *fsSplitter;
   };
 }
 
-#endif // DIALOG_H
+#endif // DLG_PREFERENCES_H

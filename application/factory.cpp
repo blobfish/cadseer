@@ -54,7 +54,7 @@
 #include <application/mainwindow.h>
 #include <viewer/viewerwidget.h>
 #include <viewer/message.h>
-#include <preferences/dialog.h>
+#include <dialogs/preferences.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <feature/seershape.h>
@@ -897,7 +897,7 @@ void Factory::preferencesDispatched(const msg::Message&)
   
   app::Application *application = dynamic_cast<app::Application *>(qApp);
   assert(application);
-  std::unique_ptr<prf::Dialog> dialog(new prf::Dialog(&prf::manager(), application->getMainWindow()));
+  std::unique_ptr<dlg::Preferences> dialog(new dlg::Preferences(&prf::manager(), application->getMainWindow()));
   dialog->setModal(true);
   if (!dialog->exec())
     return;

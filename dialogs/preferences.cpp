@@ -32,12 +32,12 @@
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <dialogs/widgetgeometry.h>
-#include <preferences/dialog.h>
-#include <ui_dialog.h> //in build directory
+#include <dialogs/preferences.h>
+#include <ui_preferences.h> //in build directory
 
-using namespace prf;
+using namespace dlg;
 
-Dialog::Dialog(Manager *managerIn, QWidget *parent) : QDialog(parent), ui(new Ui::dialog), manager(managerIn)
+Preferences::Preferences(prf::Manager *managerIn, QWidget *parent) : QDialog(parent), ui(new Ui::dialog), manager(managerIn)
 {
   this->setWindowFlags(this->windowFlags() | Qt::WindowContextHelpButtonHint);
   ui->setupUi(this);
@@ -58,12 +58,12 @@ Dialog::Dialog(Manager *managerIn, QWidget *parent) : QDialog(parent), ui(new Ui
   ui->featureListWidget->setCurrentRow(0);
 }
 
-Dialog::~Dialog()
+Preferences::~Preferences()
 {
   delete ui;
 }
 
-void Dialog::setupFeatureSplitter()
+void Preferences::setupFeatureSplitter()
 {
   fsSplitter = new SplitterDecorated(ui->featuresTab);
   QHBoxLayout *mainLayout = new QHBoxLayout();
@@ -81,7 +81,7 @@ void Dialog::setupFeatureSplitter()
   fsSplitter->restoreSettings("prf:dlg:featuresSplitter");
 }
 
-void Dialog::initialize()
+void Preferences::initialize()
 {
   QDoubleValidator *positiveDouble = new QDoubleValidator(this);
   positiveDouble->setNotation(QDoubleValidator::StandardNotation);
@@ -144,7 +144,7 @@ void Dialog::initialize()
   ui->stripGapEdit->setText(QString().setNum(manager->rootPtr->features().strip().get().gap()));
 }
 
-void Dialog::accept()
+void Preferences::accept()
 {
   try
   {
@@ -163,7 +163,7 @@ void Dialog::accept()
   }
 }
 
-void Dialog::updateVisual()
+void Preferences::updateVisual()
 {
   bool dummy;
   double tempLinearDeflection = ui->linearDeflectionEdit->text().toDouble(&dummy);
@@ -200,7 +200,7 @@ void Dialog::updateVisual()
   }
 }
 
-void Dialog::updateDragger()
+void Preferences::updateDragger()
 {
   bool dummy;
   double tempLinearIncrement = ui->linearIncrementEdit->text().toDouble(&dummy);
@@ -251,7 +251,7 @@ void Dialog::updateDragger()
     manager->rootPtr->interactiveParameter().arrowHeight() = tempArrowHeight;
 }
 
-void Dialog::updateProject()
+void Preferences::updateProject()
 {
   QString pathString = ui->basePathEdit->text();
   QDir baseDir(pathString);
@@ -272,7 +272,7 @@ void Dialog::updateProject()
   manager->rootPtr->project().gitEmail() = ui->gitEmailEdit->text().toStdString();
 }
 
-void Dialog::updateGesture()
+void Preferences::updateGesture()
 {
   double temp = ui->gestureTimeEdit->text().toDouble();
   if (temp < 0.01)
@@ -300,7 +300,7 @@ void Dialog::updateGesture()
   manager->rootPtr->gesture().sprayFactor() = sprayFactor;
 }
 
-void Dialog::updateFeature()
+void Preferences::updateFeature()
 {
   double temp;
   
@@ -417,7 +417,7 @@ void Dialog::updateFeature()
   manager->rootPtr->features().strip().get().gap() = temp;
 }
 
-void Dialog::basePathBrowseSlot()
+void Preferences::basePathBrowseSlot()
 {
   QString browseStart = ui->basePathEdit->text();
   QDir browseStartDir(browseStart);
@@ -438,7 +438,7 @@ void Dialog::basePathBrowseSlot()
   ui->basePathEdit->setText(freshDirectory);
 }
 
-void Dialog::quoteTemplateBrowseSlot()
+void Preferences::quoteTemplateBrowseSlot()
 {
   namespace bfs = boost::filesystem;
   bfs::path t = ui->quoteTSheetEdit->text().toStdString();
