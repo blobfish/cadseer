@@ -47,7 +47,7 @@
 #include <preferences/manager.h>
 #include <dialogs/expressionedit.h>
 #include <dialogs/widgetgeometry.h>
-#include <dialogs/parameterdialog.h>
+#include <dialogs/parameter.h>
 
 using namespace dlg;
 
@@ -56,7 +56,7 @@ class WidgetFactoryVisitor : public boost::static_visitor<QWidget*>
 {
 public:
   WidgetFactoryVisitor() = delete;
-  WidgetFactoryVisitor(ParameterDialog *dialogIn) : dialog(dialogIn){assert(dialog);}
+  WidgetFactoryVisitor(Parameter *dialogIn) : dialog(dialogIn){assert(dialog);}
   QWidget* operator()(double) const {return buildDouble();}
   QWidget* operator()(int) const {return buildInt();}
   QWidget* operator()(bool) const {return buildBool();}
@@ -67,7 +67,7 @@ public:
   QWidget* operator()(const osg::Matrixd&) const {return buildMatrix();}
   
 private:
-  ParameterDialog *dialog;
+  Parameter *dialog;
   
   QWidget* buildDouble() const //!< might used for more than just doubles.
   {
@@ -225,7 +225,7 @@ class ValueChangedVisitor : public boost::static_visitor<>
 {
 public:
   ValueChangedVisitor() = delete;
-  ValueChangedVisitor(ParameterDialog *dialogIn) : dialog(dialogIn){assert(dialog);}
+  ValueChangedVisitor(Parameter *dialogIn) : dialog(dialogIn){assert(dialog);}
   void operator()(double) const {dialog->valueHasChangedDouble();}
   void operator()(int) const {dialog->valueHasChangedInt();}
   void operator()(bool) const {dialog->valueHasChangedBool();}
@@ -235,7 +235,7 @@ public:
   void operator()(const osg::Quat&) const {}
   void operator()(const osg::Matrixd&) const {}
 private:
-  ParameterDialog *dialog;
+  Parameter *dialog;
 };
 
 //react to constant has changed based upon type.
@@ -243,7 +243,7 @@ class ConstantChangedVisitor : public boost::static_visitor<>
 {
 public:
   ConstantChangedVisitor() = delete;
-  ConstantChangedVisitor(ParameterDialog *dialogIn) : dialog(dialogIn){assert(dialog);}
+  ConstantChangedVisitor(Parameter *dialogIn) : dialog(dialogIn){assert(dialog);}
   void operator()(double) const {dialog->constantHasChangedDouble();}
   void operator()(int) const {}
   void operator()(bool) const {} //don't think bool should be anything other than constant?
@@ -253,10 +253,10 @@ public:
   void operator()(const osg::Quat&) const {}
   void operator()(const osg::Matrixd&) const {}
 private:
-  ParameterDialog *dialog;
+  Parameter *dialog;
 };
 
-ParameterDialog::ParameterDialog(ftr::prm::Parameter *parameterIn, const boost::uuids::uuid &idIn):
+Parameter::Parameter(ftr::prm::Parameter *parameterIn, const boost::uuids::uuid &idIn):
   QDialog(static_cast<app::Application*>(qApp)->getMainWindow()),
   parameter(parameterIn)
 {
@@ -268,27 +268,27 @@ ParameterDialog::ParameterDialog(ftr::prm::Parameter *parameterIn, const boost::
   constantHasChanged();
   
   valueConnection = parameter->connectValue
-    (boost::bind(&ParameterDialog::valueHasChanged, this));
+    (boost::bind(&Parameter::valueHasChanged, this));
   constantConnection = parameter->connectConstant
-    (boost::bind(&ParameterDialog::constantHasChanged, this));
+    (boost::bind(&Parameter::constantHasChanged, this));
   
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
   observer->dispatcher.insert(std::make_pair(msg::Response | msg::Pre | msg::Remove | msg::Feature,
-    boost::bind(&ParameterDialog::featureRemovedDispatched, this, boost::placeholders::_1)));
+    boost::bind(&Parameter::featureRemovedDispatched, this, boost::placeholders::_1)));
   
-  WidgetGeometry *filter = new WidgetGeometry(this, "dlg::ParameterDialog");
+  WidgetGeometry *filter = new WidgetGeometry(this, "dlg::Parameter");
   this->installEventFilter(filter);
   
   this->setAttribute(Qt::WA_DeleteOnClose);
 }
 
-ParameterDialog::~ParameterDialog()
+Parameter::~Parameter()
 {
   valueConnection.disconnect();
   constantConnection.disconnect();
 }
 
-void ParameterDialog::buildGui()
+void Parameter::buildGui()
 {
   QString title = feature->getName() + ": ";
   title += QString::fromStdString(parameter->getValueTypeString());
@@ -307,7 +307,7 @@ void ParameterDialog::buildGui()
   mainLayout->addLayout(editLayout);
 }
 
-void ParameterDialog::requestLinkSlot(const QString &stringIn)
+void Parameter::requestLinkSlot(const QString &stringIn)
 {
   //for now we only get here if we have a double. because connect inside double condition.
   boost::uuids::uuid id = gu::stringToId(stringIn.toStdString());
@@ -336,7 +336,7 @@ void ParameterDialog::requestLinkSlot(const QString &stringIn)
   this->activateWindow();
 }
 
-void ParameterDialog::requestUnlinkSlot()
+void Parameter::requestUnlinkSlot()
 {
   //for now we only get here if we have a double. because connect inside double condition.
   expr::Manager &eManager = static_cast<app::Application *>(qApp)->getProject()->getManager();
@@ -354,13 +354,13 @@ void ParameterDialog::requestUnlinkSlot()
   observer->outBlocked(msg::buildGitMessage(gm.str()));
 }
 
-void ParameterDialog::valueHasChanged()
+void Parameter::valueHasChanged()
 {
   ValueChangedVisitor v(this);
   boost::apply_visitor(v, parameter->getVariant());
 }
 
-void ParameterDialog::valueHasChangedDouble()
+void Parameter::valueHasChangedDouble()
 {
   ExpressionEdit *eEdit = dynamic_cast<ExpressionEdit*>(editWidget);
   assert(eEdit);
@@ -374,7 +374,7 @@ void ParameterDialog::valueHasChangedDouble()
   //if it is linked we shouldn't need to change.
 }
 
-void ParameterDialog::valueHasChangedInt()
+void Parameter::valueHasChangedInt()
 {
   QLineEdit *lineEdit = dynamic_cast<QLineEdit*>(editWidget);
   assert(lineEdit);
@@ -383,7 +383,7 @@ void ParameterDialog::valueHasChangedInt()
     lineEdit->setText(QString::number(static_cast<int>(*parameter)));
 }
 
-void ParameterDialog::valueHasChangedBool()
+void Parameter::valueHasChangedBool()
 {
   QComboBox *cBox = dynamic_cast<QComboBox*>(editWidget);
   assert(cBox);
@@ -402,7 +402,7 @@ void ParameterDialog::valueHasChangedBool()
   }
 }
 
-void ParameterDialog::valueHasChangedPath()
+void Parameter::valueHasChangedPath()
 {
   //find the line edit child widget and get text.
   QLineEdit *lineEdit = editWidget->findChild<QLineEdit*>(QString("TheLineEdit"));
@@ -413,7 +413,7 @@ void ParameterDialog::valueHasChangedPath()
   lineEdit->setText(QString::fromStdString(static_cast<boost::filesystem::path>(*parameter).string()));
 }
 
-void ParameterDialog::valueHasChangedVector()
+void Parameter::valueHasChangedVector()
 {
   QLineEdit *xLineEdit = editWidget->findChild<QLineEdit*>(QString("XLineEdit"));
   assert(xLineEdit); if (!xLineEdit) return;
@@ -431,13 +431,13 @@ void ParameterDialog::valueHasChangedVector()
   zLineEdit->setText(QString::number(theVec.z(), 'f', 12));
 }
 
-void ParameterDialog::constantHasChanged()
+void Parameter::constantHasChanged()
 {
   ConstantChangedVisitor v(this);
   boost::apply_visitor(v, parameter->getVariant());
 }
 
-void ParameterDialog::constantHasChangedDouble()
+void Parameter::constantHasChangedDouble()
 {
   ExpressionEdit *eEdit = dynamic_cast<ExpressionEdit*>(editWidget);
   assert(eEdit);
@@ -463,14 +463,14 @@ void ParameterDialog::constantHasChangedDouble()
   valueHasChangedDouble();
 }
 
-void ParameterDialog::featureRemovedDispatched(const msg::Message &messageIn)
+void Parameter::featureRemovedDispatched(const msg::Message &messageIn)
 {
   prj::Message pMessage = boost::get<prj::Message>(messageIn.payload);
   if(pMessage.feature->getId() == feature->getId())
     this->reject();
 }
 
-void ParameterDialog::updateDoubleSlot()
+void Parameter::updateDoubleSlot()
 {
   //for now we only get here if we have a double. because connect inside double condition.
   
@@ -526,7 +526,7 @@ void ParameterDialog::updateDoubleSlot()
   }
 }
 
-void ParameterDialog::textEditedDoubleSlot(const QString &textIn)
+void Parameter::textEditedDoubleSlot(const QString &textIn)
 {
   ExpressionEdit *eEdit = dynamic_cast<ExpressionEdit*>(editWidget);
   assert(eEdit);
@@ -554,7 +554,7 @@ void ParameterDialog::textEditedDoubleSlot(const QString &textIn)
   }
 }
 
-void ParameterDialog::boolChangedSlot(int i)
+void Parameter::boolChangedSlot(int i)
 {
   //we don't need to respond to this value change, so block.
   boost::signals2::shared_connection_block block(valueConnection);
@@ -573,7 +573,7 @@ void ParameterDialog::boolChangedSlot(int i)
   }
 }
 
-void ParameterDialog::browseForPathSlot()
+void Parameter::browseForPathSlot()
 {
   //we are manually setting the lineEdit so we can block value signal.
   boost::signals2::shared_connection_block block(valueConnection);
@@ -643,7 +643,7 @@ void ParameterDialog::browseForPathSlot()
   }
 }
 
-void ParameterDialog::vectorChangedSlot()
+void Parameter::vectorChangedSlot()
 {
   //block value signal.
   boost::signals2::shared_connection_block block(valueConnection);
@@ -681,7 +681,7 @@ void ParameterDialog::vectorChangedSlot()
   }
 }
 
-void ParameterDialog::intChangedSlot()
+void Parameter::intChangedSlot()
 {
   //block value signal.
   boost::signals2::shared_connection_block block(valueConnection);

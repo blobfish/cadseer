@@ -360,7 +360,7 @@ SET(TOOLS_SOURCES
     )
     
 SET(DIALOG_SOURCES
-    dialogs/parameterdialog.cpp
+    dialogs/parameter.cpp
     dialogs/checkgeometry.cpp
     dialogs/widgetgeometry.cpp
     dialogs/blend.cpp
@@ -513,7 +513,7 @@ SET(CADSEER_MOC_HDRS
     dialogs/blend.h
     dialogs/expressionedit.h
     dialogs/preferences.h
-    dialogs/parameterdialog.h
+    dialogs/parameter.h
     expressions/widget.h
     expressions/tablemodel.h
     expressions/tableview.h

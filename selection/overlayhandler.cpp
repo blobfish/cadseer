@@ -28,7 +28,7 @@
 #include <library/ipgroup.h>
 #include <library/plabel.h>
 #include <feature/parameter.h>
-#include <dialogs/parameterdialog.h>
+#include <dialogs/parameter.h>
 #include <selection/visitors.h>
 #include <modelviz/nodemaskdefs.h>
 #include <globalutilities.h>
@@ -321,7 +321,7 @@ bool OverlayHandler::handle
         dimension->accept(visitor);
         assert(visitor.out);
         
-        dlg::ParameterDialog *dialog = new dlg::ParameterDialog(dimension->getParameter(), gu::getId(visitor.out));
+        dlg::Parameter *dialog = new dlg::Parameter(dimension->getParameter(), gu::getId(visitor.out));
         dialog->show();
         dialog->raise();
         dialog->activateWindow();
@@ -353,7 +353,7 @@ bool OverlayHandler::handle
                 pLabel->accept(visitor);
                 assert(visitor.out);
                 
-                dlg::ParameterDialog *dialog = new dlg::ParameterDialog(pLabel->getParameter(), gu::getId(visitor.out));
+                dlg::Parameter *dialog = new dlg::Parameter(pLabel->getParameter(), gu::getId(visitor.out));
                 dialog->show();
                 dialog->raise();
                 dialog->activateWindow();

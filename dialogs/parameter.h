@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef PARAMETERDIALOG_H
-#define PARAMETERDIALOG_H
+#ifndef DLG_PARAMETER_H
+#define DLG_PARAMETER_H
 
 #include <memory>
 
@@ -43,12 +43,12 @@ namespace msg{class Message; class Observer;}
 
 namespace dlg
 {
-  class ParameterDialog : public QDialog
+  class Parameter : public QDialog
   {
     Q_OBJECT
   public:
-    ParameterDialog(ftr::prm::Parameter *parameterIn, const boost::uuids::uuid &idIn);
-    virtual ~ParameterDialog() override;
+    Parameter(ftr::prm::Parameter *parameterIn, const boost::uuids::uuid &idIn);
+    virtual ~Parameter() override;
     ftr::prm::Parameter *parameter = nullptr;
     QWidget *editWidget;
 
@@ -85,4 +85,4 @@ namespace dlg
   };
 }
 
-#endif // PARAMETERDIALOG_H
+#endif // DLG_PARAMETER_H
