@@ -140,6 +140,14 @@ void PLabel::setTextColor(const osg::Vec4 &cIn)
   text->setColor(cIn);
 }
 
+void PLabel::setTextColor()
+{
+  if (parameter->isConstant())
+    text->setColor(osg::Vec4(0.0, 0.0, 1.0, 1.0)); //blue is constant
+  else
+    text->setColor(osg::Vec4(0.0, 1.0, 0.0, 1.0)); //green is linked.
+}
+
 void PLabel::valueHasChanged()
 {
   assert(parameter);
@@ -148,9 +156,8 @@ void PLabel::valueHasChanged()
 
 void PLabel::constantHasChanged()
 {
-  //not doing anything with this yet.
-  //maybe color reflects linked status?
   assert(parameter);
+  setTextColor();
 }
 
 prj::srl::PLabel PLabel::serialOut() const
@@ -182,11 +189,12 @@ void PLabel::serialIn(const prj::srl::PLabel &sIn)
   );
   this->setMatrix(m);
   
+  constantHasChanged();
+  valueHasChanged();
+  
+  //label color maybe overridden by feature update.
   const auto &cIn = sIn.color();
   osg::Vec4 c(cIn.r(), cIn.g(), cIn.b(), cIn.a());
   setTextColor(c);
-  
-  constantHasChanged();
-  valueHasChanged();
 }
     

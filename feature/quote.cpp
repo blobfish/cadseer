@@ -74,6 +74,8 @@ oFile("Output File",  path(static_cast<app::Application*>(qApp)->getProject()->g
   oLabel->showName = true;
   oLabel->valueHasChanged();
   overlaySwitch->addChild(oLabel.get());
+  
+  seerShape.reset();
 }
 
 Quote::~Quote()

@@ -255,15 +255,15 @@ void DieSet::updateLabelColors()
     widthLabel->setTextColor(osg::Vec4(1.0, 0.0, 0.0, 1.0));
     originLabel->setTextColor(osg::Vec4(1.0, 0.0, 0.0, 1.0));
     
-    lengthPaddingLabel->setTextColor(osg::Vec4(0.0, 0.0, 1.0, 1.0));
-    widthPaddingLabel->setTextColor(osg::Vec4(0.0, 0.0, 1.0, 1.0));
+    lengthPaddingLabel->setTextColor();
+    widthPaddingLabel->setTextColor();
     
   }
   else
   {
-    lengthLabel->setTextColor(osg::Vec4(0.0, 0.0, 1.0, 1.0));
-    widthLabel->setTextColor(osg::Vec4(0.0, 0.0, 1.0, 1.0));
-    originLabel->setTextColor(osg::Vec4(0.0, 0.0, 1.0, 1.0));
+    lengthLabel->setTextColor();
+    widthLabel->setTextColor();
+    originLabel->setTextColor();
     
     lengthPaddingLabel->setTextColor(osg::Vec4(1.0, 0.0, 0.0, 1.0));
     widthPaddingLabel->setTextColor(osg::Vec4(1.0, 0.0, 0.0, 1.0));

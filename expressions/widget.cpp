@@ -24,7 +24,6 @@
 #include <QToolBar>
 #include <QInputDialog>
 #include <QMessageBox>
-#include <QFileDialog>
 #include <QTextEdit>
 #include <QTextStream>
 

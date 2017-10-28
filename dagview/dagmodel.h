@@ -84,6 +84,7 @@ namespace dag
     void renameAcceptedSlot();
     void renameRejectedSlot();
     void infoFeatureSlot();
+    void checkGeometrySlot();
     
   private:
     void indexVerticesEdges();

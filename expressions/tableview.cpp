@@ -21,6 +21,8 @@
 #include <assert.h>
 #include <fstream>
 
+#include <boost/filesystem.hpp>
+
 #include <QApplication>
 #include <QLineEdit>
 #include <QHeaderView>
@@ -38,6 +40,8 @@
 #include <QTimer>
 #include <QClipboard>
 
+#include <preferences/preferencesXML.h>
+#include <preferences/manager.h>
 #include <tools/idtools.h>
 #include <dialogs/expressionedit.h>
 #include <expressions/tableview.h>
@@ -106,13 +110,21 @@ void TableViewAll::exportFormulaSlot()
   TableModel *myModel = dynamic_cast<TableModel *>(pModel->sourceModel());
   assert(myModel);
   
-  QString filePath = QFileDialog::getSaveFileName(this, tr("Save File Name"), defaultDirectory, tr("Expressions (*.exp)"));
+  QString filePath = QFileDialog::getSaveFileName
+  (
+    this,
+    tr("Save File Name"),
+    QString::fromStdString(prf::manager().rootPtr->project().lastDirectory().get()),
+    tr("Expressions (*.exp)")
+  );
   if (filePath.isEmpty())
     return;
   if (!filePath.endsWith(".exp"))
     filePath += ".exp";
-  QFileInfo path(filePath);
-  defaultDirectory = path.absolutePath();
+  
+  boost::filesystem::path p = filePath.toStdString();
+  prf::manager().rootPtr->project().lastDirectory() = p.remove_filename().string();
+  prf::manager().saveConfig();
   
   QModelIndexList indexes = this->selectedIndexes();
   QModelIndexList sourceIndexes;
@@ -137,11 +149,19 @@ void TableViewAll::importFormulaSlot()
   TableModel *myModel = dynamic_cast<TableModel *>(pModel->sourceModel());
   assert(myModel);
   
-  QString filePath = QFileDialog::getOpenFileName(this, tr("Open File Name"), defaultDirectory, tr("Expressions (*.exp)"));
+  QString filePath = QFileDialog::getOpenFileName
+  (
+    this,
+    tr("Open File Name"),
+    QString::fromStdString(prf::manager().rootPtr->project().lastDirectory().get()),
+    tr("Expressions (*.exp)")
+  );
   if (filePath.isEmpty())
     return;
-  QFileInfo path(filePath);
-  defaultDirectory = path.absolutePath();
+  
+  boost::filesystem::path p = filePath.toStdString();
+  prf::manager().rootPtr->project().lastDirectory() = p.remove_filename().string();
+  prf::manager().saveConfig();
   
   std::ifstream fileStream;
   fileStream.open(filePath.toStdString().c_str());
@@ -407,13 +427,21 @@ void TableViewGroup::exportFormulaSlot()
   TableModel *myModel = dynamic_cast<TableModel *>(pModel->sourceModel());
   assert(myModel);
   
-  QString filePath = QFileDialog::getSaveFileName(this, tr("Save File Name"), defaultDirectory, tr("Expressions (*.exp)"));
+  QString filePath = QFileDialog::getSaveFileName
+  (
+    this,
+    tr("Save File Name"),
+    QString::fromStdString(prf::manager().rootPtr->project().lastDirectory().get()),
+    tr("Expressions (*.exp)")
+  );
   if (filePath.isEmpty())
     return;
   if (!filePath.endsWith(".exp"))
     filePath += ".exp";
-  QFileInfo path(filePath);
-  defaultDirectory = path.absolutePath();
+  
+  boost::filesystem::path p = filePath.toStdString();
+  prf::manager().rootPtr->project().lastDirectory() = p.remove_filename().string();
+  prf::manager().saveConfig();
   
   QModelIndexList indexes = this->selectedIndexes();
   QModelIndexList sourceIndexes;
@@ -436,11 +464,19 @@ void TableViewGroup::importFormulaSlot()
   GroupProxyModel *pModel = dynamic_cast<GroupProxyModel *>(this->model());
   assert(pModel);
   
-  QString filePath = QFileDialog::getOpenFileName(this, tr("Open File Name"), defaultDirectory, tr("Expressions (*.exp)"));
+  QString filePath = QFileDialog::getOpenFileName
+  (
+    this,
+    tr("Open File Name"),
+    QString::fromStdString(prf::manager().rootPtr->project().lastDirectory().get()),
+    tr("Expressions (*.exp)")
+  );
   if (filePath.isEmpty())
     return;
-  QFileInfo path(filePath);
-  defaultDirectory = path.absolutePath();
+  
+  boost::filesystem::path p = filePath.toStdString();
+  prf::manager().rootPtr->project().lastDirectory() = p.remove_filename().string();
+  prf::manager().saveConfig();
   
   std::ifstream fileStream;
   fileStream.open(filePath.toStdString().c_str());

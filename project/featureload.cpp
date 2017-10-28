@@ -352,13 +352,12 @@ std::shared_ptr<ftr::Base> FeatureLoad::loadStrip(const std::string &fileNameIn,
   return freshStrip;
 }
 
-std::shared_ptr<ftr::Base> FeatureLoad::loadQuote(const std::string &fileNameIn, std::size_t shapeOffsetIn)
+std::shared_ptr<ftr::Base> FeatureLoad::loadQuote(const std::string &fileNameIn, std::size_t)
 {
   auto sq = srl::quote(fileNameIn, ::xml_schema::Flags::dont_validate);
   assert(sq);
   
   std::shared_ptr<ftr::Quote> freshQuote(new ftr::Quote);
-  freshQuote->setShape(shapeVector.at(shapeOffsetIn));
   freshQuote->serialRead(*sq);
   
   return freshQuote;

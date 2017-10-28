@@ -29,10 +29,10 @@
 #include <boost/graph/filtered_graph.hpp>
 #include <boost/graph/depth_first_search.hpp>
 #include <boost/signals2/shared_connection_block.hpp>
+#include <boost/filesystem.hpp>
 
 #include <BRep_Builder.hxx>
 #include <BRepTools.hxx>
-#include <TopoDS_Iterator.hxx>
 #include <BRepBuilderAPI_MakeVertex.hxx>
 
 #include <osg/ValueObject>
@@ -205,31 +205,13 @@ void Project::writeGraphViz(const std::string& fileName)
 
 void Project::readOCC(const std::string &fileName)
 {
-    TopoDS_Shape base;
-    BRep_Builder junk;
-    std::fstream file(fileName.c_str());
-    BRepTools::Read(base, file, junk);
-
-    //structure understood to be a compound of compounds.
-    //check base is a compound.
-    if (base.ShapeType() != TopAbs_COMPOUND)
-    {
-        std::cout << "expected base compound in reading of OCC" << std::endl;
-        return;
-    }
-
-    TopoDS_Iterator it;
-    for (it.Initialize(base); it.More(); it.Next())
-    {
-        TopoDS_Shape current = it.Value();
-        if (current.ShapeType() != TopAbs_COMPOUND)
-        {
-            std::cout << "expected compound in reading of OCC. Got " << current.ShapeType() << std::endl;
-//            continue;
-        }
-
-        addOCCShape(current);
-    }
+  TopoDS_Shape base;
+  BRep_Builder junk;
+  std::fstream file(fileName.c_str());
+  BRepTools::Read(base, file, junk);
+  
+  boost::filesystem::path p = fileName;
+  addOCCShape(base, p.filename().string());
 }
 
 bool Project::hasFeature(const boost::uuids::uuid &idIn)
@@ -262,9 +244,11 @@ prg::Vertex Project::findVertex(const uuid& idIn) const
   return it->second;
 }
 
-void Project::addOCCShape(const TopoDS_Shape &shapeIn)
+void Project::addOCCShape(const TopoDS_Shape &shapeIn, std::string name)
 {
   std::shared_ptr<ftr::Inert> inert(new ftr::Inert(shapeIn));
+  if (!name.empty())
+    inert->setName(QString::fromStdString(name));
   addFeature(inert);
 }
 

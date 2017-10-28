@@ -44,6 +44,7 @@ namespace lbr
     void constantHasChanged();
     ftr::prm::Parameter* getParameter(){return parameter;}
     void setTextColor(const osg::Vec4&);
+    void setTextColor(); //!< linked is green and constant is blue.
     
     bool showName = false;
     

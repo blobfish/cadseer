@@ -740,6 +740,36 @@ namespace prf
     this->recentProjects_.set (std::move (x));
   }
 
+  const Project::LastDirectoryOptional& Project::
+  lastDirectory () const
+  {
+    return this->lastDirectory_;
+  }
+
+  Project::LastDirectoryOptional& Project::
+  lastDirectory ()
+  {
+    return this->lastDirectory_;
+  }
+
+  void Project::
+  lastDirectory (const LastDirectoryType& x)
+  {
+    this->lastDirectory_.set (x);
+  }
+
+  void Project::
+  lastDirectory (const LastDirectoryOptional& x)
+  {
+    this->lastDirectory_ = x;
+  }
+
+  void Project::
+  lastDirectory (::std::unique_ptr< LastDirectoryType > x)
+  {
+    this->lastDirectory_.set (std::move (x));
+  }
+
 
   // SpaceballButton
   // 
@@ -3250,7 +3280,8 @@ namespace prf
     basePath_ (basePath, this),
     gitName_ (gitName, this),
     gitEmail_ (gitEmail, this),
-    recentProjects_ (recentProjects, this)
+    recentProjects_ (recentProjects, this),
+    lastDirectory_ (this)
   {
   }
 
@@ -3263,7 +3294,8 @@ namespace prf
     basePath_ (basePath, this),
     gitName_ (gitName, this),
     gitEmail_ (gitEmail, this),
-    recentProjects_ (std::move (recentProjects), this)
+    recentProjects_ (std::move (recentProjects), this),
+    lastDirectory_ (this)
   {
   }
 
@@ -3275,7 +3307,8 @@ namespace prf
     basePath_ (x.basePath_, f, this),
     gitName_ (x.gitName_, f, this),
     gitEmail_ (x.gitEmail_, f, this),
-    recentProjects_ (x.recentProjects_, f, this)
+    recentProjects_ (x.recentProjects_, f, this),
+    lastDirectory_ (x.lastDirectory_, f, this)
   {
   }
 
@@ -3287,7 +3320,8 @@ namespace prf
     basePath_ (this),
     gitName_ (this),
     gitEmail_ (this),
-    recentProjects_ (this)
+    recentProjects_ (this),
+    lastDirectory_ (this)
   {
     if ((f & ::xml_schema::Flags::base) == 0)
     {
@@ -3362,6 +3396,20 @@ namespace prf
         }
       }
 
+      // lastDirectory
+      //
+      if (n.name () == "lastDirectory" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< LastDirectoryType > r (
+          LastDirectoryTraits::create (i, f, this));
+
+        if (!this->lastDirectory_)
+        {
+          this->lastDirectory_.set (::std::move (r));
+          continue;
+        }
+      }
+
       break;
     }
 
@@ -3411,6 +3459,7 @@ namespace prf
       this->gitName_ = x.gitName_;
       this->gitEmail_ = x.gitEmail_;
       this->recentProjects_ = x.recentProjects_;
+      this->lastDirectory_ = x.lastDirectory_;
     }
 
     return *this;
@@ -6691,6 +6740,18 @@ namespace prf
           e));
 
       s << i.recentProjects ();
+    }
+
+    // lastDirectory
+    //
+    if (i.lastDirectory ())
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "lastDirectory",
+          e));
+
+      s << *i.lastDirectory ();
     }
   }
 

@@ -1029,6 +1029,10 @@ void Model::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     QAction* infoFeatureAction = contextMenu.addAction(infoFeatureIcon, tr("Info Feature"));
     connect(infoFeatureAction, SIGNAL(triggered()), this, SLOT(infoFeatureSlot()));
     
+    static QIcon checkGeometryIcon(":/resources/images/inspectCheckGeometry.svg");
+    QAction* checkGeometryAction = contextMenu.addAction(checkGeometryIcon, tr("Check Geometry"));
+    connect(checkGeometryAction, SIGNAL(triggered()), this, SLOT(checkGeometrySlot()));
+    
     static QIcon editFeatureIcon(":/resources/images/dagViewEditFeature.svg");
     QAction* editFeatureAction = contextMenu.addAction(editFeatureIcon, tr("Edit Feature"));
     connect(editFeatureAction, SIGNAL(triggered()), this, SLOT(editFeatureSlot()));
@@ -1051,13 +1055,28 @@ void Model::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     QAction* removeFeatureAction = contextMenu.addAction(removeIcon, tr("Remove Feature"));
     connect(removeFeatureAction, SIGNAL(triggered()), this, SLOT(removeFeatureSlot()));
     
+    std::vector<Vertex> selected = getAllSelected();
+    
     //disable actions that work for only 1 feature at a time.
-    if (getAllSelected().size() != 1)
+    if (selected.size() != 1)
     {
       editRenameAction->setDisabled(true);
       editFeatureAction->setDisabled(true);
       setCurrentLeafAction->setDisabled(true);
     }
+    
+    //only show check geometry if all currently selected features have a seer shape.
+    bool showCheckGeometry = true;
+    for (const auto &v : selected)
+    {
+      if (!graph[v].feature.lock()->hasSeerShape())
+      {
+        showCheckGeometry = false;
+        break;
+      }
+    }
+    if (!showCheckGeometry)
+      checkGeometryAction->setDisabled(true);
     
     contextMenu.exec(event->screenPos());
   }
@@ -1137,6 +1156,11 @@ void Model::editFeatureSlot()
 void Model::infoFeatureSlot()
 {
   observer->out(msg::Message(msg::Request | msg::Info));
+}
+
+void Model::checkGeometrySlot()
+{
+  observer->out(msg::Message(msg::Request | msg::CheckGeometry));
 }
 
 void Model::renameAcceptedSlot()

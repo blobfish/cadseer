@@ -21,6 +21,7 @@
 #include <iomanip>
 
 #include <boost/variant.hpp>
+#include <boost/filesystem.hpp>
 
 #include <QHBoxLayout>
 #include <QApplication>
@@ -437,10 +438,19 @@ void ViewerWidget::exportOSGDispatched(const msg::Message&)
 {
   //ive doesn't appear to be working?
   
-  QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), QDir::homePath(),
-    tr("Scene (*.osgt *.osgx *.osgb *.osg *.ive)"));
+  QString fileName = QFileDialog::getSaveFileName
+  (
+    this,
+    tr("Save File"),
+    QString::fromStdString(prf::manager().rootPtr->project().lastDirectory().get()),
+    tr("Scene (*.osgt *.osgx *.osgb *.osg *.ive)")
+  );
   if (fileName.isEmpty())
     return;
+  
+  boost::filesystem::path p = fileName.toStdString();
+  prf::manager().rootPtr->project().lastDirectory() = p.remove_filename().string();
+  prf::manager().saveConfig();
   
   if
   (

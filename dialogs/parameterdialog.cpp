@@ -597,7 +597,7 @@ void ParameterDialog::browseForPathSlot()
   {
     //read expects the file to exist. start browse from project directory if doesn't exist.
     if (!bfs::exists(t))
-      t = static_cast<app::Application*>(qApp)->getProject()->getSaveDirectory();
+      t = prf::manager().rootPtr->project().lastDirectory().get();
     
     QString fileName = QFileDialog::getOpenFileName
     (
@@ -607,14 +607,20 @@ void ParameterDialog::browseForPathSlot()
       QString::fromStdString(extension)
     );
     
-    if (!fileName.isEmpty())
-      lineEdit->setText(fileName);
+    if (fileName.isEmpty())
+      return;
+    
+    bfs::path p = fileName.toStdString();
+    prf::manager().rootPtr->project().lastDirectory() = p.remove_filename().string();
+    prf::manager().saveConfig();
+    
+    lineEdit->setText(fileName);
   }
   else if (parameter->getPathType() == ftr::prm::PathType::Write)
   {
     if (!bfs::exists(t.parent_path()))
     {
-      t = static_cast<app::Application*>(qApp)->getProject()->getSaveDirectory();
+      t = prf::manager().rootPtr->project().lastDirectory().get();
       t /= "file" + extension;
     }
     
@@ -626,8 +632,14 @@ void ParameterDialog::browseForPathSlot()
       QString::fromStdString(extension)
     );
     
-    if (!fileName.isEmpty())
-      lineEdit->setText(fileName);
+    if (fileName.isEmpty())
+      return;
+    
+    bfs::path p = fileName.toStdString();
+    prf::manager().rootPtr->project().lastDirectory() = p.remove_filename().string();
+    prf::manager().saveConfig();
+    
+    lineEdit->setText(fileName);
   }
 }
 

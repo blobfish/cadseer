@@ -46,7 +46,7 @@ public:
     Project();
     ~Project();
     void readOCC(const std::string &fileName);
-    void addOCCShape(const TopoDS_Shape &shapeIn);
+    void addOCCShape(const TopoDS_Shape &shapeIn, std::string name = "");
     ftr::prm::Parameter* findParameter(const boost::uuids::uuid &idIn) const;
     void updateModel();
     void updateVisual();

@@ -192,7 +192,7 @@ void Base::updateVisual()
   //clear all the children from the main transform.
   lod->removeChildren(0, lod->getNumChildren());
   
-  if (seerShape->isNull())
+  if ((!seerShape) || (seerShape->isNull()))
     return;
 
   //get deflection values.

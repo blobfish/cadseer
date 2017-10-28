@@ -33,6 +33,8 @@
 #include <QTimer>
 #include <QFileDialog>
 
+#include <preferences/preferencesXML.h>
+#include <preferences/manager.h>
 #include <application/application.h>
 #include <application/mainwindow.h>
 #include <project/project.h>
@@ -449,7 +451,7 @@ void Quote::browseForTemplateSlot()
   namespace bfs = boost::filesystem;
   bfs::path t = tFileEdit->text().toStdString();
   if (!bfs::exists(t)) //todo use a parameter from preferences.
-    t = static_cast<app::Application*>(qApp)->getApplicationDirectory().canonicalPath().toStdString();
+    t = prf::manager().rootPtr->project().lastDirectory().get();
   
   QString fileName = QFileDialog::getOpenFileName
   (
@@ -459,8 +461,14 @@ void Quote::browseForTemplateSlot()
     tr("SpreadSheet (*.ods)")
   );
   
-  if (!fileName.isEmpty())
-    tFileEdit->setText(fileName);
+  if (fileName.isEmpty())
+    return;
+  
+  boost::filesystem::path p = fileName.toStdString();
+  prf::manager().rootPtr->project().lastDirectory() = p.remove_filename().string();
+  prf::manager().saveConfig();
+  
+  tFileEdit->setText(fileName);
 }
 
 void Quote::browseForOutputSlot()
@@ -469,7 +477,7 @@ void Quote::browseForOutputSlot()
   bfs::path t = oFileEdit->text().toStdString();
   if (!bfs::exists(t.parent_path()))
   {
-    t = static_cast<app::Application*>(qApp)->getProject()->getSaveDirectory();
+    t = prf::manager().rootPtr->project().lastDirectory().get();
     t /= quote->getName().toStdString() + ".ods";
   }
   
@@ -481,7 +489,13 @@ void Quote::browseForOutputSlot()
     tr("SpreadSheet (*.ods)")
   );
   
-  if (!fileName.isEmpty())
-    oFileEdit->setText(fileName);
+  if (fileName.isEmpty())
+    return;
+  
+  boost::filesystem::path p = fileName.toStdString();
+  prf::manager().rootPtr->project().lastDirectory() = p.remove_filename().string();
+  prf::manager().saveConfig();
+  
+  oFileEdit->setText(fileName);
 }
     

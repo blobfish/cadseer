@@ -30,6 +30,7 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/timer/timer.hpp>
 #include <boost/variant.hpp>
+#include <boost/filesystem.hpp>
 
 #include <BRepTools.hxx>
 #include <TopoDS_Edge.hxx>
@@ -683,13 +684,22 @@ void Factory::importOCCDispatched(const msg::Message&)
   app::Application *application = dynamic_cast<app::Application *>(qApp);
   assert(application);
   
-  QString fileName = QFileDialog::getOpenFileName(application->getMainWindow(), QObject::tr("Open File"),
-						QDir::homePath(), QObject::tr("brep (*.brep *.brp)"));
+  QString fileName = QFileDialog::getOpenFileName
+  (
+    application->getMainWindow(),
+    QObject::tr("Open File"),
+    QString::fromStdString(prf::manager().rootPtr->project().lastDirectory().get()),
+    QObject::tr("brep (*.brep *.brp)")
+  );
   if (fileName.isEmpty())
       return;
   
   assert(project);
   project->readOCC(fileName.toStdString());
+  
+  boost::filesystem::path p = fileName.toStdString();
+  prf::manager().rootPtr->project().lastDirectory() = p.remove_filename().string();
+  prf::manager().saveConfig();
   
   observer->out(msg::Mask(msg::Request | msg::Update));
 }
@@ -709,8 +719,13 @@ void Factory::exportOCCDispatched(const msg::Message&)
   
   app::Application *application = dynamic_cast<app::Application *>(qApp);
   assert(application);
-  QString fileName = QFileDialog::getSaveFileName(application->getMainWindow(), QObject::tr("Save File"),
-			  QDir::homePath(), QObject::tr("brep (*.brep *.brp)"));
+  QString fileName = QFileDialog::getSaveFileName
+  (
+    application->getMainWindow(),
+    QObject::tr("Save File"),
+    QString::fromStdString(prf::manager().rootPtr->project().lastDirectory().get()),
+    QObject::tr("brep (*.brep *.brp)")
+  );
   if (fileName.isEmpty())
       return;
   if
@@ -719,6 +734,10 @@ void Factory::exportOCCDispatched(const msg::Message&)
     (!fileName.endsWith(QObject::tr(".brp")))
   )
     fileName += QObject::tr(".brep");
+    
+  boost::filesystem::path p = fileName.toStdString();
+  prf::manager().rootPtr->project().lastDirectory() = p.remove_filename().string();
+  prf::manager().saveConfig();
     
   assert(project);
     
@@ -737,17 +756,19 @@ void Factory::importStepDispatched(const msg::Message&)
   assert(application);
   assert(project);
   
-  static QString defaultDirectory = QString::fromStdString(project->getSaveDirectory()); 
-  
   QString fileName = QFileDialog::getOpenFileName
   (
     application->getMainWindow(),
-    QObject::tr("Import Step File"), defaultDirectory,
+    QObject::tr("Import Step File"),
+    QString::fromStdString(prf::manager().rootPtr->project().lastDirectory().get()),
     QObject::tr("step (*.step *.stp)")
   );
   if (fileName.isEmpty())
     return;
-  defaultDirectory = QFileInfo(fileName).absolutePath();
+  
+  boost::filesystem::path p = fileName.toStdString();
+  prf::manager().rootPtr->project().lastDirectory() = p.remove_filename().string();
+  prf::manager().saveConfig();
   
   app::WaitCursor wc; //show busy.
   
@@ -815,7 +836,8 @@ void Factory::exportStepDispatched(const msg::Message&)
   QString fileName = QFileDialog::getSaveFileName
   (
     application->getMainWindow(),
-    QObject::tr("Save File"), QDir::homePath(),
+    QObject::tr("Save File"),
+    QString::fromStdString(prf::manager().rootPtr->project().lastDirectory().get()),
     QObject::tr("step (*.step *.stp)")
   );
   if (fileName.isEmpty())
@@ -826,6 +848,10 @@ void Factory::exportStepDispatched(const msg::Message&)
     (!fileName.endsWith(QObject::tr(".stp")))
   )
     fileName += QObject::tr(".step");
+    
+  boost::filesystem::path p = fileName.toStdString();
+  prf::manager().rootPtr->project().lastDirectory() = p.remove_filename().string();
+  prf::manager().saveConfig();
     
   assert(project);
   
@@ -1224,9 +1250,15 @@ void Factory::viewIsolateDispatched(const msg::Message&)
     if (feature->isNonLeaf()) //ignore non-leaf features.
       continue;
     if (selectedFeatures.count(id) == 0)
+    {
       feature->hide3D();
+      feature->hideOverlay();
+    }
     else
+    {
       feature->show3D();
+      feature->showOverlay();
+    }
   }
   
   observer->out(msg::Message(msg::Request | msg::View | msg::Fit));

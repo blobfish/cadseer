@@ -235,6 +235,19 @@ std::string Manager::getHotKey(int number) const
 
 void Manager::ensureDefaults()
 {
+  //project defaults.
+  QDir tbp(QString::fromStdString(rootPtr->project().basePath())); //temp base path.
+  if (!tbp.exists())
+    rootPtr->project().basePath() = QDir::home().path().toStdString();
+  QDir tld(QString::fromStdString(rootPtr->project().basePath())); //temp last directory.
+  if (rootPtr->project().lastDirectory().present())
+  {
+    QDir atld(QString::fromStdString(rootPtr->project().lastDirectory().get())); // another temp last directory
+    if (atld.exists())
+      tld = atld;
+  }
+  rootPtr->project().lastDirectory() = tld.absolutePath().toStdString();
+  
   auto &features = rootPtr->features();
   
   if (!features.blend().present())

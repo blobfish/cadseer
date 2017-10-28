@@ -45,7 +45,6 @@ namespace ftr
     virtual void serialWrite(const QDir&) override;
     void serialRead(const prj::srl::FeatureStrip &);
     
-    void setLabelColors(const osg::Vec4&);
     void setAutoCalc(bool acIn){autoCalc->setValue(acIn);}
     bool isAutoCalc(){return static_cast<bool>(*autoCalc);}
     double getPitch() const {return static_cast<double>(*pitch);}

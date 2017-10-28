@@ -422,10 +422,20 @@ void Dialog::basePathBrowseSlot()
   QString browseStart = ui->basePathEdit->text();
   QDir browseStartDir(browseStart);
   if (!browseStartDir.exists() || browseStart.isEmpty())
-    browseStart = QDir::homePath();
-  QString freshDirectory = QFileDialog::getExistingDirectory(this, tr("Browse to projects base directory"), browseStart);
-  if (!freshDirectory.isEmpty())
-    ui->basePathEdit->setText(freshDirectory);
+    browseStart = QString::fromStdString(manager->rootPtr->project().lastDirectory().get());
+  QString freshDirectory = QFileDialog::getExistingDirectory
+  (
+    this,
+    tr("Browse to projects base directory"),
+    browseStart
+  );
+  if (freshDirectory.isEmpty())
+    return;
+  
+  boost::filesystem::path p = freshDirectory.toStdString();
+  manager->rootPtr->project().lastDirectory() = p.string();
+  
+  ui->basePathEdit->setText(freshDirectory);
 }
 
 void Dialog::quoteTemplateBrowseSlot()
@@ -433,7 +443,7 @@ void Dialog::quoteTemplateBrowseSlot()
   namespace bfs = boost::filesystem;
   bfs::path t = ui->quoteTSheetEdit->text().toStdString();
   if (!bfs::exists(t)) //todo use a parameter from preferences.
-    t = static_cast<app::Application*>(qApp)->getApplicationDirectory().canonicalPath().toStdString();
+    t = manager->rootPtr->project().lastDirectory().get();
   
   QString fileName = QFileDialog::getOpenFileName
   (
@@ -443,6 +453,11 @@ void Dialog::quoteTemplateBrowseSlot()
     tr("SpreadSheet (*.ods)")
   );
   
-  if (!fileName.isEmpty())
-    ui->quoteTSheetEdit->setText(fileName);
+  if (fileName.isEmpty())
+    return;
+  
+  boost::filesystem::path p = fileName.toStdString();
+  manager->rootPtr->project().lastDirectory() = p.remove_filename().string();
+  
+  ui->quoteTSheetEdit->setText(fileName);
 }

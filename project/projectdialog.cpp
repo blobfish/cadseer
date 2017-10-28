@@ -19,6 +19,8 @@
 #include <iostream>
 #include <stdexcept>
 
+#include <boost/filesystem.hpp>
+
 #include <QDoubleValidator>
 #include <QMessageBox>
 #include <QFileDialog>
@@ -113,10 +115,19 @@ void Dialog::goNewSlot()
   QString browseStart = QString::fromStdString(prf::manager().rootPtr->project().basePath());
   QDir browseStartDir(browseStart);
   if (!browseStartDir.exists() || browseStart.isEmpty())
-    browseStart = QDir::homePath();
-  QString freshDirectory = QFileDialog::getExistingDirectory(this, tr("Browse to new project directory"), browseStart);
+    browseStart = QString::fromStdString(prf::manager().rootPtr->project().lastDirectory().get());
+  QString freshDirectory = QFileDialog::getExistingDirectory
+  (
+    this,
+    tr("Browse to new project directory"),
+    browseStart
+  );
   if (freshDirectory.isEmpty())
     return;
+  
+  boost::filesystem::path p = freshDirectory.toStdString();
+  prf::manager().rootPtr->project().lastDirectory() = p.string();
+  prf::manager().saveConfig();
   
   result = Result::New;
   directory = QDir(freshDirectory);
@@ -130,10 +141,14 @@ void Dialog::goOpenSlot()
   QString browseStart = QString::fromStdString(prf::manager().rootPtr->project().basePath());
   QDir browseStartDir(browseStart);
   if (!browseStartDir.exists() || browseStart.isEmpty())
-    browseStart = QDir::homePath();
+    browseStart = QString::fromStdString(prf::manager().rootPtr->project().lastDirectory().get());
   QString freshDirectory = QFileDialog::getExistingDirectory(this, tr("Browse to existing project directory"), browseStart);
   if (freshDirectory.isEmpty())
     return;
+  
+  boost::filesystem::path p = freshDirectory.toStdString();
+  prf::manager().rootPtr->project().lastDirectory() = p.string();
+  prf::manager().saveConfig();
   
   result = Result::Open;
   directory = QDir(freshDirectory);

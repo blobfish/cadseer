@@ -126,14 +126,6 @@ Strip::Strip() : Base()
   stations.push_back("Form");
 }
 
-void Strip::setLabelColors(const osg::Vec4 &cIn)
-{
-  pitchLabel->setTextColor(cIn);
-  widthLabel->setTextColor(cIn);
-  widthOffsetLabel->setTextColor(cIn);
-  gapLabel->setTextColor(cIn);
-}
-
 //copied from lbr::PLabel::build
 osg::Node* buildStationLabel(const std::string &sIn)
 {
@@ -193,7 +185,11 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
     
     if (static_cast<bool>(*autoCalc))
     {
-      setLabelColors(osg::Vec4(1.0, 0.0, 0.0, 1.0));
+      osg::Vec4 cIn(1.0, 0.0, 0.0, 1.0);
+      pitchLabel->setTextColor(cIn);
+      widthLabel->setTextColor(cIn);
+      widthOffsetLabel->setTextColor(cIn);
+      gapLabel->setTextColor(cIn);
       
       const Nest *nf = dynamic_cast<const Nest *>(nbf);
       assert(nf);
@@ -212,7 +208,10 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
     }
     else
     {
-      setLabelColors(osg::Vec4(0.0, 0.0, 1.0, 1.0));
+      pitchLabel->setTextColor();
+      widthLabel->setTextColor();
+      widthOffsetLabel->setTextColor();
+      gapLabel->setTextColor();
     }
     
     occt::ShapeVector shapes;
