@@ -30,12 +30,12 @@
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <dialogs/widgetgeometry.h>
-#include <project/projectdialog.h>
-#include <ui_projectdialog.h> //in build directory
+#include <dialogs/project.h>
+#include <ui_project.h> //in build directory
 
-using namespace prj;
+using namespace dlg;
 
-Dialog::Dialog(QWidget *parent) : QDialog(parent), ui(new Ui::projectDialog)
+Project::Project(QWidget *parent) : QDialog(parent), ui(new Ui::projectDialog)
 {
   ui->setupUi(this);
   populateRecentList();
@@ -44,21 +44,21 @@ Dialog::Dialog(QWidget *parent) : QDialog(parent), ui(new Ui::projectDialog)
   connect(ui->openButton, SIGNAL(clicked()), this, SLOT(goOpenSlot()));
   connect(ui->recentTableWidget, SIGNAL(cellClicked(int,int)), this, SLOT(goRecentSlot(int,int)));
   
-  dlg::WidgetGeometry *filter = new dlg::WidgetGeometry(this, "prj::ProjectDialog");
+  dlg::WidgetGeometry *filter = new dlg::WidgetGeometry(this, "dlg::Project");
   this->installEventFilter(filter);
   
   QSettings &settings = static_cast<app::Application*>(qApp)->getUserSettings();
-  settings.beginGroup("prj::ProjectDialog");
+  settings.beginGroup("dlg::Project");
   settings.beginGroup("RecentTable");
   ui->recentTableWidget->horizontalHeader()->restoreState(settings.value("header").toByteArray());
   settings.endGroup();
   settings.endGroup();
 }
 
-Dialog::~Dialog()
+Project::~Project()
 {
   QSettings &settings = static_cast<app::Application*>(qApp)->getUserSettings();
-  settings.beginGroup("prj::ProjectDialog");
+  settings.beginGroup("dlg::Project");
   settings.beginGroup("RecentTable");
   settings.setValue("header", ui->recentTableWidget->horizontalHeader()->saveState());
   settings.endGroup();
@@ -67,7 +67,7 @@ Dialog::~Dialog()
   delete ui;
 }
 
-void Dialog::populateRecentList()
+void Project::populateRecentList()
 {
   const auto &recent = prf::manager().rootPtr->project().recentProjects().Entry();
   prf::RecentProjects::EntrySequence reconcile;
@@ -94,7 +94,7 @@ void Dialog::populateRecentList()
   prf::manager().saveConfig();
 }
 
-bool Dialog::validateDir(const QDir& dir)
+bool Project::validateDir(const QDir& dir)
 {
   if (!dir.exists())
     return false;
@@ -110,7 +110,7 @@ bool Dialog::validateDir(const QDir& dir)
   return true;
 }
 
-void Dialog::goNewSlot()
+void Project::goNewSlot()
 {
   QString browseStart = QString::fromStdString(prf::manager().rootPtr->project().basePath());
   QDir browseStartDir(browseStart);
@@ -136,7 +136,7 @@ void Dialog::goNewSlot()
   this->accept();
 }
 
-void Dialog::goOpenSlot()
+void Project::goOpenSlot()
 {
   QString browseStart = QString::fromStdString(prf::manager().rootPtr->project().basePath());
   QDir browseStartDir(browseStart);
@@ -157,7 +157,7 @@ void Dialog::goOpenSlot()
   this->accept();
 }
 
-void Dialog::goRecentSlot(int rowIn, int)
+void Project::goRecentSlot(int rowIn, int)
 {
   QTableWidgetItem *widget = ui->recentTableWidget->item(rowIn, 1);
   result = Result::Recent;
@@ -167,7 +167,7 @@ void Dialog::goRecentSlot(int rowIn, int)
   this->accept();
 }
 
-void Dialog::addToRecentList()
+void Project::addToRecentList()
 {
   std::string freshEntry = directory.absolutePath().toStdString();
   auto &recent = prf::manager().rootPtr->project().recentProjects().Entry();

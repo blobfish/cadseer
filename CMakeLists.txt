@@ -369,6 +369,7 @@ SET(DIALOG_SOURCES
     dialogs/selectionbutton.cpp
     dialogs/quote.cpp
     dialogs/preferences.cpp
+    dialogs/project.cpp
     )
     
 SET(PREFERENCE_SOURCES
@@ -381,7 +382,6 @@ SET(PROJECT_SOURCES
     project/message.cpp
     project/gitmanager.cpp
     project/featureload.cpp
-    project/projectdialog.cpp
     project/serial/xsdcxxoutput/project.cpp
     project/serial/xsdcxxoutput/featurebase.cpp
     project/serial/xsdcxxoutput/featurecsysbase.cpp
@@ -514,13 +514,13 @@ SET(CADSEER_MOC_HDRS
     dialogs/expressionedit.h
     dialogs/preferences.h
     dialogs/parameterdialog.h
-    project/projectdialog.h
     expressions/widget.h
     expressions/tablemodel.h
     expressions/tableview.h
     dialogs/strip.h
     dialogs/selectionbutton.h
     dialogs/quote.h
+    dialogs/project.h
     )
 
 SET(CADSEER_LIBRARIES
@@ -540,7 +540,7 @@ SET(CADSEER_LIBRARIES
 SET(CADSEER_UIS
     application/mainwindow.ui
     dialogs/preferences.ui
-    project/projectdialog.ui
+    dialogs/project.ui
     )
 
 SET(CADSEER_RESOURCES

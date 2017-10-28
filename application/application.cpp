@@ -41,7 +41,7 @@
 #include <message/observer.h>
 #include <application/factory.h>
 #include <command/manager.h>
-#include <project/projectdialog.h>
+#include <dialogs/project.h>
 
 #include <spnav.h>
 
@@ -95,15 +95,15 @@ void Application::appStartSlot()
   //if so then don't do the dialog.
   if (!project)
   {
-    prj::Dialog dialog(this->getMainWindow());
+    dlg::Project dialog(this->getMainWindow());
     if (dialog.exec() == QDialog::Accepted)
     {
-      prj::Dialog::Result r = dialog.getResult();
-      if (r == prj::Dialog::Result::Open || r == prj::Dialog::Result::Recent)
+      dlg::Project::Result r = dialog.getResult();
+      if (r == dlg::Project::Result::Open || r == dlg::Project::Result::Recent)
       {
         openProject(dialog.getDirectory().absolutePath().toStdString());
       }
-      if (r == prj::Dialog::Result::New)
+      if (r == dlg::Project::Result::New)
       {
         createNewProject(dialog.getDirectory().absolutePath().toStdString());
       }
@@ -349,16 +349,16 @@ void Application::setupDispatcher()
 
 void Application::ProjectDialogRequestDispatched(const msg::Message&)
 {
-  prj::Dialog dialog(this->getMainWindow());
+  dlg::Project dialog(this->getMainWindow());
   if (dialog.exec() == QDialog::Accepted)
   {
-    prj::Dialog::Result r = dialog.getResult();
-    if (r == prj::Dialog::Result::Open || r == prj::Dialog::Result::Recent)
+    dlg::Project::Result r = dialog.getResult();
+    if (r == dlg::Project::Result::Open || r == dlg::Project::Result::Recent)
     {
       closeProject();
       openProject(dialog.getDirectory().absolutePath().toStdString());
     }
-    if (r == prj::Dialog::Result::New)
+    if (r == dlg::Project::Result::New)
     {
       closeProject();
       createNewProject(dialog.getDirectory().absolutePath().toStdString());

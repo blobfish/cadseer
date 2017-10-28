@@ -17,17 +17,17 @@
  *
  */
 
-#ifndef DIALOG_H
-#define DIALOG_H
+#ifndef DLG_PROJECT_H
+#define DLG_PROJECT_H
 
 #include <QDialog>
 #include <QDir>
 
 namespace Ui{ class projectDialog; }
 
-namespace prj
+namespace dlg
 {
-  class Dialog : public QDialog
+  class Project : public QDialog
   {
       Q_OBJECT
   public:
@@ -39,8 +39,8 @@ namespace prj
       Recent, //!< picked from recent list
       Cancel //!< dialog was cancelled
     };
-    Dialog(QWidget* = 0);
-    ~Dialog();
+    Project(QWidget* = 0);
+    ~Project();
     Result getResult(){return result;}
     QDir getDirectory(){return directory;}
   private:
@@ -59,4 +59,4 @@ namespace prj
   };
 }
 
-#endif // DIALOG_H
+#endif // DLG_PROJECT_H
