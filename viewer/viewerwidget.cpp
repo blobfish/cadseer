@@ -55,6 +55,7 @@
 #include <library/csysdragger.h>
 #include <selection/eventhandler.h>
 #include <selection/overlayhandler.h>
+#include <selection/visitors.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <viewer/textcamera.h>
@@ -518,6 +519,15 @@ void ViewerWidget::setupDispatcher()
   
   mask = msg::Request | msg::View | msg::Toggle | msg::HiddenLine;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewToggleHiddenLinesDispatched, this, _1)));
+  
+  mask = msg::Request | msg::View | msg::Show | msg::ThreeD;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::showThreeDDispatched, this, _1)));
+  
+  mask = msg::Request | msg::View | msg::Hide | msg::ThreeD;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::hideThreeDDispatched, this, _1)));
+  
+  mask = msg::Request | msg::View | msg::Toggle | msg::ThreeD;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::threeDToggleDispatched, this, _1)));
 }
 
 void ViewerWidget::featureAddedDispatched(const msg::Message &messageIn)
@@ -578,6 +588,61 @@ void ViewerWidget::viewToggleHiddenLinesDispatched(const msg::Message&)
   //set the hidden line state.
   HiddenLineVisitor v(!oldValue);
   root->accept(v);
+}
+
+void ViewerWidget::showThreeDDispatched(const msg::Message &msgIn)
+{
+  slc::MainSwitchVisitor v(boost::get<vwr::Message>(msgIn.payload).featureId);
+  root->accept(v);
+  assert(v.out);
+  if (!v.out)
+    return;
+  
+  if (v.out->getNewChildDefaultValue()) //already shown.
+    return;
+  
+  msg::Message mOut(msg::Response | msg::View | msg::Show | msg::ThreeD);
+  mOut.payload = msgIn.payload;
+  observer->outBlocked(mOut);
+}
+
+void ViewerWidget::hideThreeDDispatched(const msg::Message &msgIn)
+{
+  slc::MainSwitchVisitor v(boost::get<vwr::Message>(msgIn.payload).featureId);
+  root->accept(v);
+  assert(v.out);
+  if (!v.out)
+    return;
+  
+  if (!v.out->getNewChildDefaultValue()) //already hidden.
+    return;
+  
+  msg::Message mOut(msg::Response | msg::View | msg::Hide | msg::ThreeD);
+  mOut.payload = msgIn.payload;
+  observer->outBlocked(mOut);
+}
+
+void ViewerWidget::threeDToggleDispatched(const msg::Message &msgIn)
+{
+  slc::MainSwitchVisitor v(boost::get<vwr::Message>(msgIn.payload).featureId);
+  root->accept(v);
+  assert(v.out);
+  if (!v.out)
+    return;
+  msg::Mask maskOut; //notice we are not responding with Msg::Toggle that got us here.
+  if (v.out->getNewChildDefaultValue())
+  {
+    v.out->setAllChildrenOff();
+    maskOut = msg::Response | msg::View | msg::Hide | msg::ThreeD;
+  }
+  else
+  {
+    v.out->setAllChildrenOn();
+    maskOut = msg::Response | msg::View | msg::Show | msg::ThreeD;
+  }
+  msg::Message mOut(maskOut);
+  mOut.payload = msgIn.payload;
+  observer->outBlocked(mOut);
 }
 
 void ViewerWidget::screenCapture(const std::string &fp, const std::string &e)

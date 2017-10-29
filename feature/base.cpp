@@ -101,8 +101,6 @@ Base::Base()
   
   state.set(ftr::StateOffset::ModelDirty, true);
   state.set(ftr::StateOffset::VisualDirty, true);
-  state.set(ftr::StateOffset::Hidden3D, false);
-  state.set(ftr::StateOffset::HiddenOverlay, false);
   state.set(ftr::StateOffset::Failure, false);
   state.set(ftr::StateOffset::Inactive, false);
   state.set(ftr::StateOffset::NonLeaf, false);
@@ -168,6 +166,26 @@ void Base::setVisualDirty()
   observer->out(mMessage);
 }
 
+bool Base::isVisible3D() const
+{
+  return mainSwitch->getNewChildDefaultValue();
+}
+
+bool Base::isHidden3D() const
+{
+  return !mainSwitch->getNewChildDefaultValue();
+}
+
+bool Base::isVisibleOverlay() const
+{
+  return overlaySwitch->getNewChildDefaultValue();
+}
+
+bool Base::isHiddenOverlay() const
+{
+  return !overlaySwitch->getNewChildDefaultValue();
+}
+
 void Base::setName(const QString &nameIn)
 {
   name = nameIn;
@@ -220,6 +238,7 @@ void Base::updateVisual()
     lm->setTwoSided(true);
     lod->getOrCreateStateSet()->setAttributeAndModes(lm);
   };
+  //this isn't right! I need to use top explorer and avoid solids
   for (TopoDS_Iterator it(seerShape->getRootOCCTShape()); it.More(); it.Next())
   {
     if
@@ -271,83 +290,6 @@ void Base::replaceId(const boost::uuids::uuid &staleId, const boost::uuids::uuid
 {
   if (hasSeerShape())
     seerShape->replaceId(staleId, freshId, shapeHistory);
-}
-
-void Base::show3D()
-{
-  assert(mainSwitch->getNumChildren());
-  if (isVisible3D())
-    return; //already on.
-  if (isVisualDirty() && isModelClean() && isSuccess())
-    updateVisual();
-  mainSwitch->setAllChildrenOn();
-//   if (isVisibleOverlay())
-//     overlaySwitch->setAllChildrenOn();
-  state.set(ftr::StateOffset::Hidden3D, false);
-  
-  ftr::Message fMessage(id, state, StateOffset::Hidden3D, false);
-  msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
-  mMessage.payload = fMessage;
-  observer->out(mMessage);
-}
-
-void Base::hide3D()
-{
-  assert(mainSwitch->getNumChildren());
-  if (isHidden3D())
-    return; //already off.
-  mainSwitch->setAllChildrenOff();
-//   if (isVisibleOverlay())
-//     overlaySwitch->setAllChildrenOff();
-  state.set(ftr::StateOffset::Hidden3D, true);
-  
-  ftr::Message fMessage(id, state, StateOffset::Hidden3D, true);
-  msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
-  mMessage.payload = fMessage;
-  observer->out(mMessage);
-}
-
-void Base::toggle3D()
-{
-  assert(mainSwitch->getNumChildren());
-  if (isVisible3D())
-    hide3D();
-  else
-    show3D();
-}
-
-void Base::showOverlay()
-{
-  if (isVisibleOverlay())
-    return; //already on.
-  overlaySwitch->setAllChildrenOn();
-  state.set(ftr::StateOffset::HiddenOverlay, false);
-  
-  ftr::Message fMessage(id, state, StateOffset::HiddenOverlay, false);
-  msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
-  mMessage.payload = fMessage;
-  observer->out(mMessage);
-}
-
-void Base::hideOverlay()
-{
-  if (isHiddenOverlay())
-    return; //already off.
-  overlaySwitch->setAllChildrenOff();
-  state.set(ftr::StateOffset::HiddenOverlay, true);
-  
-  ftr::Message fMessage(id, state, StateOffset::HiddenOverlay, true);
-  msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
-  mMessage.payload = fMessage;
-  observer->out(mMessage);
-}
-
-void Base::toggleOverlay()
-{
-  if (isVisibleOverlay())
-    hideOverlay();
-  else
-    showOverlay();
 }
 
 void Base::setSuccess()

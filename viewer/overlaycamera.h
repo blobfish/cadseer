@@ -43,6 +43,9 @@ private:
   void closeProjectDispatched(const msg::Message&);
   void addOverlayGeometryDispatched(const msg::Message&);
   void clearOverlayGeometryDispatched(const msg::Message&); //!< only fleeting, not features.
+  void overlayToggleDispatched(const msg::Message &);
+  void showOverlayDispatched(const msg::Message &);
+  void hideOverlayDispatched(const msg::Message &);
   
   osg::ref_ptr<osg::Switch> fleetingGeometry;
 };

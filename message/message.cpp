@@ -60,3 +60,43 @@ msg::Message msg::buildSelectionMask(slc::Mask maskIn)
   
   return mMsg;
 }
+
+msg::Message msg::buildShowThreeD(const boost::uuids::uuid &idIn)
+{
+  vwr::Message vMsg;
+  vMsg.featureId = idIn;
+  msg::Message out(msg::Request | msg::View | msg::Show | msg::ThreeD);
+  out.payload = vMsg;
+  
+  return out;
+}
+
+msg::Message msg::buildHideThreeD(const boost::uuids::uuid &idIn)
+{
+  vwr::Message vMsg;
+  vMsg.featureId = idIn;
+  msg::Message out(msg::Request | msg::View | msg::Hide | msg::ThreeD);
+  out.payload = vMsg;
+  
+  return out;
+}
+
+msg::Message msg::buildShowOverlay(const boost::uuids::uuid &idIn)
+{
+  vwr::Message vMsg;
+  vMsg.featureId = idIn;
+  msg::Message out(msg::Request | msg::View | msg::Show | msg::Overlay);
+  out.payload = vMsg;
+  
+  return out;
+}
+
+msg::Message msg::buildHideOverlay(const boost::uuids::uuid &idIn)
+{
+  vwr::Message vMsg;
+  vMsg.featureId = idIn;
+  msg::Message out(msg::Request | msg::View | msg::Hide | msg::Overlay);
+  out.payload = vMsg;
+  
+  return out;
+}

@@ -86,16 +86,12 @@ public:
   bool isVisualDirty() const {return state.test(ftr::StateOffset::VisualDirty);}
   bool isVisualClean() const {return !(state.test(ftr::StateOffset::VisualDirty));}
   void setVisualDirty();
-  void show3D();
-  void hide3D();
-  void toggle3D();
-  bool isVisible3D() const {return !(state.test(ftr::StateOffset::Hidden3D));}
-  bool isHidden3D() const {return state.test(ftr::StateOffset::Hidden3D);}
-  void showOverlay();
-  void hideOverlay();
-  void toggleOverlay();
-  bool isVisibleOverlay() const {return !(state.test(ftr::StateOffset::HiddenOverlay));}
-  bool isHiddenOverlay() const {return state.test(ftr::StateOffset::HiddenOverlay);}
+  
+  bool isVisible3D() const;
+  bool isHidden3D() const;
+  bool isVisibleOverlay() const;
+  bool isHiddenOverlay() const;
+  
   bool isSuccess() const {return !(state.test(ftr::StateOffset::Failure));}
   bool isFailure() const {return state.test(ftr::StateOffset::Failure);}
   void setActive();

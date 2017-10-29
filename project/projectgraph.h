@@ -137,15 +137,20 @@ namespace prg
       }
     };
     
-    class SetHiddenVisitor : public boost::default_bfs_visitor
+    //! simply collect connected vertices.
+    template <typename VertexTypeIn>
+    class AccrueVisitor : public boost::default_bfs_visitor
     {
     public:
-      
-      template <typename VertexTypeIn, typename GraphTypeIn>
+      AccrueVisitor() = delete;
+      AccrueVisitor(std::vector<VertexTypeIn> &vsIn) : vertices(vsIn){}
+      template <typename GraphTypeIn>
       void discover_vertex(VertexTypeIn vertexIn, const GraphTypeIn &graphIn) const
       {
-        graphIn[vertexIn].feature->hide3D();
+        vertices.push_back(vertexIn);
       }
+      
+      std::vector<VertexTypeIn> &vertices;
     };
     
     template <typename GraphTypeIn>

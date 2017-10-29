@@ -46,6 +46,7 @@
 #include <project/project.h>
 #include <globalutilities.h>
 #include <tools/idtools.h>
+#include <viewer/message.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <dagview/dagcontrolleddfs.h>
@@ -338,6 +339,12 @@ void Model::setupDispatcher()
   
   mask = msg::Request | msg::DebugDumpDAGViewGraph;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::dumpDAGViewGraphDispatched, this, _1)));
+  
+  mask = msg::Response | msg::View | msg::Show | msg::ThreeD;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::threeDShowDispatched, this, _1)));
+  
+  mask = msg::Response | msg::View | msg::Hide | msg::ThreeD;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::threeDHideDispatched, this, _1)));
 }
 
 void Model::featureStateChangedDispatched(const msg::Message &messageIn)
@@ -380,14 +387,6 @@ void Model::featureStateChangedDispatched(const msg::Message &messageIn)
   ftr::State featureState = fMessage.state;
   bool currentChangedState = fMessage.freshValue;
   
-  if (fMessage.stateOffset == ftr::StateOffset::Hidden3D)
-  {
-    if (currentChangedState)
-      graph[vertex].visibleIconRaw->setPixmap(visiblePixmapDisabled);
-    else
-      graph[vertex].visibleIconRaw->setPixmap(visiblePixmapEnabled);
-  }
-  
   if (fMessage.stateOffset == ftr::StateOffset::NonLeaf)
   {
     if (currentChangedState)
@@ -413,22 +412,10 @@ void Model::featureStateChangedDispatched(const msg::Message &messageIn)
   "<td>" << tr("Model Dirty") << "</td><td>" << ((featureState.test(ftr::StateOffset::ModelDirty)) ? ts : fs) << "</td>" <<
   "</tr><tr>" <<
   "<td>" << tr("Visual Dirty") << "</td><td>" << ((featureState.test(ftr::StateOffset::VisualDirty)) ? ts : fs) << "</td>" <<
-  "</tr>" <<
-  "</tr><tr>" <<
-  "<td>" << tr("Hidden 3D") << "</td><td>" << ((featureState.test(ftr::StateOffset::Hidden3D)) ? ts : fs) << "</td>" <<
-  "</tr>" <<
-  "</tr><tr>" <<
-  "<td>" << tr("Hidden Overlay") << "</td><td>" << ((featureState.test(ftr::StateOffset::HiddenOverlay)) ? ts : fs) << "</td>" <<
-  "</tr>" <<
-  "</tr>" <<
   "</tr><tr>" <<
   "<td>" << tr("Failure") << "</td><td>" << ((featureState.test(ftr::StateOffset::Failure)) ? ts : fs) << "</td>" <<
-  "</tr>" <<
-  "</tr>" <<
   "</tr><tr>" <<
   "<td>" << tr("Inactive") << "</td><td>" << ((featureState.test(ftr::StateOffset::Inactive)) ? ts : fs) << "</td>" <<
-  "</tr>" <<
-  "</tr>" <<
   "</tr><tr>" <<
   "<td>" << tr("Non-Leaf") << "</td><td>" << ((featureState.test(ftr::StateOffset::NonLeaf)) ? ts : fs) << "</td>" <<
   "</tr>" <<
@@ -762,6 +749,20 @@ void Model::dumpDAGViewGraphDispatched(const msg::Message &)
   QDesktopServices::openUrl(QUrl(fileName));
 }
 
+void Model::threeDShowDispatched(const msg::Message &msgIn)
+{
+  Vertex vertex = findRecord(vertexIdContainer, boost::get<vwr::Message>(msgIn.payload).featureId).vertex;
+  assert(!graph[vertex].feature.expired());
+  graph[vertex].visibleIconRaw->setPixmap(visiblePixmapEnabled);
+}
+
+void Model::threeDHideDispatched(const msg::Message &msgIn)
+{
+  Vertex vertex = findRecord(vertexIdContainer, boost::get<vwr::Message>(msgIn.payload).featureId).vertex;
+  assert(!graph[vertex].feature.expired());
+  graph[vertex].visibleIconRaw->setPixmap(visiblePixmapDisabled);
+}
+
 void Model::removeAllItems()
 {
   BGL_FORALL_VERTICES(currentVertex, graph, Graph)
@@ -936,7 +937,12 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
       //this is kind of ugly. we are indexing the actual vertex PROPERTY. so we
       //can't get the vertex without and extra search into vertex id container. ?????
       Vertex vertex = findRecord(vertexIdContainer, findRecordByVisible(graphLink, currentPixmap).featureId).vertex;
-      graph[vertex].feature.lock()->toggle3D();
+      msg::Message msg(msg::Request | msg::View | msg::Toggle | msg::ThreeD);
+      vwr::Message vMsg;
+      vMsg.featureId = graph[vertex].feature.lock()->getId(); //temp during conversion.
+      msg.payload = vMsg;
+      observer->out(msg);
+      
       return;
     }
     
@@ -1113,7 +1119,13 @@ void Model::toggleOverlaySlot()
   observer->out(message);
   
   for (auto v : currentSelections)
-    graph[v].feature.lock()->toggleOverlay();
+  {
+    msg::Message mOut(msg::Request | msg::View | msg::Toggle | msg::Overlay);
+    vwr::Message vMsg;
+    vMsg.featureId = graph[v].feature.lock()->getId();
+    mOut.payload = vMsg;
+    observer->out(mOut);
+  }
 }
 
 void Model::viewIsolateSlot()

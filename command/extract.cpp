@@ -90,8 +90,9 @@ void Extract::go()
       project->addFeature(extract);
       project->connect(baseFeature->getId(), extract->getId(), ftr::InputType{ftr::InputType::target});
       
-      baseFeature->hide3D();
-      baseFeature->hideOverlay();
+      observer->outBlocked(msg::buildHideThreeD(baseFeature->getId()));
+      observer->outBlocked(msg::buildHideOverlay(baseFeature->getId()));
+      
       extract->setColor(baseFeature->getColor());
     }
     else
@@ -106,8 +107,9 @@ void Extract::go()
       project->addFeature(extract);
       project->connect(baseFeature->getId(), extract->getId(), ftr::InputType{ftr::InputType::target});
       
-      baseFeature->hide3D();
-      baseFeature->hideOverlay();
+      observer->outBlocked(msg::buildHideThreeD(baseFeature->getId()));
+      observer->outBlocked(msg::buildHideOverlay(baseFeature->getId()));
+      
       extract->setColor(baseFeature->getColor());
     }
   }

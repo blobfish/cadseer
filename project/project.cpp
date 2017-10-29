@@ -330,9 +330,9 @@ void Project::removeFeature(const uuid& idIn)
     
     //make parents have same visible state as the feature being removed.
     if (feature->isVisible3D())
-      projectGraph[current.first].feature->show3D();
+      observer->outBlocked(msg::buildShowThreeD(projectGraph[current.first].feature->getId()));
     else
-      projectGraph[current.first].feature->hide3D();
+      observer->outBlocked(msg::buildHideThreeD(projectGraph[current.first].feature->getId()));
   }
   
   for (const auto &current : children)
@@ -391,8 +391,11 @@ void Project::setCurrentLeaf(const uuid& idIn)
   //parents
   SetActiveVisitor activeVisitorParents;
   boost::breadth_first_search(rGraph, vertex, boost::visitor(activeVisitorParents));
-  SetHiddenVisitor hideVisitorParents;
+  std::vector<Vertex> parents;
+  AccrueVisitor<Vertex> hideVisitorParents(parents);
   boost::breadth_first_search(rGraph, vertex, boost::visitor(hideVisitorParents));
+  for (const auto& v : parents)
+    observer->out(msg::buildHideThreeD(projectGraph[v].feature->getId()));
   //if this is a create feature we don't want to hide the immediate parents.
   if (projectGraph[vertex].feature->getDescriptor() == ftr::Descriptor::Create)
   {
@@ -401,20 +404,23 @@ void Project::setCurrentLeaf(const uuid& idIn)
     for (; it != itEnd; ++it)
     {
       projectGraph[*it].feature->setActive();
-      projectGraph[*it].feature->show3D();
+      observer->out(msg::buildShowThreeD(projectGraph[*it].feature->getId()));
     }
   }
   
   //children
   SetInactiveVisitor inactiveVisitor;
   boost::breadth_first_search(projectGraph, vertex, boost::visitor(inactiveVisitor));
-  SetHiddenVisitor hideVisitor;
+  std::vector<Vertex> children;
+  AccrueVisitor<Vertex> hideVisitor(children);
   boost::breadth_first_search(projectGraph, vertex, boost::visitor(hideVisitor));
+  for (const auto& v : children)
+    observer->out(msg::buildHideThreeD(projectGraph[v].feature->getId()));
   
   //now we don't want the actual feature inactive just it's children so we
   //turn it back on because the BFS and visitor turned it off.
   projectGraph[vertex].feature->setActive();
-  projectGraph[vertex].feature->show3D();
+  observer->out(msg::buildShowThreeD(projectGraph[vertex].feature->getId()));
   
   updateLeafStatus();
 }
@@ -531,24 +537,6 @@ void Project::setupDispatcher()
   
   mask = msg::Request | msg::DebugDumpProjectGraph;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::dumpProjectGraphDispatched, this, _1)));
-  
-  mask = msg::Request | msg::Show | msg::ThreeD;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::show3DDispatched, this, _1)));
-  
-  mask = msg::Request | msg::Hide | msg::ThreeD;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::hide3DDispatched, this, _1)));
-  
-  mask = msg::Request | msg::Toggle | msg::ThreeD;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::toggle3DDispatched, this, _1)));
-  
-  mask = msg::Request | msg::Show | msg::Overlay;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::showOverlayDispatched, this, _1)));
-  
-  mask = msg::Request | msg::Hide | msg::Overlay;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::hideOverlayDispatched, this, _1)));
-  
-  mask = msg::Request | msg::Toggle | msg::Overlay;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::toggleOverlayDispatched, this, _1)));
 }
 
 void Project::featureStateChangedDispatched(const msg::Message &messageIn)
@@ -713,78 +701,6 @@ void Project::dumpProjectGraphDispatched(const msg::Message &)
   writeGraphViz(fileName.toStdString().c_str());
   
   QDesktopServices::openUrl(QUrl(fileName));
-}
-
-void Project::show3DDispatched(const msg::Message &messageIn)
-{
-  std::ostringstream debug;
-  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
-  msg::dispatch().dumpString(debug.str());
-  
-  prj::Message message = boost::get<prj::Message>(messageIn.payload);
-  ftr::Base *feature = findFeature(message.featureId);
-  assert(feature);
-  feature->show3D();
-}
-
-void Project::hide3DDispatched(const msg::Message &messageIn)
-{
-  std::ostringstream debug;
-  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
-  msg::dispatch().dumpString(debug.str());
-  
-  prj::Message message = boost::get<prj::Message>(messageIn.payload);
-  ftr::Base *feature = findFeature(message.featureId);
-  assert(feature);
-  feature->hide3D();
-}
-
-void Project::toggle3DDispatched(const msg::Message &messageIn)
-{
-  std::ostringstream debug;
-  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
-  msg::dispatch().dumpString(debug.str());
-  
-  prj::Message message = boost::get<prj::Message>(messageIn.payload);
-  ftr::Base *feature = findFeature(message.featureId);
-  assert(feature);
-  feature->toggle3D();
-}
-
-void Project::showOverlayDispatched(const msg::Message &messageIn)
-{
-  std::ostringstream debug;
-  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
-  msg::dispatch().dumpString(debug.str());
-  
-  prj::Message message = boost::get<prj::Message>(messageIn.payload);
-  ftr::Base *feature = findFeature(message.featureId);
-  assert(feature);
-  feature->showOverlay();
-}
-
-void Project::hideOverlayDispatched(const msg::Message &messageIn)
-{
-  std::ostringstream debug;
-  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
-  msg::dispatch().dumpString(debug.str());
-  
-  prj::Message message = boost::get<prj::Message>(messageIn.payload);
-  ftr::Base *feature = findFeature(message.featureId);
-  assert(feature);
-  feature->hideOverlay();
-}
-
-void Project::toggleOverlayDispatched(const msg::Message &messageIn)
-{
-  std::ostringstream debug;
-  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
-  msg::dispatch().dumpString(debug.str());
-  
-  prj::Message message = boost::get<prj::Message>(messageIn.payload);
-  ftr::Base *feature = findFeature(message.featureId);
-  assert(feature);
-  feature->toggleOverlay();
 }
 
 void Project::indexVerticesEdges()

@@ -52,6 +52,7 @@
 #include <expressions/stringtranslator.h>
 #include <message/message.h>
 #include <message/observer.h>
+#include <viewer/message.h>
 #include <selection/message.h>
 #include <feature/seershape.h>
 #include <feature/blend.h>
@@ -185,7 +186,7 @@ Blend::Blend(ftr::Blend *editBlendIn, QWidget *parent) : QDialog(parent), blend(
   project->setCurrentLeaf(blendParent->getId());
   
   overlayWasOn = blend->isVisibleOverlay();
-  blend->hideOverlay();
+  observer->outBlocked(msg::buildHideOverlay(blend->getId()));
   
   QTimer::singleShot(0, this, SLOT(selectFirstBlendSlot()));
 }
@@ -266,16 +267,8 @@ void Blend::finishDialog()
     project->addFeature(blendSmart);
     project->connect(blendParent->getId(), blendSmart->getId(), ftr::InputType{ftr::InputType::target});
     
-    /* hide parent. can't use non const viz functions */
-    prj::Message pMessage;
-    pMessage.featureId = blendParent->getId();
-    msg::Message message;
-    message.payload = pMessage;
-    
-    message.mask = msg::Request | msg::Hide | msg::ThreeD;
-    observer->outBlocked(message);
-    message.mask = msg::Request | msg::Hide | msg::Overlay;
-    observer->outBlocked(message);
+    observer->outBlocked(msg::buildHideThreeD(blendParent->getId()));
+    observer->outBlocked(msg::buildHideOverlay(blendParent->getId()));
     
     blend->setColor(blendParent->getColor());
   }
@@ -340,7 +333,7 @@ void Blend::finishDialog()
       project->setCurrentLeaf(id);
     
     if (overlayWasOn)
-      blend->showOverlay();
+      observer->outBlocked(msg::buildShowOverlay(blend->getId()));
   }
   
   observer->out(msg::Mask(msg::Request | msg::Command | msg::Done));

@@ -98,6 +98,9 @@ protected:
     void systemResetDispatched(const msg::Message &);
     void systemToggleDispatched(const msg::Message &);
     void renderStyleToggleDispatched(const msg::Message &);
+    void showThreeDDispatched(const msg::Message &);
+    void hideThreeDDispatched(const msg::Message &);
+    void threeDToggleDispatched(const msg::Message &);
 };
 
 class StatsHandler : public osgViewer::StatsHandler

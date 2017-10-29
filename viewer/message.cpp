@@ -19,9 +19,10 @@
 
 #include <osg/Node>
 
+#include <tools/idtools.h>
 #include <viewer/message.h>
 
 using namespace vwr;
 
-Message::Message(){}
+Message::Message() : text(), node(), featureId(gu::createNilId()){}
 Message::~Message(){}

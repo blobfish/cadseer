@@ -22,6 +22,8 @@
 
 #include <string>
 
+#include <boost/uuid/uuid.hpp>
+
 #include <osg/ref_ptr>
 
 namespace osg{class Node;}
@@ -30,10 +32,11 @@ namespace vwr
 {
   struct Message
   {
-      Message();
-      ~Message();
-        std::string text = "Default Message";
-        osg::ref_ptr<osg::Node> node;
+    Message();
+    ~Message();
+    std::string text;
+    osg::ref_ptr<osg::Node> node;
+    boost::uuids::uuid featureId;
   };
 }
 

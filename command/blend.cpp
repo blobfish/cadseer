@@ -123,8 +123,10 @@ void Blend::go()
         blend->addVariableBlend(vBlend);
       
       ftr::Base *targetFeature = project->findFeature(targetFeatureId);
-      targetFeature->hide3D();
-      targetFeature->hideOverlay();
+      
+      observer->outBlocked(msg::buildHideThreeD(targetFeature->getId()));
+      observer->outBlocked(msg::buildHideOverlay(targetFeature->getId()));
+      
       blend->setColor(targetFeature->getColor());
       
       observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));

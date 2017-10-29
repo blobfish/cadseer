@@ -29,6 +29,8 @@
 #include <feature/base.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
+#include <viewer/message.h>
+#include <selection/visitors.h>
 #include <viewer/overlaycamera.h>
 
 using namespace vwr;
@@ -80,6 +82,15 @@ void OverlayCamera::setupDispatcher()
   
   mask = msg::Request | msg::Clear | msg::Overlay;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::clearOverlayGeometryDispatched, this, _1)));
+  
+  mask = msg::Request | msg::View | msg::Show | msg::Overlay;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::showOverlayDispatched, this, _1)));
+  
+  mask = msg::Request | msg::View | msg::Hide | msg::Overlay;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::hideOverlayDispatched, this, _1)));
+  
+  mask = msg::Request | msg::View | msg::Toggle | msg::Overlay;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::overlayToggleDispatched, this, _1)));
 }
 
 void OverlayCamera::featureAddedDispatched(const msg::Message &messageIn)
@@ -118,4 +129,60 @@ void OverlayCamera::addOverlayGeometryDispatched(const msg::Message &message)
 void OverlayCamera::clearOverlayGeometryDispatched(const msg::Message&)
 {
     fleetingGeometry->removeChildren(0, fleetingGeometry->getNumChildren());
+}
+
+void OverlayCamera::showOverlayDispatched(const msg::Message &msgIn)
+{
+  slc::MainSwitchVisitor v(boost::get<vwr::Message>(msgIn.payload).featureId);
+  this->accept(v);
+  assert(v.out);
+  if (!v.out)
+    return;
+  
+  if (v.out->getNewChildDefaultValue()) //already shown
+    return;
+  
+  msg::Message mOut(msg::Response | msg::View | msg::Show | msg::Overlay);
+  mOut.payload = msgIn.payload;
+  observer->outBlocked(mOut);
+}
+
+void OverlayCamera::hideOverlayDispatched(const msg::Message &msgIn)
+{
+  slc::MainSwitchVisitor v(boost::get<vwr::Message>(msgIn.payload).featureId);
+  this->accept(v);
+  assert(v.out);
+  if (!v.out)
+    return;
+  
+  if (!v.out->getNewChildDefaultValue()) //already hidden
+    return;
+  
+  msg::Message mOut(msg::Response | msg::View | msg::Hide | msg::Overlay);
+  mOut.payload = msgIn.payload;
+  observer->outBlocked(mOut);
+}
+
+void OverlayCamera::overlayToggleDispatched(const msg::Message &msgIn)
+{
+  slc::MainSwitchVisitor v(boost::get<vwr::Message>(msgIn.payload).featureId);
+  this->accept(v);
+  assert(v.out); //some features won't have overlay, but we want to filter those out before the message call.
+  if (!v.out)
+    return;
+  
+  msg::Mask maskOut; //notice we are not responding with Msg::Toggle that got us here.
+  if (v.out->getNewChildDefaultValue())
+  {
+    v.out->setAllChildrenOff();
+    maskOut = msg::Response | msg::View | msg::Hide | msg::Overlay;
+  }
+  else
+  {
+    v.out->setAllChildrenOn();
+    maskOut = msg::Response | msg::View | msg::Show | msg::Overlay;
+  }
+  msg::Message mOut(maskOut);
+  mOut.payload = msgIn.payload;
+  observer->outBlocked(mOut);
 }

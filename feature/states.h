@@ -33,11 +33,9 @@ namespace ftr
   {
     static const unsigned long ModelDirty =       0;
     static const unsigned long VisualDirty =      1;
-    static const unsigned long Hidden3D =         2;
-    static const unsigned long HiddenOverlay =    3;
-    static const unsigned long Failure =          4;
-    static const unsigned long Inactive =         5;
-    static const unsigned long NonLeaf =          6; //keeping consistently negative.
+    static const unsigned long Failure =          2;
+    static const unsigned long Inactive =         3;
+    static const unsigned long NonLeaf =          4; //keeping consistently negative.
   };
 }
 

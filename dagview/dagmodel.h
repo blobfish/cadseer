@@ -103,6 +103,8 @@ namespace dag
     void featureStateChangedDispatched(const msg::Message &);
     void featureRenamedDispatched(const msg::Message &);
     void dumpDAGViewGraphDispatched(const msg::Message &);
+    void threeDShowDispatched(const msg::Message &);
+    void threeDHideDispatched(const msg::Message &);
     
     Graph graph;
     GraphLinkContainer graphLink;

@@ -381,10 +381,8 @@ void Factory::newUnionDispatched(const msg::Message&)
   
   for (const auto &id : featureIds)
   {
-    ftr::Base *feature = project->findFeature(id);
-    assert(feature);
-    feature->hide3D();
-    feature->hideOverlay();
+    observer->outBlocked(msg::buildHideThreeD(id));
+    observer->outBlocked(msg::buildHideOverlay(id));
   }
   
   //union keyword. whoops
@@ -430,10 +428,8 @@ void Factory::newSubtractDispatched(const msg::Message&)
   
   for (const auto &id : featureIds)
   {
-    ftr::Base *feature = project->findFeature(id);
-    assert(feature);
-    feature->hide3D();
-    feature->hideOverlay();
+    observer->outBlocked(msg::buildHideThreeD(id));
+    observer->outBlocked(msg::buildHideOverlay(id));
   }
   
   std::shared_ptr<ftr::Subtract> subtract(new ftr::Subtract());
@@ -478,10 +474,8 @@ void Factory::newIntersectDispatched(const msg::Message&)
   
   for (const auto &id : featureIds)
   {
-    ftr::Base *feature = project->findFeature(id);
-    assert(feature);
-    feature->hide3D();
-    feature->hideOverlay();
+    observer->outBlocked(msg::buildHideThreeD(id));
+    observer->outBlocked(msg::buildHideOverlay(id));
   }
   
   std::shared_ptr<ftr::Intersect> intersect(new ftr::Intersect());
@@ -537,9 +531,10 @@ void Factory::newChamferDispatched(const msg::Message&)
   project->connect(targetFeatureId, chamfer->getId(), ftr::InputType{ftr::InputType::target});
   
   ftr::Base *targetFeature = project->findFeature(targetFeatureId);
-  targetFeature->hide3D();
-  targetFeature->hideOverlay();
   chamfer->setColor(targetFeature->getColor());
+  
+  observer->outBlocked(msg::buildHideThreeD(targetFeatureId));
+  observer->outBlocked(msg::buildHideOverlay(targetFeatureId));
   
   observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
   observer->out(msg::Mask(msg::Request | msg::Update));
@@ -588,9 +583,10 @@ void Factory::newDraftDispatched(const msg::Message&)
   project->connect(targetFeatureId, draft->getId(), ftr::InputType{ftr::InputType::target});
   
   ftr::Base *targetFeature = project->findFeature(targetFeatureId);
-  targetFeature->hide3D();
-  targetFeature->hideOverlay();
   draft->setColor(targetFeature->getColor());
+  
+  observer->outBlocked(msg::buildHideThreeD(targetFeatureId));
+  observer->outBlocked(msg::buildHideOverlay(targetFeatureId));
   
   observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
   observer->out(msg::Mask(msg::Request | msg::Update));
@@ -666,10 +662,10 @@ void Factory::newHollowDispatched(const msg::Message&)
   hollow->setHollowPicks(hollowPicks);
   project->addFeature(hollow);
   project->connect(targetFeatureId, hollow->getId(), ftr::InputType{ftr::InputType::target});
-  
-  targetFeature->hide3D();
-  targetFeature->hideOverlay();
   hollow->setColor(targetFeature->getColor());
+  
+  observer->outBlocked(msg::buildHideThreeD(targetFeatureId));
+  observer->outBlocked(msg::buildHideOverlay(targetFeatureId));
   
   observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
   observer->out(msg::Mask(msg::Request | msg::Update));
@@ -1249,15 +1245,19 @@ void Factory::viewIsolateDispatched(const msg::Message&)
     ftr::Base *feature = project->findFeature(id);
     if (feature->isNonLeaf()) //ignore non-leaf features.
       continue;
+    vwr::Message vMsg;
+    vMsg.featureId = id;
+    msg::Message mOut;
+    mOut.payload = vMsg;
     if (selectedFeatures.count(id) == 0)
     {
-      feature->hide3D();
-      feature->hideOverlay();
+      observer->outBlocked(msg::buildHideThreeD(id));
+      observer->outBlocked(msg::buildHideOverlay(id));
     }
     else
     {
-      feature->show3D();
-      feature->showOverlay();
+      observer->outBlocked(msg::buildShowThreeD(id));
+      observer->outBlocked(msg::buildShowOverlay(id));
     }
   }
   

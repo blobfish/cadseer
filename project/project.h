@@ -113,12 +113,6 @@ private:
     void checkShapeIdsDispatched(const msg::Message &);
     void featureStateChangedDispatched(const msg::Message &);
     void dumpProjectGraphDispatched(const msg::Message &);
-    void show3DDispatched(const msg::Message &);
-    void hide3DDispatched(const msg::Message &);
-    void toggle3DDispatched(const msg::Message &);
-    void showOverlayDispatched(const msg::Message &);
-    void hideOverlayDispatched(const msg::Message &);
-    void toggleOverlayDispatched(const msg::Message &);
 };
 }
 

@@ -158,6 +158,10 @@ namespace msg
     msg::Message buildGitMessage(const std::string &);
     msg::Message buildStatusMessage(const std::string &);
     msg::Message buildSelectionMask(slc::Mask);
+    msg::Message buildShowThreeD(const boost::uuids::uuid&);
+    msg::Message buildHideThreeD(const boost::uuids::uuid&);
+    msg::Message buildShowOverlay(const boost::uuids::uuid&);
+    msg::Message buildHideOverlay(const boost::uuids::uuid&);
     //@}
 }
 
