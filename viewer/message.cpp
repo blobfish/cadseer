@@ -25,4 +25,7 @@
 using namespace vwr;
 
 Message::Message() : text(), node(), featureId(gu::createNilId()){}
+Message::Message(const std::string &sIn) : text(sIn), node(), featureId(gu::createNilId()){}
+Message::Message(const boost::uuids::uuid &idIn) : text(), node(), featureId(idIn){}
+
 Message::~Message(){}

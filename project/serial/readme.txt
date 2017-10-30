@@ -26,6 +26,7 @@ xsdcxx cxx-tree --std c++11 --generate-serialization --generate-doxygen --type-n
 //these will need to be run when the respective xsd file has been changed.
 cd */cadseer/source/project/serial/xsdcxxoutput
 xsdcxx cxx-tree --std c++11 --generate-serialization --generate-doxygen --type-naming ucc --hxx-suffix .h --cxx-suffix .cpp --guard-prefix PRJ_SRL --extern-xml-schema ../../../xmlbase.xsd ../project.xsd
+xsdcxx cxx-tree --std c++11 --generate-serialization --generate-doxygen --type-naming ucc --hxx-suffix .h --cxx-suffix .cpp --guard-prefix PRJ_SRL --extern-xml-schema ../../../xmlbase.xsd ../view.xsd
 xsdcxx cxx-tree --std c++11 --generate-serialization --generate-doxygen --type-naming ucc --hxx-suffix .h --cxx-suffix .cpp --guard-prefix PRJ_SRL --extern-xml-schema ../../../xmlbase.xsd ../featurebase.xsd
 xsdcxx cxx-tree --std c++11 --generate-serialization --generate-doxygen --type-naming ucc --hxx-suffix .h --cxx-suffix .cpp --guard-prefix PRJ_SRL --extern-xml-schema featurebase.xsd ../featurecsysbase.xsd
 xsdcxx cxx-tree --std c++11 --generate-serialization --generate-doxygen --type-naming ucc --hxx-suffix .h --cxx-suffix .cpp --guard-prefix PRJ_SRL --extern-xml-schema featurecsysbase.xsd ../featurebox.xsd

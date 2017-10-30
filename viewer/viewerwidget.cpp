@@ -63,6 +63,9 @@
 #include <feature/base.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
+#include <project/serial/xsdcxxoutput/view.h>
+#include <application/application.h>
+#include <project/project.h>
 
 using namespace vwr;
 
@@ -517,6 +520,12 @@ void ViewerWidget::setupDispatcher()
   mask = msg::Request | msg::SystemToggle;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::systemToggleDispatched, this, _1)));
   
+  mask = msg::Request | msg::View | msg::Show | msg::HiddenLine;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::showHiddenLinesDispatched, this, _1)));
+  
+  mask = msg::Request | msg::View | msg::Hide | msg::HiddenLine;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::hideHiddenLinesDispatched, this, _1)));
+  
   mask = msg::Request | msg::View | msg::Toggle | msg::HiddenLine;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewToggleHiddenLinesDispatched, this, _1)));
   
@@ -528,6 +537,9 @@ void ViewerWidget::setupDispatcher()
   
   mask = msg::Request | msg::View | msg::Toggle | msg::ThreeD;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::threeDToggleDispatched, this, _1)));
+  
+  mask = msg::Response | msg::Post | msg::Open | msg::Project;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::projectOpenedDispatched, this, _1)));
 }
 
 void ViewerWidget::featureAddedDispatched(const msg::Message &messageIn)
@@ -578,6 +590,26 @@ void ViewerWidget::systemToggleDispatched(const msg::Message&)
   manager.saveConfig();
 }
 
+void ViewerWidget::showHiddenLinesDispatched(const msg::Message&)
+{
+  HiddenLineVisitor v(true);
+  root->accept(v);
+  
+  //make sure prefs are in sync.
+  prf::manager().rootPtr->visual().display().showHiddenLines() = true;
+  prf::manager().saveConfig();
+}
+
+void ViewerWidget::hideHiddenLinesDispatched(const msg::Message&)
+{
+  HiddenLineVisitor v(false);
+  root->accept(v);
+  
+  //make sure prefs are in sync.
+  prf::manager().rootPtr->visual().display().showHiddenLines() = false;
+  prf::manager().saveConfig();
+}
+
 void ViewerWidget::viewToggleHiddenLinesDispatched(const msg::Message&)
 {
   prf::Manager &manager = prf::manager();
@@ -601,6 +633,9 @@ void ViewerWidget::showThreeDDispatched(const msg::Message &msgIn)
   if (v.out->getNewChildDefaultValue()) //already shown.
     return;
   
+  v.out->setAllChildrenOn();
+  serialWrite();
+  
   msg::Message mOut(msg::Response | msg::View | msg::Show | msg::ThreeD);
   mOut.payload = msgIn.payload;
   observer->outBlocked(mOut);
@@ -616,6 +651,9 @@ void ViewerWidget::hideThreeDDispatched(const msg::Message &msgIn)
   
   if (!v.out->getNewChildDefaultValue()) //already hidden.
     return;
+  
+  v.out->setAllChildrenOff();
+  serialWrite();
   
   msg::Message mOut(msg::Response | msg::View | msg::Hide | msg::ThreeD);
   mOut.payload = msgIn.payload;
@@ -640,9 +678,17 @@ void ViewerWidget::threeDToggleDispatched(const msg::Message &msgIn)
     v.out->setAllChildrenOn();
     maskOut = msg::Response | msg::View | msg::Show | msg::ThreeD;
   }
+  
+  serialWrite();
+  
   msg::Message mOut(maskOut);
   mOut.payload = msgIn.payload;
   observer->outBlocked(mOut);
+}
+
+void ViewerWidget::projectOpenedDispatched(const msg::Message &)
+{
+  serialRead();
 }
 
 void ViewerWidget::screenCapture(const std::string &fp, const std::string &e)
@@ -662,6 +708,91 @@ QTextStream& ViewerWidget::getInfo(QTextStream &stream) const
   gu::osgMatrixOut(stream, getCurrentSystem());
   
   return stream;
+}
+
+//restore states from serialize
+class SerialInVisitor : public osg::NodeVisitor
+{
+public:
+  SerialInVisitor(const prj::srl::States &statesIn) :
+  NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN),
+  states(statesIn)
+  {
+    observer.name = "vwr::Widget::SerialIn";
+  }
+  virtual void apply(osg::Switch &switchIn) override
+  {
+    std::string userValue;
+    if (switchIn.getUserValue(gu::idAttributeTitle, userValue))
+    {
+      for (const auto &s : states.array())
+      {
+        if (userValue == s.id())
+        {
+          msg::Payload payload((vwr::Message(gu::stringToId(userValue))));
+          if (s.visible())
+          {
+            switchIn.setAllChildrenOn();
+            observer.outBlocked(msg::Message(msg::Mask(msg::Response | msg::View | msg::Show | msg::ThreeD), payload));
+          }
+          else
+          {
+            switchIn.setAllChildrenOff();
+            observer.outBlocked(msg::Message(msg::Mask(msg::Response | msg::View | msg::Hide | msg::ThreeD), payload));
+          }
+          break;
+        }
+      }
+    }
+    
+    //only interested in top level children, so don't need to call traverse here.
+  }
+protected:
+  const prj::srl::States &states;
+  msg::Observer observer;
+};
+
+void ViewerWidget::serialRead()
+{
+  boost::filesystem::path file = static_cast<app::Application*>(qApp)->getProject()->getSaveDirectory();
+  file /= "view.xml";
+  if (!boost::filesystem::exists(file))
+    return;
+  
+  auto sView = prj::srl::view(file.string(), ::xml_schema::Flags::dont_validate);
+  SerialInVisitor v(sView->states());
+  root->accept(v);
+}
+
+//get all states to serialize
+class SerialOutVisitor : public osg::NodeVisitor
+{
+public:
+  SerialOutVisitor(prj::srl::States &statesIn) : NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), states(statesIn){}
+  virtual void apply(osg::Switch &switchIn) override
+  {
+    std::string userValue;
+    if (switchIn.getUserValue(gu::idAttributeTitle, userValue))
+      states.array().push_back(prj::srl::State(userValue, switchIn.getNewChildDefaultValue()));
+    
+    //only interested in top level children, so don't need to call traverse here.
+  }
+protected:
+  prj::srl::States &states;
+};
+
+void ViewerWidget::serialWrite()
+{
+  prj::srl::States states;
+  SerialOutVisitor v(states);
+  root->accept(v);
+  prj::srl::View svOut(states);
+  
+  boost::filesystem::path file = static_cast<app::Application*>(qApp)->getProject()->getSaveDirectory();
+  file /= "view.xml";
+  xml_schema::NamespaceInfomap infoMap;
+  std::ofstream stream(file.string());
+  prj::srl::view(stream, svOut, infoMap);
 }
 
 void StatsHandler::collectWhichCamerasToRenderStatsFor

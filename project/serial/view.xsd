@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="http://www.cadseer.com/prj/srl"
+  xmlns:srl="http://www.cadseer.com/prj/srl"
+>
+
+<xs:complexType name="State">
+  <xs:all>
+    <xs:element name="id" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+    <xs:element name="visible" type="xs:boolean" default="false"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="States">
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+    <xs:element name="array" type="srl:State"/>
+  </xs:sequence>
+</xs:complexType>
+  
+<xs:complexType name="View">
+  <xs:all>
+    <xs:element name="states" type="srl:States"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:element name="view" type="srl:View"/>
+  
+</xs:schema> 

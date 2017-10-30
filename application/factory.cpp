@@ -904,11 +904,15 @@ void Factory::preferencesDispatched(const msg::Message&)
     project->updateVisual();
   }
   else if(dialog->isHiddenLinesDirty())
-    observer->out(msg::Message(msg::Response | msg::Post | msg::UpdateVisual));
+  {
+    if (prf::manager().rootPtr->visual().display().showHiddenLines())
+      observer->outBlocked(msg::Message(msg::Request | msg::View | msg::Show | msg::HiddenLine));
+    else
+      observer->outBlocked(msg::Message(msg::Request | msg::View | msg::Hide | msg::HiddenLine));
+  }
   
-  msg::Message prfResponse;
-  prfResponse.mask = msg::Response | msg::Preferences;
-  observer->out(prfResponse);
+  msg::Message prfResponse(msg::Response | msg::Preferences);
+  observer->outBlocked(prfResponse);
 }
 
 void Factory::removeDispatched(const msg::Message&)

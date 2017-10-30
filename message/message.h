@@ -144,7 +144,9 @@ namespace msg
     struct Message
     {
       Message();
-      Message(const Mask &maskIn);
+      Message(const Mask&);
+      Message(const Payload&);
+      Message(const Mask&, const Payload&);
       Mask mask;
       Payload payload;
     };

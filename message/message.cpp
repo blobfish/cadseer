@@ -29,6 +29,10 @@ Message::Message() : mask(0){}
 
 Message::Message(const Mask &maskIn) : mask(maskIn){}
 
+Message::Message(const Payload &payloadIn) : payload(payloadIn){}
+
+Message::Message(const Mask &maskIn, const Payload &payloadIn) : mask(maskIn), payload(payloadIn){}
+
 msg::Message msg::buildGitMessage(const std::string &messageIn)
 {
   msg::Message out;

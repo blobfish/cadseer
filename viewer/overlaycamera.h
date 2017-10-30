@@ -46,6 +46,10 @@ private:
   void overlayToggleDispatched(const msg::Message &);
   void showOverlayDispatched(const msg::Message &);
   void hideOverlayDispatched(const msg::Message &);
+  void projectOpenedDispatched(const msg::Message &);
+  
+  void serialRead();
+  void serialWrite();
   
   osg::ref_ptr<osg::Switch> fleetingGeometry;
 };

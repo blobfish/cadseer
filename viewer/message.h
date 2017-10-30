@@ -33,6 +33,8 @@ namespace vwr
   struct Message
   {
     Message();
+    Message(const std::string&);
+    Message(const boost::uuids::uuid&);
     ~Message();
     std::string text;
     osg::ref_ptr<osg::Node> node;

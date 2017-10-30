@@ -93,6 +93,8 @@ protected:
     void viewFillDispatched(const msg::Message &);
     void viewTriangulationDispatched(const msg::Message &);
     void viewToggleHiddenLinesDispatched(const msg::Message&);
+    void showHiddenLinesDispatched(const msg::Message&);
+    void hideHiddenLinesDispatched(const msg::Message&);
     void exportOSGDispatched(const msg::Message &);
     void closeProjectDispatched(const msg::Message &);
     void systemResetDispatched(const msg::Message &);
@@ -101,6 +103,10 @@ protected:
     void showThreeDDispatched(const msg::Message &);
     void hideThreeDDispatched(const msg::Message &);
     void threeDToggleDispatched(const msg::Message &);
+    void projectOpenedDispatched(const msg::Message &);
+    
+    void serialRead();
+    void serialWrite();
 };
 
 class StatsHandler : public osgViewer::StatsHandler
