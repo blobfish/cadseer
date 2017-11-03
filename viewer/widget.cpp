@@ -59,7 +59,7 @@
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <viewer/textcamera.h>
-#include <viewer/overlaycamera.h>
+#include <viewer/overlay.h>
 #include <feature/base.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
@@ -137,7 +137,7 @@ Widget::Widget(osgViewer::ViewerBase::ThreadingModel threadingModel) : QWidget()
     infoCamera->setProjectionResizePolicy(osg::Camera::ProjectionResizePolicy::FIXED);
     view->addSlave(infoCamera, false);
     
-    OverlayCamera *oCamera = new OverlayCamera(windowQt);
+    Overlay *oCamera = new Overlay(windowQt);
     view->addSlave(oCamera, false);
     
     systemSwitch = new osg::Switch();

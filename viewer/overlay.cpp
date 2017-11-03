@@ -37,19 +37,19 @@
 #include <viewer/message.h>
 #include <selection/visitors.h>
 #include <project/serial/xsdcxxoutput/view.h>
-#include <viewer/overlaycamera.h>
+#include <viewer/overlay.h>
 
 using namespace vwr;
 
-OverlayCamera::OverlayCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
+Overlay::Overlay(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
 {
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
-  observer->name = "vwr::OverlayCamera";
+  observer->name = "vwr::Overlay";
   
   fleetingGeometry = new osg::Switch();
   this->addChild(fleetingGeometry);
   
-  setNodeMask(mdv::overlayCamera);
+  setNodeMask(mdv::overlay);
   setName("overlay");
   setupDispatcher();
   setGraphicsContext(windowIn);
@@ -70,42 +70,42 @@ OverlayCamera::OverlayCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera(
   setViewport(new osg::Viewport(*mainCamera->getViewport()));
 }
 
-void OverlayCamera::setupDispatcher()
+void Overlay::setupDispatcher()
 {
   msg::Mask mask;
 
   mask = msg::Response | msg::Post | msg::Add | msg::Feature;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::featureAddedDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Overlay::featureAddedDispatched, this, _1)));
   
   mask = msg::Response | msg::Pre | msg::Remove | msg::Feature;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::featureRemovedDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Overlay::featureRemovedDispatched, this, _1)));
   
   mask = msg::Response | msg::Pre | msg::Close | msg::Project;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::closeProjectDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Overlay::closeProjectDispatched, this, _1)));
   
   mask = msg::Request | msg::Add | msg::Overlay;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::addOverlayGeometryDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Overlay::addOverlayGeometryDispatched, this, _1)));
   
   mask = msg::Request | msg::Clear | msg::Overlay;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::clearOverlayGeometryDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Overlay::clearOverlayGeometryDispatched, this, _1)));
   
   mask = msg::Request | msg::View | msg::Show | msg::Overlay;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::showOverlayDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Overlay::showOverlayDispatched, this, _1)));
   
   mask = msg::Request | msg::View | msg::Hide | msg::Overlay;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::hideOverlayDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Overlay::hideOverlayDispatched, this, _1)));
   
   mask = msg::Request | msg::View | msg::Toggle | msg::Overlay;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::overlayToggleDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Overlay::overlayToggleDispatched, this, _1)));
   
   mask = msg::Response | msg::Post | msg::Open | msg::Project;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::projectOpenedDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Overlay::projectOpenedDispatched, this, _1)));
     
   mask = msg::Response | msg::Post | msg::UpdateModel;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::projectUpdatedDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Overlay::projectUpdatedDispatched, this, _1)));
 }
 
-void OverlayCamera::featureAddedDispatched(const msg::Message &messageIn)
+void Overlay::featureAddedDispatched(const msg::Message &messageIn)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
@@ -115,7 +115,7 @@ void OverlayCamera::featureAddedDispatched(const msg::Message &messageIn)
   addChild(message.feature->getOverlaySwitch());
 }
 
-void OverlayCamera::featureRemovedDispatched(const msg::Message &messageIn)
+void Overlay::featureRemovedDispatched(const msg::Message &messageIn)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
@@ -125,7 +125,7 @@ void OverlayCamera::featureRemovedDispatched(const msg::Message &messageIn)
   removeChild(message.feature->getOverlaySwitch());
 }
 
-void OverlayCamera::closeProjectDispatched(const msg::Message&)
+void Overlay::closeProjectDispatched(const msg::Message&)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
@@ -136,7 +136,7 @@ void OverlayCamera::closeProjectDispatched(const msg::Message&)
     removeChildren(2, getNumChildren() - 2);
 }
 
-void OverlayCamera::addOverlayGeometryDispatched(const msg::Message &message)
+void Overlay::addOverlayGeometryDispatched(const msg::Message &message)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
@@ -146,7 +146,7 @@ void OverlayCamera::addOverlayGeometryDispatched(const msg::Message &message)
     fleetingGeometry->addChild(vMessage.node.get());
 }
 
-void OverlayCamera::clearOverlayGeometryDispatched(const msg::Message&)
+void Overlay::clearOverlayGeometryDispatched(const msg::Message&)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
@@ -155,7 +155,7 @@ void OverlayCamera::clearOverlayGeometryDispatched(const msg::Message&)
     fleetingGeometry->removeChildren(0, fleetingGeometry->getNumChildren());
 }
 
-void OverlayCamera::showOverlayDispatched(const msg::Message &msgIn)
+void Overlay::showOverlayDispatched(const msg::Message &msgIn)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
@@ -177,7 +177,7 @@ void OverlayCamera::showOverlayDispatched(const msg::Message &msgIn)
   observer->outBlocked(mOut);
 }
 
-void OverlayCamera::hideOverlayDispatched(const msg::Message &msgIn)
+void Overlay::hideOverlayDispatched(const msg::Message &msgIn)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
@@ -199,7 +199,7 @@ void OverlayCamera::hideOverlayDispatched(const msg::Message &msgIn)
   observer->outBlocked(mOut);
 }
 
-void OverlayCamera::overlayToggleDispatched(const msg::Message &msgIn)
+void Overlay::overlayToggleDispatched(const msg::Message &msgIn)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
@@ -228,7 +228,7 @@ void OverlayCamera::overlayToggleDispatched(const msg::Message &msgIn)
   observer->outBlocked(mOut);
 }
 
-void OverlayCamera::projectOpenedDispatched(const msg::Message &)
+void Overlay::projectOpenedDispatched(const msg::Message &)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
@@ -237,7 +237,7 @@ void OverlayCamera::projectOpenedDispatched(const msg::Message &)
   serialRead();
 }
 
-void OverlayCamera::projectUpdatedDispatched(const msg::Message &)
+void Overlay::projectUpdatedDispatched(const msg::Message &)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
@@ -288,7 +288,7 @@ protected:
   msg::Observer observer;
 };
 
-void OverlayCamera::serialRead()
+void Overlay::serialRead()
 {
   boost::filesystem::path file = static_cast<app::Application*>(qApp)->getProject()->getSaveDirectory();
   file /= "overlay.xml";
@@ -317,7 +317,7 @@ protected:
   prj::srl::States &states;
 };
 
-void OverlayCamera::serialWrite()
+void Overlay::serialWrite()
 {
   prj::srl::States states;
   SerialOutVisitor v(states);

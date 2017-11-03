@@ -464,7 +464,7 @@ SET(VIEWER_SOURCES
     viewer/gleventwidget.cpp
     viewer/spaceballosgevent.cpp
     viewer/textcamera.cpp
-    viewer/overlaycamera.cpp
+    viewer/overlay.cpp
     viewer/message.cpp
 )
 

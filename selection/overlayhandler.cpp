@@ -23,7 +23,7 @@
 
 #include <osgViewer/View>
 
-#include <viewer/overlaycamera.h>
+#include <viewer/overlay.h>
 #include <library/csysdragger.h>
 #include <library/ipgroup.h>
 #include <library/plabel.h>
@@ -38,7 +38,7 @@
 
 using namespace slc;
 
-OverlayHandler::OverlayHandler(vwr::OverlayCamera* cameraIn) : camera(cameraIn)
+OverlayHandler::OverlayHandler(vwr::Overlay* cameraIn) : camera(cameraIn)
 {
 
 }

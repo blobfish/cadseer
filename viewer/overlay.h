@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef OVERLAYCAMERA_H
-#define OVERLAYCAMERA_H
+#ifndef VWR_OVERLAY_H
+#define VWR_OVERLAY_H
 
 #include <memory>
 
@@ -30,10 +30,10 @@ namespace osgViewer{class GraphicsWindow;}
 namespace msg{class Message; class Observer;}
 namespace vwr
 {
-class OverlayCamera : public osg::Camera
+class Overlay : public osg::Camera
 {
 public:
-    OverlayCamera(osgViewer::GraphicsWindow *);
+    Overlay(osgViewer::GraphicsWindow *);
 
 private:
   std::unique_ptr<msg::Observer> observer;
@@ -56,4 +56,4 @@ private:
 };
 }
 
-#endif // OVERLAYCAMERA_H
+#endif // VWR_OVERLAY_H

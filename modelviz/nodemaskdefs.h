@@ -29,7 +29,7 @@ namespace mdv
     static const unsigned int mainCamera =              1 << 0;
     static const unsigned int backGroundCamera =        1 << 1;
     static const unsigned int gestureCamera =           1 << 2;   //also used on gesture background.
-    static const unsigned int overlayCamera =           1 << 3;
+    static const unsigned int overlay =                 1 << 3;
     
     static const unsigned int point =                   1 << 4;   //point refers to temporary snap points.
     static const unsigned int vertex =                  1 << 5;   //vertex refers to actual geometric objects. not used right now.
