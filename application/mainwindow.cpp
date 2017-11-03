@@ -30,7 +30,7 @@
 #include <expressions/widget.h>
 #include <application/application.h>
 #include <application/splitterdecorated.h>
-#include <viewer/viewerwidget.h>
+#include <viewer/widget.h>
 #include <selection/manager.h>
 #include <message/dispatch.h>
 #include <message/message.h>
@@ -62,7 +62,7 @@ MainWindow::MainWindow(QWidget *parent) :
     subSplitter->addWidget(dagView);
     subSplitter->restoreSettings("mainWindowSubSplitter");
     
-    viewWidget = new vwr::ViewerWidget(osgViewer::ViewerBase::SingleThreaded);
+    viewWidget = new vwr::Widget(osgViewer::ViewerBase::SingleThreaded);
     viewWidget->setGeometry( 100, 100, 800, 600 );
     viewWidget->setMinimumSize(QSize(100, 100)); //don't collapse view widget. osg nan erros.
     

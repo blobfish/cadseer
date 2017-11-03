@@ -37,8 +37,8 @@
 #include <preferences/manager.h>
 #include <application/application.h>
 #include <application/mainwindow.h>
+#include <viewer/widget.h>
 #include <project/project.h>
-#include <viewer/viewerwidget.h>
 #include <message/observer.h>
 #include <feature/quote.h>
 #include <dialogs/widgetgeometry.h>

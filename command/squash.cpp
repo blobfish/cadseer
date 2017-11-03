@@ -21,7 +21,6 @@
 
 #include <application/application.h>
 #include <application/mainwindow.h>
-#include <viewer/viewerwidget.h>
 #include <selection/eventhandler.h>
 #include <message/observer.h>
 #include <project/project.h>

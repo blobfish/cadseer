@@ -21,9 +21,6 @@
 
 #include <application/application.h>
 #include <application/mainwindow.h>
-#include <project/project.h>
-#include <viewer/viewerwidget.h>
-#include <message/dispatch.h>
 
 int main( int argc, char** argv )
 {

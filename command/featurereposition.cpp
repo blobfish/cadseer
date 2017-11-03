@@ -20,9 +20,9 @@
 #include <globalutilities.h>
 #include <project/project.h>
 #include <application/mainwindow.h>
-#include <viewer/viewerwidget.h>
 #include <selection/eventhandler.h>
 #include <feature/csysbase.h>
+#include <viewer/widget.h>
 #include <command/featurereposition.h>
 
 using namespace cmd;

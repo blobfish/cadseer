@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef VIEWERWIDGET_H
-#define VIEWERWIDGET_H
+#ifndef VWR_WIDGET_H
+#define VWR_WIDGET_H
 
 #include <memory>
 
@@ -39,12 +39,12 @@ namespace msg{class Message; class Observer;}
 
 namespace vwr
 {
-class ViewerWidget : public QWidget, public osgViewer::CompositeViewer
+class Widget : public QWidget, public osgViewer::CompositeViewer
 {
     Q_OBJECT
 public:
-    ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel=osgViewer::CompositeViewer::SingleThreaded);
-    virtual ~ViewerWidget() override;
+    Widget(osgViewer::ViewerBase::ThreadingModel threadingModel=osgViewer::CompositeViewer::SingleThreaded);
+    virtual ~Widget() override;
     
     virtual void paintEvent(QPaintEvent* event);
     void myUpdate();
@@ -119,4 +119,4 @@ public:
 
 }
 
-#endif // VIEWERWIDGET_H
+#endif // VWR_WIDGET_H

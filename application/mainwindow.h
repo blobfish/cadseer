@@ -28,7 +28,7 @@
 
 class QCloseEvent;
 
-namespace vwr{class ViewerWidget;}
+namespace vwr{class Widget;}
 namespace slc{class Manager;}
 namespace msg{class Message; class Observer;}
 namespace dag{class View; class Model;}
@@ -52,7 +52,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    vwr::ViewerWidget* getViewer(){return viewWidget;}
+    vwr::Widget* getViewer(){return viewWidget;}
     slc::Manager* getSelectionManager(){return selectionManager;}
     
 protected:
@@ -61,7 +61,7 @@ protected:
 private:
     void setupSelectionToolbar();
     Ui::MainWindow *ui;
-    vwr::ViewerWidget* viewWidget;
+    vwr::Widget* viewWidget;
     dag::Model *dagModel;
     dag::View *dagView;
     expr::Widget *expressionWidget;

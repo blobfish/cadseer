@@ -39,7 +39,6 @@
 #include <application/application.h>
 #include <application/mainwindow.h>
 #include <project/project.h>
-#include <viewer/viewerwidget.h>
 #include <message/observer.h>
 #include <feature/strip.h>
 #include <dialogs/widgetgeometry.h>

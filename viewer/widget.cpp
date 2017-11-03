@@ -43,7 +43,7 @@
 #include <osg/ValueObject>
 
 #include <viewer/spaceballmanipulator.h>
-#include <viewer/viewerwidget.h>
+#include <viewer/widget.h>
 #include <viewer/gleventwidget.h>
 #include <modelviz/nodemaskdefs.h>
 #include <modelviz/hiddenlineeffect.h>
@@ -85,10 +85,10 @@ protected:
   bool visibility;
 };
 
-ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel) : QWidget(), osgViewer::CompositeViewer()
+Widget::Widget(osgViewer::ViewerBase::ThreadingModel threadingModel) : QWidget(), osgViewer::CompositeViewer()
 {
     observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
-    observer->name = "vwr::ViewerWidget";
+    observer->name = "vwr::Widget";
     setupDispatcher();
     
     setThreadingModel(threadingModel);
@@ -187,43 +187,43 @@ ViewerWidget::ViewerWidget(osgViewer::ViewerBase::ThreadingModel threadingModel)
     timer->start(10);
 }
 
-ViewerWidget::~ViewerWidget() //for forward declarations.
+Widget::~Widget() //for forward declarations.
 {
 
 }
 
-QWidget* ViewerWidget::getGraphicsWidget()
+QWidget* Widget::getGraphicsWidget()
 {
   return windowQt->getGLWidget();
 }
 
-slc::EventHandler* ViewerWidget::getSelectionEventHandler()
+slc::EventHandler* Widget::getSelectionEventHandler()
 {
   return selectionHandler.get();
 }
-const slc::Containers& ViewerWidget::getSelections() const
+const slc::Containers& Widget::getSelections() const
 {
   return selectionHandler->getSelections();
 }
-void ViewerWidget::clearSelections() const
+void Widget::clearSelections() const
 {
   selectionHandler->clearSelections();
 }
-const osg::Matrixd& ViewerWidget::getCurrentSystem() const
+const osg::Matrixd& Widget::getCurrentSystem() const
 {
   return currentSystem->getMatrix();
 }
-void ViewerWidget::setCurrentSystem(const osg::Matrixd &mIn)
+void Widget::setCurrentSystem(const osg::Matrixd &mIn)
 {
   currentSystem->setMatrix(mIn);
 }
 
-const osg::Matrixd& ViewerWidget::getViewSystem() const
+const osg::Matrixd& Widget::getViewSystem() const
 {
     return mainCamera->getViewMatrix();
 }
 
-void ViewerWidget::myUpdate()
+void Widget::myUpdate()
 {
   //I am not sure how useful calling optimizer on my generated data is?
   //TODO build large file and run with and without the optimizer to test.
@@ -244,7 +244,7 @@ void ViewerWidget::myUpdate()
   root->accept(v);
 }
 
-void ViewerWidget::createMainCamera(osg::Camera *camera)
+void Widget::createMainCamera(osg::Camera *camera)
 {
     /*
      comparison osg::GraphicsContext::Traits to QGLFormat
@@ -294,12 +294,12 @@ void ViewerWidget::createMainCamera(osg::Camera *camera)
     glWidgetHeight = glWidget->height();
 }
 
-void ViewerWidget::paintEvent(QPaintEvent*)
+void Widget::paintEvent(QPaintEvent*)
 {
     frame();
 }
 
-osg::Camera* ViewerWidget::createBackgroundCamera()
+osg::Camera* Widget::createBackgroundCamera()
 {
     //get background image and convert.
     QImage qImageBase(":/resources/images/background.png");
@@ -337,7 +337,7 @@ osg::Camera* ViewerWidget::createBackgroundCamera()
     return bgCamera;
 }
 
-osg::Camera* ViewerWidget::createGestureCamera()
+osg::Camera* Widget::createGestureCamera()
 {
     double quadSize = 10000;
 
@@ -372,25 +372,25 @@ osg::Camera* ViewerWidget::createGestureCamera()
     return fadeCamera;
 }
 
-void ViewerWidget::viewTopDispatched(const msg::Message&)
+void Widget::viewTopDispatched(const msg::Message&)
 {
     spaceballManipulator->setView(osg::Vec3d(0.0, 0.0, -1.0), osg::Vec3d(0.0, 1.0, 0.0));
     spaceballManipulator->viewFit();
 }
 
-void ViewerWidget::viewFrontDispatched(const msg::Message&)
+void Widget::viewFrontDispatched(const msg::Message&)
 {
     spaceballManipulator->setView(osg::Vec3d(0.0, 1.0, 0.0), osg::Vec3d(0.0, 0.0, 1.0));
     spaceballManipulator->viewFit();
 }
 
-void ViewerWidget::viewRightDispatched(const msg::Message&)
+void Widget::viewRightDispatched(const msg::Message&)
 {
     spaceballManipulator->setView(osg::Vec3d(-1.0, 0.0, 0.0), osg::Vec3d(0.0, 0.0, 1.0));
     spaceballManipulator->viewFit();
 }
 
-void ViewerWidget::viewIsoDispatched(const msg::Message &)
+void Widget::viewIsoDispatched(const msg::Message &)
 {
   osg::Vec3d upVector(-1.0, 1.0, 1.0); upVector.normalize();
   osg::Vec3d lookVector(-1.0, 1.0, -1.0); lookVector.normalize();
@@ -398,13 +398,13 @@ void ViewerWidget::viewIsoDispatched(const msg::Message &)
   spaceballManipulator->viewFit();
 }
 
-void ViewerWidget::viewFitDispatched(const msg::Message&)
+void Widget::viewFitDispatched(const msg::Message&)
 {
   spaceballManipulator->home(1.0);
   spaceballManipulator->viewFit();
 }
 
-void ViewerWidget::viewFillDispatched(const msg::Message&)
+void Widget::viewFillDispatched(const msg::Message&)
 {
   osg::PolygonMode *pMode = dynamic_cast<osg::PolygonMode*>
     (root->getOrCreateStateSet()->getAttribute(osg::StateAttribute::POLYGONMODE));
@@ -416,7 +416,7 @@ void ViewerWidget::viewFillDispatched(const msg::Message&)
   prf::manager().saveConfig();
 }
 
-void ViewerWidget::viewTriangulationDispatched(const msg::Message&)
+void Widget::viewTriangulationDispatched(const msg::Message&)
 {
   osg::PolygonMode *pMode = dynamic_cast<osg::PolygonMode*>
     (root->getOrCreateStateSet()->getAttribute(osg::StateAttribute::POLYGONMODE));
@@ -428,7 +428,7 @@ void ViewerWidget::viewTriangulationDispatched(const msg::Message&)
   prf::manager().saveConfig();
 }
 
-void ViewerWidget::renderStyleToggleDispatched(const msg::Message &)
+void Widget::renderStyleToggleDispatched(const msg::Message &)
 {
   prf::RenderStyle::Value cStyle = prf::Manager().rootPtr->visual().display().renderStyle().get();
   if (cStyle == prf::RenderStyle::fill)
@@ -438,7 +438,7 @@ void ViewerWidget::renderStyleToggleDispatched(const msg::Message &)
   //wireframe some day.
 }
 
-void ViewerWidget::exportOSGDispatched(const msg::Message&)
+void Widget::exportOSGDispatched(const msg::Message&)
 {
   //ive doesn't appear to be working?
   
@@ -471,81 +471,81 @@ void ViewerWidget::exportOSGDispatched(const msg::Message&)
   osgDB::writeNodeFile(*root, fileName.toStdString());
 }
 
-void ViewerWidget::setupDispatcher()
+void Widget::setupDispatcher()
 {
   msg::Mask mask;
   
   mask = msg::Response | msg::Post | msg::Add | msg::Feature;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::featureAddedDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::featureAddedDispatched, this, _1)));
   
   mask = msg::Response | msg::Pre | msg::Remove | msg::Feature;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::featureRemovedDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::featureRemovedDispatched, this, _1)));
   
   mask = msg::Response | msg::Post | msg::UpdateVisual;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::visualUpdatedDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::visualUpdatedDispatched, this, _1)));
   
   mask = msg::Request | msg::View | msg::Top;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewTopDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::viewTopDispatched, this, _1)));
   
   mask = msg::Request | msg::View | msg::Front;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewFrontDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::viewFrontDispatched, this, _1)));
   
   mask = msg::Request | msg::View | msg::Right;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewRightDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::viewRightDispatched, this, _1)));
   
   mask = msg::Request | msg::View | msg::Iso;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewIsoDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::viewIsoDispatched, this, _1)));
   
   mask = msg::Request | msg::View | msg::Fit;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewFitDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::viewFitDispatched, this, _1)));
   
   mask = msg::Request | msg::View | msg::Fill;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewFillDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::viewFillDispatched, this, _1)));
   
   mask = msg::Request | msg::View | msg::Triangulation;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewTriangulationDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::viewTriangulationDispatched, this, _1)));
   
   mask = msg::Request | msg::View | msg::RenderStyle | msg::Toggle;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::renderStyleToggleDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::renderStyleToggleDispatched, this, _1)));
   
   mask = msg::Request | msg::Export | msg::OSG;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::exportOSGDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::exportOSGDispatched, this, _1)));
   
   mask = msg::Response | msg::Pre | msg::Close | msg::Project;;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::closeProjectDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::closeProjectDispatched, this, _1)));
   
   mask = msg::Request | msg::SystemReset;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::systemResetDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::systemResetDispatched, this, _1)));
   
   mask = msg::Request | msg::SystemToggle;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::systemToggleDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::systemToggleDispatched, this, _1)));
   
   mask = msg::Request | msg::View | msg::Show | msg::HiddenLine;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::showHiddenLinesDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::showHiddenLinesDispatched, this, _1)));
   
   mask = msg::Request | msg::View | msg::Hide | msg::HiddenLine;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::hideHiddenLinesDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::hideHiddenLinesDispatched, this, _1)));
   
   mask = msg::Request | msg::View | msg::Toggle | msg::HiddenLine;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::viewToggleHiddenLinesDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::viewToggleHiddenLinesDispatched, this, _1)));
   
   mask = msg::Request | msg::View | msg::Show | msg::ThreeD;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::showThreeDDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::showThreeDDispatched, this, _1)));
   
   mask = msg::Request | msg::View | msg::Hide | msg::ThreeD;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::hideThreeDDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::hideThreeDDispatched, this, _1)));
   
   mask = msg::Request | msg::View | msg::Toggle | msg::ThreeD;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::threeDToggleDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::threeDToggleDispatched, this, _1)));
   
   mask = msg::Response | msg::Post | msg::Open | msg::Project;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::projectOpenedDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::projectOpenedDispatched, this, _1)));
   
   mask = msg::Response | msg::Post | msg::UpdateModel;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::projectUpdatedDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::projectUpdatedDispatched, this, _1)));
 }
 
-void ViewerWidget::featureAddedDispatched(const msg::Message &messageIn)
+void Widget::featureAddedDispatched(const msg::Message &messageIn)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
@@ -555,7 +555,7 @@ void ViewerWidget::featureAddedDispatched(const msg::Message &messageIn)
   root->addChild(message.feature->getMainSwitch());
 }
 
-void ViewerWidget::featureRemovedDispatched(const msg::Message &messageIn)
+void Widget::featureRemovedDispatched(const msg::Message &messageIn)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
@@ -565,7 +565,7 @@ void ViewerWidget::featureRemovedDispatched(const msg::Message &messageIn)
   root->removeChild(message.feature->getMainSwitch());
 }
 
-void ViewerWidget::visualUpdatedDispatched(const msg::Message &)
+void Widget::visualUpdatedDispatched(const msg::Message &)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
@@ -574,7 +574,7 @@ void ViewerWidget::visualUpdatedDispatched(const msg::Message &)
   this->myUpdate();
 }
 
-void ViewerWidget::closeProjectDispatched(const msg::Message&)
+void Widget::closeProjectDispatched(const msg::Message&)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
@@ -584,7 +584,7 @@ void ViewerWidget::closeProjectDispatched(const msg::Message&)
   root->removeChildren(0, root->getNumChildren());
 }
 
-void ViewerWidget::systemResetDispatched(const msg::Message&)
+void Widget::systemResetDispatched(const msg::Message&)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
@@ -593,7 +593,7 @@ void ViewerWidget::systemResetDispatched(const msg::Message&)
   currentSystem->setMatrix(osg::Matrixd::identity());
 }
 
-void ViewerWidget::systemToggleDispatched(const msg::Message&)
+void Widget::systemToggleDispatched(const msg::Message&)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
@@ -609,7 +609,7 @@ void ViewerWidget::systemToggleDispatched(const msg::Message&)
   manager.saveConfig();
 }
 
-void ViewerWidget::showHiddenLinesDispatched(const msg::Message&)
+void Widget::showHiddenLinesDispatched(const msg::Message&)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
@@ -623,7 +623,7 @@ void ViewerWidget::showHiddenLinesDispatched(const msg::Message&)
   prf::manager().saveConfig();
 }
 
-void ViewerWidget::hideHiddenLinesDispatched(const msg::Message&)
+void Widget::hideHiddenLinesDispatched(const msg::Message&)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
@@ -637,7 +637,7 @@ void ViewerWidget::hideHiddenLinesDispatched(const msg::Message&)
   prf::manager().saveConfig();
 }
 
-void ViewerWidget::viewToggleHiddenLinesDispatched(const msg::Message&)
+void Widget::viewToggleHiddenLinesDispatched(const msg::Message&)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
@@ -653,7 +653,7 @@ void ViewerWidget::viewToggleHiddenLinesDispatched(const msg::Message&)
   root->accept(v);
 }
 
-void ViewerWidget::showThreeDDispatched(const msg::Message &msgIn)
+void Widget::showThreeDDispatched(const msg::Message &msgIn)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
@@ -675,7 +675,7 @@ void ViewerWidget::showThreeDDispatched(const msg::Message &msgIn)
   observer->outBlocked(mOut);
 }
 
-void ViewerWidget::hideThreeDDispatched(const msg::Message &msgIn)
+void Widget::hideThreeDDispatched(const msg::Message &msgIn)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
@@ -697,7 +697,7 @@ void ViewerWidget::hideThreeDDispatched(const msg::Message &msgIn)
   observer->outBlocked(mOut);
 }
 
-void ViewerWidget::threeDToggleDispatched(const msg::Message &msgIn)
+void Widget::threeDToggleDispatched(const msg::Message &msgIn)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
@@ -725,7 +725,7 @@ void ViewerWidget::threeDToggleDispatched(const msg::Message &msgIn)
   observer->outBlocked(mOut);
 }
 
-void ViewerWidget::projectOpenedDispatched(const msg::Message &)
+void Widget::projectOpenedDispatched(const msg::Message &)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
@@ -734,7 +734,7 @@ void ViewerWidget::projectOpenedDispatched(const msg::Message &)
   serialRead();
 }
 
-void ViewerWidget::projectUpdatedDispatched(const msg::Message &)
+void Widget::projectUpdatedDispatched(const msg::Message &)
 {
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
@@ -743,7 +743,7 @@ void ViewerWidget::projectUpdatedDispatched(const msg::Message &)
   serialWrite();
 }
 
-void ViewerWidget::screenCapture(const std::string &fp, const std::string &e)
+void Widget::screenCapture(const std::string &fp, const std::string &e)
 {
   osg::ref_ptr<osgViewer::ScreenCaptureHandler::WriteToFile> wtf = new osgViewer::ScreenCaptureHandler::WriteToFile
   (
@@ -754,7 +754,7 @@ void ViewerWidget::screenCapture(const std::string &fp, const std::string &e)
   screenCaptureHandler->captureNextFrame(*this);
 }
 
-QTextStream& ViewerWidget::getInfo(QTextStream &stream) const
+QTextStream& Widget::getInfo(QTextStream &stream) const
 {
   stream << endl << QObject::tr("Current System: ");
   gu::osgMatrixOut(stream, getCurrentSystem());
@@ -804,7 +804,7 @@ protected:
   msg::Observer observer;
 };
 
-void ViewerWidget::serialRead()
+void Widget::serialRead()
 {
   boost::filesystem::path file = static_cast<app::Application*>(qApp)->getProject()->getSaveDirectory();
   file /= "view.xml";
@@ -833,7 +833,7 @@ protected:
   prj::srl::States &states;
 };
 
-void ViewerWidget::serialWrite()
+void Widget::serialWrite()
 {
   prj::srl::States states;
   SerialOutVisitor v(states);

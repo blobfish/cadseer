@@ -26,7 +26,6 @@
 #include <application/application.h>
 #include <application/mainwindow.h>
 #include <project/project.h>
-#include <viewer/viewerwidget.h>
 #include <feature/base.h>
 #include <command/featuretosystem.h>
 #include <command/systemtofeature.h>
@@ -46,10 +45,12 @@
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <selection/message.h>
+#include <selection/container.h>
 #include <selection/definitions.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <viewer/message.h>
+#include <viewer/widget.h>
 #include <command/manager.h>
 
 using namespace cmd;

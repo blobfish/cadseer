@@ -31,7 +31,7 @@
 #include <application/application.h>
 #include <application/mainwindow.h>
 #include <viewer/spaceballqevent.h>
-#include <viewer/viewerwidget.h>
+#include <viewer/widget.h>
 #include <project/gitmanager.h> //needed for unique_ptr destructor call.
 #include <project/project.h>
 #include <preferences/preferencesXML.h>

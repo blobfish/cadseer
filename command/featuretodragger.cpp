@@ -20,7 +20,6 @@
 #include <project/project.h>
 #include <feature/csysbase.h>
 #include <application/mainwindow.h>
-#include <viewer/viewerwidget.h>
 #include <selection/eventhandler.h>
 #include <command/featuretodragger.h>
 

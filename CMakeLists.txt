@@ -458,7 +458,7 @@ SET(LIBRARY_SOURCES
     )
     
 SET(VIEWER_SOURCES
-    viewer/viewerwidget.cpp
+    viewer/widget.cpp
     viewer/spaceballmanipulator.cpp
     viewer/spaceballqevent.cpp
     viewer/gleventwidget.cpp
@@ -500,7 +500,7 @@ SET(CADSEER_SOURCES
     )
 
 SET(CADSEER_MOC_HDRS
-    viewer/viewerwidget.h
+    viewer/widget.h
     application/mainwindow.h
     dagview/dagview.h
     dagview/dagmodel.h

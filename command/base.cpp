@@ -21,12 +21,12 @@
 
 #include <application/application.h>
 #include <application/mainwindow.h>
+#include <viewer/widget.h>
 #include <project/project.h>
 #include <selection/manager.h>
 #include <selection/eventhandler.h>
 #include <selection/message.h>
 #include <message/observer.h>
-#include <viewer/viewerwidget.h>
 #include <message/dispatch.h>
 #include <command/base.h>
 

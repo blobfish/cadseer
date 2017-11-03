@@ -20,8 +20,8 @@
 #include <project/project.h>
 #include <feature/csysbase.h>
 #include <application/mainwindow.h>
-#include <viewer/viewerwidget.h>
 #include <selection/eventhandler.h>
+#include <viewer/widget.h>
 #include <command/featuretosystem.h>
 
 using namespace cmd;

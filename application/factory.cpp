@@ -52,7 +52,7 @@
 #include <project/project.h>
 #include <application/application.h>
 #include <application/mainwindow.h>
-#include <viewer/viewerwidget.h>
+#include <viewer/widget.h>
 #include <viewer/message.h>
 #include <dialogs/preferences.h>
 #include <preferences/preferencesXML.h>
