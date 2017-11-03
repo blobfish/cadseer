@@ -91,10 +91,7 @@ void Quote::go()
   std::shared_ptr<ftr::Quote> quote(new ftr::Quote());
   project->addFeature(quote);
   
-  //this should trick the dagview into updating so it isn't screwed up
-  //while dialog is running. only dagview responds to this message
-  //as of git hash a530460.
-  observer->outBlocked(msg::Response | msg::Post | msg::UpdateModel);
+  observer->outBlocked(msg::Request | msg::DAG | msg::View | msg::Update);
   
   dialog = new dlg::Quote(quote.get(), mainWindow);
   dialog->setStripId(stripId);

@@ -26,16 +26,12 @@ using boost::uuids::uuid;
 
 Message::Message() :
   featureId(gu::createNilId()),
-  state(0),
-  stateOffset(0),
-  freshValue(false)
+  state(0)
 {}
 
-Message::Message(const uuid &idIn, State stateIn, unsigned long stateOffsetIn, bool freshValueIn) :
+Message::Message(const uuid &idIn, State stateIn) :
   featureId(idIn),
-  state(stateIn),
-  stateOffset(stateOffsetIn),
-  freshValue(freshValueIn)
+  state(stateIn)
 {}
 
 Message::Message(const uuid &idIn, const QString &stringIn) :

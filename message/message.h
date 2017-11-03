@@ -131,6 +131,7 @@ namespace msg
     static const Mask Nest(Mask().set(                          91));//!< command
     static const Mask DieSet(Mask().set(                        92));//!< command
     static const Mask Quote(Mask().set(                         93));//!< command
+    static const Mask DAG(Mask().set(                           94));//!< descriptor move up
   
     typedef boost::variant
     <

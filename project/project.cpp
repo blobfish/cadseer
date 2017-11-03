@@ -119,7 +119,7 @@ void Project::updateModel()
     if
     (
       (cFeature->isModelClean()) ||
-      (cFeature->isInactive())
+      (isFeatureInactive(currentVertex))
     )
     {
       cFeature->fillInHistory(*shapeHistory);
@@ -146,14 +146,16 @@ void Project::updateModel()
     cFeature->fillInHistory(*shapeHistory);
   }
   
-  serialWrite();
-  gitManager->update();
-  
   updateLeafStatus();
+  serialWrite();
+  /* this is here to give others a chance to make changes before git makes a commit.
+   * if this causes problems, then we will want git manager to use more messaging.
+   */
+  observer->out(msg::Message(msg::Response | msg::Post | msg::UpdateModel));
+  gitManager->update();
   
 //   shapeHistory->writeGraphViz("/home/tanderson/.CadSeer/ShapeHistory.dot");
   
-  observer->out(msg::Message(msg::Response | msg::Post | msg::UpdateModel));
   observer->out(msg::buildStatusMessage("Update Complete"));
 }
 
@@ -186,7 +188,7 @@ void Project::updateVisual()
     (
       feature->isModelClean() &&
       feature->isVisible3D() &&
-      feature->isActive() &&
+      isFeatureActive(*it) &&
 //       feature->isSuccess() && //regenerate from parent shape on failure.
       feature->isVisualDirty()
     )
@@ -389,8 +391,11 @@ void Project::setCurrentLeaf(const uuid& idIn)
   GraphReversed rGraph = boost::make_reverse_graph(projectGraph);
   
   //parents
-  SetActiveVisitor activeVisitorParents;
-  boost::breadth_first_search(rGraph, vertex, boost::visitor(activeVisitorParents));
+  std::vector<prg::Vertex> aVertices;
+  prg::AccrueVisitor<prg::Vertex> activeVisitor(aVertices);
+  boost::breadth_first_search(rGraph, vertex, boost::visitor(activeVisitor));
+  for (const auto &v : aVertices)
+    setFeatureActive(v);
   std::vector<Vertex> parents;
   AccrueVisitor<Vertex> hideVisitorParents(parents);
   boost::breadth_first_search(rGraph, vertex, boost::visitor(hideVisitorParents));
@@ -403,14 +408,17 @@ void Project::setCurrentLeaf(const uuid& idIn)
     boost::tie(it, itEnd) = boost::adjacent_vertices(vertex, rGraph);
     for (; it != itEnd; ++it)
     {
-      projectGraph[*it].feature->setActive();
+      setFeatureActive(*it);
       observer->out(msg::buildShowThreeD(projectGraph[*it].feature->getId()));
     }
   }
   
   //children
-  SetInactiveVisitor inactiveVisitor;
+  std::vector<prg::Vertex> iVertices;
+  prg::AccrueVisitor<prg::Vertex> inactiveVisitor(iVertices);
   boost::breadth_first_search(projectGraph, vertex, boost::visitor(inactiveVisitor));
+  for (const auto &v : iVertices)
+    setFeatureInactive(v);
   std::vector<Vertex> children;
   AccrueVisitor<Vertex> hideVisitor(children);
   boost::breadth_first_search(projectGraph, vertex, boost::visitor(hideVisitor));
@@ -419,7 +427,7 @@ void Project::setCurrentLeaf(const uuid& idIn)
   
   //now we don't want the actual feature inactive just it's children so we
   //turn it back on because the BFS and visitor turned it off.
-  projectGraph[vertex].feature->setActive();
+  setFeatureActive(vertex);
   observer->out(msg::buildShowThreeD(projectGraph[vertex].feature->getId()));
   
   updateLeafStatus();
@@ -427,12 +435,14 @@ void Project::setCurrentLeaf(const uuid& idIn)
 
 void Project::updateLeafStatus()
 {
+  //we end up in here twice when set current leaf from dag view.
+  //once when make the change and once when we call an update.
   indexVerticesEdges(); //redundent for setCurrentLeaf call.
   
   //first set all features to non leaf.
   BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
   {
-    projectGraph[currentVertex].feature->setNonLeaf();
+    setFeatureNonLeaf(currentVertex);
   }
   
   ActiveFilter <Graph> activeFilter(projectGraph);
@@ -447,7 +457,7 @@ void Project::updateLeafStatus()
   for (; vIt != vItEnd; ++vIt)
   {
     if (boost::out_degree(*vIt, filteredGraph) == 0)
-      filteredGraph[*vIt].feature->setLeaf();
+      setFeatureLeaf(*vIt);
     else
     {
       //if all children are of the type 'create' then it is also considered leaf.
@@ -458,12 +468,12 @@ void Project::updateLeafStatus()
       {
         if (filteredGraph[*vItNested].feature->getDescriptor() != ftr::Descriptor::Create)
         {
-        allCreate = false;
-        break;
+          allCreate = false;
+          break;
         }
       }
       if (allCreate)
-        filteredGraph[*vIt].feature->setLeaf();
+        setFeatureLeaf(*vIt);
     }
   }
 }
@@ -541,24 +551,25 @@ void Project::setupDispatcher()
 
 void Project::featureStateChangedDispatched(const msg::Message &messageIn)
 {
-  
   ftr::Message fMessage = boost::get<ftr::Message>(messageIn.payload);
-  if
-  (
-    (fMessage.stateOffset != ftr::StateOffset::ModelDirty) ||
-    (fMessage.freshValue != true)
-  )
+  //this could be a performance problem. we are visiting children and setting model
+  //dirty when ever a state change happens with a model dirty feature. we only need to
+  //do this when the model dirty changes not all the other state changes.
+  if (!fMessage.state.test(ftr::StateOffset::ModelDirty))
     return;
     
-  //this code blocks all incoming messages to the project while it
-  //executes. This prevents the cycles from setting a dependent dirty.
   indexVerticesEdges();
   
+  //this code blocks all incoming messages to the project while it
+  //executes. This prevents the cycles from setting a dependent dirty.
   auto block = observer->createBlocker();
   
   prg::Vertex vertex = findVertex(fMessage.featureId);
-  SetDirtyVisitor visitor;
+  std::vector<prg::Vertex> vertices;
+  prg::AccrueVisitor<prg::Vertex> visitor(vertices);
   boost::breadth_first_search(projectGraph, vertex, boost::visitor(visitor));
+  for (const auto &v : vertices)
+    projectGraph[v].feature->setModelDirty();
 }
 
 void Project::setCurrentLeafDispatched(const msg::Message &messageIn)
@@ -859,9 +870,13 @@ void Project::serialWrite()
   builder.MakeCompound(compound);
   
   prj::srl::Features features;
+  prj::srl::FeatureStates states;
   BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
   {
     ftr::Base *f = projectGraph[currentVertex].feature.get();
+    
+    //save the state
+    states.array().push_back(prj::srl::FeatureState(gu::idToString(f->getId()), projectGraph[currentVertex].state.to_string()));
     
     //we can't add a null shape to the compound.
     //so we check for null and add 1 vertex as a place holder.
@@ -922,7 +937,7 @@ void Project::serialWrite()
   
   prj::srl::AppVersion version(0, 0, 0);
   std::string projectPath = saveDirectory + QDir::separator().toLatin1() + "project.prjt";
-  srl::Project p(version, 0, features, connections, expressions);
+  srl::Project p(version, 0, features, states, connections, expressions);
   if (!eLinks.array().empty())
     p.expressionLinks().set(eLinks);
   if (!eGroups.array().empty())
@@ -980,7 +995,28 @@ void Project::open()
       
       std::shared_ptr<ftr::Base> featurePtr = fLoader.load(feature.id(), feature.type(), feature.shapeOffset());
       if (featurePtr)
+      {
         addFeature(featurePtr);
+        
+        //send state message
+        ftr::Message fMessage(featurePtr->getId(), featurePtr->getState());
+        msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
+        mMessage.payload = fMessage;
+        observer->outBlocked(mMessage);
+      }
+    }
+    
+    for (const auto &state : project->states().array())
+    {
+      uuid fId = gu::stringToId(state.id());
+      ftr::State fState(state.state());
+      projectGraph[findVertex(fId)].state = fState;
+      
+      //send state message
+      ftr::Message fMessage(fId, fState);
+      msg::Message mMessage(msg::Response | msg::Project | msg::Feature | msg::Status);
+      mMessage.payload = fMessage;
+      observer->outBlocked(mMessage);
     }
     
     for (const auto &fConnection : project->connections().connection())
@@ -1045,13 +1081,12 @@ void Project::open()
       }
     }
     
-    //this should trick the dagview into updating so it isn't screwed up
-    //while update is running. only dagview responds to this message
-    //as of git hash a530460.
-    observer->outBlocked(msg::Response | msg::Post | msg::UpdateModel);
+    observer->outBlocked(msg::Request | msg::DAG | msg::View | msg::Update);
     
-    updateModel();
+//     updateModel();
     updateVisual();
+    
+    observer->outBlocked(msg::buildStatusMessage("Project Opened"));
   }
   catch (const xsd::cxx::xml::invalid_utf16_string&)
   {
@@ -1121,7 +1156,7 @@ public:
       return;
     if (vertexIn == startVertex)
       return;
-    if (graphIn[vertexIn].feature->isLeaf())
+    if (!graphIn[vertexIn].state.test(ftr::StateOffset::NonLeaf))
     {
       foundLeaf = true;
       leafChildren.push_back(vertexIn);
@@ -1131,7 +1166,7 @@ public:
   template <typename GraphT >
   void finish_vertex(VertexT vertexIn, const GraphT &graphIn) const
   {
-    if (graphIn[vertexIn].feature->isActive())
+    if (!graphIn[vertexIn].state.test(ftr::StateOffset::Inactive))
       foundLeaf = false;
   }
   
@@ -1171,4 +1206,116 @@ std::vector<uuid> Project::getLeafChildren(const uuid &parentIn) const
     out.push_back(projectGraph[v].feature->getId());
   
   return out;
+}
+
+void Project::setFeatureActive(const boost::uuids::uuid &idIn)
+{
+  setFeatureActive(findVertex(idIn));
+}
+
+void Project::setFeatureInactive(const boost::uuids::uuid &idIn)
+{
+  setFeatureInactive(findVertex(idIn));
+}
+
+bool Project::isFeatureActive(const boost::uuids::uuid &idIn)
+{
+  return isFeatureActive(idIn);
+}
+
+bool Project::isFeatureInactive(const boost::uuids::uuid &idIn)
+{
+  return isFeatureInactive(idIn);
+}
+
+void Project::setFeatureLeaf(const boost::uuids::uuid &idIn)
+{
+  setFeatureLeaf(idIn);
+}
+
+void Project::setFeatureNonLeaf(const boost::uuids::uuid &idIn)
+{
+  setFeatureNonLeaf(idIn);
+}
+
+bool Project::isFeatureLeaf(const boost::uuids::uuid &idIn)
+{
+  return isFeatureLeaf(idIn);
+}
+
+bool Project::isFeatureNonLeaf(const boost::uuids::uuid &idIn)
+{
+  return isFeatureNonLeaf(idIn);
+}
+
+void Project::setFeatureActive(prg::Vertex vIn)
+{
+  if (isFeatureActive(vIn))
+    return; //already active.
+  projectGraph[vIn].state.set(ftr::StateOffset::Inactive, false);
+  
+  //send message.
+  ftr::Message fMessage(projectGraph[vIn].feature->getId(), projectGraph[vIn].state);
+  msg::Message mMessage(msg::Response | msg::Project | msg::Feature | msg::Status);
+  mMessage.payload = fMessage;
+  observer->outBlocked(mMessage);
+}
+
+void Project::setFeatureInactive(prg::Vertex vIn)
+{
+  if (isFeatureInactive(vIn))
+    return;
+  projectGraph[vIn].state.set(ftr::StateOffset::Inactive, true);
+  
+  //send message.
+  ftr::Message fMessage(projectGraph[vIn].feature->getId(), projectGraph[vIn].state);
+  msg::Message mMessage(msg::Response | msg::Project | msg::Feature | msg::Status);
+  mMessage.payload = fMessage;
+  observer->outBlocked(mMessage);
+}
+
+bool Project::isFeatureActive(prg::Vertex vIn)
+{
+  return !projectGraph[vIn].state.test(ftr::StateOffset::Inactive);
+}
+
+bool Project::isFeatureInactive(prg::Vertex vIn)
+{
+  return projectGraph[vIn].state.test(ftr::StateOffset::Inactive);
+}
+
+void Project::setFeatureLeaf(prg::Vertex vIn)
+{
+  if (isFeatureLeaf(vIn))
+    return;
+  projectGraph[vIn].state.set(ftr::StateOffset::NonLeaf, false);
+  
+  //send message
+  ftr::Message fMessage(projectGraph[vIn].feature->getId(), projectGraph[vIn].state);
+  msg::Message mMessage(msg::Response | msg::Project | msg::Feature | msg::Status);
+  mMessage.payload = fMessage;
+  observer->outBlocked(mMessage);
+}
+
+void Project::setFeatureNonLeaf(prg::Vertex vIn)
+{
+  if (isFeatureNonLeaf(vIn))
+    return;
+  projectGraph[vIn].state.set(ftr::StateOffset::NonLeaf, true);
+  
+  //send message
+  ftr::Message fMessage(projectGraph[vIn].feature->getId(), projectGraph[vIn].state);
+  msg::Message mMessage(msg::Response | msg::Project | msg::Feature | msg::Status);
+  mMessage.payload = fMessage;
+  observer->outBlocked(mMessage);
+}
+
+bool Project::isFeatureLeaf(prg::Vertex vIn)
+{
+  return !projectGraph[vIn].state.test(ftr::StateOffset::NonLeaf);
+}
+
+bool Project::isFeatureNonLeaf(prg::Vertex vIn)
+{
+  return projectGraph[vIn].state.test(ftr::StateOffset::NonLeaf);
 }

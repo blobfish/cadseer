@@ -94,14 +94,6 @@ public:
   
   bool isSuccess() const {return !(state.test(ftr::StateOffset::Failure));}
   bool isFailure() const {return state.test(ftr::StateOffset::Failure);}
-  void setActive();
-  void setInActive();
-  bool isActive() const {return !(state.test(ftr::StateOffset::Inactive));}
-  bool isInactive() const {return state.test(ftr::StateOffset::Inactive);}
-  void setLeaf();
-  void setNonLeaf();
-  bool isLeaf() const {return !(state.test(ftr::StateOffset::NonLeaf));}
-  bool isNonLeaf() const {return (state.test(ftr::StateOffset::NonLeaf));}
   void setName(const QString &nameIn);
   QString getName() const {return name;}
   ftr::State getState() const {return state;}

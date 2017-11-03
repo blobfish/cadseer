@@ -100,6 +100,9 @@ void OverlayCamera::setupDispatcher()
   
   mask = msg::Response | msg::Post | msg::Open | msg::Project;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::projectOpenedDispatched, this, _1)));
+    
+  mask = msg::Response | msg::Post | msg::UpdateModel;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&OverlayCamera::projectUpdatedDispatched, this, _1)));
 }
 
 void OverlayCamera::featureAddedDispatched(const msg::Message &messageIn)
@@ -124,6 +127,10 @@ void OverlayCamera::featureRemovedDispatched(const msg::Message &messageIn)
 
 void OverlayCamera::closeProjectDispatched(const msg::Message&)
 {
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
     //this code assumes that the first child is the absolute csys switch.
     //also the fleeting switch.
     removeChildren(2, getNumChildren() - 2);
@@ -131,17 +138,29 @@ void OverlayCamera::closeProjectDispatched(const msg::Message&)
 
 void OverlayCamera::addOverlayGeometryDispatched(const msg::Message &message)
 {
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
     vwr::Message vMessage = boost::get<vwr::Message>(message.payload);
     fleetingGeometry->addChild(vMessage.node.get());
 }
 
 void OverlayCamera::clearOverlayGeometryDispatched(const msg::Message&)
 {
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
     fleetingGeometry->removeChildren(0, fleetingGeometry->getNumChildren());
 }
 
 void OverlayCamera::showOverlayDispatched(const msg::Message &msgIn)
 {
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
   slc::MainSwitchVisitor v(boost::get<vwr::Message>(msgIn.payload).featureId);
   this->accept(v);
   assert(v.out);
@@ -152,7 +171,6 @@ void OverlayCamera::showOverlayDispatched(const msg::Message &msgIn)
     return;
   
   v.out->setAllChildrenOn();
-  serialWrite();
   
   msg::Message mOut(msg::Response | msg::View | msg::Show | msg::Overlay);
   mOut.payload = msgIn.payload;
@@ -161,6 +179,10 @@ void OverlayCamera::showOverlayDispatched(const msg::Message &msgIn)
 
 void OverlayCamera::hideOverlayDispatched(const msg::Message &msgIn)
 {
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
   slc::MainSwitchVisitor v(boost::get<vwr::Message>(msgIn.payload).featureId);
   this->accept(v);
   assert(v.out);
@@ -171,7 +193,6 @@ void OverlayCamera::hideOverlayDispatched(const msg::Message &msgIn)
     return;
   
   v.out->setAllChildrenOff();
-  serialWrite();
   
   msg::Message mOut(msg::Response | msg::View | msg::Hide | msg::Overlay);
   mOut.payload = msgIn.payload;
@@ -180,6 +201,10 @@ void OverlayCamera::hideOverlayDispatched(const msg::Message &msgIn)
 
 void OverlayCamera::overlayToggleDispatched(const msg::Message &msgIn)
 {
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
   slc::MainSwitchVisitor v(boost::get<vwr::Message>(msgIn.payload).featureId);
   this->accept(v);
   assert(v.out); //some features won't have overlay, but we want to filter those out before the message call.
@@ -198,8 +223,6 @@ void OverlayCamera::overlayToggleDispatched(const msg::Message &msgIn)
     maskOut = msg::Response | msg::View | msg::Show | msg::Overlay;
   }
   
-  serialWrite();
-  
   msg::Message mOut(maskOut);
   mOut.payload = msgIn.payload;
   observer->outBlocked(mOut);
@@ -207,14 +230,27 @@ void OverlayCamera::overlayToggleDispatched(const msg::Message &msgIn)
 
 void OverlayCamera::projectOpenedDispatched(const msg::Message &)
 {
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
   serialRead();
 }
 
+void OverlayCamera::projectUpdatedDispatched(const msg::Message &)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  serialWrite();
+}
+
 //restore states from serialize
-class SerialInVisitor : public osg::NodeVisitor
+class SerialInOverlayVisitor : public osg::NodeVisitor
 {
 public:
-  SerialInVisitor(const prj::srl::States &statesIn) :
+  SerialInOverlayVisitor(const prj::srl::States &statesIn) :
   NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN),
   states(statesIn)
   {
@@ -260,7 +296,7 @@ void OverlayCamera::serialRead()
     return;
   
   auto sView = prj::srl::view(file.string(), ::xml_schema::Flags::dont_validate);
-  SerialInVisitor v(sView->states());
+  SerialInOverlayVisitor v(sView->states());
   this->accept(v);
 }
 

@@ -104,6 +104,7 @@ protected:
     void hideThreeDDispatched(const msg::Message &);
     void threeDToggleDispatched(const msg::Message &);
     void projectOpenedDispatched(const msg::Message &);
+    void projectUpdatedDispatched(const msg::Message &);
     
     void serialRead();
     void serialWrite();

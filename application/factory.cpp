@@ -1246,8 +1246,7 @@ void Factory::viewIsolateDispatched(const msg::Message&)
   
   for (const auto &id : project->getAllFeatureIds())
   {
-    ftr::Base *feature = project->findFeature(id);
-    if (feature->isNonLeaf()) //ignore non-leaf features.
+    if (project->isFeatureNonLeaf(id)) //ignore non-leaf features.
       continue;
     vwr::Message vMsg;
     vMsg.featureId = id;

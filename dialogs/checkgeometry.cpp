@@ -1018,11 +1018,6 @@ void CheckGeometry::featureRemovedDispatched(const msg::Message &messageIn)
 void CheckGeometry::featureStateChangedDispatched(const msg::Message &messageIn)
 {
   ftr::Message fMessage = boost::get<ftr::Message>(messageIn.payload);
-  if
-  (
-    (fMessage.featureId == feature.getId()) &&
-    (fMessage.stateOffset == ftr::StateOffset::ModelDirty) &&
-    (fMessage.freshValue == true)
-  )
-  qApp->postEvent(this, new QCloseEvent());
+  if (fMessage.featureId == feature.getId())
+    qApp->postEvent(this, new QCloseEvent());
 }

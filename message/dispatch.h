@@ -44,10 +44,15 @@ namespace msg
     }
     
     void messageInSlot(const Message&);
+    void startLogging();
+    void stopLogging();
+    const std::string& getLog(){return log;}
     void dumpString(const std::string &); //!< choke point for message debug output.
     void dumpConnectionCount();
   private:
     MessageOutSignal messageOutSignal;
+    std::string log;
+    bool isLogging = false;
   };
   
   //! singleton dispatch.

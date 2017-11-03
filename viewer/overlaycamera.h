@@ -47,6 +47,7 @@ private:
   void showOverlayDispatched(const msg::Message &);
   void hideOverlayDispatched(const msg::Message &);
   void projectOpenedDispatched(const msg::Message &);
+  void projectUpdatedDispatched(const msg::Message &);
   
   void serialRead();
   void serialWrite();

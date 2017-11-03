@@ -154,6 +154,86 @@ namespace prj
     }
 
 
+    // FeatureState
+    // 
+
+    const FeatureState::IdType& FeatureState::
+    id () const
+    {
+      return this->id_.get ();
+    }
+
+    FeatureState::IdType& FeatureState::
+    id ()
+    {
+      return this->id_.get ();
+    }
+
+    void FeatureState::
+    id (const IdType& x)
+    {
+      this->id_.set (x);
+    }
+
+    void FeatureState::
+    id (::std::unique_ptr< IdType > x)
+    {
+      this->id_.set (std::move (x));
+    }
+
+    const FeatureState::IdType& FeatureState::
+    id_default_value ()
+    {
+      return id_default_value_;
+    }
+
+    const FeatureState::StateType& FeatureState::
+    state () const
+    {
+      return this->state_.get ();
+    }
+
+    FeatureState::StateType& FeatureState::
+    state ()
+    {
+      return this->state_.get ();
+    }
+
+    void FeatureState::
+    state (const StateType& x)
+    {
+      this->state_.set (x);
+    }
+
+    void FeatureState::
+    state (::std::unique_ptr< StateType > x)
+    {
+      this->state_.set (std::move (x));
+    }
+
+
+    // FeatureStates
+    // 
+
+    const FeatureStates::ArraySequence& FeatureStates::
+    array () const
+    {
+      return this->array_;
+    }
+
+    FeatureStates::ArraySequence& FeatureStates::
+    array ()
+    {
+      return this->array_;
+    }
+
+    void FeatureStates::
+    array (const ArraySequence& s)
+    {
+      this->array_ = s;
+    }
+
+
     // InputTypes
     // 
 
@@ -747,6 +827,30 @@ namespace prj
       this->features_.set (std::move (x));
     }
 
+    const Project::StatesType& Project::
+    states () const
+    {
+      return this->states_.get ();
+    }
+
+    Project::StatesType& Project::
+    states ()
+    {
+      return this->states_.get ();
+    }
+
+    void Project::
+    states (const StatesType& x)
+    {
+      this->states_.set (x);
+    }
+
+    void Project::
+    states (::std::unique_ptr< StatesType > x)
+    {
+      this->states_.set (std::move (x));
+    }
+
     const Project::ConnectionsType& Project::
     connections () const
     {
@@ -1089,6 +1193,209 @@ namespace prj
 
     Features::
     ~Features ()
+    {
+    }
+
+    // FeatureState
+    //
+
+    const FeatureState::IdType FeatureState::id_default_value_ (
+      "00000000-0000-0000-0000-000000000000");
+
+    FeatureState::
+    FeatureState (const IdType& id,
+                  const StateType& state)
+    : ::xml_schema::Type (),
+      id_ (id, this),
+      state_ (state, this)
+    {
+    }
+
+    FeatureState::
+    FeatureState (const FeatureState& x,
+                  ::xml_schema::Flags f,
+                  ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      id_ (x.id_, f, this),
+      state_ (x.state_, f, this)
+    {
+    }
+
+    FeatureState::
+    FeatureState (const ::xercesc::DOMElement& e,
+                  ::xml_schema::Flags f,
+                  ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      id_ (this),
+      state_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void FeatureState::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // id
+        //
+        if (n.name () == "id" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< IdType > r (
+            IdTraits::create (i, f, this));
+
+          if (!id_.present ())
+          {
+            this->id_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // state
+        //
+        if (n.name () == "state" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< StateType > r (
+            StateTraits::create (i, f, this));
+
+          if (!state_.present ())
+          {
+            this->state_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        break;
+      }
+
+      if (!id_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "id",
+          "");
+      }
+
+      if (!state_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "state",
+          "");
+      }
+    }
+
+    FeatureState* FeatureState::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class FeatureState (*this, f, c);
+    }
+
+    FeatureState& FeatureState::
+    operator= (const FeatureState& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->id_ = x.id_;
+        this->state_ = x.state_;
+      }
+
+      return *this;
+    }
+
+    FeatureState::
+    ~FeatureState ()
+    {
+    }
+
+    // FeatureStates
+    //
+
+    FeatureStates::
+    FeatureStates ()
+    : ::xml_schema::Type (),
+      array_ (this)
+    {
+    }
+
+    FeatureStates::
+    FeatureStates (const FeatureStates& x,
+                   ::xml_schema::Flags f,
+                   ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      array_ (x.array_, f, this)
+    {
+    }
+
+    FeatureStates::
+    FeatureStates (const ::xercesc::DOMElement& e,
+                   ::xml_schema::Flags f,
+                   ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      array_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void FeatureStates::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // array
+        //
+        if (n.name () == "array" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< ArrayType > r (
+            ArrayTraits::create (i, f, this));
+
+          this->array_.push_back (::std::move (r));
+          continue;
+        }
+
+        break;
+      }
+    }
+
+    FeatureStates* FeatureStates::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class FeatureStates (*this, f, c);
+    }
+
+    FeatureStates& FeatureStates::
+    operator= (const FeatureStates& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->array_ = x.array_;
+      }
+
+      return *this;
+    }
+
+    FeatureStates::
+    ~FeatureStates ()
     {
     }
 
@@ -2299,12 +2606,14 @@ namespace prj
     Project (const AppVersionType& appVersion,
              const FileVersionType& fileVersion,
              const FeaturesType& features,
+             const StatesType& states,
              const ConnectionsType& connections,
              const ExpressionsType& expressions)
     : ::xml_schema::Type (),
       appVersion_ (appVersion, this),
       fileVersion_ (fileVersion, this),
       features_ (features, this),
+      states_ (states, this),
       connections_ (connections, this),
       expressions_ (expressions, this),
       expressionLinks_ (this),
@@ -2316,12 +2625,14 @@ namespace prj
     Project (::std::unique_ptr< AppVersionType > appVersion,
              const FileVersionType& fileVersion,
              ::std::unique_ptr< FeaturesType > features,
+             ::std::unique_ptr< StatesType > states,
              ::std::unique_ptr< ConnectionsType > connections,
              ::std::unique_ptr< ExpressionsType > expressions)
     : ::xml_schema::Type (),
       appVersion_ (std::move (appVersion), this),
       fileVersion_ (fileVersion, this),
       features_ (std::move (features), this),
+      states_ (std::move (states), this),
       connections_ (std::move (connections), this),
       expressions_ (std::move (expressions), this),
       expressionLinks_ (this),
@@ -2337,6 +2648,7 @@ namespace prj
       appVersion_ (x.appVersion_, f, this),
       fileVersion_ (x.fileVersion_, f, this),
       features_ (x.features_, f, this),
+      states_ (x.states_, f, this),
       connections_ (x.connections_, f, this),
       expressions_ (x.expressions_, f, this),
       expressionLinks_ (x.expressionLinks_, f, this),
@@ -2352,6 +2664,7 @@ namespace prj
       appVersion_ (this),
       fileVersion_ (this),
       features_ (this),
+      states_ (this),
       connections_ (this),
       expressions_ (this),
       expressionLinks_ (this),
@@ -2409,6 +2722,20 @@ namespace prj
           if (!features_.present ())
           {
             this->features_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // states
+        //
+        if (n.name () == "states" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< StatesType > r (
+            StatesTraits::create (i, f, this));
+
+          if (!states_.present ())
+          {
+            this->states_.set (::std::move (r));
             continue;
           }
         }
@@ -2493,6 +2820,13 @@ namespace prj
           "");
       }
 
+      if (!states_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "states",
+          "");
+      }
+
       if (!connections_.present ())
       {
         throw ::xsd::cxx::tree::expected_element< char > (
@@ -2524,6 +2858,7 @@ namespace prj
         this->appVersion_ = x.appVersion_;
         this->fileVersion_ = x.fileVersion_;
         this->features_ = x.features_;
+        this->states_ = x.states_;
         this->connections_ = x.connections_;
         this->expressions_ = x.expressions_;
         this->expressionLinks_ = x.expressionLinks_;
@@ -2884,6 +3219,54 @@ namespace prj
     }
 
     void
+    operator<< (::xercesc::DOMElement& e, const FeatureState& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // id
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "id",
+            e));
+
+        s << i.id ();
+      }
+
+      // state
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "state",
+            e));
+
+        s << i.state ();
+      }
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const FeatureStates& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // array
+      //
+      for (FeatureStates::ArrayConstIterator
+           b (i.array ().begin ()), n (i.array ().end ());
+           b != n; ++b)
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "array",
+            e));
+
+        s << *b;
+      }
+    }
+
+    void
     operator<< (::xercesc::DOMElement& e, const InputTypes& i)
     {
       e << static_cast< const ::xml_schema::Type& > (i);
@@ -3212,6 +3595,17 @@ namespace prj
             e));
 
         s << i.features ();
+      }
+
+      // states
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "states",
+            e));
+
+        s << i.states ();
       }
 
       // connections

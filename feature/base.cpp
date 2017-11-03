@@ -102,8 +102,6 @@ Base::Base()
   state.set(ftr::StateOffset::ModelDirty, true);
   state.set(ftr::StateOffset::VisualDirty, true);
   state.set(ftr::StateOffset::Failure, false);
-  state.set(ftr::StateOffset::Inactive, false);
-  state.set(ftr::StateOffset::NonLeaf, false);
   
   seerShape = std::shared_ptr<SeerShape>(new SeerShape());
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
@@ -122,7 +120,7 @@ void Base::setModelDirty()
   {
     state.set(ftr::StateOffset::ModelDirty, true);
     
-    ftr::Message fMessage(id, state, StateOffset::ModelDirty, true);
+    ftr::Message fMessage(id, state);
     msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
     mMessage.payload = fMessage;
     observer->out(mMessage);
@@ -136,7 +134,7 @@ void Base::setModelClean()
     return;
   state.set(ftr::StateOffset::ModelDirty, false);
   
-  ftr::Message fMessage(id, state, StateOffset::ModelDirty, false);
+  ftr::Message fMessage(id, state);
   msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
   mMessage.payload = fMessage;
   observer->out(mMessage);
@@ -148,7 +146,7 @@ void Base::setVisualClean()
     return;
   state.set(ftr::StateOffset::VisualDirty, false);
   
-  ftr::Message fMessage(id, state, StateOffset::VisualDirty, false);
+  ftr::Message fMessage(id, state);
   msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
   mMessage.payload = fMessage;
   observer->out(mMessage);
@@ -160,7 +158,7 @@ void Base::setVisualDirty()
     return;
   state.set(ftr::StateOffset::VisualDirty, true);
   
-  ftr::Message fMessage(id, state, StateOffset::VisualDirty, true);
+  ftr::Message fMessage(id, state);
   msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
   mMessage.payload = fMessage;
   observer->out(mMessage);
@@ -298,7 +296,7 @@ void Base::setSuccess()
     return; //already success
   state.set(ftr::StateOffset::Failure, false);
   
-  ftr::Message fMessage(id, state, StateOffset::Failure, false);
+  ftr::Message fMessage(id, state);
   msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
   mMessage.payload = fMessage;
   observer->out(mMessage);
@@ -310,55 +308,7 @@ void Base::setFailure()
     return; //already failure
   state.set(ftr::StateOffset::Failure, true);
   
-  ftr::Message fMessage(id, state, StateOffset::Failure, true);
-  msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
-  mMessage.payload = fMessage;
-  observer->out(mMessage);
-}
-
-void Base::setActive()
-{
-  if (isActive())
-    return; //already active.
-  state.set(ftr::StateOffset::Inactive, false);
-  
-  ftr::Message fMessage(id, state, StateOffset::Inactive, false);
-  msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
-  mMessage.payload = fMessage;
-  observer->out(mMessage);
-}
-
-void Base::setInActive()
-{
-  if (isInactive())
-    return; //already inactive.
-  state.set(ftr::StateOffset::Inactive, true);
-  
-  ftr::Message fMessage(id, state, StateOffset::Inactive, true);
-  msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
-  mMessage.payload = fMessage;
-  observer->out(mMessage);
-}
-
-void Base::setLeaf()
-{
-  if (isLeaf())
-    return; //already a leaf.
-  state.set(ftr::StateOffset::NonLeaf, false);
-  
-  ftr::Message fMessage(id, state, StateOffset::NonLeaf, false);
-  msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
-  mMessage.payload = fMessage;
-  observer->out(mMessage);
-}
-
-void Base::setNonLeaf()
-{
-  if (isNonLeaf())
-    return; //already nonLeaf.
-  state.set(ftr::StateOffset::NonLeaf, true);
-  
-  ftr::Message fMessage(id, state, StateOffset::NonLeaf, true);
+  ftr::Message fMessage(id, state);
   msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
   mMessage.payload = fMessage;
   observer->out(mMessage);
@@ -510,9 +460,7 @@ QTextStream& Base::getInfo(QTextStream &stream) const
         << "    Feature type: " << QString::fromStdString(getTypeString()) << endl
         << "    Model is clean: " << boolString(isModelClean()) << endl
         << "    Visual is clean: " << boolString(isVisualClean()) << endl
-        << "    Update was successful: " << boolString(isSuccess()) << endl
-        << "    Feature is active: " << boolString(isActive()) << endl
-        << "    Feture is leaf: " << boolString(isLeaf()) << endl;
+        << "    Update was successful: " << boolString(isSuccess()) << endl;
     
     if (!parameterVector.empty())
     {

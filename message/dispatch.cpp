@@ -28,9 +28,23 @@ void Dispatch::messageInSlot(const Message &message)
   messageOutSignal(message);
 }
 
-void Dispatch::dumpString(const std::string& /*stringIn*/)
+void Dispatch::startLogging()
 {
-//   std::cout << stringIn;
+  log.clear();
+  isLogging = true;
+}
+
+void Dispatch::stopLogging()
+{
+  isLogging = false;
+}
+
+void Dispatch::dumpString(const std::string& stringIn)
+{
+  if (!isLogging)
+    return;
+  
+  log += stringIn; //no formatting here.
 }
 
 void Dispatch::dumpConnectionCount()

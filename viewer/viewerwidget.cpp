@@ -540,6 +540,9 @@ void ViewerWidget::setupDispatcher()
   
   mask = msg::Response | msg::Post | msg::Open | msg::Project;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::projectOpenedDispatched, this, _1)));
+  
+  mask = msg::Response | msg::Post | msg::UpdateModel;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&ViewerWidget::projectUpdatedDispatched, this, _1)));
 }
 
 void ViewerWidget::featureAddedDispatched(const msg::Message &messageIn)
@@ -564,22 +567,38 @@ void ViewerWidget::featureRemovedDispatched(const msg::Message &messageIn)
 
 void ViewerWidget::visualUpdatedDispatched(const msg::Message &)
 {
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
   this->myUpdate();
 }
 
 void ViewerWidget::closeProjectDispatched(const msg::Message&)
 {
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
   //don't need to keep any children of the viewer.
   root->removeChildren(0, root->getNumChildren());
 }
 
 void ViewerWidget::systemResetDispatched(const msg::Message&)
 {
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
   currentSystem->setMatrix(osg::Matrixd::identity());
 }
 
 void ViewerWidget::systemToggleDispatched(const msg::Message&)
 {
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
   if (systemSwitch->getValue(0))
     systemSwitch->setAllChildrenOff();
   else
@@ -592,6 +611,10 @@ void ViewerWidget::systemToggleDispatched(const msg::Message&)
 
 void ViewerWidget::showHiddenLinesDispatched(const msg::Message&)
 {
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
   HiddenLineVisitor v(true);
   root->accept(v);
   
@@ -602,6 +625,10 @@ void ViewerWidget::showHiddenLinesDispatched(const msg::Message&)
 
 void ViewerWidget::hideHiddenLinesDispatched(const msg::Message&)
 {
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
   HiddenLineVisitor v(false);
   root->accept(v);
   
@@ -612,6 +639,10 @@ void ViewerWidget::hideHiddenLinesDispatched(const msg::Message&)
 
 void ViewerWidget::viewToggleHiddenLinesDispatched(const msg::Message&)
 {
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
   prf::Manager &manager = prf::manager();
   bool oldValue = manager.rootPtr->visual().display().showHiddenLines();
   manager.rootPtr->visual().display().showHiddenLines() = !oldValue;
@@ -624,6 +655,10 @@ void ViewerWidget::viewToggleHiddenLinesDispatched(const msg::Message&)
 
 void ViewerWidget::showThreeDDispatched(const msg::Message &msgIn)
 {
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
   slc::MainSwitchVisitor v(boost::get<vwr::Message>(msgIn.payload).featureId);
   root->accept(v);
   assert(v.out);
@@ -634,7 +669,6 @@ void ViewerWidget::showThreeDDispatched(const msg::Message &msgIn)
     return;
   
   v.out->setAllChildrenOn();
-  serialWrite();
   
   msg::Message mOut(msg::Response | msg::View | msg::Show | msg::ThreeD);
   mOut.payload = msgIn.payload;
@@ -643,6 +677,10 @@ void ViewerWidget::showThreeDDispatched(const msg::Message &msgIn)
 
 void ViewerWidget::hideThreeDDispatched(const msg::Message &msgIn)
 {
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
   slc::MainSwitchVisitor v(boost::get<vwr::Message>(msgIn.payload).featureId);
   root->accept(v);
   assert(v.out);
@@ -653,7 +691,6 @@ void ViewerWidget::hideThreeDDispatched(const msg::Message &msgIn)
     return;
   
   v.out->setAllChildrenOff();
-  serialWrite();
   
   msg::Message mOut(msg::Response | msg::View | msg::Hide | msg::ThreeD);
   mOut.payload = msgIn.payload;
@@ -662,6 +699,10 @@ void ViewerWidget::hideThreeDDispatched(const msg::Message &msgIn)
 
 void ViewerWidget::threeDToggleDispatched(const msg::Message &msgIn)
 {
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
   slc::MainSwitchVisitor v(boost::get<vwr::Message>(msgIn.payload).featureId);
   root->accept(v);
   assert(v.out);
@@ -679,8 +720,6 @@ void ViewerWidget::threeDToggleDispatched(const msg::Message &msgIn)
     maskOut = msg::Response | msg::View | msg::Show | msg::ThreeD;
   }
   
-  serialWrite();
-  
   msg::Message mOut(maskOut);
   mOut.payload = msgIn.payload;
   observer->outBlocked(mOut);
@@ -688,7 +727,20 @@ void ViewerWidget::threeDToggleDispatched(const msg::Message &msgIn)
 
 void ViewerWidget::projectOpenedDispatched(const msg::Message &)
 {
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
   serialRead();
+}
+
+void ViewerWidget::projectUpdatedDispatched(const msg::Message &)
+{
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
+  serialWrite();
 }
 
 void ViewerWidget::screenCapture(const std::string &fp, const std::string &e)
@@ -711,10 +763,10 @@ QTextStream& ViewerWidget::getInfo(QTextStream &stream) const
 }
 
 //restore states from serialize
-class SerialInVisitor : public osg::NodeVisitor
+class SerialInViewVisitor : public osg::NodeVisitor
 {
 public:
-  SerialInVisitor(const prj::srl::States &statesIn) :
+  SerialInViewVisitor(const prj::srl::States &statesIn) :
   NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN),
   states(statesIn)
   {
@@ -760,7 +812,7 @@ void ViewerWidget::serialRead()
     return;
   
   auto sView = prj::srl::view(file.string(), ::xml_schema::Flags::dont_validate);
-  SerialInVisitor v(sView->states());
+  SerialInViewVisitor v(sView->states());
   root->accept(v);
 }
 

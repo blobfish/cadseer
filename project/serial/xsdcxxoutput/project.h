@@ -74,6 +74,8 @@ namespace prj
   {
     class Feature;
     class Features;
+    class FeatureState;
+    class FeatureStates;
     class InputTypes;
     class Connection;
     class Connections;
@@ -555,6 +557,386 @@ namespace prj
 
       protected:
       FeatureSequence feature_;
+
+      //@endcond
+    };
+
+    /**
+     * @brief Class corresponding to the %FeatureState schema type.
+     *
+     * @nosubgrouping
+     */
+    class FeatureState: public ::xml_schema::Type
+    {
+      public:
+      /**
+       * @name id
+       *
+       * @brief Accessor and modifier functions for the %id
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::xml_schema::String IdType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< IdType, char > IdTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const IdType&
+      id () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      IdType&
+      id ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      id (const IdType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      id (::std::unique_ptr< IdType > p);
+
+      /**
+       * @brief Return the default value for the element.
+       *
+       * @return A read-only (constant) reference to the element's
+       * default value.
+       */
+      static const IdType&
+      id_default_value ();
+
+      //@}
+
+      /**
+       * @name state
+       *
+       * @brief Accessor and modifier functions for the %state
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::xml_schema::String StateType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< StateType, char > StateTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const StateType&
+      state () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      StateType&
+      state ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      state (const StateType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      state (::std::unique_ptr< StateType > p);
+
+      //@}
+
+      /**
+       * @name Constructors
+       */
+      //@{
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes.
+       */
+      FeatureState (const IdType&,
+                    const StateType&);
+
+      /**
+       * @brief Create an instance from a DOM element.
+       *
+       * @param e A DOM element to extract the data from.
+       * @param f Flags to create the new instance with.
+       * @param c A pointer to the object that will contain the new
+       * instance.
+       */
+      FeatureState (const ::xercesc::DOMElement& e,
+                    ::xml_schema::Flags f = 0,
+                    ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy constructor.
+       *
+       * @param x An instance to make a copy of.
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      FeatureState (const FeatureState& x,
+                    ::xml_schema::Flags f = 0,
+                    ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy the instance polymorphically.
+       *
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       * @return A pointer to the dynamically allocated copy.
+       *
+       * This function ensures that the dynamic type of the instance is
+       * used for copying and should be used for polymorphic object
+       * models instead of the copy constructor.
+       */
+      virtual FeatureState*
+      _clone (::xml_schema::Flags f = 0,
+              ::xml_schema::Container* c = 0) const;
+
+      /**
+       * @brief Copy assignment operator.
+       *
+       * @param x An instance to make a copy of.
+       * @return A reference to itself.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      FeatureState&
+      operator= (const FeatureState& x);
+
+      //@}
+
+      /**
+       * @brief Destructor.
+       */
+      virtual 
+      ~FeatureState ();
+
+      // Implementation.
+      //
+
+      //@cond
+
+      protected:
+      void
+      parse (::xsd::cxx::xml::dom::parser< char >&,
+             ::xml_schema::Flags);
+
+      protected:
+      ::xsd::cxx::tree::one< IdType > id_;
+      static const IdType id_default_value_;
+      ::xsd::cxx::tree::one< StateType > state_;
+
+      //@endcond
+    };
+
+    /**
+     * @brief Class corresponding to the %FeatureStates schema type.
+     *
+     * @nosubgrouping
+     */
+    class FeatureStates: public ::xml_schema::Type
+    {
+      public:
+      /**
+       * @name array
+       *
+       * @brief Accessor and modifier functions for the %array
+       * sequence element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::FeatureState ArrayType;
+
+      /**
+       * @brief Element sequence container type.
+       */
+      typedef ::xsd::cxx::tree::sequence< ArrayType > ArraySequence;
+
+      /**
+       * @brief Element iterator type.
+       */
+      typedef ArraySequence::iterator ArrayIterator;
+
+      /**
+       * @brief Element constant iterator type.
+       */
+      typedef ArraySequence::const_iterator ArrayConstIterator;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< ArrayType, char > ArrayTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element
+       * sequence.
+       *
+       * @return A constant reference to the sequence container.
+       */
+      const ArraySequence&
+      array () const;
+
+      /**
+       * @brief Return a read-write reference to the element sequence.
+       *
+       * @return A reference to the sequence container.
+       */
+      ArraySequence&
+      array ();
+
+      /**
+       * @brief Copy elements from a given sequence.
+       *
+       * @param s A sequence to copy elements from.
+       *
+       * For each element in @a s this function makes a copy and adds it 
+       * to the sequence. Note that this operation completely changes the 
+       * sequence and all old elements will be lost.
+       */
+      void
+      array (const ArraySequence& s);
+
+      //@}
+
+      /**
+       * @name Constructors
+       */
+      //@{
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes.
+       */
+      FeatureStates ();
+
+      /**
+       * @brief Create an instance from a DOM element.
+       *
+       * @param e A DOM element to extract the data from.
+       * @param f Flags to create the new instance with.
+       * @param c A pointer to the object that will contain the new
+       * instance.
+       */
+      FeatureStates (const ::xercesc::DOMElement& e,
+                     ::xml_schema::Flags f = 0,
+                     ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy constructor.
+       *
+       * @param x An instance to make a copy of.
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      FeatureStates (const FeatureStates& x,
+                     ::xml_schema::Flags f = 0,
+                     ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy the instance polymorphically.
+       *
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       * @return A pointer to the dynamically allocated copy.
+       *
+       * This function ensures that the dynamic type of the instance is
+       * used for copying and should be used for polymorphic object
+       * models instead of the copy constructor.
+       */
+      virtual FeatureStates*
+      _clone (::xml_schema::Flags f = 0,
+              ::xml_schema::Container* c = 0) const;
+
+      /**
+       * @brief Copy assignment operator.
+       *
+       * @param x An instance to make a copy of.
+       * @return A reference to itself.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      FeatureStates&
+      operator= (const FeatureStates& x);
+
+      //@}
+
+      /**
+       * @brief Destructor.
+       */
+      virtual 
+      ~FeatureStates ();
+
+      // Implementation.
+      //
+
+      //@cond
+
+      protected:
+      void
+      parse (::xsd::cxx::xml::dom::parser< char >&,
+             ::xml_schema::Flags);
+
+      protected:
+      ArraySequence array_;
 
       //@endcond
     };
@@ -3032,6 +3414,64 @@ namespace prj
       //@}
 
       /**
+       * @name states
+       *
+       * @brief Accessor and modifier functions for the %states
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::FeatureStates StatesType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< StatesType, char > StatesTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const StatesType&
+      states () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      StatesType&
+      states ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      states (const StatesType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      states (::std::unique_ptr< StatesType > p);
+
+      //@}
+
+      /**
        * @name connections
        *
        * @brief Accessor and modifier functions for the %connections
@@ -3311,6 +3751,7 @@ namespace prj
       Project (const AppVersionType&,
                const FileVersionType&,
                const FeaturesType&,
+               const StatesType&,
                const ConnectionsType&,
                const ExpressionsType&);
 
@@ -3325,6 +3766,7 @@ namespace prj
       Project (::std::unique_ptr< AppVersionType >,
                const FileVersionType&,
                ::std::unique_ptr< FeaturesType >,
+               ::std::unique_ptr< StatesType >,
                ::std::unique_ptr< ConnectionsType >,
                ::std::unique_ptr< ExpressionsType >);
 
@@ -3401,6 +3843,7 @@ namespace prj
       ::xsd::cxx::tree::one< AppVersionType > appVersion_;
       ::xsd::cxx::tree::one< FileVersionType > fileVersion_;
       ::xsd::cxx::tree::one< FeaturesType > features_;
+      ::xsd::cxx::tree::one< StatesType > states_;
       ::xsd::cxx::tree::one< ConnectionsType > connections_;
       ::xsd::cxx::tree::one< ExpressionsType > expressions_;
       ExpressionLinksOptional expressionLinks_;
@@ -3693,6 +4136,12 @@ namespace prj
 
     void
     operator<< (::xercesc::DOMElement&, const Features&);
+
+    void
+    operator<< (::xercesc::DOMElement&, const FeatureState&);
+
+    void
+    operator<< (::xercesc::DOMElement&, const FeatureStates&);
 
     void
     operator<< (::xercesc::DOMElement&, const InputTypes&);

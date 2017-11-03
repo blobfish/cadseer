@@ -71,6 +71,7 @@ namespace dag
     std::size_t row;
     std::size_t sortedIndex; //for index into toposorted list.
     bool dagVisible; //!< should entry be visible in the DAG view.
+    ftr::State state;
     
     //keeping raw pointer for indexing.
     std::shared_ptr<RectItem> rectShared;

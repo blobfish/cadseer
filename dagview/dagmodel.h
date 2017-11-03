@@ -101,6 +101,7 @@ namespace dag
     void selectionSubtractionDispatched(const msg::Message &);
     void closeProjectDispatched(const msg::Message&);
     void featureStateChangedDispatched(const msg::Message &);
+    void projectFeatureStateChangedDispatched(const msg::Message &);
     void featureRenamedDispatched(const msg::Message &);
     void dumpDAGViewGraphDispatched(const msg::Message &);
     void threeDShowDispatched(const msg::Message &);
@@ -115,6 +116,7 @@ namespace dag
     void addEdgeItemsToScene(Edge);
     void removeVertexItemsFromScene(Vertex);
     void removeEdgeItemsFromScene(Edge);
+    void stateUpdate(Vertex);
 //     
     RectItem* getRectFromPosition(const QPointF &position); //!< can be nullptr
 //     

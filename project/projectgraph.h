@@ -39,6 +39,7 @@ namespace prg
     //boost graph will call destructor when expanding vector
     //so we need to keep from deleting when this happens.
     std::shared_ptr<ftr::Base> feature;
+    ftr::State state;
   };
   /*! @brief needed to create an internal index for vertex. needed for listS.*/
   typedef boost::property<boost::vertex_index_t, std::size_t, VertexProperty> vertex_prop;
@@ -104,39 +105,6 @@ namespace prg
                             Edge_writer<GraphIn>(graphIn));
     }
     
-    class SetDirtyVisitor : public boost::default_bfs_visitor
-    {
-    public:
-    
-      template <typename VertexTypeIn, typename GraphTypeIn>
-      void discover_vertex(VertexTypeIn vertexIn, const GraphTypeIn &graphIn) const
-      {
-        graphIn[vertexIn].feature->setModelDirty();
-      }
-    };
-    
-    class SetInactiveVisitor : public boost::default_bfs_visitor
-    {
-    public:
-    
-      template <typename VertexTypeIn, typename GraphTypeIn>
-      void discover_vertex(VertexTypeIn vertexIn, const GraphTypeIn &graphIn) const
-      {
-        graphIn[vertexIn].feature->setInActive();
-      }
-    };
-    
-    class SetActiveVisitor : public boost::default_bfs_visitor
-    {
-    public:
-    
-      template <typename VertexTypeIn, typename GraphTypeIn>
-      void discover_vertex(VertexTypeIn vertexIn, const GraphTypeIn &graphIn) const
-      {
-        graphIn[vertexIn].feature->setActive();
-      }
-    };
-    
     //! simply collect connected vertices.
     template <typename VertexTypeIn>
     class AccrueVisitor : public boost::default_bfs_visitor
@@ -161,8 +129,8 @@ namespace prg
       bool operator()(const VertexType& vertexIn) const
       {
         if(!graph)
-        return false;
-        return (*graph)[vertexIn].feature->isActive();
+          return false;
+        return !(*graph)[vertexIn].state.test(ftr::StateOffset::Inactive);
       }
       const GraphTypeIn *graph;
     };

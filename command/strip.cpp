@@ -94,10 +94,7 @@ void Strip::go()
   std::shared_ptr<ftr::Strip> strip(new ftr::Strip());
   project->addFeature(strip);
   
-  //this should trick the dagview into updating so it isn't screwed up
-  //while dialog is running. only dagview responds to this message
-  //as of git hash a530460.
-  observer->outBlocked(msg::Response | msg::Post | msg::UpdateModel);
+  observer->outBlocked(msg::Request | msg::DAG | msg::View | msg::Update);
   
   dialog = new dlg::Strip(strip.get(), mainWindow);
   dialog->setPartId(partId);

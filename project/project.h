@@ -64,6 +64,15 @@ public:
      //!< removes all tags from edges with id as target. removes edge if only tag is parameter.
     void removeParentTag(const boost::uuids::uuid &, const std::string&);
     
+    void setFeatureActive(const boost::uuids::uuid&);
+    void setFeatureInactive(const boost::uuids::uuid&);
+    bool isFeatureActive(const boost::uuids::uuid&);
+    bool isFeatureInactive(const boost::uuids::uuid&);
+    void setFeatureLeaf(const boost::uuids::uuid&);
+    void setFeatureNonLeaf(const boost::uuids::uuid&);
+    bool isFeatureLeaf(const boost::uuids::uuid&);
+    bool isFeatureNonLeaf(const boost::uuids::uuid&);
+    
     void setSaveDirectory(const std::string &directoryIn);
     std::string getSaveDirectory() const {return saveDirectory;}
     void save();
@@ -100,6 +109,15 @@ private:
     std::unique_ptr<expr::Manager> expressionManager;
     std::unique_ptr<ftr::ShapeHistory> shapeHistory;
     bool isLoading = false;
+    
+    void setFeatureActive(prg::Vertex);
+    void setFeatureInactive(prg::Vertex);
+    bool isFeatureActive(prg::Vertex);
+    bool isFeatureInactive(prg::Vertex);
+    void setFeatureLeaf(prg::Vertex);
+    void setFeatureNonLeaf(prg::Vertex);
+    bool isFeatureLeaf(prg::Vertex);
+    bool isFeatureNonLeaf(prg::Vertex);
     
     std::unique_ptr<msg::Observer> observer;
     void setupDispatcher();

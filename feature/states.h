@@ -27,15 +27,20 @@
 
 namespace ftr
 {
-  typedef std::bitset<32> State; //!< = unsigned long
-  
+  //note feature state data is divided between each feature
+  //and the project. project stores Inactive and NonLeaf.
+  //Feature stores the rest. Both use this type. 
+  //feature uses 00xxx
+  //project uses xx000
+  //dagview combines them.
+  typedef std::bitset<8> State;
   namespace StateOffset
   {
-    static const unsigned long ModelDirty =       0;
-    static const unsigned long VisualDirty =      1;
-    static const unsigned long Failure =          2;
-    static const unsigned long Inactive =         3;
-    static const unsigned long NonLeaf =          4; //keeping consistently negative.
+    static const std::size_t ModelDirty =       0;
+    static const std::size_t VisualDirty =      1;
+    static const std::size_t Failure =          2;
+    static const std::size_t Inactive =         3;
+    static const std::size_t NonLeaf =          4;
   };
 }
 

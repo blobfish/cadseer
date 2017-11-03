@@ -264,6 +264,10 @@ void Widget::setupDispatcher()
 
 void Widget::closeProjectDispatched(const msg::Message&)
 {
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
   tabWidget->clear();
   tableViewAll->deleteLater(); //should delete all child models and views.
   tableViewAll = nullptr;
@@ -274,6 +278,10 @@ void Widget::closeProjectDispatched(const msg::Message&)
 
 void Widget::openNewProjectDispatched(const msg::Message&)
 {
+  std::ostringstream debug;
+  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
+  msg::dispatch().dumpString(debug.str());
+  
   assert(!eManager);
   eManager = &(static_cast<app::Application *>(qApp)->getProject()->getManager());
   assert(eManager);

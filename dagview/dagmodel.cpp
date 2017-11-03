@@ -202,21 +202,12 @@ void Model::featureAddedDispatched(const msg::Message &messageIn)
   Vertex virginVertex = boost::add_vertex(graph);
   graph[virginVertex].feature = message.feature;
   graph[virginVertex].featureId = message.feature->getId();
+  graph[virginVertex].state = message.feature->getState();
   
   if (message.feature->isVisible3D())
     graph[virginVertex].visibleIconRaw->setPixmap(visiblePixmapEnabled);
   else
     graph[virginVertex].visibleIconRaw->setPixmap(visiblePixmapDisabled);
-  
-  //this is pretty much a duplicate of the state changed 'slot'
-  if (message.feature->isInactive())
-    graph[virginVertex].stateIconRaw->setPixmap(inactivePixmap);
-  else if (message.feature->isModelDirty())
-    graph[virginVertex].stateIconRaw->setPixmap(pendingPixmap);
-  else if (message.feature->isFailure())
-    graph[virginVertex].stateIconRaw->setPixmap(failPixmap);
-  else
-    graph[virginVertex].stateIconRaw->setPixmap(passPixmap);
   
   graph[virginVertex].featureIconRaw->setPixmap(message.feature->getIcon().pixmap(iconSize, iconSize));
   graph[virginVertex].textRaw->setPlainText(message.feature->getName());
@@ -334,6 +325,9 @@ void Model::setupDispatcher()
   mask = msg::Response | msg::Feature | msg::Status;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::featureStateChangedDispatched, this, _1)));
   
+  mask = msg::Response | msg::Project | msg::Feature | msg::Status;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::projectFeatureStateChangedDispatched, this, _1)));
+  
   mask = msg::Response | msg::Edit | msg::Feature | msg::Name;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::featureRenamedDispatched, this, _1)));
   
@@ -345,60 +339,60 @@ void Model::setupDispatcher()
   
   mask = msg::Response | msg::View | msg::Hide | msg::ThreeD;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::threeDHideDispatched, this, _1)));
+  
+  mask = msg::Request | msg::DAG | msg::View | msg::Update;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::projectUpdatedDispatched, this, _1)));
 }
 
 void Model::featureStateChangedDispatched(const msg::Message &messageIn)
 {
   ftr::Message fMessage = boost::get<ftr::Message>(messageIn.payload);
-
   Vertex vertex = findRecord(vertexIdContainer, fMessage.featureId).vertex;
-  assert(!graph[vertex].feature.expired());
-  std::shared_ptr<ftr::Base> feature = graph[vertex].feature.lock();
   
-  auto updateStateIcon = [&]()
+  //this is the feature state change from the actual feature.
+  //so clear out the lower 3 bits and set to new state
+  graph[vertex].state &= ftr::State("11000");
+  graph[vertex].state |= (ftr::State("00111") & fMessage.state);
+  
+  stateUpdate(vertex);
+}
+
+void Model::projectFeatureStateChangedDispatched(const msg::Message &mIn)
+{
+  ftr::Message fMessage = boost::get<ftr::Message>(mIn.payload);
+  Vertex vertex = findRecord(vertexIdContainer, fMessage.featureId).vertex;
+  
+  //this is the feature state change from the PROJECT.
+  //so clear out the upper 2 bits and set to new state
+  graph[vertex].state &= ftr::State("00111");
+  graph[vertex].state |= (ftr::State("11000") & fMessage.state);
+  
+  stateUpdate(vertex);
+}
+
+void Model::stateUpdate(Vertex vIn)
+{
+  ftr::State cState = graph[vIn].state;
+
+  //from highest to lowest priority.
+  if (cState.test(ftr::StateOffset::Inactive))
+    graph[vIn].stateIconRaw->setPixmap(inactivePixmap);
+  else if (cState.test(ftr::StateOffset::ModelDirty))
+    graph[vIn].stateIconRaw->setPixmap(pendingPixmap);
+  else if (cState.test(ftr::StateOffset::Failure))
+    graph[vIn].stateIconRaw->setPixmap(failPixmap);
+  else
+    graph[vIn].stateIconRaw->setPixmap(passPixmap);
+
+  if (cState.test(ftr::StateOffset::NonLeaf))
   {
-    //from highest to lowest priority.
-    if (feature->isInactive())
-    {
-      graph[vertex].stateIconRaw->setPixmap(inactivePixmap);
-      return;
-    }
-    
-    if (feature->isModelDirty())
-    {
-      graph[vertex].stateIconRaw->setPixmap(pendingPixmap);
-      return;
-    }
-    
-    if (feature->isFailure())
-      graph[vertex].stateIconRaw->setPixmap(failPixmap);
-    else
-      graph[vertex].stateIconRaw->setPixmap(passPixmap);
-  };
-  
-  if
-  (
-    (fMessage.stateOffset == ftr::StateOffset::ModelDirty) ||
-    (fMessage.stateOffset == ftr::StateOffset::Failure) ||
-    (fMessage.stateOffset == ftr::StateOffset::Inactive)
-  )
-    updateStateIcon();
-  
-  ftr::State featureState = fMessage.state;
-  bool currentChangedState = fMessage.freshValue;
-  
-  if (fMessage.stateOffset == ftr::StateOffset::NonLeaf)
+    if (graph[vIn].visibleIconRaw->scene())
+      removeItem(graph[vIn].visibleIconRaw);
+  }
+  else
   {
-    if (currentChangedState)
-    {
-      if (graph[vertex].visibleIconRaw->scene())
-        removeItem(graph[vertex].visibleIconRaw);
-    }
-    else
-    {
-      if (!graph[vertex].visibleIconRaw->scene())
-        addItem(graph[vertex].visibleIconRaw);
-    }
+    if (!graph[vIn].visibleIconRaw->scene())
+      addItem(graph[vIn].visibleIconRaw);
   }
   
   //set tool tip to current state.
@@ -409,18 +403,18 @@ void Model::featureStateChangedDispatched(const msg::Message &messageIn)
   stream <<
   "<table border=\"1\" cellpadding=\"6\">" << 
   "<tr>" <<
-  "<td>" << tr("Model Dirty") << "</td><td>" << ((featureState.test(ftr::StateOffset::ModelDirty)) ? ts : fs) << "</td>" <<
+  "<td>" << tr("Model Dirty") << "</td><td>" << ((cState.test(ftr::StateOffset::ModelDirty)) ? ts : fs) << "</td>" <<
   "</tr><tr>" <<
-  "<td>" << tr("Visual Dirty") << "</td><td>" << ((featureState.test(ftr::StateOffset::VisualDirty)) ? ts : fs) << "</td>" <<
+  "<td>" << tr("Visual Dirty") << "</td><td>" << ((cState.test(ftr::StateOffset::VisualDirty)) ? ts : fs) << "</td>" <<
   "</tr><tr>" <<
-  "<td>" << tr("Failure") << "</td><td>" << ((featureState.test(ftr::StateOffset::Failure)) ? ts : fs) << "</td>" <<
+  "<td>" << tr("Failure") << "</td><td>" << ((cState.test(ftr::StateOffset::Failure)) ? ts : fs) << "</td>" <<
   "</tr><tr>" <<
-  "<td>" << tr("Inactive") << "</td><td>" << ((featureState.test(ftr::StateOffset::Inactive)) ? ts : fs) << "</td>" <<
+  "<td>" << tr("Inactive") << "</td><td>" << ((cState.test(ftr::StateOffset::Inactive)) ? ts : fs) << "</td>" <<
   "</tr><tr>" <<
-  "<td>" << tr("Non-Leaf") << "</td><td>" << ((featureState.test(ftr::StateOffset::NonLeaf)) ? ts : fs) << "</td>" <<
+  "<td>" << tr("Non-Leaf") << "</td><td>" << ((cState.test(ftr::StateOffset::NonLeaf)) ? ts : fs) << "</td>" <<
   "</tr>" <<
   "</table>";
-  graph[vertex].stateIconRaw->setToolTip(toolTip);
+  graph[vIn].stateIconRaw->setToolTip(toolTip);
 }
 
 void Model::featureRenamedDispatched(const msg::Message &messageIn)

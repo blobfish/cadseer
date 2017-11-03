@@ -464,7 +464,7 @@ void GestureHandler::constructMenu()
     osg::MatrixTransform *viewRenderStyleToggle = gsn::buildCommandNode(":/resources/images/renderStyleToggle.svg", iconRadius);
     viewRenderStyleToggle->setMatrix(dummy);
     viewRenderStyleToggle->setUserValue(attributeMask, (msg::Request | msg::View | msg::RenderStyle | msg::Toggle).to_string());
-    viewRenderStyleToggle->setUserValue(attributeStatus, QObject::tr("View Lines Command").toStdString());
+    viewRenderStyleToggle->setUserValue(attributeStatus, QObject::tr("Toggle Render Style Command").toStdString());
     viewBase->insertChild(viewBase->getNumChildren() - 2, viewRenderStyleToggle);
     
     osg::MatrixTransform *viewToggleHiddenLines = gsn::buildCommandNode(":/resources/images/viewHiddenLines.svg", iconRadius);

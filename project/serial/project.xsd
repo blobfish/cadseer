@@ -19,6 +19,19 @@
   </xs:sequence>
 </xs:complexType>
 
+<xs:complexType name="FeatureState">
+  <xs:all>
+    <xs:element name="id" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+    <xs:element name="state" type="xs:string"/>
+  </xs:all>
+</xs:complexType>
+
+<xs:complexType name="FeatureStates">
+  <xs:sequence maxOccurs="unbounded">
+    <xs:element name="array" type="srl:FeatureState"/>
+  </xs:sequence>
+</xs:complexType>
+
 <xs:complexType name="InputTypes">
   <xs:sequence maxOccurs="unbounded">
     <xs:element name="array" type="xs:string"/>
@@ -98,6 +111,7 @@
     <xs:element name="appVersion" type="srl:AppVersion"/>
     <xs:element name="fileVersion" type="xs:int" default="0"/>
     <xs:element name="features" type="srl:Features"/>
+    <xs:element name="states" type="srl:FeatureStates"/>
     <xs:element name="connections" type="srl:Connections"/>
     <xs:element name="expressions" type="srl:Expressions"/>
     <xs:element name="expressionLinks" type="srl:ExpressionLinks" minOccurs="0"/>
