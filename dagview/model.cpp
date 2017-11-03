@@ -49,8 +49,8 @@
 #include <viewer/message.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
-#include <dagview/dagcontrolleddfs.h>
-#include <dagview/dagmodel.h>
+#include <dagview/controlleddfs.h>
+#include <dagview/model.h>
 
 using namespace dag;
 

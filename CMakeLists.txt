@@ -475,10 +475,10 @@ SET(LIBREOFFICE_SOURCES
 
 SET(CADSEER_SOURCES
     main.cpp
-    dagview/dagview.cpp
-    dagview/dagmodel.cpp
-    dagview/dagmodelgraph.cpp
-    dagview/dagrectitem.cpp
+    dagview/view.cpp
+    dagview/model.cpp
+    dagview/modelgraph.cpp
+    dagview/rectitem.cpp
     globalutilities.cpp
     ${MODELVIZ_SOURCES}
     ${TESTING_SOURCES}
@@ -502,8 +502,8 @@ SET(CADSEER_SOURCES
 SET(CADSEER_MOC_HDRS
     viewer/widget.h
     application/mainwindow.h
-    dagview/dagview.h
-    dagview/dagmodel.h
+    dagview/view.h
+    dagview/model.h
     application/application.h
     application/splitterdecorated.h
     application/infowindow.h

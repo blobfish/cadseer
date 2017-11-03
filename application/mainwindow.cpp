@@ -25,8 +25,8 @@
 #include <QDir>
 #include <QCloseEvent>
 
-#include <dagview/dagmodel.h>
-#include <dagview/dagview.h>
+#include <dagview/model.h>
+#include <dagview/view.h>
 #include <expressions/widget.h>
 #include <application/application.h>
 #include <application/splitterdecorated.h>

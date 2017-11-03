@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef DAGMODEL_H
-#define DAGMODEL_H
+#ifndef DAG_MODEL_H
+#define DAG_MODEL_H
 
 #include <memory>
 #include <vector>
@@ -35,7 +35,7 @@
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/composite_key.hpp>
 
-#include <dagview/dagmodelgraph.h>
+#include <dagview/modelgraph.h>
 #endif
 
 // #include "DAGFilter.h"
@@ -164,4 +164,4 @@ namespace dag
   };
 }
 
-#endif // DAGMODEL_H
+#endif // DAG_MODEL_H

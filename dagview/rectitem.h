@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef DAGRECTITEM_H
-#define DAGRECTITEM_H
+#ifndef DAG_RECTITEM_H
+#define DAG_RECTITEM_H
 
 #include <QGraphicsRectItem>
 #include <QBrush>
@@ -55,4 +55,4 @@ namespace dag
   };
 }
 
-#endif // DAGRECTITEM_H
+#endif // DAG_RECTITEM_H

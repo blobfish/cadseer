@@ -17,7 +17,7 @@
  *
  */
 
-#include <dagview/dagview.h>
+#include <dagview/view.h>
 
 using namespace dag;
 

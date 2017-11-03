@@ -17,7 +17,7 @@
  *
  */
 
-#include <dagview/dagmodelgraph.h>
+#include <dagview/modelgraph.h>
 
 using namespace dag;
 

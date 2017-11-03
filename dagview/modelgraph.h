@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef DAGMODELGRAPH_H
-#define DAGMODELGRAPH_H
+#ifndef DAG_MODELGRAPH_H
+#define DAG_MODELGRAPH_H
 
 #include <memory>
 #include <bitset>
@@ -35,7 +35,7 @@
 #include <tools/idtools.h>
 #include <feature/base.h>
 #include <feature/inputtype.h>
-#include <dagview/dagrectitem.h>
+#include <dagview/rectitem.h>
 
 using boost::uuids::uuid;
 
@@ -323,4 +323,4 @@ namespace dag
   }
 }
 
-#endif // DAGMODELGRAPH_H
+#endif // DAG_MODELGRAPH_H
