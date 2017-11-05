@@ -22,23 +22,25 @@
 
 #include <map>
 #include <memory>
+#include <vector>
+
+#include <osg/Vec4>
 
 #include <boost/uuid/uuid.hpp>
 
-#include <project/projectgraph.h>
+#include <feature/updatepayload.h>
 
 class QTextStream;
 class TopoDS_Shape;
 
 namespace msg{class Message; class Observer;}
 namespace expr{class Manager;}
-namespace ftr{class ShapeHistory;}
-
-typedef std::map<boost::uuids::uuid, prg::Vertex> IdVertexMap;
+namespace ftr{class ShapeHistory; class InputType; namespace prm{class Parameter;}}
 
 namespace prj
 {
   class GitManager;
+  class Stow;
   
 class Project
 {
@@ -56,8 +58,8 @@ public:
     std::vector<boost::uuids::uuid> getAllFeatureIds() const;
     
     void addFeature(std::shared_ptr<ftr::Base> feature);
-    bool hasFeature(const boost::uuids::uuid &idIn);
-    ftr::Base* findFeature(const boost::uuids::uuid &idIn);
+    bool hasFeature(const boost::uuids::uuid &idIn) const;
+    ftr::Base* findFeature(const boost::uuids::uuid &idIn) const;
     void removeFeature(const boost::uuids::uuid &idIn);
     void setCurrentLeaf(const boost::uuids::uuid &idIn);
     void connect(const boost::uuids::uuid &parentIn, const boost::uuids::uuid &childIn, const ftr::InputType &type);
@@ -90,34 +92,15 @@ public:
     QTextStream& getInfo(QTextStream&) const;
     
 private:
-    //! index all the vertices of the graph. needed for algorthims when using listS.
-    void indexVerticesEdges();
-    prg::Edge connect(prg::Vertex parentIn, prg::Vertex childIn, const ftr::InputType &type);
-    prg::Edge connectVertices(prg::Vertex parent, prg::Vertex child, const ftr::InputType &type);
-    prg::Vertex findVertex(const boost::uuids::uuid &idIn) const;
-    typedef std::pair<prg::Vertex, prg::Edge> VertexEdgePair;
-    typedef std::vector<VertexEdgePair> VertexEdgePairs;
-    VertexEdgePairs getParents(prg::Vertex) const;
-    VertexEdgePairs getChildren(prg::Vertex) const;
     void updateLeafStatus();
+    void sendConnectMessage(const boost::uuids::uuid &parentIn, const boost::uuids::uuid &childIn, const ftr::InputType &type);
     
-    IdVertexMap map;
-    prg::Graph projectGraph;
     std::string saveDirectory;
     void serialWrite();
     std::unique_ptr<GitManager> gitManager;
     std::unique_ptr<expr::Manager> expressionManager;
     std::unique_ptr<ftr::ShapeHistory> shapeHistory;
     bool isLoading = false;
-    
-    void setFeatureActive(prg::Vertex);
-    void setFeatureInactive(prg::Vertex);
-    bool isFeatureActive(prg::Vertex);
-    bool isFeatureInactive(prg::Vertex);
-    void setFeatureLeaf(prg::Vertex);
-    void setFeatureNonLeaf(prg::Vertex);
-    bool isFeatureLeaf(prg::Vertex);
-    bool isFeatureNonLeaf(prg::Vertex);
     
     std::unique_ptr<msg::Observer> observer;
     void setupDispatcher();
@@ -131,6 +114,9 @@ private:
     void checkShapeIdsDispatched(const msg::Message &);
     void featureStateChangedDispatched(const msg::Message &);
     void dumpProjectGraphDispatched(const msg::Message &);
+    void shownThreeDDispatched(const msg::Message&);
+    
+    std::unique_ptr<Stow> stow; //think pimpl
 };
 }
 

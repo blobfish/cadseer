@@ -17,6 +17,8 @@
  *
  */
 
+#include <iostream>
+
 #include <QTabWidget>
 #include <QVBoxLayout>
 #include <QSortFilterProxyModel>

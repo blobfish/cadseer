@@ -340,7 +340,12 @@ prj::srl::FeatureBase Base::serialOut()
   );
   out.color() = colorOut;
   
-  out.state() = state.to_string();
+  //currently we don't serialize anything for visual.
+  //so always set visualDirty so viz gets generated when
+  //needed after project open.
+  State temp = state;
+  temp.set(StateOffset::VisualDirty);
+  out.state() = temp.to_string();
   
   return out;
 }

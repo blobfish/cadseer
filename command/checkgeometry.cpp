@@ -20,6 +20,7 @@
 #include <project/project.h>
 #include <application/application.h>
 #include <application/mainwindow.h>
+#include <feature/base.h>
 #include <selection/eventhandler.h>
 #include <selection/manager.h>
 #include <message/message.h>

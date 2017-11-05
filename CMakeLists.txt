@@ -379,6 +379,7 @@ SET(PREFERENCE_SOURCES
     
 SET(PROJECT_SOURCES
     project/project.cpp
+    project/stow.cpp
     project/message.cpp
     project/gitmanager.cpp
     project/featureload.cpp

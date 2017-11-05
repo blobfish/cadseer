@@ -52,20 +52,21 @@
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <project/gitmanager.h>
+#include <tools/graphtools.h>
 #include <project/featureload.h>
 #include <project/serial/xsdcxxoutput/project.h>
+#include <project/stow.h>
 #include <project/project.h>
-#include <tools/graphtools.h>
 
 using namespace prj;
-using namespace prg;
 using boost::uuids::uuid;
 
 Project::Project() :
 gitManager(new GitManager()),
 expressionManager(new expr::Manager()),
 shapeHistory(new ftr::ShapeHistory()),
-observer(new msg::Observer())
+observer(new msg::Observer()),
+stow(new Stow())
 {
   observer->name = "prj::Project";
   setupDispatcher();
@@ -92,15 +93,15 @@ void Project::updateModel()
   
   expressionManager->update();
   
-  Path sorted;
+  Vertices sorted;
   try
   {
-    indexVerticesEdges();
-    boost::topological_sort(projectGraph, std::back_inserter(sorted));
+//     indexVerticesEdges();
+    boost::topological_sort(stow->graph, std::back_inserter(sorted));
   }
   catch(const boost::not_a_dag &)
   {
-    std::cout << std::endl << "Graph is not a dag exception in Project::update()" << std::endl << std::endl;
+    std::cout << std::endl << "Graph is not a dag exception in Project::updateModel()" << std::endl << std::endl;
     return;
   }
   
@@ -115,11 +116,15 @@ void Project::updateModel()
   for (auto it = sorted.rbegin(); it != sorted.rend(); ++it)
   {
     Vertex currentVertex = *it;
-    ftr::Base *cFeature = projectGraph[currentVertex].feature.get();
+    ftr::Base *cFeature = stow->graph[currentVertex].feature.get();
+    
+    if (!stow->graph[currentVertex].alive)
+      continue;
+    
     if
     (
       (cFeature->isModelClean()) ||
-      (isFeatureInactive(currentVertex))
+      (stow->isFeatureInactive(currentVertex))
     )
     {
       cFeature->fillInHistory(*shapeHistory);
@@ -131,15 +136,15 @@ void Project::updateModel()
     observer->out(msg::buildStatusMessage(messageStream.str()));
     qApp->processEvents(); //need this or we won't see messages.
     
-    ftr::UpdatePayload::UpdateMap updateMap;
-    InEdgeIterator inEdgeIt, inEdgeItDone;
-    boost::tie(inEdgeIt, inEdgeItDone) = boost::in_edges(currentVertex, projectGraph);
-    for(;inEdgeIt != inEdgeItDone; ++inEdgeIt)
-    {
-      Vertex source = boost::source(*inEdgeIt, projectGraph);
-      for (const auto &tag : projectGraph[*inEdgeIt].inputType.tags)
-        updateMap.insert(std::make_pair(tag, projectGraph[source].feature.get()));
-    }
+    RemovedGraph removedGraph = buildRemovedGraph(stow->graph);
+    ReversedGraph reversedGraph = boost::make_reverse_graph(removedGraph);
+    ftr::UpdatePayload::UpdateMap updateMap =
+    buildAjacentUpdateMap
+    <
+      ReversedGraph,
+      boost::graph_traits<ReversedGraph>::vertex_descriptor
+    >(reversedGraph, currentVertex);
+    
     ftr::UpdatePayload payload(updateMap, *shapeHistory);
     cFeature->updateModel(payload);
     cFeature->serialWrite(QDir(QString::fromStdString(saveDirectory)));
@@ -164,31 +169,21 @@ void Project::updateVisual()
   //if we have selection and then destroy the geometry when the
   //the visual updates, things get out of sync. so clear the selection.
   observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
-  
   observer->out(msg::Message(msg::Response | msg::Pre | msg::UpdateVisual));
-  
-  Path sorted;
-  try
-  {
-    indexVerticesEdges();
-    boost::topological_sort(projectGraph, std::back_inserter(sorted));
-  }
-  catch(const boost::not_a_dag &)
-  {
-    std::cout << std::endl << "Graph is not a dag exception in Project::update()" << std::endl << std::endl;
-    return;
-  }
   
   auto block = observer->createBlocker();
   
-  for(auto it = sorted.rbegin(); it != sorted.rend(); ++it)
+  //don't think we need to topo sort for visual.
+  for(auto its = boost::vertices(stow->graph); its.first != its.second; ++its.first)
   {
-    auto feature = projectGraph[*it].feature;
+    if (!stow->graph[*its.first].alive)
+      continue;
+    auto feature = stow->graph[*its.first].feature;
     if
     (
       feature->isModelClean() &&
       feature->isVisible3D() &&
-      isFeatureActive(*it) &&
+      stow->isFeatureActive(*its.first) &&
 //       feature->isSuccess() && //regenerate from parent shape on failure.
       feature->isVisualDirty()
     )
@@ -200,10 +195,8 @@ void Project::updateVisual()
 
 void Project::writeGraphViz(const std::string& fileName)
 {
-  indexVerticesEdges();
-  outputGraphviz(projectGraph, fileName);
+  stow->writeGraphViz(fileName);
 }
-
 
 void Project::readOCC(const std::string &fileName)
 {
@@ -216,34 +209,19 @@ void Project::readOCC(const std::string &fileName)
   addOCCShape(base, p.filename().string());
 }
 
-bool Project::hasFeature(const boost::uuids::uuid &idIn)
+bool Project::hasFeature(const boost::uuids::uuid &idIn) const
 {
-  return map.find(idIn) != map.end();
+  return stow->hasFeature(idIn);
 }
 
-ftr::Base* Project::findFeature(const uuid &idIn)
+ftr::Base* Project::findFeature(const uuid &idIn) const
 {
-  return projectGraph[findVertex(idIn)].feature.get();
+  return stow->findFeature(idIn);
 }
 
 ftr::prm::Parameter* Project::findParameter(const uuid &idIn) const
 {
-  BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
-  {
-    if (!projectGraph[currentVertex].feature->hasParameter(idIn))
-      continue;
-    return projectGraph[currentVertex].feature->getParameter(idIn);
-  }
-  assert(0); //no such parameter.
-  return nullptr;
-}
-
-prg::Vertex Project::findVertex(const uuid& idIn) const
-{
-  IdVertexMap::const_iterator it;
-  it = map.find(idIn);
-  assert(it != map.end());
-  return it->second;
+  return stow->findParameter(idIn);
 }
 
 void Project::addOCCShape(const TopoDS_Shape &shapeIn, std::string name)
@@ -257,10 +235,7 @@ void Project::addOCCShape(const TopoDS_Shape &shapeIn, std::string name)
 void Project::addFeature(std::shared_ptr<ftr::Base> feature)
 {
   //no pre message.
-  
-  Vertex newVertex = boost::add_vertex(projectGraph);
-  projectGraph[newVertex].feature = feature;
-  map.insert(std::make_pair(feature->getId(), newVertex));
+  stow->addFeature(feature);
   
   //log action to git if not loading.
   if (!isLoading)
@@ -279,8 +254,8 @@ void Project::addFeature(std::shared_ptr<ftr::Base> feature)
 
 void Project::removeFeature(const uuid& idIn)
 {
-  Vertex vertex = findVertex(idIn);
-  std::shared_ptr<ftr::Base> feature = projectGraph[vertex].feature;
+  Vertex vertex = stow->findVertex(idIn);
+  std::shared_ptr<ftr::Base> feature = stow->graph[vertex].feature;
   
   //don't block before this dirty call or this won't trigger the dirty children.
   feature->setModelDirty(); //this will make all children dirty.
@@ -288,62 +263,77 @@ void Project::removeFeature(const uuid& idIn)
   //shouldn't need anymore messages into project for this function call.
   auto block = observer->createBlocker();
   
-  VertexEdgePairs parents = getParents(vertex);
-  VertexEdgePairs children = getChildren(vertex);
+  RemovedGraph removedGraph = buildRemovedGraph(stow->graph); //children
+  ReversedGraph reversedGraph = boost::make_reverse_graph(removedGraph); //parents
+  
   //for now all children get connected to target parent.
-  if (!parents.empty())
+  if (boost::in_degree(vertex, stow->graph) > 0)
   {
     //default to first parent.
-    Vertex targetParent = parents.front().first;
-    for (const auto &current : parents)
+    Vertex targetParent = NullVertex();
+    for (auto its = boost::adjacent_vertices(vertex, reversedGraph); its.first != its.second; ++its.first)
     {
-      if (projectGraph[current.second].inputType.has(ftr::InputType::target))
+      if (targetParent == NullVertex())
+        targetParent = *its.first;
+      auto ce = boost::edge(vertex, *its.first, reversedGraph);
+      assert(ce.second);
+      if (reversedGraph[ce.first].inputType.has(ftr::InputType::target))
       {
-        targetParent = current.first;
+        targetParent = *its.first;
         break;
       }
     }
-    for (const auto &current : children)
+    for (auto its = boost::adjacent_vertices(vertex, removedGraph); its.first != its.second; ++its.first)
     {
-      connect(targetParent, current.first, projectGraph[current.second].inputType);
+      auto ce = boost::edge(vertex, *its.first, removedGraph);
+      assert(ce.second);
+      
+      stow->connect(targetParent, *its.first, removedGraph[ce.first].inputType);
+      sendConnectMessage(removedGraph[targetParent].feature->getId(), removedGraph[*its.first].feature->getId(), removedGraph[ce.first].inputType);
       
       if (!feature->hasSeerShape())
         continue;
       //update ids.
       for (const uuid &staleId : feature->getSeerShape().getAllShapeIds())
       {
-        uuid freshId = shapeHistory->devolve(projectGraph[targetParent].feature->getId(), staleId);
+        uuid freshId = shapeHistory->devolve(stow->graph[targetParent].feature->getId(), staleId);
         if (freshId.is_nil())
           continue;
-        projectGraph[current.first].feature->replaceId(staleId, freshId, *shapeHistory);
+        stow->graph[*its.first].feature->replaceId(staleId, freshId, *shapeHistory);
       }
     }
   }
   
-  for (const auto &current : parents)
+  for (auto its = boost::adjacent_vertices(vertex, reversedGraph); its.first != its.second; ++its.first)
   {
+    auto ce = boost::edge(vertex, *its.first, reversedGraph);
+    assert(ce.second);
+    
     msg::Message preMessage(msg::Response | msg::Pre | msg::Remove | msg::Connection);
     prj::Message pMessage;
-    pMessage.featureId = projectGraph[current.first].feature->getId();
+    pMessage.featureId = reversedGraph[*its.first].feature->getId();
     pMessage.featureId2 = idIn;
-    pMessage.inputType = projectGraph[current.second].inputType;
+    pMessage.inputType = reversedGraph[ce.first].inputType;
     preMessage.payload = pMessage;
     observer->out(preMessage);
     
     //make parents have same visible state as the feature being removed.
     if (feature->isVisible3D())
-      observer->outBlocked(msg::buildShowThreeD(projectGraph[current.first].feature->getId()));
+      observer->outBlocked(msg::buildShowThreeD(reversedGraph[*its.first].feature->getId()));
     else
-      observer->outBlocked(msg::buildHideThreeD(projectGraph[current.first].feature->getId()));
+      observer->outBlocked(msg::buildHideThreeD(reversedGraph[*its.first].feature->getId()));
   }
   
-  for (const auto &current : children)
+  for (auto its = boost::adjacent_vertices(vertex, removedGraph); its.first != its.second; ++its.first)
   {
+    auto ce = boost::edge(vertex, *its.first, removedGraph);
+    assert(ce.second);
+    
     msg::Message preMessage(msg::Response | msg::Pre | msg::Remove | msg::Connection);
     prj::Message pMessage;
     pMessage.featureId = idIn;
-    pMessage.featureId2 = projectGraph[current.first].feature->getId();
-    pMessage.inputType = projectGraph[current.second].inputType;
+    pMessage.featureId2 = removedGraph[*its.first].feature->getId();
+    pMessage.inputType = removedGraph[ce.first].inputType;
     preMessage.payload = pMessage;
     observer->out(preMessage);
   }
@@ -361,8 +351,8 @@ void Project::removeFeature(const uuid& idIn)
   if (dir.exists(fileName))
     dir.remove(fileName);
   
-  boost::clear_vertex(vertex, projectGraph);
-  boost::remove_vertex(vertex, projectGraph);
+  boost::clear_vertex(vertex, stow->graph);
+  boost::remove_vertex(vertex, stow->graph);
   
   //log action to git.
   std::ostringstream gitMessage;
@@ -374,7 +364,7 @@ void Project::removeFeature(const uuid& idIn)
 
 void Project::setCurrentLeaf(const uuid& idIn)
 {
-  indexVerticesEdges();
+//   indexVerticesEdges();
   
   //sometimes the visual of a feature is dirty and doesn't get updated 
   //until we try to show it. However it might be selected meaning that
@@ -386,49 +376,45 @@ void Project::setCurrentLeaf(const uuid& idIn)
   //so we block all the connections to avoid this.
   auto block = observer->createBlocker();
   
-  prg::Vertex vertex = findVertex(idIn);
+  auto vertex = stow->findVertex(idIn);
+  RemovedGraph removedGraph = buildRemovedGraph(stow->graph); //children
+  ReversedGraph reversedGraph = boost::make_reverse_graph(removedGraph); //parents
   
-  GraphReversed rGraph = boost::make_reverse_graph(projectGraph);
+//   GraphReversed rGraph = boost::make_reverse_graph(projectGraph);
   
   //parents
-  std::vector<prg::Vertex> aVertices;
-  prg::AccrueVisitor<prg::Vertex> activeVisitor(aVertices);
-  boost::breadth_first_search(rGraph, vertex, boost::visitor(activeVisitor));
+  Vertices aVertices;
+  AccrueVisitor<Vertex> activeVisitor(aVertices);
+  boost::breadth_first_search(reversedGraph, vertex, boost::visitor(activeVisitor));
   for (const auto &v : aVertices)
-    setFeatureActive(v);
-  std::vector<Vertex> parents;
-  AccrueVisitor<Vertex> hideVisitorParents(parents);
-  boost::breadth_first_search(rGraph, vertex, boost::visitor(hideVisitorParents));
-  for (const auto& v : parents)
-    observer->out(msg::buildHideThreeD(projectGraph[v].feature->getId()));
-  //if this is a create feature we don't want to hide the immediate parents.
-  if (projectGraph[vertex].feature->getDescriptor() == ftr::Descriptor::Create)
   {
-    GraphReversed::adjacency_iterator it, itEnd;
-    boost::tie(it, itEnd) = boost::adjacent_vertices(vertex, rGraph);
-    for (; it != itEnd; ++it)
+    stow->setFeatureActive(v);
+    observer->out(msg::buildHideThreeD(reversedGraph[v].feature->getId()));
+  }
+  //if this is a create feature we don't want to hide the immediate parents.
+  if (reversedGraph[vertex].feature->getDescriptor() == ftr::Descriptor::Create)
+  {
+    for (auto its = boost::adjacent_vertices(vertex, reversedGraph); its.first != its.second; ++its.first)
     {
-      setFeatureActive(*it);
-      observer->out(msg::buildShowThreeD(projectGraph[*it].feature->getId()));
+      stow->setFeatureActive(*its.first);
+      observer->out(msg::buildShowThreeD(reversedGraph[*its.first].feature->getId()));
     }
   }
   
   //children
-  std::vector<prg::Vertex> iVertices;
-  prg::AccrueVisitor<prg::Vertex> inactiveVisitor(iVertices);
-  boost::breadth_first_search(projectGraph, vertex, boost::visitor(inactiveVisitor));
+  Vertices iVertices;
+  AccrueVisitor<Vertex> inactiveVisitor(iVertices);
+  boost::breadth_first_search(removedGraph, vertex, boost::visitor(inactiveVisitor));
   for (const auto &v : iVertices)
-    setFeatureInactive(v);
-  std::vector<Vertex> children;
-  AccrueVisitor<Vertex> hideVisitor(children);
-  boost::breadth_first_search(projectGraph, vertex, boost::visitor(hideVisitor));
-  for (const auto& v : children)
-    observer->out(msg::buildHideThreeD(projectGraph[v].feature->getId()));
+  {
+    stow->setFeatureInactive(v);
+    observer->out(msg::buildHideThreeD(removedGraph[v].feature->getId()));
+  }
   
   //now we don't want the actual feature inactive just it's children so we
   //turn it back on because the BFS and visitor turned it off.
-  setFeatureActive(vertex);
-  observer->out(msg::buildShowThreeD(projectGraph[vertex].feature->getId()));
+  stow->setFeatureActive(vertex);
+  observer->out(msg::buildShowThreeD(stow->graph[vertex].feature->getId()));
   
   updateLeafStatus();
 }
@@ -437,53 +423,52 @@ void Project::updateLeafStatus()
 {
   //we end up in here twice when set current leaf from dag view.
   //once when make the change and once when we call an update.
-  indexVerticesEdges(); //redundent for setCurrentLeaf call.
+//   indexVerticesEdges(); //redundent for setCurrentLeaf call.
+  
+  RemovedGraph removedGraph = buildRemovedGraph(stow->graph);
   
   //first set all features to non leaf.
-  BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
+  for (auto its = boost::vertices(removedGraph); its.first != its.second; ++its.first)
+    stow->setFeatureNonLeaf(*its.first);
+  
+  ActiveFilter<RemovedGraph> activeFilter(removedGraph);
+  
+  typedef boost::filtered_graph<RemovedGraph, boost::keep_all, ActiveFilter<RemovedGraph> > FilteredGraphType;
+  FilteredGraphType filteredGraph(removedGraph, boost::keep_all(), activeFilter);
+  
+  for (auto its = boost::vertices(filteredGraph); its.first != its.second; ++its.first)
   {
-    setFeatureNonLeaf(currentVertex);
-  }
-  
-  ActiveFilter <Graph> activeFilter(projectGraph);
-  
-  typedef boost::filtered_graph<Graph, boost::keep_all, ActiveFilter<Graph> > FilteredGraphType;
-  typedef boost::graph_traits<FilteredGraphType>::vertex_iterator FilteredVertexIterator;
-  
-  FilteredGraphType filteredGraph(projectGraph, boost::keep_all(), activeFilter);
-  
-  FilteredVertexIterator vIt, vItEnd;
-  boost::tie(vIt, vItEnd) = boost::vertices(filteredGraph);
-  for (; vIt != vItEnd; ++vIt)
-  {
-    if (boost::out_degree(*vIt, filteredGraph) == 0)
-      setFeatureLeaf(*vIt);
+    if (boost::out_degree(*its.first, filteredGraph) == 0)
+      stow->setFeatureLeaf(*its.first);
     else
     {
       //if all children are of the type 'create' then it is also considered leaf.
-      boost::graph_traits<FilteredGraphType>::adjacency_iterator vItNested, vItEndNested;
-      boost::tie(vItNested, vItEndNested) = boost::adjacent_vertices(*vIt, filteredGraph);
       bool allCreate = true;
-      for (; vItNested != vItEndNested; ++vItNested)
+      for (auto nits = boost::adjacent_vertices(*its.first, filteredGraph); nits.first != nits.second; ++nits.first)
       {
-        if (filteredGraph[*vItNested].feature->getDescriptor() != ftr::Descriptor::Create)
+        if (filteredGraph[*nits.first].feature->getDescriptor() != ftr::Descriptor::Create)
         {
           allCreate = false;
           break;
         }
       }
       if (allCreate)
-        setFeatureLeaf(*vIt);
+        stow->setFeatureLeaf(*its.first);
     }
   }
 }
 
 void Project::connect(const boost::uuids::uuid& parentIn, const boost::uuids::uuid& childIn, const ftr::InputType &type)
 {
-  Vertex parent = map.at(parentIn);
-  Vertex child = map.at(childIn);
-  connectVertices(parent, child, type);
+  Vertex parent = stow->findVertex(parentIn);
+  Vertex child = stow->findVertex(childIn);
+  stow->connect(parent, child, type);
   
+  sendConnectMessage(parentIn, childIn, type);
+}
+
+void Project::sendConnectMessage(const uuid &parentIn, const uuid &childIn, const ftr::InputType &type)
+{
   msg::Message postMessage(msg::Response | msg::Post | msg::Add | msg::Connection);
   prj::Message pMessage;
   pMessage.featureId = parentIn;
@@ -495,21 +480,27 @@ void Project::connect(const boost::uuids::uuid& parentIn, const boost::uuids::uu
 
 void Project::removeParentTag(const uuid &targetIn, const std::string &tagIn)
 {
-  VertexEdgePairs eps = getParents(findVertex(targetIn));
-  for (const auto &ep : eps)
+  RemovedGraph removedGraph = buildRemovedGraph(stow->graph); //children
+  ReversedGraph reversedGraph = boost::make_reverse_graph(removedGraph); //parents
+  
+  Vertex vertex = stow->findVertex(targetIn);
+  for (auto its = boost::adjacent_vertices(vertex, reversedGraph); its.first != its.second; ++its.first)
   {
-    projectGraph[ep.second].inputType.tags.erase(tagIn);
-    if (projectGraph[ep.second].inputType.tags.empty())
+    //edge references original graph. 'forward'. remove_edge wouldn't work on reversed graph.
+    auto ce = boost::edge(*its.first, vertex, stow->graph);
+    assert(ce.second);
+    stow->graph[ce.first].inputType.tags.erase(tagIn);
+    if (stow->graph[ce.first].inputType.tags.empty())
     {
       msg::Message preMessage(msg::Response | msg::Pre | msg::Remove | msg::Connection);
       prj::Message pMessage;
-      pMessage.featureId = projectGraph[ep.first].feature->getId();
+      pMessage.featureId = reversedGraph[*its.first].feature->getId();
       pMessage.featureId2 = targetIn;
       pMessage.inputType = ftr::InputType({tagIn});
       preMessage.payload = pMessage;
       observer->out(preMessage);
       
-      boost::remove_edge(ep.second, projectGraph);
+      boost::remove_edge(ce.first, stow->graph);
     }
   }
 }
@@ -547,6 +538,9 @@ void Project::setupDispatcher()
   
   mask = msg::Request | msg::DebugDumpProjectGraph;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::dumpProjectGraphDispatched, this, _1)));
+  
+  mask = msg::Response | msg::View | msg::Show | msg::ThreeD;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::shownThreeDDispatched, this, _1)));
 }
 
 void Project::featureStateChangedDispatched(const msg::Message &messageIn)
@@ -558,18 +552,18 @@ void Project::featureStateChangedDispatched(const msg::Message &messageIn)
   if (!fMessage.state.test(ftr::StateOffset::ModelDirty))
     return;
     
-  indexVerticesEdges();
+//   indexVerticesEdges();
   
   //this code blocks all incoming messages to the project while it
   //executes. This prevents the cycles from setting a dependent dirty.
   auto block = observer->createBlocker();
   
-  prg::Vertex vertex = findVertex(fMessage.featureId);
-  std::vector<prg::Vertex> vertices;
-  prg::AccrueVisitor<prg::Vertex> visitor(vertices);
-  boost::breadth_first_search(projectGraph, vertex, boost::visitor(visitor));
+  Vertex vertex = stow->findVertex(fMessage.featureId);
+  Vertices vertices;
+  AccrueVisitor<Vertex> visitor(vertices);
+  boost::breadth_first_search(stow->graph, vertex, boost::visitor(visitor));
   for (const auto &v : vertices)
-    projectGraph[v].feature->setModelDirty();
+    stow->graph[v].feature->setModelDirty();
 }
 
 void Project::setCurrentLeafDispatched(const msg::Message &messageIn)
@@ -580,7 +574,7 @@ void Project::setCurrentLeafDispatched(const msg::Message &messageIn)
   
   prj::Message message = boost::get<prj::Message>(messageIn.payload);
   //send response signal out 'pre set current feature'.
-    setCurrentLeaf(message.featureId);
+  setCurrentLeaf(message.featureId);
   //send response signal out 'post set current feature'.
 }
 
@@ -611,9 +605,9 @@ void Project::forceUpdateDispatched(const msg::Message&)
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
   msg::dispatch().dumpString(debug.str());
   
-  BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
+  for (auto its = boost::vertices(stow->graph); its.first != its.second; ++its.first)
   {
-    projectGraph[currentVertex].feature->setModelDirty();
+    stow->graph[*its.first].feature->setModelDirty();
   }
   
   app::WaitCursor waitCursor;
@@ -656,6 +650,11 @@ void Project::checkShapeIdsDispatched(const msg::Message&)
    * for duplicated ids, which we shouldn't have anymore.
    */
   
+  
+  // this has not been updated to the new graph.
+  std::cout << "command is out of date" << std::endl;
+  
+  /*
   using boost::uuids::uuid;
   
   typedef std::vector<uuid> FeaturesIds;
@@ -700,69 +699,41 @@ void Project::checkShapeIdsDispatched(const msg::Message&)
   
   if (!foundDuplicate)
     std::cout << std::endl << "No duplicate ids found. Test passed" << std::endl;
+  
+  */
 }
 
 void Project::dumpProjectGraphDispatched(const msg::Message &)
 {
-  indexVerticesEdges();
+//   indexVerticesEdges();
   
   QString fileName = static_cast<app::Application *>(qApp)->getApplicationDirectory().path();
   fileName += QDir::separator();
   fileName += "project.dot";
-  writeGraphViz(fileName.toStdString().c_str());
+  stow->writeGraphViz(fileName.toStdString().c_str());
   
   QDesktopServices::openUrl(QUrl(fileName));
 }
 
-void Project::indexVerticesEdges()
+void Project::shownThreeDDispatched(const msg::Message &mIn)
 {
-  std::size_t index = 0;
-  
-  //index vertices.
-  BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
-  {
-    boost::put(boost::vertex_index, projectGraph, currentVertex, index);
-    index++;
-  }
-
-  //index edges.
-  index = 0;
-  BGL_FORALL_EDGES(currentEdge, projectGraph, Graph)
-  {
-    boost::put(boost::edge_index, projectGraph, currentEdge, index);
-    index++;
-  }
-}
-
-Edge Project::connect(Vertex parentIn, Vertex childIn, const ftr::InputType &type)
-{
-  Edge edge = connectVertices(parentIn, childIn, type);
-  
-  msg::Message postMessage(msg::Response | msg::Post | msg::Add | msg::Connection);
-  prj::Message pMessage;
-  pMessage.featureId = projectGraph[parentIn].feature->getId();
-  pMessage.featureId2 = projectGraph[childIn].feature->getId(); 
-  pMessage.inputType = type;
-  postMessage.payload = pMessage;
-  observer->out(postMessage);
-  
-  return edge;
-}
-
-Edge Project::connectVertices(Vertex parent, Vertex child, const ftr::InputType &type)
-{
-  bool results;
-  Edge newEdge;
-  boost::tie(newEdge, results) = boost::add_edge(parent, child, projectGraph);
-  projectGraph[newEdge].inputType += type;
-  return newEdge;
+  uuid id = boost::get<vwr::Message>(mIn.payload).featureId;
+  auto feature = stow->findFeature(id);
+  if
+  (
+    feature->isModelClean() &&
+    feature->isVisible3D() &&
+    isFeatureActive(id) &&
+    feature->isVisualDirty()
+  )
+    feature->updateVisual();
 }
 
 void Project::setAllVisualDirty()
 {
-  BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
+  for (auto its = boost::vertices(stow->graph); its.first != its.second; ++its.first)
   {
-    projectGraph[currentVertex].feature->setVisualDirty();
+    stow->graph[*its.first].feature->setVisualDirty();
   }
 }
 
@@ -771,37 +742,37 @@ void Project::setColor(const boost::uuids::uuid &featureIdIn, const osg::Vec4 &c
   //the following is a good example of accumulating history of 1 object.
   
   //first remove any non 'target' edges. this will limit the following searches.
-  TargetEdgeFilter<Graph> edgeFilter(projectGraph);
+  TargetEdgeFilter<Graph> edgeFilter(stow->graph);
   typedef boost::filtered_graph<Graph, TargetEdgeFilter<Graph>, boost::keep_all> TargetFilteredGraph;
-  TargetFilteredGraph tFilteredGraph(projectGraph, edgeFilter, boost::keep_all());
+  TargetFilteredGraph tFilteredGraph(stow->graph, edgeFilter, boost::keep_all());
   
   //find forward connected vertices.
-  Vertex baseVertex = findVertex(featureIdIn);
-  std::vector<Vertex> vertexes; //note: name 'vertices' clashes with forall_vertices macro.
+  Vertex baseVertex = stow->findVertex(featureIdIn);
+  Vertices vertexes; //note: name 'vertices' clashes with forall_vertices macro.
   gu::BFSLimitVisitor<Vertex> vis(vertexes);
   boost::breadth_first_search(tFilteredGraph, baseVertex, visitor(vis));
   
   //find reverse connected vertices.
   typedef boost::reverse_graph<TargetFilteredGraph, TargetFilteredGraph&> TFReversedGraph;
   TFReversedGraph rGraph = boost::make_reverse_graph(tFilteredGraph);
-  gu::BFSLimitVisitor<VertexReversed> rVis(vertexes);
+  gu::BFSLimitVisitor<Vertex> rVis(vertexes);
   boost::breadth_first_search(rGraph, baseVertex, visitor(rVis));
   
   //filter on the accumulated vertexes.
-  gu::SubsetFilter<Graph> vertexFilter(projectGraph, vertexes);
+  gu::SubsetFilter<Graph> vertexFilter(stow->graph, vertexes);
   typedef boost::filtered_graph<Graph, boost::keep_all, gu::SubsetFilter<Graph> > FilteredGraph;
-  FilteredGraph filteredGraph(projectGraph, boost::keep_all(), vertexFilter);
+  FilteredGraph filteredGraph(stow->graph, boost::keep_all(), vertexFilter);
   
   //set color of all objects.
-  BGL_FORALL_VERTICES(currentVertex, filteredGraph, FilteredGraph)
+  for (auto its = boost::vertices(filteredGraph); its.first != its.second; ++its.first)
   {
-    projectGraph[currentVertex].feature->setColor(colorIn);
+    stow->graph[*its.first].feature->setColor(colorIn);
     //this is a hack. Currently, in order for this color change to be serialized
     //at next update we would have to mark the feature dirty. Marking the feature dirty
     //and causing models to be recalculated seems excessive for such a minor change as
     //object color. So here we just serialize the changed features to 'sneak' the
     //color change into the git commit.
-    projectGraph[currentVertex].feature->serialWrite(QDir(QString::fromStdString(saveDirectory)));
+    stow->graph[*its.first].feature->serialWrite(QDir(QString::fromStdString(saveDirectory)));
   }
   
   //log action to git.
@@ -816,41 +787,14 @@ void Project::setColor(const boost::uuids::uuid &featureIdIn, const osg::Vec4 &c
 std::vector<boost::uuids::uuid> Project::getAllFeatureIds() const
 {
   std::vector<uuid> out;
-  BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
+  
+  for (auto its = boost::vertices(stow->graph); its.first != its.second; ++its.first)
   {
-    out.push_back(projectGraph[currentVertex].feature->getId());
+    if (!stow->graph[*its.first].alive)
+      continue;
+    out.push_back(stow->graph[*its.first].feature->getId());
   }
   
-  return out;
-}
-
-Project::VertexEdgePairs Project::getParents(prg::Vertex vertexIn) const
-{
-  VertexEdgePairs out;
-  InEdgeIterator inEdgeIt, inEdgeItDone;
-  boost::tie(inEdgeIt, inEdgeItDone) = boost::in_edges(vertexIn, projectGraph);
-  for (; inEdgeIt != inEdgeItDone; ++inEdgeIt)
-  {
-    VertexEdgePair tempPair;
-    tempPair.first = boost::source(*inEdgeIt, projectGraph);
-    tempPair.second = *inEdgeIt;
-    out.push_back(tempPair);
-  }
-  return out;
-}
-
-Project::VertexEdgePairs Project::getChildren(prg::Vertex vertexIn) const
-{
-  VertexEdgePairs out;
-  OutEdgeIterator outEdgeIt, outEdgeItDone;
-  boost::tie(outEdgeIt, outEdgeItDone) = boost::out_edges(vertexIn, projectGraph);
-  for (; outEdgeIt != outEdgeItDone; ++outEdgeIt)
-  {
-    VertexEdgePair tempPair;
-    tempPair.first = boost::target(*outEdgeIt, projectGraph);
-    tempPair.second = *outEdgeIt;
-    out.push_back(tempPair);
-  }
   return out;
 }
 
@@ -869,14 +813,16 @@ void Project::serialWrite()
   BRep_Builder builder;
   builder.MakeCompound(compound);
   
+  RemovedGraph removedGraph = buildRemovedGraph(stow->graph);
+  
   prj::srl::Features features;
   prj::srl::FeatureStates states;
-  BGL_FORALL_VERTICES(currentVertex, projectGraph, Graph)
+  for (auto its = boost::vertices(removedGraph); its.first != its.second; ++its.first)
   {
-    ftr::Base *f = projectGraph[currentVertex].feature.get();
+    ftr::Base *f = removedGraph[*its.first].feature.get();
     
     //save the state
-    states.array().push_back(prj::srl::FeatureState(gu::idToString(f->getId()), projectGraph[currentVertex].state.to_string()));
+    states.array().push_back(prj::srl::FeatureState(gu::idToString(f->getId()), removedGraph[*its.first].state.to_string()));
     
     //we can't add a null shape to the compound.
     //so we check for null and add 1 vertex as a place holder.
@@ -898,13 +844,13 @@ void Project::serialWrite()
   BRepTools::Write(compound, masterName.str().c_str());
   
   prj::srl::Connections connections;
-  BGL_FORALL_EDGES(currentEdge, projectGraph, Graph)
+  for (auto its = boost::edges(removedGraph); its.first != its.second; ++its.first)
   {
     prj::srl::InputTypes inputTypes;
-    for (const auto &tag : projectGraph[currentEdge].inputType.tags)
+    for (const auto &tag : removedGraph[*its.first].inputType.tags)
       inputTypes.array().push_back(tag);
-    ftr::Base *s = projectGraph[boost::source(currentEdge, projectGraph)].feature.get();
-    ftr::Base *t = projectGraph[boost::target(currentEdge, projectGraph)].feature.get();
+    ftr::Base *s = removedGraph[boost::source(*its.first, removedGraph)].feature.get();
+    ftr::Base *t = removedGraph[boost::target(*its.first, removedGraph)].feature.get();
     connections.connection().push_back(prj::srl::Connection(gu::idToString(s->getId()), gu::idToString(t->getId()), inputTypes));
   }
   
@@ -1010,7 +956,7 @@ void Project::open()
     {
       uuid fId = gu::stringToId(state.id());
       ftr::State fState(state.state());
-      projectGraph[findVertex(fId)].state = fState;
+      stow->graph[stow->findVertex(fId)].state = fState;
       
       //send state message
       ftr::Message fMessage(fId, fState);
@@ -1052,7 +998,7 @@ void Project::open()
        * formula nodes are not known yet.
        * 
        * To avoid this we are call update after each expression. I don't think this will
-       * be a significant with respect to performance.
+       * be significant with respect to performance.
        */
       expressionManager->update();
     }
@@ -1082,10 +1028,6 @@ void Project::open()
     }
     
     observer->outBlocked(msg::Request | msg::DAG | msg::View | msg::Update);
-    
-//     updateModel();
-    updateVisual();
-    
     observer->outBlocked(msg::buildStatusMessage("Project Opened"));
   }
   catch (const xsd::cxx::xml::invalid_utf16_string&)
@@ -1122,11 +1064,17 @@ void Project::shapeTrackDown(const uuid& shapeId) const
 ftr::UpdatePayload::UpdateMap Project::getParentMap(const boost::uuids::uuid &idIn) const
 {
   ftr::UpdatePayload::UpdateMap updateMap;
-  for (const auto &pair : getParents(findVertex(idIn)))
+  
+  auto vertex = stow->findVertex(idIn);
+  RemovedGraph removedGraph = buildRemovedGraph(stow->graph); //children
+  ReversedGraph reversedGraph = boost::make_reverse_graph(removedGraph); //parents
+  for (auto its = boost::adjacent_vertices(vertex, reversedGraph); its.first != its.second; ++its.first)
   {
-    for (const auto &tag : projectGraph[pair.second].inputType.tags)
+    auto e = boost::edge(vertex, *its.first, reversedGraph);
+    assert(e.second);
+    for (const auto &tag : reversedGraph[e.first].inputType.tags)
     {
-      auto temp = std::make_pair(tag, projectGraph[pair.first].feature.get());
+      auto temp = std::make_pair(tag, reversedGraph[*its.first].feature.get());
       updateMap.insert(temp);
     }
   }
@@ -1184,18 +1132,16 @@ private:
  */
 std::vector<uuid> Project::getLeafChildren(const uuid &parentIn) const
 {
-  IdVertexMap::const_iterator it = map.find(parentIn);
-  assert(it != map.end());
-  prg::Vertex startVertex = it->second;
+  Vertex startVertex = stow->findVertex(parentIn);
   
-  std::vector<Vertex> limitVertices;
+  Vertices limitVertices;
   gu::BFSLimitVisitor<Vertex>limitVisitor(limitVertices);
-  boost::breadth_first_search(projectGraph, startVertex, visitor(limitVisitor));
+  boost::breadth_first_search(stow->graph, startVertex, visitor(limitVisitor));
   
-  gu::SubsetFilter<Graph> filter(projectGraph, limitVertices);
+  gu::SubsetFilter<Graph> filter(stow->graph, limitVertices);
   typedef boost::filtered_graph<Graph, boost::keep_all, gu::SubsetFilter<Graph> > FilteredGraph;
   typedef boost::graph_traits<FilteredGraph>::vertex_descriptor FilteredVertex;
-  FilteredGraph filteredGraph(projectGraph, boost::keep_all(), filter);
+  FilteredGraph filteredGraph(stow->graph, boost::keep_all(), filter);
   
   std::vector<Vertex> leafChildren;
   LeafChildrenVisitor<FilteredVertex> leafVisitor(leafChildren);
@@ -1203,119 +1149,47 @@ std::vector<uuid> Project::getLeafChildren(const uuid &parentIn) const
   
   std::vector<uuid> out;
   for (const auto &v : leafChildren)
-    out.push_back(projectGraph[v].feature->getId());
+    out.push_back(stow->graph[v].feature->getId());
   
   return out;
 }
 
 void Project::setFeatureActive(const boost::uuids::uuid &idIn)
 {
-  setFeatureActive(findVertex(idIn));
+  stow->setFeatureActive(stow->findVertex(idIn));
 }
 
 void Project::setFeatureInactive(const boost::uuids::uuid &idIn)
 {
-  setFeatureInactive(findVertex(idIn));
+  stow->setFeatureInactive(stow->findVertex(idIn));
 }
 
 bool Project::isFeatureActive(const boost::uuids::uuid &idIn)
 {
-  return isFeatureActive(idIn);
+  return stow->isFeatureActive(stow->findVertex(idIn));
 }
 
 bool Project::isFeatureInactive(const boost::uuids::uuid &idIn)
 {
-  return isFeatureInactive(idIn);
+  return stow->isFeatureInactive(stow->findVertex(idIn));
 }
 
 void Project::setFeatureLeaf(const boost::uuids::uuid &idIn)
 {
-  setFeatureLeaf(idIn);
+  stow->setFeatureLeaf(stow->findVertex(idIn));
 }
 
 void Project::setFeatureNonLeaf(const boost::uuids::uuid &idIn)
 {
-  setFeatureNonLeaf(idIn);
+  stow->setFeatureNonLeaf(stow->findVertex(idIn));
 }
 
 bool Project::isFeatureLeaf(const boost::uuids::uuid &idIn)
 {
-  return isFeatureLeaf(idIn);
+  return stow->isFeatureLeaf(stow->findVertex(idIn));
 }
 
 bool Project::isFeatureNonLeaf(const boost::uuids::uuid &idIn)
 {
-  return isFeatureNonLeaf(idIn);
-}
-
-void Project::setFeatureActive(prg::Vertex vIn)
-{
-  if (isFeatureActive(vIn))
-    return; //already active.
-  projectGraph[vIn].state.set(ftr::StateOffset::Inactive, false);
-  
-  //send message.
-  ftr::Message fMessage(projectGraph[vIn].feature->getId(), projectGraph[vIn].state);
-  msg::Message mMessage(msg::Response | msg::Project | msg::Feature | msg::Status);
-  mMessage.payload = fMessage;
-  observer->outBlocked(mMessage);
-}
-
-void Project::setFeatureInactive(prg::Vertex vIn)
-{
-  if (isFeatureInactive(vIn))
-    return;
-  projectGraph[vIn].state.set(ftr::StateOffset::Inactive, true);
-  
-  //send message.
-  ftr::Message fMessage(projectGraph[vIn].feature->getId(), projectGraph[vIn].state);
-  msg::Message mMessage(msg::Response | msg::Project | msg::Feature | msg::Status);
-  mMessage.payload = fMessage;
-  observer->outBlocked(mMessage);
-}
-
-bool Project::isFeatureActive(prg::Vertex vIn)
-{
-  return !projectGraph[vIn].state.test(ftr::StateOffset::Inactive);
-}
-
-bool Project::isFeatureInactive(prg::Vertex vIn)
-{
-  return projectGraph[vIn].state.test(ftr::StateOffset::Inactive);
-}
-
-void Project::setFeatureLeaf(prg::Vertex vIn)
-{
-  if (isFeatureLeaf(vIn))
-    return;
-  projectGraph[vIn].state.set(ftr::StateOffset::NonLeaf, false);
-  
-  //send message
-  ftr::Message fMessage(projectGraph[vIn].feature->getId(), projectGraph[vIn].state);
-  msg::Message mMessage(msg::Response | msg::Project | msg::Feature | msg::Status);
-  mMessage.payload = fMessage;
-  observer->outBlocked(mMessage);
-}
-
-void Project::setFeatureNonLeaf(prg::Vertex vIn)
-{
-  if (isFeatureNonLeaf(vIn))
-    return;
-  projectGraph[vIn].state.set(ftr::StateOffset::NonLeaf, true);
-  
-  //send message
-  ftr::Message fMessage(projectGraph[vIn].feature->getId(), projectGraph[vIn].state);
-  msg::Message mMessage(msg::Response | msg::Project | msg::Feature | msg::Status);
-  mMessage.payload = fMessage;
-  observer->outBlocked(mMessage);
-}
-
-bool Project::isFeatureLeaf(prg::Vertex vIn)
-{
-  return !projectGraph[vIn].state.test(ftr::StateOffset::NonLeaf);
-}
-
-bool Project::isFeatureNonLeaf(prg::Vertex vIn)
-{
-  return projectGraph[vIn].state.test(ftr::StateOffset::NonLeaf);
+  return stow->isFeatureNonLeaf(stow->findVertex(idIn));
 }

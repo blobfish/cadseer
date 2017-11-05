@@ -21,7 +21,6 @@
 #ifndef FEATUREBASE_H
 #define FEATUREBASE_H
 
-#include <map>
 #include <memory>
 
 #include <boost/uuid/uuid.hpp>
@@ -41,6 +40,7 @@
 #include <feature/inputtype.h>
 #include <feature/states.h>
 #include <feature/parameter.h>
+#include <feature/updatepayload.h>
 
 class QDir;
 class QTextStream;
@@ -52,28 +52,6 @@ namespace ftr
 {
   class SeerShape;
   class ShapeHistory;
-  class Base;
-  
-  /*! @brief Update information needed by features.
-   * 
-   * had a choice to make. Feature update will need shapeHistory
-   * for resolving references. Features need to fill in shape history
-   * even when the update isn't needed. so shape history passed into update
-   * is const and we have a virtual method to fill in shape history.
-   */
-  class UpdatePayload
-  {
-  public:
-    typedef std::multimap<std::string, const Base*> UpdateMap;
-    
-    UpdatePayload(const UpdateMap &updateMapIn, const ShapeHistory &shapeHistoryIn) :
-    updateMap(updateMapIn),
-    shapeHistory(shapeHistoryIn)
-    {}
-    
-    const UpdateMap &updateMap;
-    const ShapeHistory &shapeHistory;
-  };
   
 class Base
 {

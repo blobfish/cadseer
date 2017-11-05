@@ -36,6 +36,7 @@
 #include <QButtonGroup>
 #include <QCheckBox>
 
+#include <tools/idtools.h>
 #include <application/application.h>
 #include <application/mainwindow.h>
 #include <project/project.h>

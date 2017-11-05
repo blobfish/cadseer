@@ -33,6 +33,7 @@
 #include <project/project.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
+#include <feature/base.h>
 #include <expressions/manager.h>
 #include <expressions/stringtranslator.h>
 #include <expressions/tablemodel.h>
