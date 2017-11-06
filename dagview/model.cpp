@@ -304,7 +304,7 @@ void Model::setupDispatcher()
   mask = msg::Response | msg::Pre | msg::Remove | msg::Connection;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::connectionRemovedDispatched, this, _1)));
   
-  mask = msg::Response | msg::Post | msg::UpdateModel;
+  mask = msg::Response | msg::Post | msg::Update | msg::Model;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::projectUpdatedDispatched, this, _1)));
   
   mask = msg::Response | msg::Post | msg::Preselection | msg::Add;

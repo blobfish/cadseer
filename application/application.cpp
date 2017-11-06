@@ -302,7 +302,7 @@ void Application::openProject(const std::string &directoryIn)
   postMessage.mask = msg::Response | msg::Post | msg::Open | msg::Project;
   observer->out(postMessage);
   
-  observer->outBlocked(msg::Message(msg::Request | msg::UpdateVisual));
+  observer->outBlocked(msg::Message(msg::Request | msg::Update | msg::Visual));
   
   msg::Message viewFitMessage;
   viewFitMessage.mask = msg::Request | msg::View | msg::Fit;

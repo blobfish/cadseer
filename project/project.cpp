@@ -89,7 +89,7 @@ QTextStream& Project::getInfo(QTextStream &stream) const
 
 void Project::updateModel()
 {
-  observer->out(msg::Message(msg::Response | msg::Pre | msg::UpdateModel));
+  observer->out(msg::Message(msg::Response | msg::Pre | msg::Update | msg::Model));
   
   expressionManager->update();
   
@@ -156,7 +156,7 @@ void Project::updateModel()
   /* this is here to give others a chance to make changes before git makes a commit.
    * if this causes problems, then we will want git manager to use more messaging.
    */
-  observer->out(msg::Message(msg::Response | msg::Post | msg::UpdateModel));
+  observer->out(msg::Message(msg::Response | msg::Post | msg::Update | msg::Model));
   gitManager->update();
   
 //   shapeHistory->writeGraphViz("/home/tanderson/.CadSeer/ShapeHistory.dot");
@@ -169,7 +169,7 @@ void Project::updateVisual()
   //if we have selection and then destroy the geometry when the
   //the visual updates, things get out of sync. so clear the selection.
   observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
-  observer->out(msg::Message(msg::Response | msg::Pre | msg::UpdateVisual));
+  observer->out(msg::Message(msg::Response | msg::Pre | msg::Update | msg::Visual));
   
   auto block = observer->createBlocker();
   
@@ -190,7 +190,7 @@ void Project::updateVisual()
       feature->updateVisual();
   }
   
-  observer->out(msg::Message(msg::Response | msg::Post | msg::UpdateVisual));
+  observer->out(msg::Message(msg::Response | msg::Post | msg::Update | msg::Visual));
 }
 
 void Project::writeGraphViz(const std::string& fileName)
@@ -521,10 +521,10 @@ void Project::setupDispatcher()
   mask = msg::Request | msg::ForceUpdate;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::forceUpdateDispatched, this, _1)));
   
-  mask = msg::Request | msg::UpdateModel;
+  mask = msg::Request | msg::Update | msg::Model;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::updateModelDispatched, this, _1)));
   
-  mask = msg::Request | msg::UpdateVisual;
+  mask = msg::Request | msg::Update | msg::Visual;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::updateVisualDispatched, this, _1)));
   
   mask = msg::Request | msg::Save | msg::Project;

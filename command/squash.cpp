@@ -109,7 +109,7 @@ void Squash::go()
   //here we are going to execute the update manually and then set skipUpdate to true.
   //this way we get the feature, but we stop the slow updates for now.
   app::WaitCursor wc;
-  observer->out(msg::Message(msg::Request | msg::UpdateModel));
+  observer->out(msg::Message(msg::Request | msg::Update | msg::Model));
   squash->setGranularity(0.0); //this will 'freeze' 
   
   observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));

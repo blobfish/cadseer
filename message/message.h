@@ -50,8 +50,8 @@ namespace msg
     static const Mask Feature(Mask().set(                       10));//!< project action & command
     static const Mask Update(Mask().set(                        11));//!< project action. request only for all: model, visual etc..
     static const Mask ForceUpdate(Mask().set(                   12));//!< project action. request only. marks dirty to force updates
-    static const Mask UpdateModel(Mask().set(                   13));//!< project action
-    static const Mask UpdateVisual(Mask().set(                  14));//!< project action
+    static const Mask Model(Mask().set(                         13));//!< project action
+    static const Mask Visual(Mask().set(                        14));//!< project action
     static const Mask Connection(Mask().set(                    15));//!< project action
     static const Mask Project(Mask().set(                       16));//!< application action
     static const Mask Dialog(Mask().set(                        17));//!< application action
