@@ -107,9 +107,8 @@ void Sphere::updateIPGroup()
 void Sphere::updateModel(const UpdatePayload& payloadIn)
 {
   setFailure();
-  
+  lastUpdateLog.clear();
   CSysBase::updateModel(payloadIn);
-  
   try
   {
     BRepPrimAPI_MakeSphere sphereMaker(system, static_cast<double>(radius));
@@ -121,11 +120,23 @@ void Sphere::updateModel(const UpdatePayload& payloadIn)
   }
   catch (const Standard_Failure &e)
   {
-    std::cout << std::endl << "Error in sphere update. " << e.GetMessageString() << std::endl;
+    std::ostringstream s; s << "OCC Error in sphere update: " << e.GetMessageString() << std::endl;
+    lastUpdateLog += s.str();
+  }
+  catch (const std::exception &e)
+  {
+    std::ostringstream s; s << "Standard error in sphere update: " << e.what() << std::endl;
+    lastUpdateLog += s.str();
+  }
+  catch (...)
+  {
+    std::ostringstream s; s << "Unknown error in sphere update." << std::endl;
+    lastUpdateLog += s.str();
   }
   setModelClean();
-  
   updateIPGroup();
+  if (!lastUpdateLog.empty())
+    std::cout << std::endl << lastUpdateLog;
 }
 
 void Sphere::initializeMaps()

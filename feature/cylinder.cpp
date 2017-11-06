@@ -168,9 +168,8 @@ void Cylinder::getParameters(double& radiusOut, double& heightOut) const
 void Cylinder::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
-  
+  lastUpdateLog.clear();
   CSysBase::updateModel(payloadIn);
-  
   try
   {
     CylinderBuilder cylinderMaker(static_cast<double>(radius), static_cast<double>(height), system);
@@ -180,11 +179,23 @@ void Cylinder::updateModel(const UpdatePayload &payloadIn)
   }
   catch (const Standard_Failure &e)
   {
-    std::cout << std::endl << "Error in cylinder update. " << e.GetMessageString() << std::endl;
+    std::ostringstream s; s << "OCC Error in cylinder update: " << e.GetMessageString() << std::endl;
+    lastUpdateLog += s.str();
+  }
+  catch (const std::exception &e)
+  {
+    std::ostringstream s; s << "Standard error in cylinder update: " << e.what() << std::endl;
+    lastUpdateLog += s.str();
+  }
+  catch (...)
+  {
+    std::ostringstream s; s << "Unknown error in cylinder update." << std::endl;
+    lastUpdateLog += s.str();
   }
   setModelClean();
-  
   updateIPGroup();
+  if (!lastUpdateLog.empty())
+    std::cout << std::endl << lastUpdateLog;
 }
 
 //the quantity of cone shapes can change so generating maps from first update can lead to missing

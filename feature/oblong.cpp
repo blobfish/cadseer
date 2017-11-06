@@ -228,9 +228,8 @@ void Oblong::setParameters(const double &lengthIn, const double &widthIn, const 
 void Oblong::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
-  
+  lastUpdateLog.clear();
   CSysBase::updateModel(payloadIn);
-  
   try
   {
     if (!(static_cast<double>(length) > static_cast<double>(width)))
@@ -244,15 +243,23 @@ void Oblong::updateModel(const UpdatePayload &payloadIn)
   }
   catch (const Standard_Failure &e)
   {
-    std::cout << std::endl << "Error in oblong update. " << e.GetMessageString() << std::endl;
+    std::ostringstream s; s << "OCC Error in oblong update: " << e.GetMessageString() << std::endl;
+    lastUpdateLog += s.str();
   }
-  catch (std::exception &e)
+  catch (const std::exception &e)
   {
-    std::cout << std::endl << "Error in oblong update: " << e.what() << std::endl;
+    std::ostringstream s; s << "Standard error in oblong update: " << e.what() << std::endl;
+    lastUpdateLog += s.str();
+  }
+  catch (...)
+  {
+    std::ostringstream s; s << "Unknown error in oblong update." << std::endl;
+    lastUpdateLog += s.str();
   }
   setModelClean();
-  
   updateIPGroup();
+  if (!lastUpdateLog.empty())
+    std::cout << std::endl << lastUpdateLog;
 }
 
 void Oblong::updateResult(const OblongBuilder& oblongMakerIn)

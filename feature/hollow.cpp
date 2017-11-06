@@ -75,6 +75,7 @@ Hollow::Hollow() : Base(), offset(prm::Names::Offset, prf::manager().rootPtr->fe
 void Hollow::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
+  lastUpdateLog.clear();
   try
   {
     if (payloadIn.updateMap.count(InputType::target) != 1)
@@ -129,13 +130,22 @@ void Hollow::updateModel(const UpdatePayload &payloadIn)
   }
   catch (const Standard_Failure &e)
   {
-    std::cout << std::endl << "Error in hollow update. " << e.GetMessageString() << std::endl;
+    std::ostringstream s; s << "OCC Error in hollow update: " << e.GetMessageString() << std::endl;
+    lastUpdateLog += s.str();
   }
-  catch (std::exception &e)
+  catch (const std::exception &e)
   {
-    std::cout << std::endl << "Error in hollow update. " << e.what() << std::endl;
+    std::ostringstream s; s << "Standard error in hollow update: " << e.what() << std::endl;
+    lastUpdateLog += s.str();
+  }
+  catch (...)
+  {
+    std::ostringstream s; s << "Unknown error in hollow update." << std::endl;
+    lastUpdateLog += s.str();
   }
   setModelClean();
+  if (!lastUpdateLog.empty())
+    std::cout << std::endl << lastUpdateLog;
 }
 
 void Hollow::setHollowPicks(const Picks &picksIn)
@@ -153,7 +163,8 @@ void Hollow::removeHollowPick(const Pick &pickIn)
   auto it = std::find(hollowPicks.begin(), hollowPicks.end(), pickIn);
   if (it == hollowPicks.end())
   {
-    std::cout << "warning: hollow: trying to remove a pick not in closing faces" << std::endl;
+    std::ostringstream s; s << "warning: hollow: trying to remove a pick not in closing faces" << std::endl;
+    lastUpdateLog += s.str();
     return;
   }
   
@@ -168,16 +179,20 @@ TopTools_ListOfShape Hollow::resolveClosingFaces(const SeerShape &seerShapeIn)
     std::vector<uuid> ids = seerShapeIn.resolvePick(closingFace.shapeHistory);
     if (ids.empty())
     {
-      std::cout << "feature id: " << gu::idToString(getId()) << "     can't find face: "
+      std::ostringstream s;
+      s << "feature id: " << gu::idToString(getId()) << "     can't find face: "
         << gu::idToString(closingFace.id) << " of parent" << std::endl;
+      lastUpdateLog += s.str();
       continue;
     }
     assert(ids.size() == 1);
     const TopoDS_Shape& faceShape = seerShapeIn.getOCCTShape(ids.front());
     if (faceShape.ShapeType() != TopAbs_FACE)
     {
-      std::cout << "feature id: " << gu::idToString(getId()) << "      wrong shape type: "
+      std::ostringstream s;
+      s << "feature id: " << gu::idToString(getId()) << "      wrong shape type: "
         << shapeStrings.at(faceShape.ShapeType()) << std::endl;
+      lastUpdateLog += s.str();
       continue;
     }
     
@@ -197,8 +212,11 @@ void Hollow::generatedMatch(BRepOffsetAPI_MakeThickSolid &operationIn, const See
     if (list.IsEmpty())
       continue;
     if (list.Size() > 1)
-      std::cout << "Warning: unexpected list size: " << list.Size()
-      << "    in Hollow::generatedMatch " << std::endl;
+    {
+      std::ostringstream s; s << "Warning: unexpected list size: " << list.Size()
+        << "    in Hollow::generatedMatch " << std::endl;
+      lastUpdateLog += s.str();
+    }
     const TopoDS_Shape &newShape = list.First();
     assert(!newShape.IsNull());
     

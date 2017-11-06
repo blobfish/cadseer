@@ -49,51 +49,72 @@ Inert::Inert(const TopoDS_Shape &shapeIn) : CSysBase()
 
 void Inert::updateModel(const UpdatePayload &payloadIn)
 {
-  
   CSysBase::updateModel(payloadIn);
-  
   gp_Ax3 tempAx3(system);
   gp_Trsf tempTrsf; tempTrsf.SetTransformation(tempAx3); tempTrsf.Invert();
   TopLoc_Location freshLocation(tempTrsf);
   
   if (gu::toOsg(seerShape->getRootOCCTShape().Location().Transformation()) != gu::toOsg(tempTrsf))
   {
-    //store a map of offset to id for restoration.
-    std::vector<uuid> oldIds;
-    TopTools_IndexedMapOfShape osm; //old shape map
-    TopExp::MapShapes(seerShape->getRootOCCTShape(), osm);
-    for (int i = 1; i < osm.Size() + 1; ++i)
+    try
     {
-      if (seerShape->hasShapeIdRecord(osm(i))) //probably degenerated edge.
-        oldIds.push_back(seerShape->findShapeIdRecord(osm(i)).id);
-      else
-        oldIds.push_back(gu::createNilId()); //place holder will be skipped again.
+      setFailure();
+      lastUpdateLog.clear();
+      
+      //store a map of offset to id for restoration.
+      std::vector<uuid> oldIds;
+      TopTools_IndexedMapOfShape osm; //old shape map
+      TopExp::MapShapes(seerShape->getRootOCCTShape(), osm);
+      for (int i = 1; i < osm.Size() + 1; ++i)
+      {
+        if (seerShape->hasShapeIdRecord(osm(i))) //probably degenerated edge.
+          oldIds.push_back(seerShape->findShapeIdRecord(osm(i)).id);
+        else
+          oldIds.push_back(gu::createNilId()); //place holder will be skipped again.
+      }
+      uuid oldRootId = seerShape->getRootShapeId();
+      
+      TopoDS_Shape tempShape(seerShape->getRootOCCTShape());
+      tempShape.Location(freshLocation);
+      seerShape->setOCCTShape(tempShape);
+      
+      seerShape->updateShapeIdRecord(seerShape->getRootOCCTShape(), oldRootId);
+      seerShape->setRootShapeId(oldRootId);
+      TopTools_IndexedMapOfShape nsm; //new shape map
+      TopExp::MapShapes(seerShape->getRootOCCTShape(), nsm);
+      for (int i = 1; i < nsm.Size() + 1; ++i)
+      {
+        if (seerShape->hasShapeIdRecord(nsm(i))) //probably degenerated edge.
+          seerShape->updateShapeIdRecord(nsm(i), oldIds.at(i - 1));
+      }
+      
+      seerShape->dumpNils("inert");
+      seerShape->dumpDuplicates("inert");
+      
+      seerShape->ensureNoNils();
+      seerShape->ensureNoDuplicates();
+      
+      setSuccess();
     }
-    uuid oldRootId = seerShape->getRootShapeId();
-    
-    TopoDS_Shape tempShape(seerShape->getRootOCCTShape());
-    tempShape.Location(freshLocation);
-    seerShape->setOCCTShape(tempShape);
-    
-    seerShape->updateShapeIdRecord(seerShape->getRootOCCTShape(), oldRootId);
-    seerShape->setRootShapeId(oldRootId);
-    TopTools_IndexedMapOfShape nsm; //new shape map
-    TopExp::MapShapes(seerShape->getRootOCCTShape(), nsm);
-    for (int i = 1; i < nsm.Size() + 1; ++i)
+    catch (const Standard_Failure &e)
     {
-      if (seerShape->hasShapeIdRecord(nsm(i))) //probably degenerated edge.
-        seerShape->updateShapeIdRecord(nsm(i), oldIds.at(i - 1));
+      std::ostringstream s; s << "OCC Error in inert update: " << e.GetMessageString() << std::endl;
+      lastUpdateLog += s.str();
     }
-    
-    seerShape->dumpNils("inert");
-    seerShape->dumpDuplicates("inert");
-    
-    seerShape->ensureNoNils();
-    seerShape->ensureNoDuplicates();
+    catch (const std::exception &e)
+    {
+      std::ostringstream s; s << "Standard error in inert update: " << e.what() << std::endl;
+      lastUpdateLog += s.str();
+    }
+    catch (...)
+    {
+      std::ostringstream s; s << "Unknown error in inert update." << std::endl;
+      lastUpdateLog += s.str();
+    }
   }
-  
-  setSuccess();
   setModelClean();
+  if (!lastUpdateLog.empty())
+    std::cout << std::endl << lastUpdateLog;
 }
 
 void Inert::serialWrite(const QDir &dIn)

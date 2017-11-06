@@ -139,7 +139,8 @@ TopoDS_Shape Nest::calcPitch(TopoDS_Shape &bIn, double guess)
     if (iter >= maxIter)
     {
       //exception ?
-      std::cout << "warning: max iterations reached in Strip::getPitch" << std::endl;
+      std::ostringstream s; s << "warning: max iterations reached in Nest::calcPitch" << std::endl;
+      lastUpdateLog += s.str();
       break;
     }
   }
@@ -154,7 +155,8 @@ TopoDS_Shape Nest::calcPitch(TopoDS_Shape &bIn, double guess)
     if (iter >= maxIter)
     {
       //exception ?
-      std::cout << "warning: max iterations reached in Strip::getPitch" << std::endl;
+      std::ostringstream s; s << "warning: max iterations reached in Nest::calcPitch" << std::endl;
+      lastUpdateLog += s.str();
       break;
     }
   }
@@ -171,6 +173,7 @@ TopoDS_Shape Nest::calcPitch(TopoDS_Shape &bIn, double guess)
 void Nest::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
+  lastUpdateLog.clear();
   try
   {
     if (payloadIn.updateMap.count(Nest::blank) != 1)
@@ -216,17 +219,22 @@ void Nest::updateModel(const UpdatePayload &payloadIn)
   }
   catch (const Standard_Failure &e)
   {
-    std::cout << std::endl << "Error in nest update. " << e.GetMessageString() << std::endl;
+    std::ostringstream s; s << "OCC Error in nest update: " << e.GetMessageString() << std::endl;
+    lastUpdateLog += s.str();
   }
-  catch (std::exception &e)
+  catch (const std::exception &e)
   {
-    std::cout << std::endl << "Error in nest update. " << e.what() << std::endl;
+    std::ostringstream s; s << "Standard error in nest update: " << e.what() << std::endl;
+    lastUpdateLog += s.str();
   }
   catch (...)
   {
-    std::cout << std::endl << "Unknown error in nest update. " << std::endl;
+    std::ostringstream s; s << "Unknown error in nest update. " << std::endl;
+    lastUpdateLog += s.str();
   }
   setModelClean();
+  if (!lastUpdateLog.empty())
+    std::cout << std::endl << lastUpdateLog;
 }
 
 void Nest::serialWrite(const QDir &dIn)

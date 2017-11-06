@@ -50,7 +50,7 @@ Union::Union() : BooleanBase()
 void Union::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure(); //assume failure until success.
-  
+  lastUpdateLog.clear();
   try
   {
     if
@@ -107,13 +107,22 @@ void Union::updateModel(const UpdatePayload &payloadIn)
   }
   catch (const Standard_Failure &e)
   {
-    std::cout << std::endl << "Error in union update. " << e.GetMessageString() << std::endl;
+    std::ostringstream s; s << "OCC Error in union update: " << e.GetMessageString() << std::endl;
+    lastUpdateLog += s.str();
   }
-  catch (std::exception &e)
+  catch (const std::exception &e)
   {
-    std::cout << std::endl << "Error in union update. " << e.what() << std::endl;
+    std::ostringstream s; s << "Standard error in union update: " << e.what() << std::endl;
+    lastUpdateLog += s.str();
+  }
+  catch (...)
+  {
+    std::ostringstream s; s << "Unknown error in union update." << std::endl;
+    lastUpdateLog += s.str();
   }
   setModelClean();
+  if (!lastUpdateLog.empty())
+    std::cout << std::endl << lastUpdateLog;
 }
 
 void Union::serialWrite(const QDir &dIn)

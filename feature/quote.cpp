@@ -86,6 +86,7 @@ Quote::~Quote()
 void Quote::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
+  lastUpdateLog.clear();
   try
   {
     if (payloadIn.updateMap.count(strip) != 1)
@@ -198,17 +199,22 @@ void Quote::updateModel(const UpdatePayload &payloadIn)
   }
   catch (const Standard_Failure &e)
   {
-    std::cout << std::endl << "Error in Quote update. " << e.GetMessageString() << std::endl;
+    std::ostringstream s; s << "OCC Error in Quote update: " << e.GetMessageString() << std::endl;
+    lastUpdateLog += s.str();
   }
-  catch (std::exception &e)
+  catch (const std::exception &e)
   {
-    std::cout << std::endl << "Error in Quote update. " << e.what() << std::endl;
+    std::ostringstream s; s << "Standard error in Quote update: " << e.what() << std::endl;
+    lastUpdateLog += s.str();
   }
   catch (...)
   {
-    std::cout << std::endl << "Unknown error in Quote update. " << std::endl;
+    std::ostringstream s; s << "Unknown error in Quote update. " << std::endl;
+    lastUpdateLog += s.str();
   }
   setModelClean();
+  if (!lastUpdateLog.empty())
+    std::cout << std::endl << lastUpdateLog;
 }
 
 void Quote::serialWrite(const QDir &dIn)

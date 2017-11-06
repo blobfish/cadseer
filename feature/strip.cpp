@@ -159,6 +159,7 @@ osg::Node* buildStationLabel(const std::string &sIn)
 void Strip::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
+  lastUpdateLog.clear();
   try
   {
     if (payloadIn.updateMap.count(part) != 1)
@@ -304,17 +305,22 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
   }
   catch (const Standard_Failure &e)
   {
-    std::cout << std::endl << "Error in strip update. " << e.GetMessageString() << std::endl;
+    std::ostringstream s; s << "OCC Error in strip update: " << e.GetMessageString() << std::endl;
+    lastUpdateLog += s.str();
   }
-  catch (std::exception &e)
+  catch (const std::exception &e)
   {
-    std::cout << std::endl << "Error in strip update. " << e.what() << std::endl;
+    std::ostringstream s; s << "Standard error in strip update: " << e.what() << std::endl;
+    lastUpdateLog += s.str();
   }
   catch (...)
   {
-    std::cout << std::endl << "Unknown error in strip update. " << std::endl;
+    std::ostringstream s; s << "Unknown error in strip update. " << std::endl;
+    lastUpdateLog += s.str();
   }
   setModelClean();
+  if (!lastUpdateLog.empty())
+    std::cout << std::endl << lastUpdateLog;
 }
 
 void Strip::serialWrite(const QDir &dIn)

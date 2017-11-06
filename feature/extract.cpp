@@ -196,6 +196,7 @@ TopoDS_Shape sew(const occt::FaceVector &faces)
 void Extract::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
+  lastUpdateLog.clear();
   try
   {
     if (payloadIn.updateMap.count(InputType::target) != 1)
@@ -212,7 +213,8 @@ void Extract::updateModel(const UpdatePayload &payloadIn)
         std::vector<uuid> resolvedIds = targetSeerShape.resolvePick(p.shapeHistory);
         if (resolvedIds.empty())
         {
-          std::cout << "Extract: can't find target id. Skipping id: " << gu::idToString(p.id) << std::endl;
+          std::ostringstream s; s << "Extract: can't find target id. Skipping id: " << gu::idToString(p.id) << std::endl;
+          lastUpdateLog += s.str();
           continue;
         }
         
@@ -275,13 +277,22 @@ void Extract::updateModel(const UpdatePayload &payloadIn)
   }
   catch (const Standard_Failure &e)
   {
-    std::cout << std::endl << "Error in extract update. " << e.GetMessageString() << std::endl;
+    std::ostringstream s; s << "OCC Error in extract update: " << e.GetMessageString() << std::endl;
+    lastUpdateLog += s.str();
   }
-  catch (std::exception &e)
+  catch (const std::exception &e)
   {
-    std::cout << std::endl << "Error in extract update. " << e.what() << std::endl;
+    std::ostringstream s; s << "Standard error in extract update: " << e.what() << std::endl;
+    lastUpdateLog += s.str();
+  }
+  catch (...)
+  {
+    std::ostringstream s; s << "Unknown error in extract update." << std::endl;
+    lastUpdateLog += s.str();
   }
   setModelClean();
+  if (!lastUpdateLog.empty())
+    std::cout << std::endl << lastUpdateLog;
 }
 
 void Extract::serialWrite(const QDir &dIn)

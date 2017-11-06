@@ -188,9 +188,8 @@ void Cone::getParameters(double& radius1Out, double& radius2Out, double& heightO
 void Cone::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
-  
+  lastUpdateLog.clear();
   CSysBase::updateModel(payloadIn);
-  
   try
   {
     ConeBuilder coneBuilder(static_cast<double>(radius1), static_cast<double>(radius2), static_cast<double>(height), system);
@@ -200,10 +199,23 @@ void Cone::updateModel(const UpdatePayload &payloadIn)
   }
   catch (const Standard_Failure &e)
   {
-    std::cout << std::endl << "Error in cone update. " << e.GetMessageString() << std::endl;
+    std::ostringstream s; s << "OCC Error in cone update: " << e.GetMessageString() << std::endl;
+    lastUpdateLog += s.str();
+  }
+  catch (const std::exception &e)
+  {
+    std::ostringstream s; s << "Standard error in cone update: " << e.what() << std::endl;
+    lastUpdateLog += s.str();
+  }
+  catch (...)
+  {
+    std::ostringstream s; s << "Unknown error in cone update." << std::endl;
+    lastUpdateLog += s.str();
   }
   setModelClean();
   updateIPGroup();
+  if (!lastUpdateLog.empty())
+    std::cout << std::endl << lastUpdateLog;
 }
 
 void Cone::updateResult(const ConeBuilder& coneBuilderIn)

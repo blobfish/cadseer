@@ -825,6 +825,7 @@ void DatumPlane::updateModel(const UpdatePayload &payloadIn)
   transform->setMatrix(matrix);
   
   setFailure();
+  lastUpdateLog.clear();
   try
   {
     if (!solver)
@@ -835,12 +836,25 @@ void DatumPlane::updateModel(const UpdatePayload &payloadIn)
     
     setSuccess();
   }
-  catch (std::exception &e)
+  catch (const Standard_Failure &e)
   {
-    std::cout << std::endl << "Error in datum plane update. " << e.what() << std::endl;
+    std::ostringstream s; s << "OCC Error in datum plane update: " << e.GetMessageString() << std::endl;
+    lastUpdateLog += s.str();
+  }
+  catch (const std::exception &e)
+  {
+    std::ostringstream s; s << "Standard error in datum plane update: " << e.what() << std::endl;
+    lastUpdateLog += s.str();
+  }
+  catch (...)
+  {
+    std::ostringstream s; s << "Unknown error in datum plane update." << std::endl;
+    lastUpdateLog += s.str();
   }
   
   setModelClean();
+  if (!lastUpdateLog.empty())
+    std::cout << std::endl << lastUpdateLog;
 }
 
 void DatumPlane::updateVisual()

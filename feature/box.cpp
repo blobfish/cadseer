@@ -239,9 +239,8 @@ void Box::getParameters(double &lengthOut, double &widthOut, double &heightOut) 
 void Box::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
-  
+  lastUpdateLog.clear();
   CSysBase::updateModel(payloadIn);
-  
   try
   {
     BoxBuilder boxMaker(static_cast<double>(length), static_cast<double>(width), static_cast<double>(height), system);
@@ -251,11 +250,23 @@ void Box::updateModel(const UpdatePayload &payloadIn)
   }
   catch (const Standard_Failure &e)
   {
-    std::cout << std::endl << "Error in box update. " << e.GetMessageString() << std::endl;
+    std::ostringstream s; s << "OCC Error in box update: " << e.GetMessageString() << std::endl;
+    lastUpdateLog += s.str();
+  }
+  catch (const std::exception &e)
+  {
+    std::ostringstream s; s << "Standard error in box update: " << e.what() << std::endl;
+    lastUpdateLog += s.str();
+  }
+  catch (...)
+  {
+    std::ostringstream s; s << "Unknown error in box update." << std::endl;
+    lastUpdateLog += s.str();
   }
   setModelClean();
-  
   updateIPGroup();
+  if (!lastUpdateLog.empty())
+    std::cout << std::endl << lastUpdateLog;
 }
 
 void Box::initializeMaps()

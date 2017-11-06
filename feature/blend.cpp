@@ -192,6 +192,7 @@ void Blend::addVariableBlendQuiet(const VariableBlend &variableBlendIn)
 void Blend::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
+  lastUpdateLog.clear();
   try
   {
     if (payloadIn.updateMap.count(InputType::target) != 1)
@@ -209,7 +210,8 @@ void Blend::updateModel(const UpdatePayload &payloadIn)
         std::vector<uuid> resolvedIds = targetSeerShape.resolvePick(pick.shapeHistory);
         if (resolvedIds.empty())
         {
-          std::cout << "Blend: can't find target edge id. Skipping id: " << gu::idToString(pick.id) << std::endl;
+          std::ostringstream s; s << "Blend: can't find target edge id. Skipping id: " << gu::idToString(pick.id) << std::endl;
+          lastUpdateLog += s.str();
           continue;
         }
         for (const auto &resolvedId : resolvedIds)
@@ -234,7 +236,8 @@ void Blend::updateModel(const UpdatePayload &payloadIn)
       std::vector<uuid> resolvedIds = targetSeerShape.resolvePick(vBlend.pick.shapeHistory);
       if (resolvedIds.empty())
       {
-        std::cout << "Blend: can't find target edge id. Skipping id: " << gu::idToString(vBlend.pick.id) << std::endl;
+        std::ostringstream s; s << "Blend: can't find target edge id. Skipping id: " << gu::idToString(vBlend.pick.id) << std::endl;
+        lastUpdateLog += s.str();
         continue;
       }
       for (const auto &resolvedId : resolvedIds)
@@ -250,7 +253,8 @@ void Blend::updateModel(const UpdatePayload &payloadIn)
         std::vector<uuid> resolvedEntryIds = targetSeerShape.resolvePick(e.pick.shapeHistory);
         if (resolvedEntryIds.empty())
         {
-          std::cout << "Blend: can't find target entry id. Skipping id: " << gu::idToString(e.pick.id) << std::endl;
+          std::ostringstream s; s << "Blend: can't find target entry id. Skipping id: " << gu::idToString(e.pick.id) << std::endl;
+          lastUpdateLog += s.str();
           continue;
         }
         assert(resolvedEntryIds.size() == 1);//don't think an entry should ever result in more than one id.
@@ -289,13 +293,22 @@ void Blend::updateModel(const UpdatePayload &payloadIn)
   }
   catch (const Standard_Failure &e)
   {
-    std::cout << std::endl << "Error in blend update. " << e.GetMessageString() << std::endl;
+    std::ostringstream s; s << "OCC Error in blend update: " << e.GetMessageString() << std::endl;
+    lastUpdateLog += s.str();
   }
-  catch (std::exception &e)
+  catch (const std::exception &e)
   {
-    std::cout << std::endl << "Error in blend update. " << e.what() << std::endl;
+    std::ostringstream s; s << "Standard error in blend update: " << e.what() << std::endl;
+    lastUpdateLog += s.str();
+  }
+  catch (...)
+  {
+    std::ostringstream s; s << "Unknown error in blend update." << std::endl;
+    lastUpdateLog += s.str();
   }
   setModelClean();
+  if (!lastUpdateLog.empty())
+    std::cout << std::endl << lastUpdateLog;
 }
 
 /* matching by interogating the MakeFillet objects generated method.
@@ -318,7 +331,10 @@ void Blend::generatedMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const SeerSha
     if (generated.IsEmpty())
       continue;
     if(generated.Extent() != 1) //see ensure noFaceNils
-      std::cout << "Warning: more than one generated shape in blend::generatedMatch" << std::endl;
+    {
+      std::ostringstream s; s << "Warning: more than one generated shape in blend::generatedMatch" << std::endl;
+      lastUpdateLog += s.str();
+    }
     const TopoDS_Shape &blendFace = generated.First();
     assert(!blendFace.IsNull());
     assert(blendFace.ShapeType() == TopAbs_FACE);

@@ -91,6 +91,7 @@ void Chamfer::addSymChamfer(const SymChamfer &chamferIn)
 void Chamfer::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
+  lastUpdateLog.clear();
   try
   {
     if (payloadIn.updateMap.count(InputType::target) != 1)
@@ -108,7 +109,9 @@ void Chamfer::updateModel(const UpdatePayload &payloadIn)
         std::vector<uuid> resolvedEdgeIds = targetSeerShape.resolvePick(pick.edgePick.shapeHistory);
         if (resolvedEdgeIds.empty())
         {
-          std::cout << "Chamfer: can't find target edge id. Skipping id: " << gu::idToString(pick.edgePick.id) << std::endl;
+          std::ostringstream s;
+          s << "Chamfer: can't find target edge id. Skipping id: " << gu::idToString(pick.edgePick.id) << std::endl;
+          lastUpdateLog += s.str();
           continue;
         }
         assert(resolvedEdgeIds.size() == 1); //want to examine this condition.
@@ -116,7 +119,9 @@ void Chamfer::updateModel(const UpdatePayload &payloadIn)
         std::vector<uuid> resolvedFaceIds = targetSeerShape.resolvePick(pick.facePick.shapeHistory);
         if (resolvedFaceIds.empty())
         {
-          std::cout << "Chamfer: can't find target face id. Skipping id: " << gu::idToString(pick.facePick.id) << std::endl;
+          std::ostringstream s;
+          s << "Chamfer: can't find target face id. Skipping id: " << gu::idToString(pick.facePick.id) << std::endl;
+          lastUpdateLog += s.str();
           continue;
         }
         assert(resolvedFaceIds.size() == 1); //want to examine this condition.
@@ -157,13 +162,22 @@ void Chamfer::updateModel(const UpdatePayload &payloadIn)
   }
   catch (const Standard_Failure &e)
   {
-    std::cout << std::endl << "Error in chamfer update. " << e.GetMessageString() << std::endl;
+    std::ostringstream s; s << "OCC Error in chamfer update: " << e.GetMessageString() << std::endl;
+    lastUpdateLog += s.str();
   }
-  catch (std::exception &e)
+  catch (const std::exception &e)
   {
-    std::cout << std::endl << "Error in chamfer update. " << e.what() << std::endl;
+    std::ostringstream s; s << "Standard error in chamfer update: " << e.what() << std::endl;
+    lastUpdateLog += s.str();
+  }
+  catch (...)
+  {
+    std::ostringstream s; s << "Unknown error in chamfer update." << std::endl;
+    lastUpdateLog += s.str();
   }
   setModelClean();
+  if (!lastUpdateLog.empty())
+    std::cout << std::endl << lastUpdateLog;
 }
 
 //duplicated with blend.
@@ -180,7 +194,10 @@ void Chamfer::generatedMatch(BRepFilletAPI_MakeChamfer &chamferMakerIn, const Se
     if (generated.IsEmpty())
       continue;
     if(generated.Extent() != 1)
-      std::cout << "Warning: more than one generated shape in chamfer::generatedMatch" << std::endl;
+    {
+      std::ostringstream s; s << "Warning: more than one generated shape in chamfer::generatedMatch" << std::endl;
+      lastUpdateLog += s.str();
+    }
     const TopoDS_Shape &chamferFace = generated.First();
     assert(!chamferFace.IsNull());
     assert(chamferFace.ShapeType() == TopAbs_FACE);

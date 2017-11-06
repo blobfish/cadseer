@@ -81,6 +81,7 @@ void Draft::setDraft(const DraftConvey &conveyIn)
 void Draft::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
+  lastUpdateLog.clear();
   try
   {
     if (payloadIn.updateMap.count(InputType::target) != 1)
@@ -116,7 +117,8 @@ void Draft::updateModel(const UpdatePayload &payloadIn)
       std::vector<uuid> pickIds = targetSeerShape.resolvePick(p.shapeHistory);
       if (pickIds.empty())
       {
-        std::cout << "Draft can't resolve id: " << gu::idToString(p.id) << std::endl;
+        std::ostringstream s; s << "Draft can't resolve id: " << gu::idToString(p.id) << std::endl;
+        lastUpdateLog += s.str();
         continue;
       }
       assert(pickIds.size() == 1);
@@ -124,7 +126,8 @@ void Draft::updateModel(const UpdatePayload &payloadIn)
       dMaker.Add(face, direction, localAngle, plane);
       if (!dMaker.AddDone())
       {
-        std::cout << "Add face to draft failed. Removing" << std::endl;
+        std::ostringstream s; s << "Draft failed adding face: " << gu::idToString(pickIds.front()) << ". Removing" << std::endl;
+        lastUpdateLog += s.str();
         dMaker.Remove(face);
       }
       if (!labelDone)
@@ -156,13 +159,22 @@ void Draft::updateModel(const UpdatePayload &payloadIn)
   }
   catch (const Standard_Failure &e)
   {
-    std::cout << std::endl << "Error in draft update. " << e.GetMessageString() << std::endl;
+    std::ostringstream s; s << "Error in draft update: " << e.GetMessageString() << std::endl;
+    lastUpdateLog += s.str();
   }
-  catch (std::exception &e)
+  catch (const std::exception &e)
   {
-    std::cout << std::endl << "Error in draft update. " << e.what() << std::endl;
+    std::ostringstream s; s << "Standard error in draft update: " << e.what() << std::endl;
+    lastUpdateLog += s.str();
+  }
+  catch (...)
+  {
+    std::ostringstream s; s << "Unknown error in draft update." << std::endl;
+    lastUpdateLog += s.str();
   }
   setModelClean();
+  if (!lastUpdateLog.empty())
+    std::cout << std::endl << lastUpdateLog;
 }
 
 gp_Pln Draft::derivePlaneFromShape(const TopoDS_Shape &shapeIn)

@@ -135,6 +135,7 @@ protected:
   osg::ref_ptr<osg::LOD> lod;
   
   osg::Vec4 color;
+  std::string lastUpdateLog;
 };
 }
 

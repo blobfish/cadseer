@@ -147,6 +147,7 @@ double DieSet::getWidth() const
 void DieSet::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
+  lastUpdateLog.clear();
   try
   {
     double h = 50.0; //height
@@ -233,17 +234,22 @@ void DieSet::updateModel(const UpdatePayload &payloadIn)
   }
   catch (const Standard_Failure &e)
   {
-    std::cout << std::endl << "Error in DieSet update. " << e.GetMessageString() << std::endl;
+    std::ostringstream s; s << "OCC Error in DieSet update: " << e.GetMessageString() << std::endl;
+    lastUpdateLog += s.str();
   }
-  catch (std::exception &e)
+  catch (const std::exception &e)
   {
-    std::cout << std::endl << "Error in DieSet update. " << e.what() << std::endl;
+    std::ostringstream s; s << "Standard error in DieSet update: " << e.what() << std::endl;
+    lastUpdateLog += s.str();
   }
   catch (...)
   {
-    std::cout << std::endl << "Unknown error in DieSet update. " << std::endl;
+    std::ostringstream s; s << "Unknown error in DieSet update. " << std::endl;
+    lastUpdateLog += s.str();
   }
   setModelClean();
+  if (!lastUpdateLog.empty())
+    std::cout << std::endl << lastUpdateLog;
 }
 
 void DieSet::updateLabelColors()

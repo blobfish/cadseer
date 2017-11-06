@@ -90,7 +90,7 @@ void Squash::updateModel(const UpdatePayload &payloadIn)
     setModelClean();
     return;
   }
-  
+  lastUpdateLog.clear();
   overlaySwitch->removeChildren(0, overlaySwitch->getNumChildren());
   overlaySwitch->addChild(label.get());
   
@@ -126,7 +126,8 @@ void Squash::updateModel(const UpdatePayload &payloadIn)
         const TopoDS_Shape &shape = targetSeerShape.getOCCTShape(lid);
         if (shape.ShapeType() != TopAbs_FACE)
         {
-          std::cout << "shape is not a face in Squash::updateModel" << std::endl;
+          std::ostringstream sm; sm << "shape is not a face in Squash::updateModel" << std::endl;
+          lastUpdateLog += sm.str();
           continue;
         }
         const TopoDS_Face &f = TopoDS::Face(shape);
@@ -186,17 +187,22 @@ void Squash::updateModel(const UpdatePayload &payloadIn)
   }
   catch (const Standard_Failure &e)
   {
-    std::cout << std::endl << "Error in squash update. " << e.GetMessageString() << std::endl;
+    std::ostringstream s; s << "OCC Error in squash update: " << e.GetMessageString() << std::endl;
+    lastUpdateLog += s.str();
   }
-  catch (std::exception &e)
+  catch (const std::exception &e)
   {
-    std::cout << std::endl << "Error in squash update. " << e.what() << std::endl;
+    std::ostringstream s; s << "Standard error in squash update: " << e.what() << std::endl;
+    lastUpdateLog += s.str();
   }
   catch (...)
   {
-    std::cout << std::endl << "Unknown error in squash update. " << std::endl;
+    std::ostringstream s; s << "Unknown error in squash update. " << std::endl;
+    lastUpdateLog += s.str();
   }
   setModelClean();
+  if (!lastUpdateLog.empty())
+    std::cout << std::endl << lastUpdateLog;
 }
 
 void Squash::serialWrite(const QDir &dIn)

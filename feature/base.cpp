@@ -465,7 +465,8 @@ QTextStream& Base::getInfo(QTextStream &stream) const
         << "    Feature type: " << QString::fromStdString(getTypeString()) << endl
         << "    Model is clean: " << boolString(isModelClean()) << endl
         << "    Visual is clean: " << boolString(isVisualClean()) << endl
-        << "    Update was successful: " << boolString(isSuccess()) << endl;
+        << "    Update was successful: " << boolString(isSuccess()) << endl
+        << endl << "Last Update: " << QString::fromStdString(lastUpdateLog);
     
     if (!parameterVector.empty())
     {
