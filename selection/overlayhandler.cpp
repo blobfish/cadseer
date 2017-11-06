@@ -22,6 +22,7 @@
 #include <memory>
 
 #include <osgViewer/View>
+#include <osgUtil/PolytopeIntersector>
 
 #include <viewer/overlay.h>
 #include <library/csysdragger.h>
@@ -37,6 +38,49 @@
 #include "overlayhandler.h"
 
 using namespace slc;
+
+
+//copied from eventhandler.
+//build polytope at origin. 8 sided.
+static osg::Polytope buildBasePolytope(double radius)
+{
+  //apparently the order of the addition matters. intersector
+  //wants opposites sequenced. This seems to be working.
+  osg::Polytope out;
+  osg::Matrixd rotation = osg::Matrixd::rotate(osg::DegreesToRadians(45.0), osg::Vec3d(0.0, 0.0, 1.0));
+  osg::Vec3d base = osg::Vec3d(1.0, 0.0, 0.0);
+  
+  out.add(osg::Plane(base, radius));
+  out.add(osg::Plane(-base, radius));
+  
+  base = rotation * base;
+  
+  out.add(osg::Plane(base, radius));
+  out.add(osg::Plane(-base, radius));
+  
+  base = rotation * base;
+  
+  out.add(osg::Plane(base, radius));
+  out.add(osg::Plane(-base, radius));
+  
+  base = rotation * base;
+  
+  out.add(osg::Plane(base, radius));
+  out.add(osg::Plane(-base, radius));
+  
+  out.add(osg::Plane(0.0,0.0,1.0, 0.0)); //last has to be 'cap'
+  
+  return out;
+}
+
+static osg::Polytope buildPolytope(double x, double y, double radius)
+{
+  static osg::Polytope base = buildBasePolytope(radius);
+  osg::Polytope out(base);
+  out.transform(osg::Matrixd::translate(x, y, 0.0));
+  
+  return out;
+}
 
 OverlayHandler::OverlayHandler(vwr::Overlay* cameraIn) : camera(cameraIn)
 {
@@ -62,29 +106,22 @@ bool OverlayHandler::handle
     return false;
   }
   
-  auto doIntersection = [&]() -> osgUtil::LineSegmentIntersector::Intersections
+  auto doIntersection = [&]() -> osgUtil::PolytopeIntersector::Intersections
   {
     osgViewer::View *viewer = dynamic_cast<osgViewer::View *>(actionAdapter.asView());
     assert(viewer);
     
-    osg::NodePath iPath; iPath.push_back(camera.get());
-    osgUtil::LineSegmentIntersector::Intersections out;
-    
-    viewer->computeIntersections
+    osg::ref_ptr<osgUtil::PolytopeIntersector> polyPicker = new osgUtil::PolytopeIntersector
     (
-      camera.get(),
       osgUtil::Intersector::WINDOW,
-      eventAdapter.getX(),
-      eventAdapter.getY(),
-      iPath,
-      out
-      //no mask at this time.
+      buildPolytope(eventAdapter.getX(), eventAdapter.getY(), 16.0)
     );
-    
-    return out;
+    osgUtil::IntersectionVisitor polyVisitor(polyPicker.get());
+    camera->accept(polyVisitor);
+    return polyPicker->getIntersections();
   };
   
-  auto findDragger = [&](const osgUtil::LineSegmentIntersector::Intersections &intersections)
+  auto findDragger = [&](const osgUtil::PolytopeIntersector::Intersections &intersections)
   {
     this->dragger = nullptr;
     
@@ -102,7 +139,7 @@ bool OverlayHandler::handle
         this->dragger = dynamic_cast<osgManipulator::Dragger *>(n);
         if (this->dragger)
         {
-            pointer.addIntersection(i.nodePath, i.getLocalIntersectPoint());
+            pointer.addIntersection(i.nodePath, i.localIntersectionPoint);
             pointer.setCamera(camera);
             pointer.setMousePosition(eventAdapter.getX(), eventAdapter.getY());
             
@@ -114,7 +151,7 @@ bool OverlayHandler::handle
     }
   };
   
-  auto findIcon = [&](const osgUtil::LineSegmentIntersector::Intersections &intersections)
+  auto findIcon = [&](const osgUtil::PolytopeIntersector::Intersections &intersections)
   {
     for (auto i : intersections)
     {
@@ -133,7 +170,7 @@ bool OverlayHandler::handle
     }
   };
   
-  auto findDimension = [&](const osgUtil::LineSegmentIntersector::Intersections &intersections)
+  auto findDimension = [&](const osgUtil::PolytopeIntersector::Intersections &intersections)
   {
     for (auto i : intersections)
     {
@@ -149,7 +186,7 @@ bool OverlayHandler::handle
     }
   };
   
-  auto findCSysOrigin = [&](const osgUtil::LineSegmentIntersector::Intersections &intersections)
+  auto findCSysOrigin = [&](const osgUtil::PolytopeIntersector::Intersections &intersections)
   {
     for (auto i : intersections)
     {
@@ -170,7 +207,7 @@ bool OverlayHandler::handle
     }
   };
   
-  auto findPLabel = [&](const osgUtil::LineSegmentIntersector::Intersections &intersections)
+  auto findPLabel = [&](const osgUtil::PolytopeIntersector::Intersections &intersections)
   {
     for (const auto &i : intersections)
     {
@@ -196,7 +233,7 @@ bool OverlayHandler::handle
     assert(!dimension);
     assert(!pLabel);
     assert(path.empty());
-    osgUtil::LineSegmentIntersector::Intersections intersections = doIntersection();
+    osgUtil::PolytopeIntersector::Intersections intersections = doIntersection();
     findDragger(intersections);
     findIcon(intersections);
     findDimension(intersections);
@@ -219,7 +256,7 @@ bool OverlayHandler::handle
   {
     assert(!dragger);
     assert(path.empty());
-    osgUtil::LineSegmentIntersector::Intersections intersections = doIntersection();
+    osgUtil::PolytopeIntersector::Intersections intersections = doIntersection();
     findDragger(intersections);
     if (dragger)
     {
@@ -313,7 +350,7 @@ bool OverlayHandler::handle
     }
     else
     {
-      osgUtil::LineSegmentIntersector::Intersections intersections = doIntersection();
+      osgUtil::PolytopeIntersector::Intersections intersections = doIntersection();
       findDimension(intersections);
       if (dimension)
       {
