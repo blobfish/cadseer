@@ -265,9 +265,10 @@ void Manager::editColorDispatched(const msg::Message&)
   addCommand(editColor);
 }
 
-void Manager::featureRenameDispatched(const msg::Message&)
+void Manager::featureRenameDispatched(const msg::Message &mIn)
 {
   std::shared_ptr<FeatureRename> featureRename(new FeatureRename());
+  featureRename->setFromMessage(mIn);
   addCommand(featureRename);
 }
 

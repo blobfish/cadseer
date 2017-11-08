@@ -19,6 +19,8 @@
 
 #include <iostream>
 
+#include <boost/graph/topological_sort.hpp>
+#include <boost/graph/breadth_first_search.hpp>
 #include <boost/variant.hpp>
 
 #include <QString>
@@ -47,9 +49,12 @@
 #include <globalutilities.h>
 #include <tools/idtools.h>
 #include <viewer/message.h>
+#include <feature/base.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <dagview/controlleddfs.h>
+#include <dagview/rectitem.h>
+#include <dagview/stow.h>
 #include <dagview/model.h>
 
 using namespace dag;
@@ -97,7 +102,7 @@ void LineEdit::focusOutEvent(QFocusEvent *e)
 //   update(boundingRect());
 //note: I haven't tried this again since I turned BSP off.
 
-Model::Model(QObject *parentIn) : QGraphicsScene(parentIn)
+Model::Model(QObject *parentIn) : QGraphicsScene(parentIn), stow(new Stow())
 {
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
   observer->name = "dag::Model";
@@ -171,26 +176,6 @@ void Model::setupViewConstants()
   }; //reserve some of the these for highlight stuff.
 }
 
-void Model::indexVerticesEdges()
-{
-  std::size_t index = 0;
-  
-  //index vertices.
-  BGL_FORALL_VERTICES(currentVertex, graph, Graph)
-  {
-    boost::put(boost::vertex_index, graph, currentVertex, index);
-    index++;
-  }
-
-  //index edges.
-  index = 0;
-  BGL_FORALL_EDGES(currentEdge, graph, Graph)
-  {
-    boost::put(boost::edge_index, graph, currentEdge, index);
-    index++;
-  }
-}
-
 void Model::featureAddedDispatched(const msg::Message &messageIn)
 {
   std::ostringstream debug;
@@ -199,29 +184,21 @@ void Model::featureAddedDispatched(const msg::Message &messageIn)
   
   prj::Message message = boost::get<prj::Message>(messageIn.payload);
   
-  Vertex virginVertex = boost::add_vertex(graph);
-  graph[virginVertex].feature = message.feature;
-  graph[virginVertex].featureId = message.feature->getId();
-  graph[virginVertex].state = message.feature->getState();
+  Vertex virginVertex = boost::add_vertex(stow->graph);
+  stow->graph[virginVertex].featureId = message.feature->getId();
+  stow->graph[virginVertex].state = message.feature->getState();
+  stow->graph[virginVertex].hasSeerShape = message.feature->hasSeerShape();
   
   if (message.feature->isVisible3D())
-    graph[virginVertex].visibleIconRaw->setPixmap(visiblePixmapEnabled);
+    stow->graph[virginVertex].visibleIconShared->setPixmap(visiblePixmapEnabled);
   else
-    graph[virginVertex].visibleIconRaw->setPixmap(visiblePixmapDisabled);
+    stow->graph[virginVertex].visibleIconShared->setPixmap(visiblePixmapDisabled);
   
-  graph[virginVertex].featureIconRaw->setPixmap(message.feature->getIcon().pixmap(iconSize, iconSize));
-  graph[virginVertex].textRaw->setPlainText(message.feature->getName());
-  graph[virginVertex].textRaw->setFont(this->font());
+  stow->graph[virginVertex].featureIconShared->setPixmap(message.feature->getIcon().pixmap(iconSize, iconSize));
+  stow->graph[virginVertex].textShared->setPlainText(message.feature->getName());
+  stow->graph[virginVertex].textShared->setFont(this->font());
   
-  graphLink.insert(graph[virginVertex]);
-  
-  VertexIdRecord record;
-  record.featureId = message.feature->getId();
-  record.vertex = virginVertex;
-  vertexIdContainer.insert(record);
-  
-  addVertexItemsToScene(virginVertex);
-  
+  addItemsToScene(stow->getAllSceneItems(virginVertex));
   this->invalidate(); //temp.
 }
 
@@ -233,13 +210,14 @@ void Model::featureRemovedDispatched(const msg::Message &messageIn)
   
   prj::Message message = boost::get<prj::Message>(messageIn.payload);
   
-  Vertex vertex = findRecord(vertexIdContainer, message.feature->getId()).vertex;
-  eraseRecord(graphLink, message.feature->getId());
-  eraseRecord(vertexIdContainer, message.feature->getId());
-  removeVertexItemsFromScene(vertex);
-  assert(boost::in_degree(vertex, graph) == 0);
-  assert(boost::out_degree(vertex, graph) == 0);
-  boost::remove_vertex(vertex, graph);
+  Vertex vertex = stow->findVertex(message.feature->getId());
+  if (vertex == NullVertex())
+    return;
+  removeItemsFromScene(stow->getAllSceneItems(vertex));
+  //connections should already removed
+  assert(boost::in_degree(vertex, stow->graph) == 0);
+  assert(boost::out_degree(vertex, stow->graph) == 0);
+  stow->graph[vertex].alive = false;
 }
 
 
@@ -251,21 +229,26 @@ void Model::connectionAddedDispatched(const msg::Message &messageIn)
   
   prj::Message message = boost::get<prj::Message>(messageIn.payload);
   
-  Vertex parentVertex = findRecord(vertexIdContainer, message.featureId).vertex;
-  Vertex childVertex = findRecord(vertexIdContainer, message.featureId2).vertex;
+  Vertex parentVertex = stow->findVertex(message.featureId);
+  Vertex childVertex = stow->findVertex(message.featureId2);
+  if (parentVertex == NullVertex() || childVertex == NullVertex())
+    return;
   
   bool results;
   Edge edge;
-  std::tie(edge, results) = boost::add_edge(parentVertex, childVertex, graph);
+  std::tie(edge, results) = boost::add_edge(parentVertex, childVertex, stow->graph);
   assert(results);
-  graph[edge].inputType = message.inputType;
+  if (!results)
+    return;
+  stow->graph[edge].inputType = message.inputType;
   
   QPainterPath path;
   path.moveTo(0.0, 0.0);
-  path.lineTo(0.0, 100.0);
-  graph[edge].connector->setPath(path);
+  path.lineTo(0.0, 1.0);
+  stow->graph[edge].connector->setPath(path);
   
-  addEdgeItemsToScene(edge);
+  if (!stow->graph[edge].connector->scene())
+    this->addItem(stow->graph[edge].connector.get());
 }
 
 void Model::connectionRemovedDispatched(const msg::Message &messageIn)
@@ -276,16 +259,21 @@ void Model::connectionRemovedDispatched(const msg::Message &messageIn)
   
   prj::Message message = boost::get<prj::Message>(messageIn.payload);
   
-  Vertex parentVertex = findRecord(vertexIdContainer, message.featureId).vertex;
-  Vertex childVertex = findRecord(vertexIdContainer, message.featureId2).vertex;
+  Vertex parentVertex = stow->findVertex(message.featureId);
+  Vertex childVertex = stow->findVertex(message.featureId2);
+  if (parentVertex == NullVertex() || childVertex == NullVertex())
+    return;
   
   bool results;
   Edge edge;
-  std::tie(edge, results) = boost::edge(parentVertex, childVertex, graph);
+  std::tie(edge, results) = boost::edge(parentVertex, childVertex, stow->graph);
   assert(results);
+  if (!results)
+    return;
   
-  removeEdgeItemsFromScene(edge);
-  boost::remove_edge(edge, graph);
+  if (stow->graph[edge].connector->scene())
+    this->removeItem(stow->graph[edge].connector.get());
+  boost::remove_edge(edge, stow->graph);
 }
 
 void Model::setupDispatcher()
@@ -347,12 +335,14 @@ void Model::setupDispatcher()
 void Model::featureStateChangedDispatched(const msg::Message &messageIn)
 {
   ftr::Message fMessage = boost::get<ftr::Message>(messageIn.payload);
-  Vertex vertex = findRecord(vertexIdContainer, fMessage.featureId).vertex;
+  Vertex vertex = stow->findVertex(fMessage.featureId);
+  if (vertex == NullVertex())
+    return;
   
   //this is the feature state change from the actual feature.
   //so clear out the lower 3 bits and set to new state
-  graph[vertex].state &= ftr::State("11000");
-  graph[vertex].state |= (ftr::State("00111") & fMessage.state);
+  stow->graph[vertex].state &= ftr::State("11000");
+  stow->graph[vertex].state |= (ftr::State("00111") & fMessage.state);
   
   stateUpdate(vertex);
 }
@@ -360,39 +350,44 @@ void Model::featureStateChangedDispatched(const msg::Message &messageIn)
 void Model::projectFeatureStateChangedDispatched(const msg::Message &mIn)
 {
   ftr::Message fMessage = boost::get<ftr::Message>(mIn.payload);
-  Vertex vertex = findRecord(vertexIdContainer, fMessage.featureId).vertex;
+  Vertex vertex = stow->findVertex(fMessage.featureId);
+  if (vertex == NullVertex())
+    return;
   
   //this is the feature state change from the PROJECT.
   //so clear out the upper 2 bits and set to new state
-  graph[vertex].state &= ftr::State("00111");
-  graph[vertex].state |= (ftr::State("11000") & fMessage.state);
+  stow->graph[vertex].state &= ftr::State("00111");
+  stow->graph[vertex].state |= (ftr::State("11000") & fMessage.state);
   
   stateUpdate(vertex);
 }
 
 void Model::stateUpdate(Vertex vIn)
 {
-  ftr::State cState = graph[vIn].state;
+  if (vIn == NullVertex())
+    return;
+  
+  ftr::State cState = stow->graph[vIn].state;
 
   //from highest to lowest priority.
   if (cState.test(ftr::StateOffset::Inactive))
-    graph[vIn].stateIconRaw->setPixmap(inactivePixmap);
+    stow->graph[vIn].stateIconShared->setPixmap(inactivePixmap);
   else if (cState.test(ftr::StateOffset::ModelDirty))
-    graph[vIn].stateIconRaw->setPixmap(pendingPixmap);
+    stow->graph[vIn].stateIconShared->setPixmap(pendingPixmap);
   else if (cState.test(ftr::StateOffset::Failure))
-    graph[vIn].stateIconRaw->setPixmap(failPixmap);
+    stow->graph[vIn].stateIconShared->setPixmap(failPixmap);
   else
-    graph[vIn].stateIconRaw->setPixmap(passPixmap);
+    stow->graph[vIn].stateIconShared->setPixmap(passPixmap);
 
   if (cState.test(ftr::StateOffset::NonLeaf))
   {
-    if (graph[vIn].visibleIconRaw->scene())
-      removeItem(graph[vIn].visibleIconRaw);
+    if (stow->graph[vIn].visibleIconShared->scene())
+      removeItem(stow->graph[vIn].visibleIconShared.get());
   }
   else
   {
-    if (!graph[vIn].visibleIconRaw->scene())
-      addItem(graph[vIn].visibleIconRaw);
+    if (!stow->graph[vIn].visibleIconShared->scene())
+      addItem(stow->graph[vIn].visibleIconShared.get());
   }
   
   //set tool tip to current state.
@@ -414,14 +409,16 @@ void Model::stateUpdate(Vertex vIn)
   "<td>" << tr("Non-Leaf") << "</td><td>" << ((cState.test(ftr::StateOffset::NonLeaf)) ? ts : fs) << "</td>" <<
   "</tr>" <<
   "</table>";
-  graph[vIn].stateIconRaw->setToolTip(toolTip);
+  stow->graph[vIn].stateIconShared->setToolTip(toolTip);
 }
 
 void Model::featureRenamedDispatched(const msg::Message &messageIn)
 {
   ftr::Message fMessage = boost::get<ftr::Message>(messageIn.payload);
-  Vertex vertex = findRecord(vertexIdContainer, fMessage.featureId).vertex;
-  graph[vertex].textRaw->setPlainText(fMessage.string);
+  Vertex vertex = stow->findVertex(fMessage.featureId);
+  if (vertex == NullVertex())
+    return;
+  stow->graph[vertex].textShared->setPlainText(fMessage.string);
 }
 
 void Model::preselectionAdditionDispatched(const msg::Message &messageIn)
@@ -433,9 +430,13 @@ void Model::preselectionAdditionDispatched(const msg::Message &messageIn)
   slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
   if (sMessage.type != slc::Type::Object)
     return;
-  Vertex vertex = findRecord(vertexIdContainer, sMessage.featureId).vertex;
+  Vertex vertex = stow->findVertex(sMessage.featureId);
+  if (vertex == NullVertex())
+    return;
   assert(!currentPrehighlight); //trying to set prehighlight when something is already set.
-  currentPrehighlight = graph[vertex].rectRaw;
+  if (currentPrehighlight)
+    return;
+  currentPrehighlight = stow->graph[vertex].rectShared.get();
   currentPrehighlight->preHighlightOn();
   
   invalidate();
@@ -450,9 +451,13 @@ void Model::preselectionSubtractionDispatched(const msg::Message &messageIn)
   slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
   if (sMessage.type != slc::Type::Object)
     return;
-  Vertex vertex = findRecord(vertexIdContainer, sMessage.featureId).vertex;
+  Vertex vertex = stow->findVertex(sMessage.featureId);
+  if (vertex == NullVertex())
+    return;
   assert(currentPrehighlight); //trying to clear prehighlight when already empty.
-  graph[vertex].rectRaw->preHighlightOff();
+  if (!currentPrehighlight)
+    return;
+  stow->graph[vertex].rectShared->preHighlightOff();
   currentPrehighlight = nullptr;
   
   invalidate();
@@ -467,11 +472,13 @@ void Model::selectionAdditionDispatched(const msg::Message &messageIn)
   slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
   if (sMessage.type != slc::Type::Object)
     return;
-  Vertex vertex = findRecord(vertexIdContainer, sMessage.featureId).vertex;
-  graph[vertex].rectRaw->selectionOn();
+  Vertex vertex = stow->findVertex(sMessage.featureId);
+  if (vertex == NullVertex())
+    return;
+  stow->graph[vertex].rectShared->selectionOn();
   
   lastPickValid = true;
-  lastPick = graph[vertex].rectRaw->mapToScene(graph[vertex].rectRaw->rect().center());
+  lastPick = stow->graph[vertex].rectShared->mapToScene(stow->graph[vertex].rectShared->rect().center());
   
   invalidate();
 }
@@ -485,8 +492,10 @@ void Model::selectionSubtractionDispatched(const msg::Message &messageIn)
   slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
   if (sMessage.type != slc::Type::Object)
     return;
-  Vertex vertex = findRecord(vertexIdContainer, sMessage.featureId).vertex;
-  graph[vertex].rectRaw->selectionOff();
+  Vertex vertex = stow->findVertex(sMessage.featureId);
+  if (vertex == NullVertex())
+    return;
+  stow->graph[vertex].rectShared->selectionOff();
   
   lastPickValid = false;
   
@@ -496,23 +505,7 @@ void Model::selectionSubtractionDispatched(const msg::Message &messageIn)
 void Model::closeProjectDispatched(const msg::Message&)
 {
   removeAllItems();
-  
-  //remove all edges.
-  //collect vertices to remove
-  std::vector<Vertex> vs;
-  BGL_FORALL_VERTICES(currentVertex, graph, Graph)
-  {
-    boost::clear_vertex(currentVertex, graph);
-    vs.push_back(currentVertex);
-  }
-
-  //remove all vertices
-  for (auto &vertex : vs)
-    boost::remove_vertex(vertex, graph);
-  
-  ::dag::clear(graphLink);
-  ::dag::clear(vertexIdContainer);
-  
+  stow->graph.clear();
   invalidate();
 }
 
@@ -521,8 +514,6 @@ void Model::projectUpdatedDispatched(const msg::Message &)
   std::ostringstream debug;
   debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
   msg::dispatch().dumpString(debug.str());
-  
-  indexVerticesEdges();
   
 //   auto dumpMask = [] (const ColumnMask& columnMaskIn)
 //   {
@@ -544,12 +535,12 @@ void Model::projectUpdatedDispatched(const msg::Message &)
     return (columnMaskIn.size() - position - 1);
   };
   
-  TopoSortVisitor<Graph> visitor(graph);
+  TopoSortVisitor<Graph> visitor(stow->graph);
   ControlledDFS<Graph, TopoSortVisitor<Graph> > dfs(visitor);
   Path sorted = visitor.getResults();
   
   //reversed graph for calculating parent mask.
-  GraphReversed rGraph = boost::make_reverse_graph(graph);
+  GraphReversed rGraph = boost::make_reverse_graph(stow->graph);
   GraphReversed::adjacency_iterator parentIt, parentItEnd;
   
   std::size_t maxColumn = 0;
@@ -558,9 +549,11 @@ void Model::projectUpdatedDispatched(const msg::Message &)
   for (auto currentIt = sorted.begin(); currentIt != sorted.end(); ++currentIt)
   {
     Vertex currentVertex = *currentIt;
-    graph[currentVertex].sortedIndex = std::distance(sorted.begin(), currentIt);
+    stow->graph[currentVertex].sortedIndex = std::distance(sorted.begin(), currentIt);
     
-    if (!graph[currentVertex].dagVisible)
+    if (!stow->graph[currentVertex].dagVisible)
+      continue;
+    if (!stow->graph[currentVertex].alive)
       continue;
     
     std::size_t currentColumn = 0; //always default to first column
@@ -607,16 +600,16 @@ void Model::projectUpdatedDispatched(const msg::Message &)
     ColumnMask freshMask;
     freshMask.set(currentColumn);
     
-    graph[currentVertex].columnMask = freshMask;
-    graph[currentVertex].row = currentRow;
+    stow->graph[currentVertex].columnMask = freshMask;
+    stow->graph[currentVertex].row = currentRow;
     QBrush currentBrush(forgroundBrushes.at(currentColumn % forgroundBrushes.size()));
     
-    auto *rectangle = graph[currentVertex].rectRaw;
+    auto rectangle = stow->graph[currentVertex].rectShared;
     rectangle->setRect(-rowPadding, 0.0, rowPadding, rowHeight); //calculate actual length later.
     rectangle->setTransform(QTransform::fromTranslate(0, rowHeight * currentRow));
     rectangle->setBackgroundBrush(backgroundBrushes[currentRow % backgroundBrushes.size()]);
     
-    auto *point = graph[currentVertex].pointRaw;
+    auto point = stow->graph[currentVertex].pointShared;
     point->setRect(0.0, 0.0, pointSize, pointSize);
     point->setTransform(QTransform::fromTranslate(pointSpacing * currentColumn,
       rowHeight * currentRow + rowHeight / 2.0 - pointSize / 2.0));
@@ -626,16 +619,16 @@ void Model::projectUpdatedDispatched(const msg::Message &)
     if (direction == -1)
       cheat = rowHeight;
     
-    auto *visiblePixmap = graph[currentVertex].visibleIconRaw;
+    auto visiblePixmap = stow->graph[currentVertex].visibleIconShared;
     visiblePixmap->setTransform(QTransform::fromTranslate(0.0, rowHeight * currentRow + cheat)); //calculate x location later.
     
-    auto *statePixmap = graph[currentVertex].stateIconRaw;
+    auto statePixmap = stow->graph[currentVertex].stateIconShared;
     statePixmap->setTransform(QTransform::fromTranslate(0.0, rowHeight * currentRow + cheat)); //calculate x location later.
     
-    auto *featurePixmap = graph[currentVertex].featureIconRaw;
+    auto featurePixmap = stow->graph[currentVertex].featureIconShared;
     featurePixmap->setTransform(QTransform::fromTranslate(0.0, rowHeight * currentRow + cheat)); //calculate x location later.
     
-    auto *text = graph[currentVertex].textRaw;
+    auto text = stow->graph[currentVertex].textShared;
     text->setDefaultTextColor(currentBrush.color());
     maxTextLength = std::max(maxTextLength, static_cast<float>(text->boundingRect().width()));
     text->setTransform(QTransform::fromTranslate
@@ -705,26 +698,26 @@ void Model::projectUpdatedDispatched(const msg::Message &)
   {
     float localCurrentX = columnSpacing;
     localCurrentX += pointToIcon;
-    auto *visiblePixmap = graph[vertex].visibleIconRaw;
+    auto visiblePixmap = stow->graph[vertex].visibleIconShared;
     QTransform visibleIconTransform = QTransform::fromTranslate(localCurrentX, 0.0);
     visiblePixmap->setTransform(visiblePixmap->transform() * visibleIconTransform);
     
     localCurrentX += iconSize + iconToIcon;
-    auto *statePixmap = graph[vertex].stateIconRaw;
+    auto statePixmap = stow->graph[vertex].stateIconShared;
     QTransform stateIconTransform = QTransform::fromTranslate(localCurrentX, 0.0);
     statePixmap->setTransform(statePixmap->transform() * stateIconTransform);
     
     localCurrentX += iconSize + iconToIcon;
-    auto *pixmap = graph[vertex].featureIconRaw;
+    auto pixmap = stow->graph[vertex].featureIconShared;
     QTransform iconTransform = QTransform::fromTranslate(localCurrentX, 0.0);
     pixmap->setTransform(pixmap->transform() * iconTransform);
     
     localCurrentX += iconSize + iconToText;
-    auto *text = graph[vertex].textRaw;
+    auto text = stow->graph[vertex].textShared;
     QTransform textTransform = QTransform::fromTranslate(localCurrentX, 0.0);
     text->setTransform(text->transform() * textTransform);
     
-    auto *rectangle = graph[vertex].rectRaw;
+    auto rectangle = stow->graph[vertex].rectShared;
     QRectF rect = rectangle->rect();
     rect.setWidth(localCurrentX + maxTextLength + 2.0 * rowPadding);
     rectangle->setRect(rect);
@@ -733,89 +726,63 @@ void Model::projectUpdatedDispatched(const msg::Message &)
 
 void Model::dumpDAGViewGraphDispatched(const msg::Message &)
 {
-  indexVerticesEdges();
   //something here to check preferences about writing this out.
   QString fileName = static_cast<app::Application *>(qApp)->getApplicationDirectory().path();
   fileName += QDir::separator();
   fileName += "dagView.dot";
-  outputGraphviz<Graph>(graph, fileName.toStdString());
+  stow->writeGraphViz(fileName.toStdString());
   
   QDesktopServices::openUrl(QUrl(fileName));
 }
 
 void Model::threeDShowDispatched(const msg::Message &msgIn)
 {
-  Vertex vertex = findRecord(vertexIdContainer, boost::get<vwr::Message>(msgIn.payload).featureId).vertex;
-  assert(!graph[vertex].feature.expired());
-  graph[vertex].visibleIconRaw->setPixmap(visiblePixmapEnabled);
+  Vertex vertex = stow->findVertex(boost::get<vwr::Message>(msgIn.payload).featureId);
+  if (vertex == NullVertex())
+    return;
+  stow->graph[vertex].visibleIconShared->setPixmap(visiblePixmapEnabled);
 }
 
 void Model::threeDHideDispatched(const msg::Message &msgIn)
 {
-  Vertex vertex = findRecord(vertexIdContainer, boost::get<vwr::Message>(msgIn.payload).featureId).vertex;
-  assert(!graph[vertex].feature.expired());
-  graph[vertex].visibleIconRaw->setPixmap(visiblePixmapDisabled);
+  Vertex vertex = stow->findVertex(boost::get<vwr::Message>(msgIn.payload).featureId);
+  if (vertex == NullVertex())
+    return;
+  stow->graph[vertex].visibleIconShared->setPixmap(visiblePixmapDisabled);
 }
 
 void Model::removeAllItems()
 {
-  BGL_FORALL_VERTICES(currentVertex, graph, Graph)
+  for (auto its = boost::vertices(stow->graph); its.first != its.second; ++its.first)
   {
-    removeVertexItemsFromScene(currentVertex);
+    if (!stow->graph[*its.first].alive)
+      continue;
+    removeItemsFromScene(stow->getAllSceneItems(*its.first));
   }
   
-  BGL_FORALL_EDGES(currentEdge, graph, Graph)
+  for (auto its = boost::edges(stow->graph); its.first != its.second; ++its.first)
   {
-    removeEdgeItemsFromScene(currentEdge);
+    if (stow->graph[*its.first].connector->scene())
+      this->removeItem(stow->graph[*its.first].connector.get());
   }
 }
 
-void Model::addVertexItemsToScene(Vertex vertexIn)
+void Model::addItemsToScene(std::vector<QGraphicsItem*> items)
 {
-  //check if already in scene.
-  if (!graph[vertexIn].rectRaw->scene())
-    this->addItem(graph[vertexIn].rectRaw);
-  if (!graph[vertexIn].pointRaw->scene())
-    this->addItem(graph[vertexIn].pointRaw);
-  if (!graph[vertexIn].visibleIconRaw->scene())
-    this->addItem(graph[vertexIn].visibleIconRaw);
-  if (!graph[vertexIn].stateIconRaw->scene())
-    this->addItem(graph[vertexIn].stateIconRaw);
-  if (!graph[vertexIn].featureIconRaw->scene())
-    this->addItem(graph[vertexIn].featureIconRaw);
-  if (!graph[vertexIn].textRaw->scene())
-    this->addItem(graph[vertexIn].textRaw);
+  for (auto *item : items)
+  {
+    if (!item->scene())
+      this->addItem(item);
+  }
 }
 
-void Model::removeVertexItemsFromScene(Vertex vertexIn)
+void Model::removeItemsFromScene(std::vector<QGraphicsItem*> items)
 {
-  //check if in scene.
-  if (graph[vertexIn].rectRaw->scene())
-    this->removeItem(graph[vertexIn].rectRaw);
-  if (graph[vertexIn].pointRaw->scene())
-    this->removeItem(graph[vertexIn].pointRaw);
-  if (graph[vertexIn].visibleIconRaw->scene())
-    this->removeItem(graph[vertexIn].visibleIconRaw);
-  if (graph[vertexIn].stateIconRaw->scene())
-    this->removeItem(graph[vertexIn].stateIconRaw);
-  if (graph[vertexIn].featureIconRaw->scene())
-    this->removeItem(graph[vertexIn].featureIconRaw);
-  if (graph[vertexIn].textRaw->scene())
-    this->removeItem(graph[vertexIn].textRaw);
-}
-
-void Model::addEdgeItemsToScene(Edge edgeIn)
-{
-  if (graph[edgeIn].connector->scene())
-    return;
-  this->addItem(graph[edgeIn].connector.get());
-}
-
-void Model::removeEdgeItemsFromScene(Edge edgeIn)
-{
-  if (!graph[edgeIn].connector->scene())
-    return;
-  this->removeItem(graph[edgeIn].connector.get());
+  for (auto *item : items)
+  {
+    if (item->scene())
+      this->removeItem(item);
+  }
 }
 
 RectItem* Model::getRectFromPosition(const QPointF& position)
@@ -832,13 +799,14 @@ void Model::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
   {
     if (!currentPrehighlight)
       return;
-    const VertexProperty& record = findRecord(graphLink, currentPrehighlight);
+    Vertex vertex = stow->findVertex(currentPrehighlight);
+    if (vertex == NullVertex())
+      return;
     
     msg::Message message(msg::Request | msg::Preselection | msg::Remove);
     slc::Message sMessage;
     sMessage.type = slc::Type::Object;
-    sMessage.featureId = record.featureId;
-    sMessage.featureType = record.feature.lock()->getType();
+    sMessage.featureId = stow->graph[vertex].featureId;
     sMessage.shapeId = gu::createNilId();
     message.payload = sMessage;
     observer->out(message);
@@ -846,13 +814,14 @@ void Model::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
   
   auto setPrehighlight = [this](RectItem *rectIn)
   {
-    const VertexProperty& record = findRecord(graphLink, rectIn);
+    Vertex vertex = stow->findVertex(rectIn);
+    if (vertex == NullVertex())
+      return;
     
     msg::Message message(msg::Request | msg::Preselection | msg::Add);
     slc::Message sMessage;
     sMessage.type = slc::Type::Object;
-    sMessage.featureId = record.featureId;
-    sMessage.featureType = record.feature.lock()->getType();
+    sMessage.featureId = stow->graph[vertex].featureId;
     sMessage.shapeId = gu::createNilId();
     message.payload = sMessage;
     observer->out(message);
@@ -872,14 +841,15 @@ void Model::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
 void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
-  auto select = [this](const uuid &featureIdIn, msg::Mask actionIn)
+  auto select = [this](const boost::uuids::uuid &featureIdIn, msg::Mask actionIn)
   {
     assert((actionIn == msg::Add) || (actionIn == msg::Remove));
+    if (featureIdIn.is_nil())
+      return;
     msg::Message message(msg::Request | msg::Selection | actionIn);
     slc::Message sMessage;
     sMessage.type = slc::Type::Object;
     sMessage.featureId = featureIdIn;
-    sMessage.featureType = findRecord(graphLink, featureIdIn).feature.lock()->getType();
     sMessage.shapeId = gu::createNilId();
     message.payload = sMessage;
     observer->out(message);
@@ -888,8 +858,10 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
   auto getFeatureIdFromRect = [this](RectItem *rectIn)
   {
     assert(rectIn);
-    const VertexProperty &selectionRecord = findRecord(graphLink, rectIn);
-    return selectionRecord.featureId;
+    Vertex vertex = stow->findVertex(rectIn);
+    if (vertex == NullVertex())
+      return gu::createNilId();
+    return stow->graph[vertex].featureId;
   };
   
   auto goShiftSelect = [this, event, select, getFeatureIdFromRect]()
@@ -901,7 +873,7 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
     {
       RectItem *rect = dynamic_cast<RectItem *>(*currentItem);
       if (!rect || rect->isSelected())
-	continue;
+        continue;
       select(getFeatureIdFromRect(rect), msg::Add);
     }
   };
@@ -928,12 +900,11 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
     {
       QGraphicsPixmapItem *currentPixmap = dynamic_cast<QGraphicsPixmapItem *>(theItems.front());
       assert(currentPixmap);
-      //this is kind of ugly. we are indexing the actual vertex PROPERTY. so we
-      //can't get the vertex without and extra search into vertex id container. ?????
-      Vertex vertex = findRecord(vertexIdContainer, findRecordByVisible(graphLink, currentPixmap).featureId).vertex;
+      
+      Vertex vertex = stow->findVisibleVertex(currentPixmap);
       msg::Message msg(msg::Request | msg::View | msg::Toggle | msg::ThreeD);
       vwr::Message vMsg;
-      vMsg.featureId = graph[vertex].feature.lock()->getId(); //temp during conversion.
+      vMsg.featureId = stow->graph[vertex].featureId; //temp during conversion.
       msg.payload = vMsg;
       observer->out(msg);
       
@@ -983,32 +954,20 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
 //   QGraphicsScene::mouseDoubleClickEvent(event);
 // }
 
-std::vector<Vertex> Model::getAllSelected()
-{
-  std::vector<Vertex> out;
-  
-  BGL_FORALL_VERTICES(currentVertex, graph, Graph)
-  {
-    if (graph[currentVertex].rectRaw->isSelected())
-      out.push_back(currentVertex);
-  }
-  
-  return out;
-}
-
 void Model::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 {
   RectItem *rect = getRectFromPosition(event->scenePos());
   if (rect)
   {
-    const VertexProperty &record = findRecord(graphLink, rect);
+    Vertex vertex = stow->findVertex(rect);
+    if (vertex == NullVertex())
+      return;
     if (!rect->isSelected())
     {
       msg::Message message(msg::Request | msg::Selection | msg::Add);
       slc::Message sMessage;
       sMessage.type = slc::Type::Object;
-      sMessage.featureId = record.featureId;
-      sMessage.featureType = record.feature.lock()->getType();
+      sMessage.featureId = stow->graph[vertex].featureId;
       message.payload = sMessage;
       observer->out(message);
     }
@@ -1055,7 +1014,7 @@ void Model::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     QAction* removeFeatureAction = contextMenu.addAction(removeIcon, tr("Remove Feature"));
     connect(removeFeatureAction, SIGNAL(triggered()), this, SLOT(removeFeatureSlot()));
     
-    std::vector<Vertex> selected = getAllSelected();
+    std::vector<Vertex> selected = stow->getAllSelected();
     
     //disable actions that work for only 1 feature at a time.
     if (selected.size() != 1)
@@ -1069,7 +1028,7 @@ void Model::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     bool showCheckGeometry = true;
     for (const auto &v : selected)
     {
-      if (!graph[v].feature.lock()->hasSeerShape())
+      if (!stow->graph[v].hasSeerShape)
       {
         showCheckGeometry = false;
         break;
@@ -1086,11 +1045,11 @@ void Model::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 
 void Model::setCurrentLeafSlot()
 {
-  auto currentSelections = getAllSelected();
+  auto currentSelections = stow->getAllSelected();
   assert(currentSelections.size() == 1);
   
   prj::Message prjMessageOut;
-  prjMessageOut.featureId = graph[currentSelections.front()].featureId;
+  prjMessageOut.featureId = stow->graph[currentSelections.front()].featureId;
   msg::Message messageOut(msg::Request | msg::SetCurrentLeaf);
   messageOut.payload = prjMessageOut;
   observer->out(messageOut);
@@ -1107,7 +1066,7 @@ void Model::removeFeatureSlot()
 
 void Model::toggleOverlaySlot()
 {
-  auto currentSelections = getAllSelected();
+  auto currentSelections = stow->getAllSelected();
   
   msg::Message message(msg::Request | msg::Selection | msg::Clear);
   observer->out(message);
@@ -1116,7 +1075,7 @@ void Model::toggleOverlaySlot()
   {
     msg::Message mOut(msg::Request | msg::View | msg::Toggle | msg::Overlay);
     vwr::Message vMsg;
-    vMsg.featureId = graph[v].feature.lock()->getId();
+    vMsg.featureId = stow->graph[v].featureId;
     mOut.payload = vMsg;
     observer->out(mOut);
   }
@@ -1135,11 +1094,11 @@ void Model::editColorSlot()
 void Model::editRenameSlot()
 {
   assert(proxy == nullptr);
-  std::vector<Vertex> selections = getAllSelected();
+  std::vector<Vertex> selections = stow->getAllSelected();
   assert(selections.size() == 1);
   
   LineEdit *lineEdit = new LineEdit();
-  auto *text = graph[selections.front()].textRaw;
+  auto text = stow->graph[selections.front()].textShared;
   lineEdit->setText(text->toPlainText());
   connect(lineEdit, SIGNAL(acceptedSignal()), this, SLOT(renameAcceptedSlot()));
   connect(lineEdit, SIGNAL(rejectedSignal()), this, SLOT(renameRejectedSlot()));
@@ -1173,7 +1132,7 @@ void Model::renameAcceptedSlot()
 {
   assert(proxy);
   
-  std::vector<Vertex> selections = getAllSelected();
+  std::vector<Vertex> selections = stow->getAllSelected();
   assert(selections.size() == 1);
   
   LineEdit *lineEdit = dynamic_cast<LineEdit*>(proxy->widget());
@@ -1181,21 +1140,9 @@ void Model::renameAcceptedSlot()
   QString freshName = lineEdit->text();
   if (!freshName.isEmpty())
   {
-    std::shared_ptr<ftr::Base> feature = graph[selections.front()].feature.lock();
-    QString oldName = feature->getName();
-    feature->setName(freshName);
-    
-    //setting the name doesn't make the feature dirty and thus doesn't
-    //serialize it. Here we force a serialization so rename is in sync
-    //with git, but doesn't trigger an unneeded update.
-    feature->serialWrite(QDir(QString::fromStdString
-      (static_cast<app::Application*>(qApp)->getProject()->getSaveDirectory())));
-    
-    std::ostringstream gitStream;
-    gitStream << "Rename feature id: " << gu::idToString(feature->getId())
-    << "    From: " << oldName.toStdString()
-    << "    To: " << freshName.toStdString();
-    observer->out(msg::buildGitMessage(gitStream.str()));
+    ftr::Message fm(stow->graph[selections.front()].featureId, freshName);
+    msg::Message m(msg::Request | msg::Edit | msg::Feature | msg::Name, fm);
+    observer->out(m); //don't block rename makes it back here.
   }
   
   finishRename();

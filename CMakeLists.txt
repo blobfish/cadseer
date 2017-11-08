@@ -478,7 +478,7 @@ SET(CADSEER_SOURCES
     main.cpp
     dagview/view.cpp
     dagview/model.cpp
-    dagview/modelgraph.cpp
+    dagview/stow.cpp
     dagview/rectitem.cpp
     globalutilities.cpp
     ${MODELVIZ_SOURCES}

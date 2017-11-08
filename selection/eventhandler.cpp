@@ -589,6 +589,8 @@ Container EventHandler::messageToContainer(const Message &messageIn)
   container.featureType = messageIn.featureType;
   container.shapeId = messageIn.shapeId;
   container.pointLocation = messageIn.pointLocation;
+  if (container.featureType == ftr::Type::Base)
+    container.featureType = feature->getType();
   
   if (feature->hasSeerShape() && !feature->getSeerShape().isNull())
   {

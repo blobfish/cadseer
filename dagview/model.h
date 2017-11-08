@@ -28,17 +28,9 @@
 #include <QBrush>
 #include <QLineEdit>
 
-#ifndef Q_MOC_RUN
-#include <boost/uuid/uuid.hpp>
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/member.hpp>
-#include <boost/multi_index/ordered_index.hpp>
-#include <boost/multi_index/composite_key.hpp>
-
-#include <dagview/modelgraph.h>
-#endif
-
 // #include "DAGFilter.h"
+
+namespace boost{namespace uuids{class uuid;}}
 
 class QGraphicsProxyWidget;
 class QFocusEvent;
@@ -59,6 +51,11 @@ namespace dag
     virtual void keyPressEvent(QKeyEvent*) override;
     virtual void focusOutEvent(QFocusEvent*) override;
   };
+  
+  class Stow;
+  class RectItem;
+  // kind of a hack to keep graph definition out
+  typedef unsigned long Vertex;
   
   class Model : public QGraphicsScene
   {
@@ -87,7 +84,6 @@ namespace dag
     void checkGeometrySlot();
     
   private:
-    void indexVerticesEdges();
     std::unique_ptr<msg::Observer> observer;
     void setupDispatcher();
     void featureAddedDispatched(const msg::Message &);
@@ -107,16 +103,12 @@ namespace dag
     void threeDShowDispatched(const msg::Message &);
     void threeDHideDispatched(const msg::Message &);
     
-    Graph graph;
-    GraphLinkContainer graphLink;
-    VertexIdContainer vertexIdContainer;
+    std::unique_ptr<Stow> stow;
     
     void removeAllItems();
-    void addVertexItemsToScene(Vertex);
-    void addEdgeItemsToScene(Edge);
-    void removeVertexItemsFromScene(Vertex);
-    void removeEdgeItemsFromScene(Edge);
     void stateUpdate(Vertex);
+    void addItemsToScene(std::vector<QGraphicsItem*>);
+    void removeItemsFromScene(std::vector<QGraphicsItem*>);
 //     
     RectItem* getRectFromPosition(const QPointF &position); //!< can be nullptr
 //     
@@ -140,7 +132,6 @@ namespace dag
   //@}
     
     RectItem *currentPrehighlight;
-    std::vector<Vertex> getAllSelected();
 
     QPointF lastPick;
     bool lastPickValid = false;

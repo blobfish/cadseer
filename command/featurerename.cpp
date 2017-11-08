@@ -32,7 +32,7 @@ using namespace cmd;
 
 using boost::uuids::uuid;
 
-FeatureRename::FeatureRename() : Base()
+FeatureRename::FeatureRename() : Base(), id(gu::createNilId()), name()
 {
   setupDispatcher();
   observer->name = "cmd::FeatureRename";
@@ -56,56 +56,79 @@ void FeatureRename::deactivate()
   isActive = false;
 }
 
-void FeatureRename::go()
+class FtrMessageVisitor : public boost::static_visitor<ftr::Message>
 {
-  const slc::Containers &containers = eventHandler->getSelections();
-  
-  //only works on the first selected object.
-  uuid featureId = gu::createNilId();
-  for (const auto &container : containers)
+public:
+  ftr::Message operator()(const prj::Message&) const {return ftr::Message();}
+  ftr::Message operator()(const slc::Message&) const {return ftr::Message();}
+  ftr::Message operator()(const app::Message&) const {return ftr::Message();}
+  ftr::Message operator()(const vwr::Message&) const {return ftr::Message();}
+  ftr::Message operator()(const ftr::Message &mIn) const {return mIn;}
+};
+void FeatureRename::setFromMessage(const msg::Message &mIn)
+{
+  ftr::Message fm = boost::apply_visitor(FtrMessageVisitor(), mIn.payload);
+  id = fm.featureId;
+  name = fm.string;
+}
+
+void FeatureRename::go() //re-enters from dispatch.
+{
+  if (id.is_nil()) //try to get feature id from selection.
   {
-    if (container.selectionType != slc::Type::Object)
-      continue;
-    featureId = container.featureId;
-    break;
+    const slc::Containers &containers = eventHandler->getSelections();
+    for (const auto &container : containers)
+    {
+      if (container.selectionType != slc::Type::Object)
+        continue;
+      id = container.featureId;
+      break; //only works on the first selected object.
+    }
   }
   
-  if (!featureId.is_nil())
+  if (!id.is_nil())
   {
-    ftr::Base *feature = project->findFeature(featureId);
-    QString oldName = feature->getName();
-    
-    bool result;
-    QString freshName = QInputDialog::getText
-    (
-      application->getMainWindow(),
-     QString("Rename Feature"),
-     QString("Rename Feature"),
-     QLineEdit::Normal,
-     oldName,
-     &result
-    );
-    
-    if (result && !freshName.isEmpty())
+    if(name.isEmpty())
     {
-      feature->setName(freshName);
+      ftr::Base *feature = project->findFeature(id);
+      QString oldName = feature->getName();
       
-      //setting the name doesn't make the feature dirty and thus doesn't
-      //serialize it. Here we force a serialization so rename is in sync
-      //with git, but doesn't trigger an unneeded update.
-      feature->serialWrite(QDir(QString::fromStdString(project->getSaveDirectory())));
-      
-      std::ostringstream gitStream;
-      gitStream << "Rename feature id: " << gu::idToString(feature->getId())
-      << "    From: " << oldName.toStdString()
-      << "    To: " << freshName.toStdString();
-      observer->out(msg::buildGitMessage(gitStream.str()));
+      name = QInputDialog::getText
+      (
+        application->getMainWindow(),
+        QString("Rename Feature"),
+        QString("Rename Feature"),
+        QLineEdit::Normal,
+        oldName
+      );
     }
+    
+    if (!name.isEmpty())
+      goRename();
     
     sendDone();
   }
   else
     observer->out(msg::buildSelectionMask(slc::ObjectsEnabled | slc::ObjectsSelectable));
+}
+
+void FeatureRename::goRename()
+{
+  ftr::Base *feature = project->findFeature(id);
+  assert(feature);
+  QString oldName = feature->getName();
+  feature->setName(name);
+      
+  //setting the name doesn't make the feature dirty and thus doesn't
+  //serialize it. Here we force a serialization so rename is in sync
+  //with git, but doesn't trigger an unneeded update.
+  feature->serialWrite(QDir(QString::fromStdString(project->getSaveDirectory())));
+  
+  std::ostringstream gitStream;
+  gitStream << "Rename feature id: " << gu::idToString(feature->getId())
+  << "    From: " << oldName.toStdString()
+  << "    To: " << name.toStdString();
+  observer->out(msg::buildGitMessage(gitStream.str()));
 }
 
 void FeatureRename::setupDispatcher()

@@ -35,10 +35,15 @@ namespace cmd
     virtual void activate() override;
     virtual void deactivate() override;
     
+    void setFromMessage(const msg::Message&);
+    boost::uuids::uuid id;
+    QString name;
+    
   private:
     void setupDispatcher();
     void selectionAdditionDispatched(const msg::Message&);
     void go();
+    void goRename();
   };
 }
 #endif // CMD_FEATURERENAME_H

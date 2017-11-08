@@ -24,20 +24,12 @@
 #include <bitset>
 
 #include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/reverse_graph.hpp>
-#include <boost/graph/topological_sort.hpp>
 #include <boost/graph/graphviz.hpp>
-#include <boost/graph/breadth_first_search.hpp>
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/member.hpp>
-#include <boost/multi_index/ordered_index.hpp>
+#include <boost/graph/reverse_graph.hpp>
+#include <boost/uuid/uuid.hpp>
 
-#include <tools/idtools.h>
-#include <feature/base.h>
 #include <feature/inputtype.h>
 #include <dagview/rectitem.h>
-
-using boost::uuids::uuid;
 
 namespace dag
 {
@@ -65,43 +57,23 @@ namespace dag
   struct VertexProperty
   {
     VertexProperty();
-    std::weak_ptr<ftr::Base> feature;
-    uuid featureId;  //? possibly for multi_index.
+    boost::uuids::uuid featureId;  //? possibly for multi_index.
     ColumnMask columnMask; //!< column number containing the point.
     std::size_t row;
     std::size_t sortedIndex; //for index into toposorted list.
-    bool dagVisible; //!< should entry be visible in the DAG view.
     ftr::State state;
+    bool dagVisible; //!< should entry be visible in the DAG view.
+    bool alive;
+    bool hasSeerShape; //!< to show check geometry context menu entry.
     
-    //keeping raw pointer for indexing.
     std::shared_ptr<RectItem> rectShared;
-    RectItem *rectRaw;
     std::shared_ptr<QGraphicsEllipseItem> pointShared;
-    QGraphicsEllipseItem *pointRaw;
     std::shared_ptr<QGraphicsPixmapItem> visibleIconShared;
-    QGraphicsPixmapItem *visibleIconRaw;
     std::shared_ptr<QGraphicsPixmapItem> stateIconShared;
-    QGraphicsPixmapItem *stateIconRaw;
     std::shared_ptr<QGraphicsPixmapItem> featureIconShared;
-    QGraphicsPixmapItem *featureIconRaw;
     std::shared_ptr<QGraphicsTextItem> textShared;
-    QGraphicsTextItem *textRaw;
-    
-    
-    //@{
-    //! used as tags. All indexes on raw pointers
-    struct ByFeatureId{};
-    struct ByRect{}; 
-    struct ByPoint{}; 
-    struct ByVisibleIcon{};
-    struct ByStateIcon{};
-    struct ByFeatureIcon{};
-    struct ByText{};
-    //@}
-    
   };
-  /*! @brief needed to create an internal index for vertex. needed for listS.*/
-  typedef boost::property<boost::vertex_index_t, std::size_t, VertexProperty> vertex_prop;
+
   
   /*! @brief Graph edge information
   *
@@ -113,10 +85,8 @@ namespace dag
     std::shared_ptr <QGraphicsPathItem> connector; //!< line representing link between nodes.
     ftr::InputType inputType;
   };
-  /*! @brief needed to create an internal index for graph edges. needed for setS. Not needed upon implementation*/
-  typedef boost::property<boost::edge_index_t, std::size_t, EdgeProperty> edge_prop;
   
-  typedef boost::adjacency_list<boost::setS, boost::listS, boost::bidirectionalS, vertex_prop, edge_prop> Graph;
+  typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS, VertexProperty, EdgeProperty> Graph;
   typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
   typedef boost::graph_traits<Graph>::edge_descriptor Edge;
   typedef boost::graph_traits<Graph>::vertex_iterator VertexIterator;
@@ -126,6 +96,7 @@ namespace dag
   typedef boost::graph_traits<Graph>::adjacency_iterator VertexAdjacencyIterator;
   typedef boost::reverse_graph<Graph, Graph&> GraphReversed;
   typedef std::vector<Vertex> Path; //!< a path or any array of vertices
+  inline Vertex NullVertex(){return boost::graph_traits<Graph>::null_vertex();}
   
   template <class GraphEW>
   class Edge_writer {
@@ -142,7 +113,7 @@ namespace dag
   private:
     const GraphEW &graphEW;
   };
-  
+
   template <class GraphVW>
   class Vertex_writer {
   public:
@@ -152,13 +123,14 @@ namespace dag
     {
       out <<
         "[label=\"" <<
-        graphVW[vertexW].textRaw->toPlainText().toUtf8().data() << "\\n" <<
-        gu::idToString(graphVW[vertexW].feature.lock()->getId()) <<
+        graphVW[vertexW].textShared->toPlainText().toUtf8().data() << "\\n" <<
+        gu::idToString(graphVW[vertexW].featureId) <<
         "\"]";
     }
   private:
     const GraphVW &graphVW;
   };
+
   
   template <class GraphIn>
   void outputGraphviz(const GraphIn &graphIn, const std::string &filePath)
@@ -167,6 +139,26 @@ namespace dag
     boost::write_graphviz(file, graphIn, Vertex_writer<GraphIn>(graphIn),
                           Edge_writer<GraphIn>(graphIn));
   }
+  
+  class Stow
+  {
+  public:
+    Stow();
+    ~Stow();
+    
+    void writeGraphViz(const std::string &fileName){outputGraphviz<Graph>(graph, fileName);}
+    Vertex findVertex(const boost::uuids::uuid&);
+    Vertex findVertex(const RectItem*);
+    Vertex findVisibleVertex(const QGraphicsPixmapItem*);
+    
+    std::vector<Vertex> getAllSelected();
+    std::vector<QGraphicsItem*> getAllSceneItems(Vertex);
+    
+    Graph graph;
+  };
+  
+  
+  
 //   
 //   //! get all the leaves of the templated graph. Not used right now.
 //   template <class GraphIn>
@@ -207,120 +199,6 @@ namespace dag
 //   private:
 //     std::vector<Vertex> &vertices;
 //   };
-  
-  namespace BMI = boost::multi_index;
-  typedef boost::multi_index_container
-  <
-    VertexProperty,
-    BMI::indexed_by
-    <
-      BMI::ordered_unique
-      <
-        BMI::tag<VertexProperty::ByFeatureId>,
-        BMI::member<VertexProperty, uuid, &VertexProperty::featureId>
-      >,
-      BMI::ordered_unique
-      <
-        BMI::tag<VertexProperty::ByRect>,
-        BMI::member<VertexProperty, RectItem *, &VertexProperty::rectRaw>
-      >,
-      BMI::ordered_unique
-      <
-        BMI::tag<VertexProperty::ByPoint>,
-        BMI::member<VertexProperty, QGraphicsEllipseItem*, &VertexProperty::pointRaw>
-      >,
-      BMI::ordered_unique
-      <
-        BMI::tag<VertexProperty::ByVisibleIcon>,
-        BMI::member<VertexProperty, QGraphicsPixmapItem*, &VertexProperty::visibleIconRaw>
-      >,
-      BMI::ordered_unique
-      <
-        BMI::tag<VertexProperty::ByStateIcon>,
-        BMI::member<VertexProperty, QGraphicsPixmapItem*, &VertexProperty::stateIconRaw>
-      >,
-      BMI::ordered_unique
-      <
-        BMI::tag<VertexProperty::ByFeatureIcon>,
-        BMI::member<VertexProperty, QGraphicsPixmapItem*, &VertexProperty::featureIconRaw>
-      >,
-      BMI::ordered_unique
-      <
-        BMI::tag<VertexProperty::ByText>,
-        BMI::member<VertexProperty, QGraphicsTextItem*, &VertexProperty::textRaw>
-      >
-    >
-  > GraphLinkContainer;
-  
-  const VertexProperty& findRecordByVisible(const GraphLinkContainer &containerIn, QGraphicsPixmapItem *itemIn);
-  const VertexProperty& findRecord(const GraphLinkContainer &containerIn, const uuid &idIn);
-  void eraseRecord(GraphLinkContainer &containerIn, const uuid &idIn);
-  const VertexProperty& findRecord(const GraphLinkContainer &containerIn, RectItem* rectIn);
-  void clear(GraphLinkContainer &containerIn);
-  
-  struct VertexIdRecord
-  {
-    uuid featureId;
-    Vertex vertex;
-    
-    //@{
-    //! used as tags. All indexes on raw pointers
-    struct ByFeatureId{};
-    struct ByVertex{};
-    //@}
-  };
-  
-  typedef boost::multi_index_container
-  <
-    VertexIdRecord,
-    BMI::indexed_by
-    <
-      BMI::ordered_unique
-      <
-        BMI::tag<VertexIdRecord::ByFeatureId>,
-        BMI::member<VertexIdRecord, uuid, &VertexIdRecord::featureId>
-      >,
-      BMI::ordered_unique
-      <
-        BMI::tag<VertexIdRecord::ByVertex>,
-        BMI::member<VertexIdRecord, Vertex, &VertexIdRecord::vertex>
-      >
-    >
-  > VertexIdContainer;
-  
-  inline const VertexIdRecord& findRecord(const VertexIdContainer &containerIn, const uuid &featureIdIn)
-  {
-    typedef VertexIdContainer::index<VertexIdRecord::ByFeatureId>::type List;
-    const List &list = containerIn.get<VertexIdRecord::ByFeatureId>();
-    List::const_iterator it = list.find(featureIdIn);
-    assert(it != list.end());
-    return *it;
-  }
-  
-  inline const VertexIdRecord& findRecord(const VertexIdContainer &containerIn, const Vertex &featureIdIn)
-  {
-    typedef VertexIdContainer::index<VertexIdRecord::ByVertex>::type List;
-    const List &list = containerIn.get<VertexIdRecord::ByVertex>();
-    List::const_iterator it = list.find(featureIdIn);
-    assert(it != list.end());
-    return *it;
-  }
-  
-  inline void eraseRecord(VertexIdContainer &containerIn, const uuid &featureIdIn)
-  {
-    typedef VertexIdContainer::index<VertexIdRecord::ByFeatureId>::type List;
-    List &list = containerIn.get<VertexIdRecord::ByFeatureId>();
-    List::const_iterator it = list.find(featureIdIn);
-    assert(it != list.end());
-    list.erase(it);
-  }
-  
-  inline void clear(VertexIdContainer &containerIn)
-  {
-    typedef VertexIdContainer::index<VertexIdRecord::ByFeatureId>::type List;
-    List &list = containerIn.get<VertexIdRecord::ByFeatureId>();
-    list.clear();
-  }
 }
 
 #endif // DAG_MODELGRAPH_H
