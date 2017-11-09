@@ -926,7 +926,7 @@ void Factory::removeDispatched(const msg::Message&)
     if (current.selectionType != slc::Type::Object)
       continue;
     msg::Message removeMessage;
-    removeMessage.mask = msg::Request  | msg::Remove | msg::Feature;
+    removeMessage.mask = msg::Request | msg::Remove | msg::Feature;
     prj::Message payload;
     payload.featureId = current.featureId;
     removeMessage.payload = payload;
