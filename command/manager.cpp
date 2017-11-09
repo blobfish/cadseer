@@ -43,6 +43,7 @@
 #include <command/dieset.h>
 #include <command/quote.h>
 #include <command/isolate.h>
+#include <command/measurelinear.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <selection/message.h>
@@ -145,6 +146,9 @@ void Manager::setupDispatcher()
   
   mask = msg::Request | msg::View | msg::ThreeD | msg::Overlay | msg::Isolate;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::viewIsolateDispatched, this, _1)));
+  
+  mask = msg::Request | msg::LinearMeasure;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::measureLinearDispatched, this, _1)));
 }
 
 void Manager::cancelCommandDispatched(const msg::Message &)
@@ -335,6 +339,12 @@ void Manager::featureRepositionDispatched(const msg::Message&)
 {
   std::shared_ptr<FeatureReposition> fr(new FeatureReposition());
   addCommand(fr);
+}
+
+void Manager::measureLinearDispatched(const msg::Message&)
+{
+  std::shared_ptr<MeasureLinear> ml(new MeasureLinear());
+  addCommand(ml);
 }
 
 void Manager::editFeatureDispatched(const msg::Message&)

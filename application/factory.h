@@ -71,7 +71,6 @@ namespace app
     void debugShapeGraphDispatched(const msg::Message&);
     void debugShapeTrackDownDispatched(const msg::Message&);
     void viewInfoDispatched(const msg::Message&);
-    void linearMeasureDispatched(const msg::Message&);
     
     void messageStressTestDispatched(const msg::Message&); //testing
     void osgToDotTestDispatched(const msg::Message&); //testing

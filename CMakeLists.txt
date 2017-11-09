@@ -440,6 +440,7 @@ SET(COMMAND_SOURCES
     command/dieset.cpp
     command/quote.cpp
     command/isolate.cpp
+    command/measurelinear.cpp
     )
     
 SET(LIBRARY_SOURCES

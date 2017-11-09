@@ -59,6 +59,7 @@ std::string Isolate::getStatusMessage()
 
 void Isolate::activate()
 {
+  isActive = true;
   go();
 }
 

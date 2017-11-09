@@ -172,9 +172,6 @@ void Factory::setupDispatcher()
   mask = msg::Request | msg::Info;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::viewInfoDispatched, this, _1)));
   
-  mask = msg::Request | msg::LinearMeasure;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::linearMeasureDispatched, this, _1)));
-  
   mask = msg::Request | msg::Construct | msg::Hollow;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newHollowDispatched, this, _1)));
   
@@ -1124,107 +1121,6 @@ void Factory::viewInfoDispatched(const msg::Message &)
     appMessage.infoMessage = infoMessage;
     viewInfoMessage.payload = appMessage;
     observer->out(viewInfoMessage);
-}
-
-void Factory::linearMeasureDispatched(const msg::Message&)
-{
-    std::ostringstream debug;
-    debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
-    msg::dispatch().dumpString(debug.str());
-    
-    assert(project);
-    if (containers.size() != 2)
-        return;
-    
-    osg::Vec3d point1(0.0, 0.0, 0.0);
-    osg::Vec3d point2(10.0, 10.0, 10.0);
-    
-    if
-    (
-        (slc::isPointType(containers.front().selectionType)) &&
-        (slc::isPointType(containers.back().selectionType))
-    )
-    {
-        //can't remember, do we need to get occt involved to precision location?
-        point1 = containers.front().pointLocation;
-        point2 = containers.back().pointLocation;
-    }
-    else
-        return; //for now.
-    
-    observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
-    
-    double distance = (point2 - point1).length();
-    
-    QString infoMessage;
-    QTextStream stream(&infoMessage);
-    stream << endl;
-    forcepoint(stream)
-        << qSetRealNumberPrecision(12)
-        << "Point1 location: ["
-        << point1.x() << ", "
-        << point1.y() << ", "
-        << point1.z() << "]"
-        << endl
-        << "Point2 location: ["
-        << point2.x() << ", "
-        << point2.y() << ", "
-        << point2.z() << "]"
-        << endl
-        <<"Length: "
-        << distance
-        <<endl;
-    msg::Message viewInfoMessage(msg::Request | msg::Info | msg::Text);
-    app::Message appMessage;
-    appMessage.infoMessage = infoMessage;
-    viewInfoMessage.payload = appMessage;
-    observer->out(viewInfoMessage);
-    
-    if (distance < std::numeric_limits<float>::epsilon())
-        return;
-    
-    //get the view matrix for orientation.
-    osg::Matrixd viewMatrix = static_cast<app::Application*>(qApp)->
-        getMainWindow()->getViewer()->getViewSystem();
-    osg::Vec3d yVector = point2 - point1; yVector.normalize();
-    osg::Vec3d zVectorView = gu::getZVector(viewMatrix); zVectorView.normalize();
-    osg::Vec3d xVector = zVectorView ^ yVector;
-    if (xVector.isNaN())
-    {
-        observer->out(msg::buildStatusMessage(
-          QObject::tr("Can't make dimension with current view direction").toStdString()));
-        return;
-    }
-    xVector.normalize();
-    //got to be an easier way!
-    osg::Vec3d zVector  = xVector ^ yVector;
-    zVector.normalize();
-    osg::Matrixd transform
-    (
-        xVector.x(), xVector.y(), xVector.z(), 0.0,
-        yVector.x(), yVector.y(), yVector.z(), 0.0,
-        zVector.x(), zVector.y(), zVector.z(), 0.0,
-        0.0, 0.0, 0.0, 1.0
-    );
-    
-    //probably should be somewhere else.
-    osg::ref_ptr<osg::AutoTransform> autoTransform = new osg::AutoTransform();
-    autoTransform->setPosition(point1);
-    autoTransform->setAutoRotateMode(osg::AutoTransform::ROTATE_TO_AXIS);
-    autoTransform->setAxis(yVector);
-    autoTransform->setNormal(-zVector);
-    
-    osg::ref_ptr<lbr::LinearDimension> dim = new lbr::LinearDimension();
-    dim->setMatrix(transform);
-    dim->setColor(osg::Vec4d(0.8, 0.0, 0.0, 1.0));
-    dim->setSpread((point2 - point1).length());
-    autoTransform->addChild(dim.get());
-    
-    msg::Message message(msg::Request | msg::Add | msg::Overlay);
-    vwr::Message vwrMessage;
-    vwrMessage.node = autoTransform;
-    message.payload = vwrMessage;
-    observer->out(message);
 }
 
 //! a testing function to analyze run time cost of messages.
