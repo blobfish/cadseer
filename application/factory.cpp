@@ -175,9 +175,6 @@ void Factory::setupDispatcher()
   mask = msg::Request | msg::LinearMeasure;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::linearMeasureDispatched, this, _1)));
   
-  mask = msg::Request | msg::View | msg::Isolate;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::viewIsolateDispatched, this, _1)));
-  
   mask = msg::Request | msg::Construct | msg::Hollow;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newHollowDispatched, this, _1)));
   
@@ -1228,44 +1225,6 @@ void Factory::linearMeasureDispatched(const msg::Message&)
     vwrMessage.node = autoTransform;
     message.payload = vwrMessage;
     observer->out(message);
-}
-
-void Factory::viewIsolateDispatched(const msg::Message&)
-{
-  std::ostringstream debug;
-  debug << "inside: " << __PRETTY_FUNCTION__ << std::endl;
-  msg::dispatch().dumpString(debug.str());
-  
-  assert(project);
-  if (containers.empty())
-    return;
-  
-  std::set<uuid> selectedFeatures;
-  for (const auto &container: containers)
-    selectedFeatures.insert(container.featureId);
-  
-  for (const auto &id : project->getAllFeatureIds())
-  {
-    if (project->isFeatureNonLeaf(id)) //ignore non-leaf features.
-      continue;
-    vwr::Message vMsg;
-    vMsg.featureId = id;
-    msg::Message mOut;
-    mOut.payload = vMsg;
-    if (selectedFeatures.count(id) == 0)
-    {
-      observer->outBlocked(msg::buildHideThreeD(id));
-      observer->outBlocked(msg::buildHideOverlay(id));
-    }
-    else
-    {
-      observer->outBlocked(msg::buildShowThreeD(id));
-      observer->outBlocked(msg::buildShowOverlay(id));
-    }
-  }
-  
-  observer->out(msg::Message(msg::Request | msg::View | msg::Fit));
-  observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
 }
 
 //! a testing function to analyze run time cost of messages.

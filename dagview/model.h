@@ -67,7 +67,7 @@ namespace dag
   protected:
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     virtual void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
-//     virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
+    virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
     virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
     
   private Q_SLOTS:
@@ -102,6 +102,8 @@ namespace dag
     void dumpDAGViewGraphDispatched(const msg::Message &);
     void threeDShowDispatched(const msg::Message &);
     void threeDHideDispatched(const msg::Message &);
+    void overlayShowDispatched(const msg::Message &);
+    void overlayHideDispatched(const msg::Message &);
     
     std::unique_ptr<Stow> stow;
     
@@ -138,6 +140,8 @@ namespace dag
     
     QPixmap visiblePixmapEnabled;
     QPixmap visiblePixmapDisabled;
+    QPixmap overlayPixmapEnabled;
+    QPixmap overlayPixmapDisabled;
     QPixmap passPixmap;
     QPixmap failPixmap;
     QPixmap pendingPixmap;

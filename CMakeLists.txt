@@ -439,6 +439,7 @@ SET(COMMAND_SOURCES
     command/nest.cpp
     command/dieset.cpp
     command/quote.cpp
+    command/isolate.cpp
     )
     
 SET(LIBRARY_SOURCES

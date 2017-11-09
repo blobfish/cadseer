@@ -1,6 +1,6 @@
 /*
  * CadSeer. Parametric Solid Modeling.
- * Copyright (C) 2015  Thomas S. Anderson blobfish.at.gmx.com
+ * Copyright (C) 2017  Thomas S. Anderson blobfish.at.gmx.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,22 +17,32 @@
  *
  */
 
-#include <dagview/view.h>
+#ifndef CMD_ISOLATE_H
+#define CMD_ISOLATE_H
 
-using namespace dag;
+#include <command/base.h>
 
-View::View(QWidget* parentIn): QGraphicsView(parentIn)
+namespace cmd
 {
-  this->setRenderHint(QPainter::Antialiasing, true);
-  this->setRenderHint(QPainter::TextAntialiasing, true);
-  
-  //AlignTop = top to bottom view. This will be set from preferences
-  //as will the direction member of model.
-  this->setAlignment(Qt::AlignTop); 
+  class Isolate : public Base
+  {
+  public:
+    Isolate();
+    virtual ~Isolate() override;
+    
+    virtual std::string getCommandName() override{return "Isolate";}
+    virtual std::string getStatusMessage() override;
+    virtual void activate() override;
+    virtual void deactivate() override;
+    
+    void setFromMessage(const msg::Message&);
+    boost::uuids::uuid id;
+    msg::Mask mask;
+  private:
+    void setupDispatcher();
+    void selectionAdditionDispatched(const msg::Message&);
+    void go();
+  };
 }
 
-View::~View()
-{
-}
-
-// #include "dagview/moc_dagview.cxx"
+#endif // CMD_ISOLATE_H

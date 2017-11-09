@@ -475,7 +475,7 @@ void GestureHandler::constructMenu()
     
     osg::MatrixTransform *viewIsolate = gsn::buildCommandNode(":/resources/images/viewIsolate.svg", iconRadius);
     viewIsolate->setMatrix(dummy);
-    viewIsolate->setUserValue(attributeMask, (msg::Request | msg::View | msg::Isolate).to_string());
+    viewIsolate->setUserValue(attributeMask, (msg::Request | msg::View | msg::ThreeD | msg::Overlay | msg::Isolate).to_string());
     viewIsolate->setUserValue(attributeStatus, QObject::tr("View Only Selected").toStdString());
     viewBase->insertChild(viewBase->getNumChildren() - 2, viewIsolate);
     

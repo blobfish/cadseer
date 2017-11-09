@@ -42,6 +42,7 @@
 #include <command/nest.h>
 #include <command/dieset.h>
 #include <command/quote.h>
+#include <command/isolate.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <selection/message.h>
@@ -135,6 +136,15 @@ void Manager::setupDispatcher()
   
   mask = msg::Request | msg::Edit | msg::Feature;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::editFeatureDispatched, this, _1)));
+  
+  mask = msg::Request | msg::View | msg::ThreeD | msg::Isolate;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::viewIsolateDispatched, this, _1)));
+  
+  mask = msg::Request | msg::View | msg::Overlay | msg::Isolate;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::viewIsolateDispatched, this, _1)));
+  
+  mask = msg::Request | msg::View | msg::ThreeD | msg::Overlay | msg::Isolate;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::viewIsolateDispatched, this, _1)));
 }
 
 void Manager::cancelCommandDispatched(const msg::Message &)
@@ -312,6 +322,13 @@ void Manager::constructQuoteDispatched(const msg::Message&)
 {
   std::shared_ptr<Quote> q(new Quote());
   addCommand(q);
+}
+
+void Manager::viewIsolateDispatched(const msg::Message &mIn)
+{
+  std::shared_ptr<Isolate> i(new Isolate());
+  i->setFromMessage(mIn);
+  addCommand(i);
 }
 
 void Manager::featureRepositionDispatched(const msg::Message&)

@@ -17,10 +17,8 @@
  *
  */
 
-#ifndef DAGVIEW_H
-#define DAGVIEW_H
-
-#include <memory>
+#ifndef DAG_VIEW_H
+#define DAG_VIEW_H
 
 #include <QGraphicsView>
 
@@ -36,4 +34,4 @@ namespace dag
   };
 }
 
-#endif // DAGVIEW_H
+#endif // DAG_VIEW_H

@@ -38,6 +38,7 @@ hasSeerShape(false),
 rectShared(new RectItem()),
 pointShared(new QGraphicsEllipseItem()), 
 visibleIconShared(new QGraphicsPixmapItem()),
+overlayIconShared(new QGraphicsPixmapItem()),
 stateIconShared(new QGraphicsPixmapItem()),
 featureIconShared(new QGraphicsPixmapItem()),
 textShared(new QGraphicsTextItem())
@@ -46,6 +47,7 @@ textShared(new QGraphicsTextItem())
   rectShared->setZValue(-1000.0);
   pointShared->setZValue(1000.0);
   visibleIconShared->setZValue(0.0);
+  overlayIconShared->setZValue(0.0);
   stateIconShared->setZValue(0.0);
   featureIconShared->setZValue(0.0);
   textShared->setZValue(0.0);
@@ -54,6 +56,7 @@ textShared(new QGraphicsTextItem())
   rectShared->setData(qtd::key, qtd::rectangle);
   pointShared->setData(qtd::key, qtd::point);
   visibleIconShared->setData(qtd::key, qtd::visibleIcon);
+  overlayIconShared->setData(qtd::key, qtd::overlayIcon);
   stateIconShared->setData(qtd::key, qtd::stateIcon);
   featureIconShared->setData(qtd::key, qtd::featureIcon);
   textShared->setData(qtd::key, qtd::text);
@@ -114,6 +117,21 @@ Vertex Stow::findVisibleVertex(const QGraphicsPixmapItem *iIn)
   return NullVertex();
 }
 
+Vertex Stow::findOverlayVertex(const QGraphicsPixmapItem *iIn)
+{
+  for (auto its = boost::vertices(graph); its.first != its.second; ++its.first)
+  {
+    if (graph[*its.first].overlayIconShared.get() == iIn)
+    {
+      assert(graph[*its.first].alive);
+      return *its.first;
+    }
+  }
+  assert(0); //no vertex with id in prj::Stow::findVertex
+  std::cout << "warning: no vertex with visibleIcon in prj::Stow::findVisibleVertex" << std::endl;
+  return NullVertex();
+}
+
 std::vector<Vertex> Stow::getAllSelected()
 {
   std::vector<Vertex> out;
@@ -133,6 +151,7 @@ std::vector<QGraphicsItem*> Stow::getAllSceneItems(Vertex v)
   out.push_back(graph[v].rectShared.get());
   out.push_back(graph[v].pointShared.get());
   out.push_back(graph[v].visibleIconShared.get());
+  out.push_back(graph[v].overlayIconShared.get());
   out.push_back(graph[v].stateIconShared.get());
   out.push_back(graph[v].featureIconShared.get());
   out.push_back(graph[v].textShared.get());

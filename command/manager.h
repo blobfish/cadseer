@@ -73,6 +73,7 @@ namespace cmd
     void constructNestDispatched(const msg::Message&);
     void constructDieSetDispatched(const msg::Message&);
     void constructQuoteDispatched(const msg::Message&);
+    void viewIsolateDispatched(const msg::Message&);
     
     //editing functions
     typedef std::function<BasePtr (ftr::Base *)> EditFunction;

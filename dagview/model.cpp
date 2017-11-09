@@ -116,9 +116,14 @@ Model::Model(QObject *parentIn) : QGraphicsScene(parentIn), stow(new Stow())
 //   setupFilters();
 //   
   currentPrehighlight = nullptr;
+  
   QIcon temp(":/resources/images/dagViewVisible.svg");
   visiblePixmapEnabled = temp.pixmap(iconSize, iconSize, QIcon::Normal, QIcon::On);
   visiblePixmapDisabled = temp.pixmap(iconSize, iconSize, QIcon::Disabled, QIcon::Off);
+  
+  QIcon tempOverlay(":/resources/images/dagViewOverlay.svg");
+  overlayPixmapEnabled = tempOverlay.pixmap(iconSize, iconSize, QIcon::Normal, QIcon::On);
+  overlayPixmapDisabled = tempOverlay.pixmap(iconSize, iconSize, QIcon::Disabled, QIcon::Off);
   
   QIcon passIcon(":/resources/images/dagViewPass.svg");
   passPixmap = passIcon.pixmap(iconSize, iconSize);
@@ -139,7 +144,7 @@ Model::~Model()
 
 void Model::setupViewConstants()
 {
-  //get direction
+  //get direction. 1.0 = top to bottom.  -1.0 = bottom to top.
   direction = 1.0;
   if (direction != -1.0 && direction != 1.0)
     direction = 1.0;
@@ -193,6 +198,11 @@ void Model::featureAddedDispatched(const msg::Message &messageIn)
     stow->graph[virginVertex].visibleIconShared->setPixmap(visiblePixmapEnabled);
   else
     stow->graph[virginVertex].visibleIconShared->setPixmap(visiblePixmapDisabled);
+  
+  if (message.feature->isVisibleOverlay())
+    stow->graph[virginVertex].overlayIconShared->setPixmap(overlayPixmapEnabled);
+  else
+    stow->graph[virginVertex].overlayIconShared->setPixmap(overlayPixmapDisabled);
   
   stow->graph[virginVertex].featureIconShared->setPixmap(message.feature->getIcon().pixmap(iconSize, iconSize));
   stow->graph[virginVertex].textShared->setPlainText(message.feature->getName());
@@ -330,6 +340,12 @@ void Model::setupDispatcher()
   
   mask = msg::Request | msg::DAG | msg::View | msg::Update;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::projectUpdatedDispatched, this, _1)));
+  
+  mask = msg::Response | msg::View | msg::Show | msg::Overlay;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::overlayShowDispatched, this, _1)));
+  
+  mask = msg::Response | msg::View | msg::Hide | msg::Overlay;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::overlayHideDispatched, this, _1)));
 }
 
 void Model::featureStateChangedDispatched(const msg::Message &messageIn)
@@ -622,6 +638,9 @@ void Model::projectUpdatedDispatched(const msg::Message &)
     auto visiblePixmap = stow->graph[currentVertex].visibleIconShared;
     visiblePixmap->setTransform(QTransform::fromTranslate(0.0, rowHeight * currentRow + cheat)); //calculate x location later.
     
+    auto overlayPixmap = stow->graph[currentVertex].overlayIconShared;
+    overlayPixmap->setTransform(QTransform::fromTranslate(0.0, rowHeight * currentRow + cheat)); //calculate x location later.
+    
     auto statePixmap = stow->graph[currentVertex].stateIconShared;
     statePixmap->setTransform(QTransform::fromTranslate(0.0, rowHeight * currentRow + cheat)); //calculate x location later.
     
@@ -703,6 +722,11 @@ void Model::projectUpdatedDispatched(const msg::Message &)
     visiblePixmap->setTransform(visiblePixmap->transform() * visibleIconTransform);
     
     localCurrentX += iconSize + iconToIcon;
+    auto overlayPixmap = stow->graph[vertex].overlayIconShared;
+    QTransform overlayIconTransform = QTransform::fromTranslate(localCurrentX, 0.0);
+    overlayPixmap->setTransform(overlayPixmap->transform() * overlayIconTransform);
+    
+    localCurrentX += iconSize + iconToIcon;
     auto statePixmap = stow->graph[vertex].stateIconShared;
     QTransform stateIconTransform = QTransform::fromTranslate(localCurrentX, 0.0);
     statePixmap->setTransform(statePixmap->transform() * stateIconTransform);
@@ -722,6 +746,8 @@ void Model::projectUpdatedDispatched(const msg::Message &)
     rect.setWidth(localCurrentX + maxTextLength + 2.0 * rowPadding);
     rectangle->setRect(rect);
   }
+  
+  this->setSceneRect(this->itemsBoundingRect());
 }
 
 void Model::dumpDAGViewGraphDispatched(const msg::Message &)
@@ -749,6 +775,22 @@ void Model::threeDHideDispatched(const msg::Message &msgIn)
   if (vertex == NullVertex())
     return;
   stow->graph[vertex].visibleIconShared->setPixmap(visiblePixmapDisabled);
+}
+
+void Model::overlayShowDispatched(const msg::Message &msgIn)
+{
+  Vertex vertex = stow->findVertex(boost::get<vwr::Message>(msgIn.payload).featureId);
+  if (vertex == NullVertex())
+    return;
+  stow->graph[vertex].overlayIconShared->setPixmap(overlayPixmapEnabled);
+}
+
+void Model::overlayHideDispatched(const msg::Message &msgIn)
+{
+  Vertex vertex = stow->findVertex(boost::get<vwr::Message>(msgIn.payload).featureId);
+  if (vertex == NullVertex())
+    return;
+  stow->graph[vertex].overlayIconShared->setPixmap(overlayPixmapDisabled);
 }
 
 void Model::removeAllItems()
@@ -902,7 +944,25 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
       assert(currentPixmap);
       
       Vertex vertex = stow->findVisibleVertex(currentPixmap);
+      if (vertex == NullVertex())
+        return;
       msg::Message msg(msg::Request | msg::View | msg::Toggle | msg::ThreeD);
+      vwr::Message vMsg;
+      vMsg.featureId = stow->graph[vertex].featureId;
+      msg.payload = vMsg;
+      observer->out(msg);
+      
+      return;
+    }
+    else if (currentType == qtd::overlayIcon)
+    {
+      QGraphicsPixmapItem *currentPixmap = dynamic_cast<QGraphicsPixmapItem *>(theItems.front());
+      assert(currentPixmap);
+      
+      Vertex vertex = stow->findOverlayVertex(currentPixmap);
+      if (vertex == NullVertex())
+        return;
+      msg::Message msg(msg::Request | msg::View | msg::Toggle | msg::Overlay);
       vwr::Message vMsg;
       vMsg.featureId = stow->graph[vertex].featureId; //temp during conversion.
       msg.payload = vMsg;
@@ -910,7 +970,6 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
       
       return;
     }
-    
     RectItem *rect = getRectFromPosition(event->scenePos());
     if (rect)
     {
@@ -924,8 +983,7 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
       }
     }
   }
-  
-  if (event->button() == Qt::MiddleButton)
+  else if (event->button() == Qt::MiddleButton)
   {
     msg::Message message(msg::Request | msg::Selection | msg::Clear);
     slc::Message sMessage;
@@ -936,26 +994,34 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
   QGraphicsScene::mousePressEvent(event);
 }
 
-// void Model::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
-// {
-//   if (event->button() == Qt::LeftButton)
-//   {
-//     auto selections = getAllSelected();
-//     if(selections.size() != 1)
-//       return;
-//     const GraphLinkRecord &record = findRecord(selections.front(), *graphLink);
-//     Gui::Document* doc = Gui::Application::Instance->getDocument(record.DObject->getDocument());
-//     MDIView *view = doc->getActiveView();
-//     if (view)
-//       getMainWindow()->setActiveWindow(view);
-//     const_cast<ViewProviderDocumentObject*>(record.VPDObject)->doubleClicked();
-//   }
-//   
-//   QGraphicsScene::mouseDoubleClickEvent(event);
-// }
+void Model::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
+{
+  if (event->button() == Qt::LeftButton)
+    observer->out(msg::Message(msg::Request | msg::Edit | msg::Feature));
+  
+  QGraphicsScene::mouseDoubleClickEvent(event);
+}
 
 void Model::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 {
+  auto theItems = this->items(event->scenePos(), Qt::IntersectsItemBoundingRect, Qt::DescendingOrder);
+  if (!theItems.isEmpty())
+  {
+    int currentType = theItems.front()->data(qtd::key).toInt();
+    if (currentType == qtd::visibleIcon)
+    {
+      Vertex v = stow->findVisibleVertex(dynamic_cast<QGraphicsPixmapItem*>(theItems.front()));
+      observer->out(msg::Message(msg::Request | msg::View | msg::ThreeD | msg::Isolate, vwr::Message(stow->graph[v].featureId)));
+      return;
+    }
+    else if (currentType == qtd::overlayIcon)
+    {
+      Vertex v = stow->findOverlayVertex(dynamic_cast<QGraphicsPixmapItem*>(theItems.front()));
+      observer->out(msg::Message(msg::Request | msg::View | msg::Overlay | msg::Isolate, vwr::Message(stow->graph[v].featureId)));
+      return;
+    }
+  }
+  
   RectItem *rect = getRectFromPosition(event->scenePos());
   if (rect)
   {
@@ -1083,7 +1149,7 @@ void Model::toggleOverlaySlot()
 
 void Model::viewIsolateSlot()
 {
-  observer->out(msg::Message(msg::Request | msg::View | msg::Isolate));
+  observer->out(msg::Message(msg::Request | msg::View | msg::ThreeD | msg::Overlay | msg::Isolate));
 }
 
 void Model::editColorSlot()
