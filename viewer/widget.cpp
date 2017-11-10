@@ -41,6 +41,7 @@
 #include <osgUtil/Optimizer>
 #include <osg/BlendFunc>
 #include <osg/ValueObject>
+#include <osg/DisplaySettings>
 
 #include <viewer/spaceballmanipulator.h>
 #include <viewer/widget.h>
@@ -91,6 +92,7 @@ Widget::Widget(osgViewer::ViewerBase::ThreadingModel threadingModel) : QWidget()
     observer->name = "vwr::Widget";
     setupDispatcher();
     
+    osg::DisplaySettings::instance()->setTextShaderTechnique("SIGNED_DISTANCE_FUNCTION"); 
     setThreadingModel(threadingModel);
     setKeyEventSetsDone(0); //stops the viewer from freezing when the escape key is pressed.
     QTimer *timer = new QTimer(this);
