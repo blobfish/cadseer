@@ -258,8 +258,7 @@ void Factory::newBoxDispatched(const msg::Message &)
   const osg::Matrixd &currentSystem = application->getMainWindow()->getViewer()->getCurrentSystem();
   
   std::shared_ptr<ftr::Box> boxPtr(new ftr::Box());
-  boxPtr->setSystem(currentSystem);
-  boxPtr->updateDragger();
+  boxPtr->setCSys(currentSystem);
   project->addFeature(boxPtr);
   
   observer->out(msg::Mask(msg::Request | msg::Update));
@@ -278,8 +277,7 @@ void Factory::newOblongDispatched(const msg::Message &)
   const osg::Matrixd &currentSystem = application->getMainWindow()->getViewer()->getCurrentSystem();
   
   std::shared_ptr<ftr::Oblong> oblongPtr(new ftr::Oblong());
-  oblongPtr->setSystem(currentSystem);
-  oblongPtr->updateDragger();
+  oblongPtr->setCSys(currentSystem);
   project->addFeature(oblongPtr);
   
   observer->out(msg::Mask(msg::Request | msg::Update));
@@ -298,8 +296,7 @@ void Factory::newCylinderDispatched(const msg::Message &)
   const osg::Matrixd &currentSystem = application->getMainWindow()->getViewer()->getCurrentSystem();
   
   std::shared_ptr<ftr::Cylinder> cylinder(new ftr::Cylinder());
-  cylinder->setSystem(currentSystem);
-  cylinder->updateDragger();
+  cylinder->setCSys(currentSystem);
   project->addFeature(cylinder);
   
   observer->out(msg::Mask(msg::Request | msg::Update));
@@ -318,8 +315,7 @@ void Factory::newSphereDispatched(const msg::Message&)
   const osg::Matrixd &currentSystem = application->getMainWindow()->getViewer()->getCurrentSystem();
   
   std::shared_ptr<ftr::Sphere> sphere(new ftr::Sphere());
-  sphere->setSystem(currentSystem);
-  sphere->updateDragger();
+  sphere->setCSys(currentSystem);
   project->addFeature(sphere);
   
   observer->out(msg::Mask(msg::Request | msg::Update));
@@ -338,8 +334,7 @@ void Factory::newConeDispatched(const msg::Message&)
   const osg::Matrixd &currentSystem = application->getMainWindow()->getViewer()->getCurrentSystem();
   
   std::shared_ptr<ftr::Cone> cone(new ftr::Cone());
-  cone->setSystem(currentSystem);
-  cone->updateDragger();
+  cone->setCSys(currentSystem);
   project->addFeature(cone);
   
   observer->out(msg::Mask(msg::Request | msg::Update));

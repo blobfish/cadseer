@@ -20,9 +20,10 @@
 #ifndef INERT_H
 #define INERT_H
 
-#include <feature/csysbase.h>
+#include <feature/base.h>
 
 namespace prj{namespace srl{class FeatureInert;}}
+namespace ann{class CSysDragger;}
 
 namespace ftr
 {
@@ -31,10 +32,12 @@ namespace ftr
    * feature that has no real parameters or update.
    * for example, used for import geometry.
    */
-  class Inert : public CSysBase
+  class Inert : public Base
   {
   public:
+    Inert() = delete;
     Inert(const TopoDS_Shape &shapeIn);
+    ~Inert();
     virtual void updateModel(const UpdatePayload&) override;
     virtual Type getType() const override {return Type::Inert;}
     virtual const std::string& getTypeString() const override {return toString(Type::Inert);}
@@ -43,8 +46,14 @@ namespace ftr
     virtual void serialWrite(const QDir&) override;
     void serialRead(const prj::srl::FeatureInert &sBox);
     
+    void setCSys(const osg::Matrixd&);
+    osg::Matrixd getCSys() const {return static_cast<osg::Matrixd>(csys);}
+    
+  protected:
+    prm::Parameter csys;
+    std::unique_ptr<ann::CSysDragger> csysDragger;
+    
   private:
-    Inert(){};
     static QIcon icon;
   };
 }

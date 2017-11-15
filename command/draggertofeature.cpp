@@ -18,9 +18,10 @@
  */
 
 #include <project/project.h>
-#include <feature/csysbase.h>
 #include <application/mainwindow.h>
 #include <selection/eventhandler.h>
+#include <annex/csysdragger.h>
+#include <feature/base.h>
 #include <command/draggertofeature.h>
 
 using namespace cmd;
@@ -48,11 +49,11 @@ void DraggerToFeature::activate()
     
     ftr::Base *baseFeature = project->findFeature(container.featureId);
     assert(baseFeature);
-    ftr::CSysBase *csysFeature = dynamic_cast<ftr::CSysBase*>(baseFeature);
-    if (!csysFeature)
-      continue;
     
-    csysFeature->updateDragger();
+    if (!baseFeature->hasAnnex(ann::Type::CSysDragger))
+      continue;
+    ann::CSysDragger &da = baseFeature->getAnnex<ann::CSysDragger>(ann::Type::CSysDragger);
+    da.draggerUpdate();
   }
   
   sendDone();

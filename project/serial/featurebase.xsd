@@ -22,7 +22,6 @@
   </xs:all>
 </xs:complexType>
 
-<!-- this is duplicate of csysbase CSys type -->
 <xs:complexType name="Matrixd">
   <xs:all>
     <xs:element name="i0j0" type="xs:double" default="1.0"/>

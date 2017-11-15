@@ -5,12 +5,13 @@
   xmlns:srl="http://www.cadseer.com/prj/srl"
 >
   
-<xs:include schemaLocation="featurecsysbase.xsd"/>
+<xs:include schemaLocation="featurebase.xsd"/>
 
 <xs:complexType name="FeatureSphere">
   <xs:all>
-    <xs:element name="featureCSysBase" type="srl:FeatureCSysBase"/>
+    <xs:element name="featureBase" type="srl:FeatureBase"/>
     <xs:element name="radius" type="srl:Parameter"/>
+    <xs:element name="csys" type="srl:Parameter"/>
   </xs:all>
 </xs:complexType>
 

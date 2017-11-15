@@ -22,16 +22,17 @@
 
 #include <osg/ref_ptr>
 
-#include <feature/csysbase.h>
+#include <feature/base.h>
 
 namespace lbr{class IPGroup;}
 namespace prj{namespace srl{class FeatureCone;}}
+namespace ann{class CSysDragger;}
 
 namespace ftr
 {
   class ConeBuilder;
   
-  class Cone : public CSysBase
+  class Cone : public Base
   {
   public:
     Cone();
@@ -40,10 +41,13 @@ namespace ftr
     void setRadius2(const double &radius2In);
     void setHeight(const double &heightIn);
     void setParameters(const double &radius1In, const double &radius2In, const double &heightIn);
+    void setCSys(const osg::Matrixd&);
     double getRadius1() const {return static_cast<double>(radius1);}
     double getRadius2() const {return static_cast<double>(radius2);}
     double getHeight() const {return static_cast<double>(height);}
     void getParameters (double &radius1Out, double &radius2Out, double &heightOut) const;
+    osg::Matrixd getCSys() const {return static_cast<osg::Matrixd>(csys);}
+    
     virtual void updateModel(const UpdatePayload&) override;
     virtual Type getType() const override {return Type::Cone;}
     virtual const std::string& getTypeString() const override {return toString(Type::Cone);}
@@ -56,6 +60,9 @@ namespace ftr
     prm::Parameter radius1;
     prm::Parameter radius2; //!< maybe zero.
     prm::Parameter height;
+    prm::Parameter csys;
+  
+    std::unique_ptr<ann::CSysDragger> csysDragger;
     
     osg::ref_ptr<lbr::IPGroup> heightIP;
     osg::ref_ptr<lbr::IPGroup> radius1IP;

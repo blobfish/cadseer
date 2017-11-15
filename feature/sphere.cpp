@@ -23,7 +23,9 @@
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <library/ipgroup.h>
+#include <library/csysdragger.h>
 #include <project/serial/xsdcxxoutput/featuresphere.h>
+#include <annex/csysdragger.h>
 #include <feature/seershape.h>
 #include <feature/sphere.h>
 
@@ -56,7 +58,11 @@ static const std::map<FeatureTag, std::string> featureTagMap =
 
 QIcon Sphere::icon;
 
-Sphere::Sphere() : CSysBase(), radius(prm::Names::Radius, prf::manager().rootPtr->features().sphere().get().radius())
+Sphere::Sphere() :
+Base(),
+radius(prm::Names::Radius, prf::manager().rootPtr->features().sphere().get().radius()),
+csys(prm::Names::CSys, osg::Matrixd::identity()),
+csysDragger(new ann::CSysDragger(this, &csys))
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionSphere.svg");
@@ -69,7 +75,13 @@ Sphere::Sphere() : CSysBase(), radius(prm::Names::Radius, prf::manager().rootPtr
   radius.setConstraint(prm::Constraint::buildNonZeroPositive());
   
   parameterVector.push_back(&radius);
+  parameterVector.push_back(&csys);
+  
+  annexes.insert(std::make_pair(ann::Type::CSysDragger, csysDragger.get()));
+  overlaySwitch->addChild(csysDragger->dragger);
+  
   radius.connectValue(boost::bind(&Sphere::setModelDirty, this));
+  csys.connectValue(boost::bind(&Sphere::setModelDirty, this));
   
   setupIPGroup();
 }
@@ -84,6 +96,17 @@ void Sphere::setRadius(const double& radiusIn)
   radius.setValue(radiusIn);
 }
 
+void Sphere::setCSys(const osg::Matrixd &csysIn)
+{
+  osg::Matrixd oldSystem = static_cast<osg::Matrixd>(csys);
+  if (!csys.setValue(csysIn))
+    return; // already at this csys
+    
+  //apply the same transformation to dragger, so dragger moves with it.
+  osg::Matrixd diffMatrix = osg::Matrixd::inverse(oldSystem) * csysIn;
+  csysDragger->draggerUpdate(csysDragger->dragger->getMatrix() * diffMatrix);
+}
+
 void Sphere::setupIPGroup()
 {
   radiusIP = new lbr::IPGroup(&radius);
@@ -92,30 +115,30 @@ void Sphere::setupIPGroup()
   radiusIP->setDimsFlipped(true);
   radiusIP->setRotationAxis(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(-1.0, 0.0, 0.0));
   overlaySwitch->addChild(radiusIP.get());
-  dragger->linkToMatrix(radiusIP.get());
+  csysDragger->dragger->linkToMatrix(radiusIP.get());
   
   updateIPGroup();
 }
 
 void Sphere::updateIPGroup()
 {
-  radiusIP->setMatrix(gu::toOsg(system));
+  radiusIP->setMatrix(static_cast<osg::Matrixd>(csys));
   radiusIP->valueHasChanged();
   radiusIP->constantHasChanged();
 }
 
-void Sphere::updateModel(const UpdatePayload& payloadIn)
+void Sphere::updateModel(const UpdatePayload&)
 {
   setFailure();
   lastUpdateLog.clear();
-  CSysBase::updateModel(payloadIn);
   try
   {
-    BRepPrimAPI_MakeSphere sphereMaker(system, static_cast<double>(radius));
+    BRepPrimAPI_MakeSphere sphereMaker(gu::toOcc(static_cast<osg::Matrixd>(csys)), static_cast<double>(radius));
     sphereMaker.Build();
     assert(sphereMaker.IsDone());
     seerShape->setOCCTShape(sphereMaker.Shape());
     updateResult(sphereMaker);
+    mainTransform->setMatrix(osg::Matrixd::identity());
     setSuccess();
   }
   catch (const Standard_Failure &e)
@@ -205,8 +228,9 @@ void Sphere::serialWrite(const QDir &dIn)
 {
   prj::srl::FeatureSphere sphereOut
   (
-    CSysBase::serialOut(),
-    radius.serialOut()
+    Base::serialOut(),
+    radius.serialOut(),
+    csys.serialOut()
   );
   
   xml_schema::NamespaceInfomap infoMap;
@@ -216,8 +240,12 @@ void Sphere::serialWrite(const QDir &dIn)
 
 void Sphere::serialRead(const prj::srl::FeatureSphere& sSphereIn)
 {
-  CSysBase::serialIn(sSphereIn.featureCSysBase());
+  Base::serialIn(sSphereIn.featureBase());
   radius.serialIn(sSphereIn.radius());
+  csys.serialIn(sSphereIn.csys());
+  
+  csysDragger->draggerUpdate(); //set dragger to parameter.
+  csysDragger->dragger->setUserValue(gu::idAttributeTitle, gu::idToString(getId()));
   
   updateIPGroup();
 }

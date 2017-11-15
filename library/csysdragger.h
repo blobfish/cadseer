@@ -118,7 +118,7 @@ protected:
 /*! @brief class to control csys drag parameters.
 * 
 * this is for coordinate systems that aren't owned by a feature.
-* for those see csysbase.
+* for those see ann::CSysDragger.
 */
 class CSysCallBack : public osgManipulator::DraggerTransformCallback
 {

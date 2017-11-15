@@ -274,10 +274,23 @@ public:
   osg::Vec3d operator()(int) const {assert(0); return osg::Vec3d();}
   osg::Vec3d operator()(bool) const {assert(0); return osg::Vec3d();}
   osg::Vec3d operator()(const std::string&) const {assert(0); return osg::Vec3d();}
-  osg::Vec3d operator()(const boost::filesystem::path) const {assert(0); return osg::Vec3d();}
+  osg::Vec3d operator()(const boost::filesystem::path&) const {assert(0); return osg::Vec3d();}
   osg::Vec3d operator()(const osg::Vec3d &v) const {return v;}
   osg::Vec3d operator()(const osg::Quat&) const {assert(0); return osg::Vec3d();}
   osg::Vec3d operator()(const osg::Matrixd&) const {assert(0); return osg::Vec3d();}
+};
+
+class MatrixdVisitor : public boost::static_visitor<osg::Matrixd>
+{
+public:
+  osg::Matrixd operator()(double) const {assert(0); return osg::Matrixd::identity();}
+  osg::Matrixd operator()(int) const {assert(0); return osg::Matrixd::identity();}
+  osg::Matrixd operator()(bool) const {assert(0); return osg::Matrixd::identity();}
+  osg::Matrixd operator()(const std::string&) const {assert(0); return osg::Matrixd::identity();}
+  osg::Matrixd operator()(const boost::filesystem::path&) const {assert(0); return osg::Matrixd::identity();}
+  osg::Matrixd operator()(const osg::Vec3d&) const {assert(0); return osg::Matrixd::identity();}
+  osg::Matrixd operator()(const osg::Quat&) const {assert(0); return osg::Matrixd::identity();}
+  osg::Matrixd operator()(const osg::Matrixd &mIn) const {return mIn;}
 };
 
 class TypeStringVisitor : public boost::static_visitor<std::string>
@@ -386,6 +399,14 @@ Parameter::Parameter(const QString &nameIn, const boost::filesystem::path &value
 }
 
 Parameter::Parameter(const QString &nameIn, const osg::Vec3d &valueIn) :
+  name(nameIn),
+  value(valueIn),
+  id(gu::createRandomId()),
+  constraint()
+{
+}
+
+Parameter::Parameter(const QString &nameIn, const osg::Matrixd &valueIn) :
   name(nameIn),
   value(valueIn),
   id(gu::createRandomId()),
@@ -561,10 +582,35 @@ Parameter::operator osg::Vec3d() const
   return boost::apply_visitor(Vec3dVisitor(), value);
 }
 
+bool Parameter::setValue(const osg::Matrixd &mIn)
+{
+  if (setValueQuiet(mIn))
+  {
+    valueChangedSignal();
+    return true;
+  }
+  
+  return false;
+}
+
+bool Parameter::setValueQuiet(const osg::Matrixd &mIn)
+{
+  if (boost::apply_visitor(MatrixdVisitor(), value) == mIn)
+    return false;
+  
+  value = mIn;
+  return true;
+}
+
+Parameter::operator osg::Matrixd() const
+{
+  return boost::apply_visitor(MatrixdVisitor(), value);
+}
+
+
 //todo
 Parameter::operator std::string() const{return std::string();}
 Parameter::operator osg::Quat() const{return osg::Quat();}
-Parameter::operator osg::Matrixd() const{return osg::Matrixd();}
 
 
 

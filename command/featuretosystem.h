@@ -39,15 +39,6 @@ namespace cmd
     virtual std::string getStatusMessage() override;
     virtual void activate() override;
     virtual void deactivate() override;
-    
-  private:
-//     void setupDispatcher();
-//     void selectionAdditionDispatched(const msg::Message &);
-//     void selectionSubtractionDispatched(const msg::Message &);
-    
-//     void analyzeSelections();
-    
-    slc::Messages messages;
   };
 }
 

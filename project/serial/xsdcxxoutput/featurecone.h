@@ -64,7 +64,7 @@
 
 #include <xsd/cxx/pre.hxx>
 
-#include "featurecsysbase.h"
+#include "featurebase.h"
 
 // Forward declarations.
 //
@@ -91,7 +91,7 @@ namespace prj
 
 #include <xsd/cxx/xml/dom/parsing-header.hxx>
 
-#include "featurecsysbase.h"
+#include "featurebase.h"
 
 namespace prj
 {
@@ -110,9 +110,9 @@ namespace prj
     {
       public:
       /**
-       * @name featureCSysBase
+       * @name featureBase
        *
-       * @brief Accessor and modifier functions for the %featureCSysBase
+       * @brief Accessor and modifier functions for the %featureBase
        * required element.
        */
       //@{
@@ -120,28 +120,28 @@ namespace prj
       /**
        * @brief Element type.
        */
-      typedef ::prj::srl::FeatureCSysBase FeatureCSysBaseType;
+      typedef ::prj::srl::FeatureBase FeatureBaseType;
 
       /**
        * @brief Element traits type.
        */
-      typedef ::xsd::cxx::tree::traits< FeatureCSysBaseType, char > FeatureCSysBaseTraits;
+      typedef ::xsd::cxx::tree::traits< FeatureBaseType, char > FeatureBaseTraits;
 
       /**
        * @brief Return a read-only (constant) reference to the element.
        *
        * @return A constant reference to the element.
        */
-      const FeatureCSysBaseType&
-      featureCSysBase () const;
+      const FeatureBaseType&
+      featureBase () const;
 
       /**
        * @brief Return a read-write reference to the element.
        *
        * @return A reference to the element.
        */
-      FeatureCSysBaseType&
-      featureCSysBase ();
+      FeatureBaseType&
+      featureBase ();
 
       /**
        * @brief Set the element value.
@@ -152,7 +152,7 @@ namespace prj
        * the new value of the element.
        */
       void
-      featureCSysBase (const FeatureCSysBaseType& x);
+      featureBase (const FeatureBaseType& x);
 
       /**
        * @brief Set the element value without copying.
@@ -163,7 +163,7 @@ namespace prj
        * instead of making a copy.
        */
       void
-      featureCSysBase (::std::unique_ptr< FeatureCSysBaseType > p);
+      featureBase (::std::unique_ptr< FeatureBaseType > p);
 
       //@}
 
@@ -342,6 +342,64 @@ namespace prj
       //@}
 
       /**
+       * @name csys
+       *
+       * @brief Accessor and modifier functions for the %csys
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::Parameter CsysType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< CsysType, char > CsysTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const CsysType&
+      csys () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      CsysType&
+      csys ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      csys (const CsysType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      csys (::std::unique_ptr< CsysType > p);
+
+      //@}
+
+      /**
        * @name Constructors
        */
       //@{
@@ -350,10 +408,11 @@ namespace prj
        * @brief Create an instance from the ultimate base and
        * initializers for required elements and attributes.
        */
-      FeatureCone (const FeatureCSysBaseType&,
+      FeatureCone (const FeatureBaseType&,
                    const Radius1Type&,
                    const Radius2Type&,
-                   const HeightType&);
+                   const HeightType&,
+                   const CsysType&);
 
       /**
        * @brief Create an instance from the ultimate base and
@@ -363,10 +422,11 @@ namespace prj
        * This constructor will try to use the passed values directly
        * instead of making copies.
        */
-      FeatureCone (::std::unique_ptr< FeatureCSysBaseType >,
+      FeatureCone (::std::unique_ptr< FeatureBaseType >,
                    ::std::unique_ptr< Radius1Type >,
                    ::std::unique_ptr< Radius2Type >,
-                   ::std::unique_ptr< HeightType >);
+                   ::std::unique_ptr< HeightType >,
+                   ::std::unique_ptr< CsysType >);
 
       /**
        * @brief Create an instance from a DOM element.
@@ -438,10 +498,11 @@ namespace prj
              ::xml_schema::Flags);
 
       protected:
-      ::xsd::cxx::tree::one< FeatureCSysBaseType > featureCSysBase_;
+      ::xsd::cxx::tree::one< FeatureBaseType > featureBase_;
       ::xsd::cxx::tree::one< Radius1Type > radius1_;
       ::xsd::cxx::tree::one< Radius2Type > radius2_;
       ::xsd::cxx::tree::one< HeightType > height_;
+      ::xsd::cxx::tree::one< CsysType > csys_;
 
       //@endcond
     };

@@ -23,17 +23,18 @@
 
 #include <osg/ref_ptr>
 
-#include <feature/csysbase.h>
+#include <feature/base.h>
 
 namespace lbr{class IPGroup;}
 namespace prj{namespace srl{class FeatureBox;}}
+namespace ann{class CSysDragger;}
 
 namespace ftr
 {
   
 class BoxBuilder;
 
-class Box : public CSysBase
+class Box : public Base
 {
 public:
   Box();
@@ -42,10 +43,13 @@ public:
   void setWidth(const double &widthIn);
   void setHeight(const double &heightIn);
   void setParameters(const double &lengthIn, const double &widthIn, const double &heightIn);
+  void setCSys(const osg::Matrixd&);
   double getLength() const {return static_cast<double>(length);}
   double getWidth() const {return static_cast<double>(width);}
   double getHeight() const {return static_cast<double>(height);}
   void getParameters (double &lengthOut, double &widthOut, double &heightOut) const;
+  osg::Matrixd getCSys() const {return static_cast<osg::Matrixd>(csys);}
+  
   virtual void updateModel(const UpdatePayload&) override;
   virtual Type getType() const override {return Type::Box;}
   virtual const std::string& getTypeString() const override {return toString(Type::Box);}
@@ -58,6 +62,9 @@ protected:
   prm::Parameter length;
   prm::Parameter width;
   prm::Parameter height;
+  prm::Parameter csys;
+  
+  std::unique_ptr<ann::CSysDragger> csysDragger;
   
   osg::ref_ptr<lbr::IPGroup> lengthIP;
   osg::ref_ptr<lbr::IPGroup> widthIP;

@@ -47,28 +47,52 @@ namespace prj
     // FeatureInert
     // 
 
-    const FeatureInert::FeatureCSysBaseType& FeatureInert::
-    featureCSysBase () const
+    const FeatureInert::FeatureBaseType& FeatureInert::
+    featureBase () const
     {
-      return this->featureCSysBase_.get ();
+      return this->featureBase_.get ();
     }
 
-    FeatureInert::FeatureCSysBaseType& FeatureInert::
-    featureCSysBase ()
+    FeatureInert::FeatureBaseType& FeatureInert::
+    featureBase ()
     {
-      return this->featureCSysBase_.get ();
-    }
-
-    void FeatureInert::
-    featureCSysBase (const FeatureCSysBaseType& x)
-    {
-      this->featureCSysBase_.set (x);
+      return this->featureBase_.get ();
     }
 
     void FeatureInert::
-    featureCSysBase (::std::unique_ptr< FeatureCSysBaseType > x)
+    featureBase (const FeatureBaseType& x)
     {
-      this->featureCSysBase_.set (std::move (x));
+      this->featureBase_.set (x);
+    }
+
+    void FeatureInert::
+    featureBase (::std::unique_ptr< FeatureBaseType > x)
+    {
+      this->featureBase_.set (std::move (x));
+    }
+
+    const FeatureInert::CsysType& FeatureInert::
+    csys () const
+    {
+      return this->csys_.get ();
+    }
+
+    FeatureInert::CsysType& FeatureInert::
+    csys ()
+    {
+      return this->csys_.get ();
+    }
+
+    void FeatureInert::
+    csys (const CsysType& x)
+    {
+      this->csys_.set (x);
+    }
+
+    void FeatureInert::
+    csys (::std::unique_ptr< CsysType > x)
+    {
+      this->csys_.set (std::move (x));
     }
   }
 }
@@ -83,16 +107,20 @@ namespace prj
     //
 
     FeatureInert::
-    FeatureInert (const FeatureCSysBaseType& featureCSysBase)
+    FeatureInert (const FeatureBaseType& featureBase,
+                  const CsysType& csys)
     : ::xml_schema::Type (),
-      featureCSysBase_ (featureCSysBase, this)
+      featureBase_ (featureBase, this),
+      csys_ (csys, this)
     {
     }
 
     FeatureInert::
-    FeatureInert (::std::unique_ptr< FeatureCSysBaseType > featureCSysBase)
+    FeatureInert (::std::unique_ptr< FeatureBaseType > featureBase,
+                  ::std::unique_ptr< CsysType > csys)
     : ::xml_schema::Type (),
-      featureCSysBase_ (std::move (featureCSysBase), this)
+      featureBase_ (std::move (featureBase), this),
+      csys_ (std::move (csys), this)
     {
     }
 
@@ -101,7 +129,8 @@ namespace prj
                   ::xml_schema::Flags f,
                   ::xml_schema::Container* c)
     : ::xml_schema::Type (x, f, c),
-      featureCSysBase_ (x.featureCSysBase_, f, this)
+      featureBase_ (x.featureBase_, f, this),
+      csys_ (x.csys_, f, this)
     {
     }
 
@@ -110,7 +139,8 @@ namespace prj
                   ::xml_schema::Flags f,
                   ::xml_schema::Container* c)
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
-      featureCSysBase_ (this)
+      featureBase_ (this),
+      csys_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -129,16 +159,30 @@ namespace prj
         const ::xsd::cxx::xml::qualified_name< char > n (
           ::xsd::cxx::xml::dom::name< char > (i));
 
-        // featureCSysBase
+        // featureBase
         //
-        if (n.name () == "featureCSysBase" && n.namespace_ ().empty ())
+        if (n.name () == "featureBase" && n.namespace_ ().empty ())
         {
-          ::std::unique_ptr< FeatureCSysBaseType > r (
-            FeatureCSysBaseTraits::create (i, f, this));
+          ::std::unique_ptr< FeatureBaseType > r (
+            FeatureBaseTraits::create (i, f, this));
 
-          if (!featureCSysBase_.present ())
+          if (!featureBase_.present ())
           {
-            this->featureCSysBase_.set (::std::move (r));
+            this->featureBase_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // csys
+        //
+        if (n.name () == "csys" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< CsysType > r (
+            CsysTraits::create (i, f, this));
+
+          if (!csys_.present ())
+          {
+            this->csys_.set (::std::move (r));
             continue;
           }
         }
@@ -146,10 +190,17 @@ namespace prj
         break;
       }
 
-      if (!featureCSysBase_.present ())
+      if (!featureBase_.present ())
       {
         throw ::xsd::cxx::tree::expected_element< char > (
-          "featureCSysBase",
+          "featureBase",
+          "");
+      }
+
+      if (!csys_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "csys",
           "");
       }
     }
@@ -167,7 +218,8 @@ namespace prj
       if (this != &x)
       {
         static_cast< ::xml_schema::Type& > (*this) = x;
-        this->featureCSysBase_ = x.featureCSysBase_;
+        this->featureBase_ = x.featureBase_;
+        this->csys_ = x.csys_;
       }
 
       return *this;
@@ -469,15 +521,26 @@ namespace prj
     {
       e << static_cast< const ::xml_schema::Type& > (i);
 
-      // featureCSysBase
+      // featureBase
       //
       {
         ::xercesc::DOMElement& s (
           ::xsd::cxx::xml::dom::create_element (
-            "featureCSysBase",
+            "featureBase",
             e));
 
-        s << i.featureCSysBase ();
+        s << i.featureBase ();
+      }
+
+      // csys
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "csys",
+            e));
+
+        s << i.csys ();
       }
     }
 

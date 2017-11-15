@@ -18,11 +18,12 @@
  */
 
 #include <project/project.h>
-#include <feature/csysbase.h>
 #include <application/mainwindow.h>
 #include <selection/eventhandler.h>
 #include <globalutilities.h>
 #include <viewer/widget.h>
+#include <annex/csysdragger.h>
+#include <feature/base.h>
 #include <command/systemtofeature.h>
 
 using namespace cmd;
@@ -50,11 +51,11 @@ void SystemToFeature::activate()
     
     ftr::Base *baseFeature = project->findFeature(container.featureId);
     assert(baseFeature);
-    ftr::CSysBase *csysFeature = dynamic_cast<ftr::CSysBase*>(baseFeature);
-    if (!csysFeature)
-      continue;
     
-    mainWindow->getViewer()->setCurrentSystem(gu::toOsg(csysFeature->getSystem()));
+    if (!baseFeature->hasAnnex(ann::Type::CSysDragger))
+      continue;
+    ann::CSysDragger &da = baseFeature->getAnnex<ann::CSysDragger>(ann::Type::CSysDragger);
+    mainWindow->getViewer()->setCurrentSystem(static_cast<osg::Matrixd>(*(da.parameter)));
     break;
   }
   

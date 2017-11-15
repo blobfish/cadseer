@@ -17,19 +17,17 @@
  *
  */
 
-#include <project/project.h>
-#include <feature/csysbase.h>
 #include <application/mainwindow.h>
-#include <selection/eventhandler.h>
 #include <viewer/widget.h>
+#include <selection/eventhandler.h>
+#include <project/project.h>
+#include <annex/csysdragger.h>
+#include <feature/base.h>
 #include <command/featuretosystem.h>
 
 using namespace cmd;
 
-FeatureToSystem::FeatureToSystem() : Base()
-{
-//   setupDispatcher();
-}
+FeatureToSystem::FeatureToSystem() : Base() {}
 
 FeatureToSystem::~FeatureToSystem(){}
 
@@ -38,48 +36,12 @@ std::string FeatureToSystem::getStatusMessage()
   return QObject::tr("Select feature to reposition to the current coordinate system").toStdString();
 }
 
-// void FeatureToSystem::setupDispatcher()
-// {
-//   msg::Mask mask;
-//   
-//   mask = msg::Response | msg::Post | msg::Selection | msg::Addition;
-//   dispatcher.insert(std::make_pair(mask, boost::bind(&FeatureToSystem::selectionAdditionDispatched, this, _1)));
-//   
-//   mask = msg::Response | msg::Pre | msg::Selection | msg::Subtraction;
-//   dispatcher.insert(std::make_pair(mask, boost::bind(&FeatureToSystem::selectionSubtractionDispatched, this, _1)));
-// }
-// 
-// void FeatureToSystem::selectionAdditionDispatched(const msg::Message &messageIn)
-// {
-//   if (!isActive)
-//     return;
-//   
-//   slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
-//   
-//   if (!slc::has(messages, sMessage))
-//     slc::add(messages, sMessage);
-//   
-//   analyzeSelections();
-// }
-// 
-// void FeatureToSystem::selectionSubtractionDispatched(const msg::Message &messageIn)
-// {
-//   if (!isActive)
-//     return;
-//   
-//   slc::Message sMessage = boost::get<slc::Message>(messageIn.payload);
-//   
-//   if (slc::has(messages, sMessage))
-//     slc::remove(messages, sMessage);
-//   
-//   analyzeSelections();
-// }
-
 void FeatureToSystem::activate()
 {
   isActive = true;
   
   const osg::Matrixd& currentSystem = mainWindow->getViewer()->getCurrentSystem();
+  
   const slc::Containers &containers = eventHandler->getSelections();
   for (const auto &container : containers)
   {
@@ -87,11 +49,10 @@ void FeatureToSystem::activate()
       continue;
     ftr::Base *baseFeature = project->findFeature(container.featureId);
     assert(baseFeature);
-    ftr::CSysBase *csysFeature = dynamic_cast<ftr::CSysBase*>(baseFeature);
-    if (!csysFeature)
+    if (!baseFeature->hasAnnex(ann::Type::CSysDragger))
       continue;
-    csysFeature->setSystem(currentSystem);
-    csysFeature->updateDragger();
+    ann::CSysDragger &da = baseFeature->getAnnex<ann::CSysDragger>(ann::Type::CSysDragger);
+    da.setCSys(currentSystem);
   }
   
   sendDone();
@@ -101,10 +62,3 @@ void FeatureToSystem::deactivate()
 {
   isActive = false;
 }
-
-// void FeatureToSystem::analyzeSelections()
-// {
-//   ftr::CSysBase *feature = dynamic_cast<ftr::CSysBase*>(project->findFeature(id));
-//   assert(feature);
-//   feature->setModelDirty();
-// }

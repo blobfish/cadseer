@@ -27,8 +27,9 @@
 #include <project/project.h>
 #include <message/message.h>
 #include <message/observer.h>
+#include <feature/base.h>
 #include <feature/seershape.h>
-#include <feature/csysbase.h>
+#include <annex/csysdragger.h>
 #include <command/csysedit.h>
 
 using namespace cmd;
@@ -113,13 +114,13 @@ void CSysEdit::analyzeSelections()
     {
       if (messages.at(0).type == slc::Type::Edge) //add face later
       {
-        ftr::CSysBase *feature = dynamic_cast<ftr::CSysBase*>(project->findFeature(messages.at(0).featureId));
+        ftr::Base *feature = dynamic_cast<ftr::Base*>(project->findFeature(messages.at(0).featureId));
         assert(feature);
         const ftr::SeerShape &seerShape = feature->getSeerShape();
         
         osg::Vec3d direction = gu::gleanVector(seerShape.getOCCTShape(messages.at(0).shapeId), messages.at(0).pointLocation);
         if (direction.isNaN())
-        return;
+          return;
         
         updateToVector(direction);
         
@@ -140,7 +141,7 @@ void CSysEdit::analyzeSelections()
         //head to tail pick.
         osg::Vec3d toVector = messages.at(0).pointLocation - messages.at(1).pointLocation;
         if (toVector.isNaN())
-        return;
+          return;
         toVector.normalize();
         
         updateToVector(toVector);
@@ -152,16 +153,25 @@ void CSysEdit::analyzeSelections()
   }
   else if((type == Type::Origin) && (messages.size() == 1))
   {
-    osg::Matrixd freshMatrix = csysDragger->getMatrix();
-    freshMatrix.setTrans(messages.at(0).pointLocation);
-    csysDragger->updateMatrix(freshMatrix);
-    
     boost::uuids::uuid id = gu::getId(csysDragger);
-    if (!id.is_nil() && csysDragger->isLinked())
+    if (id.is_nil() || (!csysDragger->isLinked())) //current system
     {
-      ftr::CSysBase *feature = dynamic_cast<ftr::CSysBase*>(project->findFeature(id));
-      assert(feature);
-      feature->setModelDirty();
+      osg::Matrixd fm = csysDragger->getMatrix();
+      fm.setTrans(messages.at(0).pointLocation);
+      csysDragger->setMatrix(fm);
+      sendDone();
+      return;
+    }
+
+    ftr::Base *feature = dynamic_cast<ftr::Base*>(project->findFeature(id));
+    assert(feature);
+    if (feature->hasAnnex(ann::Type::CSysDragger))
+    {
+      osg::Vec3d move = messages.at(0).pointLocation - csysDragger->getMatrix().getTrans();
+      ann::CSysDragger &da = feature->getAnnex<ann::CSysDragger>(ann::Type::CSysDragger);
+      osg::Matrixd ft = static_cast<osg::Matrixd>(*(da.parameter));
+      ft.setTrans(ft.getTrans() + move);
+      da.setCSys(ft); //this should update the dragger also
     }
       
     sendDone();
@@ -244,15 +254,21 @@ void CSysEdit::updateToVector(const osg::Vec3d& toVector)
   fm(0,0) = freshX.x(); fm(0,1) = freshX.y(); fm(0,2) = freshX.z();
   fm(1,0) = freshY.x(); fm(1,1) = freshY.y(); fm(1,2) = freshY.z();
   fm(2,0) = freshZ.x(); fm(2,1) = freshZ.y(); fm(2,2) = freshZ.z();
-  csysDragger->updateMatrix(fm);
-  
   
   boost::uuids::uuid id = gu::getId(csysDragger);
-  if (!id.is_nil() && csysDragger->isLinked())
+  if (id.is_nil() || (!csysDragger->isLinked())) //current system
   {
-    ftr::CSysBase *feature = dynamic_cast<ftr::CSysBase*>(project->findFeature(id));
-    assert(feature);
-    feature->setModelDirty();
+    csysDragger->setMatrix(fm);
+    return;
+  }
+
+  ftr::Base *feature = dynamic_cast<ftr::Base*>(project->findFeature(id));
+  assert(feature);
+  if (feature->hasAnnex(ann::Type::CSysDragger))
+  {
+    osg::Matrixd diffMatrix = osg::Matrixd::inverse(originalMatrix) * fm;
+    ann::CSysDragger &da = feature->getAnnex<ann::CSysDragger>(ann::Type::CSysDragger);
+    da.setCSys(static_cast<osg::Matrixd>(*(da.parameter)) * diffMatrix); //should move dragger also.
   }
 }
 

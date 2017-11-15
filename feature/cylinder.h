@@ -22,16 +22,17 @@
 
 #include <osg/ref_ptr>
 
-#include <feature/csysbase.h>
+#include <feature/base.h>
 
 namespace lbr{class IPGroup;}
 namespace prj{namespace srl{class FeatureCylinder;}}
+namespace ann{class CSysDragger;}
 
 namespace ftr
 {
   class CylinderBuilder;
   
-  class Cylinder : public CSysBase
+  class Cylinder : public Base
   {
   public:
     Cylinder();
@@ -39,9 +40,11 @@ namespace ftr
     void setRadius(const double &radiusIn);
     void setHeight(const double &heightIn);
     void setParameters(const double &radiusIn, const double &heightIn);
+    void setCSys(const osg::Matrixd&);
     double getRadius() const {return static_cast<double>(radius);}
     double getHeight() const {return static_cast<double>(height);}
     void getParameters (double &radiusOut, double &heightOut) const;
+    osg::Matrixd getCSys() const {return static_cast<osg::Matrixd>(csys);}
     
     virtual void updateModel(const UpdatePayload&) override;
     virtual Type getType() const override {return Type::Cylinder;}
@@ -54,6 +57,9 @@ namespace ftr
   protected:
     prm::Parameter radius;
     prm::Parameter height;
+    prm::Parameter csys;
+    
+    std::unique_ptr<ann::CSysDragger> csysDragger;
     
     osg::ref_ptr<lbr::IPGroup> heightIP;
     osg::ref_ptr<lbr::IPGroup> radiusIP;

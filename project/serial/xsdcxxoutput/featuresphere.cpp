@@ -47,28 +47,28 @@ namespace prj
     // FeatureSphere
     // 
 
-    const FeatureSphere::FeatureCSysBaseType& FeatureSphere::
-    featureCSysBase () const
+    const FeatureSphere::FeatureBaseType& FeatureSphere::
+    featureBase () const
     {
-      return this->featureCSysBase_.get ();
+      return this->featureBase_.get ();
     }
 
-    FeatureSphere::FeatureCSysBaseType& FeatureSphere::
-    featureCSysBase ()
+    FeatureSphere::FeatureBaseType& FeatureSphere::
+    featureBase ()
     {
-      return this->featureCSysBase_.get ();
-    }
-
-    void FeatureSphere::
-    featureCSysBase (const FeatureCSysBaseType& x)
-    {
-      this->featureCSysBase_.set (x);
+      return this->featureBase_.get ();
     }
 
     void FeatureSphere::
-    featureCSysBase (::std::unique_ptr< FeatureCSysBaseType > x)
+    featureBase (const FeatureBaseType& x)
     {
-      this->featureCSysBase_.set (std::move (x));
+      this->featureBase_.set (x);
+    }
+
+    void FeatureSphere::
+    featureBase (::std::unique_ptr< FeatureBaseType > x)
+    {
+      this->featureBase_.set (std::move (x));
     }
 
     const FeatureSphere::RadiusType& FeatureSphere::
@@ -94,6 +94,30 @@ namespace prj
     {
       this->radius_.set (std::move (x));
     }
+
+    const FeatureSphere::CsysType& FeatureSphere::
+    csys () const
+    {
+      return this->csys_.get ();
+    }
+
+    FeatureSphere::CsysType& FeatureSphere::
+    csys ()
+    {
+      return this->csys_.get ();
+    }
+
+    void FeatureSphere::
+    csys (const CsysType& x)
+    {
+      this->csys_.set (x);
+    }
+
+    void FeatureSphere::
+    csys (::std::unique_ptr< CsysType > x)
+    {
+      this->csys_.set (std::move (x));
+    }
   }
 }
 
@@ -107,20 +131,24 @@ namespace prj
     //
 
     FeatureSphere::
-    FeatureSphere (const FeatureCSysBaseType& featureCSysBase,
-                   const RadiusType& radius)
+    FeatureSphere (const FeatureBaseType& featureBase,
+                   const RadiusType& radius,
+                   const CsysType& csys)
     : ::xml_schema::Type (),
-      featureCSysBase_ (featureCSysBase, this),
-      radius_ (radius, this)
+      featureBase_ (featureBase, this),
+      radius_ (radius, this),
+      csys_ (csys, this)
     {
     }
 
     FeatureSphere::
-    FeatureSphere (::std::unique_ptr< FeatureCSysBaseType > featureCSysBase,
-                   ::std::unique_ptr< RadiusType > radius)
+    FeatureSphere (::std::unique_ptr< FeatureBaseType > featureBase,
+                   ::std::unique_ptr< RadiusType > radius,
+                   ::std::unique_ptr< CsysType > csys)
     : ::xml_schema::Type (),
-      featureCSysBase_ (std::move (featureCSysBase), this),
-      radius_ (std::move (radius), this)
+      featureBase_ (std::move (featureBase), this),
+      radius_ (std::move (radius), this),
+      csys_ (std::move (csys), this)
     {
     }
 
@@ -129,8 +157,9 @@ namespace prj
                    ::xml_schema::Flags f,
                    ::xml_schema::Container* c)
     : ::xml_schema::Type (x, f, c),
-      featureCSysBase_ (x.featureCSysBase_, f, this),
-      radius_ (x.radius_, f, this)
+      featureBase_ (x.featureBase_, f, this),
+      radius_ (x.radius_, f, this),
+      csys_ (x.csys_, f, this)
     {
     }
 
@@ -139,8 +168,9 @@ namespace prj
                    ::xml_schema::Flags f,
                    ::xml_schema::Container* c)
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
-      featureCSysBase_ (this),
-      radius_ (this)
+      featureBase_ (this),
+      radius_ (this),
+      csys_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -159,16 +189,16 @@ namespace prj
         const ::xsd::cxx::xml::qualified_name< char > n (
           ::xsd::cxx::xml::dom::name< char > (i));
 
-        // featureCSysBase
+        // featureBase
         //
-        if (n.name () == "featureCSysBase" && n.namespace_ ().empty ())
+        if (n.name () == "featureBase" && n.namespace_ ().empty ())
         {
-          ::std::unique_ptr< FeatureCSysBaseType > r (
-            FeatureCSysBaseTraits::create (i, f, this));
+          ::std::unique_ptr< FeatureBaseType > r (
+            FeatureBaseTraits::create (i, f, this));
 
-          if (!featureCSysBase_.present ())
+          if (!featureBase_.present ())
           {
-            this->featureCSysBase_.set (::std::move (r));
+            this->featureBase_.set (::std::move (r));
             continue;
           }
         }
@@ -187,13 +217,27 @@ namespace prj
           }
         }
 
+        // csys
+        //
+        if (n.name () == "csys" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< CsysType > r (
+            CsysTraits::create (i, f, this));
+
+          if (!csys_.present ())
+          {
+            this->csys_.set (::std::move (r));
+            continue;
+          }
+        }
+
         break;
       }
 
-      if (!featureCSysBase_.present ())
+      if (!featureBase_.present ())
       {
         throw ::xsd::cxx::tree::expected_element< char > (
-          "featureCSysBase",
+          "featureBase",
           "");
       }
 
@@ -201,6 +245,13 @@ namespace prj
       {
         throw ::xsd::cxx::tree::expected_element< char > (
           "radius",
+          "");
+      }
+
+      if (!csys_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "csys",
           "");
       }
     }
@@ -218,8 +269,9 @@ namespace prj
       if (this != &x)
       {
         static_cast< ::xml_schema::Type& > (*this) = x;
-        this->featureCSysBase_ = x.featureCSysBase_;
+        this->featureBase_ = x.featureBase_;
         this->radius_ = x.radius_;
+        this->csys_ = x.csys_;
       }
 
       return *this;
@@ -521,15 +573,15 @@ namespace prj
     {
       e << static_cast< const ::xml_schema::Type& > (i);
 
-      // featureCSysBase
+      // featureBase
       //
       {
         ::xercesc::DOMElement& s (
           ::xsd::cxx::xml::dom::create_element (
-            "featureCSysBase",
+            "featureBase",
             e));
 
-        s << i.featureCSysBase ();
+        s << i.featureBase ();
       }
 
       // radius
@@ -541,6 +593,17 @@ namespace prj
             e));
 
         s << i.radius ();
+      }
+
+      // csys
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "csys",
+            e));
+
+        s << i.csys ();
       }
     }
 

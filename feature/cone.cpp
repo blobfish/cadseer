@@ -23,8 +23,10 @@
 #include <preferences/manager.h>
 #include <library/lineardimension.h>
 #include <library/ipgroup.h>
+#include <library/csysdragger.h>
 #include <project/serial/xsdcxxoutput/featurecone.h>
 #include <feature/seershape.h>
+#include <annex/csysdragger.h>
 #include <feature/conebuilder.h>
 #include <feature/cone.h>
 
@@ -71,10 +73,12 @@ QIcon Cone::icon;
 
 //only complete rotational cone. no partials. because top or bottom radius
 //maybe 0.0, faces and wires might be null and edges maybe degenerate.
-Cone::Cone() : CSysBase(),
+Cone::Cone() : Base(),
   radius1(prm::Names::Radius1, prf::manager().rootPtr->features().cone().get().radius1()),
   radius2(prm::Names::Radius2, prf::manager().rootPtr->features().cone().get().radius2()),
-  height(prm::Names::Height, prf::manager().rootPtr->features().cone().get().height())
+  height(prm::Names::Height, prf::manager().rootPtr->features().cone().get().height()),
+  csys(prm::Names::CSys, osg::Matrixd::identity()),
+  csysDragger(new ann::CSysDragger(this, &csys))
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionCone.svg");
@@ -91,10 +95,15 @@ Cone::Cone() : CSysBase(),
   parameterVector.push_back(&radius1);
   parameterVector.push_back(&radius2);
   parameterVector.push_back(&height);
+  parameterVector.push_back(&csys);
+  
+  annexes.insert(std::make_pair(ann::Type::CSysDragger, csysDragger.get()));
+  overlaySwitch->addChild(csysDragger->dragger);
   
   radius1.connectValue(boost::bind(&Cone::setModelDirty, this));
   radius2.connectValue(boost::bind(&Cone::setModelDirty, this));
   height.connectValue(boost::bind(&Cone::setModelDirty, this));
+  csys.connectValue(boost::bind(&Cone::setModelDirty, this));
   
   setupIPGroup();
 }
@@ -110,7 +119,7 @@ void Cone::setupIPGroup()
   heightIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(1.0, 0.0, 0.0)));
   heightIP->setRotationAxis(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(0.0, -1.0, 0.0));
   overlaySwitch->addChild(heightIP.get());
-  dragger->linkToMatrix(heightIP.get());
+  csysDragger->dragger->linkToMatrix(heightIP.get());
   
   radius1IP = new lbr::IPGroup(&radius1);
   radius1IP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 1.0, 0.0)));
@@ -118,7 +127,7 @@ void Cone::setupIPGroup()
   radius1IP->setDimsFlipped(true);
   radius1IP->setRotationAxis(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(-1.0, 0.0, 0.0));
   overlaySwitch->addChild(radius1IP.get());
-  dragger->linkToMatrix(radius1IP.get());
+  csysDragger->dragger->linkToMatrix(radius1IP.get());
   
   radius2IP = new lbr::IPGroup(&radius2);
   radius2IP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 1.0, 0.0)));
@@ -126,7 +135,7 @@ void Cone::setupIPGroup()
   radius2IP->setDimsFlipped(true);
   radius2IP->setRotationAxis(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(-1.0, 0.0, 0.0));
   overlaySwitch->addChild(radius2IP.get());
-  dragger->linkToMatrix(radius2IP.get());
+  csysDragger->dragger->linkToMatrix(radius2IP.get());
   
   updateIPGroup();
 }
@@ -141,9 +150,9 @@ void Cone::updateIPGroup()
   radius2IP->mainDim->setSqueeze(static_cast<double>(height));
   radius2IP->mainDim->setExtensionOffset(static_cast<double>(height));
   
-  heightIP->setMatrix(gu::toOsg(system));
-  radius1IP->setMatrix(gu::toOsg(system));
-  radius2IP->setMatrix(gu::toOsg(system));
+  heightIP->setMatrix(static_cast<osg::Matrixd>(csys));
+  radius1IP->setMatrix(static_cast<osg::Matrixd>(csys));
+  radius2IP->setMatrix(static_cast<osg::Matrixd>(csys));
   
   heightIP->mainDim->setSqueeze(static_cast<double>(radius1));
   heightIP->mainDim->setExtensionOffset(static_cast<double>(radius1));
@@ -178,6 +187,17 @@ void Cone::setParameters(const double& radius1In, const double& radius2In, const
   setHeight(heightIn);
 }
 
+void Cone::setCSys(const osg::Matrixd &csysIn)
+{
+  osg::Matrixd oldSystem = static_cast<osg::Matrixd>(csys);
+  if (!csys.setValue(csysIn))
+    return; // already at this csys
+    
+  //apply the same transformation to dragger, so dragger moves with it.
+  osg::Matrixd diffMatrix = osg::Matrixd::inverse(oldSystem) * csysIn;
+  csysDragger->draggerUpdate(csysDragger->dragger->getMatrix() * diffMatrix);
+}
+
 void Cone::getParameters(double& radius1Out, double& radius2Out, double& heightOut) const
 {
   radius1Out = static_cast<double>(radius1);
@@ -185,16 +205,22 @@ void Cone::getParameters(double& radius1Out, double& radius2Out, double& heightO
   heightOut = static_cast<double>(height);
 }
 
-void Cone::updateModel(const UpdatePayload &payloadIn)
+void Cone::updateModel(const UpdatePayload &)
 {
   setFailure();
   lastUpdateLog.clear();
-  CSysBase::updateModel(payloadIn);
   try
   {
-    ConeBuilder coneBuilder(static_cast<double>(radius1), static_cast<double>(radius2), static_cast<double>(height), system);
+    ConeBuilder coneBuilder
+    (
+      static_cast<double>(radius1),
+      static_cast<double>(radius2),
+      static_cast<double>(height),
+      gu::toOcc(static_cast<osg::Matrixd>(csys))
+    );
     seerShape->setOCCTShape(coneBuilder.getSolid());
     updateResult(coneBuilder);
+    mainTransform->setMatrix(osg::Matrixd::identity());
     setSuccess();
   }
   catch (const Standard_Failure &e)
@@ -300,10 +326,11 @@ void Cone::serialWrite(const QDir &dIn)
 {
   prj::srl::FeatureCone coneOut
   (
-    CSysBase::serialOut(),
+    Base::serialOut(),
     radius1.serialOut(),
     radius2.serialOut(),
-    height.serialOut()
+    height.serialOut(),
+    csys.serialOut()
   );
   
   xml_schema::NamespaceInfomap infoMap;
@@ -313,10 +340,14 @@ void Cone::serialWrite(const QDir &dIn)
 
 void Cone::serialRead(const prj::srl::FeatureCone& sCone)
 {
-  CSysBase::serialIn(sCone.featureCSysBase());
+  Base::serialIn(sCone.featureBase());
   radius1.serialIn(sCone.radius1());
   radius2.serialIn(sCone.radius2());
   height.serialIn(sCone.height());
+  csys.serialIn(sCone.csys());
+  
+  csysDragger->draggerUpdate(); //set dragger to parameter.
+  csysDragger->dragger->setUserValue(gu::idAttributeTitle, gu::idToString(getId()));
   
   updateIPGroup();
 }

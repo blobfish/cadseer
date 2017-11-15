@@ -32,8 +32,8 @@ namespace prj{namespace srl{class FeatureDieSet;}}
 
 namespace ftr
 {
-  /*! should this inherit from csysbase? for now, location
-   * is calculated from the inputs reqardless of autoCalc value
+  /*! for now, location is calculated from the inputs.
+   *  reqardless of autoCalc value
    */
   class DieSet : public Base
   {

@@ -47,28 +47,28 @@ namespace prj
     // FeatureCylinder
     // 
 
-    const FeatureCylinder::FeatureCSysBaseType& FeatureCylinder::
-    featureCSysBase () const
+    const FeatureCylinder::FeatureBaseType& FeatureCylinder::
+    featureBase () const
     {
-      return this->featureCSysBase_.get ();
+      return this->featureBase_.get ();
     }
 
-    FeatureCylinder::FeatureCSysBaseType& FeatureCylinder::
-    featureCSysBase ()
+    FeatureCylinder::FeatureBaseType& FeatureCylinder::
+    featureBase ()
     {
-      return this->featureCSysBase_.get ();
-    }
-
-    void FeatureCylinder::
-    featureCSysBase (const FeatureCSysBaseType& x)
-    {
-      this->featureCSysBase_.set (x);
+      return this->featureBase_.get ();
     }
 
     void FeatureCylinder::
-    featureCSysBase (::std::unique_ptr< FeatureCSysBaseType > x)
+    featureBase (const FeatureBaseType& x)
     {
-      this->featureCSysBase_.set (std::move (x));
+      this->featureBase_.set (x);
+    }
+
+    void FeatureCylinder::
+    featureBase (::std::unique_ptr< FeatureBaseType > x)
+    {
+      this->featureBase_.set (std::move (x));
     }
 
     const FeatureCylinder::RadiusType& FeatureCylinder::
@@ -118,6 +118,30 @@ namespace prj
     {
       this->height_.set (std::move (x));
     }
+
+    const FeatureCylinder::CsysType& FeatureCylinder::
+    csys () const
+    {
+      return this->csys_.get ();
+    }
+
+    FeatureCylinder::CsysType& FeatureCylinder::
+    csys ()
+    {
+      return this->csys_.get ();
+    }
+
+    void FeatureCylinder::
+    csys (const CsysType& x)
+    {
+      this->csys_.set (x);
+    }
+
+    void FeatureCylinder::
+    csys (::std::unique_ptr< CsysType > x)
+    {
+      this->csys_.set (std::move (x));
+    }
   }
 }
 
@@ -131,24 +155,28 @@ namespace prj
     //
 
     FeatureCylinder::
-    FeatureCylinder (const FeatureCSysBaseType& featureCSysBase,
+    FeatureCylinder (const FeatureBaseType& featureBase,
                      const RadiusType& radius,
-                     const HeightType& height)
+                     const HeightType& height,
+                     const CsysType& csys)
     : ::xml_schema::Type (),
-      featureCSysBase_ (featureCSysBase, this),
+      featureBase_ (featureBase, this),
       radius_ (radius, this),
-      height_ (height, this)
+      height_ (height, this),
+      csys_ (csys, this)
     {
     }
 
     FeatureCylinder::
-    FeatureCylinder (::std::unique_ptr< FeatureCSysBaseType > featureCSysBase,
+    FeatureCylinder (::std::unique_ptr< FeatureBaseType > featureBase,
                      ::std::unique_ptr< RadiusType > radius,
-                     ::std::unique_ptr< HeightType > height)
+                     ::std::unique_ptr< HeightType > height,
+                     ::std::unique_ptr< CsysType > csys)
     : ::xml_schema::Type (),
-      featureCSysBase_ (std::move (featureCSysBase), this),
+      featureBase_ (std::move (featureBase), this),
       radius_ (std::move (radius), this),
-      height_ (std::move (height), this)
+      height_ (std::move (height), this),
+      csys_ (std::move (csys), this)
     {
     }
 
@@ -157,9 +185,10 @@ namespace prj
                      ::xml_schema::Flags f,
                      ::xml_schema::Container* c)
     : ::xml_schema::Type (x, f, c),
-      featureCSysBase_ (x.featureCSysBase_, f, this),
+      featureBase_ (x.featureBase_, f, this),
       radius_ (x.radius_, f, this),
-      height_ (x.height_, f, this)
+      height_ (x.height_, f, this),
+      csys_ (x.csys_, f, this)
     {
     }
 
@@ -168,9 +197,10 @@ namespace prj
                      ::xml_schema::Flags f,
                      ::xml_schema::Container* c)
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
-      featureCSysBase_ (this),
+      featureBase_ (this),
       radius_ (this),
-      height_ (this)
+      height_ (this),
+      csys_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -189,16 +219,16 @@ namespace prj
         const ::xsd::cxx::xml::qualified_name< char > n (
           ::xsd::cxx::xml::dom::name< char > (i));
 
-        // featureCSysBase
+        // featureBase
         //
-        if (n.name () == "featureCSysBase" && n.namespace_ ().empty ())
+        if (n.name () == "featureBase" && n.namespace_ ().empty ())
         {
-          ::std::unique_ptr< FeatureCSysBaseType > r (
-            FeatureCSysBaseTraits::create (i, f, this));
+          ::std::unique_ptr< FeatureBaseType > r (
+            FeatureBaseTraits::create (i, f, this));
 
-          if (!featureCSysBase_.present ())
+          if (!featureBase_.present ())
           {
-            this->featureCSysBase_.set (::std::move (r));
+            this->featureBase_.set (::std::move (r));
             continue;
           }
         }
@@ -231,13 +261,27 @@ namespace prj
           }
         }
 
+        // csys
+        //
+        if (n.name () == "csys" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< CsysType > r (
+            CsysTraits::create (i, f, this));
+
+          if (!csys_.present ())
+          {
+            this->csys_.set (::std::move (r));
+            continue;
+          }
+        }
+
         break;
       }
 
-      if (!featureCSysBase_.present ())
+      if (!featureBase_.present ())
       {
         throw ::xsd::cxx::tree::expected_element< char > (
-          "featureCSysBase",
+          "featureBase",
           "");
       }
 
@@ -252,6 +296,13 @@ namespace prj
       {
         throw ::xsd::cxx::tree::expected_element< char > (
           "height",
+          "");
+      }
+
+      if (!csys_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "csys",
           "");
       }
     }
@@ -269,9 +320,10 @@ namespace prj
       if (this != &x)
       {
         static_cast< ::xml_schema::Type& > (*this) = x;
-        this->featureCSysBase_ = x.featureCSysBase_;
+        this->featureBase_ = x.featureBase_;
         this->radius_ = x.radius_;
         this->height_ = x.height_;
+        this->csys_ = x.csys_;
       }
 
       return *this;
@@ -573,15 +625,15 @@ namespace prj
     {
       e << static_cast< const ::xml_schema::Type& > (i);
 
-      // featureCSysBase
+      // featureBase
       //
       {
         ::xercesc::DOMElement& s (
           ::xsd::cxx::xml::dom::create_element (
-            "featureCSysBase",
+            "featureBase",
             e));
 
-        s << i.featureCSysBase ();
+        s << i.featureBase ();
       }
 
       // radius
@@ -604,6 +656,17 @@ namespace prj
             e));
 
         s << i.height ();
+      }
+
+      // csys
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "csys",
+            e));
+
+        s << i.csys ();
       }
     }
 

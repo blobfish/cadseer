@@ -21,8 +21,10 @@
 #include <project/project.h>
 #include <application/mainwindow.h>
 #include <selection/eventhandler.h>
-#include <feature/csysbase.h>
 #include <viewer/widget.h>
+#include <library/csysdragger.h>
+#include <annex/csysdragger.h>
+#include <feature/base.h>
 #include <command/featurereposition.h>
 
 using namespace cmd;
@@ -61,15 +63,12 @@ void FeatureReposition::go()
       continue;
     ftr::Base *baseFeature = project->findFeature(container.featureId);
     assert(baseFeature);
-    ftr::CSysBase *csysFeature = dynamic_cast<ftr::CSysBase*>(baseFeature);
-    if (!csysFeature)
+    if (!baseFeature->hasAnnex(ann::Type::CSysDragger))
       continue;
+    ann::CSysDragger &da = baseFeature->getAnnex<ann::CSysDragger>(ann::Type::CSysDragger);
     
-    osg::Matrixd dm = csysFeature->getDragger().getMatrix(); //dragger matrix
-    dm = osg::Matrixd::inverse(dm);
-    osg::Matrixd ns = gu::toOsg(csysFeature->getSystem()) * dm * cs;
-    
-    csysFeature->setSystem(ns);
-    csysFeature->updateDragger(cs);
+    osg::Matrixd dm = osg::Matrixd::inverse(da.dragger->getMatrix()); //dragger matrix
+    osg::Matrixd ns = static_cast<osg::Matrix>(*(da.parameter)) * dm * cs;
+    da.setCSys(ns);
   }
 }

@@ -227,9 +227,9 @@ ftr::prm::Parameter* Project::findParameter(const uuid &idIn) const
 void Project::addOCCShape(const TopoDS_Shape &shapeIn, std::string name)
 {
   std::shared_ptr<ftr::Inert> inert(new ftr::Inert(shapeIn));
+  addFeature(inert);
   if (!name.empty())
     inert->setName(QString::fromStdString(name));
-  addFeature(inert);
 }
 
 void Project::addFeature(std::shared_ptr<ftr::Base> feature)

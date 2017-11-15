@@ -26,8 +26,10 @@
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <library/ipgroup.h>
+#include <library/csysdragger.h>
 #include <feature/boxbuilder.h>
 #include <feature/seershape.h>
+#include <annex/csysdragger.h>
 #include <project/serial/xsdcxxoutput/featurebox.h>
 #include <feature/box.h>
 
@@ -119,10 +121,12 @@ static const std::map<FeatureTag, std::string> featureTagMap =
 QIcon Box::icon;
 
 Box::Box() :
-  CSysBase(),
+  Base(),
   length(prm::Names::Length, prf::manager().rootPtr->features().box().get().length()),
   width(prm::Names::Width, prf::manager().rootPtr->features().box().get().width()),
-  height(prm::Names::Height, prf::manager().rootPtr->features().box().get().height())
+  height(prm::Names::Height, prf::manager().rootPtr->features().box().get().height()),
+  csys(prm::Names::CSys, osg::Matrixd::identity()),
+  csysDragger(new ann::CSysDragger(this, &csys))
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionBox.svg");
@@ -139,10 +143,15 @@ Box::Box() :
   parameterVector.push_back(&length);
   parameterVector.push_back(&width);
   parameterVector.push_back(&height);
+  parameterVector.push_back(&csys);
+  
+  annexes.insert(std::make_pair(ann::Type::CSysDragger, csysDragger.get()));
+  overlaySwitch->addChild(csysDragger->dragger);
   
   length.connectValue(boost::bind(&Box::setModelDirty, this));
   width.connectValue(boost::bind(&Box::setModelDirty, this));
   height.connectValue(boost::bind(&Box::setModelDirty, this));
+  csys.connectValue(boost::bind(&Box::setModelDirty, this));
   
   setupIPGroup();
 }
@@ -159,30 +168,30 @@ void Box::setupIPGroup()
   lengthIP->noAutoRotateDragger();
   lengthIP->setRotationAxis(osg::Vec3d(1.0, 0.0, 0.0), osg::Vec3d(0.0, 0.0, 1.0));
   overlaySwitch->addChild(lengthIP.get());
-  dragger->linkToMatrix(lengthIP.get());
+  csysDragger->dragger->linkToMatrix(lengthIP.get());
   
   widthIP = new lbr::IPGroup(&width);
 //   widthIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 0.0, -1.0)));
   widthIP->noAutoRotateDragger();
   widthIP->setRotationAxis(osg::Vec3d(0.0, 1.0, 0.0), osg::Vec3d(0.0, 0.0, -1.0));
   overlaySwitch->addChild(widthIP.get());
-  dragger->linkToMatrix(widthIP.get());
+  csysDragger->dragger->linkToMatrix(widthIP.get());
   
   heightIP = new lbr::IPGroup(&height);
   heightIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(1.0, 0.0, 0.0)));
   heightIP->noAutoRotateDragger();
   heightIP->setRotationAxis(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(0.0, 1.0, 0.0));
   overlaySwitch->addChild(heightIP.get());
-  dragger->linkToMatrix(heightIP.get());
+  csysDragger->dragger->linkToMatrix(heightIP.get());
   
   updateIPGroup();
 }
 
 void Box::updateIPGroup()
 {
-  lengthIP->setMatrix(gu::toOsg(system));
-  widthIP->setMatrix(gu::toOsg(system));
-  heightIP->setMatrix(gu::toOsg(system));
+  lengthIP->setMatrix(static_cast<osg::Matrixd>(csys));
+  widthIP->setMatrix(static_cast<osg::Matrixd>(csys));
+  heightIP->setMatrix(static_cast<osg::Matrixd>(csys));
   
   osg::Matrix lMatrix;
   lMatrix.setRotate(osg::Quat(osg::PI_2, osg::Vec3d(0.0, 1.0, 0.0)));
@@ -229,6 +238,17 @@ void Box::setParameters(const double &lengthIn, const double &widthIn, const dou
   setHeight(heightIn);
 }
 
+void Box::setCSys(const osg::Matrixd &csysIn)
+{
+  osg::Matrixd oldSystem = static_cast<osg::Matrixd>(csys);
+  if (!csys.setValue(csysIn))
+    return; // already at this csys
+    
+  //apply the same transformation to dragger, so dragger moves with it.
+  osg::Matrixd diffMatrix = osg::Matrixd::inverse(oldSystem) * csysIn;
+  csysDragger->draggerUpdate(csysDragger->dragger->getMatrix() * diffMatrix);
+}
+
 void Box::getParameters(double &lengthOut, double &widthOut, double &heightOut) const
 {
   lengthOut = static_cast<double>(length);
@@ -236,16 +256,22 @@ void Box::getParameters(double &lengthOut, double &widthOut, double &heightOut) 
   heightOut = static_cast<double>(height);
 }
 
-void Box::updateModel(const UpdatePayload &payloadIn)
+void Box::updateModel(const UpdatePayload&)
 {
   setFailure();
   lastUpdateLog.clear();
-  CSysBase::updateModel(payloadIn);
   try
   {
-    BoxBuilder boxMaker(static_cast<double>(length), static_cast<double>(width), static_cast<double>(height), system);
+    BoxBuilder boxMaker
+    (
+      static_cast<double>(length),
+      static_cast<double>(width),
+      static_cast<double>(height),
+      gu::toOcc(static_cast<osg::Matrixd>(csys))
+    );
     seerShape->setOCCTShape(boxMaker.getSolid());
     updateResult(boxMaker);
+    mainTransform->setMatrix(osg::Matrixd::identity());
     setSuccess();
   }
   catch (const Standard_Failure &e)
@@ -388,10 +414,11 @@ void Box::serialWrite(const QDir &dIn)
 {
   prj::srl::FeatureBox boxOut
   (
-    CSysBase::serialOut(),
+    Base::serialOut(),
     length.serialOut(),
     width.serialOut(),
-    height.serialOut()
+    height.serialOut(),
+    csys.serialOut()
   );
   
   xml_schema::NamespaceInfomap infoMap;
@@ -401,10 +428,14 @@ void Box::serialWrite(const QDir &dIn)
 
 void Box::serialRead(const prj::srl::FeatureBox& sBox)
 {
-  CSysBase::serialIn(sBox.featureCSysBase());
+  Base::serialIn(sBox.featureBase());
   length.serialIn(sBox.length());
   width.serialIn(sBox.width());
   height.serialIn(sBox.height());
+  csys.serialIn(sBox.csys());
+  
+  csysDragger->draggerUpdate(); //set dragger to parameter.
+  csysDragger->dragger->setUserValue(gu::idAttributeTitle, gu::idToString(getId()));
   
   updateIPGroup();
 }

@@ -18,9 +18,11 @@
  */
 
 #include <project/project.h>
-#include <feature/csysbase.h>
 #include <application/mainwindow.h>
 #include <selection/eventhandler.h>
+#include <library/csysdragger.h>
+#include <annex/csysdragger.h>
+#include <feature/base.h>
 #include <command/featuretodragger.h>
 
 using namespace cmd;
@@ -48,11 +50,12 @@ void FeatureToDragger::activate()
     
     ftr::Base *baseFeature = project->findFeature(container.featureId);
     assert(baseFeature);
-    ftr::CSysBase *csysFeature = dynamic_cast<ftr::CSysBase*>(baseFeature);
-    if (!csysFeature)
-      continue;
     
-    csysFeature->setSystem(csysFeature->getDragger().getMatrix());
+    if (!baseFeature->hasAnnex(ann::Type::CSysDragger))
+      continue;
+    ann::CSysDragger &da = baseFeature->getAnnex<ann::CSysDragger>(ann::Type::CSysDragger);
+    da.setCSys(da.dragger->getMatrix());
+    da.draggerUpdate(); //setCSys moves the dragger, so move it back.
   }
   
   sendDone();

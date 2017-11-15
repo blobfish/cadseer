@@ -27,7 +27,9 @@
 
 #include <project/serial/xsdcxxoutput/featureinert.h>
 #include <globalutilities.h>
+#include <library/csysdragger.h>
 #include <feature/seershape.h>
+#include <annex/csysdragger.h>
 #include <feature/inert.h>
 
 using namespace ftr;
@@ -35,7 +37,10 @@ using namespace boost::uuids;
 
 QIcon Inert::icon;
 
-Inert::Inert(const TopoDS_Shape &shapeIn) : CSysBase()
+Inert::Inert(const TopoDS_Shape &shapeIn) :
+Base(),
+csys(prm::Names::CSys, osg::Matrixd::identity()),
+csysDragger(new ann::CSysDragger(this, &csys))
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionInert.svg");
@@ -45,73 +50,84 @@ Inert::Inert(const TopoDS_Shape &shapeIn) : CSysBase()
   
   seerShape->setOCCTShape(shapeIn);
   seerShape->ensureNoNils();
+  
+  parameterVector.push_back(&csys);
+  
+  annexes.insert(std::make_pair(ann::Type::CSysDragger, csysDragger.get()));
+  overlaySwitch->addChild(csysDragger->dragger);
+  
+  //sync transformations.
+  csys.setValue(gu::toOsg(seerShape->getRootOCCTShape().Location().Transformation()));
+  csysDragger->draggerUpdate(); //set dragger to parameter.
+  
+  csys.connectValue(boost::bind(&Inert::setModelDirty, this));
 }
 
-void Inert::updateModel(const UpdatePayload &payloadIn)
+Inert::~Inert(){}
+
+void Inert::updateModel(const UpdatePayload&)
 {
-  CSysBase::updateModel(payloadIn);
-  gp_Ax3 tempAx3(system);
-  gp_Trsf tempTrsf; tempTrsf.SetTransformation(tempAx3); tempTrsf.Invert();
-  TopLoc_Location freshLocation(tempTrsf);
-  
-  if (gu::toOsg(seerShape->getRootOCCTShape().Location().Transformation()) != gu::toOsg(tempTrsf))
+  try
   {
-    try
+    setFailure();
+    lastUpdateLog.clear();
+    
+    //store a map of offset to id for restoration.
+    std::vector<uuid> oldIds;
+    TopTools_IndexedMapOfShape osm; //old shape map
+    TopExp::MapShapes(seerShape->getRootOCCTShape(), osm);
+    for (int i = 1; i < osm.Size() + 1; ++i)
     {
-      setFailure();
-      lastUpdateLog.clear();
-      
-      //store a map of offset to id for restoration.
-      std::vector<uuid> oldIds;
-      TopTools_IndexedMapOfShape osm; //old shape map
-      TopExp::MapShapes(seerShape->getRootOCCTShape(), osm);
-      for (int i = 1; i < osm.Size() + 1; ++i)
-      {
-        if (seerShape->hasShapeIdRecord(osm(i))) //probably degenerated edge.
-          oldIds.push_back(seerShape->findShapeIdRecord(osm(i)).id);
-        else
-          oldIds.push_back(gu::createNilId()); //place holder will be skipped again.
-      }
-      uuid oldRootId = seerShape->getRootShapeId();
-      
-      TopoDS_Shape tempShape(seerShape->getRootOCCTShape());
-      tempShape.Location(freshLocation);
-      seerShape->setOCCTShape(tempShape);
-      
-      seerShape->updateShapeIdRecord(seerShape->getRootOCCTShape(), oldRootId);
-      seerShape->setRootShapeId(oldRootId);
-      TopTools_IndexedMapOfShape nsm; //new shape map
-      TopExp::MapShapes(seerShape->getRootOCCTShape(), nsm);
-      for (int i = 1; i < nsm.Size() + 1; ++i)
-      {
-        if (seerShape->hasShapeIdRecord(nsm(i))) //probably degenerated edge.
-          seerShape->updateShapeIdRecord(nsm(i), oldIds.at(i - 1));
-      }
-      
-      seerShape->dumpNils("inert");
-      seerShape->dumpDuplicates("inert");
-      
-      seerShape->ensureNoNils();
-      seerShape->ensureNoDuplicates();
-      
-      setSuccess();
+      if (seerShape->hasShapeIdRecord(osm(i))) //probably degenerated edge.
+        oldIds.push_back(seerShape->findShapeIdRecord(osm(i)).id);
+      else
+        oldIds.push_back(gu::createNilId()); //place holder will be skipped again.
     }
-    catch (const Standard_Failure &e)
+    uuid oldRootId = seerShape->getRootShapeId();
+    
+    TopoDS_Shape tempShape(seerShape->getRootOCCTShape());
+    gp_Ax3 tempAx3(gu::toOcc(osg::Matrixd::inverse(static_cast<osg::Matrixd>(csys))));
+    gp_Trsf tempTrsf;
+    tempTrsf.SetTransformation(tempAx3);
+    TopLoc_Location freshLocation(tempTrsf);
+    tempShape.Location(freshLocation);
+    seerShape->setOCCTShape(tempShape);
+    
+    seerShape->updateShapeIdRecord(seerShape->getRootOCCTShape(), oldRootId);
+    seerShape->setRootShapeId(oldRootId);
+    TopTools_IndexedMapOfShape nsm; //new shape map
+    TopExp::MapShapes(seerShape->getRootOCCTShape(), nsm);
+    for (int i = 1; i < nsm.Size() + 1; ++i)
     {
-      std::ostringstream s; s << "OCC Error in inert update: " << e.GetMessageString() << std::endl;
-      lastUpdateLog += s.str();
+      if (seerShape->hasShapeIdRecord(nsm(i))) //probably degenerated edge.
+        seerShape->updateShapeIdRecord(nsm(i), oldIds.at(i - 1));
     }
-    catch (const std::exception &e)
-    {
-      std::ostringstream s; s << "Standard error in inert update: " << e.what() << std::endl;
-      lastUpdateLog += s.str();
-    }
-    catch (...)
-    {
-      std::ostringstream s; s << "Unknown error in inert update." << std::endl;
-      lastUpdateLog += s.str();
-    }
+    
+    seerShape->dumpNils("inert");
+    seerShape->dumpDuplicates("inert");
+    
+    seerShape->ensureNoNils();
+    seerShape->ensureNoDuplicates();
+    
+    mainTransform->setMatrix(osg::Matrixd::identity());
+    setSuccess();
   }
+  catch (const Standard_Failure &e)
+  {
+    std::ostringstream s; s << "OCC Error in inert update: " << e.GetMessageString() << std::endl;
+    lastUpdateLog += s.str();
+  }
+  catch (const std::exception &e)
+  {
+    std::ostringstream s; s << "Standard error in inert update: " << e.what() << std::endl;
+    lastUpdateLog += s.str();
+  }
+  catch (...)
+  {
+    std::ostringstream s; s << "Unknown error in inert update." << std::endl;
+    lastUpdateLog += s.str();
+  }
+  
   setModelClean();
   if (!lastUpdateLog.empty())
     std::cout << std::endl << lastUpdateLog;
@@ -121,7 +137,8 @@ void Inert::serialWrite(const QDir &dIn)
 {
   prj::srl::FeatureInert inertOut
   (
-    CSysBase::serialOut()
+    Base::serialOut(),
+    csys.serialOut()
   );
   
   xml_schema::NamespaceInfomap infoMap;
@@ -131,12 +148,8 @@ void Inert::serialWrite(const QDir &dIn)
 
 void Inert::serialRead(const prj::srl::FeatureInert& inert)
 {
-  CSysBase::serialIn(inert.featureCSysBase());
+  Base::serialIn(inert.featureBase());
+  csys.serialIn(inert.csys());
   
-  //we are not using the function calls because they send state messages.
-  //At this point the feature has not been added to the project so other
-  //objects, such as dagview, don't have knowledge of this feature.
-  
-  state.set(ftr::StateOffset::ModelDirty, false);
-  state.set(ftr::StateOffset::VisualDirty, true);
+  csysDragger->dragger->setUserValue(gu::idAttributeTitle, gu::idToString(getId()));
 }

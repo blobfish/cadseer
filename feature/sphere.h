@@ -22,21 +22,25 @@
 
 #include <osg/ref_ptr>
 
-#include <feature/csysbase.h>
+#include <feature/base.h>
 
 class BRepPrimAPI_MakeSphere;
 namespace lbr{class IPGroup;}
 namespace prj{namespace srl{class FeatureSphere;}}
+namespace ann{class CSysDragger;}
 
 namespace ftr
 {
-  class Sphere : public CSysBase
+  class Sphere : public Base
   {
   public:
     Sphere();
     ~Sphere();
     void setRadius(const double &radiusIn);
+    void setCSys(const osg::Matrixd&);
     double getRadius() const {return static_cast<double>(radius);}
+    osg::Matrixd getCSys() const {return static_cast<osg::Matrixd>(csys);}
+    
     virtual void updateModel(const UpdatePayload&) override;
     virtual Type getType() const override {return Type::Sphere;}
     virtual const std::string& getTypeString() const override {return toString(Type::Sphere);}
@@ -47,6 +51,9 @@ namespace ftr
     
   protected:
     prm::Parameter radius;
+    prm::Parameter csys;
+  
+    std::unique_ptr<ann::CSysDragger> csysDragger;
     
     osg::ref_ptr<lbr::IPGroup> radiusIP;
     

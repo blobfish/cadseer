@@ -49,6 +49,7 @@ namespace ftr
       static const QString Distance = "Distance"; //!< chamfer
       static const QString Angle = "Angle"; //!< draft
       static const QString Offset = "Offset"; //!< datum plane
+      static const QString CSys = "Coordinate System"; //!< feature with a coordinate system.
     }
     
     /*! Descriptor for path parameters.*/
@@ -130,6 +131,7 @@ namespace ftr
       Parameter(const QString &nameIn, bool valueIn);
       Parameter(const QString &nameIn, const boost::filesystem::path &valueIn, PathType);
       Parameter(const QString &nameIn, const osg::Vec3d &valueIn);
+      Parameter(const QString &nameIn, const osg::Matrixd &valueIn);
       
       QString getName() const {return name;}
       void setName(const QString &nameIn){name = nameIn;}
@@ -192,6 +194,8 @@ namespace ftr
       
       //@{
       //! osg::Matrixd support functions.
+      bool setValue(const osg::Matrixd&); //<! true = value was changed.
+      bool setValueQuiet(const osg::Matrixd&);
       explicit operator osg::Matrixd() const;
       //@}
       

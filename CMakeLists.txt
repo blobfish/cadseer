@@ -293,7 +293,6 @@ SET(MESSAGE_SOURCES
 SET(FEATURE_SOURCES
     feature/parameter.cpp
     feature/base.cpp
-    feature/csysbase.cpp
     feature/box.cpp
     feature/boxbuilder.cpp
     feature/sphere.cpp
@@ -328,6 +327,11 @@ SET(FEATURE_SOURCES
     feature/nest.cpp
     feature/dieset.cpp
     feature/quote.cpp
+    )
+    
+SET(ANNEX_SOURCES
+    annex/base.cpp
+    annex/csysdragger.cpp
     )
     
 SET(EXPRESSION_SOURCES
@@ -386,7 +390,6 @@ SET(PROJECT_SOURCES
     project/serial/xsdcxxoutput/project.cpp
     project/serial/xsdcxxoutput/view.cpp
     project/serial/xsdcxxoutput/featurebase.cpp
-    project/serial/xsdcxxoutput/featurecsysbase.cpp
     project/serial/xsdcxxoutput/featurebox.cpp
     project/serial/xsdcxxoutput/featurecylinder.cpp
     project/serial/xsdcxxoutput/featuresphere.cpp
@@ -488,6 +491,7 @@ SET(CADSEER_SOURCES
     ${GESTURE_SOURCES}
     ${MESSAGE_SOURCES}
     ${FEATURE_SOURCES}
+    ${ANNEX_SOURCES}
     ${EXPRESSION_SOURCES}
     ${SELECTION_SOURCES}
     ${TOOLS_SOURCES}

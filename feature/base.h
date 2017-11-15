@@ -41,6 +41,7 @@
 #include <feature/states.h>
 #include <feature/parameter.h>
 #include <feature/updatepayload.h>
+#include <annex/base.h>
 
 class QDir;
 class QTextStream;
@@ -102,6 +103,18 @@ public:
   bool hasParameter(const boost::uuids::uuid &idIn) const;
   prm::Parameter* getParameter(const boost::uuids::uuid &idin) const;
   const prm::Vector& getParameterVector() const{return parameterVector;}
+  
+  ann::Annexes annexes;
+  bool hasAnnex(ann::Type t)
+  {
+    return static_cast<bool>(annexes.count(t));
+  }
+  template <typename T> T& getAnnex(ann::Type t)
+  {
+    T* out = dynamic_cast<T*>(annexes.at(t));
+    assert(out);
+    return *out;
+  }
   
   virtual void serialWrite(const QDir &); //!< override in leaf classes only.
   std::string getFileName() const; //!< used by git.
