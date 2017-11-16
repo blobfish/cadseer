@@ -19,7 +19,7 @@
 
 #include <viewer/spaceballosgevent.h>
 
-using namespace spb;
+using namespace vwr;
 
 SpaceballOSGEvent::SpaceballOSGEvent() : osg::Referenced()
 {

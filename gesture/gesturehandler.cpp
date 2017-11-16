@@ -70,15 +70,15 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
 {
   if (eventAdapter.getEventType() == osgGA::GUIEventAdapter::USER)
   {
-    const spb::SpaceballOSGEvent *event = 
-      dynamic_cast<const spb::SpaceballOSGEvent *>(eventAdapter.getUserData());
+    const vwr::SpaceballOSGEvent *event = 
+      dynamic_cast<const vwr::SpaceballOSGEvent *>(eventAdapter.getUserData());
     assert (event);
     
-    if (event->theType == spb::SpaceballOSGEvent::Button)
+    if (event->theType == vwr::SpaceballOSGEvent::Button)
     {
       int currentButton = event->buttonNumber;
-      spb::SpaceballOSGEvent::ButtonState currentState = event->theButtonState;
-      if (currentState == spb::SpaceballOSGEvent::Pressed)
+      vwr::SpaceballOSGEvent::ButtonState currentState = event->theButtonState;
+      if (currentState == vwr::SpaceballOSGEvent::Pressed)
       {
         spaceballButton = currentButton;
         if (!rightButtonDown)
@@ -101,7 +101,7 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
       }
       else
       {
-        assert(currentState == spb::SpaceballOSGEvent::Released);
+        assert(currentState == vwr::SpaceballOSGEvent::Released);
         spaceballButton = -1;
         observer->out(msg::buildStatusMessage(""));
       }

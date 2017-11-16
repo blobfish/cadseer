@@ -33,18 +33,18 @@ GLEventWidget::GLEventWidget(const QGLFormat& format, QWidget* parent, const QGL
 
 bool GLEventWidget::event(QEvent* event)
 {
-    if (event->type() == spb::MotionEvent::Type)
+    if (event->type() == vwr::MotionEvent::Type)
     {
-        static_cast<spb::MotionEvent*>(event)->setHandled(true);
+        static_cast<vwr::MotionEvent*>(event)->setHandled(true);
         osg::ref_ptr<osgGA::GUIEventAdapter> osgEvent = _gw->getEventQueue()->createEvent();
         osgEvent->setEventType(osgGA::GUIEventAdapter::USER);
         osgEvent->setUserData(convertEvent(event).get());
         _gw->getEventQueue()->addEvent(osgEvent);
         return true;
     }
-    else if (event->type() == spb::ButtonEvent::Type)
+    else if (event->type() == vwr::ButtonEvent::Type)
     {
-      static_cast<spb::ButtonEvent*>(event)->setHandled(true);
+      static_cast<vwr::ButtonEvent*>(event)->setHandled(true);
       osg::ref_ptr<osgGA::GUIEventAdapter> osgEvent = _gw->getEventQueue()->createEvent();
       osgEvent->setEventType(osgGA::GUIEventAdapter::USER);
       osgEvent->setUserData(convertEvent(event).get());
@@ -54,13 +54,13 @@ bool GLEventWidget::event(QEvent* event)
     return inherited::event(event);
 }
 
-osg::ref_ptr<spb::SpaceballOSGEvent> GLEventWidget::convertEvent(QEvent* qEvent)
+osg::ref_ptr<vwr::SpaceballOSGEvent> GLEventWidget::convertEvent(QEvent* qEvent)
 {
-    osg::ref_ptr<spb::SpaceballOSGEvent> osgEvent = new spb::SpaceballOSGEvent();
-    if (qEvent->type() == spb::MotionEvent::Type)
+    osg::ref_ptr<vwr::SpaceballOSGEvent> osgEvent = new vwr::SpaceballOSGEvent();
+    if (qEvent->type() == vwr::MotionEvent::Type)
     {
-        spb::MotionEvent *spaceQEvent = dynamic_cast<spb::MotionEvent *>(qEvent);
-        osgEvent->theType = spb::SpaceballOSGEvent::Motion;
+        vwr::MotionEvent *spaceQEvent = dynamic_cast<vwr::MotionEvent *>(qEvent);
+        osgEvent->theType = vwr::SpaceballOSGEvent::Motion;
         osgEvent->translationX = spaceQEvent->translationX();
         osgEvent->translationY = spaceQEvent->translationY();
         osgEvent->translationZ = spaceQEvent->translationZ();
@@ -68,16 +68,16 @@ osg::ref_ptr<spb::SpaceballOSGEvent> GLEventWidget::convertEvent(QEvent* qEvent)
         osgEvent->rotationY = spaceQEvent->rotationY();
         osgEvent->rotationZ = spaceQEvent->rotationZ();
     }
-    else if (qEvent->type() == spb::ButtonEvent::Type)
+    else if (qEvent->type() == vwr::ButtonEvent::Type)
     {
-      spb::ButtonEvent *buttonQEvent = dynamic_cast<spb::ButtonEvent*>(qEvent);
+      vwr::ButtonEvent *buttonQEvent = dynamic_cast<vwr::ButtonEvent*>(qEvent);
       assert(buttonQEvent);
-      osgEvent->theType = spb::SpaceballOSGEvent::Button;
+      osgEvent->theType = vwr::SpaceballOSGEvent::Button;
       osgEvent->buttonNumber = buttonQEvent->buttonNumber();
-      if (buttonQEvent->buttonStatus() == spb::BUTTON_PRESSED)
-        osgEvent->theButtonState = spb::SpaceballOSGEvent::Pressed;
+      if (buttonQEvent->buttonStatus() == vwr::BUTTON_PRESSED)
+        osgEvent->theButtonState = vwr::SpaceballOSGEvent::Pressed;
       else
-        osgEvent->theButtonState = spb::SpaceballOSGEvent::Released;
+        osgEvent->theButtonState = vwr::SpaceballOSGEvent::Released;
     }
     
     return osgEvent;

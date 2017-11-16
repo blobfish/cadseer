@@ -19,15 +19,15 @@
 
 #include <viewer/spaceballqevent.h>
 
-using namespace spb;
+using namespace vwr;
 
-int spb::MotionEvent::Type = -1;
-int spb::ButtonEvent::Type = -1;
+int vwr::MotionEvent::Type = -1;
+int vwr::ButtonEvent::Type = -1;
 
-void spb::registerEvents()
+void vwr::registerEvents()
 {
-    spb::MotionEvent::Type = QEvent::registerEventType();
-    spb::ButtonEvent::Type = QEvent::registerEventType();
+    vwr::MotionEvent::Type = QEvent::registerEventType();
+    vwr::ButtonEvent::Type = QEvent::registerEventType();
 }
 
 EventBase::EventBase(QEvent::Type event) : QInputEvent(static_cast<QEvent::Type>(event))

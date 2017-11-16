@@ -22,7 +22,7 @@
 
 #include <osgQt/GraphicsWindowQt>
 
-namespace spb{class SpaceballOSGEvent;}
+namespace vwr{class SpaceballOSGEvent;}
 
 namespace vwr
 {
@@ -36,7 +36,7 @@ protected:
     virtual bool event(QEvent* event);
 
 private:
-    osg::ref_ptr<spb::SpaceballOSGEvent> convertEvent(QEvent* qEvent);
+    osg::ref_ptr<vwr::SpaceballOSGEvent> convertEvent(QEvent* qEvent);
 };
 }
 

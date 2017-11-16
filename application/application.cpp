@@ -140,9 +140,9 @@ bool Application::notify(QObject* receiver, QEvent* e)
   try
   {
     bool outDefault = QApplication::notify(receiver, e);
-    if (e->type() == spb::MotionEvent::Type)
+    if (e->type() == vwr::MotionEvent::Type)
     {
-      spb::MotionEvent *motionEvent = dynamic_cast<spb::MotionEvent*>(e);
+      vwr::MotionEvent *motionEvent = dynamic_cast<vwr::MotionEvent*>(e);
       if
       (
         (!motionEvent) ||
@@ -151,7 +151,7 @@ bool Application::notify(QObject* receiver, QEvent* e)
         return true;
         
       //make a new event and post to parent.
-      spb::MotionEvent *newEvent = new spb::MotionEvent(*motionEvent);
+      vwr::MotionEvent *newEvent = new vwr::MotionEvent(*motionEvent);
       QObject *theParent = receiver->parent();
       if (!theParent || theParent == mainWindow.get())
         postEvent(mainWindow->getViewer()->getGraphicsWidget(), newEvent);
@@ -159,9 +159,9 @@ bool Application::notify(QObject* receiver, QEvent* e)
         postEvent(theParent, newEvent);
       return true;
     }
-    else if(e->type() == spb::ButtonEvent::Type)
+    else if(e->type() == vwr::ButtonEvent::Type)
     {
-      spb::ButtonEvent *buttonEvent = dynamic_cast<spb::ButtonEvent*>(e);
+      vwr::ButtonEvent *buttonEvent = dynamic_cast<vwr::ButtonEvent*>(e);
       if
       (
         (!buttonEvent) ||
@@ -170,7 +170,7 @@ bool Application::notify(QObject* receiver, QEvent* e)
         return true;
         
       //make a new event and post to parent.
-      spb::ButtonEvent *newEvent = new spb::ButtonEvent(*buttonEvent);
+      vwr::ButtonEvent *newEvent = new vwr::ButtonEvent(*buttonEvent);
       QObject *theParent = receiver->parent();
       if (!theParent || theParent == mainWindow.get())
         postEvent(mainWindow->getViewer()->getGraphicsWidget(), newEvent);
@@ -193,7 +193,7 @@ void Application::initializeSpaceball()
     if (!mainWindow)
         return;
 
-    spb::registerEvents();
+    vwr::registerEvents();
 
     if (spnav_open() == -1)
     {
@@ -222,7 +222,7 @@ void Application::spaceballPollSlot()
 
   if (navEvent.type == SPNAV_EVENT_MOTION)
   {
-    spb::MotionEvent *qEvent = new spb::MotionEvent();
+    vwr::MotionEvent *qEvent = new vwr::MotionEvent();
     qEvent->setTranslations(navEvent.motion.x, navEvent.motion.y, navEvent.motion.z);
     qEvent->setRotations(navEvent.motion.rx, navEvent.motion.ry, navEvent.motion.rz);
     this->postEvent(currentWidget, qEvent);
@@ -231,12 +231,12 @@ void Application::spaceballPollSlot()
 
   if (navEvent.type == SPNAV_EVENT_BUTTON)
   {
-    spb::ButtonEvent *qEvent = new spb::ButtonEvent();
+    vwr::ButtonEvent *qEvent = new vwr::ButtonEvent();
     qEvent->setButtonNumber(navEvent.button.bnum);
     if (navEvent.button.press == 1)
-      qEvent->setButtonStatus(spb::BUTTON_PRESSED);
+      qEvent->setButtonStatus(vwr::BUTTON_PRESSED);
     else
-      qEvent->setButtonStatus(spb::BUTTON_RELEASED);
+      qEvent->setButtonStatus(vwr::BUTTON_RELEASED);
     this->postEvent(currentWidget, qEvent);
     return;
   }

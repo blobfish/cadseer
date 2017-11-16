@@ -188,7 +188,7 @@ bool SpaceballManipulator::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIAc
 {
     if (ea.getEventType() == osgGA::GUIEventAdapter::USER)
     {
-        const spb::SpaceballOSGEvent *event = static_cast<const spb::SpaceballOSGEvent *>(ea.getUserData());
+        const vwr::SpaceballOSGEvent *event = static_cast<const vwr::SpaceballOSGEvent *>(ea.getUserData());
         if (!event || !cam || !_node.get())
         {
             std::cout << "error in spaceball event" << std::endl;
@@ -422,7 +422,7 @@ void SpaceballManipulator::getViewData()
     viewData.x.normalize();
 }
 
-void SpaceballManipulator::goOrtho(const spb::SpaceballOSGEvent *event)
+void SpaceballManipulator::goOrtho(const vwr::SpaceballOSGEvent *event)
 {
     osg::Vec3d newEye, newCenter, newUp;
     newEye = spaceEye;
@@ -497,7 +497,7 @@ osg::Vec3d SpaceballManipulator::projectToBound(const osg::Vec3d &eye, osg::Vec3
     return out;
 }
 
-void SpaceballManipulator::goPerspective(const spb::SpaceballOSGEvent *event)
+void SpaceballManipulator::goPerspective(const vwr::SpaceballOSGEvent *event)
 {
     osg::Vec3d newEye, newCenter, newUp;
     newEye = spaceEye;

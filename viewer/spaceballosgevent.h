@@ -22,7 +22,7 @@
 
 #include <osg/Referenced>
 
-namespace spb
+namespace vwr
 {
 class SpaceballOSGEvent : public osg::Referenced
 {
