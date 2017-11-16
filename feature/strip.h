@@ -25,7 +25,7 @@
 #include <feature/base.h>
 
 namespace prj{namespace srl{class FeatureStrip;}}
-
+namespace ann{class SeerShape;}
 namespace ftr
 {
   class Strip : public Base
@@ -36,6 +36,7 @@ namespace ftr
     constexpr static const char *nest = "Nest";
     
     Strip();
+    virtual ~Strip() override;
     
     virtual void updateModel(const UpdatePayload&) override;
     virtual Type getType() const override {return Type::Strip;}
@@ -65,6 +66,7 @@ namespace ftr
     osg::ref_ptr<lbr::PLabel> gapLabel;
     osg::ref_ptr<lbr::PLabel> autoCalcLabel;
     std::vector<osg::ref_ptr<osg::MatrixTransform>> stationLabels;
+    std::unique_ptr<ann::SeerShape> sShape;
     
     osg::Vec3d feedDirection; //!< eventually a parameter.
     double stripHeight; //!< used by quote to get travel.

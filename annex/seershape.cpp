@@ -43,13 +43,13 @@
 #include <tools/idtools.h>
 #include <project/serial/xsdcxxoutput/featurebase.h>
 #include <feature/shapehistory.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 
-using namespace ftr;
+using namespace ann;
 
 using boost::uuids::uuid;
 
-std::ostream& ftr::operator<<(std::ostream& os, const ShapeIdRecord& record)
+std::ostream& ann::operator<<(std::ostream& os, const ShapeIdRecord& record)
 {
   os << gu::idToString(record.id) << "      " << 
     ShapeIdKeyHash()(record.shape) << "      " <<
@@ -58,7 +58,7 @@ std::ostream& ftr::operator<<(std::ostream& os, const ShapeIdRecord& record)
   return os;
 }
 
-std::ostream& ftr::operator<<(std::ostream& os, const ShapeIdContainer& container)
+std::ostream& ann::operator<<(std::ostream& os, const ShapeIdContainer& container)
 {
   typedef ShapeIdContainer::index<ShapeIdRecord::ById>::type List;
   const List &list = container.get<ShapeIdRecord::ById>();
@@ -69,13 +69,13 @@ std::ostream& ftr::operator<<(std::ostream& os, const ShapeIdContainer& containe
 
 
 
-ostream& ftr::operator<<(ostream& os, const EvolveRecord& record)
+ostream& ann::operator<<(ostream& os, const EvolveRecord& record)
 {
   os << gu::idToString(record.inId) << "      " << gu::idToString(record.outId) << std::endl;
   return os;
 }
 
-ostream& ftr::operator<<(ostream& os, const EvolveContainer& container)
+ostream& ann::operator<<(ostream& os, const EvolveContainer& container)
 {
   typedef EvolveContainer::index<EvolveRecord::ByInId>::type List;
   const List &list = container.get<EvolveRecord::ByInId>();
@@ -86,13 +86,13 @@ ostream& ftr::operator<<(ostream& os, const EvolveContainer& container)
 
 
 
-ostream& ftr::operator<<(ostream& os, const FeatureTagRecord& record)
+ostream& ann::operator<<(ostream& os, const FeatureTagRecord& record)
 {
   os << gu::idToString(record.id) << "      " << record.tag << std::endl;
   return os;
 }
 
-ostream& ftr::operator<<(ostream& os, const FeatureTagContainer& container)
+ostream& ann::operator<<(ostream& os, const FeatureTagContainer& container)
 {
   typedef FeatureTagContainer::index<FeatureTagRecord::ById>::type List;
   const List &list = container.get<FeatureTagRecord::ById>();
@@ -101,7 +101,8 @@ ostream& ftr::operator<<(ostream& os, const FeatureTagContainer& container)
   return os;
 }
 
-
+SeerShape::SeerShape() : Base(){}
+SeerShape::~SeerShape(){}
 
 void SeerShape::setOCCTShape(const TopoDS_Shape& shapeIn)
 {
@@ -391,7 +392,7 @@ void SeerShape::insertEvolve(const EvolveRecord &recordIn)
   evolveContainer.insert(recordIn);
 }
 
-void SeerShape::fillInHistory(ShapeHistory &historyIn, const BID::uuid &featureId) const
+void SeerShape::fillInHistory(ftr::ShapeHistory &historyIn, const BID::uuid &featureId) const
 {
   typedef EvolveContainer::index<EvolveRecord::ByInId>::type List;
   const List &list = evolveContainer.get<EvolveRecord::ByInId>();
@@ -413,7 +414,7 @@ void SeerShape::fillInHistory(ShapeHistory &historyIn, const BID::uuid &featureI
   }
 }
 
-void SeerShape::replaceId(const uuid &staleId, const uuid &freshId, const ShapeHistory &)
+void SeerShape::replaceId(const uuid &staleId, const uuid &freshId, const ftr::ShapeHistory &)
 {
   //not sure shape history should be passed into seershape?
   //don't see using this involving nil ids.
@@ -466,7 +467,7 @@ void SeerShape::replaceId(const uuid &staleId, const uuid &freshId, const ShapeH
   //I don't think I need to update the IdSet is either?
 }
 
-std::vector<uuid> SeerShape::resolvePick(const ShapeHistory &pickHistory) const
+std::vector<uuid> SeerShape::resolvePick(const ftr::ShapeHistory &pickHistory) const
 {
   std::vector<uuid> out;
   
@@ -980,7 +981,7 @@ void SeerShape::derivedMatch()
         continue;
       
       bool bail = false;
-      ftr::IdSet set;
+      IdSet set;
       occt::ShapeVector parents = useGetParentsOfType(shape, parentType);
       for (const auto &parent : parents)
       {
@@ -997,11 +998,11 @@ void SeerShape::derivedMatch()
       if (bail)
         continue;
       uuid id = gu::createNilId();
-      ftr::DerivedContainer::iterator derivedIt = derivedContainer.find(set);
+      DerivedContainer::iterator derivedIt = derivedContainer.find(set);
       if (derivedIt == derivedContainer.end())
       {
         id = gu::createRandomId();
-        ftr::DerivedContainer::value_type newEntry(set, id);
+        DerivedContainer::value_type newEntry(set, id);
         derivedContainer.insert(newEntry);
         insertEvolve(gu::createNilId(), id);
       }
@@ -1312,10 +1313,10 @@ prj::srl::SeerShape SeerShape::serialOut()
   }
   
   prj::srl::DerivedContainer dContainerOut;
-  for (ftr::DerivedContainer::const_iterator dIt = derivedContainer.begin(); dIt != derivedContainer.end(); ++dIt)
+  for (DerivedContainer::const_iterator dIt = derivedContainer.begin(); dIt != derivedContainer.end(); ++dIt)
   {
     prj::srl::IdSet setIn;
-    for (ftr::IdSet::const_iterator sIt = dIt->first.begin(); sIt != dIt->first.end(); ++sIt)
+    for (IdSet::const_iterator sIt = dIt->first.begin(); sIt != dIt->first.end(); ++sIt)
       setIn.id().push_back(gu::idToString(*sIt));
     prj::srl::DerivedRecord::IdType mId(gu::idToString(dIt->second));
     prj::srl::DerivedRecord record
@@ -1371,7 +1372,7 @@ void SeerShape::serialIn(const prj::srl::SeerShape &sSeerShapeIn)
   derivedContainer.clear();
   for (const prj::srl::DerivedRecord &sDRecord : sSeerShapeIn.derivedContainer().derivedRecord())
   {
-    ftr::IdSet setIn;
+    IdSet setIn;
     for (const auto &idSet : sDRecord.idSet().id())
       setIn.insert(gu::stringToId(idSet));
     boost::uuids::uuid mId = gu::stringToId(sDRecord.id());

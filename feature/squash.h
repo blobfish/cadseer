@@ -26,6 +26,7 @@
 #include <feature/base.h>
 
 namespace prj{namespace srl{class FeatureSquash;}}
+namespace ann{class SeerShape;}
 
 namespace ftr
 {
@@ -39,7 +40,7 @@ namespace ftr
   {
   public:
     Squash();
-    
+    virtual ~Squash() override;
     virtual void updateModel(const UpdatePayload&) override;
     virtual Type getType() const override {return Type::Squash;}
     virtual const std::string& getTypeString() const override {return toString(Type::Squash);}
@@ -59,6 +60,7 @@ namespace ftr
     boost::uuids::uuid wireId; //!< outer wire of face.
     std::shared_ptr<prm::Parameter> granularity; //!< 0 means no update.
     osg::ref_ptr<lbr::PLabel> label;
+    std::unique_ptr<ann::SeerShape> sShape;
   };
 }
 

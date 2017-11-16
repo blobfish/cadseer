@@ -192,7 +192,7 @@ void Model::featureAddedDispatched(const msg::Message &messageIn)
   Vertex virginVertex = boost::add_vertex(stow->graph);
   stow->graph[virginVertex].featureId = message.feature->getId();
   stow->graph[virginVertex].state = message.feature->getState();
-  stow->graph[virginVertex].hasSeerShape = message.feature->hasSeerShape();
+  stow->graph[virginVertex].hasSeerShape = message.feature->hasAnnex(ann::Type::SeerShape);
   
   if (message.feature->isVisible3D())
     stow->graph[virginVertex].visibleIconShared->setPixmap(visiblePixmapEnabled);

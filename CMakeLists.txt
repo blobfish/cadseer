@@ -312,7 +312,6 @@ SET(FEATURE_SOURCES
     feature/booleanoperation.cpp
     feature/intersectionmapping.cpp
     feature/shapecheck.cpp
-    feature/seershape.cpp
     feature/seershapeinfo.cpp
     feature/datumplane.cpp
     feature/message.cpp
@@ -332,6 +331,7 @@ SET(FEATURE_SOURCES
 SET(ANNEX_SOURCES
     annex/base.cpp
     annex/csysdragger.cpp
+    annex/seershape.cpp
     )
     
 SET(EXPRESSION_SOURCES

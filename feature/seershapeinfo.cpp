@@ -28,7 +28,7 @@
 
 #include <tools/infotools.h>
 #include <tools/occtools.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <feature/seershapeinfo.h>
 
 namespace ftr
@@ -44,7 +44,7 @@ namespace ftr
 
 using namespace ftr;
 
-SeerShapeInfo::SeerShapeInfo(const SeerShape &shapeIn) : seerShape(shapeIn)
+SeerShapeInfo::SeerShapeInfo(const ann::SeerShape &shapeIn) : seerShape(shapeIn)
 {
     functionMapper = std::move(std::unique_ptr<FunctionMapper>(new FunctionMapper()));
     functionMapper->functionMap.insert(std::make_pair(TopAbs_COMPOUND, std::bind(&SeerShapeInfo::compInfo, this, std::placeholders::_1, std::placeholders::_2)));
@@ -70,7 +70,7 @@ QTextStream& SeerShapeInfo::getShapeInfo(QTextStream &streamIn, const boost::uui
     functionMapper->functionMap.at(shape.ShapeType())(streamIn, shape);
     //common to all shapes.
     streamIn << "    Orientation: " << ((shape.Orientation() == TopAbs_FORWARD) ? ("Forward") : ("Reversed")) << endl
-        << "    Hash code: " << ShapeIdKeyHash()(shape) << endl
+        << "    Hash code: " << ann::ShapeIdKeyHash()(shape) << endl
         << "    Shape id: " << QString::fromStdString(gu::idToString(idIn)) << endl;
     
     occt::BoundingBox bb(shape);    

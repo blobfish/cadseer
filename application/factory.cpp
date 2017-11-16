@@ -57,7 +57,7 @@
 #include <dialogs/preferences.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <feature/types.h>
 #include <feature/box.h>
 #include <feature/oblong.h>
@@ -493,7 +493,7 @@ void Factory::newChamferDispatched(const msg::Message&)
   
   ftr::SymChamfer symChamfer;
   symChamfer.distance = ftr::Chamfer::buildSymParameter();
-  const ftr::SeerShape &targetSeerShape = project->findFeature(targetFeatureId)->getSeerShape();
+  const ann::SeerShape &targetSeerShape = project->findFeature(targetFeatureId)->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
   for (const auto &currentSelection : containers)
   {
     if
@@ -542,7 +542,7 @@ void Factory::newDraftDispatched(const msg::Message&)
   uuid targetFeatureId = containers.at(0).featureId;
   
   ftr::DraftConvey convey;
-  const ftr::SeerShape &targetSeerShape = project->findFeature(targetFeatureId)->getSeerShape();
+  const ann::SeerShape &targetSeerShape = project->findFeature(targetFeatureId)->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
   for (const auto &currentSelection : containers)
   {
     if
@@ -624,8 +624,8 @@ void Factory::newHollowDispatched(const msg::Message&)
   
   uuid targetFeatureId = containers.at(0).featureId;
   ftr::Base *targetFeature = project->findFeature(targetFeatureId);
-  assert(targetFeature->hasSeerShape());
-  const ftr::SeerShape &targetSeerShape = targetFeature->getSeerShape();
+  assert(targetFeature->hasAnnex(ann::Type::SeerShape));
+  const ann::SeerShape &targetSeerShape = targetFeature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
   
   ftr::Picks hollowPicks;
   for (const auto &currentSelection : containers)
@@ -725,8 +725,15 @@ void Factory::exportOCCDispatched(const msg::Message&)
   prf::manager().saveConfig();
     
   assert(project);
+  
+  ftr::Base *f = project->findFeature(containers.at(0).featureId);
+  if (f->hasAnnex(ann::Type::SeerShape))
+  {
+    const ann::SeerShape &sShape = f->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+    if (!sShape.isNull())
+      BRepTools::Write(sShape.getRootOCCTShape(), fileName.toStdString().c_str());
+  }
     
-  BRepTools::Write(project->findFeature(containers.at(0).featureId)->getShape(), fileName.toStdString().c_str());
   observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
 }
 
@@ -842,10 +849,21 @@ void Factory::exportStepDispatched(const msg::Message&)
   
   //for now just get the first shape from selection.
   ftr::Base *feature = project->findFeature(containers.at(0).featureId);
-  const TopoDS_Shape &shape = feature->getShape();
+  if (!feature->hasAnnex(ann::Type::SeerShape))
+  {
+    observer->out(msg::buildStatusMessage("feature doesn't have SeerShape"));
+    return;
+  }
+  const ann::SeerShape &sShape = feature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+  if (sShape.isNull())
+  {
+    observer->out(msg::buildStatusMessage("SeerShape is null"));
+    return;
+  }
+  const TopoDS_Shape &shape = sShape.getRootOCCTShape();
   if (shape.IsNull())
   {
-    observer->out(msg::buildStatusMessage("Shape of feature is null"));
+    observer->out(msg::buildStatusMessage("OCCT Shape is null"));
     return;
   }
   
@@ -949,9 +967,9 @@ void Factory::debugDumpDispatched(const msg::Message&)
       continue;
     ftr::Base *feature = project->findFeature(container.featureId);
     assert(feature);
-    if (!feature->hasSeerShape())
+    if (!feature->hasAnnex(ann::Type::SeerShape))
       continue;
-    const ftr::SeerShape &seerShape = feature->getSeerShape();
+    const ann::SeerShape &seerShape = feature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     std::cout << std::endl;
     std::cout << "feature name: " << feature->getName().toStdString() << "    feature id: " << gu::idToString(feature->getId()) << std::endl;
     std::cout << "shape id container:" << std::endl; seerShape.dumpShapeIdContainer(std::cout); std::cout << std::endl;
@@ -1019,10 +1037,10 @@ void Factory::debugShapeGraphDispatched(const msg::Message&)
         if (container.selectionType != slc::Type::Object)
             continue;
         ftr::Base *feature = project->findFeature(container.featureId);
-        if (!feature->hasSeerShape())
+        if (!feature->hasAnnex(ann::Type::SeerShape))
             continue;
         QString fileName = fileNameBase + QString::fromStdString(gu::idToString(feature->getId())) + ".dot";
-        const ftr::SeerShape &shape = feature->getSeerShape();
+        const ann::SeerShape &shape = feature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
         shape.dumpGraph(fileName.toStdString());
         
         QDesktopServices::openUrl(QUrl(fileName));
@@ -1079,7 +1097,7 @@ void Factory::viewInfoDispatched(const msg::Message &)
           }
           else if (container.selectionType == slc::Type::StartPoint)
           {
-              const ftr::SeerShape &s = feature->getSeerShape();
+              const ann::SeerShape &s = feature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
               feature->getShapeInfo(stream, s.useGetStartVertex(container.shapeId));
               forcepoint(stream)
                   << qSetRealNumberPrecision(12)
@@ -1090,7 +1108,7 @@ void Factory::viewInfoDispatched(const msg::Message &)
           }
           else if (container.selectionType == slc::Type::EndPoint)
           {
-            const ftr::SeerShape &s = feature->getSeerShape();
+            const ann::SeerShape &s = feature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
             feature->getShapeInfo(stream, s.useGetEndVertex(container.shapeId));
             forcepoint(stream)
               << qSetRealNumberPrecision(12)

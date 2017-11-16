@@ -35,7 +35,7 @@
 #include <globalutilities.h>
 #include <tools/idtools.h>
 #include <feature/base.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <feature/intersectionmapping.h>
 #include <feature/booleanidmapper.h>
 
@@ -47,17 +47,17 @@ BooleanIdMapper::BooleanIdMapper
   const UpdateMap& updateMapIn,
   BOPAlgo_Builder &builderIn,
   IMapWrapper &iMapWrapperIn,
-  SeerShape *seerShapeOutIn 
+  ann::SeerShape *seerShapeOutIn 
 ):
 updateMap(updateMapIn),
 builder(builderIn),
 iMapWrapper(iMapWrapperIn),
 seerShapeOut(seerShapeOutIn),
-inputTarget(updateMap.find(ftr::InputType::target)->second->getSeerShape())
+inputTarget(updateMap.find(ftr::InputType::target)->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape))
 {
   for (auto pairIt = updateMapIn.equal_range(InputType::tool); pairIt.first != pairIt.second; ++pairIt.first)
   {
-    const SeerShape &toolSeerShape = pairIt.first->second->getSeerShape();
+    const ann::SeerShape &toolSeerShape = pairIt.first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     assert(!toolSeerShape.isNull());
     inputTools.push_back(&toolSeerShape);
   }

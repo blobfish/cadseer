@@ -41,7 +41,7 @@
 #include <globalutilities.h>
 #include <tools/idtools.h>
 #include <feature/base.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <feature/inert.h>
 #include <feature/shapehistory.h>
 #include <expressions/manager.h>
@@ -291,10 +291,10 @@ void Project::removeFeature(const uuid& idIn)
       stow->connect(targetParent, *its.first, removedGraph[ce.first].inputType);
       sendConnectMessage(removedGraph[targetParent].feature->getId(), removedGraph[*its.first].feature->getId(), removedGraph[ce.first].inputType);
       
-      if (!feature->hasSeerShape())
+      if (!feature->hasAnnex(ann::Type::SeerShape))
         continue;
       //update ids.
-      for (const uuid &staleId : feature->getSeerShape().getAllShapeIds())
+      for (const uuid &staleId : feature->getAnnex<ann::SeerShape>(ann::Type::SeerShape).getAllShapeIds())
       {
         uuid freshId = shapeHistory->devolve(stow->graph[targetParent].feature->getId(), staleId);
         if (freshId.is_nil())
@@ -826,7 +826,15 @@ void Project::serialWrite()
     
     //we can't add a null shape to the compound.
     //so we check for null and add 1 vertex as a place holder.
-    TopoDS_Shape shapeOut = f->getShape();
+    TopoDS_Shape shapeOut;
+    if (f->hasAnnex(ann::Type::SeerShape))
+    {
+      const ann::SeerShape &sShape = f->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+      if (sShape.isNull() || sShape.getRootOCCTShape().IsNull())
+        std::cout << "WARNING: trying to write out null shape in: Project::serialWrite" << std::endl;
+      else
+        shapeOut = sShape.getRootOCCTShape();
+    }
     if (shapeOut.IsNull())
       shapeOut = BRepBuilderAPI_MakeVertex(gp_Pnt(0.0, 0.0, 0.0)).Vertex();
     

@@ -35,7 +35,7 @@
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <project/serial/xsdcxxoutput/featurechamfer.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <feature/shapecheck.h>
 #include <feature/chamfer.h>
 
@@ -44,7 +44,7 @@ using boost::uuids::uuid;
 
 QIcon Chamfer::icon;
 
-boost::uuids::uuid Chamfer::referenceFaceId(const SeerShape &seerShapeIn, const boost::uuids::uuid &edgeIdIn)
+boost::uuids::uuid Chamfer::referenceFaceId(const ann::SeerShape &seerShapeIn, const boost::uuids::uuid &edgeIdIn)
 {
   assert(seerShapeIn.hasShapeIdRecord(edgeIdIn));
   TopoDS_Shape edgeShape = seerShapeIn.findShapeIdRecord(edgeIdIn).shape;
@@ -62,14 +62,18 @@ std::shared_ptr< prm::Parameter > Chamfer::buildSymParameter()
   return out;
 }
 
-Chamfer::Chamfer() : Base()
+Chamfer::Chamfer() : Base(), sShape(new ann::SeerShape())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionChamfer.svg");
   
   name = QObject::tr("Chamfer");
   mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
+  
+  annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
 }
+
+Chamfer::~Chamfer(){}
 
 void Chamfer::addSymChamfer(const SymChamfer &chamferIn)
 {
@@ -97,7 +101,8 @@ void Chamfer::updateModel(const UpdatePayload &payloadIn)
     if (payloadIn.updateMap.count(InputType::target) != 1)
       throw std::runtime_error("no parent for chamfer");
     
-    const SeerShape &targetSeerShape = payloadIn.updateMap.equal_range(InputType::target).first->second->getSeerShape();
+    const ann::SeerShape &targetSeerShape = 
+    payloadIn.updateMap.equal_range(InputType::target).first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     
     BRepFilletAPI_MakeChamfer chamferMaker(targetSeerShape.getRootOCCTShape());
     for (const auto &chamfer : symChamfers)
@@ -146,17 +151,17 @@ void Chamfer::updateModel(const UpdatePayload &payloadIn)
     if (!check.isValid())
       throw std::runtime_error("shapeCheck failed");
 
-    seerShape->setOCCTShape(chamferMaker.Shape());
-    seerShape->shapeMatch(targetSeerShape);
-    seerShape->uniqueTypeMatch(targetSeerShape);
-    seerShape->modifiedMatch(chamferMaker, targetSeerShape);
+    sShape->setOCCTShape(chamferMaker.Shape());
+    sShape->shapeMatch(targetSeerShape);
+    sShape->uniqueTypeMatch(targetSeerShape);
+    sShape->modifiedMatch(chamferMaker, targetSeerShape);
     generatedMatch(chamferMaker, targetSeerShape);
-    seerShape->outerWireMatch(targetSeerShape);
-    seerShape->derivedMatch();
-    seerShape->dumpNils("chamfer feature"); //only if there are shapes with nil ids.
-    seerShape->dumpDuplicates("chamfer feature");
-    seerShape->ensureNoNils();
-    seerShape->ensureNoDuplicates();
+    sShape->outerWireMatch(targetSeerShape);
+    sShape->derivedMatch();
+    sShape->dumpNils("chamfer feature"); //only if there are shapes with nil ids.
+    sShape->dumpDuplicates("chamfer feature");
+    sShape->ensureNoNils();
+    sShape->ensureNoDuplicates();
     
     setSuccess();
   }
@@ -181,7 +186,7 @@ void Chamfer::updateModel(const UpdatePayload &payloadIn)
 }
 
 //duplicated with blend.
-void Chamfer::generatedMatch(BRepFilletAPI_MakeChamfer &chamferMakerIn, const SeerShape &targetShapeIn)
+void Chamfer::generatedMatch(BRepFilletAPI_MakeChamfer &chamferMakerIn, const ann::SeerShape &targetShapeIn)
 {
   using boost::uuids::uuid;
   
@@ -205,9 +210,9 @@ void Chamfer::generatedMatch(BRepFilletAPI_MakeChamfer &chamferMakerIn, const Se
     std::map<uuid, uuid>::iterator mapItFace;
     bool dummy;
     std::tie(mapItFace, dummy) = shapeMap.insert(std::make_pair(cId, gu::createRandomId()));
-    seerShape->updateShapeIdRecord(chamferFace, mapItFace->second);
+    sShape->updateShapeIdRecord(chamferFace, mapItFace->second);
     if (dummy) //insertion took place.
-      seerShape->insertEvolve(gu::createNilId(), mapItFace->second);
+      sShape->insertEvolve(gu::createNilId(), mapItFace->second);
     
     //now look for outerwire for newly generated face.
     //we use the generated face id to map to outer wire.
@@ -215,9 +220,9 @@ void Chamfer::generatedMatch(BRepFilletAPI_MakeChamfer &chamferMakerIn, const Se
     std::tie(mapItWire, dummy) = shapeMap.insert(std::make_pair(mapItFace->second, gu::createRandomId()));
     //now get the wire and update the result to id.
     const TopoDS_Shape &chamferedFaceWire = BRepTools::OuterWire(TopoDS::Face(chamferFace));
-    seerShape->updateShapeIdRecord(chamferedFaceWire, mapItWire->second);
+    sShape->updateShapeIdRecord(chamferedFaceWire, mapItWire->second);
     if (dummy) //insertion took place.
-      seerShape->insertEvolve(gu::createNilId(), mapItWire->second);
+      sShape->insertEvolve(gu::createNilId(), mapItWire->second);
   }
 }
 

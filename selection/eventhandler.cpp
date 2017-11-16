@@ -38,7 +38,7 @@
 #include <application/application.h>
 #include <project/project.h>
 #include <feature/base.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <selection/message.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
@@ -592,9 +592,9 @@ Container EventHandler::messageToContainer(const Message &messageIn)
   if (container.featureType == ftr::Type::Base)
     container.featureType = feature->getType();
   
-  if (feature->hasSeerShape() && !feature->getSeerShape().isNull())
+  if (feature->hasAnnex(ann::Type::SeerShape) && !feature->getAnnex<ann::SeerShape>(ann::Type::SeerShape).isNull())
   {
-    const ftr::SeerShape &seerShape = feature->getSeerShape();
+    const ann::SeerShape &seerShape = feature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     if
     (
       (messageIn.type == slc::Type::Object) ||

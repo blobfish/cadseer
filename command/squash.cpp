@@ -24,7 +24,7 @@
 #include <selection/eventhandler.h>
 #include <message/observer.h>
 #include <project/project.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <feature/squash.h>
 #include <tools/occtools.h>
 #include <tools/idtools.h>
@@ -68,7 +68,7 @@ void Squash::go()
       continue;
     ftr::Base *tf = project->findFeature(container.featureId);
     assert(tf);
-    if (!tf->hasSeerShape())
+    if (!tf->hasAnnex(ann::Type::SeerShape))
       continue;
     if (!f)
     {
@@ -80,7 +80,7 @@ void Squash::go()
         continue;
     }
     
-    const ftr::SeerShape &ss = f->getSeerShape();
+    const ann::SeerShape &ss = f->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     TopoDS_Face face = TopoDS::Face(ss.getOCCTShape(container.shapeId));  
     ftr::Pick pick;
     pick.id = container.shapeId;

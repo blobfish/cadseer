@@ -29,7 +29,7 @@
 #include <project/serial/xsdcxxoutput/featurecylinder.h>
 #include <annex/csysdragger.h>
 #include <feature/cylinderbuilder.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <feature/cylinder.h>
 
 using namespace ftr;
@@ -77,7 +77,8 @@ Cylinder::Cylinder() : Base(),
   radius(prm::Names::Radius, prf::manager().rootPtr->features().cylinder().get().radius()),
   height(prm::Names::Height, prf::manager().rootPtr->features().cylinder().get().height()),
   csys(prm::Names::CSys, osg::Matrixd::identity()),
-  csysDragger(new ann::CSysDragger(this, &csys))
+  csysDragger(new ann::CSysDragger(this, &csys)),
+  sShape(new ann::SeerShape())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionCylinder.svg");
@@ -94,6 +95,7 @@ Cylinder::Cylinder() : Base(),
   parameterVector.push_back(&height);
   parameterVector.push_back(&csys);
   
+  annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
   annexes.insert(std::make_pair(ann::Type::CSysDragger, csysDragger.get()));
   overlaySwitch->addChild(csysDragger->dragger);
   
@@ -196,7 +198,7 @@ void Cylinder::updateModel(const UpdatePayload&)
       static_cast<double>(height),
       gu::toOcc(static_cast<osg::Matrixd>(csys))
     );
-    seerShape->setOCCTShape(cylinderMaker.getSolid());
+    sShape->setOCCTShape(cylinderMaker.getSolid());
     updateResult(cylinderMaker);
     mainTransform->setMatrix(osg::Matrixd::identity());
     setSuccess();
@@ -233,18 +235,18 @@ void Cylinder::initializeMaps()
     uuid tempId = gu::createRandomId();
     tempIds.push_back(tempId);
     
-    EvolveRecord evolveRecord;
+    ann::EvolveRecord evolveRecord;
     evolveRecord.outId = tempId;
-    seerShape->insertEvolve(evolveRecord);
+    sShape->insertEvolve(evolveRecord);
   }
   
   //helper lamda
   auto insertIntoFeatureMap = [this](const uuid &idIn, FeatureTag featureTagIn)
   {
-    FeatureTagRecord record;
+    ann::FeatureTagRecord record;
     record.id = idIn;
     record.tag = featureTagMap.at(featureTagIn);
-    seerShape->insertFeatureTag(record);
+    sShape->insertFeatureTag(record);
   };
   
   //first we do the compound that is root. this is not in box maker.
@@ -274,11 +276,11 @@ void Cylinder::updateResult(const CylinderBuilder &cylinderBuilderIn)
   //helper lamda
   auto updateShapeByTag = [this](const TopoDS_Shape &shapeIn, FeatureTag featureTagIn)
   {
-    uuid localId = seerShape->featureTagId(featureTagMap.at(featureTagIn));
-    seerShape->updateShapeIdRecord(shapeIn, localId);
+    uuid localId = sShape->featureTagId(featureTagMap.at(featureTagIn));
+    sShape->updateShapeIdRecord(shapeIn, localId);
   };
   
-  updateShapeByTag(seerShape->getRootOCCTShape(), FeatureTag::Root);
+  updateShapeByTag(sShape->getRootOCCTShape(), FeatureTag::Root);
   updateShapeByTag(cylinderBuilderIn.getSolid(), FeatureTag::Solid);
   updateShapeByTag(cylinderBuilderIn.getShell(), FeatureTag::Shell);
   updateShapeByTag(cylinderBuilderIn.getFaceBottom(), FeatureTag::FaceBottom);
@@ -293,7 +295,7 @@ void Cylinder::updateResult(const CylinderBuilder &cylinderBuilderIn)
   updateShapeByTag(cylinderBuilderIn.getVertexBottom(), FeatureTag::VertexBottom);
   updateShapeByTag(cylinderBuilderIn.getVertexTop(), FeatureTag::VertexTop);
   
-  seerShape->setRootShapeId(seerShape->featureTagId(featureTagMap.at(FeatureTag::Root)));
+  sShape->setRootShapeId(sShape->featureTagId(featureTagMap.at(FeatureTag::Root)));
   
 }
 

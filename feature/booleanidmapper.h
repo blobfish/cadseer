@@ -30,24 +30,25 @@
 class BOPAlgo_Builder;
 class TopoDS_Shape;
 
+namespace ann{class SeerShape;}
+
 namespace ftr
 {
   class Base;
   class ResultContainerWrapper;
   class IMapWrapper;
-  class SeerShape;
   typedef std::multimap<std::string, const Base*> UpdateMap;
   
   class BooleanIdMapper
   {
   public:
-    BooleanIdMapper(const UpdateMap &, BOPAlgo_Builder &, IMapWrapper &, SeerShape *);
+    BooleanIdMapper(const UpdateMap &, BOPAlgo_Builder &, IMapWrapper &, ann::SeerShape *);
     void go();
     
     const UpdateMap &updateMap;
     BOPAlgo_Builder &builder; //couldn't make const. accessor functions not const.
     IMapWrapper &iMapWrapper;
-    SeerShape *seerShapeOut;
+    ann::SeerShape *seerShapeOut;
   private:
     void goIntersectionEdges();
     void goSingleSplits();
@@ -55,8 +56,8 @@ namespace ftr
     std::set<boost::uuids::uuid> iEdgeCache;
     void goSplitFaces();
     
-    const SeerShape &inputTarget;
-    std::vector<const SeerShape *> inputTools;
+    const ann::SeerShape &inputTarget;
+    std::vector<const ann::SeerShape *> inputTools;
   };
 }
 

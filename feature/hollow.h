@@ -29,15 +29,14 @@ class BRepOffsetAPI_MakeThickSolid;
 
 namespace lbr{class PLabel;}
 namespace prj{namespace srl{class FeatureHollow;}}
-
+namespace ann{class SeerShape;}
 namespace ftr
 {
-  class SeerShape;
-  
   class Hollow : public Base
   {
   public:
     Hollow();
+    virtual ~Hollow() override;
     virtual void updateModel(const UpdatePayload&) override;
     virtual Type getType() const override {return Type::Hollow;}
     virtual const std::string& getTypeString() const override {return toString(Type::Hollow);}
@@ -54,14 +53,15 @@ namespace ftr
     prm::Parameter offset;
     osg::ref_ptr<lbr::PLabel> label; //!< graphic icon
     Picks hollowPicks;
+    std::unique_ptr<ann::SeerShape> sShape;
     
     /*! used to map new geometry to old geometry. this will end up
      * more complicated than this as hollow can make splits.
      */ 
     std::map<boost::uuids::uuid, boost::uuids::uuid> shapeMap;
     
-    TopTools_ListOfShape resolveClosingFaces(const SeerShape &);
-    void generatedMatch(BRepOffsetAPI_MakeThickSolid&, const SeerShape &);
+    TopTools_ListOfShape resolveClosingFaces(const ann::SeerShape &);
+    void generatedMatch(BRepOffsetAPI_MakeThickSolid&, const ann::SeerShape &);
   };
 }
 

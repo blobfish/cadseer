@@ -51,7 +51,7 @@
 
 #include <application/application.h>
 #include <feature/base.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <message/message.h>
 #include <message/observer.h>
 #include <message/dispatch.h>
@@ -184,7 +184,7 @@ static osg::PositionAttitudeTransform* buildBoundingSphere(const osg::BoundingSp
 
 bool convertVertexSelection
 (
-  const ftr::SeerShape& seerShapeIn,
+  const ann::SeerShape& seerShapeIn,
   slc::Message &mInOut
 )
 {
@@ -209,7 +209,7 @@ bool convertVertexSelection
 }
 
 CheckPageBase::CheckPageBase(const ftr::Base &featureIn, QWidget *parent):
-  QWidget(parent), feature(featureIn), seerShape(featureIn.getSeerShape())
+  QWidget(parent), feature(featureIn), seerShape(featureIn.getAnnex<ann::SeerShape>(ann::Type::SeerShape))
 {
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
   
@@ -548,7 +548,7 @@ void BOPCheckPage::goSlot()
   
   //I don't why we need to make a copy, but it doesn't work without it.
   //BRepAlgoAPI_Check also makes a copy of the shape.
-  ftr::SeerShape workCopy = seerShape.createWorkCopy();
+  ann::SeerShape workCopy = seerShape.createWorkCopy();
   BOPAlgo_ArgumentAnalyzer BOPCheck;
   //   BOPCheck.StopOnFirstFaulty() = true; //this doesn't run any faster but gives us less results.
   BOPCheck.SetParallelMode(true); //this doesn't help for speed right now(occt 6.9.1).

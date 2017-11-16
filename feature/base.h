@@ -48,12 +48,9 @@ class QTextStream;
 
 namespace prj{namespace srl{class FeatureBase;}}
 namespace msg{class Message; class Observer;}
-
 namespace ftr
 {
-  class SeerShape;
-  class ShapeHistory;
-  
+class ShapeHistory;
 class Base
 {
 public:
@@ -90,24 +87,25 @@ public:
   virtual QTextStream& getInfo(QTextStream &) const;
   QTextStream&  getShapeInfo(QTextStream &, const boost::uuids::uuid&) const;
   boost::uuids::uuid getId() const {return id;}
-  const TopoDS_Shape& getShape() const;
-  void setShape(const TopoDS_Shape &in); //!< only used for serialize in!
   static TopoDS_Compound compoundWrap(const TopoDS_Shape &shapeIn);
   osg::Switch* getMainSwitch() const {return mainSwitch.get();}
   osg::Switch* getOverlaySwitch() const {return overlaySwitch.get();}
   osg::MatrixTransform* getMainTransform() const {return mainTransform.get();}
-  bool hasSeerShape() const {return static_cast<bool>(seerShape);}
-  const SeerShape& getSeerShape() const {assert(seerShape); return *seerShape;}
   bool hasParameter(const QString &nameIn) const; //!< parameter names are not unique.
   prm::Parameter* getParameter(const QString &nameIn) const; //!< parameter names are not unique.
   bool hasParameter(const boost::uuids::uuid &idIn) const;
   prm::Parameter* getParameter(const boost::uuids::uuid &idin) const;
   const prm::Vector& getParameterVector() const{return parameterVector;}
   
-  ann::Annexes annexes;
-  bool hasAnnex(ann::Type t)
+  bool hasAnnex(ann::Type t) const
   {
     return static_cast<bool>(annexes.count(t));
+  }
+  template <typename T> const T& getAnnex(ann::Type t) const
+  {
+    T* out = dynamic_cast<T*>(annexes.at(t));
+    assert(out);
+    return *out;
   }
   template <typename T> T& getAnnex(ann::Type t)
   {
@@ -133,14 +131,13 @@ protected:
   
   QString name;
   prm::Vector parameterVector;
+  ann::Annexes annexes;
   
   std::unique_ptr<msg::Observer> observer;
   
   boost::uuids::uuid id;
   ftr::State state;
   std::size_t constructionIndex; //!< for consistently ordered iteration. @see DAGView
-  
-  std::shared_ptr<SeerShape> seerShape;
   
   osg::ref_ptr<osg::Switch> mainSwitch;
   osg::ref_ptr<osg::MatrixTransform> mainTransform;

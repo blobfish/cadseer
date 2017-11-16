@@ -31,21 +31,25 @@
 #include <feature/booleanoperation.h>
 #include <feature/booleanidmapper.h>
 #include <feature/shapecheck.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <feature/union.h>
 
 using namespace ftr;
 
 QIcon Union::icon;
 
-Union::Union() : BooleanBase()
+Union::Union() : BooleanBase(), sShape(new ann::SeerShape())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionUnion.svg");
   
   name = QObject::tr("Union");
   mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
+  
+  annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
 }
+
+Union::~Union(){}
 
 void Union::updateModel(const UpdatePayload &payloadIn)
 {
@@ -68,13 +72,14 @@ void Union::updateModel(const UpdatePayload &payloadIn)
     }
     
     //target
-    const SeerShape &targetSeerShape = payloadIn.updateMap.equal_range(InputType::target).first->second->getSeerShape();
+    const ann::SeerShape &targetSeerShape =
+    payloadIn.updateMap.equal_range(InputType::target).first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     assert(!targetSeerShape.isNull());
     //tools
     occt::ShapeVector toolOCCTShapes;
     for (auto pairIt = payloadIn.updateMap.equal_range(InputType::tool); pairIt.first != pairIt.second; ++pairIt.first)
     {
-      const SeerShape &toolSeerShape = pairIt.first->second->getSeerShape();
+      const ann::SeerShape &toolSeerShape = pairIt.first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
       assert(!toolSeerShape.isNull());
       toolOCCTShapes.push_back(toolSeerShape.getRootOCCTShape());
     }
@@ -87,21 +92,21 @@ void Union::updateModel(const UpdatePayload &payloadIn)
     if (!check.isValid())
       throw std::runtime_error("shapeCheck failed");
     
-    seerShape->setOCCTShape(fuser.Shape());
-    seerShape->shapeMatch(targetSeerShape);
+    sShape->setOCCTShape(fuser.Shape());
+    sShape->shapeMatch(targetSeerShape);
     for (auto pairIt = payloadIn.updateMap.equal_range(InputType::tool); pairIt.first != pairIt.second; ++pairIt.first)
-      seerShape->shapeMatch(pairIt.first->second->getSeerShape());
-    seerShape->uniqueTypeMatch(targetSeerShape);
-    BooleanIdMapper idMapper(payloadIn.updateMap, fuser.getBuilder(), iMapWrapper, seerShape.get());
+      sShape->shapeMatch(pairIt.first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape));
+    sShape->uniqueTypeMatch(targetSeerShape);
+    BooleanIdMapper idMapper(payloadIn.updateMap, fuser.getBuilder(), iMapWrapper, sShape.get());
     idMapper.go();
-    seerShape->outerWireMatch(targetSeerShape);
+    sShape->outerWireMatch(targetSeerShape);
     for (auto pairIt = payloadIn.updateMap.equal_range(InputType::tool); pairIt.first != pairIt.second; ++pairIt.first)
-      seerShape->outerWireMatch(pairIt.first->second->getSeerShape());
-    seerShape->derivedMatch();
-    seerShape->dumpNils(getTypeString()); //only if there are shapes with nil ids.
-    seerShape->dumpDuplicates(getTypeString());
-    seerShape->ensureNoNils();
-    seerShape->ensureNoDuplicates();
+      sShape->outerWireMatch(pairIt.first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape));
+    sShape->derivedMatch();
+    sShape->dumpNils(getTypeString()); //only if there are shapes with nil ids.
+    sShape->dumpDuplicates(getTypeString());
+    sShape->ensureNoNils();
+    sShape->ensureNoDuplicates();
 
     setSuccess();
   }

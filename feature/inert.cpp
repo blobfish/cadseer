@@ -28,7 +28,7 @@
 #include <project/serial/xsdcxxoutput/featureinert.h>
 #include <globalutilities.h>
 #include <library/csysdragger.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <annex/csysdragger.h>
 #include <feature/inert.h>
 
@@ -40,7 +40,8 @@ QIcon Inert::icon;
 Inert::Inert(const TopoDS_Shape &shapeIn) :
 Base(),
 csys(prm::Names::CSys, osg::Matrixd::identity()),
-csysDragger(new ann::CSysDragger(this, &csys))
+csysDragger(new ann::CSysDragger(this, &csys)),
+sShape(new ann::SeerShape())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionInert.svg");
@@ -48,16 +49,17 @@ csysDragger(new ann::CSysDragger(this, &csys))
   name = QObject::tr("Inert");
   mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
-  seerShape->setOCCTShape(shapeIn);
-  seerShape->ensureNoNils();
+  sShape->setOCCTShape(shapeIn);
+  sShape->ensureNoNils();
   
   parameterVector.push_back(&csys);
   
+  annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
   annexes.insert(std::make_pair(ann::Type::CSysDragger, csysDragger.get()));
   overlaySwitch->addChild(csysDragger->dragger);
   
   //sync transformations.
-  csys.setValue(gu::toOsg(seerShape->getRootOCCTShape().Location().Transformation()));
+  csys.setValue(gu::toOsg(sShape->getRootOCCTShape().Location().Transformation()));
   csysDragger->draggerUpdate(); //set dragger to parameter.
   
   csys.connectValue(boost::bind(&Inert::setModelDirty, this));
@@ -75,39 +77,39 @@ void Inert::updateModel(const UpdatePayload&)
     //store a map of offset to id for restoration.
     std::vector<uuid> oldIds;
     TopTools_IndexedMapOfShape osm; //old shape map
-    TopExp::MapShapes(seerShape->getRootOCCTShape(), osm);
+    TopExp::MapShapes(sShape->getRootOCCTShape(), osm);
     for (int i = 1; i < osm.Size() + 1; ++i)
     {
-      if (seerShape->hasShapeIdRecord(osm(i))) //probably degenerated edge.
-        oldIds.push_back(seerShape->findShapeIdRecord(osm(i)).id);
+      if (sShape->hasShapeIdRecord(osm(i))) //probably degenerated edge.
+        oldIds.push_back(sShape->findShapeIdRecord(osm(i)).id);
       else
         oldIds.push_back(gu::createNilId()); //place holder will be skipped again.
     }
-    uuid oldRootId = seerShape->getRootShapeId();
+    uuid oldRootId = sShape->getRootShapeId();
     
-    TopoDS_Shape tempShape(seerShape->getRootOCCTShape());
+    TopoDS_Shape tempShape(sShape->getRootOCCTShape());
     gp_Ax3 tempAx3(gu::toOcc(osg::Matrixd::inverse(static_cast<osg::Matrixd>(csys))));
     gp_Trsf tempTrsf;
     tempTrsf.SetTransformation(tempAx3);
     TopLoc_Location freshLocation(tempTrsf);
     tempShape.Location(freshLocation);
-    seerShape->setOCCTShape(tempShape);
+    sShape->setOCCTShape(tempShape);
     
-    seerShape->updateShapeIdRecord(seerShape->getRootOCCTShape(), oldRootId);
-    seerShape->setRootShapeId(oldRootId);
+    sShape->updateShapeIdRecord(sShape->getRootOCCTShape(), oldRootId);
+    sShape->setRootShapeId(oldRootId);
     TopTools_IndexedMapOfShape nsm; //new shape map
-    TopExp::MapShapes(seerShape->getRootOCCTShape(), nsm);
+    TopExp::MapShapes(sShape->getRootOCCTShape(), nsm);
     for (int i = 1; i < nsm.Size() + 1; ++i)
     {
-      if (seerShape->hasShapeIdRecord(nsm(i))) //probably degenerated edge.
-        seerShape->updateShapeIdRecord(nsm(i), oldIds.at(i - 1));
+      if (sShape->hasShapeIdRecord(nsm(i))) //probably degenerated edge.
+        sShape->updateShapeIdRecord(nsm(i), oldIds.at(i - 1));
     }
     
-    seerShape->dumpNils("inert");
-    seerShape->dumpDuplicates("inert");
+    sShape->dumpNils("inert");
+    sShape->dumpDuplicates("inert");
     
-    seerShape->ensureNoNils();
-    seerShape->ensureNoDuplicates();
+    sShape->ensureNoNils();
+    sShape->ensureNoDuplicates();
     
     mainTransform->setMatrix(osg::Matrixd::identity());
     setSuccess();

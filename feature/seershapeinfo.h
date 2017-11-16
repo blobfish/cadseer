@@ -27,18 +27,17 @@ namespace boost{namespace uuids{struct uuid;}}
 class QTextStream;
 
 class TopoDS_Shape;
-
+namespace ann{class SeerShape;}
 namespace ftr
 {
-    class SeerShape;
     class SeerShapeInfo
     {
         public:
-            explicit SeerShapeInfo(const SeerShape &);
+            explicit SeerShapeInfo(const ann::SeerShape &);
             ~SeerShapeInfo();
             QTextStream& getShapeInfo(QTextStream&, const boost::uuids::uuid&);
         private:
-            const SeerShape &seerShape;
+            const ann::SeerShape &seerShape;
             
             class FunctionMapper;
             std::unique_ptr<FunctionMapper> functionMapper;

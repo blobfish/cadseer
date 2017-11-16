@@ -33,10 +33,9 @@ class BRepFilletAPI_MakeFillet;
 class TopoDS_Edge;
 
 namespace prj{namespace srl{class FeatureBlend;}}
-
+namespace ann{class SeerShape;}
 namespace ftr
 {
-  class SeerShape;
   class ShapeHistory;
 
 struct SimpleBlend
@@ -68,10 +67,11 @@ class Blend : public Base
 {
   public:
     Blend();
+    virtual ~Blend() override;
     
     static std::shared_ptr<prm::Parameter> buildRadiusParameter();
     static std::shared_ptr<prm::Parameter> buildPositionParameter();
-    static VariableBlend buildDefaultVariable(const SeerShape&, const Pick &, const ShapeHistory&);
+    static VariableBlend buildDefaultVariable(const ann::SeerShape&, const Pick &, const ShapeHistory&);
     
     void addSimpleBlend(const SimpleBlend&);
     void addVariableBlend(const VariableBlend&);
@@ -94,16 +94,17 @@ class Blend : public Base
      * used to map new generated face to outer wire.
      */ 
     std::map<boost::uuids::uuid, boost::uuids::uuid> shapeMap; //!< map edges or vertices to faces
+    std::unique_ptr<ann::SeerShape> sShape;
     
 private:
-    void generatedMatch(BRepFilletAPI_MakeFillet&, const SeerShape &);
+    void generatedMatch(BRepFilletAPI_MakeFillet&, const ann::SeerShape &);
     
     /*! now that we are 'resolving' picks we need to update the shapemap to ensure
      * consistant id output of generated faces.
      */
     void updateShapeMap(const boost::uuids::uuid&, const ShapeHistory &);
     void ensureNoFaceNils();
-    void dumpInfo(BRepFilletAPI_MakeFillet&, const SeerShape&);
+    void dumpInfo(BRepFilletAPI_MakeFillet&, const ann::SeerShape&);
     
     //needed for serial in.
     void addSimpleBlendQuiet(const SimpleBlend&);

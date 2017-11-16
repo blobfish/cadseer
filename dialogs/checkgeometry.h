@@ -48,8 +48,9 @@ class TopoDS_Shape;
 
 namespace osg{class PositionAttitudeTransform;}
 
-namespace ftr{class Base; class SeerShape;}
+namespace ftr{class Base;}
 namespace msg{class Message; class Observer;}
+namespace ann{class SeerShape;}
 
 namespace dlg
 {
@@ -62,7 +63,7 @@ namespace dlg
   protected:
     std::unique_ptr<msg::Observer> observer;
     const ftr::Base &feature;
-    const ftr::SeerShape &seerShape;
+    const ann::SeerShape &seerShape;
     osg::observer_ptr<osg::PositionAttitudeTransform> boundingSphere;
     osg::BoundingSphered minBoundingSphere;
   };

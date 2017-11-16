@@ -28,7 +28,7 @@
 #include <library/ipgroup.h>
 #include <library/csysdragger.h>
 #include <feature/boxbuilder.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <annex/csysdragger.h>
 #include <project/serial/xsdcxxoutput/featurebox.h>
 #include <feature/box.h>
@@ -126,7 +126,8 @@ Box::Box() :
   width(prm::Names::Width, prf::manager().rootPtr->features().box().get().width()),
   height(prm::Names::Height, prf::manager().rootPtr->features().box().get().height()),
   csys(prm::Names::CSys, osg::Matrixd::identity()),
-  csysDragger(new ann::CSysDragger(this, &csys))
+  csysDragger(new ann::CSysDragger(this, &csys)),
+  sShape(new ann::SeerShape())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionBox.svg");
@@ -144,6 +145,8 @@ Box::Box() :
   parameterVector.push_back(&width);
   parameterVector.push_back(&height);
   parameterVector.push_back(&csys);
+  
+  annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
   
   annexes.insert(std::make_pair(ann::Type::CSysDragger, csysDragger.get()));
   overlaySwitch->addChild(csysDragger->dragger);
@@ -269,7 +272,7 @@ void Box::updateModel(const UpdatePayload&)
       static_cast<double>(height),
       gu::toOcc(static_cast<osg::Matrixd>(csys))
     );
-    seerShape->setOCCTShape(boxMaker.getSolid());
+    sShape->setOCCTShape(boxMaker.getSolid());
     updateResult(boxMaker);
     mainTransform->setMatrix(osg::Matrixd::identity());
     setSuccess();
@@ -304,18 +307,18 @@ void Box::initializeMaps()
     uuid tempId = gu::createRandomId();
     tempIds.push_back(tempId);
     
-    EvolveRecord evolveRecord;
+    ann::EvolveRecord evolveRecord;
     evolveRecord.outId = tempId;
-    seerShape->insertEvolve(evolveRecord);
+    sShape->insertEvolve(evolveRecord);
   }
   
   //helper lamda
   auto insertIntoFeatureMap = [this](const uuid &idIn, FeatureTag featureTagIn)
   {
-    FeatureTagRecord record;
+    ann::FeatureTagRecord record;
     record.id = idIn;
     record.tag = featureTagMap.at(featureTagIn);
-    seerShape->insertFeatureTag(record);
+    sShape->insertFeatureTag(record);
   };
   
   insertIntoFeatureMap(tempIds.at(0), FeatureTag::Root);
@@ -365,11 +368,11 @@ void Box::updateResult(const BoxBuilder& boxMakerIn)
   //helper lamda
   auto updateShapeByTag = [this](const TopoDS_Shape &shapeIn, FeatureTag featureTagIn)
   {
-    uuid localId = seerShape->featureTagId(featureTagMap.at(featureTagIn));
-    seerShape->updateShapeIdRecord(shapeIn, localId);
+    uuid localId = sShape->featureTagId(featureTagMap.at(featureTagIn));
+    sShape->updateShapeIdRecord(shapeIn, localId);
   };
   
-  updateShapeByTag(seerShape->getRootOCCTShape(), FeatureTag::Root);
+  updateShapeByTag(sShape->getRootOCCTShape(), FeatureTag::Root);
   updateShapeByTag(boxMakerIn.getSolid(), FeatureTag::Solid);
   updateShapeByTag(boxMakerIn.getShell(), FeatureTag::Shell);
   updateShapeByTag(boxMakerIn.getFaceXP(), FeatureTag::FaceXP);
@@ -405,7 +408,7 @@ void Box::updateResult(const BoxBuilder& boxMakerIn)
   updateShapeByTag(boxMakerIn.getVertexXNYPZN(), FeatureTag::VertexXNYPZN);
   updateShapeByTag(boxMakerIn.getVertexXNYNZN(), FeatureTag::VertexXNYNZN);
   
-  seerShape->setRootShapeId(seerShape->featureTagId(featureTagMap.at(FeatureTag::Root)));
+  sShape->setRootShapeId(sShape->featureTagId(featureTagMap.at(FeatureTag::Root)));
   
 //   std::cout << std::endl << "update result:" << std::endl << resultContainer << std::endl;
 }

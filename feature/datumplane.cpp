@@ -41,7 +41,7 @@
 #include <modelviz/nodemaskdefs.h>
 #include <library/ipgroup.h>
 #include <modelviz/datumplane.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <feature/datumplane.h>
 #include <project/serial/xsdcxxoutput/featuredatumplane.h>
 
@@ -132,8 +132,8 @@ osg::Matrixd DatumPlanePlanarOffset::solve(const UpdatePayload::UpdateMap &mapIn
   {
     if (facePick.id.is_nil())
       throw std::runtime_error("DatumPlanePlanarOffset: nil faceId");
-    assert(parentFeature->hasSeerShape());
-    const SeerShape &shape = parentFeature->getSeerShape();
+    assert(parentFeature->hasAnnex(ann::Type::SeerShape));
+    const ann::SeerShape &shape = parentFeature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     
     std::vector<uuid> resolvedFaceIds = shape.resolvePick(facePick.shapeHistory);
     if (resolvedFaceIds.empty())
@@ -253,10 +253,10 @@ osg::Matrixd DatumPlanePlanarCenter::solve(const UpdatePayload::UpdateMap &mapIn
     UpdatePayload::UpdateMap::const_iterator it = mapIn.find(InputType::create);
     if (it == mapIn.end())
       throw std::runtime_error("DatumPlanePlanarCenter: Conflict between map size and count");
-    if (!it->second->hasSeerShape())
+    if (!it->second->hasAnnex(ann::Type::SeerShape))
       throw std::runtime_error("DatumPlanePlanarCenter: null seer shape");
     const Base* parentFeature = it->second;
-    const SeerShape &shape = parentFeature->getSeerShape();
+    const ann::SeerShape &shape = parentFeature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     
     std::vector<uuid> resolvedFaceIds1 = shape.resolvePick(facePick1.shapeHistory);
     if (resolvedFaceIds1.empty())
@@ -307,9 +307,9 @@ osg::Matrixd DatumPlanePlanarCenter::solve(const UpdatePayload::UpdateMap &mapIn
     }
     else
     {
-      if (!feature1->hasSeerShape())
+      if (!feature1->hasAnnex(ann::Type::SeerShape))
         throw std::runtime_error("DatumPlanePlanarCenter: expected seer shape not found");
-      const SeerShape &shape1 = feature1->getSeerShape();
+      const ann::SeerShape &shape1 = feature1->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
       
       std::vector<uuid> resolvedFaceIds1 = shape1.resolvePick(facePick1.shapeHistory);
       if (resolvedFaceIds1.empty())
@@ -342,9 +342,9 @@ osg::Matrixd DatumPlanePlanarCenter::solve(const UpdatePayload::UpdateMap &mapIn
     }
     else
     {
-      if (!feature2->hasSeerShape())
+      if (!feature2->hasAnnex(ann::Type::SeerShape))
         throw std::runtime_error("DatumPlanePlanarCenter: expected seer shape not found");
-      const SeerShape &shape2 = feature2->getSeerShape();
+      const ann::SeerShape &shape2 = feature2->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
       
       std::vector<uuid> resolvedFaceIds2 = shape2.resolvePick(facePick1.shapeHistory);
       if (resolvedFaceIds2.empty())
@@ -506,9 +506,9 @@ osg::Matrixd DatumPlanePlanarParallelThroughEdge::solve(const UpdatePayload::Upd
     if (it == mapIn.end())
       throw std::runtime_error("DatumPlanarParallelThroughEdge: Conflict between map size and count");
     
-    if (!it->second->hasSeerShape())
+    if (!it->second->hasAnnex(ann::Type::SeerShape))
       throw std::runtime_error("DatumPlanarParallelThroughEdge: no seer shape");
-    const SeerShape &shape = it->second->getSeerShape();
+    const ann::SeerShape &shape = it->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     
     std::vector<uuid> resolvedFaceIds = shape.resolvePick(facePick.shapeHistory);
     if (resolvedFaceIds.empty())
@@ -563,9 +563,9 @@ osg::Matrixd DatumPlanePlanarParallelThroughEdge::solve(const UpdatePayload::Upd
     }
     else
     {
-      if (!feature1->hasSeerShape())
+      if (!feature1->hasAnnex(ann::Type::SeerShape))
         throw std::runtime_error("DatumPlanarParallelThroughEdge: expected seer shape not found");
-      const SeerShape &shape = feature1->getSeerShape();
+      const ann::SeerShape &shape = feature1->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
       
       std::vector<uuid> resolvedId1;
       if (!facePick.id.is_nil()) //when datum is selected shape id is nil.
@@ -611,9 +611,9 @@ osg::Matrixd DatumPlanePlanarParallelThroughEdge::solve(const UpdatePayload::Upd
     }
     else
     {
-      if (!feature2->hasSeerShape())
+      if (!feature2->hasAnnex(ann::Type::SeerShape))
         throw std::runtime_error("DatumPlanarParallelThroughEdge: no seer shape");
-      const SeerShape &shape = feature2->getSeerShape();
+      const ann::SeerShape &shape = feature2->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
       
       std::vector<uuid> resolvedId2;
       if (!facePick.id.is_nil()) //when datum is selected shape id is nil.
@@ -794,8 +794,6 @@ DatumPlane::DatumPlane() : Base()
   
   mainSwitch->addChild(transform.get());
   updateGeometry();
-  
-  seerShape.reset();
 }
 
 DatumPlane::~DatumPlane()

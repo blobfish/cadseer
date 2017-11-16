@@ -29,6 +29,7 @@
 
 namespace lbr{class PLabel;}
 namespace prj{namespace srl{class FeatureNest;}}
+namespace ann{class SeerShape;}
 
 namespace ftr
 {
@@ -56,6 +57,7 @@ namespace ftr
     std::shared_ptr<prm::Parameter> gap;
     osg::ref_ptr<lbr::PLabel> gapLabel;
     osg::Vec3d feedDirection; //!< eventually a parameter.
+    std::unique_ptr<ann::SeerShape> sShape;
     
     TopoDS_Shape calcPitch(TopoDS_Shape &bIn, double guess);
     double getDistance(const TopoDS_Shape &sIn1, const TopoDS_Shape &sIn2);

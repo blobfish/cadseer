@@ -27,7 +27,7 @@
 
 namespace lbr{class IPGroup;}
 namespace prj{namespace srl{class FeatureBox;}}
-namespace ann{class CSysDragger;}
+namespace ann{class CSysDragger; class SeerShape;}
 
 namespace ftr
 {
@@ -38,7 +38,7 @@ class Box : public Base
 {
 public:
   Box();
-  ~Box();
+  virtual ~Box() override;
   void setLength(const double &lengthIn);
   void setWidth(const double &widthIn);
   void setHeight(const double &heightIn);
@@ -65,6 +65,7 @@ protected:
   prm::Parameter csys;
   
   std::unique_ptr<ann::CSysDragger> csysDragger;
+  std::unique_ptr<ann::SeerShape> sShape;
   
   osg::ref_ptr<lbr::IPGroup> lengthIP;
   osg::ref_ptr<lbr::IPGroup> widthIP;

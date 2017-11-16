@@ -54,7 +54,7 @@
 #include <message/observer.h>
 #include <viewer/message.h>
 #include <selection/message.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <feature/blend.h>
 #include <dialogs/widgetgeometry.h>
 #include <dialogs/expressionedit.h>
@@ -166,7 +166,11 @@ Blend::Blend(ftr::Blend *editBlendIn, QWidget *parent) : QDialog(parent), blend(
       bEntry.typeString = tr("Vertex"); //only vertices for now.
       bEntry.radius = static_cast<double>(*(entry.radius));
       bEntry.highlightIds.push_back(entry.pick.id);
-      bEntry.pointLocation = gu::toOsg(TopoDS::Vertex(blendParent->getSeerShape().getOCCTShape(entry.pick.id)));
+      bEntry.pointLocation = 
+      gu::toOsg
+      (
+        TopoDS::Vertex(blendParent->getAnnex<ann::SeerShape>(ann::Type::SeerShape).getOCCTShape(entry.pick.id))
+      );
       if (entry.radius->isConstant())
       {
         bEntry.expressionLinkId = gu::createNilId();
@@ -260,7 +264,7 @@ void Blend::finishDialog()
   {
     assert(blend);
     assert(blendParent);
-    assert(blendParent->hasSeerShape());
+    assert(blendParent->hasAnnex(ann::Type::SeerShape));
     
     updateBlendFeature();
     
@@ -408,7 +412,7 @@ void Blend::updateBlendFeature()
       {
         ftr::VariableBlend blendCue = ftr::Blend::buildDefaultVariable
         (
-          blendParent->getSeerShape(),
+          blendParent->getAnnex<ann::SeerShape>(ann::Type::SeerShape),
           fPick,
           static_cast<app::Application*>(qApp)->getProject()->getShapeHistory()
         );
@@ -534,12 +538,12 @@ void Blend::updateBlendFeature()
 ftr::Pick Blend::convert(const BlendEntry &entryIn)
 {
   assert(blendParent);
-  assert(blendParent->hasSeerShape());
+  assert(blendParent->hasAnnex(ann::Type::SeerShape));
   
   ftr::Pick fPick;
   fPick.id = entryIn.pickId;
   fPick.shapeHistory = static_cast<app::Application*>(qApp)->getProject()->getShapeHistory().createDevolveHistory(fPick.id);
-  const ftr::SeerShape &sShape = blendParent->getSeerShape();
+  const ann::SeerShape &sShape = blendParent->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
   assert(sShape.hasShapeIdRecord(entryIn.pickId));
   const TopoDS_Shape &shape = sShape.getOCCTShape(entryIn.pickId);
   if (shape.ShapeType() == TopAbs_EDGE)
@@ -556,7 +560,7 @@ BlendEntry Blend::convert(const ftr::Pick &pickIn)
 {
   BlendEntry entry;
   entry.pickId = pickIn.id;
-  const ftr::SeerShape &parentShape = blendParent->getSeerShape();
+  const ann::SeerShape &parentShape = blendParent->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
   assert(parentShape.hasShapeIdRecord(pickIn.id));
   const TopoDS_Shape &shape = parentShape.getOCCTShape(pickIn.id);
   BRepFilletAPI_MakeFillet blendMaker(parentShape.getRootOCCTShape());
@@ -756,7 +760,7 @@ void Blend::fillInVariable(const VariableItem &itemIn)
 
 void Blend::addToSelection(const boost::uuids::uuid &shapeIdIn)
 {
-  const ftr::SeerShape &parentShape = blendParent->getSeerShape();
+  const ann::SeerShape &parentShape = blendParent->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
   assert(parentShape.hasShapeIdRecord(shapeIdIn));
   slc::Type sType = slc::convert(parentShape.getOCCTShape(shapeIdIn).ShapeType());
   assert(sType == slc::Type::Edge || sType == slc::Type::Face);
@@ -922,7 +926,7 @@ void Blend::selectionAdditionDispatched(const msg::Message &messageIn)
     assert(project);
     blendParent = project->findFeature(sMessage.featureId);
     assert(blendParent);
-    if (!blendParent->hasSeerShape())
+    if (!blendParent->hasAnnex(ann::Type::SeerShape))
     {
       observer->out(msg::buildStatusMessage("Invalid object to blend"));
       observer->outBlocked(msg::Message(msg::Request | msg::Selection | msg::Clear));
@@ -939,7 +943,7 @@ void Blend::selectionAdditionDispatched(const msg::Message &messageIn)
   
   //build a vector of all edges that will be blended and add to highlight.
   std::vector<uuid> contourIds;
-  const ftr::SeerShape &parentShape = blendParent->getSeerShape();
+  const ann::SeerShape &parentShape = blendParent->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
   BRepFilletAPI_MakeFillet blendMaker(parentShape.getRootOCCTShape());
   if (sMessage.type == slc::Type::Edge)
   {
@@ -1059,7 +1063,7 @@ void Blend::selectionAdditionDispatched(const msg::Message &messageIn)
       std::set<uuid> contourVertices;
       for (const auto &highlight : vItem->pick.highlightIds)
       {
-        auto edgeVertices = blendParent->getSeerShape().useGetChildrenOfType(highlight, TopAbs_VERTEX);
+        auto edgeVertices = blendParent->getAnnex<ann::SeerShape>(ann::Type::SeerShape).useGetChildrenOfType(highlight, TopAbs_VERTEX);
         assert(edgeVertices.size() == 2);
         contourVertices.insert(edgeVertices.front());
         contourVertices.insert(edgeVertices.back());
@@ -1139,7 +1143,7 @@ void Blend::variableTableSelectionChangedSlot(const QItemSelection &current, con
   assert(index.isValid());
   uuid pickId = gu::stringToId(variableTableWidget->model()->data(index).toString().toStdString());
   
-  const ftr::SeerShape &parentShape = blendParent->getSeerShape();
+  const ann::SeerShape &parentShape = blendParent->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
   std::vector<uuid> parentEdges = parentShape.useGetParentsOfType(pickId, TopAbs_EDGE);
   assert(!parentEdges.empty());
   uuid parentEdge = parentEdges.front();

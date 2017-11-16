@@ -41,7 +41,7 @@
 #include <globalutilities.h>
 #include <message/message.h>
 #include <message/observer.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <feature/shapehistory.h>
 #include <feature/seershapeinfo.h>
 #include <project/serial/xsdcxxoutput/featurebase.h>
@@ -103,7 +103,6 @@ Base::Base()
   state.set(ftr::StateOffset::VisualDirty, true);
   state.set(ftr::StateOffset::Failure, false);
   
-  seerShape = std::shared_ptr<SeerShape>(new SeerShape());
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
 }
 
@@ -208,14 +207,14 @@ void Base::updateVisual()
   //clear all the children from the main transform.
   lod->removeChildren(0, lod->getNumChildren());
   
-  if ((!seerShape) || (seerShape->isNull()))
+  if ((!hasAnnex(ann::Type::SeerShape)) || (getAnnex<ann::SeerShape>(ann::Type::SeerShape).isNull()))
     return;
 
   //get deflection values.
   double linear = prf::manager().rootPtr->visual().mesh().linearDeflection();
   double angular = prf::manager().rootPtr->visual().mesh().angularDeflection();
 
-  mdv::ShapeGeometryBuilder sBuilder(seerShape);
+  mdv::ShapeGeometryBuilder sBuilder(getAnnex<ann::SeerShape>(ann::Type::SeerShape));
   sBuilder.go(linear, angular);
   assert(sBuilder.success);
   
@@ -237,7 +236,7 @@ void Base::updateVisual()
     lod->getOrCreateStateSet()->setAttributeAndModes(lm);
   };
   //this isn't right! I need to use top explorer and avoid solids
-  for (TopoDS_Iterator it(seerShape->getRootOCCTShape()); it.More(); it.Next())
+  for (TopoDS_Iterator it(getAnnex<ann::SeerShape>(ann::Type::SeerShape).getRootOCCTShape()); it.More(); it.Next())
   {
     if
     (
@@ -266,7 +265,7 @@ void Base::setColor(const osg::Vec4 &colorIn)
 
 void Base::applyColor()
 {
-  if (!hasSeerShape())
+  if (!hasAnnex(ann::Type::SeerShape))
     return;
   
   if (lod->getNumChildren() == 0)
@@ -280,14 +279,14 @@ void Base::applyColor()
 
 void Base::fillInHistory(ShapeHistory &historyIn)
 {
-  if (hasSeerShape())
-    getSeerShape().fillInHistory(historyIn, id);
+  if (hasAnnex(ann::Type::SeerShape))
+    getAnnex<ann::SeerShape>(ann::Type::SeerShape).fillInHistory(historyIn, id);
 }
 
 void Base::replaceId(const boost::uuids::uuid &staleId, const boost::uuids::uuid &freshId, const ShapeHistory &shapeHistory)
 {
-  if (hasSeerShape())
-    seerShape->replaceId(staleId, freshId, shapeHistory);
+  if (hasAnnex(ann::Type::SeerShape))
+    getAnnex<ann::SeerShape>(ann::Type::SeerShape).replaceId(staleId, freshId, shapeHistory);
 }
 
 void Base::setSuccess()
@@ -328,8 +327,8 @@ prj::srl::FeatureBase Base::serialOut()
     gu::idToString(id)
   );
   
-  if (hasSeerShape())
-      out.seerShape() = seerShape->serialOut();
+  if (hasAnnex(ann::Type::SeerShape))
+    out.seerShape() = getAnnex<ann::SeerShape>(ann::Type::SeerShape).serialOut();
   
   prj::srl::Color colorOut
   (
@@ -359,7 +358,7 @@ void Base::serialIn(const prj::srl::FeatureBase& sBaseIn)
   overlaySwitch->setUserValue(gu::idAttributeTitle, gu::idToString(id));
   
   if (sBaseIn.seerShape().present())
-    seerShape->serialIn(sBaseIn.seerShape().get());
+    getAnnex<ann::SeerShape>(ann::Type::SeerShape).serialIn(sBaseIn.seerShape().get());
   
   if (sBaseIn.color().present())
   {
@@ -381,20 +380,6 @@ void Base::serialIn(const prj::srl::FeatureBase& sBaseIn)
     overlaySwitch->setAllChildrenOn();
   else
     overlaySwitch->setAllChildrenOff();
-}
-
-const TopoDS_Shape& Base::getShape() const
-{
-  static TopoDS_Shape dummy;
-  if (!seerShape || seerShape->isNull())
-    return dummy;
-  return seerShape->getRootOCCTShape();
-}
-
-void Base::setShape(const TopoDS_Shape &in)
-{
-    assert(seerShape);
-    seerShape->setOCCTShape(in);
 }
 
 std::string Base::getFileName() const
@@ -480,16 +465,16 @@ QTextStream& Base::getInfo(QTextStream &stream) const
       }
     }
     
-    if (hasSeerShape())
-      getShapeInfo(stream, seerShape->getRootShapeId());
+    if (hasAnnex(ann::Type::SeerShape))
+      getShapeInfo(stream, getAnnex<ann::SeerShape>(ann::Type::SeerShape).getRootShapeId());
     
     return stream;
 }
 
 QTextStream&  Base::getShapeInfo(QTextStream &streamIn, const boost::uuids::uuid &idIn) const
 {
-    assert(hasSeerShape());
-    SeerShapeInfo shapeInfo(*seerShape);
+    assert(hasAnnex(ann::Type::SeerShape));
+    SeerShapeInfo shapeInfo(getAnnex<ann::SeerShape>(ann::Type::SeerShape));
     shapeInfo.getShapeInfo(streamIn, idIn);
     
     return streamIn;

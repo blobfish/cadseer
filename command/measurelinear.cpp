@@ -32,7 +32,7 @@
 #include <message/message.h>
 #include <selection/eventhandler.h>
 #include <feature/base.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <library/lineardimension.h>
 #include <command/measurelinear.h>
 
@@ -73,11 +73,11 @@ void MeasureLinear::go()
     }
     
     ftr::Base *fb = project->findFeature(cIn.featureId);
-    if (!fb->hasSeerShape() || fb->getSeerShape().isNull())
+    if (!fb->hasAnnex(ann::Type::SeerShape) || fb->getAnnex<ann::SeerShape>(ann::Type::SeerShape).isNull())
       return TopoDS_Shape();
     if (cIn.shapeId.is_nil())
-      return fb->getSeerShape().getRootOCCTShape();
-    return fb->getSeerShape().getOCCTShape(cIn.shapeId);
+      return fb->getAnnex<ann::SeerShape>(ann::Type::SeerShape).getRootOCCTShape();
+    return fb->getAnnex<ann::SeerShape>(ann::Type::SeerShape).getOCCTShape(cIn.shapeId);
   };
   
   const slc::Containers &containers = eventHandler->getSelections();

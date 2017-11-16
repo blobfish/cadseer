@@ -35,7 +35,7 @@
 #include <preferences/manager.h>
 #include <globalutilities.h>
 #include <tools/occtools.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <feature/shapecheck.h>
 #include <feature/nest.h>
 #include <project/serial/xsdcxxoutput/featurestrip.h>
@@ -47,13 +47,15 @@ using boost::uuids::uuid;
 
 QIcon Strip::icon;
 
-Strip::Strip() : Base()
+Strip::Strip() : Base(), sShape(new ann::SeerShape())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionStrip.svg");
   
   name = QObject::tr("Strip");
   mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
+  
+  annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
   
   feedDirection = osg::Vec3d(-1.0, 0.0, 0.0);
   
@@ -126,6 +128,8 @@ Strip::Strip() : Base()
   stations.push_back("Form");
 }
 
+Strip::~Strip(){}
+
 //copied from lbr::PLabel::build
 osg::Node* buildStationLabel(const std::string &sIn)
 {
@@ -165,17 +169,17 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
     if (payloadIn.updateMap.count(part) != 1)
       throw std::runtime_error("couldn't find 'part' input");
     const ftr::Base *pbf = payloadIn.updateMap.equal_range(part).first->second;
-    if(!pbf->hasSeerShape())
+    if(!pbf->hasAnnex(ann::Type::SeerShape))
       throw std::runtime_error("no seer shape for part");
-    const SeerShape &pss = pbf->getSeerShape(); //part seer shape.
+    const ann::SeerShape &pss = pbf->getAnnex<ann::SeerShape>(ann::Type::SeerShape); //part seer shape.
     const TopoDS_Shape &ps = occt::getFirstNonCompound(pss.getRootOCCTShape()); //part shape.
       
     if (payloadIn.updateMap.count(blank) != 1)
       throw std::runtime_error("couldn't find 'blank' input");
     const ftr::Base *bbf = payloadIn.updateMap.equal_range(blank).first->second;
-    if(!bbf->hasSeerShape())
+    if(!bbf->hasAnnex(ann::Type::SeerShape))
       throw std::runtime_error("no seer shape for blank");
-    const SeerShape &bss = bbf->getSeerShape(); //blank seer shape.
+    const ann::SeerShape &bss = bbf->getAnnex<ann::SeerShape>(ann::Type::SeerShape); //blank seer shape.
     const TopoDS_Shape &bs = occt::getFirstNonCompound(bss.getRootOCCTShape()); //blank shape.
       
     if (payloadIn.updateMap.count(nest) != 1)
@@ -241,8 +245,8 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
       throw std::runtime_error("shapeCheck failed");
     
     //for now, we are only going to have consistent ids for face and outer wire.
-    seerShape->setOCCTShape(out);
-    seerShape->ensureNoNils();
+    sShape->setOCCTShape(out);
+    sShape->ensureNoNils();
     
     //update label locations
     osg::Vec3d fNorm = feedDirection * osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 0.0, -1.0));

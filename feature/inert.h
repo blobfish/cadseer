@@ -37,7 +37,7 @@ namespace ftr
   public:
     Inert() = delete;
     Inert(const TopoDS_Shape &shapeIn);
-    ~Inert();
+    virtual ~Inert() override;
     virtual void updateModel(const UpdatePayload&) override;
     virtual Type getType() const override {return Type::Inert;}
     virtual const std::string& getTypeString() const override {return toString(Type::Inert);}
@@ -52,6 +52,7 @@ namespace ftr
   protected:
     prm::Parameter csys;
     std::unique_ptr<ann::CSysDragger> csysDragger;
+    std::unique_ptr<ann::SeerShape> sShape;
     
   private:
     static QIcon icon;

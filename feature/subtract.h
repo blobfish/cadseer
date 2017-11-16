@@ -23,6 +23,7 @@
 #include <feature/booleanbase.h>
 
 namespace prj{namespace srl{class FeatureSubtract;}}
+namespace ann{class SeerShape;}
 
 namespace ftr
 {
@@ -30,6 +31,7 @@ namespace ftr
   {
   public:
     Subtract();
+    virtual ~Subtract() override;
     virtual void updateModel(const UpdatePayload&) override;
     virtual Type getType() const override {return Type::Subtract;}
     virtual const std::string& getTypeString() const override {return toString(Type::Subtract);}
@@ -37,6 +39,9 @@ namespace ftr
     virtual Descriptor getDescriptor() const override {return Descriptor::Alter;}
     virtual void serialWrite(const QDir&) override; //!< write xml file. not const, might reset a modified flag.
     void serialRead(const prj::srl::FeatureSubtract &); //!<initializes this from sBox. not virtual, type already known.
+    
+  protected:
+    std::unique_ptr<ann::SeerShape> sShape;
     
   private:
     static QIcon icon;

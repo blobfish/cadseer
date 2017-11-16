@@ -29,7 +29,7 @@
 #include <globalutilities.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <feature/shapecheck.h>
 #include <library/plabel.h>
 #include <project/serial/xsdcxxoutput/featurehollow.h>
@@ -41,7 +41,10 @@ using boost::uuids::uuid;
 
 QIcon Hollow::icon;
 
-Hollow::Hollow() : Base(), offset(prm::Names::Offset, prf::manager().rootPtr->features().hollow().get().offset())
+Hollow::Hollow() :
+Base(),
+offset(prm::Names::Offset, prf::manager().rootPtr->features().hollow().get().offset()),
+sShape(new ann::SeerShape())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionHollow.svg");
@@ -55,7 +58,11 @@ Hollow::Hollow() : Base(), offset(prm::Names::Offset, prf::manager().rootPtr->fe
   label = new lbr::PLabel(&offset);
   label->valueHasChanged();
   overlaySwitch->addChild(label.get());
+  
+  annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
 }
+
+Hollow::~Hollow(){}
 
 /* as occt v7.1(actually commit 4d97335) there seems to be a tolerance bug
  * in BRepOffsetAPI_MakeThickSolid. to reproduce the bug in drawexe:
@@ -81,7 +88,8 @@ void Hollow::updateModel(const UpdatePayload &payloadIn)
     if (payloadIn.updateMap.count(InputType::target) != 1)
       throw std::runtime_error("no parent for hollow");
     
-    const SeerShape &targetSeerShape = payloadIn.updateMap.equal_range(InputType::target).first->second->getSeerShape();
+    const ann::SeerShape &targetSeerShape =
+    payloadIn.updateMap.equal_range(InputType::target).first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     
     TopTools_ListOfShape closingFaceShapes = resolveClosingFaces(targetSeerShape);
     
@@ -114,17 +122,17 @@ void Hollow::updateModel(const UpdatePayload &payloadIn)
     if (!check.isValid())
       throw std::runtime_error("shapeCheck failed in hollow feature");
     
-    seerShape->setOCCTShape(operation.Shape());
-    seerShape->shapeMatch(targetSeerShape);
-    seerShape->uniqueTypeMatch(targetSeerShape);
-    seerShape->modifiedMatch(operation, targetSeerShape);
+    sShape->setOCCTShape(operation.Shape());
+    sShape->shapeMatch(targetSeerShape);
+    sShape->uniqueTypeMatch(targetSeerShape);
+    sShape->modifiedMatch(operation, targetSeerShape);
     generatedMatch(operation, targetSeerShape);
-    seerShape->outerWireMatch(targetSeerShape);
-    seerShape->derivedMatch();
-    seerShape->dumpNils("hollow feature");
-    seerShape->dumpDuplicates("hollow feature");
-    seerShape->ensureNoNils();
-    seerShape->ensureNoDuplicates();
+    sShape->outerWireMatch(targetSeerShape);
+    sShape->derivedMatch();
+    sShape->dumpNils("hollow feature");
+    sShape->dumpDuplicates("hollow feature");
+    sShape->ensureNoNils();
+    sShape->ensureNoDuplicates();
     
     setSuccess();
   }
@@ -171,7 +179,7 @@ void Hollow::removeHollowPick(const Pick &pickIn)
   hollowPicks.erase(it);
 }
 
-TopTools_ListOfShape Hollow::resolveClosingFaces(const SeerShape &seerShapeIn)
+TopTools_ListOfShape Hollow::resolveClosingFaces(const ann::SeerShape &seerShapeIn)
 {
   TopTools_ListOfShape out;
   for (const auto &closingFace : hollowPicks)
@@ -202,7 +210,7 @@ TopTools_ListOfShape Hollow::resolveClosingFaces(const SeerShape &seerShapeIn)
   return out;
 }
 
-void Hollow::generatedMatch(BRepOffsetAPI_MakeThickSolid &operationIn, const SeerShape &targetShapeIn)
+void Hollow::generatedMatch(BRepOffsetAPI_MakeThickSolid &operationIn, const ann::SeerShape &targetShapeIn)
 {
   //note: makeThickSolid::generated is returning all kinds of shapes.
   for (const auto &targetId : targetShapeIn.getAllShapeIds())
@@ -222,10 +230,10 @@ void Hollow::generatedMatch(BRepOffsetAPI_MakeThickSolid &operationIn, const See
     
     //if think generated is returning all the geometry from operation
     //so we have to skip non-existing geometry. like other half of a split.
-    if (!seerShape->hasShapeIdRecord(newShape))
+    if (!sShape->hasShapeIdRecord(newShape))
       continue;
     
-    if (!seerShape->findShapeIdRecord(newShape).id.is_nil())
+    if (!sShape->findShapeIdRecord(newShape).id.is_nil())
       continue; //only set ids for shapes with nil ids.
       
     //should only have faces left to assign. why don't nil wires come through?
@@ -237,12 +245,12 @@ void Hollow::generatedMatch(BRepOffsetAPI_MakeThickSolid &operationIn, const See
     std::tie(it, results) = shapeMap.insert(std::make_pair(targetId, freshFaceId));
     if (!results)
       freshFaceId = it->second;
-    seerShape->updateShapeIdRecord(newShape, freshFaceId);
+    sShape->updateShapeIdRecord(newShape, freshFaceId);
     
     //in a hollow these generated entities are actually new entities, whereas for
     //other features, like draft and blend, this is not the case. So these get a nil evolve in.
-    if (!seerShape->hasEvolveRecordOut(freshFaceId))
-      seerShape->insertEvolve(gu::createNilId(), freshFaceId);
+    if (!sShape->hasEvolveRecordOut(freshFaceId))
+      sShape->insertEvolve(gu::createNilId(), freshFaceId);
     
     //update the outerwire.
     uuid freshWireId = gu::createRandomId();
@@ -251,7 +259,7 @@ void Hollow::generatedMatch(BRepOffsetAPI_MakeThickSolid &operationIn, const See
       freshWireId = it->second;
     
     const TopoDS_Shape &wireShape = BRepTools::OuterWire(TopoDS::Face(newShape));
-    seerShape->updateShapeIdRecord(wireShape, freshWireId);
+    sShape->updateShapeIdRecord(wireShape, freshWireId);
   }
 }
 

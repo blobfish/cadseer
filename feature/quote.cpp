@@ -31,7 +31,7 @@
 #include <libreoffice/odshack.h>
 #include <feature/strip.h>
 #include <feature/dieset.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <project/serial/xsdcxxoutput/featurequote.h>
 #include <feature/quote.h>
 
@@ -74,8 +74,6 @@ oFile("Output File",  path(static_cast<app::Application*>(qApp)->getProject()->g
   oLabel->showName = true;
   oLabel->valueHasChanged();
   overlaySwitch->addChild(oLabel.get());
-  
-  seerShape.reset();
 }
 
 Quote::~Quote()
@@ -104,7 +102,7 @@ void Quote::updateModel(const UpdatePayload &payloadIn)
       throw std::runtime_error("can not cast to dieset feature");
     
     //place labels
-    const SeerShape &dss = dsf->getSeerShape(); //part seer shape.
+    const ann::SeerShape &dss = dsf->getAnnex<ann::SeerShape>(ann::Type::SeerShape); //part seer shape.
     const TopoDS_Shape &ds = dss.getRootOCCTShape(); //part shape.
     occt::BoundingBox sbbox(ds); //blank bounding box.
     osg::Vec3d tLoc = gu::toOsg(sbbox.getCenter()) + osg::Vec3d(0.0, 50.0, 0.0);

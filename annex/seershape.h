@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef FTR_SEERSHAPE_H
-#define FTR_SEERSHAPE_H
+#ifndef ANN_SEERSHAPE_H
+#define ANN_SEERSHAPE_H
 
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
@@ -34,6 +34,7 @@
 #include <globalutilities.h>
 #include <tools/occtools.h>
 #include <tools/idtools.h>
+#include <annex/base.h>
 
 namespace osg{class Vec3d;}
 
@@ -54,10 +55,9 @@ static const std::vector<std::string> shapeStrings
      "Shape"
  });
 
-namespace ftr
+namespace ftr{class ShapeHistory;}
+namespace ann
 {
-  class ShapeHistory;
-  
   //mapping a set of ids to one id. this is for deriving an id from multiple parent shapes.
   typedef std::set<boost::uuids::uuid> IdSet;
   typedef std::map<IdSet, boost::uuids::uuid> DerivedContainer;
@@ -239,9 +239,13 @@ namespace ftr
   * @derivedContainer is consistantly naming newly generated entities between feature
   * updates. This container doesn't get reset between updates.
   */ 
-  struct SeerShape
+  struct SeerShape : public Base
   {
   public:
+    SeerShape();
+    virtual ~SeerShape() override;
+    virtual Type getType(){return Type::SeerShape;}
+    
     void setOCCTShape(const TopoDS_Shape& shapeIn); //!< resets container and graphs!
     
     const TopoDS_Shape& getRootOCCTShape() const;
@@ -277,9 +281,9 @@ namespace ftr
     std::vector<BID::uuid> devolve(const BID::uuid&) const; //!< reverse evolution. out to in.
     void insertEvolve(const BID::uuid&, const BID::uuid&); //!< add entry into evolve container
     void insertEvolve(const EvolveRecord&); //!< add entry into evolve container
-    void fillInHistory(ShapeHistory &, const BID::uuid&) const;
-    void replaceId(const BID::uuid &, const BID::uuid &, const ShapeHistory &);
-    std::vector<BID::uuid> resolvePick(const ShapeHistory&) const;
+    void fillInHistory(ftr::ShapeHistory &, const BID::uuid&) const;
+    void replaceId(const BID::uuid &, const BID::uuid &, const ftr::ShapeHistory &);
+    std::vector<BID::uuid> resolvePick(const ftr::ShapeHistory&) const;
     //@}
     
     //@{
@@ -400,7 +404,7 @@ namespace ftr
     ShapeIdContainer shapeIdContainer;
     EvolveContainer evolveContainer;
     FeatureTagContainer featureTagContainer;
-    ftr::DerivedContainer derivedContainer;
+    DerivedContainer derivedContainer;
     Graph graph;
     Graph rGraph; //reversed graph.
     
@@ -445,4 +449,4 @@ namespace ftr
   };
 }
 
-#endif // FTR_SEERSHAPE_H
+#endif // ANN_SEERSHAPE_H

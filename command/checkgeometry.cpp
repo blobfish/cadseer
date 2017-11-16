@@ -83,7 +83,7 @@ void CheckGeometry::go()
   {
     ftr::Base *feature = project->findFeature(containers.front().featureId);
     assert(feature);
-    if (feature->hasSeerShape())
+    if (feature->hasAnnex(ann::Type::SeerShape))
     {
       assert(!dialog);
       dialog = new dlg::CheckGeometry(*feature, application->getMainWindow());

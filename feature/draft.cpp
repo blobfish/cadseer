@@ -37,7 +37,7 @@
 #include <feature/shapecheck.h>
 #include <library/plabel.h>
 #include <project/serial/xsdcxxoutput/featuredraft.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <feature/draft.h>
 
 using namespace ftr;
@@ -45,13 +45,15 @@ using boost::uuids::uuid;
 
 QIcon Draft::icon;
 
-Draft::Draft() : Base()
+Draft::Draft() : Base(), sShape(new ann::SeerShape())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionDraft.svg");
   
   name = QObject::tr("Draft");
   mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
+  
+  annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
 }
 
 Draft::~Draft() //for forward declare with osg::ref_ptr
@@ -87,7 +89,8 @@ void Draft::updateModel(const UpdatePayload &payloadIn)
     if (payloadIn.updateMap.count(InputType::target) != 1)
       throw std::runtime_error("no parent for blend");
     
-    const SeerShape &targetSeerShape = payloadIn.updateMap.equal_range(InputType::target).first->second->getSeerShape();
+    const ann::SeerShape &targetSeerShape = 
+    payloadIn.updateMap.equal_range(InputType::target).first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     
     //neutral plane might be outside of target, if so we should have an input with a type of 'tool'
 //     const TopoDS_Shape &tool; //TODO
@@ -143,17 +146,17 @@ void Draft::updateModel(const UpdatePayload &payloadIn)
     if (!check.isValid())
       throw std::runtime_error("shapeCheck failed");
     
-    seerShape->setOCCTShape(dMaker.Shape());
-    seerShape->shapeMatch(targetSeerShape);
-    seerShape->uniqueTypeMatch(targetSeerShape);
-    seerShape->modifiedMatch(dMaker, targetSeerShape);
+    sShape->setOCCTShape(dMaker.Shape());
+    sShape->shapeMatch(targetSeerShape);
+    sShape->uniqueTypeMatch(targetSeerShape);
+    sShape->modifiedMatch(dMaker, targetSeerShape);
     generatedMatch(dMaker, targetSeerShape);
-    seerShape->outerWireMatch(targetSeerShape);
-    seerShape->derivedMatch();
-    seerShape->dumpNils("draft feature"); //only if there are shapes with nil ids.
-    seerShape->dumpDuplicates("draft feature");
-    seerShape->ensureNoNils();
-    seerShape->ensureNoDuplicates();
+    sShape->outerWireMatch(targetSeerShape);
+    sShape->derivedMatch();
+    sShape->dumpNils("draft feature"); //only if there are shapes with nil ids.
+    sShape->dumpDuplicates("draft feature");
+    sShape->ensureNoNils();
+    sShape->ensureNoDuplicates();
     
     setSuccess();
   }
@@ -184,28 +187,28 @@ gp_Pln Draft::derivePlaneFromShape(const TopoDS_Shape &shapeIn)
   return sAdapt.Plane();
 }
 
-void Draft::generatedMatch(BRepOffsetAPI_DraftAngle &dMaker, const SeerShape &targetShapeIn)
+void Draft::generatedMatch(BRepOffsetAPI_DraftAngle &dMaker, const ann::SeerShape &targetShapeIn)
 {
   using boost::uuids::uuid;
   std::vector<uuid> targetShapeIds = targetShapeIn.getAllShapeIds();
   
   for (const auto &cId : targetShapeIds)
   {
-    const ShapeIdRecord &record = targetShapeIn.findShapeIdRecord(cId);
+    const ann::ShapeIdRecord &record = targetShapeIn.findShapeIdRecord(cId);
     const TopTools_ListOfShape &shapes = dMaker.Generated(record.shape);
     if (shapes.Extent() < 1)
       continue;
     assert(shapes.Extent() == 1); //want to know about a situation where we have more than 1.
     uuid freshId;
-    if (seerShape->hasEvolveRecordIn(cId))
-      freshId = seerShape->evolve(cId).front();
+    if (sShape->hasEvolveRecordIn(cId))
+      freshId = sShape->evolve(cId).front();
     else
     {
       freshId = gu::createRandomId();
-      seerShape->insertEvolve(cId, freshId);
+      sShape->insertEvolve(cId, freshId);
     }
     
-    seerShape->updateShapeIdRecord(shapes.First(), freshId);
+    sShape->updateShapeIdRecord(shapes.First(), freshId);
   }
 }
 

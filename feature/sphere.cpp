@@ -26,7 +26,7 @@
 #include <library/csysdragger.h>
 #include <project/serial/xsdcxxoutput/featuresphere.h>
 #include <annex/csysdragger.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <feature/sphere.h>
 
 using namespace ftr;
@@ -62,7 +62,8 @@ Sphere::Sphere() :
 Base(),
 radius(prm::Names::Radius, prf::manager().rootPtr->features().sphere().get().radius()),
 csys(prm::Names::CSys, osg::Matrixd::identity()),
-csysDragger(new ann::CSysDragger(this, &csys))
+csysDragger(new ann::CSysDragger(this, &csys)),
+sShape(new ann::SeerShape())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionSphere.svg");
@@ -77,6 +78,7 @@ csysDragger(new ann::CSysDragger(this, &csys))
   parameterVector.push_back(&radius);
   parameterVector.push_back(&csys);
   
+  annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
   annexes.insert(std::make_pair(ann::Type::CSysDragger, csysDragger.get()));
   overlaySwitch->addChild(csysDragger->dragger);
   
@@ -136,7 +138,7 @@ void Sphere::updateModel(const UpdatePayload&)
     BRepPrimAPI_MakeSphere sphereMaker(gu::toOcc(static_cast<osg::Matrixd>(csys)), static_cast<double>(radius));
     sphereMaker.Build();
     assert(sphereMaker.IsDone());
-    seerShape->setOCCTShape(sphereMaker.Shape());
+    sShape->setOCCTShape(sphereMaker.Shape());
     updateResult(sphereMaker);
     mainTransform->setMatrix(osg::Matrixd::identity());
     setSuccess();
@@ -171,18 +173,18 @@ void Sphere::initializeMaps()
     uuid tempId = gu::createRandomId();
     tempIds.push_back(tempId);
     
-    EvolveRecord evolveRecord;
+    ann::EvolveRecord evolveRecord;
     evolveRecord.outId = tempId;
-    seerShape->insertEvolve(evolveRecord);
+    sShape->insertEvolve(evolveRecord);
   }
   
   //helper lamda
   auto insertIntoFeatureMap = [this](const uuid &idIn, FeatureTag featureTagIn)
   {
-    FeatureTagRecord record;
+    ann::FeatureTagRecord record;
     record.id = idIn;
     record.tag = featureTagMap.at(featureTagIn);
-    seerShape->insertFeatureTag(record);
+    sShape->insertFeatureTag(record);
   };
   
   insertIntoFeatureMap(tempIds.at(0), FeatureTag::Root);
@@ -205,11 +207,11 @@ void Sphere::updateResult(BRepPrimAPI_MakeSphere &sphereMaker)
   //helper lamda
   auto updateShapeByTag = [this](const TopoDS_Shape &shapeIn, FeatureTag featureTagIn)
   {
-    uuid localId = seerShape->featureTagId(featureTagMap.at(featureTagIn));
-    seerShape->updateShapeIdRecord(shapeIn, localId);
+    uuid localId = sShape->featureTagId(featureTagMap.at(featureTagIn));
+    sShape->updateShapeIdRecord(shapeIn, localId);
   };
   
-  updateShapeByTag(seerShape->getRootOCCTShape(), FeatureTag::Root);
+  updateShapeByTag(sShape->getRootOCCTShape(), FeatureTag::Root);
   updateShapeByTag(sphereMaker.Shape(), FeatureTag::Solid);
   
   BRepPrim_Sphere &sphereSubMaker = sphereMaker.Sphere();
@@ -221,7 +223,7 @@ void Sphere::updateResult(BRepPrimAPI_MakeSphere &sphereMaker)
   updateShapeByTag(sphereSubMaker.BottomStartVertex(), FeatureTag::VertexBottom);
   updateShapeByTag(sphereSubMaker.TopStartVertex(), FeatureTag::VertexTop);
   
-  seerShape->setRootShapeId(seerShape->featureTagId(featureTagMap.at(FeatureTag::Root)));
+  sShape->setRootShapeId(sShape->featureTagId(featureTagMap.at(FeatureTag::Root)));
 }
 
 void Sphere::serialWrite(const QDir &dIn)

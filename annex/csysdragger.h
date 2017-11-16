@@ -34,7 +34,7 @@ namespace ann
   public:
     CSysDragger() = delete;
     CSysDragger(ftr::Base*, ftr::prm::Parameter*);
-    ~CSysDragger();
+    virtual ~CSysDragger() override;
     virtual Type getType() override {return Type::CSysDragger;}
     
     void draggerUpdate(); //!< sets only the dragger to csys parameter

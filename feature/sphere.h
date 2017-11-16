@@ -27,7 +27,7 @@
 class BRepPrimAPI_MakeSphere;
 namespace lbr{class IPGroup;}
 namespace prj{namespace srl{class FeatureSphere;}}
-namespace ann{class CSysDragger;}
+namespace ann{class CSysDragger; class SeerShape;}
 
 namespace ftr
 {
@@ -35,7 +35,7 @@ namespace ftr
   {
   public:
     Sphere();
-    ~Sphere();
+    virtual ~Sphere() override;
     void setRadius(const double &radiusIn);
     void setCSys(const osg::Matrixd&);
     double getRadius() const {return static_cast<double>(radius);}
@@ -54,6 +54,7 @@ namespace ftr
     prm::Parameter csys;
   
     std::unique_ptr<ann::CSysDragger> csysDragger;
+    std::unique_ptr<ann::SeerShape> sShape;
     
     osg::ref_ptr<lbr::IPGroup> radiusIP;
     

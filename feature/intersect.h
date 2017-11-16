@@ -23,6 +23,7 @@
 #include <feature/booleanbase.h>
 
 namespace prj{namespace srl{class FeatureIntersect;}}
+namespace ann{class SeerShape;}
 
 namespace ftr
 {
@@ -30,6 +31,7 @@ namespace ftr
   {
   public:
     Intersect();
+    virtual ~Intersect() override;
     virtual void updateModel(const UpdatePayload&) override;
     virtual Type getType() const override {return Type::Intersect;}
     virtual const std::string& getTypeString() const override {return toString(Type::Intersect);}
@@ -39,6 +41,7 @@ namespace ftr
     void serialRead(const prj::srl::FeatureIntersect &); //!<initializes this from sBox. not virtual, type already known.
     
   private:
+    std::unique_ptr<ann::SeerShape> sShape;
     static QIcon icon;
   };
 }

@@ -29,6 +29,7 @@
 #include <feature/base.h>
 
 namespace prj{namespace srl{class FeatureExtract;}}
+namespace ann{class SeerShape;}
 
 namespace ftr
 {
@@ -48,6 +49,7 @@ namespace ftr
     static std::shared_ptr<prm::Parameter> buildAngleParameter(double deg = 0.0); //set up default.
     
     Extract();
+    virtual ~Extract() override;
     virtual void updateModel(const UpdatePayload&) override;
     virtual Type getType() const override {return Type::Extract;}
     virtual const std::string& getTypeString() const override {return toString(Type::Extract);}
@@ -65,6 +67,8 @@ namespace ftr
     static QIcon icon;
     Picks picks; //!< 1 to 1 geometry copies.
     AccruePicks accruePicks; //!< collections of geometries.
+    
+    std::unique_ptr<ann::SeerShape> sShape;
   };
 }
 

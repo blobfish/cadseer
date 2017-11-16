@@ -31,11 +31,9 @@ class gp_Pln;
 
 namespace lbr{class PLabel;}
 namespace prj{namespace srl{class FeatureDraft;}}
-
+namespace ann{class SeerShape;}
 namespace ftr
 {
-  class SeerShape;
-  
   struct DraftConvey
   {
     Picks targets;
@@ -68,9 +66,11 @@ namespace ftr
       std::shared_ptr<prm::Parameter> angle; //!< parameter containing draft angle.
       osg::ref_ptr<lbr::PLabel> label; //!< graphic icon
       
+      std::unique_ptr<ann::SeerShape> sShape;
+      
     private:
       static QIcon icon;
-      void generatedMatch(BRepOffsetAPI_DraftAngle&, const SeerShape &);
+      void generatedMatch(BRepOffsetAPI_DraftAngle&, const ann::SeerShape &);
       gp_Pln derivePlaneFromShape(const TopoDS_Shape &);
   };
 }

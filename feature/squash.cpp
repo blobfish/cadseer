@@ -25,7 +25,7 @@
 #include <preferences/manager.h>
 #include <tools/occtools.h>
 #include <squash/squash.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <feature/shapecheck.h>
 #include <feature/squash.h>
 #include <project/serial/xsdcxxoutput/featuresquash.h>
@@ -36,7 +36,7 @@ using boost::uuids::uuid;
 
 QIcon Squash::icon;
 
-Squash::Squash() : Base()
+Squash::Squash() : Base(), sShape(new ann::SeerShape())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionSquash.svg");
@@ -70,7 +70,11 @@ Squash::Squash() : Base()
   label->showName = true;
   label->valueHasChanged();
   overlaySwitch->addChild(label.get());
+  
+  annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
 }
+
+Squash::~Squash(){}
 
 int Squash::getGranularity()
 {
@@ -101,10 +105,10 @@ void Squash::updateModel(const UpdatePayload &payloadIn)
       throw std::runtime_error("wrong number of parents");
     
     const ftr::Base *bf = payloadIn.updateMap.equal_range(InputType::target).first->second;
-    if(!bf->hasSeerShape())
+    if(!bf->hasAnnex(ann::Type::SeerShape))
       throw std::runtime_error("no seer shape");
       
-    const SeerShape &targetSeerShape = bf->getSeerShape();
+    const ann::SeerShape &targetSeerShape = bf->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     
     //get the shell
     TopoDS_Shape ss = occt::getFirstNonCompound(targetSeerShape.getRootOCCTShape());
@@ -168,11 +172,11 @@ void Squash::updateModel(const UpdatePayload &payloadIn)
         throw std::runtime_error("shapeCheck failed");
       
       //for now, we are only going to have consistent ids for face and outer wire.
-      seerShape->setOCCTShape(out);
-      seerShape->updateShapeIdRecord(out, faceId);
+      sShape->setOCCTShape(out);
+      sShape->updateShapeIdRecord(out, faceId);
       const TopoDS_Shape &ow = BRepTools::OuterWire(out);
-      seerShape->updateShapeIdRecord(ow, wireId);
-      seerShape->ensureNoNils();
+      sShape->updateShapeIdRecord(ow, wireId);
+      sShape->ensureNoNils();
       
       setSuccess();
     }
@@ -181,8 +185,8 @@ void Squash::updateModel(const UpdatePayload &payloadIn)
       //this is incase face is bad, this should show something.
       //we don't really care about id evolution with these edges.
       TopoDS_Compound c = occt::ShapeVectorCast(ps.es);
-      seerShape->setOCCTShape(out);
-      seerShape->ensureNoNils();
+      sShape->setOCCTShape(out);
+      sShape->ensureNoNils();
     }
   }
   catch (const Standard_Failure &e)

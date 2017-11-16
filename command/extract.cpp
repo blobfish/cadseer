@@ -23,7 +23,7 @@
 #include <project/project.h>
 #include <message/observer.h>
 #include <selection/eventhandler.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <feature/extract.h>
 #include <command/extract.h>
 
@@ -68,9 +68,9 @@ void Extract::go()
   {
     ftr::Base *baseFeature = project->findFeature(container.featureId);
     assert(baseFeature);
-    if (!baseFeature->hasSeerShape())
+    if (!baseFeature->hasAnnex(ann::Type::SeerShape))
       continue;
-    const ftr::SeerShape &targetSeerShape = baseFeature->getSeerShape();
+    const ann::SeerShape &targetSeerShape = baseFeature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     
     if (container.selectionType == slc::Type::Face)
     {

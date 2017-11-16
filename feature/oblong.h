@@ -26,7 +26,7 @@
 
 namespace lbr{class IPGroup;}
 namespace prj{namespace srl{class FeatureOblong;}}
-namespace ann{class CSysDragger;}
+namespace ann{class CSysDragger; class SeerShape;}
 
 namespace ftr
 {
@@ -64,6 +64,7 @@ namespace ftr
     prm::Parameter csys;
   
     std::unique_ptr<ann::CSysDragger> csysDragger;
+    std::unique_ptr<ann::SeerShape> sShape;
     
     osg::ref_ptr<lbr::IPGroup> lengthIP;
     osg::ref_ptr<lbr::IPGroup> widthIP;

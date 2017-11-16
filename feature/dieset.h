@@ -29,6 +29,7 @@
 namespace ftr{namespace prm{class Parameter;}}
 namespace lbr{class PLabel;}
 namespace prj{namespace srl{class FeatureDieSet;}}
+namespace ann{class SeerShape;}
 
 namespace ftr
 {
@@ -68,6 +69,8 @@ namespace ftr
     osg::ref_ptr<lbr::PLabel> widthPaddingLabel;
     osg::ref_ptr<lbr::PLabel> originLabel;
     osg::ref_ptr<lbr::PLabel> autoCalcLabel;
+    
+    std::unique_ptr<ann::SeerShape> sShape;
     
     void updateLabelColors();
     

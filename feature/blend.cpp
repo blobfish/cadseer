@@ -42,7 +42,7 @@
 #include <preferences/manager.h>
 #include <project/serial/xsdcxxoutput/featureblend.h>
 #include <feature/shapecheck.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <feature/blend.h>
 
 using namespace ftr;
@@ -53,14 +53,18 @@ QIcon Blend::icon;
 SimpleBlend::SimpleBlend() : id(gu::createRandomId()) {}
 VariableBlend::VariableBlend() : id(gu::createRandomId()) {}
 
-Blend::Blend() : Base()
+Blend::Blend() : Base(), sShape(new ann::SeerShape())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionBlend.svg");
   
   name = QObject::tr("Blend");
   mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
+  
+  annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
 }
+
+Blend::~Blend(){}
 
 std::shared_ptr< prm::Parameter > Blend::buildRadiusParameter()
 {
@@ -76,7 +80,7 @@ std::shared_ptr< prm::Parameter > Blend::buildPositionParameter()
   return out;
 }
 
-VariableBlend Blend::buildDefaultVariable(const SeerShape &seerShapeIn, const Pick &pickIn, const ShapeHistory& historyIn)
+VariableBlend Blend::buildDefaultVariable(const ann::SeerShape &seerShapeIn, const Pick &pickIn, const ShapeHistory& historyIn)
 {
   VariableBlend out;
   out.pick = pickIn;
@@ -199,7 +203,7 @@ void Blend::updateModel(const UpdatePayload &payloadIn)
       throw std::runtime_error("no parent for blend");
     
     const Base *targetFeature = payloadIn.updateMap.equal_range(InputType::target).first->second;
-    const SeerShape &targetSeerShape = targetFeature->getSeerShape();
+    const ann::SeerShape &targetSeerShape = targetFeature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     
     BRepFilletAPI_MakeFillet blendMaker(targetSeerShape.getRootOCCTShape());
     for (const auto &simpleBlend : simpleBlends)
@@ -276,18 +280,18 @@ void Blend::updateModel(const UpdatePayload &payloadIn)
     if (!check.isValid())
       throw std::runtime_error("shapeCheck failed");
     
-    seerShape->setOCCTShape(blendMaker.Shape());
-    seerShape->shapeMatch(targetSeerShape);
-    seerShape->uniqueTypeMatch(targetSeerShape);
-    seerShape->modifiedMatch(blendMaker, targetSeerShape);
+    sShape->setOCCTShape(blendMaker.Shape());
+    sShape->shapeMatch(targetSeerShape);
+    sShape->uniqueTypeMatch(targetSeerShape);
+    sShape->modifiedMatch(blendMaker, targetSeerShape);
     generatedMatch(blendMaker, targetSeerShape);
     ensureNoFaceNils(); //hack see notes in function.
-    seerShape->outerWireMatch(targetSeerShape);
-    seerShape->derivedMatch();
-    seerShape->dumpNils("blend feature");
-    seerShape->dumpDuplicates("blend feature");
-    seerShape->ensureNoNils();
-    seerShape->ensureNoDuplicates();
+    sShape->outerWireMatch(targetSeerShape);
+    sShape->derivedMatch();
+    sShape->dumpNils("blend feature");
+    sShape->dumpDuplicates("blend feature");
+    sShape->ensureNoNils();
+    sShape->ensureNoDuplicates();
     
     setSuccess();
   }
@@ -317,7 +321,7 @@ void Blend::updateModel(const UpdatePayload &payloadIn)
  * blends are made from vertices. blending 3 edges of a box corner is such a situation.
  * so we will iterate over all the shapes of the targe object.
  */
-void Blend::generatedMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const SeerShape &targetShapeIn)
+void Blend::generatedMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const ann::SeerShape &targetShapeIn)
 {
   //duplicated with chamfer.
   using boost::uuids::uuid;
@@ -342,9 +346,9 @@ void Blend::generatedMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const SeerSha
     std::map<uuid, uuid>::iterator mapItFace;
     bool dummy;
     std::tie(mapItFace, dummy) = shapeMap.insert(std::make_pair(cId, gu::createRandomId()));
-    seerShape->updateShapeIdRecord(blendFace, mapItFace->second);
+    sShape->updateShapeIdRecord(blendFace, mapItFace->second);
     if (dummy) //insertion took place.
-      seerShape->insertEvolve(gu::createNilId(), mapItFace->second);
+      sShape->insertEvolve(gu::createNilId(), mapItFace->second);
     
     //now look for outerwire for newly generated face.
     //we use the generated face id to map to outer wire.
@@ -352,9 +356,9 @@ void Blend::generatedMatch(BRepFilletAPI_MakeFillet &blendMakerIn, const SeerSha
     std::tie(mapItWire, dummy) = shapeMap.insert(std::make_pair(mapItFace->second, gu::createRandomId()));
     //now get the wire and update the result to id.
     const TopoDS_Shape &blendFaceWire = BRepTools::OuterWire(TopoDS::Face(blendFace));
-    seerShape->updateShapeIdRecord(blendFaceWire, mapItWire->second);
+    sShape->updateShapeIdRecord(blendFaceWire, mapItWire->second);
     if (dummy) //insertion took place.
-      seerShape->insertEvolve(gu::createNilId(), mapItWire->second);
+      sShape->insertEvolve(gu::createNilId(), mapItWire->second);
   }
 }
 
@@ -382,19 +386,19 @@ void Blend::ensureNoFaceNils()
   //in next release.
   
   
-  auto shapes = seerShape->getAllShapes();
+  auto shapes = sShape->getAllShapes();
   for (const auto &shape : shapes)
   {
     if (shape.ShapeType() != TopAbs_FACE)
       continue;
-    if (!seerShape->findShapeIdRecord(shape).id.is_nil())
+    if (!sShape->findShapeIdRecord(shape).id.is_nil())
       continue;
     
-    seerShape->updateShapeIdRecord(shape, gu::createRandomId());
+    sShape->updateShapeIdRecord(shape, gu::createRandomId());
   }
 }
 
-void Blend::dumpInfo(BRepFilletAPI_MakeFillet &blendMakerIn, const SeerShape &targetFeatureIn)
+void Blend::dumpInfo(BRepFilletAPI_MakeFillet &blendMakerIn, const ann::SeerShape &targetFeatureIn)
 {
   std::cout << std::endl << std::endl <<
     "shape out type is: " << gu::getShapeTypeString(blendMakerIn.Shape()) << std::endl <<

@@ -25,7 +25,7 @@
 #include <library/ipgroup.h>
 #include <library/csysdragger.h>
 #include <project/serial/xsdcxxoutput/featurecone.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <annex/csysdragger.h>
 #include <feature/conebuilder.h>
 #include <feature/cone.h>
@@ -78,7 +78,8 @@ Cone::Cone() : Base(),
   radius2(prm::Names::Radius2, prf::manager().rootPtr->features().cone().get().radius2()),
   height(prm::Names::Height, prf::manager().rootPtr->features().cone().get().height()),
   csys(prm::Names::CSys, osg::Matrixd::identity()),
-  csysDragger(new ann::CSysDragger(this, &csys))
+  csysDragger(new ann::CSysDragger(this, &csys)),
+  sShape(new ann::SeerShape())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionCone.svg");
@@ -97,6 +98,7 @@ Cone::Cone() : Base(),
   parameterVector.push_back(&height);
   parameterVector.push_back(&csys);
   
+  annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
   annexes.insert(std::make_pair(ann::Type::CSysDragger, csysDragger.get()));
   overlaySwitch->addChild(csysDragger->dragger);
   
@@ -218,7 +220,7 @@ void Cone::updateModel(const UpdatePayload &)
       static_cast<double>(height),
       gu::toOcc(static_cast<osg::Matrixd>(csys))
     );
-    seerShape->setOCCTShape(coneBuilder.getSolid());
+    sShape->setOCCTShape(coneBuilder.getSolid());
     updateResult(coneBuilder);
     mainTransform->setMatrix(osg::Matrixd::identity());
     setSuccess();
@@ -252,11 +254,11 @@ void Cone::updateResult(const ConeBuilder& coneBuilderIn)
     //when a radius is set to zero we get null shapes, so skip
     if (shapeIn.IsNull())
       return;
-    uuid localId = seerShape->featureTagId(featureTagMap.at(featureTagIn));
-    seerShape->updateShapeIdRecord(shapeIn, localId);
+    uuid localId = sShape->featureTagId(featureTagMap.at(featureTagIn));
+    sShape->updateShapeIdRecord(shapeIn, localId);
   };
   
-  updateShapeByTag(seerShape->getRootOCCTShape(), FeatureTag::Root);
+  updateShapeByTag(sShape->getRootOCCTShape(), FeatureTag::Root);
   updateShapeByTag(coneBuilderIn.getSolid(), FeatureTag::Solid);
   updateShapeByTag(coneBuilderIn.getShell(), FeatureTag::Shell);
   updateShapeByTag(coneBuilderIn.getFaceBottom(), FeatureTag::FaceBottom);
@@ -271,7 +273,7 @@ void Cone::updateResult(const ConeBuilder& coneBuilderIn)
   updateShapeByTag(coneBuilderIn.getVertexBottom(), FeatureTag::VertexBottom);
   updateShapeByTag(coneBuilderIn.getVertexTop(), FeatureTag::VertexTop);
   
-  seerShape->setRootShapeId(seerShape->featureTagId(featureTagMap.at(FeatureTag::Root)));
+  sShape->setRootShapeId(sShape->featureTagId(featureTagMap.at(FeatureTag::Root)));
 }
 
 //the quantity of cone shapes can change so generating maps from first update can lead to missing
@@ -285,18 +287,18 @@ void Cone::initializeMaps()
     uuid tempId = gu::createRandomId();
     tempIds.push_back(tempId);
     
-    EvolveRecord evolveRecord;
+    ann::EvolveRecord evolveRecord;
     evolveRecord.outId = tempId;
-    seerShape->insertEvolve(evolveRecord);
+    sShape->insertEvolve(evolveRecord);
   }
   
   //helper lamda
   auto insertIntoFeatureMap = [this](const uuid &idIn, FeatureTag featureTagIn)
   {
-    FeatureTagRecord record;
+    ann::FeatureTagRecord record;
     record.id = idIn;
     record.tag = featureTagMap.at(featureTagIn);
-    seerShape->insertFeatureTag(record);
+    sShape->insertFeatureTag(record);
   };
   
   //first we do the compound that is root. this is not in box maker.

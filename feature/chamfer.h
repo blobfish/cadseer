@@ -28,10 +28,10 @@
 
 class BRepFilletAPI_MakeChamfer;
 namespace prj{namespace srl{class FeatureChamfer;}}
+namespace ann{class SeerShape;}
 
 namespace ftr
 {
-  class SeerShape;
   struct ChamferPick
   {
     Pick edgePick; //!< id of picked edge or maybe face?
@@ -49,6 +49,7 @@ namespace ftr
   {
   public:
     Chamfer();
+    virtual ~Chamfer() override;
     virtual void updateModel(const UpdatePayload&) override;
     virtual Type getType() const override {return Type::Chamfer;}
     virtual const std::string& getTypeString() const override {return toString(Type::Chamfer);}
@@ -58,11 +59,11 @@ namespace ftr
     void serialRead(const prj::srl::FeatureChamfer &);
     
     static std::shared_ptr<prm::Parameter> buildSymParameter();
-    static boost::uuids::uuid referenceFaceId(const SeerShape&, const boost::uuids::uuid&);
+    static boost::uuids::uuid referenceFaceId(const ann::SeerShape&, const boost::uuids::uuid&);
     
     void addSymChamfer(const SymChamfer &);
   private:
-    void generatedMatch(BRepFilletAPI_MakeChamfer&, const SeerShape &);
+    void generatedMatch(BRepFilletAPI_MakeChamfer&, const ann::SeerShape &);
     
     /*! now that we are 'resolving' picks we need to update the shapemap to ensure
      * consistant id output of generated faces. duplicate function in blend.
@@ -70,6 +71,7 @@ namespace ftr
     void updateShapeMap(const boost::uuids::uuid&, const ShapeHistory &);
     std::vector<SymChamfer> symChamfers;
     std::map<boost::uuids::uuid, boost::uuids::uuid> shapeMap; //!< map edges or vertices to faces
+    std::unique_ptr<ann::SeerShape> sShape;
     
     static QIcon icon;
   };

@@ -23,7 +23,7 @@
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <feature/parameter.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <feature/shapecheck.h>
 #include <feature/boxbuilder.h>
 #include <project/serial/xsdcxxoutput/featuredieset.h>
@@ -35,7 +35,7 @@ using boost::uuids::uuid;
 
 QIcon DieSet::icon;
 
-DieSet::DieSet()
+DieSet::DieSet() : Base(), sShape(new ann::SeerShape())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionDieSet.svg");
@@ -99,6 +99,8 @@ DieSet::DieSet()
   autoCalc->connectValue(boost::bind(&DieSet::setModelDirty, this));
   parameterVector.push_back(autoCalc.get());
   
+  annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
+  
   lengthLabel = new lbr::PLabel(length.get());
   lengthLabel->showName = true;
   lengthLabel->valueHasChanged();
@@ -157,9 +159,9 @@ void DieSet::updateModel(const UpdatePayload &payloadIn)
       if (payloadIn.updateMap.count(strip) != 1)
         throw std::runtime_error("couldn't find 'strip' input");
       const ftr::Base *sbf = payloadIn.updateMap.equal_range(strip).first->second;
-      if(!sbf->hasSeerShape())
+      if(!sbf->hasAnnex(ann::Type::SeerShape))
         throw std::runtime_error("no seer shape for strip");
-      const SeerShape &sss = sbf->getSeerShape(); //part seer shape.
+      const ann::SeerShape &sss = sbf->getAnnex<ann::SeerShape>(ann::Type::SeerShape); //part seer shape.
       const TopoDS_Shape &ss = sss.getRootOCCTShape(); //part shape.
       
       occt::BoundingBox sbbox(ss); //blank bounding box.
@@ -190,8 +192,8 @@ void DieSet::updateModel(const UpdatePayload &payloadIn)
       throw std::runtime_error("shapeCheck failed");
     
     //No shape consistency yet.
-    seerShape->setOCCTShape(out);
-    seerShape->ensureNoNils();
+    sShape->setOCCTShape(out);
+    sShape->ensureNoNils();
     
     //update label locations
     osg::Vec3d lLoc = //length label location.

@@ -24,7 +24,7 @@
 #include <application/mainwindow.h>
 #include <project/project.h>
 #include <selection/eventhandler.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <message/observer.h>
 #include <feature/blend.h>
 #include <dialogs/blend.h>
@@ -86,7 +86,7 @@ void Blend::go()
   {
     //get targetId and filter out edges not belonging to first target.
     uuid targetFeatureId = containers.at(0).featureId;
-    const ftr::SeerShape &targetSeerShape = project->findFeature(targetFeatureId)->getSeerShape();
+    const ann::SeerShape &targetSeerShape = project->findFeature(targetFeatureId)->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     ftr::SimpleBlend simpleBlend;
     ftr::VariableBlend vBlend;
     for (const auto &currentSelection : containers)

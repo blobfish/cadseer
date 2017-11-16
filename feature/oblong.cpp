@@ -21,7 +21,7 @@
 #include <tools/idtools.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <library/ipgroup.h>
 #include <library/csysdragger.h>
 #include <project/serial/xsdcxxoutput/featureoblong.h>
@@ -119,7 +119,8 @@ Oblong::Oblong() :
   width(prm::Names::Width, prf::manager().rootPtr->features().oblong().get().width()),
   height(prm::Names::Height, prf::manager().rootPtr->features().oblong().get().height()),
   csys(prm::Names::CSys, osg::Matrixd::identity()),
-  csysDragger(new ann::CSysDragger(this, &csys))
+  csysDragger(new ann::CSysDragger(this, &csys)),
+  sShape(new ann::SeerShape())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionOblong.svg");
@@ -138,6 +139,7 @@ Oblong::Oblong() :
   parameterVector.push_back(&height);
   parameterVector.push_back(&csys);
   
+  annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
   annexes.insert(std::make_pair(ann::Type::CSysDragger, csysDragger.get()));
   overlaySwitch->addChild(csysDragger->dragger);
   
@@ -161,18 +163,18 @@ void Oblong::initializeMaps()
     uuid tempId = gu::createRandomId();
     tempIds.push_back(tempId);
     
-    EvolveRecord evolveRecord;
+    ann::EvolveRecord evolveRecord;
     evolveRecord.outId = tempId;
-    seerShape->insertEvolve(evolveRecord);
+    sShape->insertEvolve(evolveRecord);
   }
   
   //helper lamda
   auto insertIntoFeatureMap = [this](const uuid &idIn, FeatureTag featureTagIn)
   {
-    FeatureTagRecord record;
+    ann::FeatureTagRecord record;
     record.id = idIn;
     record.tag = featureTagMap.at(featureTagIn);
-    seerShape->insertFeatureTag(record);
+    sShape->insertFeatureTag(record);
   };
   
   insertIntoFeatureMap(tempIds.at(0), FeatureTag::Root);
@@ -261,7 +263,7 @@ void Oblong::updateModel(const UpdatePayload&)
       static_cast<double>(height),
       gu::toOcc(static_cast<osg::Matrixd>(csys))
     );
-    seerShape->setOCCTShape(oblongMaker.getSolid());
+    sShape->setOCCTShape(oblongMaker.getSolid());
     updateResult(oblongMaker);
     mainTransform->setMatrix(osg::Matrixd::identity());
     setSuccess();
@@ -292,11 +294,11 @@ void Oblong::updateResult(const OblongBuilder& oblongMakerIn)
   //helper lamda
   auto updateShapeByTag = [this](const TopoDS_Shape &shapeIn, FeatureTag featureTagIn)
   {
-    uuid localId = seerShape->featureTagId(featureTagMap.at(featureTagIn));
-    seerShape->updateShapeIdRecord(shapeIn, localId);
+    uuid localId = sShape->featureTagId(featureTagMap.at(featureTagIn));
+    sShape->updateShapeIdRecord(shapeIn, localId);
   };
   
-  updateShapeByTag(seerShape->getRootOCCTShape(), FeatureTag::Root);
+  updateShapeByTag(sShape->getRootOCCTShape(), FeatureTag::Root);
   updateShapeByTag(oblongMakerIn.getSolid(), FeatureTag::Solid);
   updateShapeByTag(oblongMakerIn.getShell(), FeatureTag::Shell);
   updateShapeByTag(oblongMakerIn.getFaceXP(), FeatureTag::FaceXP);
@@ -332,7 +334,7 @@ void Oblong::updateResult(const OblongBuilder& oblongMakerIn)
   updateShapeByTag(oblongMakerIn.getVertexXNYPZN(), FeatureTag::VertexXNYPZN);
   updateShapeByTag(oblongMakerIn.getVertexXNYNZN(), FeatureTag::VertexXNYNZN);
   
-  seerShape->setRootShapeId(seerShape->featureTagId(featureTagMap.at(FeatureTag::Root)));
+  sShape->setRootShapeId(sShape->featureTagId(featureTagMap.at(FeatureTag::Root)));
 }
 
 void Oblong::setupIPGroup()

@@ -24,7 +24,7 @@
 
 #include <globalutilities.h>
 #include <tools/occtools.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <feature/shapecheck.h>
 #include <feature/extract.h>
 #include <project/serial/xsdcxxoutput/featureextract.h>
@@ -35,14 +35,18 @@ using boost::uuids::uuid;
 
 QIcon Extract::icon;
 
-Extract::Extract() : Base()
+Extract::Extract() : Base(), sShape(new ann::SeerShape())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionExtract.svg");
   
   name = QObject::tr("Extract");
   mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
+  
+  annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
 }
+
+Extract::~Extract(){}
 
 std::shared_ptr<prm::Parameter> Extract::buildAngleParameter(double deg)
 {
@@ -202,7 +206,8 @@ void Extract::updateModel(const UpdatePayload &payloadIn)
     if (payloadIn.updateMap.count(InputType::target) != 1)
       throw std::runtime_error("wrong number of parents for extract");
     
-    const SeerShape &targetSeerShape = payloadIn.updateMap.equal_range(InputType::target).first->second->getSeerShape();
+    const ann::SeerShape &targetSeerShape = 
+    payloadIn.updateMap.equal_range(InputType::target).first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     
     occt::FaceVector faces;
     for (const auto &ap : accruePicks)
@@ -263,15 +268,15 @@ void Extract::updateModel(const UpdatePayload &payloadIn)
       throw std::runtime_error("shapeCheck failed");
     
     //these seem to be taking care of it.
-    seerShape->setOCCTShape(out);
-    seerShape->shapeMatch(targetSeerShape);
-    seerShape->uniqueTypeMatch(targetSeerShape);
-    seerShape->outerWireMatch(targetSeerShape);
-    seerShape->derivedMatch();
-    seerShape->dumpNils("extract feature");
-    seerShape->dumpDuplicates("extract feature");
-    seerShape->ensureNoNils();
-    seerShape->ensureNoDuplicates();
+    sShape->setOCCTShape(out);
+    sShape->shapeMatch(targetSeerShape);
+    sShape->uniqueTypeMatch(targetSeerShape);
+    sShape->outerWireMatch(targetSeerShape);
+    sShape->derivedMatch();
+    sShape->dumpNils("extract feature");
+    sShape->dumpDuplicates("extract feature");
+    sShape->ensureNoNils();
+    sShape->ensureNoDuplicates();
     
     setSuccess();
   }

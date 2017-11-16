@@ -26,7 +26,7 @@
 #include <preferences/manager.h>
 #include <library/plabel.h>
 #include <feature/parameter.h>
-#include <feature/seershape.h>
+#include <annex/seershape.h>
 #include <feature/shapecheck.h>
 #include <tools/occtools.h>
 #include <project/serial/xsdcxxoutput/featurenest.h>
@@ -38,7 +38,7 @@ using boost::uuids::uuid;
 
 QIcon Nest::icon;
 
-Nest::Nest() : Base()
+Nest::Nest() : Base(), sShape(new ann::SeerShape())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionNest.svg");
@@ -69,6 +69,8 @@ Nest::Nest() : Base()
   overlaySwitch->addChild(gapLabel.get());
   
   feedDirection = osg::Vec3d(-1.0, 0.0, 0.0);
+  
+  annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
 }
 
 Nest::~Nest()
@@ -179,9 +181,9 @@ void Nest::updateModel(const UpdatePayload &payloadIn)
     if (payloadIn.updateMap.count(Nest::blank) != 1)
       throw std::runtime_error("couldn't find 'blank' input");
     const ftr::Base *bbf = payloadIn.updateMap.equal_range(Nest::blank).first->second;
-    if(!bbf->hasSeerShape())
+    if(!bbf->hasAnnex(ann::Type::SeerShape))
       throw std::runtime_error("no seer shape for blank");
-    const SeerShape &bss = bbf->getSeerShape(); //part seer shape.
+    const ann::SeerShape &bss = bbf->getAnnex<ann::SeerShape>(ann::Type::SeerShape); //part seer shape.
     TopoDS_Shape bs = occt::getFirstNonCompound(bss.getRootOCCTShape()); //blank shape. not const, might mesh.
     
     /* this is a little unusual. For performance reasons, we are using
@@ -212,8 +214,8 @@ void Nest::updateModel(const UpdatePayload &payloadIn)
       throw std::runtime_error("shapeCheck failed");
     
     //No shape consistency yet.
-    seerShape->setOCCTShape(out);
-    seerShape->ensureNoNils();
+    sShape->setOCCTShape(out);
+    sShape->ensureNoNils();
     
     setSuccess();
   }

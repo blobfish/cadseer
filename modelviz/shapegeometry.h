@@ -34,7 +34,7 @@
 namespace boost{namespace uuids{class uuid;}}
 class TopoDS_Face; class TopoDS_Edge;
 namespace osg{class Switch; class Depth; class LineWidth;}
-namespace ftr{class SeerShape;}
+namespace ann{class SeerShape;}
 
 namespace mdv
 {
@@ -44,10 +44,11 @@ namespace mdv
   class ShapeGeometry : public Base
   {
   public:
-    ShapeGeometry();
+    ShapeGeometry() = delete;
+    ShapeGeometry(const ann::SeerShape&);
     ShapeGeometry(const ShapeGeometry &rhs, const osg::CopyOp& copyOperation = osg::CopyOp::SHALLOW_COPY);
 
-    virtual osg::Object* cloneType() const override {return new ShapeGeometry();}
+    virtual osg::Object* cloneType() const override {return new ShapeGeometry(seerShape);}
     virtual osg::Object* clone(const osg::CopyOp& copyOperation) const override {return new ShapeGeometry(*this, copyOperation);}
     virtual bool isSameKindAs(const osg::Object* obj) const override {return dynamic_cast<const ShapeGeometry*>(obj)!=NULL;}
     /* using same libray name and class name as parent let the geometry be included
@@ -66,7 +67,7 @@ namespace mdv
     void setToPreHighlight(const boost::uuids::uuid&); //!< set to prehighlight of primitive index.
     void setToHighlight(const boost::uuids::uuid&); //!< set to highlight of primitive index.
     
-    std::shared_ptr<ftr::SeerShape> seerShape;
+    const ann::SeerShape &seerShape;
     
   protected:
     void setColor(const boost::uuids::uuid&, const osg::Vec4&); //set color of primitive index.
@@ -78,7 +79,8 @@ namespace mdv
   class ShapeGeometryBuilder
   {
   public:
-    ShapeGeometryBuilder(std::shared_ptr<ftr::SeerShape>);
+    ShapeGeometryBuilder() = delete;
+    ShapeGeometryBuilder(const ann::SeerShape&);
     ~ShapeGeometryBuilder();
     void go(double, double);
     void buildFaces(bool in){shouldBuildFaces = in;}
@@ -93,7 +95,7 @@ namespace mdv
     void faceConstruct(const TopoDS_Face &faceIn);
     const TopoDS_Shape &originalShape;
     TopoDS_Shape copiedShape;
-    std::shared_ptr<ftr::SeerShape> seerShape;
+    const ann::SeerShape &seerShape;
     Bnd_Box bound;
     TopTools_IndexedDataMapOfShapeListOfShape edgeToFace;
     TopTools_MapOfShape processed;
