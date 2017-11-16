@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef SPLITTERDECORATED_H
-#define SPLITTERDECORATED_H
+#ifndef APP_SPLITTERDECORATED_H
+#define APP_SPLITTERDECORATED_H
 
 #include <QSplitter>
 
@@ -34,4 +34,4 @@ class SplitterDecorated : public QSplitter
     virtual QSplitterHandle* createHandle() override;
 };
 
-#endif // SPLITTERDECORATED_H
+#endif // APP_SPLITTERDECORATED_H

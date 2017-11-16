@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef SPHERE_H
-#define SPHERE_H
+#ifndef FTR_SPHERE_H
+#define FTR_SPHERE_H
 
 #include <osg/ref_ptr>
 
@@ -68,4 +68,4 @@ namespace ftr
   };
 }
 
-#endif // SPHERE_H
+#endif // FTR_SPHERE_H

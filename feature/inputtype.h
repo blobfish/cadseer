@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef INPUTTYPE_H
-#define INPUTTYPE_H
+#ifndef FTR_INPUTTYPE_H
+#define FTR_INPUTTYPE_H
 
 #include <assert.h>
 #include <vector>
@@ -89,4 +89,4 @@ namespace ftr
   }
 }
 
-#endif //INPUTTYPE_H
+#endif //FTR_INPUTTYPE_H

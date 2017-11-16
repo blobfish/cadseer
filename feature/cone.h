@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef CONE_H
-#define CONE_H
+#ifndef FTR_CONE_H
+#define FTR_CONE_H
 
 #include <osg/ref_ptr>
 
@@ -79,4 +79,4 @@ namespace ftr
   };
 }
 
-#endif // CONE_H
+#endif // FTR_CONE_H

@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef PARAMETER_H
-#define PARAMETER_H
+#ifndef FTR_PARAMETER_H
+#define FTR_PARAMETER_H
 
 #include <QString>
 
@@ -232,4 +232,4 @@ namespace ftr
   }
 }
 
-#endif // PARAMETER_H
+#endif // FTR_PARAMETER_H

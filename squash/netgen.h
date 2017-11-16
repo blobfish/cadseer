@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef NETGEN_H
-#define NETGEN_H
+#ifndef SQS_NETGEN_H
+#define SQS_NETGEN_H
 
 #include "mesh.h"
 
@@ -35,4 +35,4 @@ namespace sqs
   }
 }
 
-#endif // NETGEN_H
+#endif // SQS_NETGEN_H

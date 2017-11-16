@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef BOOLEANBASE_H
-#define BOOLEANBASE_H
+#ifndef FTR_BOOLEANBASE_H
+#define FTR_BOOLEANBASE_H
 
 #include <feature/intersectionmapping.h>
 #include <feature/base.h>
@@ -44,4 +44,4 @@ namespace ftr
   };
 }
 
-#endif // BOOLEANBASE_H
+#endif // FTR_BOOLEANBASE_H

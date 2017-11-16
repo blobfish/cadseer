@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef GESTURENODE_H
-#define GESTURENODE_H
+#ifndef GSN_GESTURENODE_H
+#define GSN_GESTURENODE_H
 
 namespace osg
 {
@@ -35,4 +35,4 @@ osg::Geode* buildIconGeode(const char *, double);
 osg::Geode* buildLineGeode();
 }
 
-#endif // GESTURENODE_H
+#endif // GSN_GESTURENODE_H

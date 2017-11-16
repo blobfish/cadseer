@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef LINEARDRAGGER_H
-#define LINEARDRAGGER_H
+#ifndef LBR_LINEARDRAGGER_H
+#define LBR_LINEARDRAGGER_H
 
 #include <osgManipulator/Translate1DDragger>
 
@@ -47,4 +47,4 @@ namespace lbr
   };
 }
 
-#endif // LINEARDRAGGER_H
+#endif // LBR_LINEARDRAGGER_H

@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef GESTUREHANDLER_H
-#define GESTUREHANDLER_H
+#ifndef GSN_GESTUREHANDLER_H
+#define GSN_GESTUREHANDLER_H
 
 #include <memory>
 
@@ -73,4 +73,4 @@ public:
     virtual void apply(osg::Switch &aSwitch);
 };
 
-#endif // GESTUREHANDLER_H
+#endif // GSN_GESTUREHANDLER_H

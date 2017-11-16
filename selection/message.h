@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef SELECTIONMESSAGE_H
-#define SELECTIONMESSAGE_H
+#ifndef SLC_SELECTIONMESSAGE_H
+#define SLC_SELECTIONMESSAGE_H
 
 #include <vector>
 
@@ -70,4 +70,4 @@ namespace slc
   void remove(Messages &messagesIn, const Message &messageIn);
 }
 
-#endif // SELECTIONMESSAGE_H
+#endif // SLC_SELECTIONMESSAGE_H

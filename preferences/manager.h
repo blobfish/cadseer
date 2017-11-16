@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef MANAGER_H
-#define MANAGER_H
+#ifndef PRF_MANAGER_H
+#define PRF_MANAGER_H
 
 #include <memory>
 
@@ -57,4 +57,4 @@ namespace prf
   Manager& manager();
 }
 
-#endif // MANAGER_H
+#endif // PRF_MANAGER_H

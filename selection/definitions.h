@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef SELECTIONSTATE_H
-#define SELECTIONSTATE_H
+#ifndef SLC_SELECTIONSTATE_H
+#define SLC_SELECTIONSTATE_H
 
 #include <vector>
 #include <string>
@@ -203,4 +203,4 @@ namespace slc
   TopAbs_ShapeEnum convert(Type);
 }
 
-#endif // SELECTIONSTATE_H
+#endif // SLC_SELECTIONSTATE_H

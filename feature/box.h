@@ -18,8 +18,8 @@
  */
 
 
-#ifndef BOX_H
-#define BOX_H
+#ifndef FTR_BOX_H
+#define FTR_BOX_H
 
 #include <osg/ref_ptr>
 
@@ -82,4 +82,4 @@ private:
 };
 }
 
-#endif // BOX_H
+#endif // FTR_BOX_H

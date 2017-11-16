@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef GEOMETRYLIBRARYPRIVATE_H
-#define GEOMETRYLIBRARYPRIVATE_H
+#ifndef LBR_GEOMETRYLIBRARYPRIVATE_H
+#define LBR_GEOMETRYLIBRARYPRIVATE_H
 
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
@@ -82,4 +82,4 @@ namespace lbr
 }
 
 
-#endif //GEOMETRYLIBRARYPRIVATE_H
+#endif //LBR_GEOMETRYLIBRARYPRIVATE_H

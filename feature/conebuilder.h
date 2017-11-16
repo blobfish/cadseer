@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef CONEBUILDER_H
-#define CONEBUILDER_H
+#ifndef FTR_CONEBUILDER_H
+#define FTR_CONEBUILDER_H
 
 #include <TopoDS_Shape.hxx>
 #include <gp_Ax2.hxx>
@@ -60,4 +60,4 @@ namespace ftr
   };
 }
 
-#endif // CONEBUILDER_H
+#endif // FTR_CONEBUILDER_H

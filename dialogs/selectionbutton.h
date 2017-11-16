@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef SELECTIONBUTTON_H
-#define SELECTIONBUTTON_H
+#ifndef DLG_SELECTIONBUTTON_H
+#define DLG_SELECTIONBUTTON_H
 
 #include <memory>
 
@@ -80,4 +80,4 @@ namespace dlg
   };
 }
 
-#endif // SELECTIONBUTTON_H
+#endif // DLG_SELECTIONBUTTON_H

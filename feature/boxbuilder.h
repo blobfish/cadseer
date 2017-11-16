@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef BOXBUILDER_H
-#define BOXBUILDER_H
+#ifndef FTR_BOXBUILDER_H
+#define FTR_BOXBUILDER_H
 
 #include <TopoDS_Shape.hxx>
 #include <gp_Ax2.hxx>
@@ -113,4 +113,4 @@ namespace ftr
   };
 }
 
-#endif // BOXBUILDER_H
+#endif // FTR_BOXBUILDER_H

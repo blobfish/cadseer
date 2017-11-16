@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef OVERLAYHANDLER_H
-#define OVERLAYHANDLER_H
+#ifndef SLC_OVERLAYHANDLER_H
+#define SLC_OVERLAYHANDLER_H
 
 #include <osg/ref_ptr>
 #include <osgGA/GUIEventHandler>
@@ -49,4 +49,4 @@ namespace slc
   };
 }
 
-#endif // OVERLAYHANDLER_H
+#endif // SLC_OVERLAYHANDLER_H

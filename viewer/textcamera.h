@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef TEXTCAMERA_H
-#define TEXTCAMERA_H
+#ifndef VWR_TEXTCAMERA_H
+#define VWR_TEXTCAMERA_H
 
 #include <osg/Camera>
 #include <osg/observer_ptr>
@@ -79,4 +79,4 @@ private:
 };
 }
 
-#endif // TEXTCAMERA_H
+#endif // VWR_TEXTCAMERA_H

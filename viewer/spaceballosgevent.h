@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef SPACEBALLOSGEVENT_H
-#define SPACEBALLOSGEVENT_H
+#ifndef SPB_SPACEBALLOSGEVENT_H
+#define SPB_SPACEBALLOSGEVENT_H
 
 #include <osg/Referenced>
 
@@ -43,4 +43,4 @@ public:
     int rotationZ;
 };
 }
-#endif // SPACEBALLOSGEVENT_H
+#endif // SPB_SPACEBALLOSGEVENT_H

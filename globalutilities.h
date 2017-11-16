@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef GLOBALUTILITIES_H
-#define GLOBALUTILITIES_H
+#ifndef GU_GLOBALUTILITIES_H
+#define GU_GLOBALUTILITIES_H
 
 #include <string>
 #include <vector>
@@ -74,4 +74,4 @@ void uniquefy(T &t)
 
 std::ostream& operator<<(std::ostream &, const TopoDS_Shape &);
 
-#endif // GLOBALUTILITIES_H
+#endif // GU_GLOBALUTILITIES_H

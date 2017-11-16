@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef TOOLS_H
-#define TOOLS_H
+#ifndef SQS_TOOLS_H
+#define SQS_TOOLS_H
 
 #include <osg/Vec3d>
 #include <osg/io_utils>
@@ -64,4 +64,4 @@ namespace sqs
   }
 }
 
-#endif // TOOLS_H
+#endif // SQS_TOOLS_H

@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef APP_MAINWINDOW_H
+#define APP_MAINWINDOW_H
 
 #include <memory>
 
@@ -76,4 +76,4 @@ private:
 };
 }
 
-#endif // MAINWINDOW_H
+#endif // APP_MAINWINDOW_H

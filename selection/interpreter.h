@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef INTERPRETER_H
-#define INTERPRETER_H
+#ifndef SLC_INTERPRETER_H
+#define SLC_INTERPRETER_H
 
 #include <selection/container.h>
 #include <selection/intersection.h>
@@ -46,4 +46,4 @@ namespace slc
     Mask selectionMask;
   };
 }
-#endif // INTERPRETER_H
+#endif // SLC_INTERPRETER_H

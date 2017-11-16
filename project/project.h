@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef PROJECT_H
-#define PROJECT_H
+#ifndef PRJ_PROJECT_H
+#define PRJ_PROJECT_H
 
 #include <map>
 #include <memory>
@@ -120,4 +120,4 @@ private:
 };
 }
 
-#endif // PROJECT_H
+#endif // PRJ_PROJECT_H

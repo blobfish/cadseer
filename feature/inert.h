@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef INERT_H
-#define INERT_H
+#ifndef FTR_INERT_H
+#define FTR_INERT_H
 
 #include <feature/base.h>
 
@@ -59,4 +59,4 @@ namespace ftr
   };
 }
 
-#endif // INERT_H
+#endif // FTR_INERT_H

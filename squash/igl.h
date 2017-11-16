@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef IGL_H
-#define IGL_H
+#ifndef SQS_IGL_H
+#define SQS_IGL_H
 
 #include <Eigen/Core>
 
@@ -30,4 +30,4 @@ namespace sqs
   Mesh toCgal(const Eigen::MatrixXd&, const Eigen::MatrixXi&);
 }
 
-#endif // IGL_H
+#endif // SQS_IGL_H

@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef APPLICATION_H
-#define APPLICATION_H
+#ifndef APP_APPLICATION_H
+#define APP_APPLICATION_H
 
 #include <memory>
 
@@ -85,4 +85,4 @@ struct WaitCursor
 };
 }
 
-#endif // APPLICATION_H
+#endif // APP_APPLICATION_H

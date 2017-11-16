@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef SELECTIONMANAGER_H
-#define SELECTIONMANAGER_H
+#ifndef SLC_SELECTIONMANAGER_H
+#define SLC_SELECTIONMANAGER_H
 
 #include <memory>
 
@@ -83,4 +83,4 @@ private:
 };
 }
 
-#endif // SELECTIONMANAGER_H
+#endif // SLC_SELECTIONMANAGER_H

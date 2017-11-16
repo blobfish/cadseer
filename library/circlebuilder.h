@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef CIRCLEBUILDER_H
-#define CIRCLEBUILDER_H
+#ifndef LBR_CIRCLEBUILDER_H
+#define LBR_CIRCLEBUILDER_H
 
 #include <cstdlib> //for std::size_t
 
@@ -84,4 +84,4 @@ protected:
 };
 }
 
-#endif // CIRCLEBUILDER_H
+#endif // LBR_CIRCLEBUILDER_H

@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef ANIMATIONS_H
-#define ANIMATIONS_H
+#ifndef GSN_ANIMATIONS_H
+#define GSN_ANIMATIONS_H
 
 #include <assert.h>
 
@@ -132,4 +132,4 @@ protected:
 }
 
 
-#endif // ANIMATIONS_H
+#endif // GSN_ANIMATIONS_H

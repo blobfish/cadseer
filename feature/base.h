@@ -18,8 +18,8 @@
  */
 
 
-#ifndef FEATUREBASE_H
-#define FEATUREBASE_H
+#ifndef FTR_BASE_H
+#define FTR_BASE_H
 
 #include <memory>
 
@@ -149,4 +149,4 @@ protected:
 };
 }
 
-#endif // FEATUREBASE_H
+#endif // FTR_BASE_H

@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef CONTROLLEDDAGDFS_H
-#define CONTROLLEDDAGDFS_H
+#ifndef DAG_CONTROLLEDDAGDFS_H
+#define DAG_CONTROLLEDDAGDFS_H
 
 #include <tuple>
 #include <vector>
@@ -212,4 +212,4 @@ namespace dag
   };
 }
 
-#endif // CONTROLLEDDAGDFS_H
+#endif // DAG_CONTROLLEDDAGDFS_H

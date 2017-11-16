@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef CYLINDER_H
-#define CYLINDER_H
+#ifndef FTR_CYLINDER_H
+#define FTR_CYLINDER_H
 
 #include <osg/ref_ptr>
 
@@ -75,4 +75,4 @@ namespace ftr
   };
 }
 
-#endif // CYLINDER_H
+#endif // FTR_CYLINDER_H

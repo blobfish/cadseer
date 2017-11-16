@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef GEOMETRYLIBRARYTAG_H
-#define GEOMETRYLIBRARYTAG_H
+#ifndef LBR_GEOMETRYLIBRARYTAG_H
+#define LBR_GEOMETRYLIBRARYTAG_H
 
 #include <vector>
 #include <string>
@@ -49,4 +49,4 @@ namespace lbr
 }
 
 
-#endif //GEOMETRYLIBRARYTAG_H
+#endif //LBR_GEOMETRYLIBRARYTAG_H

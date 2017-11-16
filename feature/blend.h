@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef BLEND_H
-#define BLEND_H
+#ifndef FTR_BLEND_H
+#define FTR_BLEND_H
 
 #include <memory>
 
@@ -114,4 +114,4 @@ private:
 };
 }
 
-#endif // BLEND_H
+#endif // FTR_BLEND_H

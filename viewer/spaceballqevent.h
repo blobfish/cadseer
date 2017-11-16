@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef SPACEBALLQEVENT_H
-#define SPACEBALLQEVENT_H
+#ifndef SPB_SPACEBALLQEVENT_H
+#define SPB_SPACEBALLQEVENT_H
 
 #include <QInputEvent>
 namespace spb
@@ -86,4 +86,4 @@ namespace spb
         int button;
     };
 }
-#endif // SPACEBALLQEVENT_H
+#endif // SPB_SPACEBALLQEVENT_H

@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef CYLINDERBUILDER_H
-#define CYLINDERBUILDER_H
+#ifndef LBR_CYLINDERBUILDER_H
+#define LBR_CYLINDERBUILDER_H
 
 #include <cstdlib> //for std::size_t
 
@@ -68,4 +68,4 @@ protected:
 };
 }
 
-#endif // CYLINDERBUILDER_H
+#endif // LBR_CYLINDERBUILDER_H

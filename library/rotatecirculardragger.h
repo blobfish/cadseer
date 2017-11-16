@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef OSGMANIPULATOR_ROTATECIRCULARDRAGGER
-#define OSGMANIPULATOR_ROTATECIRCULARDRAGGER 1
+#ifndef LBR_ROTATECIRCULARDRAGGER_H
+#define LBR_ROTATECIRCULARDRAGGER_H
 
 #include <osg/Geometry>
 #include <osgManipulator/Dragger>
@@ -105,4 +105,4 @@ class RotateCircularDragger : public osgManipulator::Dragger
 };
 }
 
-#endif //OSGMANIPULATOR_ROTATECIRCULARDRAGGER
+#endif //LBR_ROTATECIRCULARDRAGGER_H

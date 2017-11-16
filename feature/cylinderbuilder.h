@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef CYLINDERBUILDER_H
-#define CYLINDERBUILDER_H
+#ifndef FTR_CYLINDERBUILDER_H
+#define FTR_CYLINDERBUILDER_H
 
 #include <TopoDS_Shape.hxx>
 #include <gp_Ax2.hxx>
@@ -60,4 +60,4 @@ namespace ftr
   };
 }
 
-#endif // CYLINDERBUILDER_H
+#endif // FTR_CYLINDERBUILDER_H

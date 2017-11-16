@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef LINEARDIMENSION_H
-#define LINEARDIMENSION_H
+#ifndef LBR_LINEARDIMENSION_H
+#define LBR_LINEARDIMENSION_H
 
 #include <osg/ref_ptr>
 #include <osg/MatrixTransform>
@@ -113,4 +113,4 @@ protected:
 };
 }
 
-#endif // LINEARDIMENSION_H
+#endif // LBR_LINEARDIMENSION_H

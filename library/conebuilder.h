@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef CONEBUILDER_H
-#define CONEBUILDER_H
+#ifndef LBR_CONEBUILDER_H
+#define LBR_CONEBUILDER_H
 
 #include <cstdlib> //for std::size_t
 
@@ -64,4 +64,4 @@ protected:
 };
 }
 
-#endif // CONEBUILDER_H
+#endif // LBR_CONEBUILDER_H

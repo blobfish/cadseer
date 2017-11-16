@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef CIRCLEPROJECTOR_H
-#define CIRCLEPROJECTOR_H 1
+#ifndef LBR_CIRCLEPROJECTOR_H
+#define LBR_CIRCLEPROJECTOR_H
 
 #include <osgManipulator/Projector>
 
@@ -40,4 +40,4 @@ protected:
 };
 }
 
-#endif //CIRCLEPROJECTOR_H
+#endif //LBR_CIRCLEPROJECTOR_H

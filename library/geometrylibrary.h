@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef GEOMETRYLIBRARY_H
-#define GEOMETRYLIBRARY_H
+#ifndef LBR_GEOMETRYLIBRARY_H
+#define LBR_GEOMETRYLIBRARY_H
 
 #include <memory>
 
@@ -116,4 +116,4 @@ namespace lbr
   }
 }
 
-#endif // GEOMETRYLIBRARY_H
+#endif // LBR_GEOMETRYLIBRARY_H

@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef MESSAGE_H
-#define MESSAGE_H
+#ifndef PRJ_MESSAGE_H
+#define PRJ_MESSAGE_H
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/shared_ptr.hpp>
@@ -41,4 +41,4 @@ namespace prj
   };
 }
 
-#endif // MESSAGE_H
+#endif // PRJ_MESSAGE_H

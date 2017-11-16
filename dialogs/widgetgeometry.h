@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef DLG_DIALOGGEOMETRY_H
-#define DLG_DIALOGGEOMETRY_H
+#ifndef DLG_WIDGETGEOMETRY_H
+#define DLG_WIDGETGEOMETRY_H
 
 #include <QObject>
 
@@ -41,4 +41,4 @@ namespace dlg
   };
 }
 
-#endif // DLG_DIALOGGEOMETRY_H
+#endif // DLG_WIDGETGEOMETRY_H

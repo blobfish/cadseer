@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef DAG_MODELGRAPH_H
-#define DAG_MODELGRAPH_H
+#ifndef DAG_STOW_H
+#define DAG_STOW_H
 
 #include <memory>
 #include <bitset>
@@ -204,4 +204,4 @@ namespace dag
 //   };
 }
 
-#endif // DAG_MODELGRAPH_H
+#endif // DAG_STOW_H

@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef ICONBUILDER_H
-#define ICONBUILDER_H
+#ifndef LBR_ICONBUILDER_H
+#define LBR_ICONBUILDER_H
 
 #include <osg/Vec3d>
 #include <osg/Image>
@@ -43,4 +43,4 @@ protected:
 };
 }
 
-#endif // ICONBUILDER_H
+#endif // LBR_ICONBUILDER_H

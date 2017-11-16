@@ -64,7 +64,7 @@
 
 #include <xsd/cxx/pre.hxx>
 
-#include "../../../xmlbase.h"
+#include "featurebase.h"
 
 // Forward declarations.
 //

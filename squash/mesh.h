@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef MESH_H
-#define MESH_H
+#ifndef SQS_MESH_H
+#define SQS_MESH_H
 
 #include <vector>
 
@@ -50,4 +50,4 @@ typedef std::vector<Face> Faces;
 typedef CGAL::Min_sphere_of_points_d_traits_3<Kernel, double, CGAL::Tag_true, CGAL::Default_algorithm> SphereTraits;
 typedef CGAL::Min_sphere_of_spheres_d<SphereTraits> BSphere;
 
-#endif // MESH_H
+#endif // SQS_MESH_H

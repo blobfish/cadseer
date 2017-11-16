@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef SPHEREBUILDER_H
-#define SPHEREBUILDER_H
+#ifndef LBR_SPHEREBUILDER_H
+#define LBR_SPHEREBUILDER_H
 
 #include <cstdlib> //for std::size_t
 
@@ -73,4 +73,4 @@ protected:
   double radius = 1.0; //!< default value of 1.0
 };
 }
-#endif // SPHEREBUILDER_H
+#endif // LBR_SPHEREBUILDER_H

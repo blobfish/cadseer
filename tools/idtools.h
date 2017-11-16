@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef IDTOOLS_H
-#define IDTOOLS_H
+#ifndef GU_IDTOOLS_H
+#define GU_IDTOOLS_H
 
 #include <string>
 
@@ -32,4 +32,4 @@ namespace gu
   boost::uuids::uuid stringToId(const std::string &stringIn);
 }
 
-#endif // IDTOOLS_H
+#endif // GU_IDTOOLS_H

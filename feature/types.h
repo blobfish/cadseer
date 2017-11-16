@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef TYPES_H
-#define TYPES_H
+#ifndef FTR_TYPES_H
+#define FTR_TYPES_H
 
 #include <assert.h>
 #include <map>
@@ -92,4 +92,4 @@ namespace ftr
 
 
 
-#endif //TYPES_H
+#endif //FTR_TYPES_H

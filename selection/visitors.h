@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef VISITORS_H
-#define VISITORS_H
+#ifndef SLC_VISITORS_H
+#define SLC_VISITORS_H
 
 #include <boost/uuid/uuid.hpp>
 
@@ -91,4 +91,4 @@ namespace slc
   };
 }
 
-#endif // VISITORS_H
+#endif // SLC_VISITORS_H

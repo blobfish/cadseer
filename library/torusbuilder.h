@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef TORUSBUILDER_H
-#define TORUSBUILDER_H
+#ifndef LBR_TORUSBUILDER_H
+#define LBR_TORUSBUILDER_H
 
 #include <cstdlib> //for std::size_t
 
@@ -81,4 +81,4 @@ protected:
 };
 }
 
-#endif // TORUSBUILDER_H
+#endif // LBR_TORUSBUILDER_H

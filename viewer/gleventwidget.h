@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef GLEVENTWIDGET_H
-#define GLEVENTWIDGET_H
+#ifndef VWR_GLEVENTWIDGET_H
+#define VWR_GLEVENTWIDGET_H
 
 #include <osgQt/GraphicsWindowQt>
 
@@ -40,4 +40,4 @@ private:
 };
 }
 
-#endif // GLEVENTWIDGET_H
+#endif // VWR_GLEVENTWIDGET_H

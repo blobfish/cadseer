@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef SUPPORT_H
-#define SUPPORT_H
+#ifndef SQS_SUPPORT_H
+#define SQS_SUPPORT_H
 
 #include <tuple>
 
@@ -129,4 +129,4 @@ namespace sqs
   }
 }
 
-#endif // SUPPORT_H
+#endif // SQS_SUPPORT_H
