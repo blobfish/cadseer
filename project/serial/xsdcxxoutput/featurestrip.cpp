@@ -145,6 +145,30 @@ namespace prj
       this->featureBase_.set (std::move (x));
     }
 
+    const FeatureStrip::FeedDirectionType& FeatureStrip::
+    feedDirection () const
+    {
+      return this->feedDirection_.get ();
+    }
+
+    FeatureStrip::FeedDirectionType& FeatureStrip::
+    feedDirection ()
+    {
+      return this->feedDirection_.get ();
+    }
+
+    void FeatureStrip::
+    feedDirection (const FeedDirectionType& x)
+    {
+      this->feedDirection_.set (x);
+    }
+
+    void FeatureStrip::
+    feedDirection (::std::unique_ptr< FeedDirectionType > x)
+    {
+      this->feedDirection_.set (std::move (x));
+    }
+
     const FeatureStrip::PitchType& FeatureStrip::
     pitch () const
     {
@@ -281,6 +305,30 @@ namespace prj
     stripHeight (const StripHeightType& x)
     {
       this->stripHeight_.set (x);
+    }
+
+    const FeatureStrip::FeedDirectionLabelType& FeatureStrip::
+    feedDirectionLabel () const
+    {
+      return this->feedDirectionLabel_.get ();
+    }
+
+    FeatureStrip::FeedDirectionLabelType& FeatureStrip::
+    feedDirectionLabel ()
+    {
+      return this->feedDirectionLabel_.get ();
+    }
+
+    void FeatureStrip::
+    feedDirectionLabel (const FeedDirectionLabelType& x)
+    {
+      this->feedDirectionLabel_.set (x);
+    }
+
+    void FeatureStrip::
+    feedDirectionLabel (::std::unique_ptr< FeedDirectionLabelType > x)
+    {
+      this->feedDirectionLabel_.set (std::move (x));
     }
 
     const FeatureStrip::PitchLabelType& FeatureStrip::
@@ -649,12 +697,14 @@ namespace prj
 
     FeatureStrip::
     FeatureStrip (const FeatureBaseType& featureBase,
+                  const FeedDirectionType& feedDirection,
                   const PitchType& pitch,
                   const WidthType& width,
                   const WidthOffsetType& widthOffset,
                   const GapType& gap,
                   const AutoCalcType& autoCalc,
                   const StripHeightType& stripHeight,
+                  const FeedDirectionLabelType& feedDirectionLabel,
                   const PitchLabelType& pitchLabel,
                   const WidthLabelType& widthLabel,
                   const WidthOffsetLabelType& widthOffsetLabel,
@@ -663,12 +713,14 @@ namespace prj
                   const StationsType& stations)
     : ::xml_schema::Type (),
       featureBase_ (featureBase, this),
+      feedDirection_ (feedDirection, this),
       pitch_ (pitch, this),
       width_ (width, this),
       widthOffset_ (widthOffset, this),
       gap_ (gap, this),
       autoCalc_ (autoCalc, this),
       stripHeight_ (stripHeight, this),
+      feedDirectionLabel_ (feedDirectionLabel, this),
       pitchLabel_ (pitchLabel, this),
       widthLabel_ (widthLabel, this),
       widthOffsetLabel_ (widthOffsetLabel, this),
@@ -680,12 +732,14 @@ namespace prj
 
     FeatureStrip::
     FeatureStrip (::std::unique_ptr< FeatureBaseType > featureBase,
+                  ::std::unique_ptr< FeedDirectionType > feedDirection,
                   ::std::unique_ptr< PitchType > pitch,
                   ::std::unique_ptr< WidthType > width,
                   ::std::unique_ptr< WidthOffsetType > widthOffset,
                   ::std::unique_ptr< GapType > gap,
                   ::std::unique_ptr< AutoCalcType > autoCalc,
                   const StripHeightType& stripHeight,
+                  ::std::unique_ptr< FeedDirectionLabelType > feedDirectionLabel,
                   ::std::unique_ptr< PitchLabelType > pitchLabel,
                   ::std::unique_ptr< WidthLabelType > widthLabel,
                   ::std::unique_ptr< WidthOffsetLabelType > widthOffsetLabel,
@@ -694,12 +748,14 @@ namespace prj
                   ::std::unique_ptr< StationsType > stations)
     : ::xml_schema::Type (),
       featureBase_ (std::move (featureBase), this),
+      feedDirection_ (std::move (feedDirection), this),
       pitch_ (std::move (pitch), this),
       width_ (std::move (width), this),
       widthOffset_ (std::move (widthOffset), this),
       gap_ (std::move (gap), this),
       autoCalc_ (std::move (autoCalc), this),
       stripHeight_ (stripHeight, this),
+      feedDirectionLabel_ (std::move (feedDirectionLabel), this),
       pitchLabel_ (std::move (pitchLabel), this),
       widthLabel_ (std::move (widthLabel), this),
       widthOffsetLabel_ (std::move (widthOffsetLabel), this),
@@ -715,12 +771,14 @@ namespace prj
                   ::xml_schema::Container* c)
     : ::xml_schema::Type (x, f, c),
       featureBase_ (x.featureBase_, f, this),
+      feedDirection_ (x.feedDirection_, f, this),
       pitch_ (x.pitch_, f, this),
       width_ (x.width_, f, this),
       widthOffset_ (x.widthOffset_, f, this),
       gap_ (x.gap_, f, this),
       autoCalc_ (x.autoCalc_, f, this),
       stripHeight_ (x.stripHeight_, f, this),
+      feedDirectionLabel_ (x.feedDirectionLabel_, f, this),
       pitchLabel_ (x.pitchLabel_, f, this),
       widthLabel_ (x.widthLabel_, f, this),
       widthOffsetLabel_ (x.widthOffsetLabel_, f, this),
@@ -736,12 +794,14 @@ namespace prj
                   ::xml_schema::Container* c)
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
       featureBase_ (this),
+      feedDirection_ (this),
       pitch_ (this),
       width_ (this),
       widthOffset_ (this),
       gap_ (this),
       autoCalc_ (this),
       stripHeight_ (this),
+      feedDirectionLabel_ (this),
       pitchLabel_ (this),
       widthLabel_ (this),
       widthOffsetLabel_ (this),
@@ -776,6 +836,20 @@ namespace prj
           if (!featureBase_.present ())
           {
             this->featureBase_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // feedDirection
+        //
+        if (n.name () == "feedDirection" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< FeedDirectionType > r (
+            FeedDirectionTraits::create (i, f, this));
+
+          if (!feedDirection_.present ())
+          {
+            this->feedDirection_.set (::std::move (r));
             continue;
           }
         }
@@ -857,6 +931,20 @@ namespace prj
           if (!stripHeight_.present ())
           {
             this->stripHeight_.set (StripHeightTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // feedDirectionLabel
+        //
+        if (n.name () == "feedDirectionLabel" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< FeedDirectionLabelType > r (
+            FeedDirectionLabelTraits::create (i, f, this));
+
+          if (!feedDirectionLabel_.present ())
+          {
+            this->feedDirectionLabel_.set (::std::move (r));
             continue;
           }
         }
@@ -955,6 +1043,13 @@ namespace prj
           "");
       }
 
+      if (!feedDirection_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "feedDirection",
+          "");
+      }
+
       if (!pitch_.present ())
       {
         throw ::xsd::cxx::tree::expected_element< char > (
@@ -994,6 +1089,13 @@ namespace prj
       {
         throw ::xsd::cxx::tree::expected_element< char > (
           "stripHeight",
+          "");
+      }
+
+      if (!feedDirectionLabel_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "feedDirectionLabel",
           "");
       }
 
@@ -1054,12 +1156,14 @@ namespace prj
       {
         static_cast< ::xml_schema::Type& > (*this) = x;
         this->featureBase_ = x.featureBase_;
+        this->feedDirection_ = x.feedDirection_;
         this->pitch_ = x.pitch_;
         this->width_ = x.width_;
         this->widthOffset_ = x.widthOffset_;
         this->gap_ = x.gap_;
         this->autoCalc_ = x.autoCalc_;
         this->stripHeight_ = x.stripHeight_;
+        this->feedDirectionLabel_ = x.feedDirectionLabel_;
         this->pitchLabel_ = x.pitchLabel_;
         this->widthLabel_ = x.widthLabel_;
         this->widthOffsetLabel_ = x.widthOffsetLabel_;
@@ -1426,6 +1530,17 @@ namespace prj
         s << i.featureBase ();
       }
 
+      // feedDirection
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "feedDirection",
+            e));
+
+        s << i.feedDirection ();
+      }
+
       // pitch
       //
       {
@@ -1490,6 +1605,17 @@ namespace prj
             e));
 
         s << ::xml_schema::AsDouble(i.stripHeight ());
+      }
+
+      // feedDirectionLabel
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "feedDirectionLabel",
+            e));
+
+        s << i.feedDirectionLabel ();
       }
 
       // pitchLabel

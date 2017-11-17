@@ -11,7 +11,9 @@
   <xs:all>
     <xs:element name="featureBase" type="srl:FeatureBase"/>
     <xs:element name="gap" type="srl:Parameter"/>
+    <xs:element name="feedDirection" type="srl:Parameter"/>
     <xs:element name="gapLabel" type="srl:PLabel"/>
+    <xs:element name="feedDirectionLabel" type="srl:PLabel"/>
     <xs:element name="pitch" type="xs:double"/>
   </xs:all>
 </xs:complexType>

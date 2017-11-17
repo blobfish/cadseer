@@ -516,7 +516,7 @@ void SeerShape::setRootShapeId(const uuid& idIn)
 
 bool SeerShape::isNull() const
 {
-  return rootShapeId.is_nil();
+  return rootShapeId.is_nil() || (!hasShapeIdRecord(rootShapeId));
 }
 
 std::vector<uuid> SeerShape::useGetParentsOfType

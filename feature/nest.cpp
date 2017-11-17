@@ -38,7 +38,13 @@ using boost::uuids::uuid;
 
 QIcon Nest::icon;
 
-Nest::Nest() : Base(), sShape(new ann::SeerShape())
+Nest::Nest() : 
+Base(),
+pitch(new prm::Parameter(QObject::tr("Pitch"), 1.0)),
+gap(new prm::Parameter(QObject::tr("Gap"), prf::manager().rootPtr->features().nest().get().gap())),
+feedDirection(new prm::Parameter(QObject::tr("Feed Direction"), osg::Vec3d(-1.0, 0.0, 0.0))),
+sShape(new ann::SeerShape())
+
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionNest.svg");
@@ -46,37 +52,31 @@ Nest::Nest() : Base(), sShape(new ann::SeerShape())
   name = QObject::tr("Nest");
   mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
-  pitch = std::shared_ptr<prm::Parameter>(new prm::Parameter(QObject::tr("Pitch"), 1.0));
   pitch->setConstraint(prm::Constraint::buildNonZeroPositive());
   parameterVector.push_back(pitch.get());
   //pitch does not get wired up to dirty.
   
-  gap = std::shared_ptr<prm::Parameter>
-  (
-    new prm::Parameter
-    (
-      QObject::tr("Gap"),
-      prf::manager().rootPtr->features().nest().get().gap()
-    )
-  );
   gap->setConstraint(prm::Constraint::buildNonZeroPositive());
   gap->connectValue(boost::bind(&Nest::setModelDirty, this));
   parameterVector.push_back(gap.get());
+  
+  feedDirection->connectValue(boost::bind(&Nest::setModelDirty, this));
+  parameterVector.push_back(feedDirection.get());
   
   gapLabel = new lbr::PLabel(gap.get());
   gapLabel->showName = true;
   gapLabel->valueHasChanged();
   overlaySwitch->addChild(gapLabel.get());
   
-  feedDirection = osg::Vec3d(-1.0, 0.0, 0.0);
+  feedDirectionLabel = new lbr::PLabel(feedDirection.get());
+  feedDirectionLabel->showName = true;
+  feedDirectionLabel->valueHasChanged();
+  overlaySwitch->addChild(feedDirectionLabel.get());
   
   annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
 }
 
-Nest::~Nest()
-{
-
-}
+Nest::~Nest(){}
 
 double Nest::getPitch() const
 {
@@ -86,6 +86,11 @@ double Nest::getPitch() const
 double Nest::getGap() const
 {
   return static_cast<double>(*gap);
+}
+
+osg::Vec3d Nest::getFeedDirection() const
+{
+  return static_cast<osg::Vec3d>(*feedDirection);
 }
 
 double Nest::getDistance(const TopoDS_Shape &sIn1, const TopoDS_Shape &sIn2)
@@ -121,7 +126,7 @@ TopoDS_Shape Nest::calcPitch(TopoDS_Shape &bIn, double guess)
 {
   //guess is expected from the bounding box and assumes no overlap.
   //dir is a unit vector.
-  gp_Vec dir = gu::toOcc(feedDirection);
+  gp_Vec dir = gu::toOcc(static_cast<osg::Vec3d>(*feedDirection));
   double localGap = static_cast<double>(*gap);
   double tol = localGap * 0.1;
   TopoDS_Shape other = occt::instanceShape(bIn, dir, guess + localGap + tol);
@@ -217,6 +222,9 @@ void Nest::updateModel(const UpdatePayload &payloadIn)
     sShape->setOCCTShape(out);
     sShape->ensureNoNils();
     
+    //update feed direction label. put at center of blank bounding box.
+    feedDirectionLabel->setMatrix(osg::Matrixd::translate(gu::toOsg(bbox.getCenter())));
+    
     setSuccess();
   }
   catch (const Standard_Failure &e)
@@ -245,7 +253,9 @@ void Nest::serialWrite(const QDir &dIn)
   (
     Base::serialOut(),
     gap->serialOut(),
+    feedDirection->serialOut(),
     gapLabel->serialOut(),
+    feedDirectionLabel->serialOut(),
     static_cast<double>(*pitch)
   );
   
@@ -258,6 +268,8 @@ void Nest::serialRead(const prj::srl::FeatureNest &sNestIn)
 {
   Base::serialIn(sNestIn.featureBase());
   gap->serialIn(sNestIn.gap());
+  feedDirection->serialIn(sNestIn.feedDirection());
   gapLabel->serialIn(sNestIn.gapLabel());
+  feedDirectionLabel->serialIn(sNestIn.feedDirectionLabel());
   pitch->setValueQuiet(sNestIn.pitch());
 }

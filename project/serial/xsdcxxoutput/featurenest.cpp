@@ -95,6 +95,30 @@ namespace prj
       this->gap_.set (std::move (x));
     }
 
+    const FeatureNest::FeedDirectionType& FeatureNest::
+    feedDirection () const
+    {
+      return this->feedDirection_.get ();
+    }
+
+    FeatureNest::FeedDirectionType& FeatureNest::
+    feedDirection ()
+    {
+      return this->feedDirection_.get ();
+    }
+
+    void FeatureNest::
+    feedDirection (const FeedDirectionType& x)
+    {
+      this->feedDirection_.set (x);
+    }
+
+    void FeatureNest::
+    feedDirection (::std::unique_ptr< FeedDirectionType > x)
+    {
+      this->feedDirection_.set (std::move (x));
+    }
+
     const FeatureNest::GapLabelType& FeatureNest::
     gapLabel () const
     {
@@ -117,6 +141,30 @@ namespace prj
     gapLabel (::std::unique_ptr< GapLabelType > x)
     {
       this->gapLabel_.set (std::move (x));
+    }
+
+    const FeatureNest::FeedDirectionLabelType& FeatureNest::
+    feedDirectionLabel () const
+    {
+      return this->feedDirectionLabel_.get ();
+    }
+
+    FeatureNest::FeedDirectionLabelType& FeatureNest::
+    feedDirectionLabel ()
+    {
+      return this->feedDirectionLabel_.get ();
+    }
+
+    void FeatureNest::
+    feedDirectionLabel (const FeedDirectionLabelType& x)
+    {
+      this->feedDirectionLabel_.set (x);
+    }
+
+    void FeatureNest::
+    feedDirectionLabel (::std::unique_ptr< FeedDirectionLabelType > x)
+    {
+      this->feedDirectionLabel_.set (std::move (x));
     }
 
     const FeatureNest::PitchType& FeatureNest::
@@ -151,12 +199,16 @@ namespace prj
     FeatureNest::
     FeatureNest (const FeatureBaseType& featureBase,
                  const GapType& gap,
+                 const FeedDirectionType& feedDirection,
                  const GapLabelType& gapLabel,
+                 const FeedDirectionLabelType& feedDirectionLabel,
                  const PitchType& pitch)
     : ::xml_schema::Type (),
       featureBase_ (featureBase, this),
       gap_ (gap, this),
+      feedDirection_ (feedDirection, this),
       gapLabel_ (gapLabel, this),
+      feedDirectionLabel_ (feedDirectionLabel, this),
       pitch_ (pitch, this)
     {
     }
@@ -164,12 +216,16 @@ namespace prj
     FeatureNest::
     FeatureNest (::std::unique_ptr< FeatureBaseType > featureBase,
                  ::std::unique_ptr< GapType > gap,
+                 ::std::unique_ptr< FeedDirectionType > feedDirection,
                  ::std::unique_ptr< GapLabelType > gapLabel,
+                 ::std::unique_ptr< FeedDirectionLabelType > feedDirectionLabel,
                  const PitchType& pitch)
     : ::xml_schema::Type (),
       featureBase_ (std::move (featureBase), this),
       gap_ (std::move (gap), this),
+      feedDirection_ (std::move (feedDirection), this),
       gapLabel_ (std::move (gapLabel), this),
+      feedDirectionLabel_ (std::move (feedDirectionLabel), this),
       pitch_ (pitch, this)
     {
     }
@@ -181,7 +237,9 @@ namespace prj
     : ::xml_schema::Type (x, f, c),
       featureBase_ (x.featureBase_, f, this),
       gap_ (x.gap_, f, this),
+      feedDirection_ (x.feedDirection_, f, this),
       gapLabel_ (x.gapLabel_, f, this),
+      feedDirectionLabel_ (x.feedDirectionLabel_, f, this),
       pitch_ (x.pitch_, f, this)
     {
     }
@@ -193,7 +251,9 @@ namespace prj
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
       featureBase_ (this),
       gap_ (this),
+      feedDirection_ (this),
       gapLabel_ (this),
+      feedDirectionLabel_ (this),
       pitch_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
@@ -241,6 +301,20 @@ namespace prj
           }
         }
 
+        // feedDirection
+        //
+        if (n.name () == "feedDirection" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< FeedDirectionType > r (
+            FeedDirectionTraits::create (i, f, this));
+
+          if (!feedDirection_.present ())
+          {
+            this->feedDirection_.set (::std::move (r));
+            continue;
+          }
+        }
+
         // gapLabel
         //
         if (n.name () == "gapLabel" && n.namespace_ ().empty ())
@@ -251,6 +325,20 @@ namespace prj
           if (!gapLabel_.present ())
           {
             this->gapLabel_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // feedDirectionLabel
+        //
+        if (n.name () == "feedDirectionLabel" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< FeedDirectionLabelType > r (
+            FeedDirectionLabelTraits::create (i, f, this));
+
+          if (!feedDirectionLabel_.present ())
+          {
+            this->feedDirectionLabel_.set (::std::move (r));
             continue;
           }
         }
@@ -283,10 +371,24 @@ namespace prj
           "");
       }
 
+      if (!feedDirection_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "feedDirection",
+          "");
+      }
+
       if (!gapLabel_.present ())
       {
         throw ::xsd::cxx::tree::expected_element< char > (
           "gapLabel",
+          "");
+      }
+
+      if (!feedDirectionLabel_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "feedDirectionLabel",
           "");
       }
 
@@ -313,7 +415,9 @@ namespace prj
         static_cast< ::xml_schema::Type& > (*this) = x;
         this->featureBase_ = x.featureBase_;
         this->gap_ = x.gap_;
+        this->feedDirection_ = x.feedDirection_;
         this->gapLabel_ = x.gapLabel_;
+        this->feedDirectionLabel_ = x.feedDirectionLabel_;
         this->pitch_ = x.pitch_;
       }
 
@@ -638,6 +742,17 @@ namespace prj
         s << i.gap ();
       }
 
+      // feedDirection
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "feedDirection",
+            e));
+
+        s << i.feedDirection ();
+      }
+
       // gapLabel
       //
       {
@@ -647,6 +762,17 @@ namespace prj
             e));
 
         s << i.gapLabel ();
+      }
+
+      // feedDirectionLabel
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "feedDirectionLabel",
+            e));
+
+        s << i.feedDirectionLabel ();
       }
 
       // pitch

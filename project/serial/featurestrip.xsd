@@ -23,12 +23,14 @@
 <xs:complexType name="FeatureStrip">
   <xs:all>
     <xs:element name="featureBase" type="srl:FeatureBase"/>
+    <xs:element name="feedDirection" type="srl:Parameter"/>
     <xs:element name="pitch" type="srl:Parameter"/>
     <xs:element name="width" type="srl:Parameter"/>
     <xs:element name="widthOffset" type="srl:Parameter"/>
     <xs:element name="gap" type="srl:Parameter"/>
     <xs:element name="autoCalc" type="srl:Parameter"/>
     <xs:element name="stripHeight" type="xs:double"/>
+    <xs:element name="feedDirectionLabel" type="srl:PLabel"/>
     <xs:element name="pitchLabel" type="srl:PLabel"/>
     <xs:element name="widthLabel" type="srl:PLabel"/>
     <xs:element name="widthOffsetLabel" type="srl:PLabel"/>

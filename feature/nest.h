@@ -51,13 +51,17 @@ namespace ftr
     
     double getPitch() const;
     double getGap() const;
+    osg::Vec3d getFeedDirection() const;
     
   protected:
-    std::shared_ptr<prm::Parameter> pitch; //!< not really a parameter. just using for convenience.
-    std::shared_ptr<prm::Parameter> gap;
-    osg::ref_ptr<lbr::PLabel> gapLabel;
-    osg::Vec3d feedDirection; //!< eventually a parameter.
+    std::unique_ptr<prm::Parameter> pitch; //!< not really a parameter. just using for convenience.
+    std::unique_ptr<prm::Parameter> gap;
+    std::unique_ptr<prm::Parameter> feedDirection;
+    
     std::unique_ptr<ann::SeerShape> sShape;
+    
+    osg::ref_ptr<lbr::PLabel> gapLabel;
+    osg::ref_ptr<lbr::PLabel> feedDirectionLabel;
     
     TopoDS_Shape calcPitch(TopoDS_Shape &bIn, double guess);
     double getDistance(const TopoDS_Shape &sIn1, const TopoDS_Shape &sIn2);

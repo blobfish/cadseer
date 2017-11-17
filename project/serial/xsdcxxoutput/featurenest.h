@@ -226,6 +226,64 @@ namespace prj
       //@}
 
       /**
+       * @name feedDirection
+       *
+       * @brief Accessor and modifier functions for the %feedDirection
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::Parameter FeedDirectionType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< FeedDirectionType, char > FeedDirectionTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const FeedDirectionType&
+      feedDirection () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      FeedDirectionType&
+      feedDirection ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      feedDirection (const FeedDirectionType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      feedDirection (::std::unique_ptr< FeedDirectionType > p);
+
+      //@}
+
+      /**
        * @name gapLabel
        *
        * @brief Accessor and modifier functions for the %gapLabel
@@ -280,6 +338,64 @@ namespace prj
        */
       void
       gapLabel (::std::unique_ptr< GapLabelType > p);
+
+      //@}
+
+      /**
+       * @name feedDirectionLabel
+       *
+       * @brief Accessor and modifier functions for the %feedDirectionLabel
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::PLabel FeedDirectionLabelType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< FeedDirectionLabelType, char > FeedDirectionLabelTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const FeedDirectionLabelType&
+      feedDirectionLabel () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      FeedDirectionLabelType&
+      feedDirectionLabel ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      feedDirectionLabel (const FeedDirectionLabelType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      feedDirectionLabel (::std::unique_ptr< FeedDirectionLabelType > p);
 
       //@}
 
@@ -341,7 +457,9 @@ namespace prj
        */
       FeatureNest (const FeatureBaseType&,
                    const GapType&,
+                   const FeedDirectionType&,
                    const GapLabelType&,
+                   const FeedDirectionLabelType&,
                    const PitchType&);
 
       /**
@@ -354,7 +472,9 @@ namespace prj
        */
       FeatureNest (::std::unique_ptr< FeatureBaseType >,
                    ::std::unique_ptr< GapType >,
+                   ::std::unique_ptr< FeedDirectionType >,
                    ::std::unique_ptr< GapLabelType >,
+                   ::std::unique_ptr< FeedDirectionLabelType >,
                    const PitchType&);
 
       /**
@@ -429,7 +549,9 @@ namespace prj
       protected:
       ::xsd::cxx::tree::one< FeatureBaseType > featureBase_;
       ::xsd::cxx::tree::one< GapType > gap_;
+      ::xsd::cxx::tree::one< FeedDirectionType > feedDirection_;
       ::xsd::cxx::tree::one< GapLabelType > gapLabel_;
+      ::xsd::cxx::tree::one< FeedDirectionLabelType > feedDirectionLabel_;
       ::xsd::cxx::tree::one< PitchType > pitch_;
 
       //@endcond

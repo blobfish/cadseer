@@ -551,6 +551,64 @@ namespace prj
       //@}
 
       /**
+       * @name feedDirection
+       *
+       * @brief Accessor and modifier functions for the %feedDirection
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::Parameter FeedDirectionType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< FeedDirectionType, char > FeedDirectionTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const FeedDirectionType&
+      feedDirection () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      FeedDirectionType&
+      feedDirection ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      feedDirection (const FeedDirectionType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      feedDirection (::std::unique_ptr< FeedDirectionType > p);
+
+      //@}
+
+      /**
        * @name pitch
        *
        * @brief Accessor and modifier functions for the %pitch
@@ -884,6 +942,64 @@ namespace prj
        */
       void
       stripHeight (const StripHeightType& x);
+
+      //@}
+
+      /**
+       * @name feedDirectionLabel
+       *
+       * @brief Accessor and modifier functions for the %feedDirectionLabel
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::PLabel FeedDirectionLabelType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< FeedDirectionLabelType, char > FeedDirectionLabelTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const FeedDirectionLabelType&
+      feedDirectionLabel () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      FeedDirectionLabelType&
+      feedDirectionLabel ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      feedDirectionLabel (const FeedDirectionLabelType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      feedDirectionLabel (::std::unique_ptr< FeedDirectionLabelType > p);
 
       //@}
 
@@ -1245,12 +1361,14 @@ namespace prj
        * initializers for required elements and attributes.
        */
       FeatureStrip (const FeatureBaseType&,
+                    const FeedDirectionType&,
                     const PitchType&,
                     const WidthType&,
                     const WidthOffsetType&,
                     const GapType&,
                     const AutoCalcType&,
                     const StripHeightType&,
+                    const FeedDirectionLabelType&,
                     const PitchLabelType&,
                     const WidthLabelType&,
                     const WidthOffsetLabelType&,
@@ -1267,12 +1385,14 @@ namespace prj
        * instead of making copies.
        */
       FeatureStrip (::std::unique_ptr< FeatureBaseType >,
+                    ::std::unique_ptr< FeedDirectionType >,
                     ::std::unique_ptr< PitchType >,
                     ::std::unique_ptr< WidthType >,
                     ::std::unique_ptr< WidthOffsetType >,
                     ::std::unique_ptr< GapType >,
                     ::std::unique_ptr< AutoCalcType >,
                     const StripHeightType&,
+                    ::std::unique_ptr< FeedDirectionLabelType >,
                     ::std::unique_ptr< PitchLabelType >,
                     ::std::unique_ptr< WidthLabelType >,
                     ::std::unique_ptr< WidthOffsetLabelType >,
@@ -1351,12 +1471,14 @@ namespace prj
 
       protected:
       ::xsd::cxx::tree::one< FeatureBaseType > featureBase_;
+      ::xsd::cxx::tree::one< FeedDirectionType > feedDirection_;
       ::xsd::cxx::tree::one< PitchType > pitch_;
       ::xsd::cxx::tree::one< WidthType > width_;
       ::xsd::cxx::tree::one< WidthOffsetType > widthOffset_;
       ::xsd::cxx::tree::one< GapType > gap_;
       ::xsd::cxx::tree::one< AutoCalcType > autoCalc_;
       ::xsd::cxx::tree::one< StripHeightType > stripHeight_;
+      ::xsd::cxx::tree::one< FeedDirectionLabelType > feedDirectionLabel_;
       ::xsd::cxx::tree::one< PitchLabelType > pitchLabel_;
       ::xsd::cxx::tree::one< WidthLabelType > widthLabel_;
       ::xsd::cxx::tree::one< WidthOffsetLabelType > widthOffsetLabel_;

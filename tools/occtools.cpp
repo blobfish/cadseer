@@ -506,6 +506,8 @@ void BoundingBox::update()
     zMin + (zMax - zMin) / 2.0
   );
   
+  diagonal = corners.at(0).Distance(corners.at(6));
+  
   dirty = false;
 }
 
@@ -539,6 +541,14 @@ double BoundingBox::getHeight()
     update();
   
   return height;
+}
+
+double BoundingBox::getDiagonal()
+{
+  if (dirty)
+    update();
+  
+  return diagonal;
 }
 
 gp_Pnt BoundingBox::getCenter()

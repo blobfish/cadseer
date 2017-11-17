@@ -156,6 +156,7 @@ namespace occt
     double getLength();
     double getWidth();
     double getHeight();
+    double getDiagonal();
     gp_Pnt getCenter();
     const std::vector<gp_Pnt>& getCorners();
     std::vector<int> getFaceIndexes(); //!< 24 referencing corners. Faces: x- x+ y- y+ z- z+
@@ -171,6 +172,7 @@ namespace occt
     double length = 0.0;
     double width = 0.0;
     double height = 0.0;
+    double diagonal = 0.0;
     
     bool dirty = true;
   };

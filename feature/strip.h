@@ -24,8 +24,11 @@
 #include <library/plabel.h>
 #include <feature/base.h>
 
+class TopoDS_Shape;
+
 namespace prj{namespace srl{class FeatureStrip;}}
 namespace ann{class SeerShape;}
+namespace occt{class BoundingBox;}
 namespace ftr
 {
   class Strip : public Base
@@ -55,21 +58,26 @@ namespace ftr
     std::vector<QString> stations;
     
   protected:
-    std::shared_ptr<prm::Parameter> pitch;
-    std::shared_ptr<prm::Parameter> width;
-    std::shared_ptr<prm::Parameter> widthOffset;
-    std::shared_ptr<prm::Parameter> gap;
-    std::shared_ptr<prm::Parameter> autoCalc;
+    std::unique_ptr<prm::Parameter> feedDirection;
+    std::unique_ptr<prm::Parameter> pitch;
+    std::unique_ptr<prm::Parameter> width;
+    std::unique_ptr<prm::Parameter> widthOffset;
+    std::unique_ptr<prm::Parameter> gap;
+    std::unique_ptr<prm::Parameter> autoCalc;
+    
+    std::unique_ptr<ann::SeerShape> sShape;
+    
+    osg::ref_ptr<lbr::PLabel> feedDirectionLabel;
     osg::ref_ptr<lbr::PLabel> pitchLabel;
     osg::ref_ptr<lbr::PLabel> widthLabel;
     osg::ref_ptr<lbr::PLabel> widthOffsetLabel; //!< centerline of die.
     osg::ref_ptr<lbr::PLabel> gapLabel;
     osg::ref_ptr<lbr::PLabel> autoCalcLabel;
     std::vector<osg::ref_ptr<osg::MatrixTransform>> stationLabels;
-    std::unique_ptr<ann::SeerShape> sShape;
     
-    osg::Vec3d feedDirection; //!< eventually a parameter.
     double stripHeight; //!< used by quote to get travel.
+    
+    void goAutoCalc(const TopoDS_Shape&, occt::BoundingBox&);
     
   private:
     static QIcon icon;

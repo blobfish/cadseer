@@ -19,9 +19,11 @@
 
 #include <boost/filesystem.hpp>
 
+#include <gp_Pnt.hxx>
+#include <gp_Pln.hxx>
 #include <BRepExtrema_DistShapeShape.hxx>
-#include <BRepExtrema_Poly.hxx>
-#include <BRepMesh_IncrementalMesh.hxx>
+#include <BRepBuilderAPI_MakeFace.hxx>
+#include <BRepBuilderAPI_MakeEdge.hxx>
 
 #include <osg/AutoTransform>
 #include <osgQt/QFontImplementation>
@@ -47,7 +49,22 @@ using boost::uuids::uuid;
 
 QIcon Strip::icon;
 
-Strip::Strip() : Base(), sShape(new ann::SeerShape())
+TopoDS_Edge makeEdge(const osg::Vec3d &v1, const osg::Vec3d &v2)
+{
+  gp_Pnt p1(v1.x(), v1.y(), v1.z());
+  gp_Pnt p2(v2.x(), v2.y(), v2.z());
+  return BRepBuilderAPI_MakeEdge(p1, p2);
+}
+
+Strip::Strip() :
+Base(),
+feedDirection(new prm::Parameter(QObject::tr("Feed Direction"), osg::Vec3d(-1.0, 0.0, 0.0))),
+pitch(new prm::Parameter(QObject::tr("Pitch"), 1.0)),
+width(new prm::Parameter(QObject::tr("Width"), 1.0)),
+widthOffset(new prm::Parameter(QObject::tr("Width Offset"), 1.0)),
+gap(new prm::Parameter(QObject::tr("Gap"), prf::manager().rootPtr->features().strip().get().gap())),
+autoCalc(new prm::Parameter(QObject::tr("Auto Calc"), true)),
+sShape(new ann::SeerShape())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionStrip.svg");
@@ -57,45 +74,32 @@ Strip::Strip() : Base(), sShape(new ann::SeerShape())
   
   annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
   
-  feedDirection = osg::Vec3d(-1.0, 0.0, 0.0);
+  feedDirection->connectValue(boost::bind(&Strip::setModelDirty, this));
+  parameterVector.push_back(feedDirection.get());
   
-  pitch = std::shared_ptr<prm::Parameter>(new prm::Parameter(QObject::tr("Pitch"), 1.0));
   pitch->setConstraint(prm::Constraint::buildNonZeroPositive());
   pitch->connectValue(boost::bind(&Strip::setModelDirty, this));
   parameterVector.push_back(pitch.get());
   
-  width = std::shared_ptr<prm::Parameter>(new prm::Parameter(QObject::tr("Width"), 1.0));
   width->setConstraint(prm::Constraint::buildNonZeroPositive());
   width->connectValue(boost::bind(&Strip::setModelDirty, this));
   parameterVector.push_back(width.get());
   
-  widthOffset = std::shared_ptr<prm::Parameter>(new prm::Parameter(QObject::tr("Width Offset"), 1.0));
   widthOffset->setConstraint(prm::Constraint::buildAll());
   widthOffset->connectValue(boost::bind(&Strip::setModelDirty, this));
   parameterVector.push_back(widthOffset.get());
   
-  gap = std::shared_ptr<prm::Parameter>
-  (
-    new prm::Parameter
-    (
-      QObject::tr("Gap"),
-      prf::manager().rootPtr->features().strip().get().gap()
-    )
-  );
   gap->setConstraint(prm::Constraint::buildNonZeroPositive());
   gap->connectValue(boost::bind(&Strip::setModelDirty, this));
   parameterVector.push_back(gap.get());
   
-  autoCalc = std::shared_ptr<prm::Parameter>
-  (
-    new prm::Parameter
-    (
-      QObject::tr("Auto Calc"),
-      true
-    )
-  );
   autoCalc->connectValue(boost::bind(&Strip::setModelDirty, this));
   parameterVector.push_back(autoCalc.get());
+  
+  feedDirectionLabel = new lbr::PLabel(feedDirection.get());
+  feedDirectionLabel->showName = true;
+  feedDirectionLabel->valueHasChanged();
+  overlaySwitch->addChild(feedDirectionLabel.get());
   
   pitchLabel = new lbr::PLabel(pitch.get());
   pitchLabel->showName = true;
@@ -191,6 +195,7 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
     if (static_cast<bool>(*autoCalc))
     {
       osg::Vec4 cIn(1.0, 0.0, 0.0, 1.0);
+      feedDirectionLabel->setTextColor(cIn);
       pitchLabel->setTextColor(cIn);
       widthLabel->setTextColor(cIn);
       widthOffsetLabel->setTextColor(cIn);
@@ -200,19 +205,17 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
       assert(nf);
       if (!nf)
         throw std::runtime_error("Bad cast to Nest");
+      feedDirection->setValueQuiet(nf->getFeedDirection());
       pitch->setValueQuiet(nf->getPitch());
       pitchLabel->valueHasChanged();
       gap->setValueQuiet(nf->getGap());
       gapLabel->valueHasChanged();
       
-      //these assume x feed direction. fix when we change feed direction to a parameter.
-      width->setValueQuiet(bbbox.getWidth() + 2 * static_cast<double>(*gap));
-      widthLabel->valueHasChanged();
-      widthOffset->setValueQuiet(bbbox.getCenter().X());
-      widthOffsetLabel->valueHasChanged();
+      goAutoCalc(bs, bbbox);
     }
     else
     {
+      feedDirectionLabel->setTextColor();
       pitchLabel->setTextColor();
       widthLabel->setTextColor();
       widthOffsetLabel->setTextColor();
@@ -232,14 +235,31 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
         break;
       }
     }
+    
+    osg::Vec3d lFeed = static_cast<osg::Vec3d>(*feedDirection);
+    osg::Vec3d fNorm = lFeed * osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 0.0, -1.0));
       
-    for (std::size_t i = 1; i < nb + 1; ++i)
-      shapes.push_back(occt::instanceShape(bs, gu::toOcc(-feedDirection), static_cast<double>(*pitch) * i));
-    for (std::size_t i = 1; i < stations.size() - nb; ++i)
-      shapes.push_back(occt::instanceShape(ps, gu::toOcc(feedDirection), static_cast<double>(*pitch) * i));
+    for (std::size_t i = 1; i < nb + 1; ++i) //blanks
+      shapes.push_back(occt::instanceShape(bs, gu::toOcc(-lFeed), static_cast<double>(*pitch) * i));
+    for (std::size_t i = 1; i < stations.size() - nb; ++i) //parts
+      shapes.push_back(occt::instanceShape(ps, gu::toOcc(lFeed), static_cast<double>(*pitch) * i));
+    
+    //add edges representing the incoming strip.
+    double edgeLength = nb * static_cast<double>(*pitch);
+    osg::Vec3d centerLinePoint = fNorm * static_cast<double>(*widthOffset);
+    centerLinePoint += lFeed * (gu::toOsg(bbbox.getCenter()) * lFeed);
+    
+    osg::Vec3d backLinePoint = centerLinePoint + (fNorm * static_cast<double>(*width) / 2.0);
+    osg::Vec3d backLineEnd1 = backLinePoint;
+    osg::Vec3d backLineEnd2 = backLinePoint + (-lFeed * edgeLength);
+    shapes.push_back(makeEdge(backLineEnd1, backLineEnd2));
+    
+    osg::Vec3d frontLinePoint = centerLinePoint + (-fNorm * static_cast<double>(*width) / 2.0);
+    osg::Vec3d frontLineEnd1 = frontLinePoint;
+    osg::Vec3d frontLineEnd2 = frontLinePoint + (-lFeed * edgeLength);
+    shapes.push_back(makeEdge(frontLineEnd1, frontLineEnd2));
     
     TopoDS_Shape out = static_cast<TopoDS_Compound>(occt::ShapeVectorCast(shapes));
-    
     ShapeCheck check(out);
     if (!check.isValid())
       throw std::runtime_error("shapeCheck failed");
@@ -248,34 +268,36 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
     sShape->setOCCTShape(out);
     sShape->ensureNoNils();
     
-    //update label locations
-    osg::Vec3d fNorm = feedDirection * osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 0.0, -1.0));
     
+    //update label locations
     osg::Vec3d plLoc = //pitch label location.
       gu::toOsg(bbbox.getCenter())
-      + (-feedDirection * static_cast<double>(*pitch) * 0.5)
+      + (-lFeed * static_cast<double>(*pitch) * 0.5)
       + (fNorm * bbbox.getWidth() * 0.5);
     pitchLabel->setMatrix(osg::Matrixd::translate(plLoc));
     
     osg::Vec3d glLoc = //gap label location.
       gu::toOsg(bbbox.getCenter())
-      + (-feedDirection * static_cast<double>(*pitch) * 0.5)
+      + (-lFeed * static_cast<double>(*pitch) * 0.5)
       + (-fNorm * bbbox.getWidth() * 0.5);
     gapLabel->setMatrix(osg::Matrixd::translate(glLoc));
     
     osg::Vec3d wolLoc = //width offset location.
       gu::toOsg(bbbox.getCenter())
-      + (-feedDirection * (static_cast<double>(*pitch) * (static_cast<double>(nb) + 0.5)));
+      + (-lFeed * (static_cast<double>(*pitch) * (static_cast<double>(nb) + 0.5)));
     widthOffsetLabel->setMatrix(osg::Matrixd::translate(wolLoc));
     
     osg::Vec3d wlLoc = //width location.
       gu::toOsg(bbbox.getCenter())
-      + (-feedDirection * (static_cast<double>(*pitch) * (static_cast<double>(nb) + 0.5)))
+      + (-lFeed * (static_cast<double>(*pitch) * (static_cast<double>(nb) + 0.5)))
       + (fNorm * bbbox.getWidth() * 0.5);
     widthLabel->setMatrix(osg::Matrixd::translate(wlLoc));
     
     osg::Vec3d acLoc = gu::toOsg(bbbox.getCenter()); //autocalc label location
     autoCalcLabel->setMatrix(osg::Matrixd::translate(acLoc + osg::Vec3d(0.0, bbbox.getWidth(), 0.0)));
+    
+    osg::Vec3d fdLoc = gu::toOsg(bbbox.getCenter()) + osg::Vec3d(0.0, -bbbox.getWidth(), 0.0);
+    feedDirectionLabel->setMatrix(osg::Matrixd::translate(fdLoc));
     
     for (const auto &l : stationLabels)
     {
@@ -287,7 +309,7 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
     for (std::size_t i = 1; i < nb + 1; ++i)
     {
       osg::ref_ptr<osg::MatrixTransform> sl = new osg::MatrixTransform(); // station label
-      sl->setMatrix(osg::Matrixd::translate(gu::toOsg(bbbox.getCenter()) + (-feedDirection * static_cast<double>(*pitch) * i)));
+      sl->setMatrix(osg::Matrixd::translate(gu::toOsg(bbbox.getCenter()) + (-lFeed * static_cast<double>(*pitch) * i)));
       sl->addChild(buildStationLabel("Blank"));
       stationLabels.push_back(sl);
       overlaySwitch->addChild(sl.get(), cv);
@@ -295,7 +317,7 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
     for (std::size_t i = nb; i < stations.size(); ++i)
     {
       osg::ref_ptr<osg::MatrixTransform> sl = new osg::MatrixTransform(); // station label
-      sl->setMatrix(osg::Matrixd::translate(gu::toOsg(bbbox.getCenter()) + (feedDirection * static_cast<double>(*pitch) * (i - nb))));
+      sl->setMatrix(osg::Matrixd::translate(gu::toOsg(bbbox.getCenter()) + (lFeed * static_cast<double>(*pitch) * (i - nb))));
       sl->addChild(buildStationLabel(stations.at(i).toStdString()));
       stationLabels.push_back(sl);
       overlaySwitch->addChild(sl.get(), cv);
@@ -327,6 +349,67 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
     std::cout << std::endl << lastUpdateLog;
 }
 
+void Strip::goAutoCalc(const TopoDS_Shape &sIn, occt::BoundingBox &bbbox)
+{
+  double offset = bbbox.getDiagonal() / 2.0;
+  osg::Vec3d feed = static_cast<osg::Vec3d>(*feedDirection);
+  osg::Vec3d norm = feed * osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 0.0, -1.0));
+  
+  gp_Ax3 orientation(gp_Pnt(0.0, 0.0, 0.0), gu::toOcc(norm), gu::toOcc(feed));
+  gp_Pln plane(orientation);
+  TopoDS_Face face1 = BRepBuilderAPI_MakeFace(plane, -offset, offset, -offset, offset);
+//   double linear = prf::manager().rootPtr->visual().mesh().linearDeflection();
+//   double angular = prf::manager().rootPtr->visual().mesh().angularDeflection();
+//   BRepMesh_IncrementalMesh(face1, linear, Standard_False, angular, Standard_True);
+//   BRepMesh_IncrementalMesh(sIn, linear, Standard_False, angular, Standard_True);
+  
+  gp_Trsf t1;
+  t1.SetTranslation(gu::toOcc(gu::toOsg(bbbox.getCenter()) + (norm * offset)));
+  face1.Location(TopLoc_Location(t1));
+  
+  TopoDS_Face face2 = face1;
+  gp_Trsf t2;
+  t2.SetTranslation(gu::toOcc(gu::toOsg(bbbox.getCenter()) + (norm * -offset)));
+  face2.Location(TopLoc_Location(t2));
+  
+  auto getDistance = [](const TopoDS_Shape &s1, const TopoDS_Shape &s2) -> double
+  {
+    //shape
+    double tol = 0.1;
+    BRepExtrema_DistShapeShape dc(s1, s2, tol, Extrema_ExtFlag_MIN);
+    if (!dc.IsDone())
+      throw std::runtime_error("BRepExtrema_DistShapeShape failed");;
+    if (dc.NbSolution() < 1)
+      throw std::runtime_error("BRepExtrema_DistShapeShape failed");;
+    return dc.Value();
+    
+    
+    /* I couldn't get poly to work. Not sure why.
+     * I am guessing it had to do with orthogonal planes
+     */
+//     gp_Pnt p1, p2;
+//     double distance;
+//     if (BRepExtrema_Poly::Distance(s1, s2, p1, p2, distance))
+//       return distance;
+//     
+//     throw std::runtime_error("BRepExtrema_Poly failed");
+  };
+  
+  double d1 = getDistance(sIn, face1);
+  double d2 = getDistance(sIn, face2);
+  double widthCalc = 2 * offset - d1 - d2 + 2 * static_cast<double>(*gap);
+  width->setValueQuiet(widthCalc);
+  widthLabel->valueHasChanged();
+  
+  osg::Vec3d projection = (norm * (offset - d1)) + (-norm * (offset - d2));
+  osg::Vec3d center = gu::toOsg(bbbox.getCenter()) + (projection * 0.5);
+  osg::Vec3d aux = feed * (feed * center);
+  osg::Vec3d auxProjection = center - aux;
+  double directionFactor = ((auxProjection * norm) < 0.0) ? -1.0 : 1.0;
+  widthOffset->setValueQuiet(auxProjection.length() * directionFactor);
+  widthOffsetLabel->valueHasChanged();
+}
+
 void Strip::serialWrite(const QDir &dIn)
 {
   assert(stations.size() == stationLabels.size());
@@ -353,12 +436,14 @@ void Strip::serialWrite(const QDir &dIn)
   prj::srl::FeatureStrip stripOut
   (
     Base::serialOut(),
+    feedDirection->serialOut(),
     pitch->serialOut(),
     width->serialOut(),
     widthOffset->serialOut(),
     gap->serialOut(),
     autoCalc->serialOut(),
     stripHeight,
+    feedDirectionLabel->serialOut(),
     pitchLabel->serialOut(),
     widthLabel->serialOut(),
     widthOffsetLabel->serialOut(),
@@ -375,12 +460,14 @@ void Strip::serialWrite(const QDir &dIn)
 void Strip::serialRead(const prj::srl::FeatureStrip &sIn)
 {
   Base::serialIn(sIn.featureBase());
+  feedDirection->serialIn(sIn.feedDirection());
   pitch->serialIn(sIn.pitch());
   width->serialIn(sIn.width());
   widthOffset->serialIn(sIn.widthOffset());
   gap->serialIn(sIn.gap());
   autoCalc->serialIn(sIn.autoCalc());
   stripHeight = sIn.stripHeight();
+  feedDirectionLabel->serialIn(sIn.feedDirectionLabel());
   pitchLabel->serialIn(sIn.pitchLabel());
   widthLabel->serialIn(sIn.widthLabel());
   widthOffsetLabel->serialIn(sIn.widthOffsetLabel());
