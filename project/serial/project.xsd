@@ -4,7 +4,9 @@
   targetNamespace="http://www.cadseer.com/prj/srl"
   xmlns:srl="http://www.cadseer.com/prj/srl"
 >
-  
+
+<xs:include schemaLocation="shapehistory.xsd"/>
+
 <xs:complexType name="Feature">
   <xs:all>
     <xs:element name="id" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
@@ -116,6 +118,7 @@
     <xs:element name="expressions" type="srl:Expressions"/>
     <xs:element name="expressionLinks" type="srl:ExpressionLinks" minOccurs="0"/>
     <xs:element name="expressionGroups" type="srl:ExpressionGroups" minOccurs="0"/>
+    <xs:element name="shapeHistory" type="srl:ShapeHistory" minOccurs="0" maxOccurs="1"/>
   </xs:all>
 </xs:complexType>
 

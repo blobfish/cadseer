@@ -958,6 +958,36 @@ namespace prj
     {
       this->expressionGroups_.set (std::move (x));
     }
+
+    const Project::ShapeHistoryOptional& Project::
+    shapeHistory () const
+    {
+      return this->shapeHistory_;
+    }
+
+    Project::ShapeHistoryOptional& Project::
+    shapeHistory ()
+    {
+      return this->shapeHistory_;
+    }
+
+    void Project::
+    shapeHistory (const ShapeHistoryType& x)
+    {
+      this->shapeHistory_.set (x);
+    }
+
+    void Project::
+    shapeHistory (const ShapeHistoryOptional& x)
+    {
+      this->shapeHistory_ = x;
+    }
+
+    void Project::
+    shapeHistory (::std::unique_ptr< ShapeHistoryType > x)
+    {
+      this->shapeHistory_.set (std::move (x));
+    }
   }
 }
 
@@ -2617,7 +2647,8 @@ namespace prj
       connections_ (connections, this),
       expressions_ (expressions, this),
       expressionLinks_ (this),
-      expressionGroups_ (this)
+      expressionGroups_ (this),
+      shapeHistory_ (this)
     {
     }
 
@@ -2636,7 +2667,8 @@ namespace prj
       connections_ (std::move (connections), this),
       expressions_ (std::move (expressions), this),
       expressionLinks_ (this),
-      expressionGroups_ (this)
+      expressionGroups_ (this),
+      shapeHistory_ (this)
     {
     }
 
@@ -2652,7 +2684,8 @@ namespace prj
       connections_ (x.connections_, f, this),
       expressions_ (x.expressions_, f, this),
       expressionLinks_ (x.expressionLinks_, f, this),
-      expressionGroups_ (x.expressionGroups_, f, this)
+      expressionGroups_ (x.expressionGroups_, f, this),
+      shapeHistory_ (x.shapeHistory_, f, this)
     {
     }
 
@@ -2668,7 +2701,8 @@ namespace prj
       connections_ (this),
       expressions_ (this),
       expressionLinks_ (this),
-      expressionGroups_ (this)
+      expressionGroups_ (this),
+      shapeHistory_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -2796,6 +2830,20 @@ namespace prj
           }
         }
 
+        // shapeHistory
+        //
+        if (n.name () == "shapeHistory" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< ShapeHistoryType > r (
+            ShapeHistoryTraits::create (i, f, this));
+
+          if (!this->shapeHistory_)
+          {
+            this->shapeHistory_.set (::std::move (r));
+            continue;
+          }
+        }
+
         break;
       }
 
@@ -2863,6 +2911,7 @@ namespace prj
         this->expressions_ = x.expressions_;
         this->expressionLinks_ = x.expressionLinks_;
         this->expressionGroups_ = x.expressionGroups_;
+        this->shapeHistory_ = x.shapeHistory_;
       }
 
       return *this;
@@ -3652,6 +3701,18 @@ namespace prj
             e));
 
         s << *i.expressionGroups ();
+      }
+
+      // shapeHistory
+      //
+      if (i.shapeHistory ())
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "shapeHistory",
+            e));
+
+        s << *i.shapeHistory ();
       }
     }
 

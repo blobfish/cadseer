@@ -387,6 +387,7 @@ SET(PROJECT_SOURCES
     project/message.cpp
     project/gitmanager.cpp
     project/featureload.cpp
+    project/serial/xsdcxxoutput/shapehistory.cpp
     project/serial/xsdcxxoutput/project.cpp
     project/serial/xsdcxxoutput/view.cpp
     project/serial/xsdcxxoutput/featurebase.cpp

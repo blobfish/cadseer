@@ -55,6 +55,7 @@
 #include <project/gitmanager.h>
 #include <tools/graphtools.h>
 #include <project/featureload.h>
+#include <project/serial/xsdcxxoutput/shapehistory.h>
 #include <project/serial/xsdcxxoutput/project.h>
 #include <project/stow.h>
 #include <project/project.h>
@@ -897,11 +898,20 @@ void Project::serialWrite()
   
   prj::srl::AppVersion version(0, 0, 0);
   std::string projectPath = saveDirectory + QDir::separator().toLatin1() + "project.prjt";
-  srl::Project p(version, 0, features, states, connections, expressions);
+  srl::Project p
+  (
+    version,
+    0,
+    features,
+    states,
+    connections,
+    expressions
+  );
   if (!eLinks.array().empty())
     p.expressionLinks().set(eLinks);
   if (!eGroups.array().empty())
     p.expressionGroups().set(eGroups);
+  p.shapeHistory().set(shapeHistory->serialOut());
   
   xml_schema::NamespaceInfomap infoMap;
   std::ofstream stream(projectPath.c_str());
@@ -1040,6 +1050,9 @@ void Project::open()
         expressionManager->userDefinedGroups.push_back(eGroup);
       }
     }
+    
+    if (project->shapeHistory().present())
+      shapeHistory->serialIn(project->shapeHistory().get());
     
     observer->outBlocked(msg::Request | msg::DAG | msg::View | msg::Update);
     observer->outBlocked(msg::buildStatusMessage("Project Opened"));

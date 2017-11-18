@@ -64,7 +64,7 @@
 
 #include <xsd/cxx/pre.hxx>
 
-#include "featurebooleanbase.h"
+#include "../../../xmlbase.h"
 
 // Forward declarations.
 //
