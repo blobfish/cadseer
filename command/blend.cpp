@@ -22,6 +22,7 @@
 
 #include <application/application.h>
 #include <application/mainwindow.h>
+#include <dialogs/parameter.h>
 #include <project/project.h>
 #include <selection/eventhandler.h>
 #include <annex/seershape.h>
@@ -88,7 +89,7 @@ void Blend::go()
     uuid targetFeatureId = containers.at(0).featureId;
     const ann::SeerShape &targetSeerShape = project->findFeature(targetFeatureId)->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     ftr::SimpleBlend simpleBlend;
-    ftr::VariableBlend vBlend;
+    //no variable blend for pick first scenario
     for (const auto &currentSelection : containers)
     {
       if
@@ -108,19 +109,14 @@ void Blend::go()
       simpleBlend.picks.push_back(pick);
       auto simpleRadius = ftr::Blend::buildRadiusParameter();
       simpleBlend.radius = simpleRadius;
-      
-      //variable blend radius test. really shouldn't be in loop.
-      //     vBlend = ftr::Blend::buildDefaultVariable(project->findFeature(targetFeatureId)->getResultContainer(), pick);
     }
-    if (!simpleBlend.picks.empty() || !vBlend.entries.empty())
+    if (!simpleBlend.picks.empty())
     {
       std::shared_ptr<ftr::Blend> blend(new ftr::Blend());
       project->addFeature(blend);
       project->connect(targetFeatureId, blend->getId(), ftr::InputType{ftr::InputType::target});
       if (!simpleBlend.picks.empty())
         blend->addSimpleBlend(simpleBlend);
-      if (!vBlend.entries.empty())
-        blend->addVariableBlend(vBlend);
       
       ftr::Base *targetFeature = project->findFeature(targetFeatureId);
       
@@ -128,9 +124,13 @@ void Blend::go()
       observer->outBlocked(msg::buildHideOverlay(targetFeature->getId()));
       
       blend->setColor(targetFeature->getColor());
+                
+      dlg::Parameter *dialog = new dlg::Parameter(simpleBlend.radius.get(), blend->getId());
+      dialog->show();
+      dialog->raise();
+      dialog->activateWindow();
       
       observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
-//       observer->out(msg::Mask(msg::Request | msg::Update)); //finishing the command should update.
       return; 
     }
   }
