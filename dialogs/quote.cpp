@@ -116,7 +116,8 @@ void Quote::finishDialog()
     updateTag(diesetIdLabel, ftr::Quote::dieSet);
   }
   
-  static_cast<app::Application *>(qApp)->messageSlot(msg::Mask(msg::Request | msg::Command | msg::Done));
+  msg::Message mOut(msg::Mask(msg::Request | msg::Command | msg::Done));
+  QMetaObject::invokeMethod(qApp, "messageSlot", Qt::QueuedConnection, Q_ARG(msg::Message, mOut));
 }
 
 void Quote::initGui()

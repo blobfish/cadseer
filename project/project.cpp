@@ -34,6 +34,7 @@
 #include <BRep_Builder.hxx>
 #include <BRepTools.hxx>
 #include <BRepBuilderAPI_MakeVertex.hxx>
+#include <TopoDS.hxx>
 
 #include <osg/ValueObject>
 
@@ -226,7 +227,12 @@ ftr::prm::Parameter* Project::findParameter(const uuid &idIn) const
 
 void Project::addOCCShape(const TopoDS_Shape &shapeIn, std::string name)
 {
-  std::shared_ptr<ftr::Inert> inert(new ftr::Inert(shapeIn));
+  TopoDS_Shape cleaned = shapeIn;
+  if (cleaned.ShapeType() == TopAbs_COMPOUND)
+    cleaned = occt::getLastUniqueCompound(TopoDS::Compound(shapeIn));
+  if (cleaned.IsNull())
+    cleaned = shapeIn;
+  std::shared_ptr<ftr::Inert> inert(new ftr::Inert(cleaned));
   addFeature(inert);
   if (!name.empty())
     inert->setName(QString::fromStdString(name));

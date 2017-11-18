@@ -96,6 +96,7 @@ void Preferences::initialize()
     ui->hiddenLineCombo->setCurrentIndex(0);
   else
     ui->hiddenLineCombo->setCurrentIndex(1);
+  ui->samplesLineEdit->setText(QString().setNum(manager->rootPtr->visual().display().samples().get()));
   
   ui->linearIncrementEdit->setText(QString().setNum(manager->rootPtr->dragger().linearIncrement()));
   ui->angularIncrementEdit->setText(QString().setNum(manager->rootPtr->dragger().angularIncrement()));
@@ -198,6 +199,8 @@ void Preferences::updateVisual()
     manager->rootPtr->visual().display().showHiddenLines() = hiddenLines;
     //some kind of notification.
   }
+  
+  manager->rootPtr->visual().display().samples() = ui->samplesLineEdit->text().toDouble();
 }
 
 void Preferences::updateDragger()

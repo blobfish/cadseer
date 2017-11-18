@@ -374,4 +374,7 @@ void Manager::ensureDefaults()
   
   if (!rootPtr->visual().display().renderStyle().present())
     rootPtr->visual().display().renderStyle() = prf::Display::renderStyle_default_value();
+  
+  if (!rootPtr->visual().display().samples().present())
+    rootPtr->visual().display().samples() = prf::Display::samples_default_value();
 }

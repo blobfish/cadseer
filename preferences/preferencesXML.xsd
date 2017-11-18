@@ -27,6 +27,7 @@
     <xs:element name="showHiddenLines" type="xs:boolean" default="false"/>
     <xs:element name="showCurrentSystem" type="xs:boolean" default="true"/>
     <xs:element name="renderStyle" type="RenderStyle" default="fill" minOccurs="0" maxOccurs="1"/>
+    <xs:element name="samples" type="xs:int" default="0" minOccurs="0" maxOccurs="1"/>
   </xs:all>
 </xs:complexType>
 

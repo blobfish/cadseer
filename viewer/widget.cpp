@@ -264,7 +264,12 @@ void Widget::createMainCamera(osg::Camera *camera)
           */
 //    osgQt::GLWidget *glWidget = new osgQt::GLWidget(QGLFormat::defaultFormat(), this);
     QGLFormat format = QGLFormat::defaultFormat();
-    format.setSamples(4); //big slowdown.
+    int samples = prf::manager().rootPtr->visual().display().samples().get();
+    if (samples > 0)
+    {
+      format.setSampleBuffers(true);
+      format.setSamples(samples); //big slowdown.
+    }
 
     vwr::GLEventWidget *glWidget = new vwr::GLEventWidget(format, this);
     windowQt = new osgQt::GraphicsWindowQt(glWidget);
@@ -364,6 +369,7 @@ osg::Camera* Widget::createGestureCamera()
     fadeCamera->setViewMatrix(osg::Matrix::identity());
     fadeCamera->setGraphicsContext(windowQt);
     fadeCamera->setNodeMask(mdv::gestureCamera);
+    fadeCamera->getOrCreateStateSet()->setMode(GL_MULTISAMPLE_ARB, osg::StateAttribute::ON);
     fadeCamera->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 
     osg::Switch *aSwitch = new osg::Switch();

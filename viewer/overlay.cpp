@@ -68,6 +68,8 @@ Overlay::Overlay(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
   }
   assert(mainCamera); //couldn't find main camera
   setViewport(new osg::Viewport(*mainCamera->getViewport()));
+  
+  this->getOrCreateStateSet()->setMode(GL_MULTISAMPLE_ARB, osg::StateAttribute::ON);
 }
 
 void Overlay::setupDispatcher()

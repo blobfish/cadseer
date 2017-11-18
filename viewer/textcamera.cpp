@@ -171,6 +171,8 @@ TextCamera::TextCamera(osgViewer::GraphicsWindow *windowIn) : osg::Camera()
   infoSwitch->addChild(commandLabel.get());
   
   infoSwitch->setAllChildrenOn();
+  
+  this->getOrCreateStateSet()->setMode(GL_MULTISAMPLE_ARB, osg::StateAttribute::ON);
 }
 
 TextCamera::~TextCamera() //for ref_ptr and forward declare.

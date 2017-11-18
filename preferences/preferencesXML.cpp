@@ -242,6 +242,36 @@ namespace prf
     return renderStyle_default_value_;
   }
 
+  const Display::SamplesOptional& Display::
+  samples () const
+  {
+    return this->samples_;
+  }
+
+  Display::SamplesOptional& Display::
+  samples ()
+  {
+    return this->samples_;
+  }
+
+  void Display::
+  samples (const SamplesType& x)
+  {
+    this->samples_.set (x);
+  }
+
+  void Display::
+  samples (const SamplesOptional& x)
+  {
+    this->samples_ = x;
+  }
+
+  Display::SamplesType Display::
+  samples_default_value ()
+  {
+    return SamplesType (0);
+  }
+
 
   // Visual
   // 
@@ -2463,7 +2493,8 @@ namespace prf
   : ::xml_schema::Type (),
     showHiddenLines_ (showHiddenLines, this),
     showCurrentSystem_ (showCurrentSystem, this),
-    renderStyle_ (this)
+    renderStyle_ (this),
+    samples_ (this)
   {
   }
 
@@ -2474,7 +2505,8 @@ namespace prf
   : ::xml_schema::Type (x, f, c),
     showHiddenLines_ (x.showHiddenLines_, f, this),
     showCurrentSystem_ (x.showCurrentSystem_, f, this),
-    renderStyle_ (x.renderStyle_, f, this)
+    renderStyle_ (x.renderStyle_, f, this),
+    samples_ (x.samples_, f, this)
   {
   }
 
@@ -2485,7 +2517,8 @@ namespace prf
   : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
     showHiddenLines_ (this),
     showCurrentSystem_ (this),
-    renderStyle_ (this)
+    renderStyle_ (this),
+    samples_ (this)
   {
     if ((f & ::xml_schema::Flags::base) == 0)
     {
@@ -2540,6 +2573,17 @@ namespace prf
         }
       }
 
+      // samples
+      //
+      if (n.name () == "samples" && n.namespace_ ().empty ())
+      {
+        if (!this->samples_)
+        {
+          this->samples_.set (SamplesTraits::create (i, f, this));
+          continue;
+        }
+      }
+
       break;
     }
 
@@ -2574,6 +2618,7 @@ namespace prf
       this->showHiddenLines_ = x.showHiddenLines_;
       this->showCurrentSystem_ = x.showCurrentSystem_;
       this->renderStyle_ = x.renderStyle_;
+      this->samples_ = x.samples_;
     }
 
     return *this;
@@ -6503,6 +6548,18 @@ namespace prf
           e));
 
       s << *i.renderStyle ();
+    }
+
+    // samples
+    //
+    if (i.samples ())
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "samples",
+          e));
+
+      s << *i.samples ();
     }
   }
 

@@ -797,6 +797,79 @@ namespace prf
     //@}
 
     /**
+     * @name samples
+     *
+     * @brief Accessor and modifier functions for the %samples
+     * optional element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::xml_schema::Int SamplesType;
+
+    /**
+     * @brief Element optional container type.
+     */
+    typedef ::xsd::cxx::tree::optional< SamplesType > SamplesOptional;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< SamplesType, char > SamplesTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element
+     * container.
+     *
+     * @return A constant reference to the optional container.
+     */
+    const SamplesOptional&
+    samples () const;
+
+    /**
+     * @brief Return a read-write reference to the element container.
+     *
+     * @return A reference to the optional container.
+     */
+    SamplesOptional&
+    samples ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    samples (const SamplesType& x);
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x An optional container with the new value to set.
+     *
+     * If the value is present in @a x then this function makes a copy 
+     * of this value and sets it as the new value of the element.
+     * Otherwise the element container is set the 'not present' state.
+     */
+    void
+    samples (const SamplesOptional& x);
+
+    /**
+     * @brief Return the default value for the element.
+     *
+     * @return The element's default value.
+     */
+    static SamplesType
+    samples_default_value ();
+
+    //@}
+
+    /**
      * @name Constructors
      */
     //@{
@@ -882,6 +955,7 @@ namespace prf
     ::xsd::cxx::tree::one< ShowCurrentSystemType > showCurrentSystem_;
     RenderStyleOptional renderStyle_;
     static const RenderStyleType renderStyle_default_value_;
+    SamplesOptional samples_;
 
     //@endcond
   };
