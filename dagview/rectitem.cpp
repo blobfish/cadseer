@@ -36,7 +36,7 @@ void RectItem::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget
 {
   painter->save();
   
-  QStyleOptionViewItemV4 styleOption;
+  QStyleOptionViewItem styleOption;
   
   styleOption.backgroundBrush = backgroundBrush;
   if (editing)
