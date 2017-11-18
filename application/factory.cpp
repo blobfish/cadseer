@@ -172,6 +172,9 @@ void Factory::setupDispatcher()
   mask = msg::Request | msg::Info;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::viewInfoDispatched, this, _1)));
   
+  mask = msg::Request | msg::Feature | msg::Model | msg::Dirty;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::featureModelDirtyDispatched, this, _1)));
+  
   mask = msg::Request | msg::Construct | msg::Hollow;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newHollowDispatched, this, _1)));
   
@@ -1134,6 +1137,13 @@ void Factory::viewInfoDispatched(const msg::Message &)
     appMessage.infoMessage = infoMessage;
     viewInfoMessage.payload = appMessage;
     observer->out(viewInfoMessage);
+}
+
+void Factory::featureModelDirtyDispatched(const msg::Message&)
+{
+  assert(project);
+  for (const auto &container : containers)
+    project->findFeature(container.featureId)->setModelDirty();
 }
 
 //! a testing function to analyze run time cost of messages.

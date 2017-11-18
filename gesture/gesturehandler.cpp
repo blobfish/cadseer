@@ -885,6 +885,12 @@ void GestureHandler::constructMenu()
     debugInquiry->setUserValue(attributeMask, (msg::Request | msg::DebugInquiry).to_string());
     debugInquiry->setUserValue(attributeStatus, QObject::tr("Inquiry. A testing facility").toStdString());
     debugBase->insertChild(debugBase->getNumChildren() - 2, debugInquiry);
+    
+    osg::MatrixTransform *featureModelDirty = gsn::buildCommandNode(":/resources/images/dagViewPending.svg", iconRadius);
+    featureModelDirty->setMatrix(dummy);
+    featureModelDirty->setUserValue(attributeMask, (msg::Request | msg::Feature | msg::Model | msg::Dirty).to_string());
+    featureModelDirty->setUserValue(attributeStatus, QObject::tr("Dirty selected features").toStdString());
+    debugBase->insertChild(debugBase->getNumChildren() - 2, featureModelDirty);
 }
 
 std::vector<osg::Vec3> GestureHandler::buildNodeLocations(osg::Vec3 direction, int nodeCount)
