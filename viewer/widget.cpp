@@ -30,6 +30,8 @@
 #include <QFileDialog>
 #include <QTimer>
 #include <QTextStream>
+#include <QScreen>
+#include <QSvgRenderer>
 
 #include <osgGA/OrbitManipulator>
 #include <osgDB/ReadFile>
@@ -246,6 +248,29 @@ void Widget::myUpdate()
   root->accept(v);
 }
 
+QPixmap Widget::loadCursor()
+{
+  //from
+  //https://falsinsoft.blogspot.com/2016/04/qt-snippet-render-svg-to-qpixmap-for.html
+  
+ const qreal PixelRatio = qApp->primaryScreen()->devicePixelRatio();
+ QSvgRenderer SvgRenderer(QString(":/resources/images/cursor.svg"));
+ int size = static_cast<int>(32.0 * PixelRatio);
+ QPixmap Image(size, size);
+ QPainter Painter;
+
+ Image.fill(Qt::transparent);
+
+ Painter.begin(&Image);
+ Painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
+ SvgRenderer.render(&Painter);
+ Painter.end();
+
+ Image.setDevicePixelRatio(PixelRatio);
+
+ return Image;
+}
+
 void Widget::createMainCamera(osg::Camera *camera)
 {
     /*
@@ -279,8 +304,7 @@ void Widget::createMainCamera(osg::Camera *camera)
     camera->setRenderOrder(osg::Camera::NESTED_RENDER, 1);
     camera->setClearMask(GL_DEPTH_BUFFER_BIT);
 
-    QPixmap cursorImage(":/resources/images/cursor.svg");
-    QCursor cursor(cursorImage.scaled(32, 32));//hot point defaults to center.
+    QCursor cursor(loadCursor());//hot point defaults to center.
     glWidget->setCursor(cursor);
 
     camera->setClearColor(osg::Vec4(0.2, 0.2, 0.6, 1.0));

@@ -37,6 +37,7 @@
 #include <application/application.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
+#include <modelviz/nodemaskdefs.h>
 #include <library/lineardimension.h>
 
 using namespace lbr;
@@ -284,8 +285,10 @@ void LinearDimension::build()
   arrow->setName("arrow");
   extensionLine = buildExtensionLine();
   extensionLine->setName("extensionLine");
+  extensionLine->setNodeMask(mdv::noIntersect);
   
   offsetX = new osg::MatrixTransform();
+  offsetX->setNodeMask(mdv::noIntersect);
   offsetX->setName("offsetX");
   offsetX->addChild(arrow.get());
   this->addChild(offsetX.get());
@@ -296,6 +299,7 @@ void LinearDimension::build()
   mirrorY->addChild(offsetX.get());
   
   spreadY = new osg::MatrixTransform();
+  spreadY->setNodeMask(mdv::noIntersect);
   spreadY->setName("spreadY");
   spreadY->addChild(extensionLine.get());
   spreadY->addChild(mirrorY.get());

@@ -63,6 +63,7 @@ public:
     QWidget* getGraphicsWidget(); //!< needed to forward spaceball events.
 
 protected:
+    QPixmap loadCursor();
     void createMainCamera(osg::Camera *camera);
     osg::Camera* createBackgroundCamera();
     osg::Camera* createGestureCamera();

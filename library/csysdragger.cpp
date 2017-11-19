@@ -138,7 +138,6 @@ void CSysDragger::setupDefaultRotation()
   assert(lbr::Manager::getManager().isLinked(lbr::csys::RotationTorusTag));
   osg::Geometry *sphere = lbr::Manager::getManager().getGeometry(lbr::csys::SphereTag);
   osg::Geometry *rotateLine = lbr::Manager::getManager().getGeometry(lbr::csys::RotationLineTag);
-  osg::Geometry *rotateTorus = lbr::Manager::getManager().getGeometry(lbr::csys::RotationTorusTag);
   
   //move sphere off of origin.
   osg::MatrixTransform *transform = new osg::MatrixTransform();
@@ -149,13 +148,10 @@ void CSysDragger::setupDefaultRotation()
   transform->addChild(sphere);
   
   xRotate->addChild(rotateLine);
-  xRotate->addChild(rotateTorus);
   xRotate->addChild(transform);
   yRotate->addChild(rotateLine);
-  yRotate->addChild(rotateTorus);
   yRotate->addChild(transform);
   zRotate->addChild(rotateLine);
-  zRotate->addChild(rotateTorus);
   zRotate->addChild(transform);
   
   xRotate->setMatrix(Matrixd::rotate(osg::Quat(M_PI_2, Vec3d(0.0, -1.0, 0.0))));

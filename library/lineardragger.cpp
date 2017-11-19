@@ -41,11 +41,9 @@ LinearDragger::LinearDragger() : Translate1DDragger(osg::Vec3d(0.0,0.0,0.0), osg
   
   assert(lbr::Manager::getManager().isLinked(lbr::csys::TranslationConeTag));
   assert(lbr::Manager::getManager().isLinked(lbr::csys::TranslationLineTag));
-  assert(lbr::Manager::getManager().isLinked(lbr::csys::TranslationCylinderTag));
   
   scaleTransform->addChild(lbr::Manager::getManager().getGeometry(lbr::csys::TranslationConeTag));
   scaleTransform->addChild(lbr::Manager::getManager().getGeometry(lbr::csys::TranslationLineTag));
-  scaleTransform->addChild(lbr::Manager::getManager().getGeometry(lbr::csys::TranslationCylinderTag));
   
   incrementConstraint = new osgManipulator::GridConstraint(*this, osg::Vec3d(0.0, 0.0, 0.0), osg::Vec3d(0.5, 0.5, 0.5));
   this->addConstraint(incrementConstraint.get());

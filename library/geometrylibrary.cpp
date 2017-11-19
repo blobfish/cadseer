@@ -25,6 +25,7 @@
 #include <osgDB/ReadFile>
 #include <osgManipulator/Dragger>
 
+#include <modelviz/nodemaskdefs.h>
 #include "circlebuilder.h"
 #include "cylinderbuilder.h"
 #include "spherebuilder.h"
@@ -96,6 +97,7 @@ osg::Geometry* Manager::getGeometry(const Tag& tagIn)
 osg::Geometry* lbr::csys::buildTranslationLine()
 {
   osg::Geometry *out = new osg::Geometry();
+  out->setNodeMask(mdv::noIntersect);
   osg::Vec3Array* vertices = new osg::Vec3Array(2);
   (*vertices)[0] = osg::Vec3(0.0f,0.0f,0.0f);
   (*vertices)[1] = osg::Vec3(0.0f,0.0f,1.0f);
@@ -111,7 +113,7 @@ osg::Geometry* lbr::csys::buildTranslationCylinder()
   CylinderBuilder cBuilder;
   cBuilder.setRadius(0.05);
   cBuilder.setHeight(1.0);
-  cBuilder.setIsoLines(32);
+  cBuilder.setIsoLines(16);
   osg::Geometry *out = cBuilder;
   
   osgManipulator::setDrawableToAlwaysCull(*out);
@@ -122,9 +124,9 @@ osg::Geometry* lbr::csys::buildTranslationCylinder()
 osg::Geometry* lbr::csys::buildTranslationCone()
 {
   ConeBuilder builder;
-  builder.setRadius(0.1);
-  builder.setHeight(0.4f);
-  builder.setIsoLines(32);
+  builder.setRadius(0.05);
+  builder.setHeight(0.2f);
+  builder.setIsoLines(16);
   osg::Geometry *coneGeometry = builder;
   
   //translate all points 1 unit in z.
@@ -140,8 +142,8 @@ osg::Geometry* lbr::csys::buildTranslationCone()
 osg::Geometry* lbr::csys::buildSphere()
 {
   SphereBuilder sBuilder;
-  sBuilder.setRadius(0.10);
-  sBuilder.setIsoLines(32);
+  sBuilder.setRadius(0.05);
+  sBuilder.setIsoLines(16);
   
   return sBuilder;
 }
@@ -149,7 +151,7 @@ osg::Geometry* lbr::csys::buildSphere()
 osg::Geometry* lbr::csys::buildRotationLine()
 {
   CircleBuilder cBuilder;
-  cBuilder.setSegments(32);
+  cBuilder.setSegments(16);
   cBuilder.setRadius(0.75);
   cBuilder.setAngularSpanDegrees(90.0);
   std::vector<osg::Vec3d> circlePoints = cBuilder;
@@ -158,6 +160,7 @@ osg::Geometry* lbr::csys::buildRotationLine()
   std::copy(circlePoints.begin(), circlePoints.end(), std::back_inserter(*points));
   
   osg::Geometry *out = new osg::Geometry();
+  out->setNodeMask(mdv::noIntersect);
   out->setVertexArray(points);
   out->setUseDisplayList(false);
   out->setUseVertexBufferObjects(true);
@@ -176,7 +179,7 @@ osg::Geometry* lbr::csys::buildRotationTorus()
 {
   TorusBuilder tBuilder;
   tBuilder.setMajorRadius(0.75);
-  tBuilder.setMajorIsoLines(32);
+  tBuilder.setMajorIsoLines(16);
   tBuilder.setMinorRadius(0.0375);
   tBuilder.setMinorIsoLines(16);
   tBuilder.setAngularSpanDegrees(90.0);

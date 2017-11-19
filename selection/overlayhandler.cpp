@@ -117,6 +117,7 @@ bool OverlayHandler::handle
       buildPolytope(eventAdapter.getX(), eventAdapter.getY(), 16.0)
     );
     osgUtil::IntersectionVisitor polyVisitor(polyPicker.get());
+    polyVisitor.setTraversalMask(~mdv::noIntersect);
     camera->accept(polyVisitor);
     return polyPicker->getIntersections();
   };
