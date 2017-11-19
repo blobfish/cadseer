@@ -13,6 +13,7 @@
     <xs:element name="radius" type="srl:Parameter"/>
     <xs:element name="height" type="srl:Parameter"/>
     <xs:element name="csys" type="srl:Parameter"/>
+    <xs:element name="csysDragger" type="srl:CSysDragger"/>
   </xs:all>
 </xs:complexType>
 

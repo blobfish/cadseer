@@ -1932,6 +1932,52 @@ namespace prj
     {
       this->color_.set (std::move (x));
     }
+
+
+    // CSysDragger
+    // 
+
+    const CSysDragger::MatrixType& CSysDragger::
+    matrix () const
+    {
+      return this->matrix_.get ();
+    }
+
+    CSysDragger::MatrixType& CSysDragger::
+    matrix ()
+    {
+      return this->matrix_.get ();
+    }
+
+    void CSysDragger::
+    matrix (const MatrixType& x)
+    {
+      this->matrix_.set (x);
+    }
+
+    void CSysDragger::
+    matrix (::std::unique_ptr< MatrixType > x)
+    {
+      this->matrix_.set (std::move (x));
+    }
+
+    const CSysDragger::LinkedType& CSysDragger::
+    linked () const
+    {
+      return this->linked_.get ();
+    }
+
+    CSysDragger::LinkedType& CSysDragger::
+    linked ()
+    {
+      return this->linked_.get ();
+    }
+
+    void CSysDragger::
+    linked (const LinkedType& x)
+    {
+      this->linked_.set (x);
+    }
   }
 }
 
@@ -4942,6 +4988,130 @@ namespace prj
     ~PLabel ()
     {
     }
+
+    // CSysDragger
+    //
+
+    CSysDragger::
+    CSysDragger (const MatrixType& matrix,
+                 const LinkedType& linked)
+    : ::xml_schema::Type (),
+      matrix_ (matrix, this),
+      linked_ (linked, this)
+    {
+    }
+
+    CSysDragger::
+    CSysDragger (::std::unique_ptr< MatrixType > matrix,
+                 const LinkedType& linked)
+    : ::xml_schema::Type (),
+      matrix_ (std::move (matrix), this),
+      linked_ (linked, this)
+    {
+    }
+
+    CSysDragger::
+    CSysDragger (const CSysDragger& x,
+                 ::xml_schema::Flags f,
+                 ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      matrix_ (x.matrix_, f, this),
+      linked_ (x.linked_, f, this)
+    {
+    }
+
+    CSysDragger::
+    CSysDragger (const ::xercesc::DOMElement& e,
+                 ::xml_schema::Flags f,
+                 ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      matrix_ (this),
+      linked_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void CSysDragger::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // matrix
+        //
+        if (n.name () == "matrix" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< MatrixType > r (
+            MatrixTraits::create (i, f, this));
+
+          if (!matrix_.present ())
+          {
+            this->matrix_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // linked
+        //
+        if (n.name () == "linked" && n.namespace_ ().empty ())
+        {
+          if (!linked_.present ())
+          {
+            this->linked_.set (LinkedTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        break;
+      }
+
+      if (!matrix_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "matrix",
+          "");
+      }
+
+      if (!linked_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "linked",
+          "");
+      }
+    }
+
+    CSysDragger* CSysDragger::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class CSysDragger (*this, f, c);
+    }
+
+    CSysDragger& CSysDragger::
+    operator= (const CSysDragger& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->matrix_ = x.matrix_;
+        this->linked_ = x.linked_;
+      }
+
+      return *this;
+    }
+
+    CSysDragger::
+    ~CSysDragger ()
+    {
+    }
   }
 }
 
@@ -5902,6 +6072,34 @@ namespace prj
             e));
 
         s << i.color ();
+      }
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const CSysDragger& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // matrix
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "matrix",
+            e));
+
+        s << i.matrix ();
+      }
+
+      // linked
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "linked",
+            e));
+
+        s << i.linked ();
       }
     }
   }

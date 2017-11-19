@@ -400,7 +400,8 @@ void Oblong::serialWrite(const QDir &dIn)
     length.serialOut(),
     width.serialOut(),
     height.serialOut(),
-    csys.serialOut()
+    csys.serialOut(),
+    csysDragger->serialOut()
   );
   
   xml_schema::NamespaceInfomap infoMap;
@@ -415,8 +416,8 @@ void Oblong::serialRead(const prj::srl::FeatureOblong &sOblong)
   width.serialIn(sOblong.width());
   height.serialIn(sOblong.height());
   csys.serialIn(sOblong.csys());
+  csysDragger->serialIn(sOblong.csysDragger());
   
-  csysDragger->draggerUpdate(); //set dragger to parameter.
   csysDragger->dragger->setUserValue(gu::idAttributeTitle, gu::idToString(getId()));
   
   updateIPGroup();

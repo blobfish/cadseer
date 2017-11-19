@@ -232,7 +232,8 @@ void Sphere::serialWrite(const QDir &dIn)
   (
     Base::serialOut(),
     radius.serialOut(),
-    csys.serialOut()
+    csys.serialOut(),
+    csysDragger->serialOut()
   );
   
   xml_schema::NamespaceInfomap infoMap;
@@ -245,8 +246,8 @@ void Sphere::serialRead(const prj::srl::FeatureSphere& sSphereIn)
   Base::serialIn(sSphereIn.featureBase());
   radius.serialIn(sSphereIn.radius());
   csys.serialIn(sSphereIn.csys());
+  csysDragger->serialIn(sSphereIn.csysDragger());
   
-  csysDragger->draggerUpdate(); //set dragger to parameter.
   csysDragger->dragger->setUserValue(gu::idAttributeTitle, gu::idToString(getId()));
   
   updateIPGroup();

@@ -306,7 +306,8 @@ void Cylinder::serialWrite(const QDir &dIn)
     Base::serialOut(),
     radius.serialOut(),
     height.serialOut(),
-    csys.serialOut()
+    csys.serialOut(),
+    csysDragger->serialOut()
   );
   
   xml_schema::NamespaceInfomap infoMap;
@@ -320,8 +321,8 @@ void Cylinder::serialRead(const prj::srl::FeatureCylinder& sCylinderIn)
   radius.serialIn(sCylinderIn.radius());
   height.serialIn(sCylinderIn.height());
   csys.serialIn(sCylinderIn.csys());
+  csysDragger->serialIn(sCylinderIn.csysDragger());
   
-  csysDragger->draggerUpdate(); //set dragger to parameter.
   csysDragger->dragger->setUserValue(gu::idAttributeTitle, gu::idToString(getId()));
   
   updateIPGroup();

@@ -421,7 +421,8 @@ void Box::serialWrite(const QDir &dIn)
     length.serialOut(),
     width.serialOut(),
     height.serialOut(),
-    csys.serialOut()
+    csys.serialOut(),
+    csysDragger->serialOut()
   );
   
   xml_schema::NamespaceInfomap infoMap;
@@ -436,8 +437,8 @@ void Box::serialRead(const prj::srl::FeatureBox& sBox)
   width.serialIn(sBox.width());
   height.serialIn(sBox.height());
   csys.serialIn(sBox.csys());
+  csysDragger->serialIn(sBox.csysDragger());
   
-  csysDragger->draggerUpdate(); //set dragger to parameter.
   csysDragger->dragger->setUserValue(gu::idAttributeTitle, gu::idToString(getId()));
   
   updateIPGroup();

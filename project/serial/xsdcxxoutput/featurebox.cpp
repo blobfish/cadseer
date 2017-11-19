@@ -166,6 +166,30 @@ namespace prj
     {
       this->csys_.set (std::move (x));
     }
+
+    const FeatureBox::CsysDraggerType& FeatureBox::
+    csysDragger () const
+    {
+      return this->csysDragger_.get ();
+    }
+
+    FeatureBox::CsysDraggerType& FeatureBox::
+    csysDragger ()
+    {
+      return this->csysDragger_.get ();
+    }
+
+    void FeatureBox::
+    csysDragger (const CsysDraggerType& x)
+    {
+      this->csysDragger_.set (x);
+    }
+
+    void FeatureBox::
+    csysDragger (::std::unique_ptr< CsysDraggerType > x)
+    {
+      this->csysDragger_.set (std::move (x));
+    }
   }
 }
 
@@ -183,13 +207,15 @@ namespace prj
                 const LengthType& length,
                 const WidthType& width,
                 const HeightType& height,
-                const CsysType& csys)
+                const CsysType& csys,
+                const CsysDraggerType& csysDragger)
     : ::xml_schema::Type (),
       featureBase_ (featureBase, this),
       length_ (length, this),
       width_ (width, this),
       height_ (height, this),
-      csys_ (csys, this)
+      csys_ (csys, this),
+      csysDragger_ (csysDragger, this)
     {
     }
 
@@ -198,13 +224,15 @@ namespace prj
                 ::std::unique_ptr< LengthType > length,
                 ::std::unique_ptr< WidthType > width,
                 ::std::unique_ptr< HeightType > height,
-                ::std::unique_ptr< CsysType > csys)
+                ::std::unique_ptr< CsysType > csys,
+                ::std::unique_ptr< CsysDraggerType > csysDragger)
     : ::xml_schema::Type (),
       featureBase_ (std::move (featureBase), this),
       length_ (std::move (length), this),
       width_ (std::move (width), this),
       height_ (std::move (height), this),
-      csys_ (std::move (csys), this)
+      csys_ (std::move (csys), this),
+      csysDragger_ (std::move (csysDragger), this)
     {
     }
 
@@ -217,7 +245,8 @@ namespace prj
       length_ (x.length_, f, this),
       width_ (x.width_, f, this),
       height_ (x.height_, f, this),
-      csys_ (x.csys_, f, this)
+      csys_ (x.csys_, f, this),
+      csysDragger_ (x.csysDragger_, f, this)
     {
     }
 
@@ -230,7 +259,8 @@ namespace prj
       length_ (this),
       width_ (this),
       height_ (this),
-      csys_ (this)
+      csys_ (this),
+      csysDragger_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -319,6 +349,20 @@ namespace prj
           }
         }
 
+        // csysDragger
+        //
+        if (n.name () == "csysDragger" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< CsysDraggerType > r (
+            CsysDraggerTraits::create (i, f, this));
+
+          if (!csysDragger_.present ())
+          {
+            this->csysDragger_.set (::std::move (r));
+            continue;
+          }
+        }
+
         break;
       }
 
@@ -356,6 +400,13 @@ namespace prj
           "csys",
           "");
       }
+
+      if (!csysDragger_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "csysDragger",
+          "");
+      }
     }
 
     FeatureBox* FeatureBox::
@@ -376,6 +427,7 @@ namespace prj
         this->width_ = x.width_;
         this->height_ = x.height_;
         this->csys_ = x.csys_;
+        this->csysDragger_ = x.csysDragger_;
       }
 
       return *this;
@@ -730,6 +782,17 @@ namespace prj
             e));
 
         s << i.csys ();
+      }
+
+      // csysDragger
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "csysDragger",
+            e));
+
+        s << i.csysDragger ();
       }
     }
 

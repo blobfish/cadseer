@@ -12,6 +12,7 @@
     <xs:element name="featureBase" type="srl:FeatureBase"/>
     <xs:element name="radius" type="srl:Parameter"/>
     <xs:element name="csys" type="srl:Parameter"/>
+    <xs:element name="csysDragger" type="srl:CSysDragger"/>
   </xs:all>
 </xs:complexType>
 

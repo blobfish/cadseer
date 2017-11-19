@@ -140,7 +140,8 @@ void Inert::serialWrite(const QDir &dIn)
   prj::srl::FeatureInert inertOut
   (
     Base::serialOut(),
-    csys.serialOut()
+    csys.serialOut(),
+    csysDragger->serialOut()
   );
   
   xml_schema::NamespaceInfomap infoMap;
@@ -152,6 +153,7 @@ void Inert::serialRead(const prj::srl::FeatureInert& inert)
 {
   Base::serialIn(inert.featureBase());
   csys.serialIn(inert.csys());
+  csysDragger->serialIn(inert.csysDragger());
   
   csysDragger->dragger->setUserValue(gu::idAttributeTitle, gu::idToString(getId()));
 }

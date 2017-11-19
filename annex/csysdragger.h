@@ -25,6 +25,7 @@
 namespace ftr{class Base; namespace prm{class Parameter;}}
 namespace lbr{class CSysDragger;}
 namespace osg{class Matrixd;}
+namespace prj{namespace srl{class CSysDragger;}}
 
 namespace ann
 {
@@ -40,6 +41,9 @@ namespace ann
     void draggerUpdate(); //!< sets only the dragger to csys parameter
     void draggerUpdate(const osg::Matrixd&); //!< sets only the dragger to matrix
     void setCSys(const osg::Matrixd&); //!< sets parameter to matrix and applies transformation to dragger.
+    
+    prj::srl::CSysDragger serialOut();
+    void serialIn(const prj::srl::CSysDragger&);
     
     osg::ref_ptr<lbr::CSysDragger> dragger;
     osg::ref_ptr<DCallBack> callBack;

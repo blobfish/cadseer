@@ -186,4 +186,11 @@
   </xs:all>
 </xs:complexType>
 
+<xs:complexType name="CSysDragger">
+  <xs:all>
+    <xs:element name="matrix" type="srl:Matrixd"/>
+    <xs:element name="linked" type="xs:boolean"/>
+  </xs:all>
+</xs:complexType>
+
 </xs:schema> 

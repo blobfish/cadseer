@@ -332,7 +332,8 @@ void Cone::serialWrite(const QDir &dIn)
     radius1.serialOut(),
     radius2.serialOut(),
     height.serialOut(),
-    csys.serialOut()
+    csys.serialOut(),
+    csysDragger->serialOut()
   );
   
   xml_schema::NamespaceInfomap infoMap;
@@ -347,8 +348,8 @@ void Cone::serialRead(const prj::srl::FeatureCone& sCone)
   radius2.serialIn(sCone.radius2());
   height.serialIn(sCone.height());
   csys.serialIn(sCone.csys());
+  csysDragger->serialIn(sCone.csysDragger());
   
-  csysDragger->draggerUpdate(); //set dragger to parameter.
   csysDragger->dragger->setUserValue(gu::idAttributeTitle, gu::idToString(getId()));
   
   updateIPGroup();
