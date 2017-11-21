@@ -51,7 +51,8 @@ namespace ftr
     Strip, //!< feature strip class.
     Nest, //!< feature nest class.
     DieSet, //!< feature dieset class.
-    Quote //!< feature quote class.
+    Quote, //!< feature quote class.
+    Refine //!< feature refine class.
   };
   
   inline const static std::string& toString(Type typeIn)
@@ -81,7 +82,8 @@ namespace ftr
       {Type::Strip, "Strip"},
       {Type::Nest, "Nest"},
       {Type::DieSet, "DieSet"},
-      {Type::Quote, "Quote"}
+      {Type::Quote, "Quote"},
+      {Type::Refine, "Refine"}
     };
     
     assert(strings.count(typeIn) > 0);

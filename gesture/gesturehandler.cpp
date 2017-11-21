@@ -559,6 +559,12 @@ void GestureHandler::constructMenu()
     constructionExtract->setUserValue(attributeStatus, QObject::tr("Extract Command").toStdString());
     constructionFinishing->insertChild(constructionFinishing->getNumChildren() - 2, constructionExtract);
     
+    osg::MatrixTransform *constructionRefine = gsn::buildCommandNode(":/resources/images/constructionRefine.svg", iconRadius);
+    constructionRefine->setMatrix(dummy);
+    constructionRefine->setUserValue(attributeMask, (msg::Request | msg::Construct | msg::Refine).to_string());
+    constructionRefine->setUserValue(attributeStatus, QObject::tr("Refine Command").toStdString());
+    constructionFinishing->insertChild(constructionFinishing->getNumChildren() - 2, constructionRefine);
+    
     //booleans
     osg::MatrixTransform *constructionBoolean;
     constructionBoolean = gsn::buildMenuNode(":/resources/images/constructionBoolean.svg", iconRadius);

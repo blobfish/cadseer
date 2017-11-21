@@ -327,6 +327,7 @@ SET(FEATURE_SOURCES
     feature/nest.cpp
     feature/dieset.cpp
     feature/quote.cpp
+    feature/refine.cpp
     )
     
 SET(ANNEX_SOURCES
@@ -446,6 +447,7 @@ SET(COMMAND_SOURCES
     command/quote.cpp
     command/isolate.cpp
     command/measurelinear.cpp
+    command/refine.cpp
     )
     
 SET(LIBRARY_SOURCES

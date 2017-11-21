@@ -358,6 +358,14 @@ bool SeerShape::hasEvolveRecordOut(const uuid &idOut) const
   return (it != list.end());
 }
 
+bool SeerShape::hasEvolveRecord(const BID::uuid &inId, const BID::uuid &outId) const
+{
+  typedef EvolveContainer::index<EvolveRecord::ByInOutIds>::type List;
+  const List &list = evolveContainer.get<EvolveRecord::ByInOutIds>();
+  List::const_iterator it = list.find(std::make_tuple(inId, outId));
+  return (it != list.end());
+}
+
 std::vector<uuid> SeerShape::evolve(const uuid &idIn) const
 {
   std::vector<uuid> out;
@@ -389,6 +397,8 @@ void SeerShape::insertEvolve(const uuid& idIn, const uuid& idOut)
 
 void SeerShape::insertEvolve(const EvolveRecord &recordIn)
 {
+  if (hasEvolveRecord(recordIn.inId, recordIn.outId))
+    return;
   evolveContainer.insert(recordIn);
 }
 
@@ -406,8 +416,8 @@ void SeerShape::fillInHistory(ftr::ShapeHistory &historyIn, const BID::uuid &fea
     }
     if (!it->outId.is_nil())
     {
-      assert(!historyIn.hasShape(it->outId)); //shape shouldn't be there.
-      historyIn.addShape(featureId, it->outId);
+      if (!historyIn.hasShape(it->outId)) //might be there already, like a 'merge' situation.
+        historyIn.addShape(featureId, it->outId);
     }
     if (historyIn.hasShape(it->inId) && historyIn.hasShape(it->outId))
       historyIn.addConnection(it->outId, it->inId); //child points to parent.

@@ -25,6 +25,7 @@
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/mem_fun.hpp>
 #include <boost/multi_index/hashed_index.hpp>
+#include <boost/multi_index/composite_key.hpp>
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/breadth_first_search.hpp>
@@ -154,6 +155,7 @@ namespace ann
     //! used as tags.
     struct ByInId{};
     struct ByOutId{};
+    struct ByInOutIds{};
     //@}
   };
   
@@ -171,6 +173,16 @@ namespace ann
       <
         BMI::tag<EvolveRecord::ByOutId>,
         BMI::member<EvolveRecord, boost::uuids::uuid, &EvolveRecord::outId>
+      >,
+      BMI::ordered_unique
+      < 
+        BMI::tag<EvolveRecord::ByInOutIds>,
+        BMI::composite_key
+        <
+          EvolveRecord,
+          BMI::member<EvolveRecord, boost::uuids::uuid, &EvolveRecord::inId>,
+          BMI::member<EvolveRecord, boost::uuids::uuid, &EvolveRecord::outId>
+        >
       >
     >
   > EvolveContainer;
@@ -277,6 +289,7 @@ namespace ann
     //! evolve container related functions.
     bool hasEvolveRecordIn(const BID::uuid&) const;
     bool hasEvolveRecordOut(const BID::uuid&) const;
+    bool hasEvolveRecord(const BID::uuid&, const BID::uuid&) const;
     std::vector<BID::uuid> evolve(const BID::uuid&) const; //!< forward evolution. in to out.
     std::vector<BID::uuid> devolve(const BID::uuid&) const; //!< reverse evolution. out to in.
     void insertEvolve(const BID::uuid&, const BID::uuid&); //!< add entry into evolve container
