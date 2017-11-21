@@ -20,6 +20,7 @@
 #include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <BRepTools_History.hxx>
 
+#include <project/serial/xsdcxxoutput/featurerefine.h>
 #include <annex/seershape.h>
 #include <feature/refine.h>
 
@@ -122,6 +123,40 @@ void Refine::historyMatch(const BRepTools_History &hIn , const ann::SeerShape &t
   }
 }
 
-void Refine::serialWrite(const QDir&)
+void Refine::serialWrite(const QDir &dIn)
 {
+  prj::srl::FeatureRefine::ShapeMapType shapeMapOut;
+  for (const auto &p : shapeMap)
+  {
+    prj::srl::EvolveRecord eRecord
+    (
+      gu::idToString(p.first),
+      gu::idToString(p.second)
+    );
+    shapeMapOut.evolveRecord().push_back(eRecord);
+  }
+  
+  prj::srl::FeatureRefine ro
+  (
+    Base::serialOut(),
+    shapeMapOut
+  );
+  
+  xml_schema::NamespaceInfomap infoMap;
+  std::ofstream stream(buildFilePathName(dIn).toUtf8().constData());
+  prj::srl::refine(stream, ro, infoMap);
+}
+
+void Refine::serialRead(const prj::srl::FeatureRefine &rfIn)
+{
+  Base::serialIn(rfIn.featureBase());
+  
+  shapeMap.clear();
+  for (const prj::srl::EvolveRecord &sERecord : rfIn.shapeMap().evolveRecord())
+  {
+    std::pair<uuid, uuid> record;
+    record.first = gu::stringToId(sERecord.idIn());
+    record.second = gu::stringToId(sERecord.idOut());
+    shapeMap.insert(record);
+  }
 }

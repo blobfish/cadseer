@@ -414,6 +414,7 @@ SET(PROJECT_SOURCES
     project/serial/xsdcxxoutput/featuredieset.cpp
     project/serial/xsdcxxoutput/featurestrip.cpp
     project/serial/xsdcxxoutput/featurequote.cpp
+    project/serial/xsdcxxoutput/featurerefine.cpp
     )
     
 SET(APPLICATION_SOURCES

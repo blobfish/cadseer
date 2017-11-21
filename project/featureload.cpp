@@ -40,6 +40,7 @@
 #include <feature/dieset.h>
 #include <feature/strip.h>
 #include <feature/quote.h>
+#include <feature/refine.h>
 #include <project/serial/xsdcxxoutput/featurebox.h>
 #include <project/serial/xsdcxxoutput/featurecylinder.h>
 #include <project/serial/xsdcxxoutput/featuresphere.h>
@@ -60,6 +61,7 @@
 #include <project/serial/xsdcxxoutput/featuredieset.h>
 #include <project/serial/xsdcxxoutput/featurestrip.h>
 #include <project/serial/xsdcxxoutput/featurequote.h>
+#include <project/serial/xsdcxxoutput/featurerefine.h>
 
 #include "featureload.h"
 
@@ -91,6 +93,7 @@ directory(directoryIn), fileExtension(".fetr")
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::DieSet), std::bind(&FeatureLoad::loadDieSet, this, std::placeholders::_1, std::placeholders::_2)));
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Strip), std::bind(&FeatureLoad::loadStrip, this, std::placeholders::_1, std::placeholders::_2)));
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Quote), std::bind(&FeatureLoad::loadQuote, this, std::placeholders::_1, std::placeholders::_2)));
+  functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Refine), std::bind(&FeatureLoad::loadRefine, this, std::placeholders::_1, std::placeholders::_2)));
 }
 
 FeatureLoad::~FeatureLoad()
@@ -363,4 +366,16 @@ std::shared_ptr<ftr::Base> FeatureLoad::loadQuote(const std::string &fileNameIn,
   freshQuote->serialRead(*sq);
   
   return freshQuote;
+}
+
+std::shared_ptr<ftr::Base> FeatureLoad::loadRefine(const std::string &fileNameIn, std::size_t shapeOffsetIn)
+{
+  auto sr = srl::refine(fileNameIn, ::xml_schema::Flags::dont_validate);
+  assert(sr);
+  
+  std::shared_ptr<ftr::Refine> freshRefine(new ftr::Refine);
+  freshRefine->getAnnex<ann::SeerShape>(ann::Type::SeerShape).setOCCTShape(shapeVector.at(shapeOffsetIn));
+  freshRefine->serialRead(*sr);
+  
+  return freshRefine;
 }
