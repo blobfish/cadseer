@@ -62,9 +62,9 @@ void SpaceballManipulator::init(const osgGA::GUIEventAdapter &, osgGA::GUIAction
     us.requestContinuousUpdate(false);
 }
 
-void SpaceballManipulator::setByMatrix(const osg::Matrixd&)
+void SpaceballManipulator::setByMatrix(const osg::Matrixd &matrix)
 {
-//    matrix.getLookAt(spaceEye, spaceCenter, spaceUp);
+   matrix.getLookAt(spaceEye, spaceCenter, spaceUp);
 }
 
 void SpaceballManipulator::setByInverseMatrix(const osg::Matrixd&)
@@ -543,7 +543,7 @@ void SpaceballManipulator::goPerspective(const vwr::SpaceballOSGEvent *event)
     spaceUp = newUp;
 }
 
-void SpaceballManipulator::setView(osg::Vec3d lookDirection, osg::Vec3d upDirection)
+void SpaceballManipulator::setView(const osg::Vec3d &lookDirection, const osg::Vec3d &upDirection)
 {
     if (projectionData.isCamOrtho)
     {

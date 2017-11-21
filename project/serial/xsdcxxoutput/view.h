@@ -74,6 +74,7 @@ namespace prj
   {
     class State;
     class States;
+    class Ortho;
     class View;
   }
 }
@@ -92,6 +93,8 @@ namespace prj
 #include <xsd/cxx/tree/list.hxx>
 
 #include <xsd/cxx/xml/dom/parsing-header.hxx>
+
+#include "featurebase.h"
 
 namespace prj
 {
@@ -479,6 +482,392 @@ namespace prj
     };
 
     /**
+     * @brief Class corresponding to the %Ortho schema type.
+     *
+     * @nosubgrouping
+     */
+    class Ortho: public ::xml_schema::Type
+    {
+      public:
+      /**
+       * @name left
+       *
+       * @brief Accessor and modifier functions for the %left
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::xml_schema::Double LeftType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< LeftType, char, ::xsd::cxx::tree::schema_type::double_ > LeftTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const LeftType&
+      left () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      LeftType&
+      left ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      left (const LeftType& x);
+
+      //@}
+
+      /**
+       * @name right
+       *
+       * @brief Accessor and modifier functions for the %right
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::xml_schema::Double RightType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< RightType, char, ::xsd::cxx::tree::schema_type::double_ > RightTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const RightType&
+      right () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      RightType&
+      right ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      right (const RightType& x);
+
+      //@}
+
+      /**
+       * @name bottom
+       *
+       * @brief Accessor and modifier functions for the %bottom
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::xml_schema::Double BottomType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< BottomType, char, ::xsd::cxx::tree::schema_type::double_ > BottomTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const BottomType&
+      bottom () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      BottomType&
+      bottom ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      bottom (const BottomType& x);
+
+      //@}
+
+      /**
+       * @name top
+       *
+       * @brief Accessor and modifier functions for the %top
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::xml_schema::Double TopType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< TopType, char, ::xsd::cxx::tree::schema_type::double_ > TopTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const TopType&
+      top () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      TopType&
+      top ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      top (const TopType& x);
+
+      //@}
+
+      /**
+       * @name near
+       *
+       * @brief Accessor and modifier functions for the %near
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::xml_schema::Double NearType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< NearType, char, ::xsd::cxx::tree::schema_type::double_ > NearTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const NearType&
+      near () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      NearType&
+      near ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      near (const NearType& x);
+
+      //@}
+
+      /**
+       * @name far
+       *
+       * @brief Accessor and modifier functions for the %far
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::xml_schema::Double FarType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< FarType, char, ::xsd::cxx::tree::schema_type::double_ > FarTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const FarType&
+      far () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      FarType&
+      far ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      far (const FarType& x);
+
+      //@}
+
+      /**
+       * @name Constructors
+       */
+      //@{
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes.
+       */
+      Ortho (const LeftType&,
+             const RightType&,
+             const BottomType&,
+             const TopType&,
+             const NearType&,
+             const FarType&);
+
+      /**
+       * @brief Create an instance from a DOM element.
+       *
+       * @param e A DOM element to extract the data from.
+       * @param f Flags to create the new instance with.
+       * @param c A pointer to the object that will contain the new
+       * instance.
+       */
+      Ortho (const ::xercesc::DOMElement& e,
+             ::xml_schema::Flags f = 0,
+             ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy constructor.
+       *
+       * @param x An instance to make a copy of.
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      Ortho (const Ortho& x,
+             ::xml_schema::Flags f = 0,
+             ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy the instance polymorphically.
+       *
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       * @return A pointer to the dynamically allocated copy.
+       *
+       * This function ensures that the dynamic type of the instance is
+       * used for copying and should be used for polymorphic object
+       * models instead of the copy constructor.
+       */
+      virtual Ortho*
+      _clone (::xml_schema::Flags f = 0,
+              ::xml_schema::Container* c = 0) const;
+
+      /**
+       * @brief Copy assignment operator.
+       *
+       * @param x An instance to make a copy of.
+       * @return A reference to itself.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      Ortho&
+      operator= (const Ortho& x);
+
+      //@}
+
+      /**
+       * @brief Destructor.
+       */
+      virtual 
+      ~Ortho ();
+
+      // Implementation.
+      //
+
+      //@cond
+
+      protected:
+      void
+      parse (::xsd::cxx::xml::dom::parser< char >&,
+             ::xml_schema::Flags);
+
+      protected:
+      ::xsd::cxx::tree::one< LeftType > left_;
+      ::xsd::cxx::tree::one< RightType > right_;
+      ::xsd::cxx::tree::one< BottomType > bottom_;
+      ::xsd::cxx::tree::one< TopType > top_;
+      ::xsd::cxx::tree::one< NearType > near_;
+      ::xsd::cxx::tree::one< FarType > far_;
+
+      //@endcond
+    };
+
+    /**
      * @brief Class corresponding to the %View schema type.
      *
      * @nosubgrouping
@@ -541,6 +930,158 @@ namespace prj
        */
       void
       states (::std::unique_ptr< StatesType > p);
+
+      //@}
+
+      /**
+       * @name csys
+       *
+       * @brief Accessor and modifier functions for the %csys
+       * optional element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::Matrixd CsysType;
+
+      /**
+       * @brief Element optional container type.
+       */
+      typedef ::xsd::cxx::tree::optional< CsysType > CsysOptional;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< CsysType, char > CsysTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element
+       * container.
+       *
+       * @return A constant reference to the optional container.
+       */
+      const CsysOptional&
+      csys () const;
+
+      /**
+       * @brief Return a read-write reference to the element container.
+       *
+       * @return A reference to the optional container.
+       */
+      CsysOptional&
+      csys ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      csys (const CsysType& x);
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x An optional container with the new value to set.
+       *
+       * If the value is present in @a x then this function makes a copy 
+       * of this value and sets it as the new value of the element.
+       * Otherwise the element container is set the 'not present' state.
+       */
+      void
+      csys (const CsysOptional& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly instead
+       * of making a copy.
+       */
+      void
+      csys (::std::unique_ptr< CsysType > p);
+
+      //@}
+
+      /**
+       * @name ortho
+       *
+       * @brief Accessor and modifier functions for the %ortho
+       * optional element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::Ortho OrthoType;
+
+      /**
+       * @brief Element optional container type.
+       */
+      typedef ::xsd::cxx::tree::optional< OrthoType > OrthoOptional;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< OrthoType, char > OrthoTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element
+       * container.
+       *
+       * @return A constant reference to the optional container.
+       */
+      const OrthoOptional&
+      ortho () const;
+
+      /**
+       * @brief Return a read-write reference to the element container.
+       *
+       * @return A reference to the optional container.
+       */
+      OrthoOptional&
+      ortho ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      ortho (const OrthoType& x);
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x An optional container with the new value to set.
+       *
+       * If the value is present in @a x then this function makes a copy 
+       * of this value and sets it as the new value of the element.
+       * Otherwise the element container is set the 'not present' state.
+       */
+      void
+      ortho (const OrthoOptional& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly instead
+       * of making a copy.
+       */
+      void
+      ortho (::std::unique_ptr< OrthoType > p);
 
       //@}
 
@@ -636,6 +1177,8 @@ namespace prj
 
       protected:
       ::xsd::cxx::tree::one< StatesType > states_;
+      CsysOptional csys_;
+      OrthoOptional ortho_;
 
       //@endcond
     };
@@ -924,6 +1467,9 @@ namespace prj
 
     void
     operator<< (::xercesc::DOMElement&, const States&);
+
+    void
+    operator<< (::xercesc::DOMElement&, const Ortho&);
 
     void
     operator<< (::xercesc::DOMElement&, const View&);

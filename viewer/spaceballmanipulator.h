@@ -66,7 +66,7 @@ public:
     virtual void init(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &us) override;
 
     void dump();
-    void setView(osg::Vec3d lookDirection, osg::Vec3d upDirection);
+    void setView(const osg::Vec3d &lookDirection, const osg::Vec3d &upDirection);
     void viewFit();
 
 protected:

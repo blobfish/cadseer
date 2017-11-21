@@ -846,6 +846,25 @@ void Widget::serialRead()
   auto sView = prj::srl::view(file.string(), ::xml_schema::Flags::dont_validate);
   SerialInViewVisitor v(sView->states());
   root->accept(v);
+  
+  if (sView->csys().present())
+  {
+    const auto &mIn = sView->csys().get();
+    osg::Matrixd m
+    (
+      mIn.i0j0(), mIn.i0j1(), mIn.i0j2(), mIn.i0j3(),
+      mIn.i1j0(), mIn.i1j1(), mIn.i1j2(), mIn.i1j3(),
+      mIn.i2j0(), mIn.i2j1(), mIn.i2j2(), mIn.i2j3(),
+      mIn.i3j0(), mIn.i3j1(), mIn.i3j2(), mIn.i3j3()
+    );
+    spaceballManipulator->setByMatrix(m);
+  }
+  
+  if (sView->ortho().present())
+  {
+    const auto &p = sView->ortho().get();
+    mainCamera->setProjectionMatrixAsOrtho(p.left(), p.right(), p.bottom(), p.top(), p.near(), p.far());
+  }
 }
 
 //get all states to serialize
@@ -871,6 +890,20 @@ void Widget::serialWrite()
   SerialOutVisitor v(states);
   root->accept(v);
   prj::srl::View svOut(states);
+  
+  osg::Matrixd m = mainCamera->getViewMatrix();
+  prj::srl::Matrixd mOut
+  (
+    m(0,0), m(0,1), m(0,2), m(0,3),
+    m(1,0), m(1,1), m(1,2), m(1,3),
+    m(2,0), m(2,1), m(2,2), m(2,3),
+    m(3,0), m(3,1), m(3,2), m(3,3)
+  );
+  svOut.csys() = mOut;
+  
+  double left, right, bottom, top, near, far;
+  if (mainCamera->getProjectionMatrixAsOrtho(left, right, bottom, top, near, far))
+    svOut.ortho() = prj::srl::Ortho(left, right, bottom, top, near, far);
   
   boost::filesystem::path file = static_cast<app::Application*>(qApp)->getProject()->getSaveDirectory();
   file /= "view.xml";

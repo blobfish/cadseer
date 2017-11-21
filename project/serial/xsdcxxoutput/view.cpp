@@ -124,6 +124,118 @@ namespace prj
     }
 
 
+    // Ortho
+    // 
+
+    const Ortho::LeftType& Ortho::
+    left () const
+    {
+      return this->left_.get ();
+    }
+
+    Ortho::LeftType& Ortho::
+    left ()
+    {
+      return this->left_.get ();
+    }
+
+    void Ortho::
+    left (const LeftType& x)
+    {
+      this->left_.set (x);
+    }
+
+    const Ortho::RightType& Ortho::
+    right () const
+    {
+      return this->right_.get ();
+    }
+
+    Ortho::RightType& Ortho::
+    right ()
+    {
+      return this->right_.get ();
+    }
+
+    void Ortho::
+    right (const RightType& x)
+    {
+      this->right_.set (x);
+    }
+
+    const Ortho::BottomType& Ortho::
+    bottom () const
+    {
+      return this->bottom_.get ();
+    }
+
+    Ortho::BottomType& Ortho::
+    bottom ()
+    {
+      return this->bottom_.get ();
+    }
+
+    void Ortho::
+    bottom (const BottomType& x)
+    {
+      this->bottom_.set (x);
+    }
+
+    const Ortho::TopType& Ortho::
+    top () const
+    {
+      return this->top_.get ();
+    }
+
+    Ortho::TopType& Ortho::
+    top ()
+    {
+      return this->top_.get ();
+    }
+
+    void Ortho::
+    top (const TopType& x)
+    {
+      this->top_.set (x);
+    }
+
+    const Ortho::NearType& Ortho::
+    near () const
+    {
+      return this->near_.get ();
+    }
+
+    Ortho::NearType& Ortho::
+    near ()
+    {
+      return this->near_.get ();
+    }
+
+    void Ortho::
+    near (const NearType& x)
+    {
+      this->near_.set (x);
+    }
+
+    const Ortho::FarType& Ortho::
+    far () const
+    {
+      return this->far_.get ();
+    }
+
+    Ortho::FarType& Ortho::
+    far ()
+    {
+      return this->far_.get ();
+    }
+
+    void Ortho::
+    far (const FarType& x)
+    {
+      this->far_.set (x);
+    }
+
+
     // View
     // 
 
@@ -149,6 +261,66 @@ namespace prj
     states (::std::unique_ptr< StatesType > x)
     {
       this->states_.set (std::move (x));
+    }
+
+    const View::CsysOptional& View::
+    csys () const
+    {
+      return this->csys_;
+    }
+
+    View::CsysOptional& View::
+    csys ()
+    {
+      return this->csys_;
+    }
+
+    void View::
+    csys (const CsysType& x)
+    {
+      this->csys_.set (x);
+    }
+
+    void View::
+    csys (const CsysOptional& x)
+    {
+      this->csys_ = x;
+    }
+
+    void View::
+    csys (::std::unique_ptr< CsysType > x)
+    {
+      this->csys_.set (std::move (x));
+    }
+
+    const View::OrthoOptional& View::
+    ortho () const
+    {
+      return this->ortho_;
+    }
+
+    View::OrthoOptional& View::
+    ortho ()
+    {
+      return this->ortho_;
+    }
+
+    void View::
+    ortho (const OrthoType& x)
+    {
+      this->ortho_.set (x);
+    }
+
+    void View::
+    ortho (const OrthoOptional& x)
+    {
+      this->ortho_ = x;
+    }
+
+    void View::
+    ortho (::std::unique_ptr< OrthoType > x)
+    {
+      this->ortho_.set (std::move (x));
     }
   }
 }
@@ -359,20 +531,228 @@ namespace prj
     {
     }
 
+    // Ortho
+    //
+
+    Ortho::
+    Ortho (const LeftType& left,
+           const RightType& right,
+           const BottomType& bottom,
+           const TopType& top,
+           const NearType& near,
+           const FarType& far)
+    : ::xml_schema::Type (),
+      left_ (left, this),
+      right_ (right, this),
+      bottom_ (bottom, this),
+      top_ (top, this),
+      near_ (near, this),
+      far_ (far, this)
+    {
+    }
+
+    Ortho::
+    Ortho (const Ortho& x,
+           ::xml_schema::Flags f,
+           ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      left_ (x.left_, f, this),
+      right_ (x.right_, f, this),
+      bottom_ (x.bottom_, f, this),
+      top_ (x.top_, f, this),
+      near_ (x.near_, f, this),
+      far_ (x.far_, f, this)
+    {
+    }
+
+    Ortho::
+    Ortho (const ::xercesc::DOMElement& e,
+           ::xml_schema::Flags f,
+           ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      left_ (this),
+      right_ (this),
+      bottom_ (this),
+      top_ (this),
+      near_ (this),
+      far_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void Ortho::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // left
+        //
+        if (n.name () == "left" && n.namespace_ ().empty ())
+        {
+          if (!left_.present ())
+          {
+            this->left_.set (LeftTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // right
+        //
+        if (n.name () == "right" && n.namespace_ ().empty ())
+        {
+          if (!right_.present ())
+          {
+            this->right_.set (RightTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // bottom
+        //
+        if (n.name () == "bottom" && n.namespace_ ().empty ())
+        {
+          if (!bottom_.present ())
+          {
+            this->bottom_.set (BottomTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // top
+        //
+        if (n.name () == "top" && n.namespace_ ().empty ())
+        {
+          if (!top_.present ())
+          {
+            this->top_.set (TopTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // near
+        //
+        if (n.name () == "near" && n.namespace_ ().empty ())
+        {
+          if (!near_.present ())
+          {
+            this->near_.set (NearTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // far
+        //
+        if (n.name () == "far" && n.namespace_ ().empty ())
+        {
+          if (!far_.present ())
+          {
+            this->far_.set (FarTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        break;
+      }
+
+      if (!left_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "left",
+          "");
+      }
+
+      if (!right_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "right",
+          "");
+      }
+
+      if (!bottom_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "bottom",
+          "");
+      }
+
+      if (!top_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "top",
+          "");
+      }
+
+      if (!near_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "near",
+          "");
+      }
+
+      if (!far_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "far",
+          "");
+      }
+    }
+
+    Ortho* Ortho::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class Ortho (*this, f, c);
+    }
+
+    Ortho& Ortho::
+    operator= (const Ortho& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->left_ = x.left_;
+        this->right_ = x.right_;
+        this->bottom_ = x.bottom_;
+        this->top_ = x.top_;
+        this->near_ = x.near_;
+        this->far_ = x.far_;
+      }
+
+      return *this;
+    }
+
+    Ortho::
+    ~Ortho ()
+    {
+    }
+
     // View
     //
 
     View::
     View (const StatesType& states)
     : ::xml_schema::Type (),
-      states_ (states, this)
+      states_ (states, this),
+      csys_ (this),
+      ortho_ (this)
     {
     }
 
     View::
     View (::std::unique_ptr< StatesType > states)
     : ::xml_schema::Type (),
-      states_ (std::move (states), this)
+      states_ (std::move (states), this),
+      csys_ (this),
+      ortho_ (this)
     {
     }
 
@@ -381,7 +761,9 @@ namespace prj
           ::xml_schema::Flags f,
           ::xml_schema::Container* c)
     : ::xml_schema::Type (x, f, c),
-      states_ (x.states_, f, this)
+      states_ (x.states_, f, this),
+      csys_ (x.csys_, f, this),
+      ortho_ (x.ortho_, f, this)
     {
     }
 
@@ -390,7 +772,9 @@ namespace prj
           ::xml_schema::Flags f,
           ::xml_schema::Container* c)
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
-      states_ (this)
+      states_ (this),
+      csys_ (this),
+      ortho_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -423,6 +807,34 @@ namespace prj
           }
         }
 
+        // csys
+        //
+        if (n.name () == "csys" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< CsysType > r (
+            CsysTraits::create (i, f, this));
+
+          if (!this->csys_)
+          {
+            this->csys_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // ortho
+        //
+        if (n.name () == "ortho" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< OrthoType > r (
+            OrthoTraits::create (i, f, this));
+
+          if (!this->ortho_)
+          {
+            this->ortho_.set (::std::move (r));
+            continue;
+          }
+        }
+
         break;
       }
 
@@ -448,6 +860,8 @@ namespace prj
       {
         static_cast< ::xml_schema::Type& > (*this) = x;
         this->states_ = x.states_;
+        this->csys_ = x.csys_;
+        this->ortho_ = x.ortho_;
       }
 
       return *this;
@@ -793,6 +1207,78 @@ namespace prj
     }
 
     void
+    operator<< (::xercesc::DOMElement& e, const Ortho& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // left
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "left",
+            e));
+
+        s << ::xml_schema::AsDouble(i.left ());
+      }
+
+      // right
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "right",
+            e));
+
+        s << ::xml_schema::AsDouble(i.right ());
+      }
+
+      // bottom
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "bottom",
+            e));
+
+        s << ::xml_schema::AsDouble(i.bottom ());
+      }
+
+      // top
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "top",
+            e));
+
+        s << ::xml_schema::AsDouble(i.top ());
+      }
+
+      // near
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "near",
+            e));
+
+        s << ::xml_schema::AsDouble(i.near ());
+      }
+
+      // far
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "far",
+            e));
+
+        s << ::xml_schema::AsDouble(i.far ());
+      }
+    }
+
+    void
     operator<< (::xercesc::DOMElement& e, const View& i)
     {
       e << static_cast< const ::xml_schema::Type& > (i);
@@ -806,6 +1292,30 @@ namespace prj
             e));
 
         s << i.states ();
+      }
+
+      // csys
+      //
+      if (i.csys ())
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "csys",
+            e));
+
+        s << *i.csys ();
+      }
+
+      // ortho
+      //
+      if (i.ortho ())
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "ortho",
+            e));
+
+        s << *i.ortho ();
       }
     }
 
