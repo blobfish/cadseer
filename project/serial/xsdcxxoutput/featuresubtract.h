@@ -91,7 +91,7 @@ namespace prj
 
 #include <xsd/cxx/xml/dom/parsing-header.hxx>
 
-#include "featurebooleanbase.h"
+#include "featurebase.h"
 
 namespace prj
 {
@@ -110,9 +110,9 @@ namespace prj
     {
       public:
       /**
-       * @name featureBooleanBase
+       * @name featureBase
        *
-       * @brief Accessor and modifier functions for the %featureBooleanBase
+       * @brief Accessor and modifier functions for the %featureBase
        * required element.
        */
       //@{
@@ -120,28 +120,28 @@ namespace prj
       /**
        * @brief Element type.
        */
-      typedef ::prj::srl::FeatureBooleanBase FeatureBooleanBaseType;
+      typedef ::prj::srl::FeatureBase FeatureBaseType;
 
       /**
        * @brief Element traits type.
        */
-      typedef ::xsd::cxx::tree::traits< FeatureBooleanBaseType, char > FeatureBooleanBaseTraits;
+      typedef ::xsd::cxx::tree::traits< FeatureBaseType, char > FeatureBaseTraits;
 
       /**
        * @brief Return a read-only (constant) reference to the element.
        *
        * @return A constant reference to the element.
        */
-      const FeatureBooleanBaseType&
-      featureBooleanBase () const;
+      const FeatureBaseType&
+      featureBase () const;
 
       /**
        * @brief Return a read-write reference to the element.
        *
        * @return A reference to the element.
        */
-      FeatureBooleanBaseType&
-      featureBooleanBase ();
+      FeatureBaseType&
+      featureBase ();
 
       /**
        * @brief Set the element value.
@@ -152,7 +152,7 @@ namespace prj
        * the new value of the element.
        */
       void
-      featureBooleanBase (const FeatureBooleanBaseType& x);
+      featureBase (const FeatureBaseType& x);
 
       /**
        * @brief Set the element value without copying.
@@ -163,7 +163,65 @@ namespace prj
        * instead of making a copy.
        */
       void
-      featureBooleanBase (::std::unique_ptr< FeatureBooleanBaseType > p);
+      featureBase (::std::unique_ptr< FeatureBaseType > p);
+
+      //@}
+
+      /**
+       * @name intersectionMapper
+       *
+       * @brief Accessor and modifier functions for the %intersectionMapper
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::IntersectionMapper IntersectionMapperType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< IntersectionMapperType, char > IntersectionMapperTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const IntersectionMapperType&
+      intersectionMapper () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      IntersectionMapperType&
+      intersectionMapper ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      intersectionMapper (const IntersectionMapperType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      intersectionMapper (::std::unique_ptr< IntersectionMapperType > p);
 
       //@}
 
@@ -176,7 +234,8 @@ namespace prj
        * @brief Create an instance from the ultimate base and
        * initializers for required elements and attributes.
        */
-      FeatureSubtract (const FeatureBooleanBaseType&);
+      FeatureSubtract (const FeatureBaseType&,
+                       const IntersectionMapperType&);
 
       /**
        * @brief Create an instance from the ultimate base and
@@ -186,7 +245,8 @@ namespace prj
        * This constructor will try to use the passed values directly
        * instead of making copies.
        */
-      FeatureSubtract (::std::unique_ptr< FeatureBooleanBaseType >);
+      FeatureSubtract (::std::unique_ptr< FeatureBaseType >,
+                       ::std::unique_ptr< IntersectionMapperType >);
 
       /**
        * @brief Create an instance from a DOM element.
@@ -258,7 +318,8 @@ namespace prj
              ::xml_schema::Flags);
 
       protected:
-      ::xsd::cxx::tree::one< FeatureBooleanBaseType > featureBooleanBase_;
+      ::xsd::cxx::tree::one< FeatureBaseType > featureBase_;
+      ::xsd::cxx::tree::one< IntersectionMapperType > intersectionMapper_;
 
       //@endcond
     };

@@ -20,14 +20,14 @@
 #ifndef FTR_INTERSECT_H
 #define FTR_INTERSECT_H
 
-#include <feature/booleanbase.h>
+#include <feature/base.h>
 
 namespace prj{namespace srl{class FeatureIntersect;}}
-namespace ann{class SeerShape;}
+namespace ann{class SeerShape; class IntersectionMapper;}
 
 namespace ftr
 {
-  class Intersect : public BooleanBase
+  class Intersect : public Base
   {
   public:
     Intersect();
@@ -42,6 +42,7 @@ namespace ftr
     
   private:
     std::unique_ptr<ann::SeerShape> sShape;
+    std::unique_ptr<ann::IntersectionMapper> iMapper;
     static QIcon icon;
   };
 }

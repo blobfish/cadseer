@@ -47,28 +47,52 @@ namespace prj
     // FeatureSubtract
     // 
 
-    const FeatureSubtract::FeatureBooleanBaseType& FeatureSubtract::
-    featureBooleanBase () const
+    const FeatureSubtract::FeatureBaseType& FeatureSubtract::
+    featureBase () const
     {
-      return this->featureBooleanBase_.get ();
+      return this->featureBase_.get ();
     }
 
-    FeatureSubtract::FeatureBooleanBaseType& FeatureSubtract::
-    featureBooleanBase ()
+    FeatureSubtract::FeatureBaseType& FeatureSubtract::
+    featureBase ()
     {
-      return this->featureBooleanBase_.get ();
-    }
-
-    void FeatureSubtract::
-    featureBooleanBase (const FeatureBooleanBaseType& x)
-    {
-      this->featureBooleanBase_.set (x);
+      return this->featureBase_.get ();
     }
 
     void FeatureSubtract::
-    featureBooleanBase (::std::unique_ptr< FeatureBooleanBaseType > x)
+    featureBase (const FeatureBaseType& x)
     {
-      this->featureBooleanBase_.set (std::move (x));
+      this->featureBase_.set (x);
+    }
+
+    void FeatureSubtract::
+    featureBase (::std::unique_ptr< FeatureBaseType > x)
+    {
+      this->featureBase_.set (std::move (x));
+    }
+
+    const FeatureSubtract::IntersectionMapperType& FeatureSubtract::
+    intersectionMapper () const
+    {
+      return this->intersectionMapper_.get ();
+    }
+
+    FeatureSubtract::IntersectionMapperType& FeatureSubtract::
+    intersectionMapper ()
+    {
+      return this->intersectionMapper_.get ();
+    }
+
+    void FeatureSubtract::
+    intersectionMapper (const IntersectionMapperType& x)
+    {
+      this->intersectionMapper_.set (x);
+    }
+
+    void FeatureSubtract::
+    intersectionMapper (::std::unique_ptr< IntersectionMapperType > x)
+    {
+      this->intersectionMapper_.set (std::move (x));
     }
   }
 }
@@ -83,16 +107,20 @@ namespace prj
     //
 
     FeatureSubtract::
-    FeatureSubtract (const FeatureBooleanBaseType& featureBooleanBase)
+    FeatureSubtract (const FeatureBaseType& featureBase,
+                     const IntersectionMapperType& intersectionMapper)
     : ::xml_schema::Type (),
-      featureBooleanBase_ (featureBooleanBase, this)
+      featureBase_ (featureBase, this),
+      intersectionMapper_ (intersectionMapper, this)
     {
     }
 
     FeatureSubtract::
-    FeatureSubtract (::std::unique_ptr< FeatureBooleanBaseType > featureBooleanBase)
+    FeatureSubtract (::std::unique_ptr< FeatureBaseType > featureBase,
+                     ::std::unique_ptr< IntersectionMapperType > intersectionMapper)
     : ::xml_schema::Type (),
-      featureBooleanBase_ (std::move (featureBooleanBase), this)
+      featureBase_ (std::move (featureBase), this),
+      intersectionMapper_ (std::move (intersectionMapper), this)
     {
     }
 
@@ -101,7 +129,8 @@ namespace prj
                      ::xml_schema::Flags f,
                      ::xml_schema::Container* c)
     : ::xml_schema::Type (x, f, c),
-      featureBooleanBase_ (x.featureBooleanBase_, f, this)
+      featureBase_ (x.featureBase_, f, this),
+      intersectionMapper_ (x.intersectionMapper_, f, this)
     {
     }
 
@@ -110,7 +139,8 @@ namespace prj
                      ::xml_schema::Flags f,
                      ::xml_schema::Container* c)
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
-      featureBooleanBase_ (this)
+      featureBase_ (this),
+      intersectionMapper_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -129,16 +159,30 @@ namespace prj
         const ::xsd::cxx::xml::qualified_name< char > n (
           ::xsd::cxx::xml::dom::name< char > (i));
 
-        // featureBooleanBase
+        // featureBase
         //
-        if (n.name () == "featureBooleanBase" && n.namespace_ ().empty ())
+        if (n.name () == "featureBase" && n.namespace_ ().empty ())
         {
-          ::std::unique_ptr< FeatureBooleanBaseType > r (
-            FeatureBooleanBaseTraits::create (i, f, this));
+          ::std::unique_ptr< FeatureBaseType > r (
+            FeatureBaseTraits::create (i, f, this));
 
-          if (!featureBooleanBase_.present ())
+          if (!featureBase_.present ())
           {
-            this->featureBooleanBase_.set (::std::move (r));
+            this->featureBase_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // intersectionMapper
+        //
+        if (n.name () == "intersectionMapper" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< IntersectionMapperType > r (
+            IntersectionMapperTraits::create (i, f, this));
+
+          if (!intersectionMapper_.present ())
+          {
+            this->intersectionMapper_.set (::std::move (r));
             continue;
           }
         }
@@ -146,10 +190,17 @@ namespace prj
         break;
       }
 
-      if (!featureBooleanBase_.present ())
+      if (!featureBase_.present ())
       {
         throw ::xsd::cxx::tree::expected_element< char > (
-          "featureBooleanBase",
+          "featureBase",
+          "");
+      }
+
+      if (!intersectionMapper_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "intersectionMapper",
           "");
       }
     }
@@ -167,7 +218,8 @@ namespace prj
       if (this != &x)
       {
         static_cast< ::xml_schema::Type& > (*this) = x;
-        this->featureBooleanBase_ = x.featureBooleanBase_;
+        this->featureBase_ = x.featureBase_;
+        this->intersectionMapper_ = x.intersectionMapper_;
       }
 
       return *this;
@@ -469,15 +521,26 @@ namespace prj
     {
       e << static_cast< const ::xml_schema::Type& > (i);
 
-      // featureBooleanBase
+      // featureBase
       //
       {
         ::xercesc::DOMElement& s (
           ::xsd::cxx::xml::dom::create_element (
-            "featureBooleanBase",
+            "featureBase",
             e));
 
-        s << i.featureBooleanBase ();
+        s << i.featureBase ();
+      }
+
+      // intersectionMapper
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "intersectionMapper",
+            e));
+
+        s << i.intersectionMapper ();
       }
     }
 

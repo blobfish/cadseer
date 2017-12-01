@@ -29,16 +29,16 @@
 
 #include <project/serial/xsdcxxoutput/featureunion.h>
 #include <feature/booleanoperation.h>
-#include <feature/booleanidmapper.h>
 #include <feature/shapecheck.h>
 #include <annex/seershape.h>
+#include <annex/intersectionmapper.h>
 #include <feature/union.h>
 
 using namespace ftr;
 
 QIcon Union::icon;
 
-Union::Union() : BooleanBase(), sShape(new ann::SeerShape())
+Union::Union() : Base(), sShape(new ann::SeerShape()), iMapper(new ann::IntersectionMapper())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionUnion.svg");
@@ -47,6 +47,7 @@ Union::Union() : BooleanBase(), sShape(new ann::SeerShape())
   mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
+  annexes.insert(std::make_pair(ann::Type::IntersectionMapper, iMapper.get()));
 }
 
 Union::~Union(){}
@@ -97,8 +98,9 @@ void Union::updateModel(const UpdatePayload &payloadIn)
     for (auto pairIt = payloadIn.updateMap.equal_range(InputType::tool); pairIt.first != pairIt.second; ++pairIt.first)
       sShape->shapeMatch(pairIt.first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape));
     sShape->uniqueTypeMatch(targetSeerShape);
-    BooleanIdMapper idMapper(payloadIn.updateMap, fuser.getBuilder(), iMapWrapper, sShape.get());
-    idMapper.go();
+    
+    iMapper->go(payloadIn, fuser.getBuilder(), *sShape);
+    
     sShape->outerWireMatch(targetSeerShape);
     for (auto pairIt = payloadIn.updateMap.equal_range(InputType::tool); pairIt.first != pairIt.second; ++pairIt.first)
       sShape->outerWireMatch(pairIt.first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape));
@@ -134,7 +136,8 @@ void Union::serialWrite(const QDir &dIn)
 {
   prj::srl::FeatureUnion unionOut
   (
-    BooleanBase::serialOut()
+    Base::serialOut(),
+    iMapper->serialOut()
   );
   
   xml_schema::NamespaceInfomap infoMap;
@@ -144,5 +147,6 @@ void Union::serialWrite(const QDir &dIn)
 
 void Union::serialRead(const prj::srl::FeatureUnion& sUnionIn)
 {
-  BooleanBase::serialIn(sUnionIn.featureBooleanBase());
+  Base::serialIn(sUnionIn.featureBase());
+  iMapper->serialIn(sUnionIn.intersectionMapper());
 }

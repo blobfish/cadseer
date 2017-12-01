@@ -20,15 +20,15 @@
 #ifndef FTR_UNION_H
 #define FTR_UNION_H
 
-#include <feature/booleanbase.h>
+#include <feature/base.h>
 
 class QDir;
 
 namespace prj{namespace srl{class FeatureUnion;}}
-namespace ann{class SeerShape;}
+namespace ann{class SeerShape; class IntersectionMapper;}
 namespace ftr
 {
-  class Union : public BooleanBase
+  class Union : public Base
   {
   public:
     Union();
@@ -44,6 +44,7 @@ namespace ftr
     
   protected:
     std::unique_ptr<ann::SeerShape> sShape;
+    std::unique_ptr<ann::IntersectionMapper> iMapper;
     
   private:
     static QIcon icon;

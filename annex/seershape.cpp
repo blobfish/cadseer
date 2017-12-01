@@ -174,8 +174,12 @@ void SeerShape::updateGraphs()
       {
         Vertex pVertex = findShapeIdRecord(shapeStack.top()).graphVertex;
         Vertex cVertex = findShapeIdRecord(currentShape).graphVertex;
-        boost::add_edge(pVertex, cVertex, graph);
-        boost::add_edge(cVertex, pVertex, rGraph);
+        
+        if (!boost::edge(pVertex, cVertex, graph).second)
+        {
+          boost::add_edge(pVertex, cVertex, graph);
+          boost::add_edge(cVertex, pVertex, rGraph);
+        }
       }
       shapeStack.push(currentShape);
       recursion(currentShape);
@@ -554,10 +558,10 @@ occt::ShapeVector SeerShape::useGetParentsOfType
   TypeCollectionVisitor vis(shapeTypeIn, *this, vertices);
   boost::breadth_first_search(rGraph, findShapeIdRecord(shapeIn).graphVertex, boost::visitor(vis));
 
-  std::vector<Vertex>::const_iterator vit;
   occt::ShapeVector shapesOut;
   for (const auto &gVertex : vertices)
     shapesOut.push_back(findShapeIdRecord(gVertex).shape);
+  
   return shapesOut;
 }
 

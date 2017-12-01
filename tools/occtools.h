@@ -42,16 +42,18 @@ namespace occt
   template<typename T>
   void uniquefy(T &t)
   {
-    struct Predicate
+    auto lessThan = [](const typename T::value_type& t1, const typename T::value_type& t2) -> bool
     {
-      bool operator()(const typename T::value_type& t1, const typename T::value_type& t2)
-      {
-        return t1.HashCode(std::numeric_limits<int>::max()) < t2.HashCode(std::numeric_limits<int>::max());
-      }
+      return t1.HashCode(std::numeric_limits<int>::max()) < t2.HashCode(std::numeric_limits<int>::max());
     };
-    Predicate p;
-    std::sort(t.begin(), t.end(), p);
-    auto last = std::unique(t.begin(), t.end(), p);
+    
+    auto equal = [](const typename T::value_type& t1, const typename T::value_type& t2) -> bool
+    {
+      return t1.HashCode(std::numeric_limits<int>::max()) == t2.HashCode(std::numeric_limits<int>::max());
+    };
+    
+    std::sort(t.begin(), t.end(), lessThan);
+    auto last = std::unique(t.begin(), t.end(), equal);
     t.erase(last, t.end());
   }
   

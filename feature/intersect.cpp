@@ -21,18 +21,18 @@
 #include <TopExp.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 
-#include <feature/booleanidmapper.h>
 #include <feature/booleanoperation.h>
 #include <project/serial/xsdcxxoutput/featureintersect.h>
 #include <feature/shapecheck.h>
 #include <annex/seershape.h>
+#include <annex/intersectionmapper.h>
 #include <feature/intersect.h>
 
 using namespace ftr;
 
 QIcon Intersect::icon;
 
-Intersect::Intersect() : BooleanBase(), sShape(new ann::SeerShape())
+Intersect::Intersect() : Base(), sShape(new ann::SeerShape()), iMapper(new ann::IntersectionMapper())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionIntersect.svg");
@@ -41,6 +41,7 @@ Intersect::Intersect() : BooleanBase(), sShape(new ann::SeerShape())
   mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
+  annexes.insert(std::make_pair(ann::Type::IntersectionMapper, iMapper.get()));
 }
 
 Intersect::~Intersect(){}
@@ -91,8 +92,9 @@ void Intersect::updateModel(const UpdatePayload &payloadIn)
     for (auto pairIt = payloadIn.updateMap.equal_range(InputType::tool); pairIt.first != pairIt.second; ++pairIt.first)
       sShape->shapeMatch(pairIt.first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape));
     sShape->uniqueTypeMatch(targetSeerShape);
-    BooleanIdMapper idMapper(payloadIn.updateMap, intersector.getBuilder(), iMapWrapper, sShape.get());
-    idMapper.go();
+    
+    iMapper->go(payloadIn, intersector.getBuilder(), *sShape);
+    
     sShape->outerWireMatch(targetSeerShape);
     for (auto pairIt = payloadIn.updateMap.equal_range(InputType::tool); pairIt.first != pairIt.second; ++pairIt.first)
       sShape->outerWireMatch(pairIt.first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape));
@@ -128,7 +130,8 @@ void Intersect::serialWrite(const QDir &dIn)
 {
   prj::srl::FeatureIntersect intersectOut
   (
-    BooleanBase::serialOut()
+    Base::serialOut(),
+    iMapper->serialOut()
   );
   
   xml_schema::NamespaceInfomap infoMap;
@@ -138,5 +141,6 @@ void Intersect::serialWrite(const QDir &dIn)
 
 void Intersect::serialRead(const prj::srl::FeatureIntersect& sIntersectIn)
 {
-  BooleanBase::serialIn(sIntersectIn.featureBooleanBase());
+  Base::serialIn(sIntersectIn.featureBase());
+  iMapper->serialIn(sIntersectIn.intersectionMapper());
 }

@@ -20,14 +20,14 @@
 #ifndef FTR_SUBTRACT_H
 #define FTR_SUBTRACT_H
 
-#include <feature/booleanbase.h>
+#include <feature/base.h>
 
 namespace prj{namespace srl{class FeatureSubtract;}}
-namespace ann{class SeerShape;}
+namespace ann{class SeerShape; class IntersectionMapper;}
 
 namespace ftr
 {
-  class Subtract : public BooleanBase
+  class Subtract : public Base
   {
   public:
     Subtract();
@@ -42,6 +42,7 @@ namespace ftr
     
   protected:
     std::unique_ptr<ann::SeerShape> sShape;
+    std::unique_ptr<ann::IntersectionMapper> iMapper;
     
   private:
     static QIcon icon;

@@ -17,22 +17,28 @@
  *
  */
 
+#include <BOPAlgo_Builder.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
 #include <TopExp.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
+#include <TopoDS.hxx>
+#include <BRepTools.hxx>
+#include <BOPDS_DS.hxx>
 
-#include <feature/booleanidmapper.h>
 #include <feature/booleanoperation.h>
 #include <feature/shapecheck.h>
 #include <project/serial/xsdcxxoutput/featuresubtract.h>
 #include <annex/seershape.h>
+#include <annex/intersectionmapper.h>
 #include <feature/subtract.h>
+
+using boost::uuids::uuid;
 
 using namespace ftr;
 
 QIcon Subtract::icon;
 
-Subtract::Subtract() : BooleanBase(), sShape(new ann::SeerShape())
+Subtract::Subtract() : Base(), sShape(new ann::SeerShape()), iMapper(new ann::IntersectionMapper())
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionSubtract.svg");
@@ -41,6 +47,7 @@ Subtract::Subtract() : BooleanBase(), sShape(new ann::SeerShape())
   mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
+  annexes.insert(std::make_pair(ann::Type::IntersectionMapper, iMapper.get()));
 }
 
 Subtract::~Subtract(){}
@@ -91,8 +98,9 @@ void Subtract::updateModel(const UpdatePayload &payloadIn)
     for (auto pairIt = payloadIn.updateMap.equal_range(InputType::tool); pairIt.first != pairIt.second; ++pairIt.first)
       sShape->shapeMatch(pairIt.first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape));
     sShape->uniqueTypeMatch(targetSeerShape);
-    BooleanIdMapper idMapper(payloadIn.updateMap, subtracter.getBuilder(), iMapWrapper, sShape.get());
-    idMapper.go();
+
+    iMapper->go(payloadIn, subtracter.getBuilder(), *sShape);
+    
     sShape->outerWireMatch(targetSeerShape);
     for (auto pairIt = payloadIn.updateMap.equal_range(InputType::tool); pairIt.first != pairIt.second; ++pairIt.first)
       sShape->outerWireMatch(pairIt.first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape));
@@ -128,7 +136,8 @@ void Subtract::serialWrite(const QDir &dIn)
 {
   prj::srl::FeatureSubtract subtractOut
   (
-    BooleanBase::serialOut()
+    Base::serialOut(),
+    iMapper->serialOut()
   );
   
   xml_schema::NamespaceInfomap infoMap;
@@ -138,6 +147,7 @@ void Subtract::serialWrite(const QDir &dIn)
 
 void Subtract::serialRead(const prj::srl::FeatureSubtract& sSubtractIn)
 {
-  BooleanBase::serialIn(sSubtractIn.featureBooleanBase());
+  Base::serialIn(sSubtractIn.featureBase());
+  iMapper->serialIn(sSubtractIn.intersectionMapper());
 }
 

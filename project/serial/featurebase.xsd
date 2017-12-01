@@ -136,6 +136,62 @@
   </xs:all>
 </xs:complexType>
 
+<xs:complexType name="EdgeNode">
+  <xs:all>
+    <xs:element name="edgeId" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+    <xs:element name="center" type="xs:double"/>
+    <xs:element name="alive" type="xs:boolean"/>
+  </xs:all>
+</xs:complexType>
+<xs:complexType name="EdgeNodes">
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+    <xs:element name="array" type="srl:EdgeNode"/>
+  </xs:sequence>
+</xs:complexType>
+<xs:complexType name="EdgeSplit">
+  <xs:all>
+    <xs:element name="faceHistory1" type="srl:ShapeHistory"/>
+    <xs:element name="faceHistory2" type="srl:ShapeHistory"/>
+    <xs:element name="nodes" type="srl:EdgeNodes"/>
+  </xs:all>
+</xs:complexType>
+<xs:complexType name="EdgeSplits">
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+    <xs:element name="array" type="srl:EdgeSplit"/>
+  </xs:sequence>
+</xs:complexType>
+<xs:complexType name="FaceNode">
+  <xs:all>
+    <xs:element name="faceId" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+    <xs:element name="wireId" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
+    <xs:element name="centerX" type="xs:double"/>
+    <xs:element name="centerY" type="xs:double"/>
+    <xs:element name="alive" type="xs:boolean"/>
+  </xs:all>
+</xs:complexType>
+<xs:complexType name="FaceNodes">
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+    <xs:element name="array" type="srl:FaceNode"/>
+  </xs:sequence>
+</xs:complexType>
+<xs:complexType name="FaceSplit">
+  <xs:all>
+    <xs:element name="faceHistory" type="srl:ShapeHistory"/>
+    <xs:element name="nodes" type="srl:FaceNodes"/>
+  </xs:all>
+</xs:complexType>
+<xs:complexType name="FaceSplits">
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+    <xs:element name="array" type="srl:FaceSplit"/>
+  </xs:sequence>
+</xs:complexType>
+<xs:complexType name="IntersectionMapper">
+  <xs:all>
+    <xs:element name="edgeSplits" type="srl:EdgeSplits"/>
+    <xs:element name="faceSplits" type="srl:FaceSplits"/>
+  </xs:all>
+</xs:complexType>
+
 <xs:simpleType name="ColorValue">
   <xs:restriction base="xs:decimal">
     <xs:minExclusive value="0.0"/>
@@ -157,6 +213,7 @@
     <xs:element name="name" type="xs:string" default="Empty"/>
     <xs:element name="id" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
     <xs:element name="seerShape" type="srl:SeerShape"  minOccurs="0" maxOccurs="1"/>
+    <xs:element name="intersectionMapper" type="srl:IntersectionMapper"  minOccurs="0" maxOccurs="1"/>
     <xs:element name="color" type="srl:Color"  minOccurs="0" maxOccurs="1"/>
     <xs:element name="state" type="xs:string"  minOccurs="0" maxOccurs="1"/>
   </xs:all>

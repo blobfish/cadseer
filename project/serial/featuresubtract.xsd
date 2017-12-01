@@ -5,11 +5,12 @@
   xmlns:srl="http://www.cadseer.com/prj/srl"
 >
   
-<xs:include schemaLocation="featurebooleanbase.xsd"/>
+<xs:include schemaLocation="featurebase.xsd"/>
 
 <xs:complexType name="FeatureSubtract">
   <xs:all>
-    <xs:element name="featureBooleanBase" type="srl:FeatureBooleanBase"/>
+    <xs:element name="featureBase" type="srl:FeatureBase"/>
+    <xs:element name="intersectionMapper" type="srl:IntersectionMapper"/>
   </xs:all>
 </xs:complexType>
 

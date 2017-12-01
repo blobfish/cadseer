@@ -359,7 +359,7 @@ void Project::removeFeature(const uuid& idIn)
     dir.remove(fileName);
   
   boost::clear_vertex(vertex, stow->graph);
-  boost::remove_vertex(vertex, stow->graph);
+  stow->graph[vertex].alive = false;
   
   //log action to git.
   std::ostringstream gitMessage;

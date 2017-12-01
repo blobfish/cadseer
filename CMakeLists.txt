@@ -305,13 +305,10 @@ SET(FEATURE_SOURCES
     feature/chamfer.cpp
     feature/draft.cpp
     feature/cylinderbuilder.cpp
-    feature/booleanbase.cpp
     feature/union.cpp
     feature/subtract.cpp
     feature/intersect.cpp
-    feature/booleanidmapper.cpp
     feature/booleanoperation.cpp
-    feature/intersectionmapping.cpp
     feature/shapecheck.cpp
     feature/seershapeinfo.cpp
     feature/datumplane.cpp
@@ -334,6 +331,7 @@ SET(ANNEX_SOURCES
     annex/base.cpp
     annex/csysdragger.cpp
     annex/seershape.cpp
+    annex/intersectionmapper.cpp
     )
     
 SET(EXPRESSION_SOURCES

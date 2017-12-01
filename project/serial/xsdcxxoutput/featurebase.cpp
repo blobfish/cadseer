@@ -1490,6 +1490,462 @@ namespace prj
     }
 
 
+    // EdgeNode
+    // 
+
+    const EdgeNode::EdgeIdType& EdgeNode::
+    edgeId () const
+    {
+      return this->edgeId_.get ();
+    }
+
+    EdgeNode::EdgeIdType& EdgeNode::
+    edgeId ()
+    {
+      return this->edgeId_.get ();
+    }
+
+    void EdgeNode::
+    edgeId (const EdgeIdType& x)
+    {
+      this->edgeId_.set (x);
+    }
+
+    void EdgeNode::
+    edgeId (::std::unique_ptr< EdgeIdType > x)
+    {
+      this->edgeId_.set (std::move (x));
+    }
+
+    const EdgeNode::EdgeIdType& EdgeNode::
+    edgeId_default_value ()
+    {
+      return edgeId_default_value_;
+    }
+
+    const EdgeNode::CenterType& EdgeNode::
+    center () const
+    {
+      return this->center_.get ();
+    }
+
+    EdgeNode::CenterType& EdgeNode::
+    center ()
+    {
+      return this->center_.get ();
+    }
+
+    void EdgeNode::
+    center (const CenterType& x)
+    {
+      this->center_.set (x);
+    }
+
+    const EdgeNode::AliveType& EdgeNode::
+    alive () const
+    {
+      return this->alive_.get ();
+    }
+
+    EdgeNode::AliveType& EdgeNode::
+    alive ()
+    {
+      return this->alive_.get ();
+    }
+
+    void EdgeNode::
+    alive (const AliveType& x)
+    {
+      this->alive_.set (x);
+    }
+
+
+    // EdgeNodes
+    // 
+
+    const EdgeNodes::ArraySequence& EdgeNodes::
+    array () const
+    {
+      return this->array_;
+    }
+
+    EdgeNodes::ArraySequence& EdgeNodes::
+    array ()
+    {
+      return this->array_;
+    }
+
+    void EdgeNodes::
+    array (const ArraySequence& s)
+    {
+      this->array_ = s;
+    }
+
+
+    // EdgeSplit
+    // 
+
+    const EdgeSplit::FaceHistory1Type& EdgeSplit::
+    faceHistory1 () const
+    {
+      return this->faceHistory1_.get ();
+    }
+
+    EdgeSplit::FaceHistory1Type& EdgeSplit::
+    faceHistory1 ()
+    {
+      return this->faceHistory1_.get ();
+    }
+
+    void EdgeSplit::
+    faceHistory1 (const FaceHistory1Type& x)
+    {
+      this->faceHistory1_.set (x);
+    }
+
+    void EdgeSplit::
+    faceHistory1 (::std::unique_ptr< FaceHistory1Type > x)
+    {
+      this->faceHistory1_.set (std::move (x));
+    }
+
+    const EdgeSplit::FaceHistory2Type& EdgeSplit::
+    faceHistory2 () const
+    {
+      return this->faceHistory2_.get ();
+    }
+
+    EdgeSplit::FaceHistory2Type& EdgeSplit::
+    faceHistory2 ()
+    {
+      return this->faceHistory2_.get ();
+    }
+
+    void EdgeSplit::
+    faceHistory2 (const FaceHistory2Type& x)
+    {
+      this->faceHistory2_.set (x);
+    }
+
+    void EdgeSplit::
+    faceHistory2 (::std::unique_ptr< FaceHistory2Type > x)
+    {
+      this->faceHistory2_.set (std::move (x));
+    }
+
+    const EdgeSplit::NodesType& EdgeSplit::
+    nodes () const
+    {
+      return this->nodes_.get ();
+    }
+
+    EdgeSplit::NodesType& EdgeSplit::
+    nodes ()
+    {
+      return this->nodes_.get ();
+    }
+
+    void EdgeSplit::
+    nodes (const NodesType& x)
+    {
+      this->nodes_.set (x);
+    }
+
+    void EdgeSplit::
+    nodes (::std::unique_ptr< NodesType > x)
+    {
+      this->nodes_.set (std::move (x));
+    }
+
+
+    // EdgeSplits
+    // 
+
+    const EdgeSplits::ArraySequence& EdgeSplits::
+    array () const
+    {
+      return this->array_;
+    }
+
+    EdgeSplits::ArraySequence& EdgeSplits::
+    array ()
+    {
+      return this->array_;
+    }
+
+    void EdgeSplits::
+    array (const ArraySequence& s)
+    {
+      this->array_ = s;
+    }
+
+
+    // FaceNode
+    // 
+
+    const FaceNode::FaceIdType& FaceNode::
+    faceId () const
+    {
+      return this->faceId_.get ();
+    }
+
+    FaceNode::FaceIdType& FaceNode::
+    faceId ()
+    {
+      return this->faceId_.get ();
+    }
+
+    void FaceNode::
+    faceId (const FaceIdType& x)
+    {
+      this->faceId_.set (x);
+    }
+
+    void FaceNode::
+    faceId (::std::unique_ptr< FaceIdType > x)
+    {
+      this->faceId_.set (std::move (x));
+    }
+
+    const FaceNode::FaceIdType& FaceNode::
+    faceId_default_value ()
+    {
+      return faceId_default_value_;
+    }
+
+    const FaceNode::WireIdType& FaceNode::
+    wireId () const
+    {
+      return this->wireId_.get ();
+    }
+
+    FaceNode::WireIdType& FaceNode::
+    wireId ()
+    {
+      return this->wireId_.get ();
+    }
+
+    void FaceNode::
+    wireId (const WireIdType& x)
+    {
+      this->wireId_.set (x);
+    }
+
+    void FaceNode::
+    wireId (::std::unique_ptr< WireIdType > x)
+    {
+      this->wireId_.set (std::move (x));
+    }
+
+    const FaceNode::WireIdType& FaceNode::
+    wireId_default_value ()
+    {
+      return wireId_default_value_;
+    }
+
+    const FaceNode::CenterXType& FaceNode::
+    centerX () const
+    {
+      return this->centerX_.get ();
+    }
+
+    FaceNode::CenterXType& FaceNode::
+    centerX ()
+    {
+      return this->centerX_.get ();
+    }
+
+    void FaceNode::
+    centerX (const CenterXType& x)
+    {
+      this->centerX_.set (x);
+    }
+
+    const FaceNode::CenterYType& FaceNode::
+    centerY () const
+    {
+      return this->centerY_.get ();
+    }
+
+    FaceNode::CenterYType& FaceNode::
+    centerY ()
+    {
+      return this->centerY_.get ();
+    }
+
+    void FaceNode::
+    centerY (const CenterYType& x)
+    {
+      this->centerY_.set (x);
+    }
+
+    const FaceNode::AliveType& FaceNode::
+    alive () const
+    {
+      return this->alive_.get ();
+    }
+
+    FaceNode::AliveType& FaceNode::
+    alive ()
+    {
+      return this->alive_.get ();
+    }
+
+    void FaceNode::
+    alive (const AliveType& x)
+    {
+      this->alive_.set (x);
+    }
+
+
+    // FaceNodes
+    // 
+
+    const FaceNodes::ArraySequence& FaceNodes::
+    array () const
+    {
+      return this->array_;
+    }
+
+    FaceNodes::ArraySequence& FaceNodes::
+    array ()
+    {
+      return this->array_;
+    }
+
+    void FaceNodes::
+    array (const ArraySequence& s)
+    {
+      this->array_ = s;
+    }
+
+
+    // FaceSplit
+    // 
+
+    const FaceSplit::FaceHistoryType& FaceSplit::
+    faceHistory () const
+    {
+      return this->faceHistory_.get ();
+    }
+
+    FaceSplit::FaceHistoryType& FaceSplit::
+    faceHistory ()
+    {
+      return this->faceHistory_.get ();
+    }
+
+    void FaceSplit::
+    faceHistory (const FaceHistoryType& x)
+    {
+      this->faceHistory_.set (x);
+    }
+
+    void FaceSplit::
+    faceHistory (::std::unique_ptr< FaceHistoryType > x)
+    {
+      this->faceHistory_.set (std::move (x));
+    }
+
+    const FaceSplit::NodesType& FaceSplit::
+    nodes () const
+    {
+      return this->nodes_.get ();
+    }
+
+    FaceSplit::NodesType& FaceSplit::
+    nodes ()
+    {
+      return this->nodes_.get ();
+    }
+
+    void FaceSplit::
+    nodes (const NodesType& x)
+    {
+      this->nodes_.set (x);
+    }
+
+    void FaceSplit::
+    nodes (::std::unique_ptr< NodesType > x)
+    {
+      this->nodes_.set (std::move (x));
+    }
+
+
+    // FaceSplits
+    // 
+
+    const FaceSplits::ArraySequence& FaceSplits::
+    array () const
+    {
+      return this->array_;
+    }
+
+    FaceSplits::ArraySequence& FaceSplits::
+    array ()
+    {
+      return this->array_;
+    }
+
+    void FaceSplits::
+    array (const ArraySequence& s)
+    {
+      this->array_ = s;
+    }
+
+
+    // IntersectionMapper
+    // 
+
+    const IntersectionMapper::EdgeSplitsType& IntersectionMapper::
+    edgeSplits () const
+    {
+      return this->edgeSplits_.get ();
+    }
+
+    IntersectionMapper::EdgeSplitsType& IntersectionMapper::
+    edgeSplits ()
+    {
+      return this->edgeSplits_.get ();
+    }
+
+    void IntersectionMapper::
+    edgeSplits (const EdgeSplitsType& x)
+    {
+      this->edgeSplits_.set (x);
+    }
+
+    void IntersectionMapper::
+    edgeSplits (::std::unique_ptr< EdgeSplitsType > x)
+    {
+      this->edgeSplits_.set (std::move (x));
+    }
+
+    const IntersectionMapper::FaceSplitsType& IntersectionMapper::
+    faceSplits () const
+    {
+      return this->faceSplits_.get ();
+    }
+
+    IntersectionMapper::FaceSplitsType& IntersectionMapper::
+    faceSplits ()
+    {
+      return this->faceSplits_.get ();
+    }
+
+    void IntersectionMapper::
+    faceSplits (const FaceSplitsType& x)
+    {
+      this->faceSplits_.set (x);
+    }
+
+    void IntersectionMapper::
+    faceSplits (::std::unique_ptr< FaceSplitsType > x)
+    {
+      this->faceSplits_.set (std::move (x));
+    }
+
+
     // ColorValue
     // 
 
@@ -1685,6 +2141,36 @@ namespace prj
     seerShape (::std::unique_ptr< SeerShapeType > x)
     {
       this->seerShape_.set (std::move (x));
+    }
+
+    const FeatureBase::IntersectionMapperOptional& FeatureBase::
+    intersectionMapper () const
+    {
+      return this->intersectionMapper_;
+    }
+
+    FeatureBase::IntersectionMapperOptional& FeatureBase::
+    intersectionMapper ()
+    {
+      return this->intersectionMapper_;
+    }
+
+    void FeatureBase::
+    intersectionMapper (const IntersectionMapperType& x)
+    {
+      this->intersectionMapper_.set (x);
+    }
+
+    void FeatureBase::
+    intersectionMapper (const IntersectionMapperOptional& x)
+    {
+      this->intersectionMapper_ = x;
+    }
+
+    void FeatureBase::
+    intersectionMapper (::std::unique_ptr< IntersectionMapperType > x)
+    {
+      this->intersectionMapper_.set (std::move (x));
     }
 
     const FeatureBase::ColorOptional& FeatureBase::
@@ -4219,6 +4705,1077 @@ namespace prj
     {
     }
 
+    // EdgeNode
+    //
+
+    const EdgeNode::EdgeIdType EdgeNode::edgeId_default_value_ (
+      "00000000-0000-0000-0000-000000000000");
+
+    EdgeNode::
+    EdgeNode (const EdgeIdType& edgeId,
+              const CenterType& center,
+              const AliveType& alive)
+    : ::xml_schema::Type (),
+      edgeId_ (edgeId, this),
+      center_ (center, this),
+      alive_ (alive, this)
+    {
+    }
+
+    EdgeNode::
+    EdgeNode (const EdgeNode& x,
+              ::xml_schema::Flags f,
+              ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      edgeId_ (x.edgeId_, f, this),
+      center_ (x.center_, f, this),
+      alive_ (x.alive_, f, this)
+    {
+    }
+
+    EdgeNode::
+    EdgeNode (const ::xercesc::DOMElement& e,
+              ::xml_schema::Flags f,
+              ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      edgeId_ (this),
+      center_ (this),
+      alive_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void EdgeNode::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // edgeId
+        //
+        if (n.name () == "edgeId" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< EdgeIdType > r (
+            EdgeIdTraits::create (i, f, this));
+
+          if (!edgeId_.present ())
+          {
+            this->edgeId_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // center
+        //
+        if (n.name () == "center" && n.namespace_ ().empty ())
+        {
+          if (!center_.present ())
+          {
+            this->center_.set (CenterTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // alive
+        //
+        if (n.name () == "alive" && n.namespace_ ().empty ())
+        {
+          if (!alive_.present ())
+          {
+            this->alive_.set (AliveTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        break;
+      }
+
+      if (!edgeId_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "edgeId",
+          "");
+      }
+
+      if (!center_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "center",
+          "");
+      }
+
+      if (!alive_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "alive",
+          "");
+      }
+    }
+
+    EdgeNode* EdgeNode::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class EdgeNode (*this, f, c);
+    }
+
+    EdgeNode& EdgeNode::
+    operator= (const EdgeNode& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->edgeId_ = x.edgeId_;
+        this->center_ = x.center_;
+        this->alive_ = x.alive_;
+      }
+
+      return *this;
+    }
+
+    EdgeNode::
+    ~EdgeNode ()
+    {
+    }
+
+    // EdgeNodes
+    //
+
+    EdgeNodes::
+    EdgeNodes ()
+    : ::xml_schema::Type (),
+      array_ (this)
+    {
+    }
+
+    EdgeNodes::
+    EdgeNodes (const EdgeNodes& x,
+               ::xml_schema::Flags f,
+               ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      array_ (x.array_, f, this)
+    {
+    }
+
+    EdgeNodes::
+    EdgeNodes (const ::xercesc::DOMElement& e,
+               ::xml_schema::Flags f,
+               ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      array_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void EdgeNodes::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // array
+        //
+        if (n.name () == "array" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< ArrayType > r (
+            ArrayTraits::create (i, f, this));
+
+          this->array_.push_back (::std::move (r));
+          continue;
+        }
+
+        break;
+      }
+    }
+
+    EdgeNodes* EdgeNodes::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class EdgeNodes (*this, f, c);
+    }
+
+    EdgeNodes& EdgeNodes::
+    operator= (const EdgeNodes& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->array_ = x.array_;
+      }
+
+      return *this;
+    }
+
+    EdgeNodes::
+    ~EdgeNodes ()
+    {
+    }
+
+    // EdgeSplit
+    //
+
+    EdgeSplit::
+    EdgeSplit (const FaceHistory1Type& faceHistory1,
+               const FaceHistory2Type& faceHistory2,
+               const NodesType& nodes)
+    : ::xml_schema::Type (),
+      faceHistory1_ (faceHistory1, this),
+      faceHistory2_ (faceHistory2, this),
+      nodes_ (nodes, this)
+    {
+    }
+
+    EdgeSplit::
+    EdgeSplit (::std::unique_ptr< FaceHistory1Type > faceHistory1,
+               ::std::unique_ptr< FaceHistory2Type > faceHistory2,
+               ::std::unique_ptr< NodesType > nodes)
+    : ::xml_schema::Type (),
+      faceHistory1_ (std::move (faceHistory1), this),
+      faceHistory2_ (std::move (faceHistory2), this),
+      nodes_ (std::move (nodes), this)
+    {
+    }
+
+    EdgeSplit::
+    EdgeSplit (const EdgeSplit& x,
+               ::xml_schema::Flags f,
+               ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      faceHistory1_ (x.faceHistory1_, f, this),
+      faceHistory2_ (x.faceHistory2_, f, this),
+      nodes_ (x.nodes_, f, this)
+    {
+    }
+
+    EdgeSplit::
+    EdgeSplit (const ::xercesc::DOMElement& e,
+               ::xml_schema::Flags f,
+               ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      faceHistory1_ (this),
+      faceHistory2_ (this),
+      nodes_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void EdgeSplit::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // faceHistory1
+        //
+        if (n.name () == "faceHistory1" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< FaceHistory1Type > r (
+            FaceHistory1Traits::create (i, f, this));
+
+          if (!faceHistory1_.present ())
+          {
+            this->faceHistory1_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // faceHistory2
+        //
+        if (n.name () == "faceHistory2" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< FaceHistory2Type > r (
+            FaceHistory2Traits::create (i, f, this));
+
+          if (!faceHistory2_.present ())
+          {
+            this->faceHistory2_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // nodes
+        //
+        if (n.name () == "nodes" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< NodesType > r (
+            NodesTraits::create (i, f, this));
+
+          if (!nodes_.present ())
+          {
+            this->nodes_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        break;
+      }
+
+      if (!faceHistory1_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "faceHistory1",
+          "");
+      }
+
+      if (!faceHistory2_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "faceHistory2",
+          "");
+      }
+
+      if (!nodes_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "nodes",
+          "");
+      }
+    }
+
+    EdgeSplit* EdgeSplit::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class EdgeSplit (*this, f, c);
+    }
+
+    EdgeSplit& EdgeSplit::
+    operator= (const EdgeSplit& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->faceHistory1_ = x.faceHistory1_;
+        this->faceHistory2_ = x.faceHistory2_;
+        this->nodes_ = x.nodes_;
+      }
+
+      return *this;
+    }
+
+    EdgeSplit::
+    ~EdgeSplit ()
+    {
+    }
+
+    // EdgeSplits
+    //
+
+    EdgeSplits::
+    EdgeSplits ()
+    : ::xml_schema::Type (),
+      array_ (this)
+    {
+    }
+
+    EdgeSplits::
+    EdgeSplits (const EdgeSplits& x,
+                ::xml_schema::Flags f,
+                ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      array_ (x.array_, f, this)
+    {
+    }
+
+    EdgeSplits::
+    EdgeSplits (const ::xercesc::DOMElement& e,
+                ::xml_schema::Flags f,
+                ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      array_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void EdgeSplits::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // array
+        //
+        if (n.name () == "array" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< ArrayType > r (
+            ArrayTraits::create (i, f, this));
+
+          this->array_.push_back (::std::move (r));
+          continue;
+        }
+
+        break;
+      }
+    }
+
+    EdgeSplits* EdgeSplits::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class EdgeSplits (*this, f, c);
+    }
+
+    EdgeSplits& EdgeSplits::
+    operator= (const EdgeSplits& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->array_ = x.array_;
+      }
+
+      return *this;
+    }
+
+    EdgeSplits::
+    ~EdgeSplits ()
+    {
+    }
+
+    // FaceNode
+    //
+
+    const FaceNode::FaceIdType FaceNode::faceId_default_value_ (
+      "00000000-0000-0000-0000-000000000000");
+
+    const FaceNode::WireIdType FaceNode::wireId_default_value_ (
+      "00000000-0000-0000-0000-000000000000");
+
+    FaceNode::
+    FaceNode (const FaceIdType& faceId,
+              const WireIdType& wireId,
+              const CenterXType& centerX,
+              const CenterYType& centerY,
+              const AliveType& alive)
+    : ::xml_schema::Type (),
+      faceId_ (faceId, this),
+      wireId_ (wireId, this),
+      centerX_ (centerX, this),
+      centerY_ (centerY, this),
+      alive_ (alive, this)
+    {
+    }
+
+    FaceNode::
+    FaceNode (const FaceNode& x,
+              ::xml_schema::Flags f,
+              ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      faceId_ (x.faceId_, f, this),
+      wireId_ (x.wireId_, f, this),
+      centerX_ (x.centerX_, f, this),
+      centerY_ (x.centerY_, f, this),
+      alive_ (x.alive_, f, this)
+    {
+    }
+
+    FaceNode::
+    FaceNode (const ::xercesc::DOMElement& e,
+              ::xml_schema::Flags f,
+              ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      faceId_ (this),
+      wireId_ (this),
+      centerX_ (this),
+      centerY_ (this),
+      alive_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void FaceNode::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // faceId
+        //
+        if (n.name () == "faceId" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< FaceIdType > r (
+            FaceIdTraits::create (i, f, this));
+
+          if (!faceId_.present ())
+          {
+            this->faceId_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // wireId
+        //
+        if (n.name () == "wireId" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< WireIdType > r (
+            WireIdTraits::create (i, f, this));
+
+          if (!wireId_.present ())
+          {
+            this->wireId_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // centerX
+        //
+        if (n.name () == "centerX" && n.namespace_ ().empty ())
+        {
+          if (!centerX_.present ())
+          {
+            this->centerX_.set (CenterXTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // centerY
+        //
+        if (n.name () == "centerY" && n.namespace_ ().empty ())
+        {
+          if (!centerY_.present ())
+          {
+            this->centerY_.set (CenterYTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // alive
+        //
+        if (n.name () == "alive" && n.namespace_ ().empty ())
+        {
+          if (!alive_.present ())
+          {
+            this->alive_.set (AliveTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        break;
+      }
+
+      if (!faceId_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "faceId",
+          "");
+      }
+
+      if (!wireId_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "wireId",
+          "");
+      }
+
+      if (!centerX_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "centerX",
+          "");
+      }
+
+      if (!centerY_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "centerY",
+          "");
+      }
+
+      if (!alive_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "alive",
+          "");
+      }
+    }
+
+    FaceNode* FaceNode::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class FaceNode (*this, f, c);
+    }
+
+    FaceNode& FaceNode::
+    operator= (const FaceNode& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->faceId_ = x.faceId_;
+        this->wireId_ = x.wireId_;
+        this->centerX_ = x.centerX_;
+        this->centerY_ = x.centerY_;
+        this->alive_ = x.alive_;
+      }
+
+      return *this;
+    }
+
+    FaceNode::
+    ~FaceNode ()
+    {
+    }
+
+    // FaceNodes
+    //
+
+    FaceNodes::
+    FaceNodes ()
+    : ::xml_schema::Type (),
+      array_ (this)
+    {
+    }
+
+    FaceNodes::
+    FaceNodes (const FaceNodes& x,
+               ::xml_schema::Flags f,
+               ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      array_ (x.array_, f, this)
+    {
+    }
+
+    FaceNodes::
+    FaceNodes (const ::xercesc::DOMElement& e,
+               ::xml_schema::Flags f,
+               ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      array_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void FaceNodes::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // array
+        //
+        if (n.name () == "array" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< ArrayType > r (
+            ArrayTraits::create (i, f, this));
+
+          this->array_.push_back (::std::move (r));
+          continue;
+        }
+
+        break;
+      }
+    }
+
+    FaceNodes* FaceNodes::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class FaceNodes (*this, f, c);
+    }
+
+    FaceNodes& FaceNodes::
+    operator= (const FaceNodes& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->array_ = x.array_;
+      }
+
+      return *this;
+    }
+
+    FaceNodes::
+    ~FaceNodes ()
+    {
+    }
+
+    // FaceSplit
+    //
+
+    FaceSplit::
+    FaceSplit (const FaceHistoryType& faceHistory,
+               const NodesType& nodes)
+    : ::xml_schema::Type (),
+      faceHistory_ (faceHistory, this),
+      nodes_ (nodes, this)
+    {
+    }
+
+    FaceSplit::
+    FaceSplit (::std::unique_ptr< FaceHistoryType > faceHistory,
+               ::std::unique_ptr< NodesType > nodes)
+    : ::xml_schema::Type (),
+      faceHistory_ (std::move (faceHistory), this),
+      nodes_ (std::move (nodes), this)
+    {
+    }
+
+    FaceSplit::
+    FaceSplit (const FaceSplit& x,
+               ::xml_schema::Flags f,
+               ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      faceHistory_ (x.faceHistory_, f, this),
+      nodes_ (x.nodes_, f, this)
+    {
+    }
+
+    FaceSplit::
+    FaceSplit (const ::xercesc::DOMElement& e,
+               ::xml_schema::Flags f,
+               ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      faceHistory_ (this),
+      nodes_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void FaceSplit::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // faceHistory
+        //
+        if (n.name () == "faceHistory" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< FaceHistoryType > r (
+            FaceHistoryTraits::create (i, f, this));
+
+          if (!faceHistory_.present ())
+          {
+            this->faceHistory_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // nodes
+        //
+        if (n.name () == "nodes" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< NodesType > r (
+            NodesTraits::create (i, f, this));
+
+          if (!nodes_.present ())
+          {
+            this->nodes_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        break;
+      }
+
+      if (!faceHistory_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "faceHistory",
+          "");
+      }
+
+      if (!nodes_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "nodes",
+          "");
+      }
+    }
+
+    FaceSplit* FaceSplit::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class FaceSplit (*this, f, c);
+    }
+
+    FaceSplit& FaceSplit::
+    operator= (const FaceSplit& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->faceHistory_ = x.faceHistory_;
+        this->nodes_ = x.nodes_;
+      }
+
+      return *this;
+    }
+
+    FaceSplit::
+    ~FaceSplit ()
+    {
+    }
+
+    // FaceSplits
+    //
+
+    FaceSplits::
+    FaceSplits ()
+    : ::xml_schema::Type (),
+      array_ (this)
+    {
+    }
+
+    FaceSplits::
+    FaceSplits (const FaceSplits& x,
+                ::xml_schema::Flags f,
+                ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      array_ (x.array_, f, this)
+    {
+    }
+
+    FaceSplits::
+    FaceSplits (const ::xercesc::DOMElement& e,
+                ::xml_schema::Flags f,
+                ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      array_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void FaceSplits::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // array
+        //
+        if (n.name () == "array" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< ArrayType > r (
+            ArrayTraits::create (i, f, this));
+
+          this->array_.push_back (::std::move (r));
+          continue;
+        }
+
+        break;
+      }
+    }
+
+    FaceSplits* FaceSplits::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class FaceSplits (*this, f, c);
+    }
+
+    FaceSplits& FaceSplits::
+    operator= (const FaceSplits& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->array_ = x.array_;
+      }
+
+      return *this;
+    }
+
+    FaceSplits::
+    ~FaceSplits ()
+    {
+    }
+
+    // IntersectionMapper
+    //
+
+    IntersectionMapper::
+    IntersectionMapper (const EdgeSplitsType& edgeSplits,
+                        const FaceSplitsType& faceSplits)
+    : ::xml_schema::Type (),
+      edgeSplits_ (edgeSplits, this),
+      faceSplits_ (faceSplits, this)
+    {
+    }
+
+    IntersectionMapper::
+    IntersectionMapper (::std::unique_ptr< EdgeSplitsType > edgeSplits,
+                        ::std::unique_ptr< FaceSplitsType > faceSplits)
+    : ::xml_schema::Type (),
+      edgeSplits_ (std::move (edgeSplits), this),
+      faceSplits_ (std::move (faceSplits), this)
+    {
+    }
+
+    IntersectionMapper::
+    IntersectionMapper (const IntersectionMapper& x,
+                        ::xml_schema::Flags f,
+                        ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      edgeSplits_ (x.edgeSplits_, f, this),
+      faceSplits_ (x.faceSplits_, f, this)
+    {
+    }
+
+    IntersectionMapper::
+    IntersectionMapper (const ::xercesc::DOMElement& e,
+                        ::xml_schema::Flags f,
+                        ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      edgeSplits_ (this),
+      faceSplits_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void IntersectionMapper::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // edgeSplits
+        //
+        if (n.name () == "edgeSplits" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< EdgeSplitsType > r (
+            EdgeSplitsTraits::create (i, f, this));
+
+          if (!edgeSplits_.present ())
+          {
+            this->edgeSplits_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // faceSplits
+        //
+        if (n.name () == "faceSplits" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< FaceSplitsType > r (
+            FaceSplitsTraits::create (i, f, this));
+
+          if (!faceSplits_.present ())
+          {
+            this->faceSplits_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        break;
+      }
+
+      if (!edgeSplits_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "edgeSplits",
+          "");
+      }
+
+      if (!faceSplits_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "faceSplits",
+          "");
+      }
+    }
+
+    IntersectionMapper* IntersectionMapper::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class IntersectionMapper (*this, f, c);
+    }
+
+    IntersectionMapper& IntersectionMapper::
+    operator= (const IntersectionMapper& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->edgeSplits_ = x.edgeSplits_;
+        this->faceSplits_ = x.faceSplits_;
+      }
+
+      return *this;
+    }
+
+    IntersectionMapper::
+    ~IntersectionMapper ()
+    {
+    }
+
     // ColorValue
     //
 
@@ -4459,6 +6016,7 @@ namespace prj
       name_ (name, this),
       id_ (id, this),
       seerShape_ (this),
+      intersectionMapper_ (this),
       color_ (this),
       state_ (this)
     {
@@ -4472,6 +6030,7 @@ namespace prj
       name_ (x.name_, f, this),
       id_ (x.id_, f, this),
       seerShape_ (x.seerShape_, f, this),
+      intersectionMapper_ (x.intersectionMapper_, f, this),
       color_ (x.color_, f, this),
       state_ (x.state_, f, this)
     {
@@ -4485,6 +6044,7 @@ namespace prj
       name_ (this),
       id_ (this),
       seerShape_ (this),
+      intersectionMapper_ (this),
       color_ (this),
       state_ (this)
     {
@@ -4543,6 +6103,20 @@ namespace prj
           if (!this->seerShape_)
           {
             this->seerShape_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // intersectionMapper
+        //
+        if (n.name () == "intersectionMapper" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< IntersectionMapperType > r (
+            IntersectionMapperTraits::create (i, f, this));
+
+          if (!this->intersectionMapper_)
+          {
+            this->intersectionMapper_.set (::std::move (r));
             continue;
           }
         }
@@ -4609,6 +6183,7 @@ namespace prj
         this->name_ = x.name_;
         this->id_ = x.id_;
         this->seerShape_ = x.seerShape_;
+        this->intersectionMapper_ = x.intersectionMapper_;
         this->color_ = x.color_;
         this->state_ = x.state_;
       }
@@ -5844,6 +7419,281 @@ namespace prj
     }
 
     void
+    operator<< (::xercesc::DOMElement& e, const EdgeNode& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // edgeId
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "edgeId",
+            e));
+
+        s << i.edgeId ();
+      }
+
+      // center
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "center",
+            e));
+
+        s << ::xml_schema::AsDouble(i.center ());
+      }
+
+      // alive
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "alive",
+            e));
+
+        s << i.alive ();
+      }
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const EdgeNodes& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // array
+      //
+      for (EdgeNodes::ArrayConstIterator
+           b (i.array ().begin ()), n (i.array ().end ());
+           b != n; ++b)
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "array",
+            e));
+
+        s << *b;
+      }
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const EdgeSplit& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // faceHistory1
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "faceHistory1",
+            e));
+
+        s << i.faceHistory1 ();
+      }
+
+      // faceHistory2
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "faceHistory2",
+            e));
+
+        s << i.faceHistory2 ();
+      }
+
+      // nodes
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "nodes",
+            e));
+
+        s << i.nodes ();
+      }
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const EdgeSplits& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // array
+      //
+      for (EdgeSplits::ArrayConstIterator
+           b (i.array ().begin ()), n (i.array ().end ());
+           b != n; ++b)
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "array",
+            e));
+
+        s << *b;
+      }
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const FaceNode& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // faceId
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "faceId",
+            e));
+
+        s << i.faceId ();
+      }
+
+      // wireId
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "wireId",
+            e));
+
+        s << i.wireId ();
+      }
+
+      // centerX
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "centerX",
+            e));
+
+        s << ::xml_schema::AsDouble(i.centerX ());
+      }
+
+      // centerY
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "centerY",
+            e));
+
+        s << ::xml_schema::AsDouble(i.centerY ());
+      }
+
+      // alive
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "alive",
+            e));
+
+        s << i.alive ();
+      }
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const FaceNodes& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // array
+      //
+      for (FaceNodes::ArrayConstIterator
+           b (i.array ().begin ()), n (i.array ().end ());
+           b != n; ++b)
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "array",
+            e));
+
+        s << *b;
+      }
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const FaceSplit& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // faceHistory
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "faceHistory",
+            e));
+
+        s << i.faceHistory ();
+      }
+
+      // nodes
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "nodes",
+            e));
+
+        s << i.nodes ();
+      }
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const FaceSplits& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // array
+      //
+      for (FaceSplits::ArrayConstIterator
+           b (i.array ().begin ()), n (i.array ().end ());
+           b != n; ++b)
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "array",
+            e));
+
+        s << *b;
+      }
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const IntersectionMapper& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // edgeSplits
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "edgeSplits",
+            e));
+
+        s << i.edgeSplits ();
+      }
+
+      // faceSplits
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "faceSplits",
+            e));
+
+        s << i.faceSplits ();
+      }
+    }
+
+    void
     operator<< (::xercesc::DOMElement& e, const ColorValue& i)
     {
       e << static_cast< const ::xsd::cxx::tree::fundamental_base< ::xml_schema::Decimal, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::decimal >& > (i);
@@ -5949,6 +7799,18 @@ namespace prj
             e));
 
         s << *i.seerShape ();
+      }
+
+      // intersectionMapper
+      //
+      if (i.intersectionMapper ())
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "intersectionMapper",
+            e));
+
+        s << *i.intersectionMapper ();
       }
 
       // color
