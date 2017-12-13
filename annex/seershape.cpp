@@ -830,9 +830,18 @@ void SeerShape::shapeMatch(const SeerShape &source)
   {
     if (!hasShapeIdRecord(record.shape))
       continue;
+    if (!findShapeIdRecord(record.shape).id.is_nil())
+      continue;
     uuid freshId = gu::createNilId();
     if (hasEvolveRecordIn(record.id))
-      freshId = evolve(record.id).front(); //multiple returns?
+    {
+      if (evolve(record.id).size() > 1)
+      {
+        std::cout << "WARNING: multiple evolution match in SeerShape::shapeMatch" << std::endl;
+        continue;
+      }
+      freshId = evolve(record.id).front();
+    }
     else
     {
       freshId = gu::createRandomId();

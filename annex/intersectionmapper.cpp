@@ -77,7 +77,7 @@ namespace ann
   struct FaceSplit
   {
     ftr::ShapeHistory faceHistory; //history upon construction.
-    bool isMatch(const boost::uuids::uuid&); //!< does split origin match shapeHistory.
+    bool isMatch(const boost::uuids::uuid&) const; //!< does split origin match shapeHistory.
     
     /* run at the begginning and ending of feature for all face split objects. don't run before
      * each 'match'. the idea is that multiple faces might match and we want to carry
@@ -87,7 +87,7 @@ namespace ann
     void finish();
     
     void match(const occt::FaceVector&); //!< cids is updated to reflect match.
-    std::vector<FaceNode> getResults(); //!< get all alive and used
+    std::vector<FaceNode> getResults() const; //!< get all alive and used
     std::vector<FaceNode> nodes; //!< only set this in serialIn
   };
   
@@ -98,7 +98,7 @@ namespace ann
     double weight(const EdgeNode&);
     void copyGeometry(const EdgeNode&);
     void graphViz(std::ostream&) const;
-    TopoDS_Edge edge; //!< face for new types, null for old types.
+    TopoDS_Edge edge; //!< edge for new types, null for old types.
     double center; //!< center parametric range.
     boost::uuids::uuid edgeId; //!< edge id associated to center. only for 'old'
     bool alive = false; //!< whether the id is currently used. between updates. only for 'old'
@@ -106,13 +106,26 @@ namespace ann
     Node::Type type = Node::Type::None; //!< lets us know if this vertex is old or new.
   };
   
-  /* maps the intersection of 2 faces to 1 or more edges */
+  struct IntersectionNode
+  {
+    IntersectionNode(){}; //needed for graph. don't use.
+    IntersectionNode(const TopoDS_Edge&, const gp_Vec2d&);
+    double weight(const IntersectionNode&);
+    void copyGeometry(const IntersectionNode&);
+    void graphViz(std::ostream&) const;
+    TopoDS_Edge edge; //!< edge for new types, null for old types.
+    gp_Vec2d center; //!< center of bounding box of edge in face's parametric space.
+    boost::uuids::uuid edgeId; //!< edge id associated to center. only for 'old'
+    bool alive = false; //!< whether the id is currently used. between updates. only for 'old'
+    bool used = false; //!< whether the id has been used during this update. for both 'new' and 'old'
+    Node::Type type = Node::Type::None; //!< lets us know if this vertex is old or new.
+  };
+  
   struct EdgeSplit
   {
-    ftr::ShapeHistory faceHistory1;
-    ftr::ShapeHistory faceHistory2;
+    ftr::ShapeHistory edgeHistory;
     
-    bool isMatch(const boost::uuids::uuid&, const boost::uuids::uuid&); //!< order doesn't matter
+    bool isMatch(const boost::uuids::uuid&) const; //!< order doesn't matter
     
     // see facesplit on why we need these.
     void start();
@@ -121,6 +134,84 @@ namespace ann
     void match(const occt::EdgeVector&);
     std::vector<EdgeNode> getResults();
     std::vector<EdgeNode> nodes; //!< only set this in serialIn
+  };
+  
+  /*! @brief Maps the intersection of 2 faces to 1 or more edges
+   * 
+   * this structure would work for an edge split, but doesn't
+   * work for an edge intersection. See shapeTracking.svg, there is a small picture
+   * of a subtraction between 2 cylinders. We have parallel lines that don't share
+   * the same parametric space. That is my flaw, this was set up to where all edges to match
+   * would share the same space. That will work for an edge split where they all come from the
+   * same parent shape, but not for an intersection edge. We will have to put intersection edges
+   * into a face or faces parametric space and then do the solve. Significant change. The question is
+   * do we just use the first face as basis space for distance analysis? Choose the simplest
+   * geometry type upon creation? always use the simplest and possible change between faces?
+   */
+  struct EdgeIntersection
+  {
+    ftr::ShapeHistory faceHistory1;
+    ftr::ShapeHistory faceHistory2;
+    
+    bool isMatch(const boost::uuids::uuid&, const boost::uuids::uuid&) const; //!< order doesn't matter
+    
+    // see facesplit on why we need these.
+    void start();
+    void finish();
+    
+    void match(const std::vector<std::pair<TopoDS_Edge, gp_Vec2d>>&);
+    std::vector<IntersectionNode> getResults();
+    std::vector<IntersectionNode> nodes; //!< only set this in serialIn
+  };
+  
+  /*! @brief maps an id to output geometry that has more than 1 parent
+   * and they all coincide.
+   *
+   *this used for both faces and edges.
+   */ 
+  struct SameDomain
+  {
+    boost::uuids::uuid id = gu::createRandomId();
+    bool used = false;
+    std::vector<ftr::ShapeHistory> histories;
+    bool isMatch(const std::vector<boost::uuids::uuid> &idsIn) const
+    {
+      /* I am concerned with how the shape history matching
+       * works. Each history is completely traced to origin,
+       * never concerned with depth. I am concerned with a
+       * 'diamond' pattern and one search going too deep
+       * and finding a match and cancelling out a potential
+       * match. This isn't the only time I have come
+       * across this concern.
+       * 
+       */
+      
+      std::vector<ftr::ShapeHistory> hsc = histories; //histories copy
+      std::vector<uuid> idsc = idsIn; //ids copy
+      for (auto idit = idsc.begin(); idit != idsc.end();) //id iterator
+      {
+        bool aMatch = false;
+        for (auto hit = hsc.begin(); hit != hsc.end();)
+        {
+          if (hit->hasShape(*idit))
+          {
+            aMatch = true;
+            hsc.erase(hit);
+            break;
+          }
+          else
+            ++hit;
+        }
+        if (aMatch)
+          idit = idsc.erase(idit);
+        else
+          ++idit;
+      }
+      
+      if (hsc.empty() && idsc.empty())
+        return true;
+      return false;
+    }
   };
   
   struct EdgeProperty
@@ -146,6 +237,15 @@ namespace ann
     EdgeNode,
     boost::property<boost::edge_weight_t, double, EdgeProperty >
   > EdgeGraph;
+
+  typedef boost::adjacency_list
+  <
+    boost::vecS,
+    boost::vecS,
+    boost::undirectedS,
+    IntersectionNode,
+    boost::property<boost::edge_weight_t, double, EdgeProperty >
+  > IntersectionGraph;
 
 
   template <class GraphEW>
@@ -228,8 +328,10 @@ namespace ann
   
   struct IntersectionMapper::Data
   {
-    std::vector<EdgeSplit> edgeSplits;
+    std::vector<EdgeIntersection> edgeIntersections;
     std::vector<FaceSplit> faceSplits;
+    std::vector<EdgeSplit> edgeSplits;
+    std::vector<SameDomain> sameDomains;
   };
 }
 
@@ -404,7 +506,7 @@ void FaceNode::graphViz(std::ostream &s) const
     "\"]";
 }
 
-bool FaceSplit::isMatch(const uuid &idIn)
+bool FaceSplit::isMatch(const uuid &idIn) const
 {
   return faceHistory.hasShape(idIn);
 }
@@ -478,7 +580,7 @@ void FaceSplit::match(const occt::FaceVector &fsIn)
   }
 }
 
-std::vector<FaceNode> FaceSplit::getResults()
+std::vector<FaceNode> FaceSplit::getResults() const
 {
   std::vector<FaceNode> out;
   
@@ -538,14 +640,48 @@ void EdgeNode::graphViz(std::ostream &s) const
     "\"]";
 }
 
-bool EdgeSplit::isMatch(const uuid& id1, const uuid& id2)
+IntersectionNode::IntersectionNode(const TopoDS_Edge &eIn, const gp_Vec2d &cIn)
 {
-  if (faceHistory1.hasShape(id1))
-    return faceHistory2.hasShape(id2);
-  if (faceHistory2.hasShape(id1))
-    return faceHistory1.hasShape(id2);
+  assert(!eIn.IsNull());
   
-  return false;
+  center = cIn;
+  type = Node::Type::New;
+  edge = eIn;
+  edgeId = gu::createRandomId();
+}
+
+double IntersectionNode::weight(const IntersectionNode &other)
+{
+  return (center - other.center).Magnitude();
+}
+
+void IntersectionNode::copyGeometry(const IntersectionNode &other)
+{
+  edge = other.edge;
+}
+
+void IntersectionNode::graphViz(std::ostream &s) const
+{
+  const static std::vector<std::string> typeStrings = 
+  {
+    "None",
+    "Old",
+    "New"
+  };
+    
+  s << 
+    "[label=\"" <<
+    "edgeId: " << gu::idToString(edgeId) << "\\n" <<
+    "shape hash: " << ((edge.IsNull()) ? ("null") : (std::to_string(gu::getShapeHash(edge)))) << "\\n" <<
+    "type: " << typeStrings.at(static_cast<std::size_t>(type)) << "\\n" <<
+    ((alive) ? "alive" : "dead") << "\\n" <<
+    ((used) ? "used" : "NOT used") << "\\n" <<
+    "\"]";
+}
+
+bool EdgeSplit::isMatch(const uuid& idIn) const
+{
+  return edgeHistory.hasShape(idIn);
 }
 
 void EdgeSplit::start()
@@ -579,21 +715,16 @@ void EdgeSplit::match(const occt::EdgeVector &esIn)
     boost::add_vertex(EdgeNode(e), graph);
     
   connect<EdgeGraph>(graph);
-//   writeGraph<EdgeGraph>(graph, "/home/tanderson/temp/edgePostConnect.dot");
   
   Filter1<EdgeGraph> filter1(graph);
   typedef boost::filtered_graph<EdgeGraph, boost::keep_all, Filter1<EdgeGraph> > Filtered1GraphType;
   Filtered1GraphType filtered1Graph(graph, boost::keep_all(), filter1);
-//   writeGraph<Filtered1GraphType>(filtered1Graph, "/home/tanderson/temp/postFilter1.dot");
   solve<Filtered1GraphType>(filtered1Graph);
-//   writeGraph<EdgeGraph>(graph, "/home/tanderson/temp/edgePostSolve1.dot");
   
   Filter2<EdgeGraph> filter2(graph);
   typedef boost::filtered_graph<EdgeGraph, boost::keep_all, Filter2<EdgeGraph> > Filtered2GraphType;
   Filtered2GraphType filtered2Graph(graph, boost::keep_all(), filter2);
-//   writeGraph<Filtered2GraphType>(filtered2Graph, "/home/tanderson/temp/postFilter2.dot");
   solve<Filtered2GraphType>(filtered2Graph);
-//   writeGraph<EdgeGraph>(graph, "/home/tanderson/temp/edgePostSolve2.dot");
   
   nodes.clear();
   
@@ -634,8 +765,101 @@ std::vector<EdgeNode> EdgeSplit::getResults()
   return out;
 }
 
+bool EdgeIntersection::isMatch(const uuid& id1, const uuid& id2) const
+{
+  if (faceHistory1.hasShape(id1))
+    return faceHistory2.hasShape(id2);
+  if (faceHistory2.hasShape(id1))
+    return faceHistory1.hasShape(id2);
+  
+  return false;
+}
 
+void EdgeIntersection::start()
+{
+  for (auto &node : nodes)
+    node.used = false;
+}
 
+void EdgeIntersection::finish()
+{
+  for (auto &node : nodes)
+  {
+    //there shouldn't be any new ones
+    assert (node.type == Node::Type::Old);
+    if (node.used)
+      node.alive = true;
+    else
+      node.alive = false;
+    
+    //let go of shape.
+    node.edge = TopoDS_Edge();
+  }
+}
+
+void EdgeIntersection::match(const std::vector<std::pair<TopoDS_Edge, gp_Vec2d>> &pairs)
+{
+  IntersectionGraph graph;
+  for (const auto &node : nodes)
+    boost::add_vertex(node, graph);
+  for (const auto &e : pairs)
+    boost::add_vertex(IntersectionNode(e.first, e.second), graph);
+    
+  connect<IntersectionGraph>(graph);
+//   writeGraph<IntersectionGraph>(graph, "/home/tanderson/temp/edgePostConnect.dot");
+  
+  Filter1<IntersectionGraph> filter1(graph);
+  typedef boost::filtered_graph<IntersectionGraph, boost::keep_all, Filter1<IntersectionGraph> > Filtered1GraphType;
+  Filtered1GraphType filtered1Graph(graph, boost::keep_all(), filter1);
+//   writeGraph<Filtered1GraphType>(filtered1Graph, "/home/tanderson/temp/postFilter1.dot");
+  solve<Filtered1GraphType>(filtered1Graph);
+//   writeGraph<IntersectionGraph>(graph, "/home/tanderson/temp/edgePostSolve1.dot");
+  
+  Filter2<IntersectionGraph> filter2(graph);
+  typedef boost::filtered_graph<IntersectionGraph, boost::keep_all, Filter2<IntersectionGraph> > Filtered2GraphType;
+  Filtered2GraphType filtered2Graph(graph, boost::keep_all(), filter2);
+//   writeGraph<Filtered2GraphType>(filtered2Graph, "/home/tanderson/temp/postFilter2.dot");
+  solve<Filtered2GraphType>(filtered2Graph);
+//   writeGraph<IntersectionGraph>(graph, "/home/tanderson/temp/edgePostSolve2.dot");
+  
+  nodes.clear();
+  
+  for (auto its = boost::vertices(graph); its.first != its.second; its.first++)
+  {
+    if (graph[*its.first].type == Node::Type::Old)
+      nodes.push_back(graph[*its.first]);
+    
+    if //there should never be new unused.
+    (
+      (graph[*its.first].type == Node::Type::New)
+      && (!graph[*its.first].used)
+    )
+    {
+      IntersectionNode fresh = graph[*its.first];
+      fresh.alive = true;
+      fresh.used = true;
+      fresh.type = Node::Type::Old;
+      nodes.push_back(fresh);
+    }
+  }
+}
+
+std::vector<IntersectionNode> EdgeIntersection::getResults()
+{
+  std::vector<IntersectionNode> out;
+  
+  for (const auto &node : nodes)
+  {
+    if (!node.alive || !node.used)
+      continue;
+    assert(node.type == Node::Type::Old);
+    assert(!node.edge.IsNull());
+    assert(!node.edgeId.is_nil());
+    out.push_back(node);
+  }
+  
+  return out;
+}
 
 IntersectionMapper::IntersectionMapper() : Base(), data(new IntersectionMapper::Data) {}
 
@@ -643,26 +867,27 @@ IntersectionMapper::~IntersectionMapper() {}
 
 prj::srl::IntersectionMapper IntersectionMapper::serialOut()
 {
-  prj::srl::EdgeSplits eSplitsOut;
-  for (const auto es : data->edgeSplits)
+  prj::srl::EdgeIntersections eiOut;
+  for (const auto &es : data->edgeIntersections)
   {
-    prj::srl::EdgeNodes ensOut;
-    for (const auto ens : es.nodes)
+    prj::srl::IntersectionNodes ensOut;
+    for (const auto &ens : es.nodes)
     {
       assert(ens.type == Node::Type::Old);
       ensOut.array().push_back
       (
-        prj::srl::EdgeNode
+        prj::srl::IntersectionNode
         (
           gu::idToString(ens.edgeId),
-          ens.center,
+          ens.center.X(),
+          ens.center.Y(),
           ens.alive
         )
       );
     }
-    eSplitsOut.array().push_back
+    eiOut.array().push_back
     (
-      prj::srl::EdgeSplit
+      prj::srl::EdgeIntersection
       (
         es.faceHistory1.serialOut(),
         es.faceHistory2.serialOut(),
@@ -672,10 +897,10 @@ prj::srl::IntersectionMapper IntersectionMapper::serialOut()
   }
   
   prj::srl::FaceSplits fSplitsOut;
-  for (const auto fs : data->faceSplits)
+  for (const auto &fs : data->faceSplits)
   {
     prj::srl::FaceNodes fnsOut;
-    for (const auto fns : fs.nodes)
+    for (const auto &fns : fs.nodes)
     {
       assert(fns.type == Node::Type::Old);
       fnsOut.array().push_back
@@ -700,33 +925,70 @@ prj::srl::IntersectionMapper IntersectionMapper::serialOut()
     );
   }
   
-  return prj::srl::IntersectionMapper(eSplitsOut, fSplitsOut);
+  prj::srl::EdgeSplits eSplitsOut;
+  for (const auto &ens : data->edgeSplits)
+  {
+    prj::srl::EdgeNodes ensOut;
+    for (const auto &en : ens.nodes)
+    {
+      assert(en.type == Node::Type::Old);
+      ensOut.array().push_back
+      (
+        prj::srl::EdgeNode
+        (
+          gu::idToString(en.edgeId),
+          en.center,
+          en.alive
+        )
+      );
+    }
+    eSplitsOut.array().push_back
+    (
+      prj::srl::EdgeSplit
+      (
+        ens.edgeHistory.serialOut(),
+        ensOut
+      )
+    );
+  }
+  
+  prj::srl::SameDomains sdso; //same domains out.
+  for (const auto &sds : data->sameDomains)
+  {
+    prj::srl::ShapeHistories sdhs; //same domain histories
+    for (const auto &h : sds.histories)
+      sdhs.array().push_back(h.serialOut());
+    sdso.array().push_back(prj::srl::SameDomain(gu::idToString(sds.id), sdhs));
+  }
+  
+  
+  return prj::srl::IntersectionMapper(eiOut, fSplitsOut, eSplitsOut, sdso);
 }
 
 void IntersectionMapper::serialIn(const prj::srl::IntersectionMapper &sIn)
 {
-  for (const auto esIn : sIn.edgeSplits().array())
+  for (const auto &eisIn : sIn.edgeIntersections().array())
   {
-    EdgeSplit es;
-    es.faceHistory1.serialIn(esIn.faceHistory1());
-    es.faceHistory2.serialIn(esIn.faceHistory2());
-    for (const auto enIn : esIn.nodes().array())
+    EdgeIntersection ei;
+    ei.faceHistory1.serialIn(eisIn.faceHistory1());
+    ei.faceHistory2.serialIn(eisIn.faceHistory2());
+    for (const auto &enIn : eisIn.nodes().array())
     {
-      EdgeNode en;
+      IntersectionNode en;
       en.edgeId = gu::stringToId(enIn.edgeId());
-      en.center = enIn.center();
+      en.center = gp_Vec2d(enIn.centerX(), enIn.centerY());
       en.alive = enIn.alive();
       en.type = Node::Type::Old;
-      es.nodes.push_back(en);
+      ei.nodes.push_back(en);
     }
-    data->edgeSplits.push_back(es);
+    data->edgeIntersections.push_back(ei);
   }
   
-  for (const auto fsIn : sIn.faceSplits().array())
+  for (const auto &fsIn : sIn.faceSplits().array())
   {
     FaceSplit fs;
     fs.faceHistory.serialIn(fsIn.faceHistory());
-    for (const auto fnIn : fsIn.nodes().array())
+    for (const auto &fnIn : fsIn.nodes().array())
     {
       FaceNode fn;
       fn.faceId = gu::stringToId(fnIn.faceId());
@@ -738,10 +1000,44 @@ void IntersectionMapper::serialIn(const prj::srl::IntersectionMapper &sIn)
     }
     data->faceSplits.push_back(fs);
   }
+  
+  for (const auto &ess : sIn.edgeSplits().array())
+  {
+    EdgeSplit es;
+    es.edgeHistory.serialIn(ess.edgeHistory());
+    for (const auto &enIn : ess.nodes().array())
+    {
+      EdgeNode en;
+      en.edgeId = gu::stringToId(enIn.edgeId());
+      en.center = enIn.center();
+      en.alive = enIn.alive();
+      en.type = Node::Type::Old;
+      es.nodes.push_back(en);
+    }
+    data->edgeSplits.push_back(es);
+  }
+  
+  for (const auto &sdIn : sIn.sameDomains().array())
+  {
+    SameDomain sd;
+    sd.id = gu::stringToId(sdIn.id());
+    for (const auto &hIn : sdIn.histories().array())
+    {
+      ftr::ShapeHistory h;
+      h.serialIn(hIn);
+      sd.histories.push_back(h);
+    }
+    data->sameDomains.push_back(sd);
+  }
 }
 
 void IntersectionMapper::go(const ftr::UpdatePayload &payloadIn, BOPAlgo_Builder &builder, SeerShape &sShape)
 {
+  /* any TopoDS_Edge or TopoDS_Face may change back and forth between being a split or not.
+   * this means that for each edge and face we need to construct an EdgeSplit or FaceSplit
+   * object so we can keep consistent naming between updates
+   */
+  
   std::vector<std::reference_wrapper<const ann::SeerShape>> seerShapes;
   for (auto its = payloadIn.updateMap.equal_range(ftr::InputType::target); its.first != its.second; ++its.first)
   {
@@ -756,9 +1052,14 @@ void IntersectionMapper::go(const ftr::UpdatePayload &payloadIn, BOPAlgo_Builder
     assert(!seerShapes.back().get().isNull());
   }
   
+  //cache builder info
+  const BOPCol_DataMapOfShapeListOfShape &splits = builder.Splits();
+  const BOPCol_DataMapOfShapeListOfShape &origins = builder.Origins();
+  const BOPCol_DataMapOfShapeListOfShape &images = builder.Images();
+
+  //start of face splits  
   for (auto &fs : data->faceSplits)
     fs.start();
-  const BOPCol_DataMapOfShapeListOfShape &splits = builder.Splits();
   BOPCol_DataMapOfShapeListOfShape::Iterator splitIt(splits);
   for (; splitIt.More(); splitIt.Next())
   {
@@ -785,7 +1086,8 @@ void IntersectionMapper::go(const ftr::UpdatePayload &payloadIn, BOPAlgo_Builder
     }
     if (keyId.is_nil())
     {
-      std::cout << "WARNING: can't find keyId in IntersectionMapper::go" << std::endl;
+      //same domain causes some funning split results and will trigger the following warning. FYI
+      std::cout << "WARNING: can't find keyId for face split in IntersectionMapper::go" << std::endl;
       continue;
     }
     
@@ -822,30 +1124,109 @@ void IntersectionMapper::go(const ftr::UpdatePayload &payloadIn, BOPAlgo_Builder
   for (auto &fs : data->faceSplits)
     fs.finish();
   
-  
-  //start of edge splits/intersection.
+  //start of edge splits.
   for (auto &es : data->edgeSplits)
     es.start();
+  occt::ShapeVector shapes = sShape.getAllNilShapes();
+  for (const auto &os : shapes) //output shape
+  {
+    if (os.ShapeType() != TopAbs_EDGE)
+      continue; //only interested in edges here.
+    // id might have been set by previous loop iteration
+    if (!sShape.findShapeIdRecord(os).id.is_nil())
+      continue;
+    
+    TopoDS_Shape sourceShape = os; //default non split 
+    if (origins.IsBound(os))
+    {
+      const auto& oss = origins(os); //origin shapes.
+      if (oss.Size() != 1)
+        continue; //more than 1 means a same domain shape we will handle later.
+      sourceShape = oss.First();
+    }
+    uuid sId = gu::createNilId(); //source id
+    for (const auto &ss : seerShapes)
+    {
+      if (ss.get().hasShapeIdRecord(sourceShape))
+      {
+        sId = ss.get().findShapeIdRecord(sourceShape).id;
+        break;
+      }
+    }
+    if (sId.is_nil()) // probably an intersection edge
+      continue;
+    occt::EdgeVector edges;
+    if (images.IsBound(sourceShape))
+    {
+      for (const auto &e : images(sourceShape))
+      {
+        if (sShape.hasShapeIdRecord(e))
+          edges.push_back(TopoDS::Edge(e));
+      }
+    }
+    else
+    {
+      edges.push_back(TopoDS::Edge(os));
+    }
+    bool foundMatch = false;
+    for (auto &es : data->edgeSplits)
+    {
+      if (!es.isMatch(sId))
+        continue;
+      foundMatch = true;
+      es.match(edges);
+      for (const auto &en : es.getResults())
+      {
+        sShape.updateShapeIdRecord(en.edge, en.edgeId);
+        sShape.insertEvolve(sId, en.edgeId);
+      }
+      break;
+    }
+    if (!foundMatch)
+    {
+      EdgeSplit nes; //new edge intersection
+      nes.edgeHistory = payloadIn.shapeHistory.createDevolveHistory(sId);
+      nes.match(edges);
+      for (const auto &en : nes.getResults())
+      {
+        sShape.updateShapeIdRecord(en.edge, en.edgeId);
+        sShape.insertEvolve(sId, en.edgeId);
+      }
+      data->edgeSplits.push_back(nes);
+    }
+  }
   
+  for (auto &es : data->edgeSplits)
+    es.finish();
+  
+  //start of edge intersections.
+  for (auto &es : data->edgeIntersections)
+    es.start();
+  
+  //bopalgo doesn't have edges created by face intersection in there
+  //exposed data structures. So we get down and dirty with BOP_DS.
   const BOPDS_DS &bopDS = *(builder.PDS());
-  const BOPCol_DataMapOfShapeListOfShape &origins = builder.Origins();
   
-  //occt splits don't include edges, so we have to work backwards from
-  //origins to accumulate edge 'splits'.
-  typedef std::pair<std::set<uuid>, occt::EdgeVector> TempEdgeSplit;
-  typedef std::vector<TempEdgeSplit> TempEdgeSplits;
-  TempEdgeSplits teSplits;
-  auto getEdgeVector = [&](const uuid& faceId1, const uuid& faceId2) -> occt::EdgeVector&
+  struct TempEdgeIntersection
+  {
+    std::set<uuid> ids; //2 face ids.
+    std::vector<std::pair<TopoDS_Edge, gp_Vec2d>> pairs;
+  };
+  typedef std::vector<TempEdgeIntersection> TempEdgeIntersections;
+  TempEdgeIntersections teis; //temp edge intersections
+  auto getTempEntry = [&](const uuid& faceId1, const uuid& faceId2) -> std::vector<std::pair<TopoDS_Edge, gp_Vec2d>>&
   {
     std::set<uuid> testSet = {faceId1, faceId2};
     assert(testSet.size() == 2);
-    for (auto &teSplit : teSplits)
+    for (auto &tei : teis)
     {
-      if (teSplit.first == testSet)
-        return teSplit.second;
+      if (tei.ids == testSet)
+        return tei.pairs;
     }
-    teSplits.push_back(TempEdgeSplit(testSet, occt::EdgeVector()));
-    return teSplits.back().second;
+    TempEdgeIntersection freshEntry;
+    freshEntry.ids = testSet;
+    teis.push_back(freshEntry);
+    return teis.back().pairs;
   };
   
   for (int index = 0; index < bopDS.NbShapes(); ++index)
@@ -863,6 +1244,7 @@ void IntersectionMapper::go(const ftr::UpdatePayload &payloadIn, BOPAlgo_Builder
     
     std::vector<uuid> faceIds;
     occt::ShapeVector parentShapes = sShape.useGetParentsOfType(shape, TopAbs_FACE);
+    gp_Vec2d tc; //tempCenter
     
     for (const auto &cShape : parentShapes)
     {
@@ -873,6 +1255,18 @@ void IntersectionMapper::go(const ftr::UpdatePayload &payloadIn, BOPAlgo_Builder
           if (ss.get().hasShapeIdRecord(sil))
           {
             faceIds.push_back(ss.get().findShapeIdRecord(sil).id);
+            
+            //get the current center
+            double umin, umax, vmin, vmax;
+            BRepTools::UVBounds(TopoDS::Face(cShape), TopoDS::Edge(shape), umin, umax, vmin, vmax);
+            gp_Vec2d minc(umin, vmin);
+            gp_Vec2d maxc(umax, vmax);
+            gp_Vec2d center = minc + ((maxc - minc) * 0.5);
+            
+            //'average' in the new center to old.
+            if (tc.Magnitude() != 0.0)
+              tc = tc + ((center - tc) * 0.5);
+            
             break;
           }
         }
@@ -881,22 +1275,22 @@ void IntersectionMapper::go(const ftr::UpdatePayload &payloadIn, BOPAlgo_Builder
     gu::uniquefy(faceIds);
     if (faceIds.size() != 2) //should we have a warning here?
       continue;
-    occt::EdgeVector &ev = getEdgeVector(faceIds.front(), faceIds.back());
-    ev.push_back(TopoDS::Edge(shape));
+    auto &te = getTempEntry(faceIds.front(), faceIds.back());
+    te.push_back(std::make_pair(TopoDS::Edge(shape), tc));
   }
   
-  //loop through temp splits and try to match up
-  //with an existing edge split or create a new one.
-  for (auto &teSplit : teSplits)
+  //loop through temp edge intersections and try to match up
+  //with an existing edge intersections or create a new one.
+  for (auto &tei : teis)
   {
-    assert(teSplit.first.size() == 2); //2 faces.
+    assert(tei.ids.size() == 2); //2 faces.
     bool foundMatch = false;
-    for (auto &es : data->edgeSplits)
+    for (auto &es : data->edgeIntersections)
     {
-      if (es.isMatch(*(teSplit.first.begin()), *(++teSplit.first.begin())))
+      if (es.isMatch(*(tei.ids.begin()), *(++tei.ids.begin())))
       {
         foundMatch = true;
-        es.match(teSplit.second);
+        es.match(tei.pairs);
         for (const auto &en : es.getResults())
         {
           sShape.updateShapeIdRecord(en.edge, en.edgeId);
@@ -907,19 +1301,76 @@ void IntersectionMapper::go(const ftr::UpdatePayload &payloadIn, BOPAlgo_Builder
     }
     if (!foundMatch)
     {
-      EdgeSplit nes; //new edge split
-      nes.faceHistory1 = payloadIn.shapeHistory.createDevolveHistory(*(teSplit.first.begin()));
-      nes.faceHistory2 = payloadIn.shapeHistory.createDevolveHistory(*(++teSplit.first.begin()));
-      nes.match(teSplit.second);
-      for (const auto &en : nes.getResults())
+      EdgeIntersection nei; //new edge intersection
+      nei.faceHistory1 = payloadIn.shapeHistory.createDevolveHistory(*(tei.ids.begin()));
+      nei.faceHistory2 = payloadIn.shapeHistory.createDevolveHistory(*(++tei.ids.begin()));
+      nei.match(tei.pairs);
+      for (const auto &en : nei.getResults())
       {
         sShape.updateShapeIdRecord(en.edge, en.edgeId);
         sShape.insertEvolve(gu::createNilId(), en.edgeId); //intersection edges come from nothing.
       }
-      data->edgeSplits.push_back(nes);
+      data->edgeIntersections.push_back(nei);
     }
   }
   
-  for (auto &es : data->edgeSplits)
+  for (auto &es : data->edgeIntersections)
     es.finish();
+  
+  
+  //start of same domain.
+  for (auto &sd : data->sameDomains)
+    sd.used = false;
+  //the same domain data structure of the builder appears FUBAR. occt 7.2. using origins with multiples.
+  for (const auto &os : sShape.getAllShapes()) //output shape
+  {
+    if (!origins.IsBound(os))
+      continue;
+    if (os.ShapeType() != TopAbs_EDGE && os.ShapeType() != TopAbs_FACE)
+      continue;
+    const auto &ogs = origins(os);
+    if (ogs.Extent() < 2)
+      continue;
+    
+    std::vector<uuid> oids; //origin ids.
+    for (const auto &oShape : ogs)
+    {
+      for (const auto &ss : seerShapes)
+      {
+        if (ss.get().hasShapeIdRecord(oShape))
+        {
+          oids.push_back(ss.get().findShapeIdRecord(oShape).id);
+          break;
+        }
+      }
+    }
+    
+    if (oids.size() != static_cast<std::size_t>(ogs.Extent()))
+    {
+      std::cout << "WARNING: couldn't find all ids for shapes in: intersection mapper same domain" << std::endl;
+      continue;
+    }
+    
+    bool foundMatch = false;
+    for (const auto &sd : data->sameDomains)
+    {
+      if (!sd.isMatch(oids))
+        continue;
+      foundMatch = true;
+      sShape.updateShapeIdRecord(os, sd.id);
+      for (const auto &oid : oids)
+        sShape.insertEvolve(oid, sd.id);
+      break;
+    }
+    if (!foundMatch)
+    {
+      SameDomain nsd; //new same domain
+      for (const auto &oid : oids)
+        nsd.histories.push_back(payloadIn.shapeHistory.createDevolveHistory(oid));
+      data->sameDomains.push_back(nsd);
+      sShape.updateShapeIdRecord(os, nsd.id);
+      for (const auto &oid : oids)
+        sShape.insertEvolve(oid, nsd.id);
+    }
+  }
 }

@@ -1585,52 +1585,28 @@ namespace prj
     // EdgeSplit
     // 
 
-    const EdgeSplit::FaceHistory1Type& EdgeSplit::
-    faceHistory1 () const
+    const EdgeSplit::EdgeHistoryType& EdgeSplit::
+    edgeHistory () const
     {
-      return this->faceHistory1_.get ();
+      return this->edgeHistory_.get ();
     }
 
-    EdgeSplit::FaceHistory1Type& EdgeSplit::
-    faceHistory1 ()
+    EdgeSplit::EdgeHistoryType& EdgeSplit::
+    edgeHistory ()
     {
-      return this->faceHistory1_.get ();
-    }
-
-    void EdgeSplit::
-    faceHistory1 (const FaceHistory1Type& x)
-    {
-      this->faceHistory1_.set (x);
+      return this->edgeHistory_.get ();
     }
 
     void EdgeSplit::
-    faceHistory1 (::std::unique_ptr< FaceHistory1Type > x)
+    edgeHistory (const EdgeHistoryType& x)
     {
-      this->faceHistory1_.set (std::move (x));
-    }
-
-    const EdgeSplit::FaceHistory2Type& EdgeSplit::
-    faceHistory2 () const
-    {
-      return this->faceHistory2_.get ();
-    }
-
-    EdgeSplit::FaceHistory2Type& EdgeSplit::
-    faceHistory2 ()
-    {
-      return this->faceHistory2_.get ();
+      this->edgeHistory_.set (x);
     }
 
     void EdgeSplit::
-    faceHistory2 (const FaceHistory2Type& x)
+    edgeHistory (::std::unique_ptr< EdgeHistoryType > x)
     {
-      this->faceHistory2_.set (x);
-    }
-
-    void EdgeSplit::
-    faceHistory2 (::std::unique_ptr< FaceHistory2Type > x)
-    {
-      this->faceHistory2_.set (std::move (x));
+      this->edgeHistory_.set (std::move (x));
     }
 
     const EdgeSplit::NodesType& EdgeSplit::
@@ -1674,6 +1650,214 @@ namespace prj
     }
 
     void EdgeSplits::
+    array (const ArraySequence& s)
+    {
+      this->array_ = s;
+    }
+
+
+    // IntersectionNode
+    // 
+
+    const IntersectionNode::EdgeIdType& IntersectionNode::
+    edgeId () const
+    {
+      return this->edgeId_.get ();
+    }
+
+    IntersectionNode::EdgeIdType& IntersectionNode::
+    edgeId ()
+    {
+      return this->edgeId_.get ();
+    }
+
+    void IntersectionNode::
+    edgeId (const EdgeIdType& x)
+    {
+      this->edgeId_.set (x);
+    }
+
+    void IntersectionNode::
+    edgeId (::std::unique_ptr< EdgeIdType > x)
+    {
+      this->edgeId_.set (std::move (x));
+    }
+
+    const IntersectionNode::EdgeIdType& IntersectionNode::
+    edgeId_default_value ()
+    {
+      return edgeId_default_value_;
+    }
+
+    const IntersectionNode::CenterXType& IntersectionNode::
+    centerX () const
+    {
+      return this->centerX_.get ();
+    }
+
+    IntersectionNode::CenterXType& IntersectionNode::
+    centerX ()
+    {
+      return this->centerX_.get ();
+    }
+
+    void IntersectionNode::
+    centerX (const CenterXType& x)
+    {
+      this->centerX_.set (x);
+    }
+
+    const IntersectionNode::CenterYType& IntersectionNode::
+    centerY () const
+    {
+      return this->centerY_.get ();
+    }
+
+    IntersectionNode::CenterYType& IntersectionNode::
+    centerY ()
+    {
+      return this->centerY_.get ();
+    }
+
+    void IntersectionNode::
+    centerY (const CenterYType& x)
+    {
+      this->centerY_.set (x);
+    }
+
+    const IntersectionNode::AliveType& IntersectionNode::
+    alive () const
+    {
+      return this->alive_.get ();
+    }
+
+    IntersectionNode::AliveType& IntersectionNode::
+    alive ()
+    {
+      return this->alive_.get ();
+    }
+
+    void IntersectionNode::
+    alive (const AliveType& x)
+    {
+      this->alive_.set (x);
+    }
+
+
+    // IntersectionNodes
+    // 
+
+    const IntersectionNodes::ArraySequence& IntersectionNodes::
+    array () const
+    {
+      return this->array_;
+    }
+
+    IntersectionNodes::ArraySequence& IntersectionNodes::
+    array ()
+    {
+      return this->array_;
+    }
+
+    void IntersectionNodes::
+    array (const ArraySequence& s)
+    {
+      this->array_ = s;
+    }
+
+
+    // EdgeIntersection
+    // 
+
+    const EdgeIntersection::FaceHistory1Type& EdgeIntersection::
+    faceHistory1 () const
+    {
+      return this->faceHistory1_.get ();
+    }
+
+    EdgeIntersection::FaceHistory1Type& EdgeIntersection::
+    faceHistory1 ()
+    {
+      return this->faceHistory1_.get ();
+    }
+
+    void EdgeIntersection::
+    faceHistory1 (const FaceHistory1Type& x)
+    {
+      this->faceHistory1_.set (x);
+    }
+
+    void EdgeIntersection::
+    faceHistory1 (::std::unique_ptr< FaceHistory1Type > x)
+    {
+      this->faceHistory1_.set (std::move (x));
+    }
+
+    const EdgeIntersection::FaceHistory2Type& EdgeIntersection::
+    faceHistory2 () const
+    {
+      return this->faceHistory2_.get ();
+    }
+
+    EdgeIntersection::FaceHistory2Type& EdgeIntersection::
+    faceHistory2 ()
+    {
+      return this->faceHistory2_.get ();
+    }
+
+    void EdgeIntersection::
+    faceHistory2 (const FaceHistory2Type& x)
+    {
+      this->faceHistory2_.set (x);
+    }
+
+    void EdgeIntersection::
+    faceHistory2 (::std::unique_ptr< FaceHistory2Type > x)
+    {
+      this->faceHistory2_.set (std::move (x));
+    }
+
+    const EdgeIntersection::NodesType& EdgeIntersection::
+    nodes () const
+    {
+      return this->nodes_.get ();
+    }
+
+    EdgeIntersection::NodesType& EdgeIntersection::
+    nodes ()
+    {
+      return this->nodes_.get ();
+    }
+
+    void EdgeIntersection::
+    nodes (const NodesType& x)
+    {
+      this->nodes_.set (x);
+    }
+
+    void EdgeIntersection::
+    nodes (::std::unique_ptr< NodesType > x)
+    {
+      this->nodes_.set (std::move (x));
+    }
+
+
+    // EdgeIntersections
+    // 
+
+    const EdgeIntersections::ArraySequence& EdgeIntersections::
+    array () const
+    {
+      return this->array_;
+    }
+
+    EdgeIntersections::ArraySequence& EdgeIntersections::
+    array ()
+    {
+      return this->array_;
+    }
+
+    void EdgeIntersections::
     array (const ArraySequence& s)
     {
       this->array_ = s;
@@ -1894,8 +2078,136 @@ namespace prj
     }
 
 
+    // SameDomain
+    // 
+
+    const SameDomain::IdType& SameDomain::
+    id () const
+    {
+      return this->id_.get ();
+    }
+
+    SameDomain::IdType& SameDomain::
+    id ()
+    {
+      return this->id_.get ();
+    }
+
+    void SameDomain::
+    id (const IdType& x)
+    {
+      this->id_.set (x);
+    }
+
+    void SameDomain::
+    id (::std::unique_ptr< IdType > x)
+    {
+      this->id_.set (std::move (x));
+    }
+
+    const SameDomain::IdType& SameDomain::
+    id_default_value ()
+    {
+      return id_default_value_;
+    }
+
+    const SameDomain::HistoriesType& SameDomain::
+    histories () const
+    {
+      return this->histories_.get ();
+    }
+
+    SameDomain::HistoriesType& SameDomain::
+    histories ()
+    {
+      return this->histories_.get ();
+    }
+
+    void SameDomain::
+    histories (const HistoriesType& x)
+    {
+      this->histories_.set (x);
+    }
+
+    void SameDomain::
+    histories (::std::unique_ptr< HistoriesType > x)
+    {
+      this->histories_.set (std::move (x));
+    }
+
+
+    // SameDomains
+    // 
+
+    const SameDomains::ArraySequence& SameDomains::
+    array () const
+    {
+      return this->array_;
+    }
+
+    SameDomains::ArraySequence& SameDomains::
+    array ()
+    {
+      return this->array_;
+    }
+
+    void SameDomains::
+    array (const ArraySequence& s)
+    {
+      this->array_ = s;
+    }
+
+
     // IntersectionMapper
     // 
+
+    const IntersectionMapper::EdgeIntersectionsType& IntersectionMapper::
+    edgeIntersections () const
+    {
+      return this->edgeIntersections_.get ();
+    }
+
+    IntersectionMapper::EdgeIntersectionsType& IntersectionMapper::
+    edgeIntersections ()
+    {
+      return this->edgeIntersections_.get ();
+    }
+
+    void IntersectionMapper::
+    edgeIntersections (const EdgeIntersectionsType& x)
+    {
+      this->edgeIntersections_.set (x);
+    }
+
+    void IntersectionMapper::
+    edgeIntersections (::std::unique_ptr< EdgeIntersectionsType > x)
+    {
+      this->edgeIntersections_.set (std::move (x));
+    }
+
+    const IntersectionMapper::FaceSplitsType& IntersectionMapper::
+    faceSplits () const
+    {
+      return this->faceSplits_.get ();
+    }
+
+    IntersectionMapper::FaceSplitsType& IntersectionMapper::
+    faceSplits ()
+    {
+      return this->faceSplits_.get ();
+    }
+
+    void IntersectionMapper::
+    faceSplits (const FaceSplitsType& x)
+    {
+      this->faceSplits_.set (x);
+    }
+
+    void IntersectionMapper::
+    faceSplits (::std::unique_ptr< FaceSplitsType > x)
+    {
+      this->faceSplits_.set (std::move (x));
+    }
 
     const IntersectionMapper::EdgeSplitsType& IntersectionMapper::
     edgeSplits () const
@@ -1921,28 +2233,28 @@ namespace prj
       this->edgeSplits_.set (std::move (x));
     }
 
-    const IntersectionMapper::FaceSplitsType& IntersectionMapper::
-    faceSplits () const
+    const IntersectionMapper::SameDomainsType& IntersectionMapper::
+    sameDomains () const
     {
-      return this->faceSplits_.get ();
+      return this->sameDomains_.get ();
     }
 
-    IntersectionMapper::FaceSplitsType& IntersectionMapper::
-    faceSplits ()
+    IntersectionMapper::SameDomainsType& IntersectionMapper::
+    sameDomains ()
     {
-      return this->faceSplits_.get ();
-    }
-
-    void IntersectionMapper::
-    faceSplits (const FaceSplitsType& x)
-    {
-      this->faceSplits_.set (x);
+      return this->sameDomains_.get ();
     }
 
     void IntersectionMapper::
-    faceSplits (::std::unique_ptr< FaceSplitsType > x)
+    sameDomains (const SameDomainsType& x)
     {
-      this->faceSplits_.set (std::move (x));
+      this->sameDomains_.set (x);
+    }
+
+    void IntersectionMapper::
+    sameDomains (::std::unique_ptr< SameDomainsType > x)
+    {
+      this->sameDomains_.set (std::move (x));
     }
 
 
@@ -4932,23 +5244,19 @@ namespace prj
     //
 
     EdgeSplit::
-    EdgeSplit (const FaceHistory1Type& faceHistory1,
-               const FaceHistory2Type& faceHistory2,
+    EdgeSplit (const EdgeHistoryType& edgeHistory,
                const NodesType& nodes)
     : ::xml_schema::Type (),
-      faceHistory1_ (faceHistory1, this),
-      faceHistory2_ (faceHistory2, this),
+      edgeHistory_ (edgeHistory, this),
       nodes_ (nodes, this)
     {
     }
 
     EdgeSplit::
-    EdgeSplit (::std::unique_ptr< FaceHistory1Type > faceHistory1,
-               ::std::unique_ptr< FaceHistory2Type > faceHistory2,
+    EdgeSplit (::std::unique_ptr< EdgeHistoryType > edgeHistory,
                ::std::unique_ptr< NodesType > nodes)
     : ::xml_schema::Type (),
-      faceHistory1_ (std::move (faceHistory1), this),
-      faceHistory2_ (std::move (faceHistory2), this),
+      edgeHistory_ (std::move (edgeHistory), this),
       nodes_ (std::move (nodes), this)
     {
     }
@@ -4958,8 +5266,7 @@ namespace prj
                ::xml_schema::Flags f,
                ::xml_schema::Container* c)
     : ::xml_schema::Type (x, f, c),
-      faceHistory1_ (x.faceHistory1_, f, this),
-      faceHistory2_ (x.faceHistory2_, f, this),
+      edgeHistory_ (x.edgeHistory_, f, this),
       nodes_ (x.nodes_, f, this)
     {
     }
@@ -4969,8 +5276,7 @@ namespace prj
                ::xml_schema::Flags f,
                ::xml_schema::Container* c)
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
-      faceHistory1_ (this),
-      faceHistory2_ (this),
+      edgeHistory_ (this),
       nodes_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
@@ -4990,30 +5296,16 @@ namespace prj
         const ::xsd::cxx::xml::qualified_name< char > n (
           ::xsd::cxx::xml::dom::name< char > (i));
 
-        // faceHistory1
+        // edgeHistory
         //
-        if (n.name () == "faceHistory1" && n.namespace_ ().empty ())
+        if (n.name () == "edgeHistory" && n.namespace_ ().empty ())
         {
-          ::std::unique_ptr< FaceHistory1Type > r (
-            FaceHistory1Traits::create (i, f, this));
+          ::std::unique_ptr< EdgeHistoryType > r (
+            EdgeHistoryTraits::create (i, f, this));
 
-          if (!faceHistory1_.present ())
+          if (!edgeHistory_.present ())
           {
-            this->faceHistory1_.set (::std::move (r));
-            continue;
-          }
-        }
-
-        // faceHistory2
-        //
-        if (n.name () == "faceHistory2" && n.namespace_ ().empty ())
-        {
-          ::std::unique_ptr< FaceHistory2Type > r (
-            FaceHistory2Traits::create (i, f, this));
-
-          if (!faceHistory2_.present ())
-          {
-            this->faceHistory2_.set (::std::move (r));
+            this->edgeHistory_.set (::std::move (r));
             continue;
           }
         }
@@ -5035,17 +5327,10 @@ namespace prj
         break;
       }
 
-      if (!faceHistory1_.present ())
+      if (!edgeHistory_.present ())
       {
         throw ::xsd::cxx::tree::expected_element< char > (
-          "faceHistory1",
-          "");
-      }
-
-      if (!faceHistory2_.present ())
-      {
-        throw ::xsd::cxx::tree::expected_element< char > (
-          "faceHistory2",
+          "edgeHistory",
           "");
       }
 
@@ -5070,8 +5355,7 @@ namespace prj
       if (this != &x)
       {
         static_cast< ::xml_schema::Type& > (*this) = x;
-        this->faceHistory1_ = x.faceHistory1_;
-        this->faceHistory2_ = x.faceHistory2_;
+        this->edgeHistory_ = x.edgeHistory_;
         this->nodes_ = x.nodes_;
       }
 
@@ -5162,6 +5446,489 @@ namespace prj
 
     EdgeSplits::
     ~EdgeSplits ()
+    {
+    }
+
+    // IntersectionNode
+    //
+
+    const IntersectionNode::EdgeIdType IntersectionNode::edgeId_default_value_ (
+      "00000000-0000-0000-0000-000000000000");
+
+    IntersectionNode::
+    IntersectionNode (const EdgeIdType& edgeId,
+                      const CenterXType& centerX,
+                      const CenterYType& centerY,
+                      const AliveType& alive)
+    : ::xml_schema::Type (),
+      edgeId_ (edgeId, this),
+      centerX_ (centerX, this),
+      centerY_ (centerY, this),
+      alive_ (alive, this)
+    {
+    }
+
+    IntersectionNode::
+    IntersectionNode (const IntersectionNode& x,
+                      ::xml_schema::Flags f,
+                      ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      edgeId_ (x.edgeId_, f, this),
+      centerX_ (x.centerX_, f, this),
+      centerY_ (x.centerY_, f, this),
+      alive_ (x.alive_, f, this)
+    {
+    }
+
+    IntersectionNode::
+    IntersectionNode (const ::xercesc::DOMElement& e,
+                      ::xml_schema::Flags f,
+                      ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      edgeId_ (this),
+      centerX_ (this),
+      centerY_ (this),
+      alive_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void IntersectionNode::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // edgeId
+        //
+        if (n.name () == "edgeId" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< EdgeIdType > r (
+            EdgeIdTraits::create (i, f, this));
+
+          if (!edgeId_.present ())
+          {
+            this->edgeId_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // centerX
+        //
+        if (n.name () == "centerX" && n.namespace_ ().empty ())
+        {
+          if (!centerX_.present ())
+          {
+            this->centerX_.set (CenterXTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // centerY
+        //
+        if (n.name () == "centerY" && n.namespace_ ().empty ())
+        {
+          if (!centerY_.present ())
+          {
+            this->centerY_.set (CenterYTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        // alive
+        //
+        if (n.name () == "alive" && n.namespace_ ().empty ())
+        {
+          if (!alive_.present ())
+          {
+            this->alive_.set (AliveTraits::create (i, f, this));
+            continue;
+          }
+        }
+
+        break;
+      }
+
+      if (!edgeId_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "edgeId",
+          "");
+      }
+
+      if (!centerX_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "centerX",
+          "");
+      }
+
+      if (!centerY_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "centerY",
+          "");
+      }
+
+      if (!alive_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "alive",
+          "");
+      }
+    }
+
+    IntersectionNode* IntersectionNode::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class IntersectionNode (*this, f, c);
+    }
+
+    IntersectionNode& IntersectionNode::
+    operator= (const IntersectionNode& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->edgeId_ = x.edgeId_;
+        this->centerX_ = x.centerX_;
+        this->centerY_ = x.centerY_;
+        this->alive_ = x.alive_;
+      }
+
+      return *this;
+    }
+
+    IntersectionNode::
+    ~IntersectionNode ()
+    {
+    }
+
+    // IntersectionNodes
+    //
+
+    IntersectionNodes::
+    IntersectionNodes ()
+    : ::xml_schema::Type (),
+      array_ (this)
+    {
+    }
+
+    IntersectionNodes::
+    IntersectionNodes (const IntersectionNodes& x,
+                       ::xml_schema::Flags f,
+                       ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      array_ (x.array_, f, this)
+    {
+    }
+
+    IntersectionNodes::
+    IntersectionNodes (const ::xercesc::DOMElement& e,
+                       ::xml_schema::Flags f,
+                       ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      array_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void IntersectionNodes::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // array
+        //
+        if (n.name () == "array" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< ArrayType > r (
+            ArrayTraits::create (i, f, this));
+
+          this->array_.push_back (::std::move (r));
+          continue;
+        }
+
+        break;
+      }
+    }
+
+    IntersectionNodes* IntersectionNodes::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class IntersectionNodes (*this, f, c);
+    }
+
+    IntersectionNodes& IntersectionNodes::
+    operator= (const IntersectionNodes& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->array_ = x.array_;
+      }
+
+      return *this;
+    }
+
+    IntersectionNodes::
+    ~IntersectionNodes ()
+    {
+    }
+
+    // EdgeIntersection
+    //
+
+    EdgeIntersection::
+    EdgeIntersection (const FaceHistory1Type& faceHistory1,
+                      const FaceHistory2Type& faceHistory2,
+                      const NodesType& nodes)
+    : ::xml_schema::Type (),
+      faceHistory1_ (faceHistory1, this),
+      faceHistory2_ (faceHistory2, this),
+      nodes_ (nodes, this)
+    {
+    }
+
+    EdgeIntersection::
+    EdgeIntersection (::std::unique_ptr< FaceHistory1Type > faceHistory1,
+                      ::std::unique_ptr< FaceHistory2Type > faceHistory2,
+                      ::std::unique_ptr< NodesType > nodes)
+    : ::xml_schema::Type (),
+      faceHistory1_ (std::move (faceHistory1), this),
+      faceHistory2_ (std::move (faceHistory2), this),
+      nodes_ (std::move (nodes), this)
+    {
+    }
+
+    EdgeIntersection::
+    EdgeIntersection (const EdgeIntersection& x,
+                      ::xml_schema::Flags f,
+                      ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      faceHistory1_ (x.faceHistory1_, f, this),
+      faceHistory2_ (x.faceHistory2_, f, this),
+      nodes_ (x.nodes_, f, this)
+    {
+    }
+
+    EdgeIntersection::
+    EdgeIntersection (const ::xercesc::DOMElement& e,
+                      ::xml_schema::Flags f,
+                      ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      faceHistory1_ (this),
+      faceHistory2_ (this),
+      nodes_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void EdgeIntersection::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // faceHistory1
+        //
+        if (n.name () == "faceHistory1" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< FaceHistory1Type > r (
+            FaceHistory1Traits::create (i, f, this));
+
+          if (!faceHistory1_.present ())
+          {
+            this->faceHistory1_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // faceHistory2
+        //
+        if (n.name () == "faceHistory2" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< FaceHistory2Type > r (
+            FaceHistory2Traits::create (i, f, this));
+
+          if (!faceHistory2_.present ())
+          {
+            this->faceHistory2_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // nodes
+        //
+        if (n.name () == "nodes" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< NodesType > r (
+            NodesTraits::create (i, f, this));
+
+          if (!nodes_.present ())
+          {
+            this->nodes_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        break;
+      }
+
+      if (!faceHistory1_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "faceHistory1",
+          "");
+      }
+
+      if (!faceHistory2_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "faceHistory2",
+          "");
+      }
+
+      if (!nodes_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "nodes",
+          "");
+      }
+    }
+
+    EdgeIntersection* EdgeIntersection::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class EdgeIntersection (*this, f, c);
+    }
+
+    EdgeIntersection& EdgeIntersection::
+    operator= (const EdgeIntersection& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->faceHistory1_ = x.faceHistory1_;
+        this->faceHistory2_ = x.faceHistory2_;
+        this->nodes_ = x.nodes_;
+      }
+
+      return *this;
+    }
+
+    EdgeIntersection::
+    ~EdgeIntersection ()
+    {
+    }
+
+    // EdgeIntersections
+    //
+
+    EdgeIntersections::
+    EdgeIntersections ()
+    : ::xml_schema::Type (),
+      array_ (this)
+    {
+    }
+
+    EdgeIntersections::
+    EdgeIntersections (const EdgeIntersections& x,
+                       ::xml_schema::Flags f,
+                       ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      array_ (x.array_, f, this)
+    {
+    }
+
+    EdgeIntersections::
+    EdgeIntersections (const ::xercesc::DOMElement& e,
+                       ::xml_schema::Flags f,
+                       ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      array_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void EdgeIntersections::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // array
+        //
+        if (n.name () == "array" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< ArrayType > r (
+            ArrayTraits::create (i, f, this));
+
+          this->array_.push_back (::std::move (r));
+          continue;
+        }
+
+        break;
+      }
+    }
+
+    EdgeIntersections* EdgeIntersections::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class EdgeIntersections (*this, f, c);
+    }
+
+    EdgeIntersections& EdgeIntersections::
+    operator= (const EdgeIntersections& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->array_ = x.array_;
+      }
+
+      return *this;
+    }
+
+    EdgeIntersections::
+    ~EdgeIntersections ()
     {
     }
 
@@ -5649,24 +6416,244 @@ namespace prj
     {
     }
 
+    // SameDomain
+    //
+
+    const SameDomain::IdType SameDomain::id_default_value_ (
+      "00000000-0000-0000-0000-000000000000");
+
+    SameDomain::
+    SameDomain (const IdType& id,
+                const HistoriesType& histories)
+    : ::xml_schema::Type (),
+      id_ (id, this),
+      histories_ (histories, this)
+    {
+    }
+
+    SameDomain::
+    SameDomain (const IdType& id,
+                ::std::unique_ptr< HistoriesType > histories)
+    : ::xml_schema::Type (),
+      id_ (id, this),
+      histories_ (std::move (histories), this)
+    {
+    }
+
+    SameDomain::
+    SameDomain (const SameDomain& x,
+                ::xml_schema::Flags f,
+                ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      id_ (x.id_, f, this),
+      histories_ (x.histories_, f, this)
+    {
+    }
+
+    SameDomain::
+    SameDomain (const ::xercesc::DOMElement& e,
+                ::xml_schema::Flags f,
+                ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      id_ (this),
+      histories_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void SameDomain::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // id
+        //
+        if (n.name () == "id" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< IdType > r (
+            IdTraits::create (i, f, this));
+
+          if (!id_.present ())
+          {
+            this->id_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // histories
+        //
+        if (n.name () == "histories" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< HistoriesType > r (
+            HistoriesTraits::create (i, f, this));
+
+          if (!histories_.present ())
+          {
+            this->histories_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        break;
+      }
+
+      if (!id_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "id",
+          "");
+      }
+
+      if (!histories_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "histories",
+          "");
+      }
+    }
+
+    SameDomain* SameDomain::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class SameDomain (*this, f, c);
+    }
+
+    SameDomain& SameDomain::
+    operator= (const SameDomain& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->id_ = x.id_;
+        this->histories_ = x.histories_;
+      }
+
+      return *this;
+    }
+
+    SameDomain::
+    ~SameDomain ()
+    {
+    }
+
+    // SameDomains
+    //
+
+    SameDomains::
+    SameDomains ()
+    : ::xml_schema::Type (),
+      array_ (this)
+    {
+    }
+
+    SameDomains::
+    SameDomains (const SameDomains& x,
+                 ::xml_schema::Flags f,
+                 ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      array_ (x.array_, f, this)
+    {
+    }
+
+    SameDomains::
+    SameDomains (const ::xercesc::DOMElement& e,
+                 ::xml_schema::Flags f,
+                 ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      array_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void SameDomains::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // array
+        //
+        if (n.name () == "array" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< ArrayType > r (
+            ArrayTraits::create (i, f, this));
+
+          this->array_.push_back (::std::move (r));
+          continue;
+        }
+
+        break;
+      }
+    }
+
+    SameDomains* SameDomains::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class SameDomains (*this, f, c);
+    }
+
+    SameDomains& SameDomains::
+    operator= (const SameDomains& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->array_ = x.array_;
+      }
+
+      return *this;
+    }
+
+    SameDomains::
+    ~SameDomains ()
+    {
+    }
+
     // IntersectionMapper
     //
 
     IntersectionMapper::
-    IntersectionMapper (const EdgeSplitsType& edgeSplits,
-                        const FaceSplitsType& faceSplits)
+    IntersectionMapper (const EdgeIntersectionsType& edgeIntersections,
+                        const FaceSplitsType& faceSplits,
+                        const EdgeSplitsType& edgeSplits,
+                        const SameDomainsType& sameDomains)
     : ::xml_schema::Type (),
+      edgeIntersections_ (edgeIntersections, this),
+      faceSplits_ (faceSplits, this),
       edgeSplits_ (edgeSplits, this),
-      faceSplits_ (faceSplits, this)
+      sameDomains_ (sameDomains, this)
     {
     }
 
     IntersectionMapper::
-    IntersectionMapper (::std::unique_ptr< EdgeSplitsType > edgeSplits,
-                        ::std::unique_ptr< FaceSplitsType > faceSplits)
+    IntersectionMapper (::std::unique_ptr< EdgeIntersectionsType > edgeIntersections,
+                        ::std::unique_ptr< FaceSplitsType > faceSplits,
+                        ::std::unique_ptr< EdgeSplitsType > edgeSplits,
+                        ::std::unique_ptr< SameDomainsType > sameDomains)
     : ::xml_schema::Type (),
+      edgeIntersections_ (std::move (edgeIntersections), this),
+      faceSplits_ (std::move (faceSplits), this),
       edgeSplits_ (std::move (edgeSplits), this),
-      faceSplits_ (std::move (faceSplits), this)
+      sameDomains_ (std::move (sameDomains), this)
     {
     }
 
@@ -5675,8 +6662,10 @@ namespace prj
                         ::xml_schema::Flags f,
                         ::xml_schema::Container* c)
     : ::xml_schema::Type (x, f, c),
+      edgeIntersections_ (x.edgeIntersections_, f, this),
+      faceSplits_ (x.faceSplits_, f, this),
       edgeSplits_ (x.edgeSplits_, f, this),
-      faceSplits_ (x.faceSplits_, f, this)
+      sameDomains_ (x.sameDomains_, f, this)
     {
     }
 
@@ -5685,8 +6674,10 @@ namespace prj
                         ::xml_schema::Flags f,
                         ::xml_schema::Container* c)
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      edgeIntersections_ (this),
+      faceSplits_ (this),
       edgeSplits_ (this),
-      faceSplits_ (this)
+      sameDomains_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -5705,16 +6696,16 @@ namespace prj
         const ::xsd::cxx::xml::qualified_name< char > n (
           ::xsd::cxx::xml::dom::name< char > (i));
 
-        // edgeSplits
+        // edgeIntersections
         //
-        if (n.name () == "edgeSplits" && n.namespace_ ().empty ())
+        if (n.name () == "edgeIntersections" && n.namespace_ ().empty ())
         {
-          ::std::unique_ptr< EdgeSplitsType > r (
-            EdgeSplitsTraits::create (i, f, this));
+          ::std::unique_ptr< EdgeIntersectionsType > r (
+            EdgeIntersectionsTraits::create (i, f, this));
 
-          if (!edgeSplits_.present ())
+          if (!edgeIntersections_.present ())
           {
-            this->edgeSplits_.set (::std::move (r));
+            this->edgeIntersections_.set (::std::move (r));
             continue;
           }
         }
@@ -5733,7 +6724,49 @@ namespace prj
           }
         }
 
+        // edgeSplits
+        //
+        if (n.name () == "edgeSplits" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< EdgeSplitsType > r (
+            EdgeSplitsTraits::create (i, f, this));
+
+          if (!edgeSplits_.present ())
+          {
+            this->edgeSplits_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // sameDomains
+        //
+        if (n.name () == "sameDomains" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< SameDomainsType > r (
+            SameDomainsTraits::create (i, f, this));
+
+          if (!sameDomains_.present ())
+          {
+            this->sameDomains_.set (::std::move (r));
+            continue;
+          }
+        }
+
         break;
+      }
+
+      if (!edgeIntersections_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "edgeIntersections",
+          "");
+      }
+
+      if (!faceSplits_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "faceSplits",
+          "");
       }
 
       if (!edgeSplits_.present ())
@@ -5743,10 +6776,10 @@ namespace prj
           "");
       }
 
-      if (!faceSplits_.present ())
+      if (!sameDomains_.present ())
       {
         throw ::xsd::cxx::tree::expected_element< char > (
-          "faceSplits",
+          "sameDomains",
           "");
       }
     }
@@ -5764,8 +6797,10 @@ namespace prj
       if (this != &x)
       {
         static_cast< ::xml_schema::Type& > (*this) = x;
-        this->edgeSplits_ = x.edgeSplits_;
+        this->edgeIntersections_ = x.edgeIntersections_;
         this->faceSplits_ = x.faceSplits_;
+        this->edgeSplits_ = x.edgeSplits_;
+        this->sameDomains_ = x.sameDomains_;
       }
 
       return *this;
@@ -7482,6 +8517,124 @@ namespace prj
     {
       e << static_cast< const ::xml_schema::Type& > (i);
 
+      // edgeHistory
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "edgeHistory",
+            e));
+
+        s << i.edgeHistory ();
+      }
+
+      // nodes
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "nodes",
+            e));
+
+        s << i.nodes ();
+      }
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const EdgeSplits& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // array
+      //
+      for (EdgeSplits::ArrayConstIterator
+           b (i.array ().begin ()), n (i.array ().end ());
+           b != n; ++b)
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "array",
+            e));
+
+        s << *b;
+      }
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const IntersectionNode& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // edgeId
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "edgeId",
+            e));
+
+        s << i.edgeId ();
+      }
+
+      // centerX
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "centerX",
+            e));
+
+        s << ::xml_schema::AsDouble(i.centerX ());
+      }
+
+      // centerY
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "centerY",
+            e));
+
+        s << ::xml_schema::AsDouble(i.centerY ());
+      }
+
+      // alive
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "alive",
+            e));
+
+        s << i.alive ();
+      }
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const IntersectionNodes& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // array
+      //
+      for (IntersectionNodes::ArrayConstIterator
+           b (i.array ().begin ()), n (i.array ().end ());
+           b != n; ++b)
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "array",
+            e));
+
+        s << *b;
+      }
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const EdgeIntersection& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
       // faceHistory1
       //
       {
@@ -7517,13 +8670,13 @@ namespace prj
     }
 
     void
-    operator<< (::xercesc::DOMElement& e, const EdgeSplits& i)
+    operator<< (::xercesc::DOMElement& e, const EdgeIntersections& i)
     {
       e << static_cast< const ::xml_schema::Type& > (i);
 
       // array
       //
-      for (EdgeSplits::ArrayConstIterator
+      for (EdgeIntersections::ArrayConstIterator
            b (i.array ().begin ()), n (i.array ().end ());
            b != n; ++b)
       {
@@ -7666,9 +8819,79 @@ namespace prj
     }
 
     void
+    operator<< (::xercesc::DOMElement& e, const SameDomain& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // id
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "id",
+            e));
+
+        s << i.id ();
+      }
+
+      // histories
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "histories",
+            e));
+
+        s << i.histories ();
+      }
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const SameDomains& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // array
+      //
+      for (SameDomains::ArrayConstIterator
+           b (i.array ().begin ()), n (i.array ().end ());
+           b != n; ++b)
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "array",
+            e));
+
+        s << *b;
+      }
+    }
+
+    void
     operator<< (::xercesc::DOMElement& e, const IntersectionMapper& i)
     {
       e << static_cast< const ::xml_schema::Type& > (i);
+
+      // edgeIntersections
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "edgeIntersections",
+            e));
+
+        s << i.edgeIntersections ();
+      }
+
+      // faceSplits
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "faceSplits",
+            e));
+
+        s << i.faceSplits ();
+      }
 
       // edgeSplits
       //
@@ -7681,15 +8904,15 @@ namespace prj
         s << i.edgeSplits ();
       }
 
-      // faceSplits
+      // sameDomains
       //
       {
         ::xercesc::DOMElement& s (
           ::xsd::cxx::xml::dom::create_element (
-            "faceSplits",
+            "sameDomains",
             e));
 
-        s << i.faceSplits ();
+        s << i.sameDomains ();
       }
     }
 

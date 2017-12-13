@@ -266,6 +266,28 @@ namespace prj
     {
       this->edges_.set (std::move (x));
     }
+
+
+    // ShapeHistories
+    // 
+
+    const ShapeHistories::ArraySequence& ShapeHistories::
+    array () const
+    {
+      return this->array_;
+    }
+
+    ShapeHistories::ArraySequence& ShapeHistories::
+    array ()
+    {
+      return this->array_;
+    }
+
+    void ShapeHistories::
+    array (const ArraySequence& s)
+    {
+      this->array_ = s;
+    }
   }
 }
 
@@ -813,6 +835,88 @@ namespace prj
     ~ShapeHistory ()
     {
     }
+
+    // ShapeHistories
+    //
+
+    ShapeHistories::
+    ShapeHistories ()
+    : ::xml_schema::Type (),
+      array_ (this)
+    {
+    }
+
+    ShapeHistories::
+    ShapeHistories (const ShapeHistories& x,
+                    ::xml_schema::Flags f,
+                    ::xml_schema::Container* c)
+    : ::xml_schema::Type (x, f, c),
+      array_ (x.array_, f, this)
+    {
+    }
+
+    ShapeHistories::
+    ShapeHistories (const ::xercesc::DOMElement& e,
+                    ::xml_schema::Flags f,
+                    ::xml_schema::Container* c)
+    : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+      array_ (this)
+    {
+      if ((f & ::xml_schema::Flags::base) == 0)
+      {
+        ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+        this->parse (p, f);
+      }
+    }
+
+    void ShapeHistories::
+    parse (::xsd::cxx::xml::dom::parser< char >& p,
+           ::xml_schema::Flags f)
+    {
+      for (; p.more_content (); p.next_content (false))
+      {
+        const ::xercesc::DOMElement& i (p.cur_element ());
+        const ::xsd::cxx::xml::qualified_name< char > n (
+          ::xsd::cxx::xml::dom::name< char > (i));
+
+        // array
+        //
+        if (n.name () == "array" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< ArrayType > r (
+            ArrayTraits::create (i, f, this));
+
+          this->array_.push_back (::std::move (r));
+          continue;
+        }
+
+        break;
+      }
+    }
+
+    ShapeHistories* ShapeHistories::
+    _clone (::xml_schema::Flags f,
+            ::xml_schema::Container* c) const
+    {
+      return new class ShapeHistories (*this, f, c);
+    }
+
+    ShapeHistories& ShapeHistories::
+    operator= (const ShapeHistories& x)
+    {
+      if (this != &x)
+      {
+        static_cast< ::xml_schema::Type& > (*this) = x;
+        this->array_ = x.array_;
+      }
+
+      return *this;
+    }
+
+    ShapeHistories::
+    ~ShapeHistories ()
+    {
+    }
   }
 }
 
@@ -956,6 +1060,26 @@ namespace prj
             e));
 
         s << i.edges ();
+      }
+    }
+
+    void
+    operator<< (::xercesc::DOMElement& e, const ShapeHistories& i)
+    {
+      e << static_cast< const ::xml_schema::Type& > (i);
+
+      // array
+      //
+      for (ShapeHistories::ArrayConstIterator
+           b (i.array ().begin ()), n (i.array ().end ());
+           b != n; ++b)
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "array",
+            e));
+
+        s << *b;
       }
     }
   }

@@ -94,13 +94,13 @@ void Subtract::updateModel(const UpdatePayload &payloadIn)
       throw std::runtime_error("shapeCheck failed");
     
     sShape->setOCCTShape(subtracter.Shape());
+    
+    iMapper->go(payloadIn, subtracter.getBuilder(), *sShape);
+    
     sShape->shapeMatch(targetSeerShape);
     for (auto pairIt = payloadIn.updateMap.equal_range(InputType::tool); pairIt.first != pairIt.second; ++pairIt.first)
       sShape->shapeMatch(pairIt.first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape));
     sShape->uniqueTypeMatch(targetSeerShape);
-
-    iMapper->go(payloadIn, subtracter.getBuilder(), *sShape);
-    
     sShape->outerWireMatch(targetSeerShape);
     for (auto pairIt = payloadIn.updateMap.equal_range(InputType::tool); pairIt.first != pairIt.second; ++pairIt.first)
       sShape->outerWireMatch(pairIt.first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape));

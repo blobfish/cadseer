@@ -38,4 +38,10 @@
   </xs:all>
 </xs:complexType>
 
+<xs:complexType name="ShapeHistories">
+  <xs:sequence maxOccurs="unbounded">
+    <xs:element name="array" type="srl:ShapeHistory"/>
+  </xs:sequence>
+</xs:complexType>
+
 </xs:schema> 

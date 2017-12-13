@@ -77,6 +77,7 @@ namespace prj
     class HistoryEdge;
     class HistoryEdges;
     class ShapeHistory;
+    class ShapeHistories;
   }
 }
 
@@ -1105,6 +1106,164 @@ namespace prj
 
       //@endcond
     };
+
+    /**
+     * @brief Class corresponding to the %ShapeHistories schema type.
+     *
+     * @nosubgrouping
+     */
+    class ShapeHistories: public ::xml_schema::Type
+    {
+      public:
+      /**
+       * @name array
+       *
+       * @brief Accessor and modifier functions for the %array
+       * sequence element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::ShapeHistory ArrayType;
+
+      /**
+       * @brief Element sequence container type.
+       */
+      typedef ::xsd::cxx::tree::sequence< ArrayType > ArraySequence;
+
+      /**
+       * @brief Element iterator type.
+       */
+      typedef ArraySequence::iterator ArrayIterator;
+
+      /**
+       * @brief Element constant iterator type.
+       */
+      typedef ArraySequence::const_iterator ArrayConstIterator;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< ArrayType, char > ArrayTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element
+       * sequence.
+       *
+       * @return A constant reference to the sequence container.
+       */
+      const ArraySequence&
+      array () const;
+
+      /**
+       * @brief Return a read-write reference to the element sequence.
+       *
+       * @return A reference to the sequence container.
+       */
+      ArraySequence&
+      array ();
+
+      /**
+       * @brief Copy elements from a given sequence.
+       *
+       * @param s A sequence to copy elements from.
+       *
+       * For each element in @a s this function makes a copy and adds it 
+       * to the sequence. Note that this operation completely changes the 
+       * sequence and all old elements will be lost.
+       */
+      void
+      array (const ArraySequence& s);
+
+      //@}
+
+      /**
+       * @name Constructors
+       */
+      //@{
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes.
+       */
+      ShapeHistories ();
+
+      /**
+       * @brief Create an instance from a DOM element.
+       *
+       * @param e A DOM element to extract the data from.
+       * @param f Flags to create the new instance with.
+       * @param c A pointer to the object that will contain the new
+       * instance.
+       */
+      ShapeHistories (const ::xercesc::DOMElement& e,
+                      ::xml_schema::Flags f = 0,
+                      ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy constructor.
+       *
+       * @param x An instance to make a copy of.
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      ShapeHistories (const ShapeHistories& x,
+                      ::xml_schema::Flags f = 0,
+                      ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy the instance polymorphically.
+       *
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       * @return A pointer to the dynamically allocated copy.
+       *
+       * This function ensures that the dynamic type of the instance is
+       * used for copying and should be used for polymorphic object
+       * models instead of the copy constructor.
+       */
+      virtual ShapeHistories*
+      _clone (::xml_schema::Flags f = 0,
+              ::xml_schema::Container* c = 0) const;
+
+      /**
+       * @brief Copy assignment operator.
+       *
+       * @param x An instance to make a copy of.
+       * @return A reference to itself.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      ShapeHistories&
+      operator= (const ShapeHistories& x);
+
+      //@}
+
+      /**
+       * @brief Destructor.
+       */
+      virtual 
+      ~ShapeHistories ();
+
+      // Implementation.
+      //
+
+      //@cond
+
+      protected:
+      void
+      parse (::xsd::cxx::xml::dom::parser< char >&,
+             ::xml_schema::Flags);
+
+      protected:
+      ArraySequence array_;
+
+      //@endcond
+    };
   }
 }
 
@@ -1147,6 +1306,9 @@ namespace prj
 
     void
     operator<< (::xercesc::DOMElement&, const ShapeHistory&);
+
+    void
+    operator<< (::xercesc::DOMElement&, const ShapeHistories&);
   }
 }
 

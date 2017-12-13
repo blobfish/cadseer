@@ -91,10 +91,16 @@ namespace prj
     class EdgeNodes;
     class EdgeSplit;
     class EdgeSplits;
+    class IntersectionNode;
+    class IntersectionNodes;
+    class EdgeIntersection;
+    class EdgeIntersections;
     class FaceNode;
     class FaceNodes;
     class FaceSplit;
     class FaceSplits;
+    class SameDomain;
+    class SameDomains;
     class IntersectionMapper;
     class ColorValue;
     class Color;
@@ -5417,9 +5423,9 @@ namespace prj
     {
       public:
       /**
-       * @name faceHistory1
+       * @name edgeHistory
        *
-       * @brief Accessor and modifier functions for the %faceHistory1
+       * @brief Accessor and modifier functions for the %edgeHistory
        * required element.
        */
       //@{
@@ -5427,28 +5433,28 @@ namespace prj
       /**
        * @brief Element type.
        */
-      typedef ::prj::srl::ShapeHistory FaceHistory1Type;
+      typedef ::prj::srl::ShapeHistory EdgeHistoryType;
 
       /**
        * @brief Element traits type.
        */
-      typedef ::xsd::cxx::tree::traits< FaceHistory1Type, char > FaceHistory1Traits;
+      typedef ::xsd::cxx::tree::traits< EdgeHistoryType, char > EdgeHistoryTraits;
 
       /**
        * @brief Return a read-only (constant) reference to the element.
        *
        * @return A constant reference to the element.
        */
-      const FaceHistory1Type&
-      faceHistory1 () const;
+      const EdgeHistoryType&
+      edgeHistory () const;
 
       /**
        * @brief Return a read-write reference to the element.
        *
        * @return A reference to the element.
        */
-      FaceHistory1Type&
-      faceHistory1 ();
+      EdgeHistoryType&
+      edgeHistory ();
 
       /**
        * @brief Set the element value.
@@ -5459,7 +5465,7 @@ namespace prj
        * the new value of the element.
        */
       void
-      faceHistory1 (const FaceHistory1Type& x);
+      edgeHistory (const EdgeHistoryType& x);
 
       /**
        * @brief Set the element value without copying.
@@ -5470,65 +5476,7 @@ namespace prj
        * instead of making a copy.
        */
       void
-      faceHistory1 (::std::unique_ptr< FaceHistory1Type > p);
-
-      //@}
-
-      /**
-       * @name faceHistory2
-       *
-       * @brief Accessor and modifier functions for the %faceHistory2
-       * required element.
-       */
-      //@{
-
-      /**
-       * @brief Element type.
-       */
-      typedef ::prj::srl::ShapeHistory FaceHistory2Type;
-
-      /**
-       * @brief Element traits type.
-       */
-      typedef ::xsd::cxx::tree::traits< FaceHistory2Type, char > FaceHistory2Traits;
-
-      /**
-       * @brief Return a read-only (constant) reference to the element.
-       *
-       * @return A constant reference to the element.
-       */
-      const FaceHistory2Type&
-      faceHistory2 () const;
-
-      /**
-       * @brief Return a read-write reference to the element.
-       *
-       * @return A reference to the element.
-       */
-      FaceHistory2Type&
-      faceHistory2 ();
-
-      /**
-       * @brief Set the element value.
-       *
-       * @param x A new value to set.
-       *
-       * This function makes a copy of its argument and sets it as
-       * the new value of the element.
-       */
-      void
-      faceHistory2 (const FaceHistory2Type& x);
-
-      /**
-       * @brief Set the element value without copying.
-       *
-       * @param p A new value to use.
-       *
-       * This function will try to use the passed value directly
-       * instead of making a copy.
-       */
-      void
-      faceHistory2 (::std::unique_ptr< FaceHistory2Type > p);
+      edgeHistory (::std::unique_ptr< EdgeHistoryType > p);
 
       //@}
 
@@ -5599,8 +5547,7 @@ namespace prj
        * @brief Create an instance from the ultimate base and
        * initializers for required elements and attributes.
        */
-      EdgeSplit (const FaceHistory1Type&,
-                 const FaceHistory2Type&,
+      EdgeSplit (const EdgeHistoryType&,
                  const NodesType&);
 
       /**
@@ -5611,8 +5558,7 @@ namespace prj
        * This constructor will try to use the passed values directly
        * instead of making copies.
        */
-      EdgeSplit (::std::unique_ptr< FaceHistory1Type >,
-                 ::std::unique_ptr< FaceHistory2Type >,
+      EdgeSplit (::std::unique_ptr< EdgeHistoryType >,
                  ::std::unique_ptr< NodesType >);
 
       /**
@@ -5685,8 +5631,7 @@ namespace prj
              ::xml_schema::Flags);
 
       protected:
-      ::xsd::cxx::tree::one< FaceHistory1Type > faceHistory1_;
-      ::xsd::cxx::tree::one< FaceHistory2Type > faceHistory2_;
+      ::xsd::cxx::tree::one< EdgeHistoryType > edgeHistory_;
       ::xsd::cxx::tree::one< NodesType > nodes_;
 
       //@endcond
@@ -5833,6 +5778,915 @@ namespace prj
        */
       virtual 
       ~EdgeSplits ();
+
+      // Implementation.
+      //
+
+      //@cond
+
+      protected:
+      void
+      parse (::xsd::cxx::xml::dom::parser< char >&,
+             ::xml_schema::Flags);
+
+      protected:
+      ArraySequence array_;
+
+      //@endcond
+    };
+
+    /**
+     * @brief Class corresponding to the %IntersectionNode schema type.
+     *
+     * @nosubgrouping
+     */
+    class IntersectionNode: public ::xml_schema::Type
+    {
+      public:
+      /**
+       * @name edgeId
+       *
+       * @brief Accessor and modifier functions for the %edgeId
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::xml_schema::String EdgeIdType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< EdgeIdType, char > EdgeIdTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const EdgeIdType&
+      edgeId () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      EdgeIdType&
+      edgeId ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      edgeId (const EdgeIdType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      edgeId (::std::unique_ptr< EdgeIdType > p);
+
+      /**
+       * @brief Return the default value for the element.
+       *
+       * @return A read-only (constant) reference to the element's
+       * default value.
+       */
+      static const EdgeIdType&
+      edgeId_default_value ();
+
+      //@}
+
+      /**
+       * @name centerX
+       *
+       * @brief Accessor and modifier functions for the %centerX
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::xml_schema::Double CenterXType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< CenterXType, char, ::xsd::cxx::tree::schema_type::double_ > CenterXTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const CenterXType&
+      centerX () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      CenterXType&
+      centerX ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      centerX (const CenterXType& x);
+
+      //@}
+
+      /**
+       * @name centerY
+       *
+       * @brief Accessor and modifier functions for the %centerY
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::xml_schema::Double CenterYType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< CenterYType, char, ::xsd::cxx::tree::schema_type::double_ > CenterYTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const CenterYType&
+      centerY () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      CenterYType&
+      centerY ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      centerY (const CenterYType& x);
+
+      //@}
+
+      /**
+       * @name alive
+       *
+       * @brief Accessor and modifier functions for the %alive
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::xml_schema::Boolean AliveType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< AliveType, char > AliveTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const AliveType&
+      alive () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      AliveType&
+      alive ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      alive (const AliveType& x);
+
+      //@}
+
+      /**
+       * @name Constructors
+       */
+      //@{
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes.
+       */
+      IntersectionNode (const EdgeIdType&,
+                        const CenterXType&,
+                        const CenterYType&,
+                        const AliveType&);
+
+      /**
+       * @brief Create an instance from a DOM element.
+       *
+       * @param e A DOM element to extract the data from.
+       * @param f Flags to create the new instance with.
+       * @param c A pointer to the object that will contain the new
+       * instance.
+       */
+      IntersectionNode (const ::xercesc::DOMElement& e,
+                        ::xml_schema::Flags f = 0,
+                        ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy constructor.
+       *
+       * @param x An instance to make a copy of.
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      IntersectionNode (const IntersectionNode& x,
+                        ::xml_schema::Flags f = 0,
+                        ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy the instance polymorphically.
+       *
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       * @return A pointer to the dynamically allocated copy.
+       *
+       * This function ensures that the dynamic type of the instance is
+       * used for copying and should be used for polymorphic object
+       * models instead of the copy constructor.
+       */
+      virtual IntersectionNode*
+      _clone (::xml_schema::Flags f = 0,
+              ::xml_schema::Container* c = 0) const;
+
+      /**
+       * @brief Copy assignment operator.
+       *
+       * @param x An instance to make a copy of.
+       * @return A reference to itself.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      IntersectionNode&
+      operator= (const IntersectionNode& x);
+
+      //@}
+
+      /**
+       * @brief Destructor.
+       */
+      virtual 
+      ~IntersectionNode ();
+
+      // Implementation.
+      //
+
+      //@cond
+
+      protected:
+      void
+      parse (::xsd::cxx::xml::dom::parser< char >&,
+             ::xml_schema::Flags);
+
+      protected:
+      ::xsd::cxx::tree::one< EdgeIdType > edgeId_;
+      static const EdgeIdType edgeId_default_value_;
+      ::xsd::cxx::tree::one< CenterXType > centerX_;
+      ::xsd::cxx::tree::one< CenterYType > centerY_;
+      ::xsd::cxx::tree::one< AliveType > alive_;
+
+      //@endcond
+    };
+
+    /**
+     * @brief Class corresponding to the %IntersectionNodes schema type.
+     *
+     * @nosubgrouping
+     */
+    class IntersectionNodes: public ::xml_schema::Type
+    {
+      public:
+      /**
+       * @name array
+       *
+       * @brief Accessor and modifier functions for the %array
+       * sequence element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::IntersectionNode ArrayType;
+
+      /**
+       * @brief Element sequence container type.
+       */
+      typedef ::xsd::cxx::tree::sequence< ArrayType > ArraySequence;
+
+      /**
+       * @brief Element iterator type.
+       */
+      typedef ArraySequence::iterator ArrayIterator;
+
+      /**
+       * @brief Element constant iterator type.
+       */
+      typedef ArraySequence::const_iterator ArrayConstIterator;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< ArrayType, char > ArrayTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element
+       * sequence.
+       *
+       * @return A constant reference to the sequence container.
+       */
+      const ArraySequence&
+      array () const;
+
+      /**
+       * @brief Return a read-write reference to the element sequence.
+       *
+       * @return A reference to the sequence container.
+       */
+      ArraySequence&
+      array ();
+
+      /**
+       * @brief Copy elements from a given sequence.
+       *
+       * @param s A sequence to copy elements from.
+       *
+       * For each element in @a s this function makes a copy and adds it 
+       * to the sequence. Note that this operation completely changes the 
+       * sequence and all old elements will be lost.
+       */
+      void
+      array (const ArraySequence& s);
+
+      //@}
+
+      /**
+       * @name Constructors
+       */
+      //@{
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes.
+       */
+      IntersectionNodes ();
+
+      /**
+       * @brief Create an instance from a DOM element.
+       *
+       * @param e A DOM element to extract the data from.
+       * @param f Flags to create the new instance with.
+       * @param c A pointer to the object that will contain the new
+       * instance.
+       */
+      IntersectionNodes (const ::xercesc::DOMElement& e,
+                         ::xml_schema::Flags f = 0,
+                         ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy constructor.
+       *
+       * @param x An instance to make a copy of.
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      IntersectionNodes (const IntersectionNodes& x,
+                         ::xml_schema::Flags f = 0,
+                         ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy the instance polymorphically.
+       *
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       * @return A pointer to the dynamically allocated copy.
+       *
+       * This function ensures that the dynamic type of the instance is
+       * used for copying and should be used for polymorphic object
+       * models instead of the copy constructor.
+       */
+      virtual IntersectionNodes*
+      _clone (::xml_schema::Flags f = 0,
+              ::xml_schema::Container* c = 0) const;
+
+      /**
+       * @brief Copy assignment operator.
+       *
+       * @param x An instance to make a copy of.
+       * @return A reference to itself.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      IntersectionNodes&
+      operator= (const IntersectionNodes& x);
+
+      //@}
+
+      /**
+       * @brief Destructor.
+       */
+      virtual 
+      ~IntersectionNodes ();
+
+      // Implementation.
+      //
+
+      //@cond
+
+      protected:
+      void
+      parse (::xsd::cxx::xml::dom::parser< char >&,
+             ::xml_schema::Flags);
+
+      protected:
+      ArraySequence array_;
+
+      //@endcond
+    };
+
+    /**
+     * @brief Class corresponding to the %EdgeIntersection schema type.
+     *
+     * @nosubgrouping
+     */
+    class EdgeIntersection: public ::xml_schema::Type
+    {
+      public:
+      /**
+       * @name faceHistory1
+       *
+       * @brief Accessor and modifier functions for the %faceHistory1
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::ShapeHistory FaceHistory1Type;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< FaceHistory1Type, char > FaceHistory1Traits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const FaceHistory1Type&
+      faceHistory1 () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      FaceHistory1Type&
+      faceHistory1 ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      faceHistory1 (const FaceHistory1Type& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      faceHistory1 (::std::unique_ptr< FaceHistory1Type > p);
+
+      //@}
+
+      /**
+       * @name faceHistory2
+       *
+       * @brief Accessor and modifier functions for the %faceHistory2
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::ShapeHistory FaceHistory2Type;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< FaceHistory2Type, char > FaceHistory2Traits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const FaceHistory2Type&
+      faceHistory2 () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      FaceHistory2Type&
+      faceHistory2 ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      faceHistory2 (const FaceHistory2Type& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      faceHistory2 (::std::unique_ptr< FaceHistory2Type > p);
+
+      //@}
+
+      /**
+       * @name nodes
+       *
+       * @brief Accessor and modifier functions for the %nodes
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::IntersectionNodes NodesType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< NodesType, char > NodesTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const NodesType&
+      nodes () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      NodesType&
+      nodes ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      nodes (const NodesType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      nodes (::std::unique_ptr< NodesType > p);
+
+      //@}
+
+      /**
+       * @name Constructors
+       */
+      //@{
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes.
+       */
+      EdgeIntersection (const FaceHistory1Type&,
+                        const FaceHistory2Type&,
+                        const NodesType&);
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes
+       * (::std::unique_ptr version).
+       *
+       * This constructor will try to use the passed values directly
+       * instead of making copies.
+       */
+      EdgeIntersection (::std::unique_ptr< FaceHistory1Type >,
+                        ::std::unique_ptr< FaceHistory2Type >,
+                        ::std::unique_ptr< NodesType >);
+
+      /**
+       * @brief Create an instance from a DOM element.
+       *
+       * @param e A DOM element to extract the data from.
+       * @param f Flags to create the new instance with.
+       * @param c A pointer to the object that will contain the new
+       * instance.
+       */
+      EdgeIntersection (const ::xercesc::DOMElement& e,
+                        ::xml_schema::Flags f = 0,
+                        ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy constructor.
+       *
+       * @param x An instance to make a copy of.
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      EdgeIntersection (const EdgeIntersection& x,
+                        ::xml_schema::Flags f = 0,
+                        ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy the instance polymorphically.
+       *
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       * @return A pointer to the dynamically allocated copy.
+       *
+       * This function ensures that the dynamic type of the instance is
+       * used for copying and should be used for polymorphic object
+       * models instead of the copy constructor.
+       */
+      virtual EdgeIntersection*
+      _clone (::xml_schema::Flags f = 0,
+              ::xml_schema::Container* c = 0) const;
+
+      /**
+       * @brief Copy assignment operator.
+       *
+       * @param x An instance to make a copy of.
+       * @return A reference to itself.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      EdgeIntersection&
+      operator= (const EdgeIntersection& x);
+
+      //@}
+
+      /**
+       * @brief Destructor.
+       */
+      virtual 
+      ~EdgeIntersection ();
+
+      // Implementation.
+      //
+
+      //@cond
+
+      protected:
+      void
+      parse (::xsd::cxx::xml::dom::parser< char >&,
+             ::xml_schema::Flags);
+
+      protected:
+      ::xsd::cxx::tree::one< FaceHistory1Type > faceHistory1_;
+      ::xsd::cxx::tree::one< FaceHistory2Type > faceHistory2_;
+      ::xsd::cxx::tree::one< NodesType > nodes_;
+
+      //@endcond
+    };
+
+    /**
+     * @brief Class corresponding to the %EdgeIntersections schema type.
+     *
+     * @nosubgrouping
+     */
+    class EdgeIntersections: public ::xml_schema::Type
+    {
+      public:
+      /**
+       * @name array
+       *
+       * @brief Accessor and modifier functions for the %array
+       * sequence element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::EdgeIntersection ArrayType;
+
+      /**
+       * @brief Element sequence container type.
+       */
+      typedef ::xsd::cxx::tree::sequence< ArrayType > ArraySequence;
+
+      /**
+       * @brief Element iterator type.
+       */
+      typedef ArraySequence::iterator ArrayIterator;
+
+      /**
+       * @brief Element constant iterator type.
+       */
+      typedef ArraySequence::const_iterator ArrayConstIterator;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< ArrayType, char > ArrayTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element
+       * sequence.
+       *
+       * @return A constant reference to the sequence container.
+       */
+      const ArraySequence&
+      array () const;
+
+      /**
+       * @brief Return a read-write reference to the element sequence.
+       *
+       * @return A reference to the sequence container.
+       */
+      ArraySequence&
+      array ();
+
+      /**
+       * @brief Copy elements from a given sequence.
+       *
+       * @param s A sequence to copy elements from.
+       *
+       * For each element in @a s this function makes a copy and adds it 
+       * to the sequence. Note that this operation completely changes the 
+       * sequence and all old elements will be lost.
+       */
+      void
+      array (const ArraySequence& s);
+
+      //@}
+
+      /**
+       * @name Constructors
+       */
+      //@{
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes.
+       */
+      EdgeIntersections ();
+
+      /**
+       * @brief Create an instance from a DOM element.
+       *
+       * @param e A DOM element to extract the data from.
+       * @param f Flags to create the new instance with.
+       * @param c A pointer to the object that will contain the new
+       * instance.
+       */
+      EdgeIntersections (const ::xercesc::DOMElement& e,
+                         ::xml_schema::Flags f = 0,
+                         ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy constructor.
+       *
+       * @param x An instance to make a copy of.
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      EdgeIntersections (const EdgeIntersections& x,
+                         ::xml_schema::Flags f = 0,
+                         ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy the instance polymorphically.
+       *
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       * @return A pointer to the dynamically allocated copy.
+       *
+       * This function ensures that the dynamic type of the instance is
+       * used for copying and should be used for polymorphic object
+       * models instead of the copy constructor.
+       */
+      virtual EdgeIntersections*
+      _clone (::xml_schema::Flags f = 0,
+              ::xml_schema::Container* c = 0) const;
+
+      /**
+       * @brief Copy assignment operator.
+       *
+       * @param x An instance to make a copy of.
+       * @return A reference to itself.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      EdgeIntersections&
+      operator= (const EdgeIntersections& x);
+
+      //@}
+
+      /**
+       * @brief Destructor.
+       */
+      virtual 
+      ~EdgeIntersections ();
 
       // Implementation.
       //
@@ -6769,17 +7623,17 @@ namespace prj
     };
 
     /**
-     * @brief Class corresponding to the %IntersectionMapper schema type.
+     * @brief Class corresponding to the %SameDomain schema type.
      *
      * @nosubgrouping
      */
-    class IntersectionMapper: public ::xml_schema::Type
+    class SameDomain: public ::xml_schema::Type
     {
       public:
       /**
-       * @name edgeSplits
+       * @name id
        *
-       * @brief Accessor and modifier functions for the %edgeSplits
+       * @brief Accessor and modifier functions for the %id
        * required element.
        */
       //@{
@@ -6787,28 +7641,28 @@ namespace prj
       /**
        * @brief Element type.
        */
-      typedef ::prj::srl::EdgeSplits EdgeSplitsType;
+      typedef ::xml_schema::String IdType;
 
       /**
        * @brief Element traits type.
        */
-      typedef ::xsd::cxx::tree::traits< EdgeSplitsType, char > EdgeSplitsTraits;
+      typedef ::xsd::cxx::tree::traits< IdType, char > IdTraits;
 
       /**
        * @brief Return a read-only (constant) reference to the element.
        *
        * @return A constant reference to the element.
        */
-      const EdgeSplitsType&
-      edgeSplits () const;
+      const IdType&
+      id () const;
 
       /**
        * @brief Return a read-write reference to the element.
        *
        * @return A reference to the element.
        */
-      EdgeSplitsType&
-      edgeSplits ();
+      IdType&
+      id ();
 
       /**
        * @brief Set the element value.
@@ -6819,7 +7673,7 @@ namespace prj
        * the new value of the element.
        */
       void
-      edgeSplits (const EdgeSplitsType& x);
+      id (const IdType& x);
 
       /**
        * @brief Set the element value without copying.
@@ -6830,7 +7684,398 @@ namespace prj
        * instead of making a copy.
        */
       void
-      edgeSplits (::std::unique_ptr< EdgeSplitsType > p);
+      id (::std::unique_ptr< IdType > p);
+
+      /**
+       * @brief Return the default value for the element.
+       *
+       * @return A read-only (constant) reference to the element's
+       * default value.
+       */
+      static const IdType&
+      id_default_value ();
+
+      //@}
+
+      /**
+       * @name histories
+       *
+       * @brief Accessor and modifier functions for the %histories
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::ShapeHistories HistoriesType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< HistoriesType, char > HistoriesTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const HistoriesType&
+      histories () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      HistoriesType&
+      histories ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      histories (const HistoriesType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      histories (::std::unique_ptr< HistoriesType > p);
+
+      //@}
+
+      /**
+       * @name Constructors
+       */
+      //@{
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes.
+       */
+      SameDomain (const IdType&,
+                  const HistoriesType&);
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes
+       * (::std::unique_ptr version).
+       *
+       * This constructor will try to use the passed values directly
+       * instead of making copies.
+       */
+      SameDomain (const IdType&,
+                  ::std::unique_ptr< HistoriesType >);
+
+      /**
+       * @brief Create an instance from a DOM element.
+       *
+       * @param e A DOM element to extract the data from.
+       * @param f Flags to create the new instance with.
+       * @param c A pointer to the object that will contain the new
+       * instance.
+       */
+      SameDomain (const ::xercesc::DOMElement& e,
+                  ::xml_schema::Flags f = 0,
+                  ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy constructor.
+       *
+       * @param x An instance to make a copy of.
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      SameDomain (const SameDomain& x,
+                  ::xml_schema::Flags f = 0,
+                  ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy the instance polymorphically.
+       *
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       * @return A pointer to the dynamically allocated copy.
+       *
+       * This function ensures that the dynamic type of the instance is
+       * used for copying and should be used for polymorphic object
+       * models instead of the copy constructor.
+       */
+      virtual SameDomain*
+      _clone (::xml_schema::Flags f = 0,
+              ::xml_schema::Container* c = 0) const;
+
+      /**
+       * @brief Copy assignment operator.
+       *
+       * @param x An instance to make a copy of.
+       * @return A reference to itself.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      SameDomain&
+      operator= (const SameDomain& x);
+
+      //@}
+
+      /**
+       * @brief Destructor.
+       */
+      virtual 
+      ~SameDomain ();
+
+      // Implementation.
+      //
+
+      //@cond
+
+      protected:
+      void
+      parse (::xsd::cxx::xml::dom::parser< char >&,
+             ::xml_schema::Flags);
+
+      protected:
+      ::xsd::cxx::tree::one< IdType > id_;
+      static const IdType id_default_value_;
+      ::xsd::cxx::tree::one< HistoriesType > histories_;
+
+      //@endcond
+    };
+
+    /**
+     * @brief Class corresponding to the %SameDomains schema type.
+     *
+     * @nosubgrouping
+     */
+    class SameDomains: public ::xml_schema::Type
+    {
+      public:
+      /**
+       * @name array
+       *
+       * @brief Accessor and modifier functions for the %array
+       * sequence element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::SameDomain ArrayType;
+
+      /**
+       * @brief Element sequence container type.
+       */
+      typedef ::xsd::cxx::tree::sequence< ArrayType > ArraySequence;
+
+      /**
+       * @brief Element iterator type.
+       */
+      typedef ArraySequence::iterator ArrayIterator;
+
+      /**
+       * @brief Element constant iterator type.
+       */
+      typedef ArraySequence::const_iterator ArrayConstIterator;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< ArrayType, char > ArrayTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element
+       * sequence.
+       *
+       * @return A constant reference to the sequence container.
+       */
+      const ArraySequence&
+      array () const;
+
+      /**
+       * @brief Return a read-write reference to the element sequence.
+       *
+       * @return A reference to the sequence container.
+       */
+      ArraySequence&
+      array ();
+
+      /**
+       * @brief Copy elements from a given sequence.
+       *
+       * @param s A sequence to copy elements from.
+       *
+       * For each element in @a s this function makes a copy and adds it 
+       * to the sequence. Note that this operation completely changes the 
+       * sequence and all old elements will be lost.
+       */
+      void
+      array (const ArraySequence& s);
+
+      //@}
+
+      /**
+       * @name Constructors
+       */
+      //@{
+
+      /**
+       * @brief Create an instance from the ultimate base and
+       * initializers for required elements and attributes.
+       */
+      SameDomains ();
+
+      /**
+       * @brief Create an instance from a DOM element.
+       *
+       * @param e A DOM element to extract the data from.
+       * @param f Flags to create the new instance with.
+       * @param c A pointer to the object that will contain the new
+       * instance.
+       */
+      SameDomains (const ::xercesc::DOMElement& e,
+                   ::xml_schema::Flags f = 0,
+                   ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy constructor.
+       *
+       * @param x An instance to make a copy of.
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      SameDomains (const SameDomains& x,
+                   ::xml_schema::Flags f = 0,
+                   ::xml_schema::Container* c = 0);
+
+      /**
+       * @brief Copy the instance polymorphically.
+       *
+       * @param f Flags to create the copy with.
+       * @param c A pointer to the object that will contain the copy.
+       * @return A pointer to the dynamically allocated copy.
+       *
+       * This function ensures that the dynamic type of the instance is
+       * used for copying and should be used for polymorphic object
+       * models instead of the copy constructor.
+       */
+      virtual SameDomains*
+      _clone (::xml_schema::Flags f = 0,
+              ::xml_schema::Container* c = 0) const;
+
+      /**
+       * @brief Copy assignment operator.
+       *
+       * @param x An instance to make a copy of.
+       * @return A reference to itself.
+       *
+       * For polymorphic object models use the @c _clone function instead.
+       */
+      SameDomains&
+      operator= (const SameDomains& x);
+
+      //@}
+
+      /**
+       * @brief Destructor.
+       */
+      virtual 
+      ~SameDomains ();
+
+      // Implementation.
+      //
+
+      //@cond
+
+      protected:
+      void
+      parse (::xsd::cxx::xml::dom::parser< char >&,
+             ::xml_schema::Flags);
+
+      protected:
+      ArraySequence array_;
+
+      //@endcond
+    };
+
+    /**
+     * @brief Class corresponding to the %IntersectionMapper schema type.
+     *
+     * @nosubgrouping
+     */
+    class IntersectionMapper: public ::xml_schema::Type
+    {
+      public:
+      /**
+       * @name edgeIntersections
+       *
+       * @brief Accessor and modifier functions for the %edgeIntersections
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::EdgeIntersections EdgeIntersectionsType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< EdgeIntersectionsType, char > EdgeIntersectionsTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const EdgeIntersectionsType&
+      edgeIntersections () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      EdgeIntersectionsType&
+      edgeIntersections ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      edgeIntersections (const EdgeIntersectionsType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      edgeIntersections (::std::unique_ptr< EdgeIntersectionsType > p);
 
       //@}
 
@@ -6893,6 +8138,122 @@ namespace prj
       //@}
 
       /**
+       * @name edgeSplits
+       *
+       * @brief Accessor and modifier functions for the %edgeSplits
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::EdgeSplits EdgeSplitsType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< EdgeSplitsType, char > EdgeSplitsTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const EdgeSplitsType&
+      edgeSplits () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      EdgeSplitsType&
+      edgeSplits ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      edgeSplits (const EdgeSplitsType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      edgeSplits (::std::unique_ptr< EdgeSplitsType > p);
+
+      //@}
+
+      /**
+       * @name sameDomains
+       *
+       * @brief Accessor and modifier functions for the %sameDomains
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::SameDomains SameDomainsType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< SameDomainsType, char > SameDomainsTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const SameDomainsType&
+      sameDomains () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      SameDomainsType&
+      sameDomains ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      sameDomains (const SameDomainsType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      sameDomains (::std::unique_ptr< SameDomainsType > p);
+
+      //@}
+
+      /**
        * @name Constructors
        */
       //@{
@@ -6901,8 +8262,10 @@ namespace prj
        * @brief Create an instance from the ultimate base and
        * initializers for required elements and attributes.
        */
-      IntersectionMapper (const EdgeSplitsType&,
-                          const FaceSplitsType&);
+      IntersectionMapper (const EdgeIntersectionsType&,
+                          const FaceSplitsType&,
+                          const EdgeSplitsType&,
+                          const SameDomainsType&);
 
       /**
        * @brief Create an instance from the ultimate base and
@@ -6912,8 +8275,10 @@ namespace prj
        * This constructor will try to use the passed values directly
        * instead of making copies.
        */
-      IntersectionMapper (::std::unique_ptr< EdgeSplitsType >,
-                          ::std::unique_ptr< FaceSplitsType >);
+      IntersectionMapper (::std::unique_ptr< EdgeIntersectionsType >,
+                          ::std::unique_ptr< FaceSplitsType >,
+                          ::std::unique_ptr< EdgeSplitsType >,
+                          ::std::unique_ptr< SameDomainsType >);
 
       /**
        * @brief Create an instance from a DOM element.
@@ -6985,8 +8350,10 @@ namespace prj
              ::xml_schema::Flags);
 
       protected:
-      ::xsd::cxx::tree::one< EdgeSplitsType > edgeSplits_;
+      ::xsd::cxx::tree::one< EdgeIntersectionsType > edgeIntersections_;
       ::xsd::cxx::tree::one< FaceSplitsType > faceSplits_;
+      ::xsd::cxx::tree::one< EdgeSplitsType > edgeSplits_;
+      ::xsd::cxx::tree::one< SameDomainsType > sameDomains_;
 
       //@endcond
     };
@@ -8988,6 +10355,18 @@ namespace prj
     operator<< (::xercesc::DOMElement&, const EdgeSplits&);
 
     void
+    operator<< (::xercesc::DOMElement&, const IntersectionNode&);
+
+    void
+    operator<< (::xercesc::DOMElement&, const IntersectionNodes&);
+
+    void
+    operator<< (::xercesc::DOMElement&, const EdgeIntersection&);
+
+    void
+    operator<< (::xercesc::DOMElement&, const EdgeIntersections&);
+
+    void
     operator<< (::xercesc::DOMElement&, const FaceNode&);
 
     void
@@ -8998,6 +10377,12 @@ namespace prj
 
     void
     operator<< (::xercesc::DOMElement&, const FaceSplits&);
+
+    void
+    operator<< (::xercesc::DOMElement&, const SameDomain&);
+
+    void
+    operator<< (::xercesc::DOMElement&, const SameDomains&);
 
     void
     operator<< (::xercesc::DOMElement&, const IntersectionMapper&);

@@ -395,7 +395,6 @@ SET(PROJECT_SOURCES
     project/serial/xsdcxxoutput/featurecylinder.cpp
     project/serial/xsdcxxoutput/featuresphere.cpp
     project/serial/xsdcxxoutput/featurecone.cpp
-    project/serial/xsdcxxoutput/featurebooleanbase.cpp
     project/serial/xsdcxxoutput/featureunion.cpp
     project/serial/xsdcxxoutput/featureintersect.cpp
     project/serial/xsdcxxoutput/featuresubtract.cpp

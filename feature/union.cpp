@@ -94,13 +94,13 @@ void Union::updateModel(const UpdatePayload &payloadIn)
       throw std::runtime_error("shapeCheck failed");
     
     sShape->setOCCTShape(fuser.Shape());
+    
+    iMapper->go(payloadIn, fuser.getBuilder(), *sShape);
+    
     sShape->shapeMatch(targetSeerShape);
     for (auto pairIt = payloadIn.updateMap.equal_range(InputType::tool); pairIt.first != pairIt.second; ++pairIt.first)
       sShape->shapeMatch(pairIt.first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape));
     sShape->uniqueTypeMatch(targetSeerShape);
-    
-    iMapper->go(payloadIn, fuser.getBuilder(), *sShape);
-    
     sShape->outerWireMatch(targetSeerShape);
     for (auto pairIt = payloadIn.updateMap.equal_range(InputType::tool); pairIt.first != pairIt.second; ++pairIt.first)
       sShape->outerWireMatch(pairIt.first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape));
