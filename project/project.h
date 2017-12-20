@@ -94,6 +94,7 @@ public:
 private:
     void updateLeafStatus();
     void sendConnectMessage(const boost::uuids::uuid &parentIn, const boost::uuids::uuid &childIn, const ftr::InputType &type);
+    void sendDisconnectMessage(const boost::uuids::uuid &parentIn, const boost::uuids::uuid &childIn, const ftr::InputType &type);
     
     std::string saveDirectory;
     void serialWrite();
@@ -115,6 +116,7 @@ private:
     void featureStateChangedDispatched(const msg::Message &);
     void dumpProjectGraphDispatched(const msg::Message &);
     void shownThreeDDispatched(const msg::Message&);
+    void reorderFeatureDispatched(const msg::Message&);
     
     std::unique_ptr<Stow> stow; //think pimpl
 };

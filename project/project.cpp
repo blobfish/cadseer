@@ -316,13 +316,7 @@ void Project::removeFeature(const uuid& idIn)
     auto ce = boost::edge(vertex, *its.first, reversedGraph);
     assert(ce.second);
     
-    msg::Message preMessage(msg::Response | msg::Pre | msg::Remove | msg::Connection);
-    prj::Message pMessage;
-    pMessage.featureId = reversedGraph[*its.first].feature->getId();
-    pMessage.featureId2 = idIn;
-    pMessage.inputType = reversedGraph[ce.first].inputType;
-    preMessage.payload = pMessage;
-    observer->out(preMessage);
+    sendDisconnectMessage(reversedGraph[*its.first].feature->getId(), idIn, reversedGraph[ce.first].inputType);
     
     //make parents have same visible state as the feature being removed.
     if (feature->isVisible3D())
@@ -336,13 +330,7 @@ void Project::removeFeature(const uuid& idIn)
     auto ce = boost::edge(vertex, *its.first, removedGraph);
     assert(ce.second);
     
-    msg::Message preMessage(msg::Response | msg::Pre | msg::Remove | msg::Connection);
-    prj::Message pMessage;
-    pMessage.featureId = idIn;
-    pMessage.featureId2 = removedGraph[*its.first].feature->getId();
-    pMessage.inputType = removedGraph[ce.first].inputType;
-    preMessage.payload = pMessage;
-    observer->out(preMessage);
+    sendDisconnectMessage(idIn, removedGraph[*its.first].feature->getId(), removedGraph[ce.first].inputType);
   }
   
   msg::Message preMessage(msg::Response | msg::Pre | msg::Remove | msg::Feature);
@@ -485,6 +473,17 @@ void Project::sendConnectMessage(const uuid &parentIn, const uuid &childIn, cons
   observer->out(postMessage);
 }
 
+void Project::sendDisconnectMessage(const uuid &parentIn, const uuid &childIn, const ftr::InputType &type)
+{
+  msg::Message preMessage(msg::Response | msg::Pre | msg::Remove | msg::Connection);
+  prj::Message pMessage;
+  pMessage.featureId = parentIn;
+  pMessage.featureId2 = childIn;
+  pMessage.inputType = type;
+  preMessage.payload = pMessage;
+  observer->out(preMessage);
+}
+
 void Project::removeParentTag(const uuid &targetIn, const std::string &tagIn)
 {
   RemovedGraph removedGraph = buildRemovedGraph(stow->graph); //children
@@ -499,14 +498,7 @@ void Project::removeParentTag(const uuid &targetIn, const std::string &tagIn)
     stow->graph[ce.first].inputType.tags.erase(tagIn);
     if (stow->graph[ce.first].inputType.tags.empty())
     {
-      msg::Message preMessage(msg::Response | msg::Pre | msg::Remove | msg::Connection);
-      prj::Message pMessage;
-      pMessage.featureId = reversedGraph[*its.first].feature->getId();
-      pMessage.featureId2 = targetIn;
-      pMessage.inputType = ftr::InputType({tagIn});
-      preMessage.payload = pMessage;
-      observer->out(preMessage);
-      
+      sendDisconnectMessage(reversedGraph[*its.first].feature->getId(), targetIn, ftr::InputType({tagIn}));
       boost::remove_edge(ce.first, stow->graph);
     }
   }
@@ -548,6 +540,9 @@ void Project::setupDispatcher()
   
   mask = msg::Response | msg::View | msg::Show | msg::ThreeD;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::shownThreeDDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Project | msg::Feature | msg::Reorder;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::reorderFeatureDispatched, this, _1)));
 }
 
 void Project::featureStateChangedDispatched(const msg::Message &messageIn)
@@ -734,6 +729,30 @@ void Project::shownThreeDDispatched(const msg::Message &mIn)
     feature->isVisualDirty()
   )
     feature->updateVisual();
+}
+
+void Project::reorderFeatureDispatched(const msg::Message &mIn)
+{
+  const prj::Message &pm = boost::get<prj::Message>(mIn.payload);
+  Vertex ftmv = stow->findVertex(pm.featureId); // feature to move vertex
+  Vertex ftlv = stow->findVertex(pm.featureId2); // feature to land vertex
+  stow->graph[ftmv].feature->setModelDirty();
+  stow->graph[ftlv].feature->setModelDirty();
+  
+  //shouldn't need anymore messages into project.
+  auto block = observer->createBlocker();
+  
+  std::vector<Vertices> fvs = getAllPaths<Graph>(ftmv, ftlv, stow->graph);
+  if (!fvs.empty())
+    std::cout << "forward drag" << std::endl;
+  
+  std::vector<Vertices> rvs = getAllPaths<Graph>(ftlv, ftmv, stow->graph);
+  if (!rvs.empty())
+    std::cout << "reverse drag" << std::endl;
+  
+  //assuming everything went well
+  updateModel();
+  updateVisual();
 }
 
 void Project::setAllVisualDirty()

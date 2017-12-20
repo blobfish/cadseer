@@ -17,9 +17,12 @@
  *
  */
 
+#include <boost/graph/breadth_first_search.hpp>
+
 #include <QTextStream>
 
 #include <tools/idtools.h>
+#include <tools/graphtools.h>
 #include <feature/states.h>
 #include <dagview/stow.h>
 
@@ -60,6 +63,8 @@ textShared(new QGraphicsTextItem())
   stateIconShared->setData(qtd::key, qtd::stateIcon);
   featureIconShared->setData(qtd::key, qtd::featureIcon);
   textShared->setData(qtd::key, qtd::text);
+  
+  pointShared->setFlag(QGraphicsItem::ItemIsMovable, true);
 }
 
 EdgeProperty::EdgeProperty() : connector(new QGraphicsPathItem()), inputType()
@@ -99,6 +104,21 @@ Vertex Stow::findVertex(const RectItem *iIn)
   }
   assert(0); //no vertex with id in prj::Stow::findVertex
   std::cout << "warning: no vertex with RectItem in prj::Stow::findVertex" << std::endl;
+  return NullVertex();
+}
+
+Vertex Stow::findVertex(const QGraphicsEllipseItem *eIn)
+{
+  for (auto its = boost::vertices(graph); its.first != its.second; ++its.first)
+  {
+    if (graph[*its.first].pointShared.get() == eIn)
+    {
+      assert(graph[*its.first].alive);
+      return *its.first;
+    }
+  }
+  assert(0); //no vertex with id in prj::Stow::findVertex
+  std::cout << "warning: no vertex with pointIcon in prj::Stow::findVertex" << std::endl;
   return NullVertex();
 }
 
@@ -155,6 +175,33 @@ std::vector<QGraphicsItem*> Stow::getAllSceneItems(Vertex v)
   out.push_back(graph[v].stateIconShared.get());
   out.push_back(graph[v].featureIconShared.get());
   out.push_back(graph[v].textShared.get());
+  
+  return out;
+}
+
+std::vector<boost::uuids::uuid> Stow::getDropAccepted(Vertex v)
+{
+  //start out real simple and just grab connected vertices.
+  
+  std::vector<Vertex> vs;
+  gu::BFSLimitVisitor<Vertex> lv1(vs);
+  boost::breadth_first_search(graph, v, boost::visitor(lv1));
+  
+  GraphReversed rGraph = boost::make_reverse_graph(graph);
+  gu::BFSLimitVisitor<Vertex> lv2(vs);
+  boost::breadth_first_search(rGraph, v, boost::visitor(lv2));
+  
+  //remove the passed in vertex. Should be in there twice.
+  std::vector<Vertex>::iterator it = std::find(vs.begin(), vs.end(), v);
+  while (it != vs.end())
+  {
+    vs.erase(it);
+    it = std::find(vs.begin(), vs.end(), v);
+  }
+  
+  std::vector<boost::uuids::uuid> out;
+  for (const auto &vert : vs)
+    out.push_back(graph[vert].featureId);
   
   return out;
 }

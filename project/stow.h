@@ -21,6 +21,7 @@
 #define PRJ_STOW_H
 
 #include <memory>
+#include <vector>
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/filtered_graph.hpp>
@@ -30,6 +31,8 @@
 
 #include <feature/states.h>
 #include <feature/inputtype.h>
+#include <tools/graphtools.h>
+#include <globalutilities.h>
 
 namespace msg{class Message; class Observer;}
 namespace ftr{class Base; namespace prm{class Parameter;}}
@@ -89,9 +92,6 @@ namespace prj
     void sendStateMessage(const Vertex&);
   };
   
-  
-  
-  
   //works with straight adjacency iterator. if parent map wanted, pass in reversed graph.
   //dont forget to filter out removed features.
   template<typename G, typename V>
@@ -107,8 +107,6 @@ namespace prj
     }
     return out;
   }
-  
-  
   
   template <typename G>
   struct RemovedFilter
@@ -179,6 +177,38 @@ namespace prj
     }
     const GraphTypeIn *graph;
   };
+  
+  template <typename G, typename V>
+  std::vector<std::vector<V>> getAllPaths(V source, V target, G graph)
+  {
+    //filter
+    std::vector<V> slvs; //source limit vertices 
+    gu::BFSLimitVisitor<V> slv(slvs); //source limit visitor
+    boost::breadth_first_search(graph, source, boost::visitor(slv));
+    
+    typedef boost::reverse_graph<G, G&> RG;
+    RG rGraph = boost::make_reverse_graph(graph);
+    std::vector<V> tlvs; //target limit vertices
+    gu::BFSLimitVisitor<V> tlv(tlvs); //target limit visitor
+    boost::breadth_first_search(rGraph, target, boost::visitor(tlv));
+    
+    std::vector<V> lvs; //limit vertices
+    gu::uniquefy(slvs); //need sort for set intersection
+    gu::uniquefy(tlvs); //need sort for set intersection
+    std::set_intersection(slvs.begin(), slvs.end(), tlvs.begin(), tlvs.end(), std::back_inserter(lvs));
+    
+    //path search algorithm expects at 1 root and 1 leaf.
+    if (lvs.size() < 2)
+      return std::vector<std::vector<V>>(); 
+    
+    //filter on the accumulated vertexes.
+    gu::SubsetFilter<G> vertexFilter(graph, lvs);
+    typedef boost::filtered_graph<G, boost::keep_all, gu::SubsetFilter<G> > FilteredGraph;
+    FilteredGraph fg(graph, boost::keep_all(), vertexFilter);
+    
+    gu::PathSearch<FilteredGraph> ps(fg);
+    return ps.getPaths();
+  }
 }
 
 #endif // PRJ_STOW_H

@@ -151,11 +151,14 @@ namespace dag
     void writeGraphViz(const std::string &fileName){outputGraphviz<Graph>(graph, fileName);}
     Vertex findVertex(const boost::uuids::uuid&);
     Vertex findVertex(const RectItem*);
+    Vertex findVertex(const QGraphicsEllipseItem*);
     Vertex findVisibleVertex(const QGraphicsPixmapItem*);
     Vertex findOverlayVertex(const QGraphicsPixmapItem*);
     
     std::vector<Vertex> getAllSelected();
     std::vector<QGraphicsItem*> getAllSceneItems(Vertex);
+    
+    std::vector<boost::uuids::uuid> getDropAccepted(Vertex); //!< find connected vertices that vertex can be dropped upon.
     
     Graph graph;
   };

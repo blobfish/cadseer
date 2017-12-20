@@ -54,8 +54,8 @@ namespace dag
   
   class Stow;
   class RectItem;
-  // kind of a hack to keep graph definition out
-  typedef unsigned long Vertex;
+  typedef unsigned long Vertex; //!< kind of a hack to keep graph definition out
+  struct DragData;
   
   class Model : public QGraphicsScene
   {
@@ -67,6 +67,7 @@ namespace dag
   protected:
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     virtual void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent*) override;
     virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
     virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
     
@@ -151,6 +152,9 @@ namespace dag
     QAction *editingFinishedAction;
     QGraphicsProxyWidget *proxy = nullptr;
     void finishRename();
+    
+    std::shared_ptr<DragData> dragData; //!< valid means a drag in progress.
+
 //     
 //     //filters
 //     void setupFilters();

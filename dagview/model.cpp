@@ -18,6 +18,7 @@
  */
 
 #include <iostream>
+#include <cassert>
 
 #include <boost/graph/topological_sort.hpp>
 #include <boost/graph/breadth_first_search.hpp>
@@ -31,6 +32,7 @@
 #include <QGraphicsRectItem>
 #include <QGraphicsSceneHoverEvent>
 #include <QGraphicsProxyWidget>
+#include <QGraphicsView>
 #include <QPen>
 #include <QBrush>
 #include <QColor>
@@ -56,6 +58,8 @@
 #include <dagview/rectitem.h>
 #include <dagview/stow.h>
 #include <dagview/model.h>
+
+using boost::uuids::uuid;
 
 using namespace dag;
 
@@ -101,6 +105,15 @@ void LineEdit::focusOutEvent(QFocusEvent *e)
 //   this->scene()->invalidate(this->sceneTransform().inverted().mapRect(this->boundingRect()));
 //   update(boundingRect());
 //note: I haven't tried this again since I turned BSP off.
+
+namespace dag
+{
+  struct DragData
+  {
+    uuid featureId = gu::createNilId();
+    std::vector<uuid> acceptedList;
+  };
+}
 
 Model::Model(QObject *parentIn) : QGraphicsScene(parentIn), stow(new Stow())
 {
@@ -837,6 +850,8 @@ RectItem* Model::getRectFromPosition(const QPointF& position)
 
 void Model::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
+  QGraphicsScene::mouseMoveEvent(event);
+  
   auto clearPrehighlight = [this]()
   {
     if (!currentPrehighlight)
@@ -870,19 +885,48 @@ void Model::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
   };
   
   RectItem *rect = getRectFromPosition(event->scenePos());
-  if (rect == currentPrehighlight)
-    return;
-  clearPrehighlight();
-  if (!rect)
-    return;
   
-  setPrehighlight(rect);
-  
-  QGraphicsScene::mouseMoveEvent(event);
+  if (dragData)
+  {
+    QGraphicsView *qgv = this->views().front();
+    if (rect)
+    {
+      Vertex rv = stow->findVertex(rect);
+      if (rv != NullVertex())
+      {
+        uuid tid = stow->graph[rv].featureId;
+        if (std::find(dragData->acceptedList.begin(), dragData->acceptedList.end(), tid) != dragData->acceptedList.end())
+        {
+          //set accepted icon.
+          qgv->setCursor(Qt::DragMoveCursor);
+        }
+        else
+        {
+          qgv->setCursor(Qt::ForbiddenCursor);
+        }
+      }
+      else
+        qgv->setCursor(Qt::ForbiddenCursor);
+    }
+    else
+      qgv->setCursor(Qt::ForbiddenCursor);
+  }
+  else
+  {
+    if (rect == currentPrehighlight)
+      return;
+    clearPrehighlight();
+    if (!rect)
+      return;
+    
+    setPrehighlight(rect);
+  }
 }
 
 void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
+  QGraphicsScene::mousePressEvent(event); //make sure we don't skip this.
+  
   auto select = [this](const boost::uuids::uuid &featureIdIn, msg::Mask actionIn)
   {
     assert((actionIn == msg::Add) || (actionIn == msg::Remove));
@@ -920,7 +964,7 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
     }
   };
   
-  auto toggleSelect = [this, select, getFeatureIdFromRect](RectItem *rectIn)
+  auto toggleSelect = [select, getFeatureIdFromRect](RectItem *rectIn)
   {
     if (rectIn->isSelected())
       select(getFeatureIdFromRect(rectIn), msg::Remove);
@@ -970,6 +1014,26 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
       
       return;
     }
+    else if (currentType == qtd::point)
+    {
+      QGraphicsEllipseItem *ellipse = dynamic_cast<QGraphicsEllipseItem *>(theItems.front());
+      assert(ellipse);
+      
+      Vertex vertex = stow->findVertex(ellipse);
+      if (vertex == NullVertex())
+        return;
+      
+      assert(!dragData);
+      dragData = std::shared_ptr<DragData>(new DragData());
+      dragData->featureId = stow->graph[vertex].featureId;
+      dragData->acceptedList = stow->getDropAccepted(vertex);
+      
+      observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
+      
+      return;
+    }
+    
+    //now going with selection.
     RectItem *rect = getRectFromPosition(event->scenePos());
     if (rect)
     {
@@ -990,8 +1054,48 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
     message.payload = sMessage;
     observer->out(message);
   }
+}
+
+void Model::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
+{
+  QGraphicsScene::mouseReleaseEvent(e); //make sure we don't skip this.
   
-  QGraphicsScene::mousePressEvent(event);
+  if ((e->button() == Qt::LeftButton) && dragData)
+  {
+    //drag operation sets the ellipse xy location. set it back.
+    Vertex dv = stow->findVertex(dragData->featureId);
+    stow->graph[dv].pointShared->setX(0.0);
+    stow->graph[dv].pointShared->setY(0.0);
+    
+    RectItem *rect = getRectFromPosition(e->scenePos());
+    if (rect)
+    {
+      Vertex rv = stow->findVertex(rect);
+      if (rv != NullVertex())
+      {
+        uuid tid = stow->graph[rv].featureId;
+        if (std::find(dragData->acceptedList.begin(), dragData->acceptedList.end(), tid) != dragData->acceptedList.end())
+        {
+          prj::Message pmOut;
+          pmOut.featureId = dragData->featureId;
+          pmOut.featureId2 = tid;
+          msg::Message mOut(msg::Mask(msg::Request | msg::Project | msg::Feature | msg::Reorder), pmOut);
+          observer->out(mOut);
+        }
+        else
+          projectUpdatedDispatched(msg::Message());
+      }
+      else
+        projectUpdatedDispatched(msg::Message());
+    }
+    else
+      projectUpdatedDispatched(msg::Message());
+    
+    //take action.
+    QGraphicsView *qgv = this->views().front();
+    qgv->setCursor(Qt::ArrowCursor);
+    dragData.reset();
+  }
 }
 
 void Model::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)

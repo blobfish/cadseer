@@ -134,6 +134,7 @@ namespace msg
     static const Mask DAG(Mask().set(                           94));//!< descriptor move up
     static const Mask Dirty(Mask().set(                         95));//!< command
     static const Mask Refine(Mask().set(                        96));//!< command
+    static const Mask Reorder(Mask().set(                       97));//!< project action. move up.
   
     typedef boost::variant
     <
