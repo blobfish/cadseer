@@ -55,6 +55,7 @@ namespace prj
   typedef boost::graph_traits<Graph>::vertex_iterator VertexIterator;
   typedef boost::graph_traits<Graph>::edge_iterator EdgeIterator;
   typedef std::vector<Vertex> Vertices;
+  typedef std::vector<Edge> Edges;
   inline Vertex NullVertex()
   {
     return boost::graph_traits<Graph>::null_vertex();
@@ -67,7 +68,11 @@ namespace prj
     ~Stow();
     
     Vertex addFeature(std::shared_ptr<ftr::Base> feature);
-    Edge connect(Vertex parentIn, Vertex childIn, const ftr::InputType &type);
+    Edge connect(const Vertex &parentIn, const Vertex &childIn, const ftr::InputType &type);
+    void sendConnectMessage(const Vertex&, const Vertex&, const ftr::InputType&) const;
+    void disconnect(const Edge&);
+    void sendDisconnectMessage(const Vertex&, const Vertex&, const ftr::InputType&) const;
+    void removeEdges(Edges);
     
     bool hasFeature(const boost::uuids::uuid &idIn) const;
     ftr::Base* findFeature(const boost::uuids::uuid &) const;

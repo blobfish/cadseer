@@ -1011,7 +1011,11 @@ void CheckGeometry::featureRemovedDispatched(const msg::Message &messageIn)
   
   prj::Message message = boost::get<prj::Message>(messageIn.payload);
   
-  if (message.featureId == feature.getId())
+  if
+  (
+    (message.featureIds.size() == 1)
+    && (message.featureIds.front() == feature.getId())
+  )
     qApp->postEvent(this, new QCloseEvent());
 }
 

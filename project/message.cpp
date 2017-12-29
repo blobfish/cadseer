@@ -22,6 +22,4 @@
 
 prj::Message::Message()
 {
-  featureId = gu::createNilId();
-  featureId2 = gu::createNilId();
 }

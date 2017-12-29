@@ -30,6 +30,7 @@
 #include <boost/graph/depth_first_search.hpp>
 #include <boost/signals2/shared_connection_block.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/optional.hpp>
 
 #include <BRep_Builder.hxx>
 #include <BRepTools.hxx>
@@ -296,8 +297,6 @@ void Project::removeFeature(const uuid& idIn)
       assert(ce.second);
       
       stow->connect(targetParent, *its.first, removedGraph[ce.first].inputType);
-      sendConnectMessage(removedGraph[targetParent].feature->getId(), removedGraph[*its.first].feature->getId(), removedGraph[ce.first].inputType);
-      
       if (!feature->hasAnnex(ann::Type::SeerShape))
         continue;
       //update ids.
@@ -316,7 +315,7 @@ void Project::removeFeature(const uuid& idIn)
     auto ce = boost::edge(vertex, *its.first, reversedGraph);
     assert(ce.second);
     
-    sendDisconnectMessage(reversedGraph[*its.first].feature->getId(), idIn, reversedGraph[ce.first].inputType);
+    stow->sendDisconnectMessage(*its.first, vertex, reversedGraph[ce.first].inputType);
     
     //make parents have same visible state as the feature being removed.
     if (feature->isVisible3D())
@@ -330,7 +329,7 @@ void Project::removeFeature(const uuid& idIn)
     auto ce = boost::edge(vertex, *its.first, removedGraph);
     assert(ce.second);
     
-    sendDisconnectMessage(idIn, removedGraph[*its.first].feature->getId(), removedGraph[ce.first].inputType);
+    stow->sendDisconnectMessage(vertex, *its.first, removedGraph[ce.first].inputType);
   }
   
   msg::Message preMessage(msg::Response | msg::Pre | msg::Remove | msg::Feature);
@@ -458,30 +457,6 @@ void Project::connect(const boost::uuids::uuid& parentIn, const boost::uuids::uu
   Vertex parent = stow->findVertex(parentIn);
   Vertex child = stow->findVertex(childIn);
   stow->connect(parent, child, type);
-  
-  sendConnectMessage(parentIn, childIn, type);
-}
-
-void Project::sendConnectMessage(const uuid &parentIn, const uuid &childIn, const ftr::InputType &type)
-{
-  msg::Message postMessage(msg::Response | msg::Post | msg::Add | msg::Connection);
-  prj::Message pMessage;
-  pMessage.featureId = parentIn;
-  pMessage.featureId2 = childIn; 
-  pMessage.inputType = type;
-  postMessage.payload = pMessage;
-  observer->out(postMessage);
-}
-
-void Project::sendDisconnectMessage(const uuid &parentIn, const uuid &childIn, const ftr::InputType &type)
-{
-  msg::Message preMessage(msg::Response | msg::Pre | msg::Remove | msg::Connection);
-  prj::Message pMessage;
-  pMessage.featureId = parentIn;
-  pMessage.featureId2 = childIn;
-  pMessage.inputType = type;
-  preMessage.payload = pMessage;
-  observer->out(preMessage);
 }
 
 void Project::removeParentTag(const uuid &targetIn, const std::string &tagIn)
@@ -497,10 +472,7 @@ void Project::removeParentTag(const uuid &targetIn, const std::string &tagIn)
     assert(ce.second);
     stow->graph[ce.first].inputType.tags.erase(tagIn);
     if (stow->graph[ce.first].inputType.tags.empty())
-    {
-      sendDisconnectMessage(reversedGraph[*its.first].feature->getId(), targetIn, ftr::InputType({tagIn}));
-      boost::remove_edge(ce.first, stow->graph);
-    }
+      stow->disconnect(ce.first);
   }
 }
 
@@ -576,7 +548,8 @@ void Project::setCurrentLeafDispatched(const msg::Message &messageIn)
   
   prj::Message message = boost::get<prj::Message>(messageIn.payload);
   //send response signal out 'pre set current feature'.
-  setCurrentLeaf(message.featureId);
+  assert(message.featureIds.size() == 1);
+  setCurrentLeaf(message.featureIds.front());
   //send response signal out 'post set current feature'.
 }
 
@@ -587,7 +560,8 @@ void Project::removeFeatureDispatched(const msg::Message &messageIn)
   msg::dispatch().dumpString(debug.str());
   
   prj::Message message = boost::get<prj::Message>(messageIn.payload);
-  removeFeature(message.featureId);
+  assert(message.featureIds.size() == 1);
+  removeFeature(message.featureIds.front());
 }
 
 void Project::updateDispatched(const msg::Message&)
@@ -734,23 +708,129 @@ void Project::shownThreeDDispatched(const msg::Message &mIn)
 void Project::reorderFeatureDispatched(const msg::Message &mIn)
 {
   const prj::Message &pm = boost::get<prj::Message>(mIn.payload);
-  Vertex ftmv = stow->findVertex(pm.featureId); // feature to move vertex
-  Vertex ftlv = stow->findVertex(pm.featureId2); // feature to land vertex
-  stow->graph[ftmv].feature->setModelDirty();
-  stow->graph[ftlv].feature->setModelDirty();
+  Vertices fvs; //feature vertices.
+  for (const auto &id : pm.featureIds)
+  {
+    fvs.push_back(stow->findVertex(id));
+    stow->graph[fvs.back()].feature->setModelDirty();
+  }
+  assert(fvs.size() == 2 || fvs.size() == 3);
+  if (fvs.size() !=2 && fvs.size() != 3)
+  {
+    std::cout << "Warning: wrong vertex count in Project::reorderFeatureDispatched" << std::endl;
+    return;
+  }
   
   //shouldn't need anymore messages into project.
   auto block = observer->createBlocker();
   
-  std::vector<Vertices> fvs = getAllPaths<Graph>(ftmv, ftlv, stow->graph);
-  if (!fvs.empty())
-    std::cout << "forward drag" << std::endl;
+  /* reorder operation. Real simple For now. This only supports
+   * an edge as the drop target. source node can only have 1
+   * or less in-edge. same is true for out-edge.
+   */
+  struct Reorder
+  {
+    struct DragNode
+    {
+      boost::optional<Vertex> parent;
+      Vertex v;
+      boost::optional<Vertex> child;
+      boost::optional<Edge> oldInEdge;
+      boost::optional<Edge> oldOutEdge;
+    };
+    struct DropNode
+    {
+      Vertex parent;
+      Vertex child;
+      Edge edge;
+    };
+    
+    Reorder() = delete;
+    Reorder(Stow &stowIn, Vertex drag, Edge drop) : stow(stowIn)
+    {
+      if
+      (
+        (boost::in_degree(drag, stow.graph) > 1)
+        || (boost::out_degree(drag, stow.graph) > 1)
+      )
+      {
+        std::cout << "unsupported reorder" << std::endl;
+        return;
+      }
+      
+      dragNode.v = drag;
+      for (auto its = boost::in_edges(drag, stow.graph); its.first != its.second; ++its.first)
+      {
+        dragNode.oldInEdge = *its.first;
+        dragNode.parent = boost::source(*its.first, stow.graph);
+      }
+      for (auto its = boost::out_edges(drag, stow.graph); its.first != its.second; ++its.first)
+      {
+        dragNode.oldOutEdge = *its.first;
+        dragNode.child = boost::target(*its.first, stow.graph);
+      }
+      
+      dropNode.edge = drop;
+      dropNode.parent = boost::source(drop, stow.graph);
+      dropNode.child = boost::target(drop, stow.graph);
+      
+      go();
+    }
+    
+    void go()
+    {
+      //make all new connections.
+      ftr::InputType ph = (dragNode.oldInEdge) ? (stow.graph[*dragNode.oldInEdge].inputType) : (ftr::InputType()); // place holder
+      stow.connect(dropNode.parent, dragNode.v, ph);
+      stow.connect(dragNode.v, dropNode.child, stow.graph[dropNode.edge].inputType);
+      if (dragNode.parent && dragNode.oldOutEdge) //if an out edge then the child vertex is present also.
+        stow.connect(*dragNode.parent, *dragNode.child, stow.graph[*dragNode.oldOutEdge].inputType);
+      //collect old connections for erasure.
+      oldEdges.push_back(dropNode.edge);
+      if (dragNode.oldInEdge)
+        oldEdges.push_back(*dragNode.oldInEdge);
+      if (dragNode.oldOutEdge)
+        oldEdges.push_back(*dragNode.oldOutEdge);
+    }
+    
+    Stow &stow;
+    DragNode dragNode;
+    DropNode dropNode;
+    Edges oldEdges;
+  };
   
-  std::vector<Vertices> rvs = getAllPaths<Graph>(ftlv, ftmv, stow->graph);
-  if (!rvs.empty())
-    std::cout << "reverse drag" << std::endl;
+  if (pm.featureIds.size() == 2) //drop onto vertex.
+  {
+    //first is the feature to move and the last is feature to land.
+    //forward and reverse dictate whether the feature is moved before or after the landing vertex.
+    std::vector<Vertices> fps = getAllPaths<Graph>(fvs.front(), fvs.back(), stow->graph);
+    if (!fps.empty())
+      std::cout << "forward drag with vertex drop" << std::endl;
+    
+    std::vector<Vertices> rps = getAllPaths<Graph>(fvs.back(), fvs.front(), stow->graph);
+    if (!rps.empty())
+      std::cout << "reverse drag with vertex drop" << std::endl;
+  }
+  if (pm.featureIds.size() == 3) //drop onto edge.
+  {
+    //first is the feature to move and the last two are the source and target of edge, respectively.
+    //we don't care about forward and reverse when landing on edge.
+    bool results;
+    Edge ce; //connecting edge.
+    std::tie(ce, results) = boost::edge(fvs.at(1), fvs.back(), stow->graph);
+    assert(results);
+    if (!results)
+    {
+      std::cout << "Warning: couldn't find edge in Project::reorderFeatureDispatched" << std::endl;
+      return;
+    }
+    std::cout << "drag with edge drop" << std::endl;
+    Reorder re(*stow, fvs.front(), ce);
+    stow->removeEdges(re.oldEdges);
+  }
   
-  //assuming everything went well
+  //assuming everything went well.
+  //should I call these here? maybe let source of reorder request call update on the project?
   updateModel();
   updateVisual();
 }

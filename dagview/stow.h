@@ -154,11 +154,19 @@ namespace dag
     Vertex findVertex(const QGraphicsEllipseItem*);
     Vertex findVisibleVertex(const QGraphicsPixmapItem*);
     Vertex findOverlayVertex(const QGraphicsPixmapItem*);
+    Edge findEdge(const QGraphicsPathItem *);
     
     std::vector<Vertex> getAllSelected();
     std::vector<QGraphicsItem*> getAllSceneItems(Vertex);
+    float connectionOffset(Vertex, Edge); //!< parameterized between [-1.0, 1.0]. zero means center of point.
+    void highlightConnectorOn(Edge, const QColor&);
+    void highlightConnectorOn(QGraphicsPathItem *, const QColor&);
+    void highlightConnectorOff(Edge);
+    void highlightConnectorOff(QGraphicsPathItem *);
+    std::vector<Edge> getAllEdges(Vertex); //!< all edges connected to a vertex, both in an out.
     
-    std::vector<boost::uuids::uuid> getDropAccepted(Vertex); //!< find connected vertices that vertex can be dropped upon.
+    
+    std::pair<std::vector<Vertex>, std::vector<Edge>> getDropAccepted(Vertex); //!< find connected vertices that vertex can be dropped upon.
     
     Graph graph;
   };

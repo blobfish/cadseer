@@ -44,7 +44,7 @@ Vertex Stow::addFeature(std::shared_ptr<ftr::Base> feature)
   return newVertex;
 }
 
-Edge Stow::connect(Vertex parentIn, Vertex childIn, const ftr::InputType &type)
+Edge Stow::connect(const Vertex &parentIn, const Vertex &childIn, const ftr::InputType &type)
 {
   assert(graph[parentIn].alive);
   assert(graph[childIn].alive);
@@ -59,7 +59,44 @@ Edge Stow::connect(Vertex parentIn, Vertex childIn, const ftr::InputType &type)
     return newEdge;
   }
   graph[newEdge].inputType += type;
+  sendConnectMessage(parentIn, childIn, type);
   return newEdge;
+}
+
+void Stow::sendConnectMessage(const Vertex &parentIn, const Vertex &childIn, const ftr::InputType &type) const
+{
+  msg::Message postMessage(msg::Response | msg::Post | msg::Add | msg::Connection);
+  prj::Message pMessage;
+  pMessage.featureIds.push_back(graph[parentIn].feature->getId());
+  pMessage.featureIds.push_back(graph[childIn].feature->getId()); 
+  pMessage.inputType = type;
+  postMessage.payload = pMessage;
+  observer->outBlocked(postMessage);
+}
+
+void Stow::disconnect(const Edge &eIn)
+{
+  sendDisconnectMessage(boost::source(eIn, graph), boost::target(eIn, graph), graph[eIn].inputType);
+  boost::remove_edge(eIn, graph);
+}
+
+void Stow::sendDisconnectMessage(const Vertex &parentIn, const Vertex &childIn, const ftr::InputType &type) const
+{
+  msg::Message preMessage(msg::Response | msg::Pre | msg::Remove | msg::Connection);
+  prj::Message pMessage;
+  pMessage.featureIds.push_back(graph[parentIn].feature->getId());
+  pMessage.featureIds.push_back(graph[childIn].feature->getId());
+  pMessage.inputType = type;
+  preMessage.payload = pMessage;
+  observer->out(preMessage);
+}
+
+void Stow::removeEdges(Edges esIn)
+{
+  //don't invalidate.
+  gu::uniquefy(esIn);
+  for (auto it = esIn.rbegin(); it != esIn.rend(); ++it)
+    disconnect(*it);
 }
 
 bool Stow::hasFeature(const boost::uuids::uuid &idIn) const
@@ -178,9 +215,6 @@ void Stow::sendStateMessage(const Vertex &v)
   mMessage.payload = fMessage;
   observer->outBlocked(mMessage);
 }
-
-
-
 
 
 template <class GraphEW>

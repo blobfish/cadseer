@@ -944,7 +944,7 @@ void Factory::removeDispatched(const msg::Message&)
     msg::Message removeMessage;
     removeMessage.mask = msg::Request | msg::Remove | msg::Feature;
     prj::Message payload;
-    payload.featureId = current.featureId;
+    payload.featureIds.push_back(current.featureId);
     removeMessage.payload = payload;
     observer->out(removeMessage);
   }

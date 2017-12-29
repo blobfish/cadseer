@@ -32,8 +32,7 @@ namespace prj
   struct Message
   {
     Message();
-    boost::uuids::uuid featureId;
-    boost::uuids::uuid featureId2;
+    std::vector<boost::uuids::uuid> featureIds;
     std::shared_ptr<ftr::Base> feature;
     ftr::InputType inputType;
     std::string directory;

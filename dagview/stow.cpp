@@ -20,6 +20,7 @@
 #include <boost/graph/breadth_first_search.hpp>
 
 #include <QTextStream>
+#include <QPen>
 
 #include <tools/idtools.h>
 #include <tools/graphtools.h>
@@ -152,6 +153,17 @@ Vertex Stow::findOverlayVertex(const QGraphicsPixmapItem *iIn)
   return NullVertex();
 }
 
+Edge Stow::findEdge(const QGraphicsPathItem *pi) //path item
+{
+  for (auto its = boost::edges(graph); its.first != its.second; ++its.first)
+  {
+    if (graph[*its.first].connector.get() == pi)
+      return *its.first;
+  }
+  assert(0); //couldn't find edge.
+  return Edge(); //what to do here?
+}
+
 std::vector<Vertex> Stow::getAllSelected()
 {
   std::vector<Vertex> out;
@@ -179,7 +191,7 @@ std::vector<QGraphicsItem*> Stow::getAllSceneItems(Vertex v)
   return out;
 }
 
-std::vector<boost::uuids::uuid> Stow::getDropAccepted(Vertex v)
+std::pair<std::vector<Vertex>, std::vector<Edge>> Stow::getDropAccepted(Vertex v)
 {
   //start out real simple and just grab connected vertices.
   
@@ -199,9 +211,101 @@ std::vector<boost::uuids::uuid> Stow::getDropAccepted(Vertex v)
     it = std::find(vs.begin(), vs.end(), v);
   }
   
-  std::vector<boost::uuids::uuid> out;
-  for (const auto &vert : vs)
-    out.push_back(graph[vert].featureId);
+  //filter to get edges.
+  gu::SubsetFilter<Graph> vertexFilter(graph, vs);
+  typedef boost::filtered_graph<Graph, boost::keep_all, gu::SubsetFilter<Graph> > FilteredGraph;
+  FilteredGraph filteredGraph(graph, boost::keep_all(), vertexFilter);
   
+  std::vector<Edge> es; //edges
+  for (auto its = boost::edges(filteredGraph); its.first != its.second; ++its.first)
+    es.push_back(*its.first);
+  
+  return std::make_pair(vs, es);
+}
+
+float Stow::connectionOffset(Vertex v, Edge e)
+{
+  //incoming edges always come from the top, so this works good for that.
+  //outgoing edges can go out left, right or the bottom, so this doesn't work good for that. leaving for now.
+  
+  int edgeIndex = -1; // -1 equals not found.
+  int indexCount = 0;
+  
+  int edgeCount = boost::in_degree(v, graph);
+  for (auto its = boost::in_edges(v, graph); its.first != its.second; ++its.first)
+  {
+    if (*its.first == e)
+    {
+      edgeIndex = indexCount;
+      break;
+    }
+    indexCount++;
+  }
+  
+  if (edgeIndex == -1)
+  {
+    edgeCount = boost::out_degree(v, graph);
+    indexCount = 0;
+    for (auto its = boost::out_edges(v, graph); its.first != its.second; ++its.first)
+    {
+      if (*its.first == e)
+      {
+        edgeIndex = indexCount;
+        break;
+      }
+      indexCount++;
+    }
+  }
+  
+  assert(edgeCount != 0);
+  assert(edgeIndex < edgeCount);
+  if
+  (
+    (edgeIndex < 0) //couldn't find edge
+    || (edgeCount < 2) //1 edge, return center. 0 edges, WTF
+    || (edgeIndex >= edgeCount) //WTF
+  )
+    return 0.0;
+    
+  //2 or more edges.
+  float nos = static_cast<float>(edgeCount) - 1.0; //number of spaces.
+  float s = 2.0 / nos; //space between edges.
+  
+  return -1.0 + (s * static_cast<float>(edgeIndex));
+  
+}
+
+void Stow::highlightConnectorOn(Edge e, const QColor &colorIn)
+{
+  highlightConnectorOn(graph[e].connector.get(), colorIn);
+}
+
+void Stow::highlightConnectorOff(Edge e)
+{
+  highlightConnectorOff(graph[e].connector.get());
+}
+
+void Stow::highlightConnectorOn(QGraphicsPathItem *pi, const QColor &c)
+{
+  QPen pen(c);
+  pen.setWidth(3.0);
+  pi->setPen(pen);
+  pi->setZValue(1.0);
+}
+
+void Stow::highlightConnectorOff(QGraphicsPathItem *pi)
+{
+  pi->setPen(QPen());
+  pi->setZValue(0.0);
+}
+
+std::vector<Edge> Stow::getAllEdges(Vertex v)
+{
+  //is there really no function to get both in and out edges?
+  std::vector<Edge> out;
+  for (auto its = boost::out_edges(v, graph); its.first != its.second; ++its.first)
+    out.push_back(*its.first);
+  for (auto its = boost::in_edges(v, graph); its.first != its.second; ++its.first)
+    out.push_back(*its.first);
   return out;
 }

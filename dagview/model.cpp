@@ -111,7 +111,13 @@ namespace dag
   struct DragData
   {
     uuid featureId = gu::createNilId();
-    std::vector<uuid> acceptedList;
+    std::vector<Vertex> acceptedVertices;
+    std::vector<Edge> acceptedEdges;
+    QGraphicsPathItem *lastHighlight = nullptr;
+    bool isAcceptedEdge(const Edge &eIn)
+    {
+      return std::find(acceptedEdges.begin(), acceptedEdges.end(), eIn) != acceptedEdges.end();
+    }
   };
 }
 
@@ -167,8 +173,8 @@ void Model::setupViewConstants()
   verticalSpacing = 1.0;
   rowHeight = (fontHeight + 2.0 * verticalSpacing) * direction; //pixel space top and bottom.
   iconSize = fontHeight;
-  pointSize = fontHeight / 2.0;
-  pointSpacing = pointSize;
+  pointSize = fontHeight * 0.6;
+  pointSpacing = pointSize * 1.10;
   pointToIcon = iconSize;
   iconToIcon = iconSize * 0.25;
   iconToText = iconSize / 2.0;
@@ -252,8 +258,9 @@ void Model::connectionAddedDispatched(const msg::Message &messageIn)
   
   prj::Message message = boost::get<prj::Message>(messageIn.payload);
   
-  Vertex parentVertex = stow->findVertex(message.featureId);
-  Vertex childVertex = stow->findVertex(message.featureId2);
+  assert(message.featureIds.size() == 2);
+  Vertex parentVertex = stow->findVertex(message.featureIds.front());
+  Vertex childVertex = stow->findVertex(message.featureIds.back());
   if (parentVertex == NullVertex() || childVertex == NullVertex())
     return;
   
@@ -282,8 +289,9 @@ void Model::connectionRemovedDispatched(const msg::Message &messageIn)
   
   prj::Message message = boost::get<prj::Message>(messageIn.payload);
   
-  Vertex parentVertex = stow->findVertex(message.featureId);
-  Vertex childVertex = stow->findVertex(message.featureId2);
+  assert(message.featureIds.size() == 2);
+  Vertex parentVertex = stow->findVertex(message.featureIds.front());
+  Vertex childVertex = stow->findVertex(message.featureIds.back());
   if (parentVertex == NullVertex() || childVertex == NullVertex())
     return;
   
@@ -505,6 +513,8 @@ void Model::selectionAdditionDispatched(const msg::Message &messageIn)
   if (vertex == NullVertex())
     return;
   stow->graph[vertex].rectShared->selectionOn();
+  for (const auto &e : stow->getAllEdges(vertex))
+    stow->highlightConnectorOn(e, stow->graph[vertex].textShared->defaultTextColor());
   
   lastPickValid = true;
   lastPick = stow->graph[vertex].rectShared->mapToScene(stow->graph[vertex].rectShared->rect().center());
@@ -525,6 +535,8 @@ void Model::selectionSubtractionDispatched(const msg::Message &messageIn)
   if (vertex == NullVertex())
     return;
   stow->graph[vertex].rectShared->selectionOff();
+  for (const auto &e : stow->getAllEdges(vertex))
+    stow->highlightConnectorOff(e);
   
   lastPickValid = false;
   
@@ -675,29 +687,36 @@ void Model::projectUpdatedDispatched(const msg::Message &)
     std::tie(parentIt, parentItEnd) = boost::adjacent_vertices(currentVertex, rGraph);
     for (; parentIt != parentItEnd; ++parentIt)
     {
+      bool results;
+      GraphReversed::edge_descriptor edge;
+      std::tie(edge, results) = boost::edge(currentVertex, *parentIt, rGraph);
+      assert(results);
+      
+      //create an offset along x axis to allow separation in multiple edge scenario.
+      Edge forwardEdge;
+      std::tie(forwardEdge, results) = boost::edge(*parentIt, currentVertex, stow->graph);
+      assert(results);
+      float currentXOffset = currentX + pointSize * 0.25 * stow->connectionOffset(currentVertex, forwardEdge);
+      
       //we can't do this when loop through parents above because then we don't
       //know what the column is going to be.
       if (!rGraph[*parentIt].dagVisible)
         continue; //we don't make it here if source isn't visible. So don't have to worry about that.
       float dependentX = pointSpacing * static_cast<int>(columnNumberFromMask(rGraph[*parentIt].columnMask)) + pointSize / 2.0; //on center.
-      float dependentY = rowHeight * rGraph[*parentIt].row + rowHeight / 2.0;
+      float dependentY = rowHeight * rGraph[*parentIt].row + rowHeight / 2.0 + pointSize * 0.25 * stow->connectionOffset(*parentIt, forwardEdge);;
       
-      bool results;
-      GraphReversed::edge_descriptor edge;
-      std::tie(edge, results) = boost::edge(currentVertex, *parentIt, rGraph);
-      assert(results);
       QGraphicsPathItem *pathItem = rGraph[edge].connector.get();
       pathItem->setBrush(Qt::NoBrush);
       QPainterPath path;
-      path.moveTo(currentX, currentY);
+      path.moveTo(currentXOffset, currentY);
       if (currentColumn == columnNumberFromMask(rGraph[*parentIt].columnMask))
-        path.lineTo(currentX, dependentY); //straight connector in y.
+        path.lineTo(currentXOffset, dependentY); //straight connector in y.
       else
       {
         //connector with bend.
         float radius = pointSpacing / 1.9; //no zero length line.
         
-        path.lineTo(currentX, dependentY + radius * direction);
+        path.lineTo(currentXOffset, dependentY + radius * direction);
       
         float yPosition;
         if (direction == -1.0)
@@ -706,14 +725,14 @@ void Model::projectUpdatedDispatched(const msg::Message &)
           yPosition = dependentY;
         float width = 2.0 * radius;
         float height = width;
-        if (dependentX > currentX) //radius to the right.
+        if (dependentX > currentXOffset) //radius to the right.
         {
-          QRectF arcRect(currentX, yPosition, width, height);
+          QRectF arcRect(currentXOffset, yPosition, width, height);
           path.arcTo(arcRect, 180.0, 90.0 * -direction);
         }
         else //radius to the left.
         {
-          QRectF arcRect(currentX - 2.0 * radius, yPosition, width, height);
+          QRectF arcRect(currentXOffset - 2.0 * radius, yPosition, width, height);
           path.arcTo(arcRect, 0.0, 90.0 * direction);
         }
         path.lineTo(dependentX, dependentY);
@@ -852,74 +871,109 @@ void Model::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
   QGraphicsScene::mouseMoveEvent(event);
   
-  auto clearPrehighlight = [this]()
-  {
-    if (!currentPrehighlight)
-      return;
-    Vertex vertex = stow->findVertex(currentPrehighlight);
-    if (vertex == NullVertex())
-      return;
-    
-    msg::Message message(msg::Request | msg::Preselection | msg::Remove);
-    slc::Message sMessage;
-    sMessage.type = slc::Type::Object;
-    sMessage.featureId = stow->graph[vertex].featureId;
-    sMessage.shapeId = gu::createNilId();
-    message.payload = sMessage;
-    observer->out(message);
-  };
-  
-  auto setPrehighlight = [this](RectItem *rectIn)
-  {
-    Vertex vertex = stow->findVertex(rectIn);
-    if (vertex == NullVertex())
-      return;
-    
-    msg::Message message(msg::Request | msg::Preselection | msg::Add);
-    slc::Message sMessage;
-    sMessage.type = slc::Type::Object;
-    sMessage.featureId = stow->graph[vertex].featureId;
-    sMessage.shapeId = gu::createNilId();
-    message.payload = sMessage;
-    observer->out(message);
-  };
-  
   RectItem *rect = getRectFromPosition(event->scenePos());
-  
   if (dragData)
   {
     QGraphicsView *qgv = this->views().front();
-    if (rect)
+    
+    //search for edge first as it is more explicit.
+    Vertex dv = stow->findVertex(dragData->featureId); //drag vertex
+    auto pi = stow->graph[dv].pointShared.get(); //point item.
+    QList<QGraphicsItem *> cis = collidingItems(pi);
+    bool foundIntersection = false;
+    for (QGraphicsItem* gi : cis)
+    {
+      if (gi->data(qtd::key).toInt() != qtd::connector)
+        continue;
+      if (pi->collidesWithItem(gi))
+      {
+        QGraphicsPathItem *npi = static_cast<QGraphicsPathItem *>(gi); //new path item
+        Edge edge = stow->findEdge(npi);
+        if (dragData->isAcceptedEdge(edge))
+        {
+          foundIntersection = true;
+          if (dragData->lastHighlight)
+            stow->highlightConnectorOff(dragData->lastHighlight);
+          stow->highlightConnectorOn(npi, Qt::darkYellow);
+          dragData->lastHighlight = npi;
+          observer->out(msg::buildStatusMessage(QObject::tr("Drop accepted on edge").toStdString()));
+          break;
+        }
+      }
+    }
+    if (!foundIntersection)
+    {
+      if (dragData->lastHighlight)
+      {
+        stow->highlightConnectorOff(dragData->lastHighlight);
+        dragData->lastHighlight = nullptr;
+      }
+    }
+    
+    //now search for a vertex.
+    if (!foundIntersection && rect)
     {
       Vertex rv = stow->findVertex(rect);
       if (rv != NullVertex())
       {
-        uuid tid = stow->graph[rv].featureId;
-        if (std::find(dragData->acceptedList.begin(), dragData->acceptedList.end(), tid) != dragData->acceptedList.end())
+        const auto &av = dragData->acceptedVertices; //just makes next line readable
+        if (std::find(av.begin(), av.end(), rv) != av.end())
         {
-          //set accepted icon.
-          qgv->setCursor(Qt::DragMoveCursor);
-        }
-        else
-        {
-          qgv->setCursor(Qt::ForbiddenCursor);
+          foundIntersection = true;
+          observer->out(msg::buildStatusMessage(QObject::tr("Drop accepted on vertex").toStdString()));
         }
       }
-      else
-        qgv->setCursor(Qt::ForbiddenCursor);
+    }
+    if (!foundIntersection)
+    {
+      qgv->setCursor(Qt::ForbiddenCursor);
+      observer->out(msg::buildStatusMessage(QObject::tr("Drop rejected").toStdString()));
     }
     else
-      qgv->setCursor(Qt::ForbiddenCursor);
+      qgv->setCursor(Qt::DragMoveCursor);
   }
-  else
+  else //not in a drag operation
   {
+    auto clearPrehighlight = [this]()
+    {
+      if (!currentPrehighlight)
+        return;
+      Vertex vertex = stow->findVertex(currentPrehighlight);
+      if (vertex == NullVertex())
+        return;
+      
+      msg::Message message(msg::Request | msg::Preselection | msg::Remove);
+      slc::Message sMessage;
+      sMessage.type = slc::Type::Object;
+      sMessage.featureId = stow->graph[vertex].featureId;
+      sMessage.shapeId = gu::createNilId();
+      message.payload = sMessage;
+      observer->out(message);
+    };
+    
+    auto setPrehighlight = [this](RectItem *rectIn)
+    {
+      Vertex vertex = stow->findVertex(rectIn);
+      if (vertex == NullVertex())
+        return;
+      
+      msg::Message message(msg::Request | msg::Preselection | msg::Add);
+      slc::Message sMessage;
+      sMessage.type = slc::Type::Object;
+      sMessage.featureId = stow->graph[vertex].featureId;
+      sMessage.shapeId = gu::createNilId();
+      message.payload = sMessage;
+      observer->out(message);
+    };
+    
     if (rect == currentPrehighlight)
       return;
-    clearPrehighlight();
-    if (!rect)
-      return;
-    
-    setPrehighlight(rect);
+    else
+    {
+      clearPrehighlight();
+      if (rect)
+        setPrehighlight(rect);
+    }
   }
 }
 
@@ -1026,7 +1080,7 @@ void Model::mousePressEvent(QGraphicsSceneMouseEvent* event)
       assert(!dragData);
       dragData = std::shared_ptr<DragData>(new DragData());
       dragData->featureId = stow->graph[vertex].featureId;
-      dragData->acceptedList = stow->getDropAccepted(vertex);
+      std::tie(dragData->acceptedVertices, dragData->acceptedEdges) = stow->getDropAccepted(vertex);
       
       observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
       
@@ -1067,28 +1121,44 @@ void Model::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
     stow->graph[dv].pointShared->setX(0.0);
     stow->graph[dv].pointShared->setY(0.0);
     
-    RectItem *rect = getRectFromPosition(e->scenePos());
-    if (rect)
+    bool sentMessage = false;
+    
+    //make sure no edges are left highlighted.
+    if (dragData->lastHighlight)
     {
-      Vertex rv = stow->findVertex(rect);
-      if (rv != NullVertex())
-      {
-        uuid tid = stow->graph[rv].featureId;
-        if (std::find(dragData->acceptedList.begin(), dragData->acceptedList.end(), tid) != dragData->acceptedList.end())
-        {
-          prj::Message pmOut;
-          pmOut.featureId = dragData->featureId;
-          pmOut.featureId2 = tid;
-          msg::Message mOut(msg::Mask(msg::Request | msg::Project | msg::Feature | msg::Reorder), pmOut);
-          observer->out(mOut);
-        }
-        else
-          projectUpdatedDispatched(msg::Message());
-      }
-      else
-        projectUpdatedDispatched(msg::Message());
+      Edge edge = stow->findEdge(dragData->lastHighlight);
+      stow->highlightConnectorOff(dragData->lastHighlight);
+      dragData->lastHighlight = nullptr;
+      prj::Message pmOut;
+      pmOut.featureIds.push_back(dragData->featureId);
+      pmOut.featureIds.push_back(stow->graph[boost::source(edge, stow->graph)].featureId);
+      pmOut.featureIds.push_back(stow->graph[boost::target(edge, stow->graph)].featureId);
+      msg::Message mOut(msg::Mask(msg::Request | msg::Project | msg::Feature | msg::Reorder), pmOut);
+      observer->out(mOut);
+      sentMessage = true;
     }
     else
+    {
+      RectItem *rect = getRectFromPosition(e->scenePos());
+      if (rect)
+      {
+        Vertex rv = stow->findVertex(rect);
+        if (rv != NullVertex())
+        {
+          if (std::find(dragData->acceptedVertices.begin(), dragData->acceptedVertices.end(), rv) != dragData->acceptedVertices.end())
+          {
+            prj::Message pmOut;
+            pmOut.featureIds.push_back(dragData->featureId);
+            pmOut.featureIds.push_back(stow->graph[rv].featureId);
+            msg::Message mOut(msg::Mask(msg::Request | msg::Project | msg::Feature | msg::Reorder), pmOut);
+            observer->out(mOut);
+            sentMessage = true;
+          }
+        }
+      }
+    }
+    
+    if (!sentMessage)
       projectUpdatedDispatched(msg::Message());
     
     //take action.
@@ -1219,7 +1289,7 @@ void Model::setCurrentLeafSlot()
   assert(currentSelections.size() == 1);
   
   prj::Message prjMessageOut;
-  prjMessageOut.featureId = stow->graph[currentSelections.front()].featureId;
+  prjMessageOut.featureIds.push_back(stow->graph[currentSelections.front()].featureId);
   msg::Message messageOut(msg::Request | msg::SetCurrentLeaf);
   messageOut.payload = prjMessageOut;
   observer->out(messageOut);

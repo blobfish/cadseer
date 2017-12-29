@@ -93,8 +93,6 @@ public:
     
 private:
     void updateLeafStatus();
-    void sendConnectMessage(const boost::uuids::uuid &parentIn, const boost::uuids::uuid &childIn, const ftr::InputType &type);
-    void sendDisconnectMessage(const boost::uuids::uuid &parentIn, const boost::uuids::uuid &childIn, const ftr::InputType &type);
     
     std::string saveDirectory;
     void serialWrite();
