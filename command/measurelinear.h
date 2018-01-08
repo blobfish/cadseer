@@ -20,6 +20,7 @@
 #ifndef CMD_MEASURELINEAR_H
 #define CMD_MEASURELINEAR_H
 
+#include <selection/definitions.h>
 #include <command/base.h>
 
 namespace cmd
@@ -37,8 +38,10 @@ namespace cmd
   private:
     void setupDispatcher();
     void selectionAdditionDispatched(const msg::Message&);
+    void selectionMaskDispatched(const msg::Message&);
     void go();
     void build(const osg::Vec3d&, const osg::Vec3d&);
+    slc::Mask selectionMask;
   };
 }
 

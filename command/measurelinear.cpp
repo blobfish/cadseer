@@ -17,6 +17,8 @@
  *
  */
 
+#include <boost/variant.hpp>
+
 #include <QTextStream>
 
 #include <BRepBuilderAPI_MakeVertex.hxx>
@@ -31,6 +33,7 @@
 #include <message/observer.h>
 #include <message/message.h>
 #include <selection/eventhandler.h>
+#include <selection/message.h>
 #include <feature/base.h>
 #include <annex/seershape.h>
 #include <library/lineardimension.h>
@@ -42,6 +45,8 @@ MeasureLinear::MeasureLinear() : Base()
 {
   setupDispatcher();
   observer->name = "cmd::MeasureLinear";
+  
+  selectionMask = slc::AllEnabled;
 }
 
 MeasureLinear::~MeasureLinear(){}
@@ -54,6 +59,7 @@ std::string MeasureLinear::getStatusMessage()
 void MeasureLinear::activate()
 {
   isActive = true;
+  observer->outBlocked(msg::buildSelectionMask(selectionMask));
   go();
 }
 
@@ -193,3 +199,13 @@ void MeasureLinear::selectionAdditionDispatched(const msg::Message&)
   
   go();
 }
+
+void MeasureLinear::selectionMaskDispatched(const msg::Message &messageIn)
+{
+  if (!isActive)
+    return;
+  
+  slc::Message sMsg = boost::get<slc::Message>(messageIn.payload);
+  selectionMask = sMsg.selectionMask;
+}
+
