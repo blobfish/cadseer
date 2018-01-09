@@ -87,8 +87,11 @@ protected:
     void featureRemovedDispatched(const msg::Message &);
     void visualUpdatedDispatched(const msg::Message &);
     void viewTopDispatched(const msg::Message &);
+    void viewTopCurrentDispatched(const msg::Message &);
     void viewFrontDispatched(const msg::Message &);
+    void viewFrontCurrentDispatched(const msg::Message &);
     void viewRightDispatched(const msg::Message &);
+    void viewRightCurrentDispatched(const msg::Message &);
     void viewIsoDispatched(const msg::Message &);
     void viewFitDispatched(const msg::Message &);
     void viewFillDispatched(const msg::Message &);

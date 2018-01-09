@@ -442,6 +442,30 @@ void GestureHandler::constructMenu()
     viewIso->setUserValue(attributeMask, (msg::Request | msg::View | msg::Iso).to_string());
     viewIso->setUserValue(attributeStatus, QObject::tr("View Iso Command").toStdString());
     viewStandard->insertChild(viewStandard->getNumChildren() - 2, viewIso);
+    
+    osg::MatrixTransform *viewStandardCurrent;
+    viewStandardCurrent = gsn::buildMenuNode(":/resources/images/viewStandardCurrent.svg", iconRadius);
+    viewStandardCurrent->setMatrix(dummy);
+    viewStandardCurrent->setUserValue(attributeStatus, QObject::tr("Standard Views Menu Relative To Current System").toStdString());
+    viewBase->insertChild(viewBase->getNumChildren() - 2, viewStandardCurrent);
+    
+    osg::MatrixTransform *viewTopCurrent = gsn::buildCommandNode(":/resources/images/viewTopCurrent.svg", iconRadius);
+    viewTopCurrent->setMatrix(dummy);
+    viewTopCurrent->setUserValue(attributeMask, (msg::Request | msg::View | msg::Top | msg::Current).to_string());
+    viewTopCurrent->setUserValue(attributeStatus, QObject::tr("Top View Current Command").toStdString());
+    viewStandardCurrent->insertChild(viewStandardCurrent->getNumChildren() - 2, viewTopCurrent);
+
+    osg::MatrixTransform *viewFrontCurrent = gsn::buildCommandNode(":/resources/images/viewFrontCurrent.svg", iconRadius);
+    viewFrontCurrent->setMatrix(dummy);
+    viewFrontCurrent->setUserValue(attributeMask, (msg::Request | msg::View | msg::Front | msg::Current).to_string());
+    viewFrontCurrent->setUserValue(attributeStatus, QObject::tr("View Front Current Command").toStdString());
+    viewStandardCurrent->insertChild(viewStandardCurrent->getNumChildren() - 2, viewFrontCurrent);
+
+    osg::MatrixTransform *viewRightCurrent = gsn::buildCommandNode(":/resources/images/viewRightCurrent.svg", iconRadius);
+    viewRightCurrent->setMatrix(dummy);
+    viewRightCurrent->setUserValue(attributeMask, (msg::Request | msg::View | msg::Right | msg::Current).to_string());
+    viewRightCurrent->setUserValue(attributeStatus, QObject::tr("View Right Current Command").toStdString());
+    viewStandardCurrent->insertChild(viewStandardCurrent->getNumChildren() - 2, viewRightCurrent);
 
     osg::MatrixTransform *viewFit = gsn::buildCommandNode(":/resources/images/viewFit.svg", iconRadius);
     viewFit->setMatrix(dummy);

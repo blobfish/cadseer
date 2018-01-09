@@ -8,10 +8,14 @@
     <file>resources/images/viewBase.svg</file>
     <file>resources/images/start.svg</file>
     <file>resources/images/viewTop.svg</file>
+    <file>resources/images/viewTopCurrent.svg</file>
     <file>resources/images/viewRight.svg</file>
+    <file>resources/images/viewRightCurrent.svg</file>
     <file>resources/images/viewFront.svg</file>
+    <file>resources/images/viewFrontCurrent.svg</file>
     <file>resources/images/viewIso.svg</file>
     <file>resources/images/viewStandard.svg</file>
+    <file>resources/images/viewStandardCurrent.svg</file>
     <file>resources/images/viewFit.svg</file>
     <file>resources/images/viewFill.svg</file>
     <file>resources/images/viewTriangulation.svg</file>

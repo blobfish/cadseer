@@ -135,6 +135,7 @@ namespace msg
     static const Mask Dirty(Mask().set(                         95));//!< command
     static const Mask Refine(Mask().set(                        96));//!< command
     static const Mask Reorder(Mask().set(                       97));//!< project action. move up.
+    static const Mask Current(Mask().set(                       98));//!< modifier referencing current coordinate system.
   
     typedef boost::variant
     <

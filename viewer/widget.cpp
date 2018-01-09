@@ -410,15 +410,39 @@ void Widget::viewTopDispatched(const msg::Message&)
     spaceballManipulator->viewFit();
 }
 
+void Widget::viewTopCurrentDispatched(const msg::Message&)
+{
+    osg::Vec3d z = -gu::getZVector(currentSystem->getMatrix());
+    osg::Vec3d y = gu::getYVector(currentSystem->getMatrix());
+    spaceballManipulator->setView(z, y);
+    spaceballManipulator->viewFit();
+}
+
 void Widget::viewFrontDispatched(const msg::Message&)
 {
     spaceballManipulator->setView(osg::Vec3d(0.0, 1.0, 0.0), osg::Vec3d(0.0, 0.0, 1.0));
     spaceballManipulator->viewFit();
 }
 
+void Widget::viewFrontCurrentDispatched(const msg::Message&)
+{
+    osg::Vec3d z = gu::getZVector(currentSystem->getMatrix());
+    osg::Vec3d y = gu::getYVector(currentSystem->getMatrix());
+    spaceballManipulator->setView(y, z);
+    spaceballManipulator->viewFit();
+}
+
 void Widget::viewRightDispatched(const msg::Message&)
 {
     spaceballManipulator->setView(osg::Vec3d(-1.0, 0.0, 0.0), osg::Vec3d(0.0, 0.0, 1.0));
+    spaceballManipulator->viewFit();
+}
+
+void Widget::viewRightCurrentDispatched(const msg::Message&)
+{
+    osg::Vec3d x = -gu::getXVector(currentSystem->getMatrix());
+    osg::Vec3d z = gu::getZVector(currentSystem->getMatrix());
+    spaceballManipulator->setView(x, z);
     spaceballManipulator->viewFit();
 }
 
@@ -519,11 +543,20 @@ void Widget::setupDispatcher()
   mask = msg::Request | msg::View | msg::Top;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::viewTopDispatched, this, _1)));
   
+  mask = msg::Request | msg::View | msg::Top | msg::Current;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::viewTopCurrentDispatched, this, _1)));
+  
   mask = msg::Request | msg::View | msg::Front;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::viewFrontDispatched, this, _1)));
   
+  mask = msg::Request | msg::View | msg::Front | msg::Current;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::viewFrontCurrentDispatched, this, _1)));
+  
   mask = msg::Request | msg::View | msg::Right;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::viewRightDispatched, this, _1)));
+  
+  mask = msg::Request | msg::View | msg::Right | msg::Current;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::viewRightCurrentDispatched, this, _1)));
   
   mask = msg::Request | msg::View | msg::Iso;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::viewIsoDispatched, this, _1)));
