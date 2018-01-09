@@ -396,531 +396,665 @@ float GestureHandler::time()
 
 void GestureHandler::constructMenu()
 {
-    //should only be 2. the start object and the transparent quad
-    gestureSwitch->removeChildren(0, gestureSwitch->getNumChildren() - 1);
+  //should only be 2. the start object and the transparent quad
+  gestureSwitch->removeChildren(0, gestureSwitch->getNumChildren() - 1);
+
+  startNode = gsn::buildMenuNode(":/resources/images/start.svg", iconRadius);
+  startNode->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+  startNode->getOrCreateStateSet()->setAttributeAndModes(new osg::Depth(osg::Depth::LEQUAL, 0.0, 0.0)); //????
+  gestureSwitch->insertChild(0, startNode);
+
+  osg::Matrixd dummy = osg::Matrixd::identity();
   
-    startNode = gsn::buildMenuNode(":/resources/images/start.svg", iconRadius);
-    startNode->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
-    startNode->getOrCreateStateSet()->setAttributeAndModes(new osg::Depth(osg::Depth::LEQUAL, 0.0, 0.0));
-    gestureSwitch->insertChild(0, startNode);
+  auto constructMenuNode = [&]
+  (
+    const char *resource,
+    const std::string &statusText,
+    osg::MatrixTransform *parent
+  ) -> osg::MatrixTransform*
+  {
+    assert(!statusText.empty());
+    assert(parent);
+    
+    osg::MatrixTransform *out;
+    out = gsn::buildMenuNode(resource, iconRadius);
+    out->setMatrix(osg::Matrixd::identity());
+    out->setUserValue(attributeStatus, statusText);
+    parent->insertChild(parent->getNumChildren() - 2, out);
+    
+    return out;
+  };
+  
+  auto constructCommandNode = [&]
+  (
+    const char *resource,
+    const std::string &statusText,
+    const std::string &mask,
+    osg::MatrixTransform *parent
+  ) -> osg::MatrixTransform*
+  {
+    assert(!statusText.empty());
+    assert(!mask.empty());
+    assert(parent);
+    
+    osg::MatrixTransform *out;
+    out = gsn::buildCommandNode(resource, iconRadius);
+    out->setMatrix(osg::Matrixd::identity());
+    out->setUserValue(attributeStatus, statusText);
+    out->setUserValue(attributeMask, mask);
+    parent->insertChild(parent->getNumChildren() - 2, out);
+    
+    return out;
+  };
+  
+  //using braces and indents to show hierarchy of menu
 
-    osg::Matrixd dummy;
-
-    //view base
-    osg::MatrixTransform *viewBase;
-    viewBase = gsn::buildMenuNode(":/resources/images/viewBase.svg", iconRadius);
-    viewBase->setMatrix(dummy);
-    viewBase->setUserValue(attributeStatus, QObject::tr("View Menu").toStdString());
-    startNode->insertChild(startNode->getNumChildren() - 2, viewBase);
-
-    osg::MatrixTransform *viewStandard;
-    viewStandard = gsn::buildMenuNode(":/resources/images/viewStandard.svg", iconRadius);
-    viewStandard->setMatrix(dummy);
-    viewStandard->setUserValue(attributeStatus, QObject::tr("Standard Views Menu").toStdString());
-    viewBase->insertChild(viewBase->getNumChildren() - 2, viewStandard);
-
-    osg::MatrixTransform *viewTop = gsn::buildCommandNode(":/resources/images/viewTop.svg", iconRadius);
-    viewTop->setMatrix(dummy);
-    viewTop->setUserValue(attributeMask, (msg::Request | msg::View | msg::Top).to_string());
-    viewTop->setUserValue(attributeStatus, QObject::tr("Top View Command").toStdString());
-    viewStandard->insertChild(viewStandard->getNumChildren() - 2, viewTop);
-
-    osg::MatrixTransform *viewFront = gsn::buildCommandNode(":/resources/images/viewFront.svg", iconRadius);
-    viewFront->setMatrix(dummy);
-    viewFront->setUserValue(attributeMask, (msg::Request | msg::View | msg::Front).to_string());
-    viewFront->setUserValue(attributeStatus, QObject::tr("View Front Command").toStdString());
-    viewStandard->insertChild(viewStandard->getNumChildren() - 2, viewFront);
-
-    osg::MatrixTransform *viewRight = gsn::buildCommandNode(":/resources/images/viewRight.svg", iconRadius);
-    viewRight->setMatrix(dummy);
-    viewRight->setUserValue(attributeMask, (msg::Request | msg::View | msg::Right).to_string());
-    viewRight->setUserValue(attributeStatus, QObject::tr("View Right Command").toStdString());
-    viewStandard->insertChild(viewStandard->getNumChildren() - 2, viewRight);
-
-    osg::MatrixTransform *viewIso = gsn::buildCommandNode(":/resources/images/viewIso.svg", iconRadius);
-    viewIso->setMatrix(dummy);
-    viewIso->setUserValue(attributeMask, (msg::Request | msg::View | msg::Iso).to_string());
-    viewIso->setUserValue(attributeStatus, QObject::tr("View Iso Command").toStdString());
-    viewStandard->insertChild(viewStandard->getNumChildren() - 2, viewIso);
-    
-    osg::MatrixTransform *viewStandardCurrent;
-    viewStandardCurrent = gsn::buildMenuNode(":/resources/images/viewStandardCurrent.svg", iconRadius);
-    viewStandardCurrent->setMatrix(dummy);
-    viewStandardCurrent->setUserValue(attributeStatus, QObject::tr("Standard Views Menu Relative To Current System").toStdString());
-    viewBase->insertChild(viewBase->getNumChildren() - 2, viewStandardCurrent);
-    
-    osg::MatrixTransform *viewTopCurrent = gsn::buildCommandNode(":/resources/images/viewTopCurrent.svg", iconRadius);
-    viewTopCurrent->setMatrix(dummy);
-    viewTopCurrent->setUserValue(attributeMask, (msg::Request | msg::View | msg::Top | msg::Current).to_string());
-    viewTopCurrent->setUserValue(attributeStatus, QObject::tr("Top View Current Command").toStdString());
-    viewStandardCurrent->insertChild(viewStandardCurrent->getNumChildren() - 2, viewTopCurrent);
-
-    osg::MatrixTransform *viewFrontCurrent = gsn::buildCommandNode(":/resources/images/viewFrontCurrent.svg", iconRadius);
-    viewFrontCurrent->setMatrix(dummy);
-    viewFrontCurrent->setUserValue(attributeMask, (msg::Request | msg::View | msg::Front | msg::Current).to_string());
-    viewFrontCurrent->setUserValue(attributeStatus, QObject::tr("View Front Current Command").toStdString());
-    viewStandardCurrent->insertChild(viewStandardCurrent->getNumChildren() - 2, viewFrontCurrent);
-
-    osg::MatrixTransform *viewRightCurrent = gsn::buildCommandNode(":/resources/images/viewRightCurrent.svg", iconRadius);
-    viewRightCurrent->setMatrix(dummy);
-    viewRightCurrent->setUserValue(attributeMask, (msg::Request | msg::View | msg::Right | msg::Current).to_string());
-    viewRightCurrent->setUserValue(attributeStatus, QObject::tr("View Right Current Command").toStdString());
-    viewStandardCurrent->insertChild(viewStandardCurrent->getNumChildren() - 2, viewRightCurrent);
-
-    osg::MatrixTransform *viewFit = gsn::buildCommandNode(":/resources/images/viewFit.svg", iconRadius);
-    viewFit->setMatrix(dummy);
-    viewFit->setUserValue(attributeMask, (msg::Request | msg::View | msg::Fit).to_string());
-    viewFit->setUserValue(attributeStatus, QObject::tr("View Fit Command").toStdString());
-    viewBase->insertChild(viewBase->getNumChildren() - 2, viewFit);
-    
-    osg::MatrixTransform *viewFill = gsn::buildCommandNode(":/resources/images/viewFill.svg", iconRadius);
-    viewFill->setMatrix(dummy);
-    viewFill->setUserValue(attributeMask, (msg::Request | msg::View | msg::Fill).to_string());
-    viewFill->setUserValue(attributeStatus, QObject::tr("View Fill Command").toStdString());
-    viewBase->insertChild(viewBase->getNumChildren() - 2, viewFill);
-    
-    osg::MatrixTransform *viewTriangulation = gsn::buildCommandNode(":/resources/images/viewTriangulation.svg", iconRadius);
-    viewTriangulation->setMatrix(dummy);
-    viewTriangulation->setUserValue(attributeMask, (msg::Request | msg::View | msg::Triangulation).to_string());
-    viewTriangulation->setUserValue(attributeStatus, QObject::tr("View Triangulation Command").toStdString());
-    viewBase->insertChild(viewBase->getNumChildren() - 2, viewTriangulation);
-    
-    osg::MatrixTransform *viewRenderStyleToggle = gsn::buildCommandNode(":/resources/images/renderStyleToggle.svg", iconRadius);
-    viewRenderStyleToggle->setMatrix(dummy);
-    viewRenderStyleToggle->setUserValue(attributeMask, (msg::Request | msg::View | msg::RenderStyle | msg::Toggle).to_string());
-    viewRenderStyleToggle->setUserValue(attributeStatus, QObject::tr("Toggle Render Style Command").toStdString());
-    viewBase->insertChild(viewBase->getNumChildren() - 2, viewRenderStyleToggle);
-    
-    osg::MatrixTransform *viewToggleHiddenLines = gsn::buildCommandNode(":/resources/images/viewHiddenLines.svg", iconRadius);
-    viewToggleHiddenLines->setMatrix(dummy);
-    viewToggleHiddenLines->setUserValue(attributeMask, (msg::Request | msg::View | msg::Toggle | msg::HiddenLine).to_string());
-    viewToggleHiddenLines->setUserValue(attributeStatus, QObject::tr("Toggle hidden lines Command").toStdString());
-    viewBase->insertChild(viewBase->getNumChildren() - 2, viewToggleHiddenLines);
-    
-    osg::MatrixTransform *viewIsolate = gsn::buildCommandNode(":/resources/images/viewIsolate.svg", iconRadius);
-    viewIsolate->setMatrix(dummy);
-    viewIsolate->setUserValue(attributeMask, (msg::Request | msg::View | msg::ThreeD | msg::Overlay | msg::Isolate).to_string());
-    viewIsolate->setUserValue(attributeStatus, QObject::tr("View Only Selected").toStdString());
-    viewBase->insertChild(viewBase->getNumChildren() - 2, viewIsolate);
-    
-    //construction base
-    osg::MatrixTransform *constructionBase;
-    constructionBase = gsn::buildMenuNode(":/resources/images/constructionBase.svg", iconRadius);
-    constructionBase->setMatrix(dummy);
-    constructionBase->setUserValue(attributeStatus, QObject::tr("Construction Menu").toStdString());
-    startNode->insertChild(startNode->getNumChildren() - 2, constructionBase);
-
-    osg::MatrixTransform *constructionPrimitives;
-    constructionPrimitives = gsn::buildMenuNode(":/resources/images/constructionPrimitives.svg", iconRadius);
-    constructionPrimitives->setMatrix(dummy);
-    constructionPrimitives->setUserValue(attributeStatus, QObject::tr("Primitives Menu").toStdString());
-    constructionBase->insertChild(constructionBase->getNumChildren() - 2, constructionPrimitives);
-
-    osg::MatrixTransform *constructionBox = gsn::buildCommandNode(":/resources/images/constructionBox.svg", iconRadius);
-    constructionBox->setMatrix(dummy);
-    constructionBox->setUserValue(attributeMask, (msg::Request | msg::Construct | msg::Box).to_string());
-    constructionBox->setUserValue(attributeStatus, QObject::tr("Box Command").toStdString());
-    constructionPrimitives->insertChild(constructionPrimitives->getNumChildren() - 2, constructionBox);
-
-    osg::MatrixTransform *constructionSphere = gsn::buildCommandNode(":/resources/images/constructionSphere.svg", iconRadius);
-    constructionSphere->setMatrix(dummy);
-    constructionSphere->setUserValue(attributeMask, (msg::Request | msg::Construct | msg::Sphere).to_string());
-    constructionSphere->setUserValue(attributeStatus, QObject::tr("Sphere Command").toStdString());
-    constructionPrimitives->insertChild(constructionPrimitives->getNumChildren() - 2, constructionSphere);
-
-    osg::MatrixTransform *constructionCone = gsn::buildCommandNode(":/resources/images/constructionCone.svg", iconRadius);
-    constructionCone->setMatrix(dummy);
-    constructionCone->setUserValue(attributeMask, (msg::Request | msg::Construct | msg::Cone).to_string());
-    constructionCone->setUserValue(attributeStatus, QObject::tr("Cone Command").toStdString());
-    constructionPrimitives->insertChild(constructionPrimitives->getNumChildren() - 2, constructionCone);
-
-    osg::MatrixTransform *constructionCylinder = gsn::buildCommandNode(":/resources/images/constructionCylinder.svg", iconRadius);
-    constructionCylinder->setMatrix(dummy);
-    constructionCylinder->setUserValue(attributeMask, (msg::Request | msg::Construct | msg::Cylinder).to_string());
-    constructionCylinder->setUserValue(attributeStatus, QObject::tr("Cylinder Command").toStdString());
-    constructionPrimitives->insertChild(constructionPrimitives->getNumChildren() - 2, constructionCylinder);
-    
-    osg::MatrixTransform *constructionOblong = gsn::buildCommandNode(":/resources/images/constructionOblong.svg", iconRadius);
-    constructionOblong->setMatrix(dummy);
-    constructionOblong->setUserValue(attributeMask, (msg::Request | msg::Construct | msg::Oblong).to_string());
-    constructionOblong->setUserValue(attributeStatus, QObject::tr("Oblong Command").toStdString());
-    constructionPrimitives->insertChild(constructionPrimitives->getNumChildren() - 2, constructionOblong);
-    
-    //construction finishing base
-    osg::MatrixTransform *constructionFinishing;
-    constructionFinishing = gsn::buildMenuNode(":/resources/images/constructionFinishing.svg", iconRadius);
-    constructionFinishing->setMatrix(dummy);
-    constructionFinishing->setUserValue(attributeStatus, QObject::tr("Finishing Menu").toStdString());
-    constructionBase->insertChild(constructionBase->getNumChildren() - 2, constructionFinishing);
-    
-    osg::MatrixTransform *constructionBlend = gsn::buildCommandNode(":/resources/images/constructionBlend.svg", iconRadius);
-    constructionBlend->setMatrix(dummy);
-    constructionBlend->setUserValue(attributeMask, (msg::Request | msg::Construct | msg::Blend).to_string());
-    constructionBlend->setUserValue(attributeStatus, QObject::tr("Blend Command").toStdString());
-    constructionFinishing->insertChild(constructionFinishing->getNumChildren() - 2, constructionBlend);
-    
-    osg::MatrixTransform *constructionChamfer = gsn::buildCommandNode(":/resources/images/constructionChamfer.svg", iconRadius);
-    constructionChamfer->setMatrix(dummy);
-    constructionChamfer->setUserValue(attributeMask, (msg::Request | msg::Construct | msg::Chamfer).to_string());
-    constructionChamfer->setUserValue(attributeStatus, QObject::tr("Chamfer Command").toStdString());
-    constructionFinishing->insertChild(constructionFinishing->getNumChildren() - 2, constructionChamfer);
-    
-    osg::MatrixTransform *constructionDraft = gsn::buildCommandNode(":/resources/images/constructionDraft.svg", iconRadius);
-    constructionDraft->setMatrix(dummy);
-    constructionDraft->setUserValue(attributeMask, (msg::Request | msg::Construct | msg::Draft).to_string());
-    constructionDraft->setUserValue(attributeStatus, QObject::tr("Draft Command").toStdString());
-    constructionFinishing->insertChild(constructionFinishing->getNumChildren() - 2, constructionDraft);
-    
-    osg::MatrixTransform *constructionHollow = gsn::buildCommandNode(":/resources/images/constructionHollow.svg", iconRadius);
-    constructionHollow->setMatrix(dummy);
-    constructionHollow->setUserValue(attributeMask, (msg::Request | msg::Construct | msg::Hollow).to_string());
-    constructionHollow->setUserValue(attributeStatus, QObject::tr("Hollow Command").toStdString());
-    constructionFinishing->insertChild(constructionFinishing->getNumChildren() - 2, constructionHollow);
-    
-    osg::MatrixTransform *constructionExtract = gsn::buildCommandNode(":/resources/images/constructionExtract.svg", iconRadius);
-    constructionExtract->setMatrix(dummy);
-    constructionExtract->setUserValue(attributeMask, (msg::Request | msg::Construct | msg::Extract).to_string());
-    constructionExtract->setUserValue(attributeStatus, QObject::tr("Extract Command").toStdString());
-    constructionFinishing->insertChild(constructionFinishing->getNumChildren() - 2, constructionExtract);
-    
-    osg::MatrixTransform *constructionRefine = gsn::buildCommandNode(":/resources/images/constructionRefine.svg", iconRadius);
-    constructionRefine->setMatrix(dummy);
-    constructionRefine->setUserValue(attributeMask, (msg::Request | msg::Construct | msg::Refine).to_string());
-    constructionRefine->setUserValue(attributeStatus, QObject::tr("Refine Command").toStdString());
-    constructionFinishing->insertChild(constructionFinishing->getNumChildren() - 2, constructionRefine);
-    
-    //booleans
-    osg::MatrixTransform *constructionBoolean;
-    constructionBoolean = gsn::buildMenuNode(":/resources/images/constructionBoolean.svg", iconRadius);
-    constructionBoolean->setMatrix(dummy);
-    constructionBoolean->setUserValue(attributeStatus, QObject::tr("Boolean Menu").toStdString());
-    constructionBase->insertChild(constructionBase->getNumChildren() - 2, constructionBoolean);
-    
-    osg::MatrixTransform *constructionUnion = gsn::buildCommandNode(":/resources/images/constructionUnion.svg", iconRadius);
-    constructionUnion->setMatrix(dummy);
-    constructionUnion->setUserValue(attributeMask, (msg::Request | msg::Construct | msg::Union).to_string());
-    constructionUnion->setUserValue(attributeStatus, QObject::tr("Union Command").toStdString());
-    constructionBoolean->insertChild(constructionBoolean->getNumChildren() - 2, constructionUnion);
-    
-    osg::MatrixTransform *constructionSubtract = gsn::buildCommandNode(":/resources/images/constructionSubtract.svg", iconRadius);
-    constructionSubtract->setMatrix(dummy);
-    constructionSubtract->setUserValue(attributeMask, (msg::Request | msg::Construct | msg::Subtract).to_string());
-    constructionSubtract->setUserValue(attributeStatus, QObject::tr("Subtract Command").toStdString());
-    constructionBoolean->insertChild(constructionBoolean->getNumChildren() - 2, constructionSubtract);
-    
-    osg::MatrixTransform *constructionIntersect = gsn::buildCommandNode(":/resources/images/constructionIntersect.svg", iconRadius);
-    constructionIntersect->setMatrix(dummy);
-    constructionIntersect->setUserValue(attributeMask, (msg::Request | msg::Construct | msg::Intersect).to_string());
-    constructionIntersect->setUserValue(attributeStatus, QObject::tr("Intersection Command").toStdString());
-    constructionBoolean->insertChild(constructionBoolean->getNumChildren() - 2, constructionIntersect);
-    
-    //die
-    osg::MatrixTransform *constructionDie;
-    constructionDie = gsn::buildMenuNode(":/resources/images/constructionDie.svg", iconRadius);
-    constructionDie->setMatrix(dummy);
-    constructionDie->setUserValue(attributeStatus, QObject::tr("Die Menu").toStdString());
-    constructionBase->insertChild(constructionBase->getNumChildren() - 2, constructionDie);
-    
-    osg::MatrixTransform *constructionSquash = gsn::buildCommandNode(":/resources/images/constructionSquash.svg", iconRadius);
-    constructionSquash->setMatrix(dummy);
-    constructionSquash->setUserValue(attributeMask, (msg::Request | msg::Construct | msg::Squash).to_string());
-    constructionSquash->setUserValue(attributeStatus, QObject::tr("Squash Command").toStdString());
-    constructionDie->insertChild(constructionDie->getNumChildren() - 2, constructionSquash);
-    
-    osg::MatrixTransform *constructionStrip = gsn::buildCommandNode(":/resources/images/constructionStrip.svg", iconRadius);
-    constructionStrip->setMatrix(dummy);
-    constructionStrip->setUserValue(attributeMask, (msg::Request | msg::Construct | msg::Strip).to_string());
-    constructionStrip->setUserValue(attributeStatus, QObject::tr("Strip Command").toStdString());
-    constructionDie->insertChild(constructionDie->getNumChildren() - 2, constructionStrip);
-    
-    osg::MatrixTransform *constructionNest = gsn::buildCommandNode(":/resources/images/constructionNest.svg", iconRadius);
-    constructionNest->setMatrix(dummy);
-    constructionNest->setUserValue(attributeMask, (msg::Request | msg::Construct | msg::Nest).to_string());
-    constructionNest->setUserValue(attributeStatus, QObject::tr("Nest Command").toStdString());
-    constructionDie->insertChild(constructionDie->getNumChildren() - 2, constructionNest);
-    
-    osg::MatrixTransform *constructionDieSet = gsn::buildCommandNode(":/resources/images/constructionDieSet.svg", iconRadius);
-    constructionDieSet->setMatrix(dummy);
-    constructionDieSet->setUserValue(attributeMask, (msg::Request | msg::Construct | msg::DieSet).to_string());
-    constructionDieSet->setUserValue(attributeStatus, QObject::tr("DieSet Command").toStdString());
-    constructionDie->insertChild(constructionDie->getNumChildren() - 2, constructionDieSet);
-    
-    osg::MatrixTransform *constructionQuote = gsn::buildCommandNode(":/resources/images/constructionQuote.svg", iconRadius);
-    constructionQuote->setMatrix(dummy);
-    constructionQuote->setUserValue(attributeMask, (msg::Request | msg::Construct | msg::Quote).to_string());
-    constructionQuote->setUserValue(attributeStatus, QObject::tr("Quote Command").toStdString());
-    constructionDie->insertChild(constructionDie->getNumChildren() - 2, constructionQuote);
-    
-    //TODO build datum menu node and move datum plane to it.
-    osg::MatrixTransform *constructDatumPlane = gsn::buildCommandNode(":/resources/images/constructionDatumPlane.svg", iconRadius);
-    constructDatumPlane->setMatrix(dummy);
-    constructDatumPlane->setUserValue(attributeMask, (msg::Request | msg::Construct | msg::DatumPlane).to_string());
-    constructDatumPlane->setUserValue(attributeStatus, QObject::tr("Datum Plane Command").toStdString());
-    constructionBase->insertChild(constructionBase->getNumChildren() - 2, constructDatumPlane);
-    
-    //edit base
-    osg::MatrixTransform *editBase;
-    editBase = gsn::buildMenuNode(":/resources/images/editBase.svg", iconRadius);
-    editBase->setMatrix(dummy);
-    editBase->setUserValue(attributeStatus, QObject::tr("Edit Menu").toStdString());
-    startNode->insertChild(startNode->getNumChildren() - 2, editBase);
-    
-    osg::MatrixTransform *editFeature = gsn::buildCommandNode(":/resources/images/editFeature.svg", iconRadius);
-    editFeature->setMatrix(dummy);
-    editFeature->setUserValue(attributeMask, (msg::Request | msg::Edit | msg::Feature).to_string());
-    editFeature->setUserValue(attributeStatus, QObject::tr("Edit Feature Command").toStdString());
-    editBase->insertChild(editBase->getNumChildren() - 2, editFeature);
-    
-    osg::MatrixTransform *remove = gsn::buildCommandNode(":/resources/images/editRemove.svg", iconRadius);
-    remove->setMatrix(dummy);
-    remove->setUserValue(attributeMask, (msg::Request | msg::Remove).to_string());
-    remove->setUserValue(attributeStatus, QObject::tr("Remove Command").toStdString());
-    editBase->insertChild(editBase->getNumChildren() - 2, remove);
-    
-    osg::MatrixTransform *editColor = gsn::buildCommandNode(":/resources/images/editColor.svg", iconRadius);
-    editColor->setMatrix(dummy);
-    editColor->setUserValue(attributeMask, (msg::Request | msg::Edit | msg::Feature | msg::Color).to_string());
-    editColor->setUserValue(attributeStatus, QObject::tr("Edit Color Command").toStdString());
-    editBase->insertChild(editBase->getNumChildren() - 2, editColor);
-    
-    osg::MatrixTransform *editRename = gsn::buildCommandNode(":/resources/images/editRename.svg", iconRadius);
-    editRename->setMatrix(dummy);
-    editRename->setUserValue(attributeMask, (msg::Request | msg::Edit | msg::Feature | msg::Name).to_string());
-    editRename->setUserValue(attributeStatus, QObject::tr("Edit Name Command").toStdString());
-    editBase->insertChild(editBase->getNumChildren() - 2, editRename);
-    
-    osg::MatrixTransform *editUpdate = gsn::buildCommandNode(":/resources/images/editUpdate.svg", iconRadius);
-    editUpdate->setMatrix(dummy);
-    editUpdate->setUserValue(attributeMask, (msg::Request | msg::Update).to_string());
-    editUpdate->setUserValue(attributeStatus, QObject::tr("Update Command").toStdString());
-    editBase->insertChild(editBase->getNumChildren() - 2, editUpdate);
-    
-    osg::MatrixTransform *editForceUpdate = gsn::buildCommandNode(":/resources/images/editForceUpdate.svg", iconRadius);
-    editForceUpdate->setMatrix(dummy);
-    editForceUpdate->setUserValue(attributeMask, (msg::Request | msg::ForceUpdate).to_string());
-    editForceUpdate->setUserValue(attributeStatus, QObject::tr("Force Update Command").toStdString());
-    editBase->insertChild(editBase->getNumChildren() - 2, editForceUpdate);
-    
-    osg::MatrixTransform *editSystemBase;
-    editSystemBase = gsn::buildMenuNode(":/resources/images/systemBase.svg", iconRadius);
-    editSystemBase->setMatrix(dummy);
-    editSystemBase->setUserValue(attributeStatus, QObject::tr("Coordinate System Menu").toStdString());
-    editBase->insertChild(editBase->getNumChildren() - 2, editSystemBase);
-    
-    osg::MatrixTransform *editDraggerToFeature = gsn::buildCommandNode(":/resources/images/editDraggerToFeature.svg", iconRadius);
-    editDraggerToFeature->setMatrix(dummy);
-    editDraggerToFeature->setUserValue(attributeMask, (msg::Request | msg::DraggerToFeature).to_string());
-    editDraggerToFeature->setUserValue(attributeStatus, QObject::tr("Dragger To Feature Command").toStdString());
-    editSystemBase->insertChild(editSystemBase->getNumChildren() - 2, editDraggerToFeature);
-    
-    osg::MatrixTransform *editFeatureToDragger = gsn::buildCommandNode(":/resources/images/editFeatureToDragger.svg", iconRadius);
-    editFeatureToDragger->setMatrix(dummy);
-    editFeatureToDragger->setUserValue(attributeMask, (msg::Request | msg::FeatureToDragger).to_string());
-    editFeatureToDragger->setUserValue(attributeStatus, QObject::tr("Feature To Dragger Command").toStdString());
-    editSystemBase->insertChild(editSystemBase->getNumChildren() - 2, editFeatureToDragger);
-    
-    osg::MatrixTransform *featureToSystem = gsn::buildCommandNode(":/resources/images/featureToSystem.svg", iconRadius);
-    featureToSystem->setMatrix(dummy);
-    featureToSystem->setUserValue(attributeMask, (msg::Request | msg::FeatureToSystem).to_string());
-    featureToSystem->setUserValue(attributeStatus, QObject::tr("Feature To Current System Command").toStdString());
-    editSystemBase->insertChild(editSystemBase->getNumChildren() - 2, featureToSystem);
-    
-    osg::MatrixTransform *featureReposition = gsn::buildCommandNode(":/resources/images/featureReposition.svg", iconRadius);
-    featureReposition->setMatrix(dummy);
-    featureReposition->setUserValue(attributeMask, (msg::Request | msg::FeatureReposition).to_string());
-    featureReposition->setUserValue(attributeStatus, QObject::tr("Dragger To Current System Command").toStdString());
-    editSystemBase->insertChild(editSystemBase->getNumChildren() - 2, featureReposition);
-    
-    osg::MatrixTransform *preferences = gsn::buildCommandNode(":/resources/images/preferences.svg", iconRadius);
-    preferences->setMatrix(dummy);
-    preferences->setUserValue(attributeMask, (msg::Request | msg::Preferences).to_string());
-    preferences->setUserValue(attributeStatus, QObject::tr("Preferences Command").toStdString());
-    editBase->insertChild(editBase->getNumChildren() - 2, preferences);
-    
-    //file base
-    osg::MatrixTransform *fileBase;
-    fileBase = gsn::buildMenuNode(":/resources/images/fileBase.svg", iconRadius);
-    fileBase->setMatrix(dummy);
-    fileBase->setUserValue(attributeStatus, QObject::tr("File Menu").toStdString());
-    startNode->insertChild(startNode->getNumChildren() - 2, fileBase);
-    
-    osg::MatrixTransform *fileImport;
-    fileImport = gsn::buildMenuNode(":/resources/images/fileImport.svg", iconRadius);
-    fileImport->setMatrix(dummy);
-    fileImport->setUserValue(attributeStatus, QObject::tr("Import Menu").toStdString());
-    fileBase->insertChild(fileBase->getNumChildren() - 2, fileImport);
-    
-    osg::MatrixTransform *fileImportOCC = gsn::buildCommandNode(":/resources/images/fileOCC.svg", iconRadius);
-    fileImportOCC->setMatrix(dummy);
-    fileImportOCC->setUserValue(attributeMask, (msg::Request | msg::Import | msg::OCC).to_string());
-    fileImportOCC->setUserValue(attributeStatus, QObject::tr("Import OCC Brep Command").toStdString());
-    fileImport->insertChild(fileImport->getNumChildren() - 2, fileImportOCC);
-    
-    osg::MatrixTransform *fileImportStep = gsn::buildCommandNode(":/resources/images/fileStep.svg", iconRadius);
-    fileImportStep->setMatrix(dummy);
-    fileImportStep->setUserValue(attributeMask, (msg::Request | msg::Import | msg::Step).to_string());
-    fileImportStep->setUserValue(attributeStatus, QObject::tr("Import Step Command").toStdString());
-    fileImport->insertChild(fileImport->getNumChildren() - 2, fileImportStep);
-    
-    osg::MatrixTransform *fileExport;
-    fileExport = gsn::buildMenuNode(":/resources/images/fileExport.svg", iconRadius);
-    fileExport->setMatrix(dummy);
-    fileExport->setUserValue(attributeStatus, QObject::tr("Export Menu").toStdString());
-    fileBase->insertChild(fileBase->getNumChildren() - 2, fileExport);
-    
-    osg::MatrixTransform *fileExportOSG = gsn::buildCommandNode(":/resources/images/fileOSG.svg", iconRadius);
-    fileExportOSG->setMatrix(dummy);
-    fileExportOSG->setUserValue(attributeMask, (msg::Request | msg::Export | msg::OSG).to_string());
-    fileExportOSG->setUserValue(attributeStatus, QObject::tr("Export Open Scene Graph Command").toStdString());
-    fileExport->insertChild(fileExport->getNumChildren() - 2, fileExportOSG);
-    
-    osg::MatrixTransform *fileExportOCC = gsn::buildCommandNode(":/resources/images/fileOCC.svg", iconRadius);
-    fileExportOCC->setMatrix(dummy);
-    fileExportOCC->setUserValue(attributeMask, (msg::Request | msg::Export | msg::OCC).to_string());
-    fileExportOCC->setUserValue(attributeStatus, QObject::tr("Export OCC Brep Command").toStdString());
-    fileExport->insertChild(fileExport->getNumChildren() - 2, fileExportOCC);
-    
-    osg::MatrixTransform *fileExportStep = gsn::buildCommandNode(":/resources/images/fileStep.svg", iconRadius);
-    fileExportStep->setMatrix(dummy);
-    fileExportStep->setUserValue(attributeMask, (msg::Request | msg::Export | msg::Step).to_string());
-    fileExportStep->setUserValue(attributeStatus, QObject::tr("Export Step Command").toStdString());
-    fileExport->insertChild(fileExport->getNumChildren() - 2, fileExportStep);
-    
-    osg::MatrixTransform *fileOpen = gsn::buildCommandNode(":/resources/images/fileOpen.svg", iconRadius);
-    fileOpen->setMatrix(dummy);
-    fileOpen->setUserValue(attributeMask, (msg::Request | msg::Project | msg::Dialog).to_string());
-    fileOpen->setUserValue(attributeStatus, QObject::tr("Open Project Command").toStdString());
-    fileBase->insertChild(fileBase->getNumChildren() - 2, fileOpen);
-    
-    osg::MatrixTransform *fileSave = gsn::buildCommandNode(":/resources/images/fileSave.svg", iconRadius);
-    fileSave->setMatrix(dummy);
-    fileSave->setUserValue(attributeMask, (msg::Request | msg::Save | msg::Project).to_string());
-    fileSave->setUserValue(attributeStatus, QObject::tr("Save Project Command").toStdString());
-    fileBase->insertChild(fileBase->getNumChildren() - 2, fileSave);
-    
-    //system base
-    osg::MatrixTransform *systemBase;
-    systemBase = gsn::buildMenuNode(":/resources/images/systemBase.svg", iconRadius);
-    systemBase->setMatrix(dummy);
-    systemBase->setUserValue(attributeStatus, QObject::tr("Coordinate System Menu").toStdString());
-    startNode->insertChild(startNode->getNumChildren() - 2, systemBase);
-    
-    osg::MatrixTransform *systemReset = gsn::buildCommandNode(":/resources/images/systemReset.svg", iconRadius);
-    systemReset->setMatrix(dummy);
-    systemReset->setUserValue(attributeMask, (msg::Request | msg::SystemReset).to_string());
-    systemReset->setUserValue(attributeStatus, QObject::tr("Coordinate System Reset Command").toStdString());
-    systemBase->insertChild(systemBase->getNumChildren() - 2, systemReset);
-    
-    osg::MatrixTransform *systemToggle = gsn::buildCommandNode(":/resources/images/systemToggle.svg", iconRadius);
-    systemToggle->setMatrix(dummy);
-    systemToggle->setUserValue(attributeMask, (msg::Request | msg::SystemToggle).to_string());
-    systemToggle->setUserValue(attributeStatus, QObject::tr("Toggle Coordinate System Visibility Command").toStdString());
-    systemBase->insertChild(systemBase->getNumChildren() - 2, systemToggle);
-    
-    osg::MatrixTransform *systemToFeature = gsn::buildCommandNode(":/resources/images/systemToFeature.svg", iconRadius);
-    systemToFeature->setMatrix(dummy);
-    systemToFeature->setUserValue(attributeMask, (msg::Request | msg::SystemToFeature).to_string());
-    systemToFeature->setUserValue(attributeStatus, QObject::tr("Coordinate System To Feature Command").toStdString());
-    systemBase->insertChild(systemBase->getNumChildren() - 2, systemToFeature);
-    
-    //inpect base
-    osg::MatrixTransform *inspectBase;
-    inspectBase = gsn::buildMenuNode(":/resources/images/inspectBase.svg", iconRadius);
-    inspectBase->setMatrix(dummy);
-    inspectBase->setUserValue(attributeStatus, QObject::tr("Inspect Menu").toStdString());
-    startNode->insertChild(startNode->getNumChildren() - 2, inspectBase);
-    
-    osg::MatrixTransform *inpsectInfo = gsn::buildCommandNode(":/resources/images/inspectInfo.svg", iconRadius);
-    inpsectInfo->setMatrix(dummy);
-    inpsectInfo->setUserValue(attributeMask, (msg::Request | msg::Info).to_string());
-    inpsectInfo->setUserValue(attributeStatus, QObject::tr("View Info Command").toStdString());
-    inspectBase->insertChild(inspectBase->getNumChildren() - 2, inpsectInfo);
-    
-    osg::MatrixTransform *inspectCheckGeometry = gsn::buildCommandNode(":/resources/images/inspectCheckGeometry.svg", iconRadius);
-    inspectCheckGeometry->setMatrix(dummy);
-    inspectCheckGeometry->setUserValue(attributeMask, (msg::Request | msg::CheckGeometry).to_string());
-    inspectCheckGeometry->setUserValue(attributeStatus, QObject::tr("Check Geometry For Errors").toStdString());
-    inspectBase->insertChild(inspectBase->getNumChildren() - 2, inspectCheckGeometry);
-    
-    //inspect measure base
-    osg::MatrixTransform *inspectMeasureBase;
-    inspectMeasureBase = gsn::buildMenuNode(":/resources/images/inspectMeasureBase.svg", iconRadius);
-    inspectMeasureBase->setMatrix(dummy);
-    inspectMeasureBase->setUserValue(attributeStatus, QObject::tr("Measure Menu").toStdString());
-    inspectBase->insertChild(inspectBase->getNumChildren() - 2, inspectMeasureBase);
-    
-    osg::MatrixTransform *inspectMeasureClear = gsn::buildCommandNode(":/resources/images/inspectMeasureClear.svg", iconRadius);
-    inspectMeasureClear->setMatrix(dummy);
-    inspectMeasureClear->setUserValue(attributeMask, (msg::Request | msg::Clear | msg::Overlay).to_string());
-    inspectMeasureClear->setUserValue(attributeStatus, QObject::tr("Clear Measure Command").toStdString());
-    inspectMeasureBase->insertChild(inspectMeasureBase->getNumChildren() - 2, inspectMeasureClear);
-    
-    osg::MatrixTransform *inspectLinearMeasure = gsn::buildCommandNode(":/resources/images/inspectLinearMeasure.svg", iconRadius);
-    inspectLinearMeasure->setMatrix(dummy);
-    inspectLinearMeasure->setUserValue(attributeMask, (msg::Request | msg::LinearMeasure).to_string());
-    inspectLinearMeasure->setUserValue(attributeStatus, QObject::tr("LinearMeasure Command").toStdString());
-    inspectMeasureBase->insertChild(inspectMeasureBase->getNumChildren() - 2, inspectLinearMeasure);
-    
-    //debug base
-    osg::MatrixTransform *debugBase;
-    debugBase = gsn::buildMenuNode(":/resources/images/debugBase.svg", iconRadius);
-    debugBase->setMatrix(dummy);
-    debugBase->setUserValue(attributeStatus, QObject::tr("Debug Menu").toStdString());
-    inspectBase->insertChild(inspectBase->getNumChildren() - 2, debugBase);
-    
-    osg::MatrixTransform *checkShapeIds = gsn::buildCommandNode(":/resources/images/debugCheckShapeIds.svg", iconRadius);
-    checkShapeIds->setMatrix(dummy);
-    checkShapeIds->setUserValue(attributeMask, (msg::Request | msg::CheckShapeIds).to_string());
-    checkShapeIds->setUserValue(attributeStatus, QObject::tr("Check Shaped Ids").toStdString());
-    debugBase->insertChild(debugBase->getNumChildren() - 2, checkShapeIds);
-    
-    osg::MatrixTransform *debugDump = gsn::buildCommandNode(":/resources/images/debugDump.svg", iconRadius);
-    debugDump->setMatrix(dummy);
-    debugDump->setUserValue(attributeMask, (msg::Request | msg::DebugDump).to_string());
-    debugDump->setUserValue(attributeStatus, QObject::tr("Debug Feature Dump").toStdString());
-    debugBase->insertChild(debugBase->getNumChildren() - 2, debugDump);
-    
-    osg::MatrixTransform *debugShapeTrackUp = gsn::buildCommandNode(":/resources/images/debugShapeTrackUp.svg", iconRadius);
-    debugShapeTrackUp->setMatrix(dummy);
-    debugShapeTrackUp->setUserValue(attributeMask, (msg::Request | msg::DebugShapeTrackUp).to_string());
-    debugShapeTrackUp->setUserValue(attributeStatus, QObject::tr("Track Shape Up").toStdString());
-    debugBase->insertChild(debugBase->getNumChildren() - 2, debugShapeTrackUp);
-    
-    osg::MatrixTransform *debugShapeTrackDown = gsn::buildCommandNode(":/resources/images/debugShapeTrackDown.svg", iconRadius);
-    debugShapeTrackDown->setMatrix(dummy);
-    debugShapeTrackDown->setUserValue(attributeMask, (msg::Request | msg::DebugShapeTrackDown).to_string());
-    debugShapeTrackDown->setUserValue(attributeStatus, QObject::tr("Track Shape Down").toStdString());
-    debugBase->insertChild(debugBase->getNumChildren() - 2, debugShapeTrackDown);
-    
-    osg::MatrixTransform *debugShapeGraph = gsn::buildCommandNode(":/resources/images/debugShapeGraph.svg", iconRadius);
-    debugShapeGraph->setMatrix(dummy);
-    debugShapeGraph->setUserValue(attributeMask, (msg::Request | msg::DebugShapeGraph).to_string());
-    debugShapeGraph->setUserValue(attributeStatus, QObject::tr("Write shape graph to application directory").toStdString());
-    debugBase->insertChild(debugBase->getNumChildren() - 2, debugShapeGraph);
-    
-    osg::MatrixTransform *debugDumpProjectGraph = gsn::buildCommandNode(":/resources/images/debugDumpProjectGraph.svg", iconRadius);
-    debugDumpProjectGraph->setMatrix(dummy);
-    debugDumpProjectGraph->setUserValue(attributeMask, (msg::Request | msg::DebugDumpProjectGraph).to_string());
-    debugDumpProjectGraph->setUserValue(attributeStatus, QObject::tr("Write project graph to application directory").toStdString());
-    debugBase->insertChild(debugBase->getNumChildren() - 2, debugDumpProjectGraph);
-    
-    osg::MatrixTransform *debugDumpDAGViewGraph = gsn::buildCommandNode(":/resources/images/debugDumpDAGViewGraph.svg", iconRadius);
-    debugDumpDAGViewGraph->setMatrix(dummy);
-    debugDumpDAGViewGraph->setUserValue(attributeMask, (msg::Request | msg::DebugDumpDAGViewGraph).to_string());
-    debugDumpDAGViewGraph->setUserValue(attributeStatus, QObject::tr("Write DAGView graph to application directory").toStdString());
-    debugBase->insertChild(debugBase->getNumChildren() - 2, debugDumpDAGViewGraph);
-    
-    osg::MatrixTransform *debugInquiry = gsn::buildCommandNode(":/resources/images/debugInquiry.svg", iconRadius);
-    debugInquiry->setMatrix(dummy);
-    debugInquiry->setUserValue(attributeMask, (msg::Request | msg::DebugInquiry).to_string());
-    debugInquiry->setUserValue(attributeStatus, QObject::tr("Inquiry. A testing facility").toStdString());
-    debugBase->insertChild(debugBase->getNumChildren() - 2, debugInquiry);
-    
-    osg::MatrixTransform *featureModelDirty = gsn::buildCommandNode(":/resources/images/dagViewPending.svg", iconRadius);
-    featureModelDirty->setMatrix(dummy);
-    featureModelDirty->setUserValue(attributeMask, (msg::Request | msg::Feature | msg::Model | msg::Dirty).to_string());
-    featureModelDirty->setUserValue(attributeStatus, QObject::tr("Dirty selected features").toStdString());
-    debugBase->insertChild(debugBase->getNumChildren() - 2, featureModelDirty);
+  osg::MatrixTransform *viewBase = constructMenuNode
+  (
+    ":/resources/images/viewBase.svg",
+    QObject::tr("View Menu").toStdString(),
+    startNode.get()
+  );
+  {
+    osg::MatrixTransform *viewStandard = constructMenuNode
+    (
+      ":/resources/images/viewStandard.svg",
+      QObject::tr("Standard Views Menu").toStdString(),
+      viewBase
+    );
+    {
+      constructCommandNode
+      (
+        ":/resources/images/viewTop.svg",
+        QObject::tr("Top View Command").toStdString(),
+        (msg::Request | msg::View | msg::Top).to_string(),
+        viewStandard
+      );
+      constructCommandNode
+      (
+        ":/resources/images/viewFront.svg",
+        QObject::tr("View Front Command").toStdString(),
+        (msg::Request | msg::View | msg::Front).to_string(),
+        viewStandard
+      );
+      constructCommandNode
+      (
+        ":/resources/images/viewRight.svg",
+        QObject::tr("View Right Command").toStdString(),
+        (msg::Request | msg::View | msg::Right).to_string(),
+        viewStandard
+      );
+      constructCommandNode
+      (
+        ":/resources/images/viewIso.svg",
+        QObject::tr("View Iso Command").toStdString(),
+        (msg::Request | msg::View | msg::Iso).to_string(),
+        viewStandard
+      );
+    }
+    osg::MatrixTransform *viewStandardCurrent = constructMenuNode
+    (
+      ":/resources/images/viewStandardCurrent.svg",
+      QObject::tr("Standard Views Menu Relative To Current System").toStdString(),
+      viewBase
+    );
+    {
+      constructCommandNode
+      (
+        ":/resources/images/viewTopCurrent.svg",
+        QObject::tr("Top View Current Command").toStdString(),
+        (msg::Request | msg::View | msg::Top | msg::Current).to_string(),
+        viewStandardCurrent
+      );
+      constructCommandNode
+      (
+        ":/resources/images/viewFrontCurrent.svg",
+        QObject::tr("View Front Current Command").toStdString(),
+        (msg::Request | msg::View | msg::Front | msg::Current).to_string(),
+        viewStandardCurrent
+      );
+      constructCommandNode
+      (
+        ":/resources/images/viewRightCurrent.svg",
+        QObject::tr("View Right Current Command").toStdString(),
+        (msg::Request | msg::View | msg::Right | msg::Current).to_string(),
+        viewStandardCurrent
+      );
+    }
+    //back to viewbase menu
+    constructCommandNode
+    (
+      ":/resources/images/viewFit.svg",
+      QObject::tr("View Fit Command").toStdString(),
+      (msg::Request | msg::View | msg::Fit).to_string(),
+      viewBase
+    );
+    constructCommandNode
+    (
+      ":/resources/images/viewFill.svg",
+      QObject::tr("View Fill Command").toStdString(),
+      (msg::Request | msg::View | msg::Fill).to_string(),
+      viewBase
+    );
+    constructCommandNode
+    (
+      ":/resources/images/viewTriangulation.svg",
+      QObject::tr("View Triangulation Command").toStdString(),
+      (msg::Request | msg::View | msg::Triangulation).to_string(),
+      viewBase
+    );
+    constructCommandNode
+    (
+      ":/resources/images/renderStyleToggle.svg",
+      QObject::tr("Toggle Render Style Command").toStdString(),
+      (msg::Request | msg::View | msg::RenderStyle | msg::Toggle).to_string(),
+      viewBase
+    );
+    constructCommandNode
+    (
+      ":/resources/images/viewHiddenLines.svg",
+      QObject::tr("Toggle hidden lines Command").toStdString(),
+      (msg::Request | msg::View | msg::Toggle | msg::HiddenLine).to_string(),
+      viewBase
+    );
+    constructCommandNode
+    (
+      ":/resources/images/viewIsolate.svg",
+      QObject::tr("View Only Selected").toStdString(),
+      (msg::Request | msg::View | msg::ThreeD | msg::Overlay | msg::Isolate).to_string(),
+      viewBase
+    );
+  }
+  osg::MatrixTransform *constructionBase = constructMenuNode
+  (
+    ":/resources/images/constructionBase.svg",
+    QObject::tr("Construction Menu").toStdString(),
+    startNode.get()
+  );
+  {
+    osg::MatrixTransform *constructionPrimitives = constructMenuNode
+    (
+      ":/resources/images/constructionPrimitives.svg",
+      QObject::tr("Primitives Menu").toStdString(),
+      constructionBase
+    );
+    {
+      constructCommandNode
+      (
+        ":/resources/images/constructionBox.svg",
+        QObject::tr("Box Command").toStdString(),
+        (msg::Request | msg::Construct | msg::Box).to_string(),
+        constructionPrimitives
+      );
+      constructCommandNode
+      (
+        ":/resources/images/constructionSphere.svg",
+        QObject::tr("Sphere Command").toStdString(),
+        (msg::Request | msg::Construct | msg::Sphere).to_string(),
+        constructionPrimitives
+      );
+      constructCommandNode
+      (
+        ":/resources/images/constructionCone.svg",
+        QObject::tr("Cone Command").toStdString(),
+        (msg::Request | msg::Construct | msg::Cone).to_string(),
+        constructionPrimitives
+      );
+      constructCommandNode
+      (
+        ":/resources/images/constructionCylinder.svg",
+        QObject::tr("Cylinder Command").toStdString(),
+        (msg::Request | msg::Construct | msg::Cylinder).to_string(),
+        constructionPrimitives
+      );
+      constructCommandNode
+      (
+        ":/resources/images/constructionOblong.svg",
+        QObject::tr("Oblong Command").toStdString(),
+        (msg::Request | msg::Construct | msg::Oblong).to_string(),
+        constructionPrimitives
+      );
+    }
+    osg::MatrixTransform *constructionFinishing = constructMenuNode
+    (
+      ":/resources/images/constructionFinishing.svg",
+      QObject::tr("Finishing Menu").toStdString(),
+      constructionBase
+    );
+    {
+      constructCommandNode
+      (
+        ":/resources/images/constructionBlend.svg",
+        QObject::tr("Blend Command").toStdString(),
+        (msg::Request | msg::Construct | msg::Blend).to_string(),
+        constructionFinishing
+      );
+      constructCommandNode
+      (
+        ":/resources/images/constructionChamfer.svg",
+        QObject::tr("Chamfer Command").toStdString(),
+        (msg::Request | msg::Construct | msg::Chamfer).to_string(),
+        constructionFinishing
+      );
+      constructCommandNode
+      (
+        ":/resources/images/constructionDraft.svg",
+        QObject::tr("Draft Command").toStdString(),
+        (msg::Request | msg::Construct | msg::Draft).to_string(),
+        constructionFinishing
+      );
+      constructCommandNode
+      (
+        ":/resources/images/constructionHollow.svg",
+        QObject::tr("Hollow Command").toStdString(),
+        (msg::Request | msg::Construct | msg::Hollow).to_string(),
+        constructionFinishing
+      );
+      constructCommandNode
+      (
+        ":/resources/images/constructionExtract.svg",
+        QObject::tr("Extract Command").toStdString(),
+        (msg::Request | msg::Construct | msg::Extract).to_string(),
+        constructionFinishing
+      );
+      constructCommandNode
+      (
+        ":/resources/images/constructionRefine.svg",
+        QObject::tr("Refine Command").toStdString(),
+        (msg::Request | msg::Construct | msg::Refine).to_string(),
+        constructionFinishing
+      );
+    }
+    osg::MatrixTransform *constructionBoolean = constructMenuNode
+    (
+      ":/resources/images/constructionBoolean.svg",
+      QObject::tr("Boolean Menu").toStdString(),
+      constructionBase
+    );
+    {
+      constructCommandNode
+      (
+        ":/resources/images/constructionUnion.svg",
+        QObject::tr("Union Command").toStdString(),
+        (msg::Request | msg::Construct | msg::Union).to_string(),
+        constructionBoolean
+      );
+      constructCommandNode
+      (
+        ":/resources/images/constructionSubtract.svg",
+        QObject::tr("Subtract Command").toStdString(),
+        (msg::Request | msg::Construct | msg::Subtract).to_string(),
+        constructionBoolean
+      );
+      constructCommandNode
+      (
+        ":/resources/images/constructionIntersect.svg",
+        QObject::tr("Intersection Command").toStdString(),
+        (msg::Request | msg::Construct | msg::Intersect).to_string(),
+        constructionBoolean
+      );
+    }
+    osg::MatrixTransform *constructionDie = constructMenuNode
+    (
+      ":/resources/images/constructionDie.svg",
+      QObject::tr("Die Menu").toStdString(),
+      constructionBase
+    );
+    {
+      constructCommandNode
+      (
+        ":/resources/images/constructionSquash.svg",
+        QObject::tr("Squash Command").toStdString(),
+        (msg::Request | msg::Construct | msg::Squash).to_string(),
+        constructionDie
+      );
+      constructCommandNode
+      (
+        ":/resources/images/constructionStrip.svg",
+        QObject::tr("Strip Command").toStdString(),
+        (msg::Request | msg::Construct | msg::Strip).to_string(),
+        constructionDie
+      );
+      constructCommandNode
+      (
+        ":/resources/images/constructionNest.svg",
+        QObject::tr("Nest Command").toStdString(),
+        (msg::Request | msg::Construct | msg::Nest).to_string(),
+        constructionDie
+      );
+      constructCommandNode
+      (
+        ":/resources/images/constructionDieSet.svg",
+        QObject::tr("DieSet Command").toStdString(),
+        (msg::Request | msg::Construct | msg::DieSet).to_string(),
+        constructionDie
+      );
+      constructCommandNode
+      (
+        ":/resources/images/constructionQuote.svg",
+        QObject::tr("Quote Command").toStdString(),
+        (msg::Request | msg::Construct | msg::Quote).to_string(),
+        constructionDie
+      );
+    }
+    constructCommandNode //TODO build datum menu node and move datum plane to it.
+    (
+      ":/resources/images/constructionDatumPlane.svg",
+      QObject::tr("Datum Plane Command").toStdString(),
+      (msg::Request | msg::Construct | msg::DatumPlane).to_string(),
+      constructionBase
+    );
+  }
+  osg::MatrixTransform *editBase = constructMenuNode
+  (
+    ":/resources/images/editBase.svg",
+    QObject::tr("Edit Menu").toStdString(),
+    startNode.get()
+  );
+  {
+    constructCommandNode
+    (
+      ":/resources/images/editFeature.svg",
+      QObject::tr("Edit Feature Command").toStdString(),
+      (msg::Request | msg::Edit | msg::Feature).to_string(),
+      editBase
+    );
+    constructCommandNode
+    (
+      ":/resources/images/editRemove.svg",
+      QObject::tr("Remove Command").toStdString(),
+      (msg::Request | msg::Remove).to_string(),
+      editBase
+    );
+    constructCommandNode
+    (
+      ":/resources/images/editColor.svg",
+      QObject::tr("Edit Color Command").toStdString(),
+      (msg::Request | msg::Edit | msg::Feature | msg::Color).to_string(),
+      editBase
+    );
+    constructCommandNode
+    (
+      ":/resources/images/editRename.svg",
+      QObject::tr("Edit Name Command").toStdString(),
+      (msg::Request | msg::Edit | msg::Feature | msg::Name).to_string(),
+      editBase
+    );
+    constructCommandNode
+    (
+      ":/resources/images/editUpdate.svg",
+      QObject::tr("Update Command").toStdString(),
+      (msg::Request | msg::Update).to_string(),
+      editBase
+    );
+    constructCommandNode
+    (
+      ":/resources/images/editForceUpdate.svg",
+      QObject::tr("Force Update Command").toStdString(),
+      (msg::Request | msg::ForceUpdate).to_string(),
+      editBase
+    );
+    osg::MatrixTransform *editSystemBase = constructMenuNode
+    (
+      ":/resources/images/systemBase.svg",
+      QObject::tr("Coordinate System Menu").toStdString(),
+      editBase
+    );
+    {
+      constructCommandNode
+      (
+        ":/resources/images/editDraggerToFeature.svg",
+        QObject::tr("Dragger To Feature Command").toStdString(),
+        (msg::Request | msg::DraggerToFeature).to_string(),
+        editSystemBase
+      );
+      constructCommandNode
+      (
+        ":/resources/images/editFeatureToDragger.svg",
+        QObject::tr("Feature To Dragger Command").toStdString(),
+        (msg::Request | msg::FeatureToDragger).to_string(),
+        editSystemBase
+      );
+      constructCommandNode
+      (
+        ":/resources/images/featureToSystem.svg",
+        QObject::tr("Feature To Current System Command").toStdString(),
+        (msg::Request | msg::FeatureToSystem).to_string(),
+        editSystemBase
+      );
+      constructCommandNode
+      (
+        ":/resources/images/featureReposition.svg",
+        QObject::tr("Dragger To Current System Command").toStdString(),
+        (msg::Request | msg::FeatureReposition).to_string(),
+        editSystemBase
+      );
+    }
+    constructCommandNode
+    (
+      ":/resources/images/preferences.svg",
+      QObject::tr("Preferences Command").toStdString(),
+      (msg::Request | msg::Preferences).to_string(),
+      editBase
+    );
+  }
+  osg::MatrixTransform *fileBase = constructMenuNode
+  (
+    ":/resources/images/fileBase.svg",
+    QObject::tr("File Menu").toStdString(),
+    startNode.get()
+  );
+  {
+    osg::MatrixTransform *fileImport = constructMenuNode
+    (
+      ":/resources/images/fileImport.svg",
+      QObject::tr("Import Menu").toStdString(),
+      fileBase
+    );
+    {
+      constructCommandNode
+      (
+        ":/resources/images/fileOCC.svg",
+        QObject::tr("Import OCC Brep Command").toStdString(),
+        (msg::Request | msg::Import | msg::OCC).to_string(),
+        fileImport
+      );
+      constructCommandNode
+      (
+        ":/resources/images/fileStep.svg",
+        QObject::tr("Import Step Command").toStdString(),
+        (msg::Request | msg::Import | msg::Step).to_string(),
+        fileImport
+      );
+    }
+    osg::MatrixTransform *fileExport = constructMenuNode
+    (
+      ":/resources/images/fileExport.svg",
+      QObject::tr("Export Menu").toStdString(),
+      fileBase
+    );
+    {
+      constructCommandNode
+      (
+        ":/resources/images/fileOSG.svg",
+        QObject::tr("Export Open Scene Graph Command").toStdString(),
+        (msg::Request | msg::Export | msg::OSG).to_string(),
+        fileExport
+      );
+      constructCommandNode
+      (
+        ":/resources/images/fileOCC.svg",
+        QObject::tr("Export OCC Brep Command").toStdString(),
+        (msg::Request | msg::Export | msg::OCC).to_string(),
+        fileExport
+      );
+      constructCommandNode
+      (
+        ":/resources/images/fileStep.svg",
+        QObject::tr("Export Step Command").toStdString(),
+        (msg::Request | msg::Export | msg::Step).to_string(),
+        fileExport
+      );
+    }
+    constructCommandNode
+    (
+      ":/resources/images/fileOpen.svg",
+      QObject::tr("Open Project Command").toStdString(),
+      (msg::Request | msg::Project | msg::Dialog).to_string(),
+      fileBase
+    );
+    constructCommandNode
+    (
+      ":/resources/images/fileSave.svg",
+      QObject::tr("Save Project Command").toStdString(),
+      (msg::Request | msg::Save | msg::Project).to_string(),
+      fileBase
+    );
+  }
+  osg::MatrixTransform *systemBase = constructMenuNode
+  (
+    ":/resources/images/systemBase.svg",
+    QObject::tr("Coordinate System Menu").toStdString(),
+    startNode.get()
+  );
+  {
+    constructCommandNode
+    (
+      ":/resources/images/systemReset.svg",
+      QObject::tr("Coordinate System Reset Command").toStdString(),
+      (msg::Request | msg::SystemReset).to_string(),
+      systemBase
+    );
+    constructCommandNode
+    (
+      ":/resources/images/systemToggle.svg",
+      QObject::tr("Toggle Coordinate System Visibility Command").toStdString(),
+      (msg::Request | msg::SystemToggle).to_string(),
+      systemBase
+    );
+    constructCommandNode
+    (
+      ":/resources/images/systemToFeature.svg",
+      QObject::tr("Coordinate System To Feature Command").toStdString(),
+      (msg::Request | msg::SystemToFeature).to_string(),
+      systemBase
+    );
+  }
+  osg::MatrixTransform *inspectBase = constructMenuNode
+  (
+    ":/resources/images/inspectBase.svg",
+    QObject::tr("Inspect Menu").toStdString(),
+    startNode.get()
+  );
+  {
+    constructCommandNode
+    (
+      ":/resources/images/inspectInfo.svg",
+      QObject::tr("View Info Command").toStdString(),
+      (msg::Request | msg::Info).to_string(),
+      inspectBase
+    );
+    constructCommandNode
+    (
+      ":/resources/images/inspectCheckGeometry.svg",
+      QObject::tr("Check Geometry For Errors").toStdString(),
+      (msg::Request | msg::CheckGeometry).to_string(),
+      inspectBase
+    );
+    osg::MatrixTransform *inspectMeasureBase = constructMenuNode
+    (
+      ":/resources/images/inspectMeasureBase.svg",
+      QObject::tr("Measure Menu").toStdString(),
+      inspectBase
+    );
+    {
+      constructCommandNode
+      (
+        ":/resources/images/inspectMeasureClear.svg",
+        QObject::tr("Clear Measure Command").toStdString(),
+        (msg::Request | msg::Clear | msg::Overlay).to_string(),
+        inspectMeasureBase
+      );
+      constructCommandNode
+      (
+        ":/resources/images/inspectLinearMeasure.svg",
+        QObject::tr("LinearMeasure Command").toStdString(),
+        (msg::Request | msg::LinearMeasure).to_string(),
+        inspectMeasureBase
+      );
+    }
+    osg::MatrixTransform *debugBase = constructMenuNode
+    (
+      ":/resources/images/debugBase.svg",
+      QObject::tr("Debug Menu").toStdString(),
+      inspectBase
+    );
+    {
+      constructCommandNode
+      (
+        ":/resources/images/debugCheckShapeIds.svg",
+        QObject::tr("Check Shaped Ids").toStdString(),
+        (msg::Request | msg::CheckShapeIds).to_string(),
+        debugBase
+      );
+      constructCommandNode
+      (
+        ":/resources/images/debugDump.svg",
+        QObject::tr("Debug Feature Dump").toStdString(),
+        (msg::Request | msg::DebugDump).to_string(),
+        debugBase
+      );
+      constructCommandNode
+      (
+        ":/resources/images/debugShapeTrackUp.svg",
+        QObject::tr("Track Shape Up").toStdString(),
+        (msg::Request | msg::DebugShapeTrackUp).to_string(),
+        debugBase
+      );
+      constructCommandNode
+      (
+        ":/resources/images/debugShapeTrackDown.svg",
+        QObject::tr("Track Shape Down").toStdString(),
+        (msg::Request | msg::DebugShapeTrackDown).to_string(),
+        debugBase
+      );
+      constructCommandNode
+      (
+        ":/resources/images/debugShapeGraph.svg",
+        QObject::tr("Write shape graph to application directory").toStdString(),
+        (msg::Request | msg::DebugShapeGraph).to_string(),
+        debugBase
+      );
+      constructCommandNode
+      (
+        ":/resources/images/debugDumpProjectGraph.svg",
+        QObject::tr("Write project graph to application directory").toStdString(),
+        (msg::Request | msg::DebugDumpProjectGraph).to_string(),
+        debugBase
+      );
+      constructCommandNode
+      (
+        ":/resources/images/debugDumpDAGViewGraph.svg",
+        QObject::tr("Write DAGView graph to application directory").toStdString(),
+        (msg::Request | msg::DebugDumpDAGViewGraph).to_string(),
+        debugBase
+      );
+      constructCommandNode
+      (
+        ":/resources/images/debugInquiry.svg",
+        QObject::tr("Inquiry. A testing facility").toStdString(),
+        (msg::Request | msg::DebugInquiry).to_string(),
+        debugBase
+      );
+      constructCommandNode
+      (
+        ":/resources/images/dagViewPending.svg",
+        QObject::tr("Dirty selected features").toStdString(),
+        (msg::Request | msg::Feature | msg::Model | msg::Dirty).to_string(),
+        debugBase
+      );
+    }
+  }
 }
 
 std::vector<osg::Vec3> GestureHandler::buildNodeLocations(osg::Vec3 direction, int nodeCount)
