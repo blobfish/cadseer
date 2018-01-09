@@ -40,7 +40,8 @@ Base::Base()
   mainWindow = application->getMainWindow(); assert(mainWindow);
   project = application->getProject(); assert(project);
   selectionManager = mainWindow->getSelectionManager(); assert(selectionManager);
-  eventHandler = mainWindow->getViewer()->getSelectionEventHandler(); assert(eventHandler);
+  viewer = mainWindow->getViewer(); assert(viewer);
+  eventHandler = viewer->getSelectionEventHandler(); assert(eventHandler);
   
   isActive = false;
 }

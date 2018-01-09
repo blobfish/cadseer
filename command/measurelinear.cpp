@@ -115,22 +115,43 @@ void MeasureLinear::build(const osg::Vec3d &point1, const osg::Vec3d &point2)
     
   QString infoMessage;
   QTextStream stream(&infoMessage);
+  //if I don't set the realNumberNotation I get 10 decimal places. 
+  //with it I get the specified 12. Why qt?
+  stream.setRealNumberNotation(QTextStream::FixedNotation);
+  forcepoint(stream) << qSetRealNumberPrecision(12);
+  auto streamPoint = [&](const osg::Vec3d &p)
+  {
+    stream
+      << "["
+      << p.x() << ", "
+      << p.y() << ", "
+      << p.z() << "]";
+  };
+  
+  stream << endl << "Measure linear: "<< endl
+    << "    3d distance: "<< distance
+    << endl << "    Absolute System:" << endl << "        Point1 location: ";
+  streamPoint(point1);
+  stream << endl << "        Point2 location: ";
+  streamPoint(point2);
+  
+  stream << endl << "        delta X: " << point2.x() - point1.x()
+    << endl << "        delta Y: " << point2.y() - point1.y()
+    << endl << "        delta Z: " << point2.z() - point1.z();
+  
+  //report points in current system.
+  osg::Matrixd ics = osg::Matrixd::inverse(viewer->getCurrentSystem()); //inverted current system.
+  osg::Vec3d csPoint1 = point1 * ics; //current system point1
+  osg::Vec3d csPoint2 = point2 * ics; //current system point2
+  stream << endl << "    Current system:" << endl << "        Point1 location: ";
+  streamPoint(csPoint1);
+  stream << endl << "        Point2 location: ";
+  streamPoint(csPoint2);
+  stream << endl << "        delta X: " << csPoint2.x() - csPoint1.x()
+    << endl << "        delta Y: " << csPoint2.y() - csPoint1.y()
+    << endl << "        delta Z: " << csPoint2.z() - csPoint1.z();
   stream << endl;
-  forcepoint(stream)
-      << qSetRealNumberPrecision(12)
-      << "Point1 location: ["
-      << point1.x() << ", "
-      << point1.y() << ", "
-      << point1.z() << "]"
-      << endl
-      << "Point2 location: ["
-      << point2.x() << ", "
-      << point2.y() << ", "
-      << point2.z() << "]"
-      << endl
-      <<"Length: "
-      << distance
-      <<endl;
+  
   msg::Message viewInfoMessage(msg::Request | msg::Info | msg::Text);
   app::Message appMessage;
   appMessage.infoMessage = infoMessage;

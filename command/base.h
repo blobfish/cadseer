@@ -31,6 +31,7 @@ namespace app{class Application; class MainWindow;}
 namespace prj{class Project;}
 namespace slc{class Manager; class EventHandler;}
 namespace msg{class Message; class Observer;}
+namespace vwr{class Widget;}
 
 namespace cmd
 {
@@ -56,6 +57,7 @@ namespace cmd
     prj::Project *project;
     slc::Manager *selectionManager;
     slc::EventHandler *eventHandler;
+    vwr::Widget *viewer;
     
     bool isActive;
   };

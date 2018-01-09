@@ -683,11 +683,11 @@ void GestureHandler::constructMenu()
     editSystemBase->setUserValue(attributeStatus, QObject::tr("Coordinate System Menu").toStdString());
     editBase->insertChild(editBase->getNumChildren() - 2, editSystemBase);
     
-    osg::MatrixTransform *featureToSystem = gsn::buildCommandNode(":/resources/images/featureToSystem.svg", iconRadius);
-    featureToSystem->setMatrix(dummy);
-    featureToSystem->setUserValue(attributeMask, (msg::Request | msg::FeatureToSystem).to_string());
-    featureToSystem->setUserValue(attributeStatus, QObject::tr("Feature To Coordinate System Command").toStdString());
-    editSystemBase->insertChild(editSystemBase->getNumChildren() - 2, featureToSystem);
+    osg::MatrixTransform *editDraggerToFeature = gsn::buildCommandNode(":/resources/images/editDraggerToFeature.svg", iconRadius);
+    editDraggerToFeature->setMatrix(dummy);
+    editDraggerToFeature->setUserValue(attributeMask, (msg::Request | msg::DraggerToFeature).to_string());
+    editDraggerToFeature->setUserValue(attributeStatus, QObject::tr("Dragger To Feature Command").toStdString());
+    editSystemBase->insertChild(editSystemBase->getNumChildren() - 2, editDraggerToFeature);
     
     osg::MatrixTransform *editFeatureToDragger = gsn::buildCommandNode(":/resources/images/editFeatureToDragger.svg", iconRadius);
     editFeatureToDragger->setMatrix(dummy);
@@ -695,16 +695,16 @@ void GestureHandler::constructMenu()
     editFeatureToDragger->setUserValue(attributeStatus, QObject::tr("Feature To Dragger Command").toStdString());
     editSystemBase->insertChild(editSystemBase->getNumChildren() - 2, editFeatureToDragger);
     
-    osg::MatrixTransform *editDraggerToFeature = gsn::buildCommandNode(":/resources/images/editDraggerToFeature.svg", iconRadius);
-    editDraggerToFeature->setMatrix(dummy);
-    editDraggerToFeature->setUserValue(attributeMask, (msg::Request | msg::DraggerToFeature).to_string());
-    editDraggerToFeature->setUserValue(attributeStatus, QObject::tr("Dragger To Feature Command").toStdString());
-    editSystemBase->insertChild(editSystemBase->getNumChildren() - 2, editDraggerToFeature);
+    osg::MatrixTransform *featureToSystem = gsn::buildCommandNode(":/resources/images/featureToSystem.svg", iconRadius);
+    featureToSystem->setMatrix(dummy);
+    featureToSystem->setUserValue(attributeMask, (msg::Request | msg::FeatureToSystem).to_string());
+    featureToSystem->setUserValue(attributeStatus, QObject::tr("Feature To Current System Command").toStdString());
+    editSystemBase->insertChild(editSystemBase->getNumChildren() - 2, featureToSystem);
     
     osg::MatrixTransform *featureReposition = gsn::buildCommandNode(":/resources/images/featureReposition.svg", iconRadius);
     featureReposition->setMatrix(dummy);
     featureReposition->setUserValue(attributeMask, (msg::Request | msg::FeatureReposition).to_string());
-    featureReposition->setUserValue(attributeStatus, QObject::tr("Feature From Dragger To Coordinate System Command").toStdString());
+    featureReposition->setUserValue(attributeStatus, QObject::tr("Dragger To Current System Command").toStdString());
     editSystemBase->insertChild(editSystemBase->getNumChildren() - 2, featureReposition);
     
     osg::MatrixTransform *preferences = gsn::buildCommandNode(":/resources/images/preferences.svg", iconRadius);

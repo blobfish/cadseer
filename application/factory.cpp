@@ -1056,7 +1056,33 @@ void Factory::viewInfoDispatched(const msg::Message &)
 {
   QString infoMessage;
   QTextStream stream(&infoMessage);
+  stream.setRealNumberNotation(QTextStream::FixedNotation);
+  forcepoint(stream) << qSetRealNumberPrecision(12);
   stream << endl;
+  
+  vwr::Widget *viewer = static_cast<app::Application*>(qApp)->getMainWindow()->getViewer();
+  osg::Matrixd ics = osg::Matrixd::inverse(viewer->getCurrentSystem()); //inverted current system.
+  
+  auto streamPoint = [&](const osg::Vec3d &p)
+  {
+    stream
+      << "Absolute Point location: "
+      << "["
+      << p.x() << ", "
+      << p.y() << ", "
+      << p.z() << "]"
+      << endl;
+      
+    osg::Vec3d tp = p * ics;
+    stream
+      << "Current System Point location: "
+      << "["
+      << tp.x() << ", "
+      << tp.y() << ", "
+      << tp.z() << "]"
+      << endl;
+  };
+  
   
   
     //maybe if selection is empty we will dump out application information.
@@ -1102,32 +1128,17 @@ void Factory::viewInfoDispatched(const msg::Message &)
           {
               const ann::SeerShape &s = feature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
               feature->getShapeInfo(stream, s.useGetStartVertex(container.shapeId));
-              forcepoint(stream)
-                  << qSetRealNumberPrecision(12)
-                  << "Point location: ["
-                  << container.pointLocation.x() << ", "
-                  << container.pointLocation.y() << ", "
-                  << container.pointLocation.z() << "]";
+              streamPoint(container.pointLocation);
           }
           else if (container.selectionType == slc::Type::EndPoint)
           {
             const ann::SeerShape &s = feature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
             feature->getShapeInfo(stream, s.useGetEndVertex(container.shapeId));
-            forcepoint(stream)
-              << qSetRealNumberPrecision(12)
-              << "Point location: ["
-              << container.pointLocation.x() << ", "
-              << container.pointLocation.y() << ", "
-              << container.pointLocation.z() << "]";
+            streamPoint(container.pointLocation);
           }
           else //all other points.
           {
-            forcepoint(stream)
-              << qSetRealNumberPrecision(12)
-              << "Point location: ["
-              << container.pointLocation.x() << ", "
-              << container.pointLocation.y() << ", "
-              << container.pointLocation.z() << "]";
+            streamPoint(container.pointLocation);
           }
       }
     }
