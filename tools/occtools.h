@@ -23,6 +23,7 @@
 #include <vector>
 #include <stack>
 #include <algorithm>
+#include <cassert>
 
 #include <Standard_StdAllocator.hxx>
 #include <TopoDS_Shape.hxx>
@@ -56,6 +57,33 @@ namespace occt
     auto last = std::unique(t.begin(), t.end(), equal);
     t.erase(last, t.end());
   }
+  
+  /*! get occt hash */
+  inline int getShapeHash(const TopoDS_Shape &shape)
+  {
+    return shape.HashCode(std::numeric_limits<int>::max());
+  }
+  
+  /*! get the shape type as a string*/
+  inline std::string getShapeTypeString(const TopoDS_Shape &shapeIn)
+  {
+    static const std::vector<std::string> strings = 
+    {
+      "Compound",
+      "CompSolid",
+      "Solid",
+      "Shell",
+      "Face",
+      "Wire",
+      "Edge",
+      "Vertex",
+      "Shape"
+    };
+    
+    std::size_t index = static_cast<std::size_t>(shapeIn.ShapeType());
+    assert(index < strings.size());
+    return strings.at(index);
+  };
   
   typedef std::vector<TopoDS_Shape, Standard_StdAllocator<TopoDS_Shape> > ShapeVector;
   typedef std::vector<TopoDS_Solid, Standard_StdAllocator<TopoDS_Solid> > SolidVector;
@@ -178,6 +206,13 @@ namespace occt
     
     bool dirty = true;
   };
+}
+
+inline std::ostream& operator<<(std::ostream &st, const TopoDS_Shape &sh)
+{
+  st << "Shape hash: " << occt::getShapeHash(sh)
+    << "    Shape type: " << occt::getShapeTypeString(sh);
+  return st;
 }
 
 #endif // GU_OCCTOOLS_H

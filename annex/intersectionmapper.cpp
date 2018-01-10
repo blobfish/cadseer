@@ -499,7 +499,7 @@ void FaceNode::graphViz(std::ostream &s) const
     "[label=\"" <<
     "faceId: " << gu::idToString(faceId) << "\\n" <<
     "wireId: " << gu::idToString(wireId) << "\\n" <<
-    "shape hash: " << ((face.IsNull()) ? ("null") : (std::to_string(gu::getShapeHash(face)))) << "\\n" <<
+    "shape hash: " << ((face.IsNull()) ? ("null") : (std::to_string(occt::getShapeHash(face)))) << "\\n" <<
     "type: " << typeStrings.at(static_cast<std::size_t>(type)) << "\\n" <<
     ((alive) ? "alive" : "dead") << "\\n" <<
     ((used) ? "used" : "NOT used") << "\\n" <<
@@ -633,7 +633,7 @@ void EdgeNode::graphViz(std::ostream &s) const
   s << 
     "[label=\"" <<
     "edgeId: " << gu::idToString(edgeId) << "\\n" <<
-    "shape hash: " << ((edge.IsNull()) ? ("null") : (std::to_string(gu::getShapeHash(edge)))) << "\\n" <<
+    "shape hash: " << ((edge.IsNull()) ? ("null") : (std::to_string(occt::getShapeHash(edge)))) << "\\n" <<
     "type: " << typeStrings.at(static_cast<std::size_t>(type)) << "\\n" <<
     ((alive) ? "alive" : "dead") << "\\n" <<
     ((used) ? "used" : "NOT used") << "\\n" <<
@@ -672,7 +672,7 @@ void IntersectionNode::graphViz(std::ostream &s) const
   s << 
     "[label=\"" <<
     "edgeId: " << gu::idToString(edgeId) << "\\n" <<
-    "shape hash: " << ((edge.IsNull()) ? ("null") : (std::to_string(gu::getShapeHash(edge)))) << "\\n" <<
+    "shape hash: " << ((edge.IsNull()) ? ("null") : (std::to_string(occt::getShapeHash(edge)))) << "\\n" <<
     "type: " << typeStrings.at(static_cast<std::size_t>(type)) << "\\n" <<
     ((alive) ? "alive" : "dead") << "\\n" <<
     ((used) ? "used" : "NOT used") << "\\n" <<

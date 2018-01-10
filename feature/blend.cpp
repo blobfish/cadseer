@@ -401,20 +401,20 @@ void Blend::ensureNoFaceNils()
 void Blend::dumpInfo(BRepFilletAPI_MakeFillet &blendMakerIn, const ann::SeerShape &targetFeatureIn)
 {
   std::cout << std::endl << std::endl <<
-    "shape out type is: " << gu::getShapeTypeString(blendMakerIn.Shape()) << std::endl <<
+    "shape out type is: " << occt::getShapeTypeString(blendMakerIn.Shape()) << std::endl <<
     "fillet dump:" << std::endl;
   
   auto shapes = targetFeatureIn.getAllShapes();
   for (const auto &currentShape : shapes)
   {
-    std::cout << "ShapeType is: " << std::setw(10) << gu::getShapeTypeString(currentShape) << 
+    std::cout << "ShapeType is: " << std::setw(10) << occt::getShapeTypeString(currentShape) << 
       "      Generated Count is: " << blendMakerIn.Generated(currentShape).Extent() <<
       "      Modified Count is: " << blendMakerIn.Modified(currentShape).Extent() <<
       "      is deleted: " << ((blendMakerIn.IsDeleted(currentShape)) ? "true" : "false") << std::endl; 
       
       if (blendMakerIn.Generated(currentShape).Extent() > 0)
         std::cout << "   generated type is: " << 
-          gu::getShapeTypeString(blendMakerIn.Generated(currentShape).First()) << std::endl;
+          occt::getShapeTypeString(blendMakerIn.Generated(currentShape).First()) << std::endl;
   }
   
 //   std::cout << std::endl << std::endl << "output of blend: " << std::endl;

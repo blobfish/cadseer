@@ -45,12 +45,10 @@ class Matrixd;
 
 namespace gu
 {
-int getShapeHash(const TopoDS_Shape &shape);
 boost::uuids::uuid getId(const osg::Geometry *geometry);
 boost::uuids::uuid getId(const osg::Node *node);
 static const std::string idAttributeTitle = "id";
 static const std::string featureTypeAttributeTitle = "featureType";
-std::string getShapeTypeString(const TopoDS_Shape&);
 osg::Vec3d toOsg(const gp_Vec &occVecIn);
 osg::Vec3d toOsg(const gp_Pnt &occPointIn);
 osg::Vec3d toOsg(const TopoDS_Vertex &vertexIn);
@@ -71,7 +69,5 @@ void uniquefy(T &t)
   t.erase(last, t.end());
 }
 }
-
-std::ostream& operator<<(std::ostream &, const TopoDS_Shape &);
 
 #endif // GU_GLOBALUTILITIES_H

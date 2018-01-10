@@ -100,7 +100,7 @@
     <string>SelectVertices</string>
    </property>
    <property name="toolTip">
-    <string>Vertices on/off</string>
+    <string>Points on/off</string>
    </property>
   </action>
   <action name="actionSelectWires">

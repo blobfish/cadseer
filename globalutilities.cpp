@@ -35,14 +35,6 @@
 #include <tools/idtools.h>
 #include <globalutilities.h>
 
-int gu::getShapeHash(const TopoDS_Shape &shape)
-{
-//     assert(!shape.IsNull()); need to get shape hash of null.
-    int hashOut;
-    hashOut = shape.HashCode(std::numeric_limits<int>::max());
-    return hashOut;
-}
-
 boost::uuids::uuid gu::getId(const osg::Geometry *geometry)
 {
     return getId(geometry->getParent(0));
@@ -55,26 +47,6 @@ boost::uuids::uuid gu::getId(const osg::Node *node)
       assert(0);
   return gu::stringToId(stringId);
 }
-
-std::string gu::getShapeTypeString(const TopoDS_Shape &shapeIn)
-{
-  static const std::vector<std::string> strings = 
-  {
-    "Compound",
-    "CompSolid",
-    "Solid",
-    "Shell",
-    "Face",
-    "Wire",
-    "Edge",
-    "Vertex",
-    "Shape"
-  };
-  
-  std::size_t index = static_cast<std::size_t>(shapeIn.ShapeType());
-  assert(index < strings.size());
-  return strings.at(index);
-};
 
 osg::Vec3d gu::toOsg(const gp_Vec &occVecIn)
 {
@@ -223,11 +195,4 @@ osg::Vec3d gu::gleanVector(const TopoDS_Shape& shapeIn, const osg::Vec3d &pickPo
   }
   
   return out;
-}
-
-std::ostream& operator<<(std::ostream &st, const TopoDS_Shape &sh)
-{
-  st << "Shape hash: " << gu::getShapeHash(sh)
-    << "    Shape type: " << gu::getShapeTypeString(sh);
-  return st;
 }
