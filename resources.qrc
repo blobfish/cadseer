@@ -66,6 +66,7 @@
     <file>resources/images/editColor.svg</file>
     <file>resources/images/editRename.svg</file>
     <file>resources/images/editFeature.svg</file>
+    <file>resources/images/editCommandCancel.svg</file>
     <file>resources/images/fileBase.svg</file>
     <file>resources/images/fileImport.svg</file>
     <file>resources/images/fileExport.svg</file>
