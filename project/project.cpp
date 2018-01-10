@@ -391,7 +391,13 @@ void Project::setCurrentLeaf(const uuid& idIn)
     for (auto its = boost::adjacent_vertices(vertex, reversedGraph); its.first != its.second; ++its.first)
     {
       stow->setFeatureActive(*its.first);
+      
+      // view signals when feature is shown3d.
+      // project responds to make sure visual is up to date in Project::shownThreeDDispatched.
+      // so don't block for this.
+      block.unblock();
       observer->out(msg::buildShowThreeD(reversedGraph[*its.first].feature->getId()));
+      block.block();
     }
   }
   
@@ -408,7 +414,9 @@ void Project::setCurrentLeaf(const uuid& idIn)
   //now we don't want the actual feature inactive just it's children so we
   //turn it back on because the BFS and visitor turned it off.
   stow->setFeatureActive(vertex);
+  block.unblock(); //see notes above.
   observer->out(msg::buildShowThreeD(stow->graph[vertex].feature->getId()));
+  block.block();
   
   updateLeafStatus();
 }
