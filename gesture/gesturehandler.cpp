@@ -754,6 +754,13 @@ void GestureHandler::constructMenu()
   {
     constructCommandNode
     (
+      ":/resources/images/editCommandCancel.svg",
+      QObject::tr("Cancel Command").toStdString(),
+      (msg::Request | msg::Command | msg::Cancel).to_string(),
+      editBase
+    );
+    constructCommandNode
+    (
       ":/resources/images/editFeature.svg",
       QObject::tr("Edit Feature Command").toStdString(),
       (msg::Request | msg::Edit | msg::Feature).to_string(),
