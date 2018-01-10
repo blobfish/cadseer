@@ -323,7 +323,7 @@ void Model::setupDispatcher()
   mask = msg::Response | msg::Pre | msg::Remove | msg::Connection;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::connectionRemovedDispatched, this, _1)));
   
-  mask = msg::Response | msg::Post | msg::Update | msg::Model;
+  mask = msg::Response | msg::Post | msg::Project | msg::Update | msg::Model;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Model::projectUpdatedDispatched, this, _1)));
   
   mask = msg::Response | msg::Post | msg::Preselection | msg::Add;
@@ -1295,7 +1295,7 @@ void Model::setCurrentLeafSlot()
   observer->out(messageOut);
   
   if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
-    observer->out(msg::Mask(msg::Request | msg::Update));
+    observer->out(msg::Mask(msg::Request | msg::Project | msg::Update));
 }
 
 void Model::removeFeatureSlot()

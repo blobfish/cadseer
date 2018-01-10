@@ -199,7 +199,7 @@ void Manager::doneSlot()
   
   if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
   {
-    observer->outBlocked(msg::Mask(msg::Request | msg::Update));
+    observer->outBlocked(msg::Mask(msg::Request | msg::Project | msg::Update));
   }
   
   if (!stack.empty())

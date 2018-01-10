@@ -784,14 +784,14 @@ void GestureHandler::constructMenu()
     (
       ":/resources/images/editUpdate.svg",
       QObject::tr("Update Command").toStdString(),
-      (msg::Request | msg::Update).to_string(),
+      (msg::Request | msg::Project | msg::Update).to_string(),
       editBase
     );
     constructCommandNode
     (
       ":/resources/images/editForceUpdate.svg",
       QObject::tr("Force Update Command").toStdString(),
-      (msg::Request | msg::ForceUpdate).to_string(),
+      (msg::Request | msg::Force | msg::Update).to_string(),
       editBase
     );
     osg::MatrixTransform *editSystemBase = constructMenuNode

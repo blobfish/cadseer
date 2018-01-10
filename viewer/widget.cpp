@@ -537,7 +537,7 @@ void Widget::setupDispatcher()
   mask = msg::Response | msg::Pre | msg::Remove | msg::Feature;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::featureRemovedDispatched, this, _1)));
   
-  mask = msg::Response | msg::Post | msg::Update | msg::Visual;
+  mask = msg::Response | msg::Post | msg::Project | msg::Update | msg::Visual;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::visualUpdatedDispatched, this, _1)));
   
   mask = msg::Request | msg::View | msg::Top;
@@ -606,7 +606,7 @@ void Widget::setupDispatcher()
   mask = msg::Response | msg::Post | msg::Open | msg::Project;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::projectOpenedDispatched, this, _1)));
   
-  mask = msg::Response | msg::Post | msg::Update | msg::Model;
+  mask = msg::Response | msg::Post | msg::Project | msg::Update | msg::Model;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::projectUpdatedDispatched, this, _1)));
 }
 

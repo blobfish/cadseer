@@ -264,7 +264,7 @@ void Factory::newBoxDispatched(const msg::Message &)
   boxPtr->setCSys(currentSystem);
   project->addFeature(boxPtr);
   
-  observer->out(msg::Mask(msg::Request | msg::Update));
+  observer->out(msg::Mask(msg::Request | msg::Project | msg::Update));
 }
 
 void Factory::newOblongDispatched(const msg::Message &)
@@ -283,7 +283,7 @@ void Factory::newOblongDispatched(const msg::Message &)
   oblongPtr->setCSys(currentSystem);
   project->addFeature(oblongPtr);
   
-  observer->out(msg::Mask(msg::Request | msg::Update));
+  observer->out(msg::Mask(msg::Request | msg::Project | msg::Update));
 }
 
 void Factory::newCylinderDispatched(const msg::Message &)
@@ -302,7 +302,7 @@ void Factory::newCylinderDispatched(const msg::Message &)
   cylinder->setCSys(currentSystem);
   project->addFeature(cylinder);
   
-  observer->out(msg::Mask(msg::Request | msg::Update));
+  observer->out(msg::Mask(msg::Request | msg::Project | msg::Update));
 }
 
 void Factory::newSphereDispatched(const msg::Message&)
@@ -321,7 +321,7 @@ void Factory::newSphereDispatched(const msg::Message&)
   sphere->setCSys(currentSystem);
   project->addFeature(sphere);
   
-  observer->out(msg::Mask(msg::Request | msg::Update));
+  observer->out(msg::Mask(msg::Request | msg::Project | msg::Update));
 }
 
 void Factory::newConeDispatched(const msg::Message&)
@@ -340,7 +340,7 @@ void Factory::newConeDispatched(const msg::Message&)
   cone->setCSys(currentSystem);
   project->addFeature(cone);
   
-  observer->out(msg::Mask(msg::Request | msg::Update));
+  observer->out(msg::Mask(msg::Request | msg::Project | msg::Update));
 }
 
 void Factory::newUnionDispatched(const msg::Message&)
@@ -387,7 +387,7 @@ void Factory::newUnionDispatched(const msg::Message&)
   onion->setColor(project->findFeature(featureIds.at(0))->getColor());
   
   observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
-  observer->out(msg::Mask(msg::Request | msg::Update));
+  observer->out(msg::Mask(msg::Request | msg::Project | msg::Update));
 }
 
 void Factory::newSubtractDispatched(const msg::Message&)
@@ -433,7 +433,7 @@ void Factory::newSubtractDispatched(const msg::Message&)
   subtract->setColor(project->findFeature(featureIds.at(0))->getColor());
   
   observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
-  observer->out(msg::Mask(msg::Request | msg::Update));
+  observer->out(msg::Mask(msg::Request | msg::Project | msg::Update));
 }
 
 void Factory::newIntersectDispatched(const msg::Message&)
@@ -479,7 +479,7 @@ void Factory::newIntersectDispatched(const msg::Message&)
   intersect->setColor(project->findFeature(featureIds.at(0))->getColor());
   
   observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
-  observer->out(msg::Mask(msg::Request | msg::Update));
+  observer->out(msg::Mask(msg::Request | msg::Project | msg::Update));
 }
 
 void Factory::newChamferDispatched(const msg::Message&)
@@ -529,7 +529,7 @@ void Factory::newChamferDispatched(const msg::Message&)
   observer->outBlocked(msg::buildHideOverlay(targetFeatureId));
   
   observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
-  observer->out(msg::Mask(msg::Request | msg::Update));
+  observer->out(msg::Mask(msg::Request | msg::Project | msg::Update));
 }
 
 void Factory::newDraftDispatched(const msg::Message&)
@@ -581,7 +581,7 @@ void Factory::newDraftDispatched(const msg::Message&)
   observer->outBlocked(msg::buildHideOverlay(targetFeatureId));
   
   observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
-  observer->out(msg::Mask(msg::Request | msg::Update));
+  observer->out(msg::Mask(msg::Request | msg::Project | msg::Update));
 }
 
 void Factory::newDatumPlaneDispatched(const msg::Message&)
@@ -611,7 +611,7 @@ void Factory::newDatumPlaneDispatched(const msg::Message&)
     project->connect(connection.parentId, dPlane->getId(), connection.inputType);
 
   observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
-  observer->out(msg::Mask(msg::Request | msg::Update));
+  observer->out(msg::Mask(msg::Request | msg::Project | msg::Update));
 }
 
 void Factory::newHollowDispatched(const msg::Message&)
@@ -660,7 +660,7 @@ void Factory::newHollowDispatched(const msg::Message&)
   observer->outBlocked(msg::buildHideOverlay(targetFeatureId));
   
   observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
-  observer->out(msg::Mask(msg::Request | msg::Update));
+  observer->out(msg::Mask(msg::Request | msg::Project | msg::Update));
 }
 
 void Factory::importOCCDispatched(const msg::Message&)
@@ -689,7 +689,7 @@ void Factory::importOCCDispatched(const msg::Message&)
   prf::manager().rootPtr->project().lastDirectory() = p.remove_filename().string();
   prf::manager().saveConfig();
   
-  observer->out(msg::Mask(msg::Request | msg::Update));
+  observer->out(msg::Mask(msg::Request | msg::Project | msg::Update));
 }
 
 void Factory::exportOCCDispatched(const msg::Message&)
@@ -802,7 +802,7 @@ void Factory::importStepDispatched(const msg::Message&)
     }
   }
   
-  observer->out(msg::Mask(msg::Request | msg::Update));
+  observer->out(msg::Mask(msg::Request | msg::Project | msg::Update));
   
   std::ostringstream m;
   m << si << " shapes imported";
@@ -949,7 +949,7 @@ void Factory::removeDispatched(const msg::Message&)
     observer->out(removeMessage);
   }
   
-  observer->out(msg::Mask(msg::Request | msg::Update));
+  observer->out(msg::Mask(msg::Request | msg::Project | msg::Update));
 }
 
 void Factory::debugDumpDispatched(const msg::Message&)

@@ -103,7 +103,7 @@ void Overlay::setupDispatcher()
   mask = msg::Response | msg::Post | msg::Open | msg::Project;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Overlay::projectOpenedDispatched, this, _1)));
     
-  mask = msg::Response | msg::Post | msg::Update | msg::Model;
+  mask = msg::Response | msg::Post | msg::Project | msg::Update | msg::Model;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Overlay::projectUpdatedDispatched, this, _1)));
 }
 

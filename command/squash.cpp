@@ -110,7 +110,7 @@ void Squash::go()
   //this way we get the feature, but we stop the slow updates for now.
   app::WaitCursor wc;
   observer->outBlocked(msg::Request | msg::DAG | msg::View | msg::Update);
-  observer->out(msg::Message(msg::Request | msg::Update | msg::Model));
+  observer->out(msg::Message(msg::Request | msg::Project | msg::Update | msg::Model));
   squash->setGranularity(0.0); //this will 'freeze' 
   
   observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));

@@ -238,7 +238,7 @@ bool TableModel::setData(const QModelIndex& index, const QVariant& value, int)
   removeRhs(fId);
   Q_EMIT dataChanged(index, index);
   
-  observer->out(msg::Mask(msg::Request | msg::Update));
+  observer->out(msg::Mask(msg::Request | msg::Project | msg::Update));
   
   return true;
 }
@@ -342,7 +342,7 @@ void TableModel::removeFormula(const QModelIndexList &indexesIn)
   idToRhsMap.clear();
   endResetModel();
   
-  observer->out(msg::Mask(msg::Request | msg::Update));
+  observer->out(msg::Mask(msg::Request | msg::Project | msg::Update));
 }
 
 void TableModel::exportExpressions(QModelIndexList& indexesIn, std::ostream &streamIn) const

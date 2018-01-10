@@ -331,7 +331,7 @@ void Parameter::requestLinkSlot(const QString &stringIn)
   observer->outBlocked(msg::buildGitMessage(gm.str()));
   
   if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
-    observer->out(msg::Mask(msg::Request | msg::Update));
+    observer->out(msg::Mask(msg::Request | msg::Project | msg::Update));
   
   this->activateWindow();
 }
@@ -510,7 +510,7 @@ void Parameter::updateDoubleSlot()
       {
         gitStream  << QObject::tr("    changed to: ").toStdString() << static_cast<double>(*parameter);
         observer->out(msg::buildGitMessage(gitStream.str()));
-        observer->out(msg::Mask(msg::Request | msg::Update));
+        observer->out(msg::Mask(msg::Request | msg::Project | msg::Update));
       }
     }
     else
@@ -569,7 +569,7 @@ void Parameter::boolChangedSlot(int i)
     gitStream  << QObject::tr("    changed to: ").toStdString() << static_cast<bool>(*parameter);
     observer->out(msg::buildGitMessage(gitStream.str()));
     if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
-      observer->out(msg::Mask(msg::Request | msg::Update));
+      observer->out(msg::Mask(msg::Request | msg::Project | msg::Update));
   }
 }
 
@@ -677,7 +677,7 @@ void Parameter::vectorChangedSlot()
     gitStream  << QObject::tr("    changed to: ").toStdString() << buffer.toStdString();
     observer->out(msg::buildGitMessage(gitStream.str()));
     if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
-      observer->out(msg::Mask(msg::Request | msg::Update));
+      observer->out(msg::Mask(msg::Request | msg::Project | msg::Update));
   }
 }
 
@@ -703,7 +703,7 @@ void Parameter::intChangedSlot()
       gitStream  << QObject::tr("    changed to: ").toStdString() << tv;
       observer->out(msg::buildGitMessage(gitStream.str()));
       if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
-        observer->out(msg::Mask(msg::Request | msg::Update));
+        observer->out(msg::Mask(msg::Request | msg::Project | msg::Update));
     }
   }
   
