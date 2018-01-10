@@ -103,7 +103,6 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
       {
         assert(currentState == vwr::SpaceballOSGEvent::Released);
         spaceballButton = -1;
-        observer->out(msg::buildStatusMessage(""));
       }
       return true;
     }
