@@ -45,6 +45,8 @@
     <file>resources/images/constructionChamfer.svg</file>
     <file>resources/images/constructionDraft.svg</file>
     <file>resources/images/constructionInert.svg</file>
+    <file>resources/images/constructionInstance.svg</file>
+    <file>resources/images/constructionInstanceLinear.svg</file>
     <file>resources/images/constructionBoolean.svg</file>
     <file>resources/images/constructionUnion.svg</file>
     <file>resources/images/constructionSubtract.svg</file>
