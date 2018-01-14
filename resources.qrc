@@ -47,6 +47,7 @@
     <file>resources/images/constructionInert.svg</file>
     <file>resources/images/constructionInstance.svg</file>
     <file>resources/images/constructionInstanceLinear.svg</file>
+    <file>resources/images/constructionInstanceMirror.svg</file>
     <file>resources/images/constructionBoolean.svg</file>
     <file>resources/images/constructionUnion.svg</file>
     <file>resources/images/constructionSubtract.svg</file>
