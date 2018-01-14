@@ -41,6 +41,7 @@
 #include <osg/Vec3d>
 
 #include <tools/idtools.h>
+#include <tools/occtools.h>
 #include <project/serial/xsdcxxoutput/featurebase.h>
 #include <feature/shapehistory.h>
 #include <annex/seershape.h>
@@ -126,25 +127,16 @@ void SeerShape::setOCCTShape(const TopoDS_Shape& shapeIn)
   }
   
   //fill in container with shapes and nil ids and new vertices.
-  TopTools_IndexedMapOfShape freshShapeMap;
-  TopExp::MapShapes(workShape, freshShapeMap);
-  for (int index = 1; index <= freshShapeMap.Extent(); ++index)
+  for (const auto &s : occt::mapShapes(workShape))
   {
-    //skip degenerated edges.
-    if (freshShapeMap(index).ShapeType() == TopAbs_EDGE)
-    {
-      const TopoDS_Edge &edge = TopoDS::Edge(freshShapeMap(index));
-      if (BRep_Tool::Degenerated(edge))
-        continue;
-    }
-    
     ShapeIdRecord record;
-    record.shape = freshShapeMap(index);
+    record.shape = s;
     record.graphVertex = boost::add_vertex(graph);
     //id is nil. set by record constructor.
     
     shapeIdContainer.insert(record);
   }
+  
   //root compound shape needs an id even though it maybe temp.
   rootShapeId = gu::createRandomId();
   updateShapeIdRecord(workShape, rootShapeId);
@@ -819,6 +811,25 @@ uuid SeerShape::useGetEndVertex(const uuid &edgeIdIn) const
   return findShapeIdRecord(v).id;
 }
 
+occt::ShapeVector SeerShape::useGetNonCompoundChildren() const
+{
+  occt::ShapeVector out;
+  for (auto its = boost::vertices(graph); its.first != its.second; ++its.first)
+  {
+    const TopoDS_Shape &shape = findShapeIdRecord(*its.first).shape;
+    if (shape.ShapeType() != TopAbs_COMPOUND)
+      continue;
+    for (auto aits = boost::adjacent_vertices(*its.first, graph); aits.first != aits.second; ++aits.first)
+    {
+      const TopoDS_Shape &subShape = findShapeIdRecord(*aits.first).shape;
+      if (subShape.ShapeType() == TopAbs_COMPOUND)
+        continue;
+      out.push_back(subShape);
+    }
+  }
+  return out;
+}
+
 void SeerShape::shapeMatch(const SeerShape &source)
 {
   typedef ShapeIdContainer::index<ShapeIdRecord::ByShape>::type List;
@@ -1292,19 +1303,24 @@ prj::srl::SeerShape SeerShape::serialOut()
     const TopoDS_Shape &shape = getRootOCCTShape();
     if (!shape.IsNull())
     {
-      TopTools_IndexedMapOfShape shapeMap;
-      TopExp::MapShapes(shape, shapeMap);
-      for (std::size_t index = 1; index <= static_cast<std::size_t>(shapeMap.Extent()); ++index)
+      //if mapShapes only contains subshapes, like the doc says, we don't write out compound?
+      occt::ShapeVector shapes = occt::mapShapes(shape);
+      std::size_t count = 0;
+      for (const auto &s : shapes)
       {
-        if (!hasShapeIdRecord(shapeMap(index)))
-            continue; //things like degenerated edges exist in shape but not in result.
-        
+        if (!hasShapeIdRecord(s))
+        {
+          std::cerr << "WARNING: ShapeId Container doesn't have shape in SeerShape::serialOut" << std::endl;
+          count++;
+          continue;
+        }
         prj::srl::ShapeIdRecord rRecord
         (
-            gu::idToString(findShapeIdRecord(shapeMap(index)).id),
-            index
+          gu::idToString(findShapeIdRecord(s).id),
+          count
         );
         shapeIdContainerOut.shapeIdRecord().push_back(rRecord);
+        count++;
       }
     }
   }
@@ -1366,12 +1382,18 @@ void SeerShape::serialIn(const prj::srl::SeerShape &sSeerShapeIn)
   //note: shape has already been set through setOCCTShape, so shapeIdContainer has been populated and don't clear.
   //setOCCTShape assigns an id for the root, so that is valid.
   
-  //fill in shape vector
-  TopTools_IndexedMapOfShape shapeMap;
-  TopExp::MapShapes(getRootOCCTShape(), shapeMap);
+  //fill in shapeId container.
+  occt::ShapeVector shapes = occt::mapShapes(getRootOCCTShape());
   for (const prj::srl::ShapeIdRecord &sRRecord : sSeerShapeIn.shapeIdContainer().shapeIdRecord())
   {
-    updateShapeIdRecord(shapeMap(sRRecord.shapeOffset()), gu::stringToId(sRRecord.id()));
+    std::size_t offset = sRRecord.shapeOffset();
+    assert(offset < shapes.size());
+    if (offset >= shapes.size())
+    {
+      std::cerr << "WARNING: invalid shape offset in SeerShape::serialIn" << std::endl;
+      continue;
+    }
+    updateShapeIdRecord(shapes.at(sRRecord.shapeOffset()), gu::stringToId(sRRecord.id()));
   }
   
   evolveContainer.get<EvolveRecord::ByInId>().clear();

@@ -325,6 +325,7 @@ SET(FEATURE_SOURCES
     feature/dieset.cpp
     feature/quote.cpp
     feature/refine.cpp
+    feature/instancelinear.cpp
     )
     
 SET(ANNEX_SOURCES
@@ -332,6 +333,7 @@ SET(ANNEX_SOURCES
     annex/csysdragger.cpp
     annex/seershape.cpp
     annex/intersectionmapper.cpp
+    annex/instancemapper.cpp
     )
     
 SET(EXPRESSION_SOURCES
@@ -446,6 +448,7 @@ SET(COMMAND_SOURCES
     command/isolate.cpp
     command/measurelinear.cpp
     command/refine.cpp
+    command/instancelinear.cpp
     )
     
 SET(LIBRARY_SOURCES

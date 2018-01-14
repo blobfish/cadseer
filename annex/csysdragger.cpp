@@ -64,7 +64,7 @@ namespace ann
           originStart = tCommand->getTranslation() * tCommand->getLocalToWorld();
         lastTranslation = 0.0;
         lastRotation = 0.0;
-        cachedMatrix = feature->getMainTransform()->getMatrix();
+        cachedMatrix = this->getTransform()->getMatrix();
         
         lbr::CSysDragger *dragger = dynamic_cast<lbr::CSysDragger*>(this->getTransform());
         assert(dragger);
@@ -108,7 +108,7 @@ namespace ann
         {
           if (lastTranslation != 0.0 || lastRotation != 0.0)
           {
-            osg::Matrixd diffMatrix = osg::Matrixd::inverse(cachedMatrix) * feature->getMainTransform()->getMatrix();
+            osg::Matrixd diffMatrix = osg::Matrixd::inverse(cachedMatrix) * this->getTransform()->getMatrix();
             parameter->setValue(static_cast<osg::Matrixd>(*parameter) * diffMatrix);
             
             //add git message.

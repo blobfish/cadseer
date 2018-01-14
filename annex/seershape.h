@@ -322,6 +322,7 @@ namespace ann
     std::vector<osg::Vec3d> useGetNearestPoint(const BID::uuid &, const osg::Vec3d&) const;
     BID::uuid useGetStartVertex(const BID::uuid &) const;
     BID::uuid useGetEndVertex(const BID::uuid &) const;
+    occt::ShapeVector useGetNonCompoundChildren() const;
     //@}
     
     //@{

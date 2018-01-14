@@ -76,6 +76,7 @@ namespace cmd
     void viewIsolateDispatched(const msg::Message&);
     void measureLinearDispatched(const msg::Message&);
     void constructRefineDispatched(const msg::Message&);
+    void constructInstanceLinearDispatched(const msg::Message&);
     
     //editing functions
     typedef std::function<BasePtr (ftr::Base *)> EditFunction;

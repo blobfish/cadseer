@@ -27,6 +27,7 @@
 
 #include <project/serial/xsdcxxoutput/featureinert.h>
 #include <globalutilities.h>
+#include <tools/occtools.h>
 #include <library/csysdragger.h>
 #include <annex/seershape.h>
 #include <annex/csysdragger.h>
@@ -76,14 +77,18 @@ void Inert::updateModel(const UpdatePayload&)
     
     //store a map of offset to id for restoration.
     std::vector<uuid> oldIds;
-    TopTools_IndexedMapOfShape osm; //old shape map
-    TopExp::MapShapes(sShape->getRootOCCTShape(), osm);
-    for (int i = 1; i < osm.Size() + 1; ++i)
+    occt::ShapeVector shapes = occt::mapShapes(sShape->getRootOCCTShape());
+    for (const auto &s : shapes)
     {
-      if (sShape->hasShapeIdRecord(osm(i))) //probably degenerated edge.
-        oldIds.push_back(sShape->findShapeIdRecord(osm(i)).id);
+      if (sShape->hasShapeIdRecord(s))
+      {
+        oldIds.push_back(sShape->findShapeIdRecord(s).id);
+      }
       else
+      {
+        std::cerr << "WARNING: shape is not in shapeId container in Inert::updateModel" << std::endl;
         oldIds.push_back(gu::createNilId()); //place holder will be skipped again.
+      }
     }
     uuid oldRootId = sShape->getRootShapeId();
     
@@ -97,12 +102,20 @@ void Inert::updateModel(const UpdatePayload&)
     
     sShape->updateShapeIdRecord(sShape->getRootOCCTShape(), oldRootId);
     sShape->setRootShapeId(oldRootId);
-    TopTools_IndexedMapOfShape nsm; //new shape map
-    TopExp::MapShapes(sShape->getRootOCCTShape(), nsm);
-    for (int i = 1; i < nsm.Size() + 1; ++i)
+    
+    shapes = occt::mapShapes(sShape->getRootOCCTShape());
+    std::size_t count = 0;
+    for (const auto &s : shapes)
     {
-      if (sShape->hasShapeIdRecord(nsm(i))) //probably degenerated edge.
-        sShape->updateShapeIdRecord(nsm(i), oldIds.at(i - 1));
+      if (sShape->hasShapeIdRecord(s))
+      {
+        sShape->updateShapeIdRecord(s, oldIds.at(count));
+      }
+      else
+      {
+        std::cerr << "WARNING: shape is not in moved shapeId container in Inert::updateModel" << std::endl;
+      }
+      count++;
     }
     
     sShape->dumpNils("inert");

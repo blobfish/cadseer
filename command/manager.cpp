@@ -45,6 +45,7 @@
 #include <command/isolate.h>
 #include <command/measurelinear.h>
 #include <command/refine.h>
+#include <command/instancelinear.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <selection/message.h>
@@ -153,6 +154,9 @@ void Manager::setupDispatcher()
   
   mask = msg::Request | msg::Construct | msg::Refine;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::constructRefineDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Construct | msg::InstanceLinear;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::constructInstanceLinearDispatched, this, _1)));
 }
 
 void Manager::cancelCommandDispatched(const msg::Message &)
@@ -355,6 +359,12 @@ void Manager::constructRefineDispatched(const msg::Message&)
 {
   std::shared_ptr<Refine> r(new Refine());
   addCommand(r);
+}
+
+void Manager::constructInstanceLinearDispatched(const msg::Message&)
+{
+  std::shared_ptr<InstanceLinear> i(new InstanceLinear());
+  addCommand(i);
 }
 
 void Manager::editFeatureDispatched(const msg::Message&)

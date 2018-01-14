@@ -743,6 +743,21 @@ void GestureHandler::constructMenu()
       (msg::Request | msg::Construct | msg::DatumPlane).to_string(),
       constructionBase
     );
+    osg::MatrixTransform *constructionInstance = constructMenuNode
+    (
+      ":/resources/images/constructionInstance.svg",
+      QObject::tr("Instance Menu").toStdString(),
+      constructionBase
+    );
+    {
+      constructCommandNode
+      (
+        ":/resources/images/constructionInstanceLinear.svg",
+        QObject::tr("Instance Linear Command").toStdString(),
+        (msg::Request | msg::Construct | msg::InstanceLinear).to_string(),
+        constructionInstance
+      );
+    }
   }
   osg::MatrixTransform *editBase = constructMenuNode
   (

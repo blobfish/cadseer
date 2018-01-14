@@ -630,3 +630,28 @@ void occt::moveShape(TopoDS_Shape &sIn, const gp_Vec &dir, double distance)
   TopLoc_Location movement(move);
   sIn.Move(movement);
 }
+
+ShapeVector occt::mapShapes(const TopoDS_Shape &sIn)
+{
+  ShapeVector out;
+  assert(!sIn.IsNull());
+  if(sIn.IsNull())
+    return out;
+  
+  TopTools_IndexedMapOfShape freshShapeMap;
+  TopExp::MapShapes(sIn, freshShapeMap);
+  for (int index = 1; index <= freshShapeMap.Extent(); ++index)
+  {
+    //skip degenerated edges.
+    if (freshShapeMap(index).ShapeType() == TopAbs_EDGE)
+    {
+      const TopoDS_Edge &edge = TopoDS::Edge(freshShapeMap(index));
+      if (BRep_Tool::Degenerated(edge))
+        continue;
+    }
+    
+    out.push_back(freshShapeMap(index));
+  }
+  
+  return out;
+}

@@ -52,7 +52,8 @@ namespace ftr
     Nest, //!< feature nest class.
     DieSet, //!< feature dieset class.
     Quote, //!< feature quote class.
-    Refine //!< feature refine class.
+    Refine, //!< feature refine class.
+    InstanceLinear //!< feature refine class.
   };
   
   inline const static std::string& toString(Type typeIn)
@@ -83,7 +84,8 @@ namespace ftr
       {Type::Nest, "Nest"},
       {Type::DieSet, "DieSet"},
       {Type::Quote, "Quote"},
-      {Type::Refine, "Refine"}
+      {Type::Refine, "Refine"},
+      {Type::InstanceLinear, "InstanceLinear"}
     };
     
     assert(strings.count(typeIn) > 0);

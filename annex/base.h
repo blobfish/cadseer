@@ -32,7 +32,8 @@ namespace ann
     Base,
     CSysDragger,
     SeerShape,
-    IntersectionMapper
+    IntersectionMapper,
+    InstanceMapper
   };
   
   typedef boost::bimap<Type, std::string> TypeMap;
@@ -40,7 +41,8 @@ namespace ann
   (Type::Base, "Base")
   (Type::CSysDragger, "CSysDragger")
   (Type::SeerShape, "SeerShape")
-  (Type::IntersectionMapper, "IntersectionMapper");
+  (Type::IntersectionMapper, "IntersectionMapper")
+  (Type::InstanceMapper, "InstanceMapper");
   
   inline const std::string& toString(const Type &tIn)
   {

@@ -172,6 +172,14 @@ namespace occt
    */
   void moveShape(TopoDS_Shape &sIn, const gp_Vec &dir, double distance);
   
+  /*! @brief Accumalate unique child shapes.
+   * 
+   * @note this method ignores degenerate edges.
+   * @param sIn shape to explore
+   * @return vector of unique child shapes
+   */
+  ShapeVector mapShapes(const TopoDS_Shape &sIn);
+  
   class BoundingBox
   {
   public:
