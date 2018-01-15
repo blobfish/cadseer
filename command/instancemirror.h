@@ -17,23 +17,23 @@
  *
  */
 
-#ifndef CMD_INSTANCE_H
-#define CMD_INSTANCE_H
+#ifndef CMD_INSTANCEMIRROR_H
+#define CMD_INSTANCEMIRROR_H
 
 #include <command/base.h>
 
 namespace cmd
 {
   /**
-  * @brief command to handle creating and editing linear instances
+  * @brief command to handle creating and editing mirror instances
   */
-  class InstanceLinear : public Base
+  class InstanceMirror : public Base
   {
   public:
-    InstanceLinear();
-    virtual ~InstanceLinear() override;
+    InstanceMirror();
+    virtual ~InstanceMirror() override;
     
-    virtual std::string getCommandName() override{return "Instance Linear";}
+    virtual std::string getCommandName() override{return "Instance Mirror";}
     virtual std::string getStatusMessage() override;
     virtual void activate() override;
     virtual void deactivate() override;
@@ -42,4 +42,4 @@ namespace cmd
   };
 }
 
-#endif // CMD_INSTANCE_H
+#endif // CMD_INSTANCEMIRROR_H

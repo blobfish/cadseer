@@ -266,6 +266,15 @@ void Model::connectionAddedDispatched(const msg::Message &messageIn)
   
   bool results;
   Edge edge;
+  
+  std::tie(edge, results) = boost::edge(parentVertex, childVertex, stow->graph);
+  if (results)
+  {
+    //connection already exists. just add input type and get out.
+    stow->graph[edge].inputType += message.inputType;
+    return;
+  }
+  
   std::tie(edge, results) = boost::add_edge(parentVertex, childVertex, stow->graph);
   assert(results);
   if (!results)

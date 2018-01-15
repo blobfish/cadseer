@@ -757,6 +757,13 @@ void GestureHandler::constructMenu()
         (msg::Request | msg::Construct | msg::InstanceLinear).to_string(),
         constructionInstance
       );
+      constructCommandNode
+      (
+        ":/resources/images/constructionInstanceMirror.svg",
+        QObject::tr("Instance Mirror Command").toStdString(),
+        (msg::Request | msg::Construct | msg::InstanceMirror).to_string(),
+        constructionInstance
+      );
     }
   }
   osg::MatrixTransform *editBase = constructMenuNode

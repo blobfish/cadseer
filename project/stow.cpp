@@ -51,7 +51,9 @@ Edge Stow::connect(const Vertex &parentIn, const Vertex &childIn, const ftr::Inp
   
   bool results;
   Edge newEdge;
-  boost::tie(newEdge, results) = boost::add_edge(parentIn, childIn, graph);
+  boost::tie(newEdge, results) = boost::edge(parentIn, childIn, graph);
+  if (!results)
+    boost::tie(newEdge, results) = boost::add_edge(parentIn, childIn, graph);
   assert(results);
   if (!results)
   {

@@ -53,7 +53,8 @@ namespace ftr
     DieSet, //!< feature dieset class.
     Quote, //!< feature quote class.
     Refine, //!< feature refine class.
-    InstanceLinear //!< feature refine class.
+    InstanceLinear, //!< feature for linear patterns.
+    InstanceMirror //!< feature for mirrored patterns.
   };
   
   inline const static std::string& toString(Type typeIn)
@@ -85,7 +86,8 @@ namespace ftr
       {Type::DieSet, "DieSet"},
       {Type::Quote, "Quote"},
       {Type::Refine, "Refine"},
-      {Type::InstanceLinear, "InstanceLinear"}
+      {Type::InstanceLinear, "InstanceLinear"},
+      {Type::InstanceMirror, "InstanceMirror"}
     };
     
     assert(strings.count(typeIn) > 0);

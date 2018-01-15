@@ -137,6 +137,7 @@ namespace msg
     static const Mask Reorder(Mask().set(                       97));//!< project action. move up.
     static const Mask Current(Mask().set(                       98));//!< modifier referencing current coordinate system.
     static const Mask InstanceLinear(Mask().set(                99));//!< command, move.
+    static const Mask InstanceMirror(Mask().set(               100));//!< command, move.
   
     typedef boost::variant
     <

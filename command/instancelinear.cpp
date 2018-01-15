@@ -32,7 +32,7 @@ InstanceLinear::~InstanceLinear() {}
 
 std::string InstanceLinear::getStatusMessage()
 {
-  return QObject::tr("Select feature or geometry for instance").toStdString();
+  return QObject::tr("Select feature or geometry for linear instance").toStdString();
 }
 
 void InstanceLinear::activate()
