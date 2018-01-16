@@ -47,6 +47,7 @@
 #include <command/refine.h>
 #include <command/instancelinear.h>
 #include <command/instancemirror.h>
+#include <command/instancepolar.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <selection/message.h>
@@ -161,6 +162,9 @@ void Manager::setupDispatcher()
   
   mask = msg::Request | msg::Construct | msg::InstanceMirror;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::constructInstanceMirrorDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Construct | msg::InstancePolar;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::constructInstancePolarDispatched, this, _1)));
 }
 
 void Manager::cancelCommandDispatched(const msg::Message &)
@@ -374,6 +378,12 @@ void Manager::constructInstanceLinearDispatched(const msg::Message&)
 void Manager::constructInstanceMirrorDispatched(const msg::Message&)
 {
   std::shared_ptr<InstanceMirror> i(new InstanceMirror());
+  addCommand(i);
+}
+
+void Manager::constructInstancePolarDispatched(const msg::Message&)
+{
+  std::shared_ptr<InstancePolar> i(new InstancePolar());
   addCommand(i);
 }
 

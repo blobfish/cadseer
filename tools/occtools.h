@@ -21,10 +21,10 @@
 #define GU_OCCTOOLS_H
 
 #include <vector>
-#include <stack>
 #include <algorithm>
 #include <cassert>
 
+#include <gp_Ax1.hxx>
 #include <Standard_StdAllocator.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Compound.hxx>
@@ -155,6 +155,14 @@ namespace occt
    * @param v parameter in the v direction
    */
   gp_Vec getNormal(const TopoDS_Face &fIn, double u, double v);
+  
+  /*! @brief Derive an axis from input
+   * 
+   * @param sIn face or edge
+   * @return pair with axis bool status if worked.
+   * @note origin of axis will be center point of bounding box of shape projected onto axis.
+   */
+  std::pair<gp_Ax1, bool> gleanAxis(const TopoDS_Shape sIn);
   
   /*! @brief Copy shape at distance.
    * 

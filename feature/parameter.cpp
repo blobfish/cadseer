@@ -148,6 +148,26 @@ Constraint Constraint::buildUnit()
   return out;
 }
 
+Constraint Constraint::buildNonZeroAngle()
+{
+  Constraint out;
+  
+  {
+    Boundary lower(-360.0, Boundary::End::Closed);
+    Boundary upper(0.0, Boundary::End::Open);
+    Interval interval(lower, upper);
+    out.intervals.push_back(interval);
+  }
+  {
+    Boundary lower(0.0, Boundary::End::Open);
+    Boundary upper(360.0, Boundary::End::Closed);
+    Interval interval(lower, upper);
+    out.intervals.push_back(interval);
+  }
+  
+  return out;
+}
+
 void Constraint::unitTest()
 {
   Constraint all = Constraint::buildAll();

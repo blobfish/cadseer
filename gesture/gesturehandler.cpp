@@ -759,6 +759,13 @@ void GestureHandler::constructMenu()
       );
       constructCommandNode
       (
+        ":/resources/images/constructionInstancePolar.svg",
+        QObject::tr("Instance Polar Command").toStdString(),
+        (msg::Request | msg::Construct | msg::InstancePolar).to_string(),
+        constructionInstance
+      );
+      constructCommandNode
+      (
         ":/resources/images/constructionInstanceMirror.svg",
         QObject::tr("Instance Mirror Command").toStdString(),
         (msg::Request | msg::Construct | msg::InstanceMirror).to_string(),

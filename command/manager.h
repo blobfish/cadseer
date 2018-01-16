@@ -78,6 +78,7 @@ namespace cmd
     void constructRefineDispatched(const msg::Message&);
     void constructInstanceLinearDispatched(const msg::Message&);
     void constructInstanceMirrorDispatched(const msg::Message&);
+    void constructInstancePolarDispatched(const msg::Message&);
     
     //editing functions
     typedef std::function<BasePtr (ftr::Base *)> EditFunction;

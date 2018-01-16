@@ -54,7 +54,8 @@ namespace ftr
     Quote, //!< feature quote class.
     Refine, //!< feature refine class.
     InstanceLinear, //!< feature for linear patterns.
-    InstanceMirror //!< feature for mirrored patterns.
+    InstanceMirror, //!< feature for mirrored patterns.
+    InstancePolar //!< feature for polar patterns.
   };
   
   inline const static std::string& toString(Type typeIn)
@@ -87,7 +88,8 @@ namespace ftr
       {Type::Quote, "Quote"},
       {Type::Refine, "Refine"},
       {Type::InstanceLinear, "InstanceLinear"},
-      {Type::InstanceMirror, "InstanceMirror"}
+      {Type::InstanceMirror, "InstanceMirror"},
+      {Type::InstancePolar, "InstancePolar"}
     };
     
     assert(strings.count(typeIn) > 0);

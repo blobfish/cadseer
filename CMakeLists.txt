@@ -327,6 +327,7 @@ SET(FEATURE_SOURCES
     feature/refine.cpp
     feature/instancelinear.cpp
     feature/instancemirror.cpp
+    feature/instancepolar.cpp
     )
     
 SET(ANNEX_SOURCES
@@ -451,6 +452,7 @@ SET(COMMAND_SOURCES
     command/refine.cpp
     command/instancelinear.cpp
     command/instancemirror.cpp
+    command/instancepolar.cpp
     )
     
 SET(LIBRARY_SOURCES

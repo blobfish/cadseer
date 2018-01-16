@@ -105,7 +105,8 @@ namespace ftr
       static Constraint buildNonZeroNegative();
       static Constraint buildZeroNegative();
       static Constraint buildNonZero();
-      static Constraint buildUnit();
+      static Constraint buildUnit(); //!< parametric range of 0 to 1
+      static Constraint buildNonZeroAngle(); //!< -360 to 360 excludes zero
       static void unitTest();
     };
     

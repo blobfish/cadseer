@@ -69,8 +69,11 @@ void InstanceMapper::startMapping(const SeerShape &sShapeIn, const uuid &idIn, c
   if (!idIn.is_nil())
   {
     assert(sShapeIn.hasShapeIdRecord(idIn));
-    std::cerr << "WARNING: seershape doesn't have shape with id passed in" << std::endl;
-    return;
+    if (!sShapeIn.hasShapeIdRecord(idIn))
+    {
+      std::cerr << "WARNING: seershape doesn't have shape with id passed in: " << gu::idToString(idIn) << std::endl;
+      return;
+    }
   }
   
   for (auto &sih : data->historyOuts)

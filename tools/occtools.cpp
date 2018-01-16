@@ -18,13 +18,23 @@
  */
 
 #include <cassert>
+#include <stack>
+
 #include <boost/math/constants/constants.hpp>
 
+#include <gp_Lin.hxx>
+#include <gp_Circ.hxx>
+#include <gp_Elips.hxx>
+#include <gp_Hypr.hxx>
+#include <gp_Parab.hxx>
+#include <Geom_Line.hxx>
+#include <GeomAPI_ProjectPointOnCurve.hxx>
 #include <BRep_Builder.hxx>
 #include <BRepBndLib.hxx>
 #include <BRep_Tool.hxx>
 #include <BRepBuilderAPI_Copy.hxx>
 #include <BRepAdaptor_Surface.hxx>
+#include <BRepAdaptor_Curve.hxx>
 #include <BRepExtrema_ExtPF.hxx>
 #include <BRepBuilderAPI_MakeVertex.hxx>
 #include <TopTools_MapIteratorOfMapOfShape.hxx>
@@ -458,6 +468,93 @@ gp_Vec occt::getNormal(const TopoDS_Face& fIn, double u, double v)
     n = -n;
   return n;
 };
+
+std::pair<gp_Ax1, bool> occt::gleanAxis(const TopoDS_Shape sIn)
+{
+  auto axisOriginToCenter = [&](const gp_Ax1 &aIn) -> gp_Ax1
+  {
+    BoundingBox inputBounds(sIn);
+    gp_Pnt inputCenter = inputBounds.getCenter();
+    
+    Handle_Geom_Line rl = new Geom_Line(aIn);
+    GeomAPI_ProjectPointOnCurve projector(inputCenter, rl);
+    gp_Pnt axisPoint = projector.NearestPoint();
+    
+    return gp_Ax1(axisPoint, aIn.Direction());
+  };
+  
+  if (sIn.ShapeType() == TopAbs_FACE)
+  {
+    bool foundAxis = false;
+    gp_Ax1 axis;
+    
+    BRepAdaptor_Surface sa(TopoDS::Face(sIn));
+    if (sa.GetType() == GeomAbs_Cylinder)
+    {
+      gp_Cylinder gpc = sa.Cylinder();
+      axis = gpc.Axis().Transformed(sa.Trsf());
+      foundAxis = true;
+    }
+    else if (sa.GetType() == GeomAbs_Cone)
+    {
+      gp_Cone cone = sa.Cone();
+      axis = cone.Axis().Transformed(sa.Trsf());
+      foundAxis = true;
+    }
+    else if (sa.GetType() == GeomAbs_Torus)
+    {
+      gp_Torus torus = sa.Torus();
+      axis = torus.Axis().Transformed(sa.Trsf());
+      foundAxis = true;
+    }
+    
+    if (foundAxis)
+      return std::make_pair(axisOriginToCenter(axis), true);
+  }
+  else if(sIn.ShapeType() == TopAbs_EDGE)
+  {
+    bool foundAxis = false;
+    gp_Ax1 axis;
+    
+    BRepAdaptor_Curve ca(TopoDS::Edge(sIn));
+    if (ca.GetType() == GeomAbs_Line)
+    {
+      gp_Lin l = ca.Line();
+      axis = l.Position().Transformed(ca.Trsf());
+      foundAxis = true;
+    }
+    else if (ca.GetType() == GeomAbs_Circle)
+    {
+      gp_Circ c = ca.Circle();
+      axis = c.Axis().Transformed(ca.Trsf());
+      foundAxis = true;
+    }
+    else if (ca.GetType() == GeomAbs_Ellipse)
+    {
+      gp_Elips e = ca.Ellipse();
+      axis = e.Axis().Transformed(ca.Trsf());
+      foundAxis = true;
+    }
+    else if (ca.GetType() == GeomAbs_Hyperbola)
+    {
+      gp_Hypr h = ca.Hyperbola();
+      axis = h.Axis().Transformed(ca.Trsf());
+      foundAxis = true;
+    }
+    else if (ca.GetType() == GeomAbs_Parabola)
+    {
+      gp_Parab p = ca.Parabola();
+      axis = p.Axis().Transformed(ca.Trsf());
+      foundAxis = true;
+    }
+    //skip offset.
+    
+    if (foundAxis)
+      return std::make_pair(axisOriginToCenter(axis), true);
+  }
+  
+  return std::make_pair(gp_Ax1(), false);
+}
 
 BoundingBox::BoundingBox(){}
 
