@@ -20,10 +20,13 @@
 #ifndef FTR_INSTANCEMIRROR_H
 #define FTR_INSTANCEMIRROR_H
 
+#include <osg/ref_ptr>
+
 #include <feature/pick.h>
 #include <feature/base.h>
 
 namespace ann{class SeerShape; class InstanceMapper; class CSysDragger;}
+namespace lbr{class PLabel;}
 
 namespace ftr
 {
@@ -52,12 +55,18 @@ namespace ftr
     const Pick& getPlanePick(){return planePick;}
     void setPlanePick(const Pick&);
     void setCSys(const osg::Matrixd&); //when no plane pick
+    bool getIncludeSource(){return static_cast<bool>(includeSource);}
+    void setIncludeSource(bool in){includeSource.setValue(in);}
     
   protected:
     std::unique_ptr<ann::SeerShape> sShape;
     std::unique_ptr<ann::InstanceMapper> iMapper;
     std::unique_ptr<ann::CSysDragger> csysDragger;
+    
     prm::Parameter csys;
+    prm::Parameter includeSource;
+    
+    osg::ref_ptr<lbr::PLabel> includeSourceLabel;
     
     Pick shapePick;
     Pick planePick;

@@ -46,7 +46,8 @@ zOffset(QObject::tr("Z Offset"), 20.0),
 xCount(QObject::tr("X Count"), 2),
 yCount(QObject::tr("Y Count"), 2),
 zCount(QObject::tr("Z Count"), 2),
-csys(prm::Names::CSys, osg::Matrixd::identity())
+csys(prm::Names::CSys, osg::Matrixd::identity()),
+includeSource(QObject::tr("Include Source"), true)
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionInstanceLinear.svg");
@@ -71,6 +72,8 @@ csys(prm::Names::CSys, osg::Matrixd::identity())
   zCount.connectValue(boost::bind(&InstanceLinear::setModelDirty, this));
   
   csys.connectValue(boost::bind(&InstanceLinear::setModelDirty, this));
+  
+  includeSource.connectValue(boost::bind(&InstanceLinear::setModelDirty, this));
   
   xOffsetLabel = new lbr::PLabel(&xOffset);
   xOffsetLabel->showName = true;
@@ -104,6 +107,11 @@ csys(prm::Names::CSys, osg::Matrixd::identity())
   csysDragger->dragger->hide(lbr::CSysDragger::SwitchIndexes::Origin);
   overlaySwitch->addChild(csysDragger->dragger);
   
+  includeSourceLabel = new lbr::PLabel(&includeSource);
+  includeSourceLabel->showName = true;
+  includeSourceLabel->valueHasChanged();
+  overlaySwitch->addChild(includeSourceLabel.get());
+  
   parameterVector.push_back(&xOffset);
   parameterVector.push_back(&yOffset);
   parameterVector.push_back(&zOffset);
@@ -111,6 +119,7 @@ csys(prm::Names::CSys, osg::Matrixd::identity())
   parameterVector.push_back(&yCount);
   parameterVector.push_back(&zCount);
   parameterVector.push_back(&csys);
+  parameterVector.push_back(&includeSource);
   
   annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
   annexes.insert(std::make_pair(ann::Type::InstanceMapper, iMapper.get()));
@@ -190,13 +199,14 @@ void InstanceLinear::updateModel(const UpdatePayload &payloadIn)
       osg::Matrixd shapeBase = gu::toOsg(tShape.Location().Transformation());
       osg::Vec3d baseTrans = shapeBase.getTrans();
       
-      
       for (int z = 0; z < static_cast<int>(zCount); ++z)
       {
         for (int y = 0; y < static_cast<int>(yCount); ++y)
         {
           for (int x = 0; x < static_cast<int>(xCount); ++x)
           {
+            if ((x == 0) && (y == 0) && (z == 0) && (!static_cast<bool>(includeSource)))
+              continue;
             osg::Vec3d no = baseTrans; //new origin
             no += zProjection * static_cast<double>(z);
             no += yProjection * static_cast<double>(y);
@@ -241,6 +251,8 @@ void InstanceLinear::updateModel(const UpdatePayload &payloadIn)
     xCountLabel->setMatrix(tsys * osg::Matrixd::translate(xProjection * cheat(static_cast<int>(xCount))));
     yCountLabel->setMatrix(tsys * osg::Matrixd::translate(yProjection * cheat(static_cast<int>(yCount))));
     zCountLabel->setMatrix(tsys * osg::Matrixd::translate(zProjection * cheat(static_cast<int>(zCount))));
+    
+    includeSourceLabel->setMatrix(osg::Matrixd::translate(origin + osg::Vec3d(0.0, 0.0, -bb.getHeight() / 2.0)));
     
     setSuccess();
   }

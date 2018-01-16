@@ -50,7 +50,8 @@ csysDragger(new ann::CSysDragger(this, &csys)),
 csys(prm::Names::CSys, osg::Matrixd::identity()),
 count(QObject::tr("X Count"), 3),
 angle(prm::Names::Angle, 20.0),
-inclusive(QObject::tr("Inclusive"), false)
+inclusiveAngle(QObject::tr("Inclusive Angle"), false),
+includeSource(QObject::tr("Include Source"), true)
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionInstancePolar.svg");
@@ -69,8 +70,11 @@ inclusive(QObject::tr("Inclusive"), false)
   angle.connectValue(boost::bind(&InstancePolar::setModelDirty, this));
   parameterVector.push_back(&angle);
   
-  inclusive.connectValue(boost::bind(&InstancePolar::setModelDirty, this));
-  parameterVector.push_back(&inclusive);
+  inclusiveAngle.connectValue(boost::bind(&InstancePolar::setModelDirty, this));
+  parameterVector.push_back(&inclusiveAngle);
+  
+  includeSource.connectValue(boost::bind(&InstancePolar::setModelDirty, this));
+  parameterVector.push_back(&includeSource);
   
   countLabel = new lbr::PLabel(&count);
   countLabel->showName = true;
@@ -82,15 +86,20 @@ inclusive(QObject::tr("Inclusive"), false)
   angleLabel->valueHasChanged();
   overlaySwitch->addChild(angleLabel.get());
   
-  inclusiveLabel = new lbr::PLabel(&inclusive);
-  inclusiveLabel->showName = true;
-  inclusiveLabel->valueHasChanged();
-  overlaySwitch->addChild(inclusiveLabel.get());
+  inclusiveAngleLabel = new lbr::PLabel(&inclusiveAngle);
+  inclusiveAngleLabel->showName = true;
+  inclusiveAngleLabel->valueHasChanged();
+  overlaySwitch->addChild(inclusiveAngleLabel.get());
   
   csysDragger->dragger->unlinkToMatrix(getMainTransform());
   csysDragger->dragger->hide(lbr::CSysDragger::SwitchIndexes::LinkIcon);
   //don't worry about adding dragger. update takes care of it.
 //   overlaySwitch->addChild(csysDragger->dragger);
+  
+  includeSourceLabel = new lbr::PLabel(&includeSource);
+  includeSourceLabel->showName = true;
+  includeSourceLabel->valueHasChanged();
+  overlaySwitch->addChild(includeSourceLabel.get());
   
   annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
   annexes.insert(std::make_pair(ann::Type::InstanceMapper, iMapper.get()));
@@ -244,11 +253,11 @@ void InstancePolar::updateModel(const UpdatePayload &payloadIn)
     
     int ac = static_cast<int>(count); //actual count
     double aa = static_cast<double>(angle); //actual angle
-    bool ai = static_cast<bool>(inclusive); //actual inclusive
+    bool ai = static_cast<bool>(inclusiveAngle); //actual inclusive angle
     
     if (ai)
     {
-      if (std::fabs(aa - 360.0) <= Precision::Confusion()) //angle parameter has been constrained to less than or equal to 360
+      if (std::fabs(std::fabs(aa) - 360.0) <= Precision::Confusion()) //angle parameter has been constrained to less than or equal to 360
         aa = aa / ac;
       else
         aa = aa / (ac - 1);
@@ -256,7 +265,7 @@ void InstancePolar::updateModel(const UpdatePayload &payloadIn)
     else //ai = false
     {
       //stay under 360. don't overlap.
-      int maxCount = static_cast<int>(360.0 / aa);
+      int maxCount = static_cast<int>(360.0 / std::fabs(aa));
       ac = std::min(ac, maxCount);
       if (ac != static_cast<int>(count))
       {
@@ -270,6 +279,8 @@ void InstancePolar::updateModel(const UpdatePayload &payloadIn)
     
     for (int index = 0; index < ac; ++index)
     {
+      if (index == 0 && !(static_cast<bool>(includeSource)))
+        continue;
       gp_Trsf rotation;
       rotation.SetRotation(ra, osg::DegreesToRadians(static_cast<double>(index) * aa));
       BRepBuilderAPI_Transform bt(rotation);
@@ -307,7 +318,9 @@ void InstancePolar::updateModel(const UpdatePayload &payloadIn)
     Handle_Geom_Line rl = new Geom_Line(ra);
     GeomAPI_ProjectPointOnCurve projector(inputCenter, rl);
     gp_Pnt axisPoint = projector.NearestPoint();
-    inclusiveLabel->setMatrix(osg::Matrixd::translate(gu::toOsg(axisPoint)));
+    inclusiveAngleLabel->setMatrix(osg::Matrixd::translate(gu::toOsg(axisPoint)));
+    
+    includeSourceLabel->setMatrix(osg::Matrixd::translate(gu::toOsg(inputCenter) + osg::Vec3d(0.0, 0.0, -inputBounds.getHeight() / 2.0)));
     
     setSuccess();
   }

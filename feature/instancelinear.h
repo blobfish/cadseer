@@ -55,6 +55,8 @@ namespace ftr
     
     const Pick& getPick(){return pick;}
     void setPick(const Pick&);
+    bool getIncludeSource(){return static_cast<bool>(includeSource);}
+    void setIncludeSource(bool in){includeSource.setValue(in);}
     
   protected:
     std::unique_ptr<ann::SeerShape> sShape;
@@ -71,6 +73,8 @@ namespace ftr
     
     prm::Parameter csys;
     
+    prm::Parameter includeSource;
+    
     osg::ref_ptr<lbr::PLabel> xOffsetLabel;
     osg::ref_ptr<lbr::PLabel> yOffsetLabel;
     osg::ref_ptr<lbr::PLabel> zOffsetLabel;
@@ -78,6 +82,8 @@ namespace ftr
     osg::ref_ptr<lbr::PLabel> xCountLabel;
     osg::ref_ptr<lbr::PLabel> yCountLabel;
     osg::ref_ptr<lbr::PLabel> zCountLabel;
+    
+    osg::ref_ptr<lbr::PLabel> includeSourceLabel;
     
     Pick pick;
     

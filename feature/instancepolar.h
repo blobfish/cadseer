@@ -64,11 +64,13 @@ namespace ftr
     prm::Parameter csys;
     prm::Parameter count;
     prm::Parameter angle;
-    prm::Parameter inclusive;
+    prm::Parameter inclusiveAngle;
+    prm::Parameter includeSource;
     
     osg::ref_ptr<lbr::PLabel> countLabel;
     osg::ref_ptr<lbr::PLabel> angleLabel;
-    osg::ref_ptr<lbr::PLabel> inclusiveLabel;
+    osg::ref_ptr<lbr::PLabel> inclusiveAngleLabel;
+    osg::ref_ptr<lbr::PLabel> includeSourceLabel;
     
     Pick shapePick;
     Pick axisPick;

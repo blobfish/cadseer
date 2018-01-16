@@ -24,6 +24,7 @@
 #include <globalutilities.h>
 #include <tools/occtools.h>
 #include <library/csysdragger.h>
+#include <library/plabel.h>
 #include <annex/seershape.h>
 #include <annex/csysdragger.h>
 #include <annex/instancemapper.h>
@@ -42,7 +43,8 @@ Base(),
 sShape(new ann::SeerShape()),
 iMapper(new ann::InstanceMapper()),
 csysDragger(new ann::CSysDragger(this, &csys)),
-csys(prm::Names::CSys, osg::Matrixd::identity())
+csys(prm::Names::CSys, osg::Matrixd::identity()),
+includeSource(QObject::tr("Include Source"), true)
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionInstanceMirror.svg");
@@ -51,13 +53,20 @@ csys(prm::Names::CSys, osg::Matrixd::identity())
   mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   csys.connectValue(boost::bind(&InstanceMirror::setModelDirty, this));
+  includeSource.connectValue(boost::bind(&InstanceMirror::setModelDirty, this));
   
   csysDragger->dragger->unlinkToMatrix(getMainTransform());
   csysDragger->dragger->hide(lbr::CSysDragger::SwitchIndexes::LinkIcon);
   //don't worry about adding dragger. update takes care of it.
 //   overlaySwitch->addChild(csysDragger->dragger);
   
+  includeSourceLabel = new lbr::PLabel(&includeSource);
+  includeSourceLabel->showName = true;
+  includeSourceLabel->valueHasChanged();
+  overlaySwitch->addChild(includeSourceLabel.get());
+  
   parameterVector.push_back(&csys);
+  parameterVector.push_back(&includeSource);
   
   annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
   annexes.insert(std::make_pair(ann::Type::InstanceMapper, iMapper.get()));
@@ -227,6 +236,8 @@ void InstanceMirror::updateModel(const UpdatePayload &payloadIn)
     occt::ShapeVector out;
     for (const auto &tShape : tShapes)
     {
+      if (static_cast<bool>(includeSource))
+        out.push_back(tShape);
       bt.Perform(tShape);
       out.push_back(bt.Shape());
     }
@@ -240,6 +251,9 @@ void InstanceMirror::updateModel(const UpdatePayload &payloadIn)
       iMapper->mapIndex(*sShape, si, count);
       count++;
     }
+    
+    occt::BoundingBox bb(tShapes);
+    includeSourceLabel->setMatrix(osg::Matrixd::translate(gu::toOsg(bb.getCenter()) + osg::Vec3d(0.0, 0.0, -bb.getHeight() / 2.0)));
     
     setSuccess();
   }
