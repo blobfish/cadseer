@@ -34,6 +34,7 @@
 #include <annex/csysdragger.h>
 #include <annex/instancemapper.h>
 #include <feature/parameter.h>
+#include <project/serial/xsdcxxoutput/featureinstancepolar.h>
 #include <feature/instancepolar.h>
 
 using namespace ftr;
@@ -346,4 +347,44 @@ void InstancePolar::updateModel(const UpdatePayload &payloadIn)
 
 void InstancePolar::serialWrite(const QDir &dIn)
 {
+  prj::srl::FeatureInstancePolar sip
+  (
+    Base::serialOut(),
+    iMapper->serialOut(),
+    csysDragger->serialOut(),
+    csys.serialOut(),
+    count.serialOut(),
+    angle.serialOut(),
+    inclusiveAngle.serialOut(),
+    includeSource.serialOut(),
+    countLabel->serialOut(),
+    angleLabel->serialOut(),
+    inclusiveAngleLabel->serialOut(),
+    includeSourceLabel->serialOut(),
+    shapePick.serialOut(),
+    axisPick.serialOut()
+  );
+  
+  xml_schema::NamespaceInfomap infoMap;
+  std::ofstream stream(buildFilePathName(dIn).toUtf8().constData());
+  prj::srl::instancePolar(stream, sip, infoMap);
 }
+
+void InstancePolar::serialRead(const prj::srl::FeatureInstancePolar &sip)
+{
+  Base::serialIn(sip.featureBase());
+  iMapper->serialIn(sip.instanceMapper());
+  csysDragger->serialIn(sip.csysDragger());
+  csys.serialIn(sip.csys());
+  count.serialIn(sip.count());
+  angle.serialIn(sip.angle());
+  inclusiveAngle.serialIn(sip.inclusiveAngle());
+  includeSource.serialIn(sip.includeSource());
+  countLabel->serialIn(sip.countLabel());
+  angleLabel->serialIn(sip.angleLabel());
+  inclusiveAngleLabel->serialIn(sip.inclusiveAngleLabel());
+  includeSourceLabel->serialIn(sip.includeSourceLabel());
+  shapePick.serialIn(sip.shapePick());
+  axisPick.serialIn(sip.axisPick());
+}
+

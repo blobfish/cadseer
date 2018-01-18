@@ -30,6 +30,7 @@ namespace osg{class Node;}
 
 namespace ann{class SeerShape; class InstanceMapper; class CSysDragger;}
 namespace lbr{class PLabel;}
+namespace prj{namespace srl{class FeatureInstanceLinear;}}
 
 namespace ftr
 {
@@ -51,7 +52,7 @@ namespace ftr
     virtual Descriptor getDescriptor() const override {return Descriptor::Create;}
     
     virtual void serialWrite(const QDir&) override;
-//     void serialRead(const prj::srl::FeatureRefine &);
+    void serialRead(const prj::srl::FeatureInstanceLinear &);
     
     const Pick& getPick(){return pick;}
     void setPick(const Pick&);

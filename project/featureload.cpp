@@ -41,6 +41,9 @@
 #include <feature/strip.h>
 #include <feature/quote.h>
 #include <feature/refine.h>
+#include <feature/instancelinear.h>
+#include <feature/instancemirror.h>
+#include <feature/instancepolar.h>
 #include <project/serial/xsdcxxoutput/featurebox.h>
 #include <project/serial/xsdcxxoutput/featurecylinder.h>
 #include <project/serial/xsdcxxoutput/featuresphere.h>
@@ -62,6 +65,9 @@
 #include <project/serial/xsdcxxoutput/featurestrip.h>
 #include <project/serial/xsdcxxoutput/featurequote.h>
 #include <project/serial/xsdcxxoutput/featurerefine.h>
+#include <project/serial/xsdcxxoutput/featureinstancelinear.h>
+#include <project/serial/xsdcxxoutput/featureinstancemirror.h>
+#include <project/serial/xsdcxxoutput/featureinstancepolar.h>
 
 #include "featureload.h"
 
@@ -94,6 +100,9 @@ directory(directoryIn), fileExtension(".fetr")
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Strip), std::bind(&FeatureLoad::loadStrip, this, std::placeholders::_1, std::placeholders::_2)));
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Quote), std::bind(&FeatureLoad::loadQuote, this, std::placeholders::_1, std::placeholders::_2)));
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Refine), std::bind(&FeatureLoad::loadRefine, this, std::placeholders::_1, std::placeholders::_2)));
+  functionMap.insert(std::make_pair(ftr::toString(ftr::Type::InstanceLinear), std::bind(&FeatureLoad::loadInstanceLinear, this, std::placeholders::_1, std::placeholders::_2)));
+  functionMap.insert(std::make_pair(ftr::toString(ftr::Type::InstanceMirror), std::bind(&FeatureLoad::loadInstanceMirror, this, std::placeholders::_1, std::placeholders::_2)));
+  functionMap.insert(std::make_pair(ftr::toString(ftr::Type::InstancePolar), std::bind(&FeatureLoad::loadInstancePolar, this, std::placeholders::_1, std::placeholders::_2)));
 }
 
 FeatureLoad::~FeatureLoad()
@@ -378,4 +387,40 @@ std::shared_ptr<ftr::Base> FeatureLoad::loadRefine(const std::string &fileNameIn
   freshRefine->serialRead(*sr);
   
   return freshRefine;
+}
+
+std::shared_ptr<ftr::Base> FeatureLoad::loadInstanceLinear(const std::string &fileNameIn, std::size_t shapeOffsetIn)
+{
+  auto sr = srl::instanceLinear(fileNameIn, ::xml_schema::Flags::dont_validate);
+  assert(sr);
+  
+  std::shared_ptr<ftr::InstanceLinear> freshInstanceLinear(new ftr::InstanceLinear);
+  freshInstanceLinear->getAnnex<ann::SeerShape>(ann::Type::SeerShape).setOCCTShape(shapeVector.at(shapeOffsetIn));
+  freshInstanceLinear->serialRead(*sr);
+  
+  return freshInstanceLinear;
+}
+
+std::shared_ptr<ftr::Base> FeatureLoad::loadInstanceMirror(const std::string &fileNameIn, std::size_t shapeOffsetIn)
+{
+  auto sr = srl::instanceMirror(fileNameIn, ::xml_schema::Flags::dont_validate);
+  assert(sr);
+  
+  std::shared_ptr<ftr::InstanceMirror> freshInstanceMirror(new ftr::InstanceMirror);
+  freshInstanceMirror->getAnnex<ann::SeerShape>(ann::Type::SeerShape).setOCCTShape(shapeVector.at(shapeOffsetIn));
+  freshInstanceMirror->serialRead(*sr);
+  
+  return freshInstanceMirror;
+}
+
+std::shared_ptr<ftr::Base> FeatureLoad::loadInstancePolar(const std::string &fileNameIn, std::size_t shapeOffsetIn)
+{
+  auto sr = srl::instancePolar(fileNameIn, ::xml_schema::Flags::dont_validate);
+  assert(sr);
+  
+  std::shared_ptr<ftr::InstancePolar> freshInstancePolar(new ftr::InstancePolar);
+  freshInstancePolar->getAnnex<ann::SeerShape>(ann::Type::SeerShape).setOCCTShape(shapeVector.at(shapeOffsetIn));
+  freshInstancePolar->serialRead(*sr);
+  
+  return freshInstancePolar;
 }

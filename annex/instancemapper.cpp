@@ -23,6 +23,7 @@
 #include <tools/occtools.h>
 #include <feature/shapehistory.h>
 #include <annex/seershape.h>
+#include <project/serial/xsdcxxoutput/instancemapper.h>
 #include <annex/instancemapper.h>
 
 using boost::uuids::uuid;
@@ -141,5 +142,31 @@ void InstanceMapper::mapIndex(SeerShape &sShape, const TopoDS_Shape &dsShape, st
     sShape.updateShapeIdRecord(s, outId);
     sShape.insertEvolve(data->sourceIds.at(shapeCount), outId);
     shapeCount++;
+  }
+}
+
+prj::srl::InstanceData InstanceMapper::serialOut()
+{
+  prj::srl::HistoryOuts hos;
+  for (const auto &historyOut : data->historyOuts)
+  {
+    prj::srl::OutIds oids;
+    for (const auto &oid : historyOut.outIds)
+      oids.array().push_back(gu::idToString(oid));
+    hos.array().push_back(prj::srl::HistoryOut(historyOut.history.serialOut(), oids));
+  }
+  return prj::srl::InstanceData(hos);
+}
+
+void InstanceMapper::serialIn(const prj::srl::InstanceData &dataIn)
+{
+  for (const auto &hos : dataIn.historyOuts().array())
+  {
+    ftr::ShapeHistory t;
+    t.serialIn(hos.history());
+    Data::HistoryOut historyOut(t);
+    for (const auto &id : hos.outIds().array())
+      historyOut.outIds.push_back(gu::stringToId(id));
+    data->historyOuts.push_back(historyOut);
   }
 }

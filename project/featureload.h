@@ -70,6 +70,9 @@ namespace prj
     std::shared_ptr<ftr::Base> loadStrip(const std::string &, std::size_t);
     std::shared_ptr<ftr::Base> loadQuote(const std::string &, std::size_t);
     std::shared_ptr<ftr::Base> loadRefine(const std::string &, std::size_t);
+    std::shared_ptr<ftr::Base> loadInstanceLinear(const std::string &, std::size_t);
+    std::shared_ptr<ftr::Base> loadInstanceMirror(const std::string &, std::size_t);
+    std::shared_ptr<ftr::Base> loadInstancePolar(const std::string &, std::size_t);
   };
 }
 

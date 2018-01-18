@@ -416,6 +416,10 @@ SET(PROJECT_SOURCES
     project/serial/xsdcxxoutput/featurestrip.cpp
     project/serial/xsdcxxoutput/featurequote.cpp
     project/serial/xsdcxxoutput/featurerefine.cpp
+    project/serial/xsdcxxoutput/instancemapper.cpp
+    project/serial/xsdcxxoutput/featureinstancelinear.cpp
+    project/serial/xsdcxxoutput/featureinstancemirror.cpp
+    project/serial/xsdcxxoutput/featureinstancepolar.cpp
     )
     
 SET(APPLICATION_SOURCES

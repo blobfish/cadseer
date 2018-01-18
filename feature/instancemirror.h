@@ -27,6 +27,7 @@
 
 namespace ann{class SeerShape; class InstanceMapper; class CSysDragger;}
 namespace lbr{class PLabel;}
+namespace prj{namespace srl{class FeatureInstanceMirror;}}
 
 namespace ftr
 {
@@ -48,7 +49,7 @@ namespace ftr
     virtual Descriptor getDescriptor() const override {return Descriptor::Create;}
     
     virtual void serialWrite(const QDir&) override;
-//     void serialRead(const prj::srl::FeatureRefine &);
+    void serialRead(const prj::srl::FeatureInstanceMirror &);
     
     const Pick& getShapePick(){return shapePick;}
     void setShapePick(const Pick&);

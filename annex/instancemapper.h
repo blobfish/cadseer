@@ -23,6 +23,7 @@
 #include <annex/base.h>
 
 namespace ftr{class ShapeHistory;}
+namespace prj{namespace srl{class InstanceData;}}
 namespace ann
 {
   class SeerShape;
@@ -55,6 +56,9 @@ namespace ann
    * @note dsShape should already be in the root shape of sShape.
    */
     void mapIndex(SeerShape &sShape, const TopoDS_Shape &dsShape, std::size_t instance);
+    
+    prj::srl::InstanceData serialOut();
+    void serialIn(const prj::srl::InstanceData&);
     
   private:
     struct Data;

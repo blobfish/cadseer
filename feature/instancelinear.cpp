@@ -27,6 +27,7 @@
 #include <annex/instancemapper.h>
 #include <feature/datumplane.h>
 #include <feature/parameter.h>
+#include <project/serial/xsdcxxoutput/featureinstancelinear.h>
 #include <feature/instancelinear.h>
 
 using namespace ftr;
@@ -278,4 +279,54 @@ void InstanceLinear::updateModel(const UpdatePayload &payloadIn)
 
 void InstanceLinear::serialWrite(const QDir &dIn)
 {
+  prj::srl::FeatureInstanceLinear so
+  (
+    Base::serialOut(),
+    iMapper->serialOut(),
+    csysDragger->serialOut(),
+    xOffset.serialOut(),
+    yOffset.serialOut(),
+    zOffset.serialOut(),
+    xCount.serialOut(),
+    yCount.serialOut(),
+    zCount.serialOut(),
+    csys.serialOut(),
+    includeSource.serialOut(),
+    pick.serialOut(),
+    xOffsetLabel->serialOut(),
+    yOffsetLabel->serialOut(),
+    zOffsetLabel->serialOut(),
+    xCountLabel->serialOut(),
+    yCountLabel->serialOut(),
+    zCountLabel->serialOut(),
+    includeSourceLabel->serialOut()
+  );
+  
+  xml_schema::NamespaceInfomap infoMap;
+  std::ofstream stream(buildFilePathName(dIn).toUtf8().constData());
+  prj::srl::instanceLinear(stream, so, infoMap);
 }
+
+void InstanceLinear::serialRead(const prj::srl::FeatureInstanceLinear &sil)
+{
+  Base::serialIn(sil.featureBase());
+  iMapper->serialIn(sil.instanceMapper());
+  csysDragger->serialIn(sil.csysDragger());
+  xOffset.serialIn(sil.xOffset());
+  yOffset.serialIn(sil.yOffset());
+  zOffset.serialIn(sil.zOffset());
+  xCount.serialIn(sil.xCount());
+  yCount.serialIn(sil.yCount());
+  zCount.serialIn(sil.zCount());
+  csys.serialIn(sil.csys());
+  includeSource.serialIn(sil.includeSource());
+  pick.serialIn(sil.pick());
+  xOffsetLabel->serialIn(sil.xOffsetLabel());
+  yOffsetLabel->serialIn(sil.yOffsetLabel());
+  zOffsetLabel->serialIn(sil.zOffsetLabel());
+  xCountLabel->serialIn(sil.xCountLabel());
+  yCountLabel->serialIn(sil.yCountLabel());
+  zCountLabel->serialIn(sil.zCountLabel());
+  includeSourceLabel->serialIn(sil.includeSourceLabel());
+}
+    

@@ -30,6 +30,7 @@
 #include <annex/instancemapper.h>
 #include <feature/datumplane.h>
 #include <feature/parameter.h>
+#include <project/serial/xsdcxxoutput/featureinstancemirror.h>
 #include <feature/instancemirror.h>
 
 using namespace ftr;
@@ -279,4 +280,31 @@ void InstanceMirror::updateModel(const UpdatePayload &payloadIn)
 
 void InstanceMirror::serialWrite(const QDir &dIn)
 {
+  prj::srl::FeatureInstanceMirror so
+  (
+    Base::serialOut(),
+    iMapper->serialOut(),
+    csysDragger->serialOut(),
+    csys.serialOut(),
+    includeSource.serialOut(),
+    shapePick.serialOut(),
+    planePick.serialOut(),
+    includeSourceLabel->serialOut()
+  );
+  
+  xml_schema::NamespaceInfomap infoMap;
+  std::ofstream stream(buildFilePathName(dIn).toUtf8().constData());
+  prj::srl::instanceMirror(stream, so, infoMap);
+}
+
+void InstanceMirror::serialRead(const prj::srl::FeatureInstanceMirror &sim)
+{
+  Base::serialIn(sim.featureBase());
+  iMapper->serialIn(sim.instanceMapper());
+  csysDragger->serialIn(sim.csysDragger());
+  csys.serialIn(sim.csys());
+  includeSource.serialIn(sim.includeSource());
+  shapePick.serialIn(sim.shapePick());
+  planePick.serialIn(sim.planePick());
+  includeSourceLabel->serialIn(sim.includeSourceLabel());
 }
