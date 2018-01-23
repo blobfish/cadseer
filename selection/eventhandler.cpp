@@ -595,16 +595,19 @@ Container EventHandler::messageToContainer(const Message &messageIn)
   if (feature->hasAnnex(ann::Type::SeerShape) && !feature->getAnnex<ann::SeerShape>(ann::Type::SeerShape).isNull())
   {
     const ann::SeerShape &seerShape = feature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
-    if
-    (
-      (messageIn.type == slc::Type::Object) ||
-      (messageIn.type == slc::Type::Solid) ||
-      (messageIn.type == slc::Type::Shell)
-    )
+    if (messageIn.type == slc::Type::Object)
     {
       container.selectionIds = seerShape.useGetChildrenOfType(seerShape.getRootOCCTShape(), TopAbs_FACE);
     }
     //skip feature for now.
+    else if
+    (
+      (messageIn.type == slc::Type::Solid) ||
+      (messageIn.type == slc::Type::Shell)
+    )
+    {
+      container.selectionIds = seerShape.useGetChildrenOfType(container.shapeId, TopAbs_FACE);
+    }
     else if
     (
       (messageIn.type == slc::Type::Face) ||

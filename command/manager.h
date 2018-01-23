@@ -79,6 +79,9 @@ namespace cmd
     void constructInstanceLinearDispatched(const msg::Message&);
     void constructInstanceMirrorDispatched(const msg::Message&);
     void constructInstancePolarDispatched(const msg::Message&);
+    void constructIntersectDispatched(const msg::Message&);
+    void constructSubtractDispatched(const msg::Message&);
+    void constructUnionDispatched(const msg::Message&);
     
     //editing functions
     typedef std::function<BasePtr (ftr::Base *)> EditFunction;

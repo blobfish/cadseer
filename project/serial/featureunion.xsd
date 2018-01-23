@@ -11,6 +11,8 @@
   <xs:all>
     <xs:element name="featureBase" type="srl:FeatureBase"/>
     <xs:element name="intersectionMapper" type="srl:IntersectionMapper"/>
+    <xs:element name="targetPicks" type="srl:Picks"/>
+    <xs:element name="toolPicks" type="srl:Picks"/>
   </xs:all>
 </xs:complexType>
 

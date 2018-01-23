@@ -43,7 +43,10 @@ namespace ftr
   public:
     BooleanOperation(const TopoDS_Shape &, const TopoDS_Shape &, BOPAlgo_Operation);
     BooleanOperation(const TopoDS_Shape &, const occt::ShapeVector &, BOPAlgo_Operation);
+    BooleanOperation(const occt::ShapeVector &, const occt::ShapeVector &, BOPAlgo_Operation);
     BOPAlgo_Builder& getBuilder();
+  private:
+    void init(const occt::ShapeVector &, const occt::ShapeVector &, BOPAlgo_Operation);
   };
 }
 

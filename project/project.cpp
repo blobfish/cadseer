@@ -484,6 +484,15 @@ void Project::removeParentTag(const uuid &targetIn, const std::string &tagIn)
   }
 }
 
+void Project::clearAllInputs(const boost::uuids::uuid &idIn)
+{
+  Vertex vertex = stow->findVertex(idIn);
+  Edges inEdges;
+  for (auto its = boost::in_edges(vertex, stow->graph); its.first != its.second; ++its.first)
+    inEdges.push_back(*its.first);
+  stow->removeEdges(inEdges);
+}
+
 void Project::setupDispatcher()
 {
   msg::Mask mask;

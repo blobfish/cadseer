@@ -44,9 +44,14 @@ namespace ftr
     shapeHistory(shapeHistoryIn)
     {}
     
+    std::vector<const Base*> getFeatures(const std::string &tag) const;
+    
     const UpdateMap &updateMap;
     const ShapeHistory &shapeHistory;
+    
+    static std::vector<const Base*> getFeatures(const UpdateMap &updateMapIn, const std::string &tag);
   };
+  
 }
 
 #endif // FTR_UPDATEPAYLOAD_H

@@ -67,6 +67,9 @@ void SelectionButton::setupDispatcher()
   
   dMask = msg::Response | msg::Pre | msg::Selection | msg::Remove;
   observer->dispatcher.insert(std::make_pair(dMask, boost::bind(&SelectionButton::selectionSubtractionDispatched, this, _1)));
+  
+  dMask = msg::Response | msg::Selection | msg::SetMask;
+  observer->dispatcher.insert(std::make_pair(dMask, boost::bind(&SelectionButton::selectionMaskDispatched, this, _1)));
 }
 
 /* I think it will be easier to check state in the message handlers than trying
@@ -125,6 +128,9 @@ void SelectionButton::addMessages(const slc::Messages &msIn)
 
 void SelectionButton::syncToSelection()
 {
+  if (mask != slc::None)
+    observer->outBlocked(msg::buildSelectionMask(mask));
+  
   for (const auto m : messages)
   {
     msg::Message mm(msg::Request | msg::Selection | msg::Add);
@@ -132,8 +138,8 @@ void SelectionButton::syncToSelection()
     observer->outBlocked(mm);
   }
   
-  if (mask != slc::None)
-    observer->outBlocked(msg::buildSelectionMask(mask));
+  if (!statusPrompt.isEmpty())
+    observer->outBlocked(msg::buildStatusMessage(statusPrompt.toStdString()));
 }
 
 void SelectionButton::showEvent(QShowEvent *)
@@ -158,4 +164,13 @@ void SelectionButton::toggledSlot(bool cState)
     syncToSelection();
   else
     observer->outBlocked(msg::Message(msg::Request | msg::Selection | msg::Clear));
+}
+
+void SelectionButton::selectionMaskDispatched(const msg::Message &messageIn)
+{
+  if (!isVisible() || !isChecked())
+    return;
+  
+  slc::Message sMsg = boost::get<slc::Message>(messageIn.payload);
+  mask = sMsg.selectionMask;
 }

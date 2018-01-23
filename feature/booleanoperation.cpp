@@ -32,8 +32,21 @@ BooleanOperation::BooleanOperation(const TopoDS_Shape &shape1, const TopoDS_Shap
 BooleanOperation::BooleanOperation(const TopoDS_Shape &target, const occt::ShapeVector &tools, BOPAlgo_Operation op):
   BRepAlgoAPI_BooleanOperation()
 {
+  occt::ShapeVector targets;
+  targets.push_back(target);
+  init(targets, tools, op);
+}
+
+BooleanOperation::BooleanOperation(const occt::ShapeVector &targets, const occt::ShapeVector &tools, BOPAlgo_Operation op)
+{
+  init(targets, tools, op);
+}
+
+void BooleanOperation::init(const occt::ShapeVector &targets, const occt::ShapeVector &tools, BOPAlgo_Operation op)
+{
   TopTools_ListOfShape targetList;
-  targetList.Append(target);
+  for (const auto &cTarget : targets)
+    targetList.Append(cTarget);
   SetArguments(targetList);
   
   TopTools_ListOfShape toolList;

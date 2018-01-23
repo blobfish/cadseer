@@ -20,6 +20,7 @@
 #ifndef FTR_INTERSECT_H
 #define FTR_INTERSECT_H
 
+#include <feature/pick.h>
 #include <feature/base.h>
 
 namespace prj{namespace srl{class FeatureIntersect;}}
@@ -37,12 +38,23 @@ namespace ftr
     virtual const std::string& getTypeString() const override {return toString(Type::Intersect);}
     virtual const QIcon& getIcon() const override {return icon;}
     virtual Descriptor getDescriptor() const override {return Descriptor::Alter;}
-    virtual void serialWrite(const QDir&) override; //!< write xml file. not const, might reset a modified flag.
-    void serialRead(const prj::srl::FeatureIntersect &); //!<initializes this from sBox. not virtual, type already known.
     
-  private:
+    virtual void serialWrite(const QDir&) override;
+    void serialRead(const prj::srl::FeatureIntersect &);
+    
+    void setTargetPicks(const Picks&);
+    const Picks& getTargetPicks(){return targetPicks;}
+    void setToolPicks(const Picks&);
+    const Picks& getToolPicks(){return toolPicks;}
+    
+  protected:
     std::unique_ptr<ann::SeerShape> sShape;
     std::unique_ptr<ann::IntersectionMapper> iMapper;
+    
+    Picks targetPicks;
+    Picks toolPicks;
+    
+  private:
     static QIcon icon;
   };
 }

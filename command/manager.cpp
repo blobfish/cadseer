@@ -48,6 +48,9 @@
 #include <command/instancelinear.h>
 #include <command/instancemirror.h>
 #include <command/instancepolar.h>
+#include <command/intersect.h>
+#include <command/subtract.h>
+#include <command/union.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <selection/message.h>
@@ -165,6 +168,15 @@ void Manager::setupDispatcher()
   
   mask = msg::Request | msg::Construct | msg::InstancePolar;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::constructInstancePolarDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Construct | msg::Intersect;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::constructIntersectDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Construct | msg::Subtract;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::constructSubtractDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Construct | msg::Union;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::constructUnionDispatched, this, _1)));
 }
 
 void Manager::cancelCommandDispatched(const msg::Message &)
@@ -387,6 +399,24 @@ void Manager::constructInstancePolarDispatched(const msg::Message&)
   addCommand(i);
 }
 
+void Manager::constructIntersectDispatched(const msg::Message&)
+{
+  std::shared_ptr<Intersect> i(new Intersect());
+  addCommand(i);
+}
+
+void Manager::constructSubtractDispatched(const msg::Message&)
+{
+  std::shared_ptr<Subtract> s(new Subtract());
+  addCommand(s);
+}
+
+void Manager::constructUnionDispatched(const msg::Message&)
+{
+  std::shared_ptr<Union> u(new Union());
+  addCommand(u);
+}
+
 void Manager::editFeatureDispatched(const msg::Message&)
 {
   app::Application *application = static_cast<app::Application*>(qApp);
@@ -418,11 +448,35 @@ void Manager::editFeatureDispatched(const msg::Message&)
   addCommand(it->second(feature));
 }
 
+
+
+
+BasePtr editIntersect(ftr::Base *feature)
+{
+  std::shared_ptr<Base> command(new IntersectEdit(feature));
+  return command;
+}
+
+BasePtr editSubtract(ftr::Base *feature)
+{
+  std::shared_ptr<Base> command(new SubtractEdit(feature));
+  return command;
+}
+
+BasePtr editUnion(ftr::Base *feature)
+{
+  std::shared_ptr<Base> command(new UnionEdit(feature));
+  return command;
+}
+
 void Manager::setupEditFunctionMap()
 {
   editFunctionMap.insert(std::make_pair(ftr::Type::Blend, std::bind(&Manager::editBlend, this, std::placeholders::_1)));
   editFunctionMap.insert(std::make_pair(ftr::Type::Strip, std::bind(&Manager::editStrip, this, std::placeholders::_1)));
   editFunctionMap.insert(std::make_pair(ftr::Type::Quote, std::bind(&Manager::editQuote, this, std::placeholders::_1)));
+  editFunctionMap.insert(std::make_pair(ftr::Type::Intersect, std::bind(editIntersect, std::placeholders::_1)));
+  editFunctionMap.insert(std::make_pair(ftr::Type::Subtract, std::bind(editSubtract, std::placeholders::_1)));
+  editFunctionMap.insert(std::make_pair(ftr::Type::Union, std::bind(editUnion, std::placeholders::_1)));
 }
 
 BasePtr Manager::editBlend(ftr::Base *feature)

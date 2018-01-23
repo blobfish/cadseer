@@ -20,6 +20,7 @@
 #ifndef FTR_UNION_H
 #define FTR_UNION_H
 
+#include <feature/pick.h>
 #include <feature/base.h>
 
 class QDir;
@@ -39,12 +40,21 @@ namespace ftr
     virtual const std::string& getTypeString() const override {return toString(Type::Union);}
     virtual const QIcon& getIcon() const override {return icon;}
     virtual Descriptor getDescriptor() const override {return Descriptor::Alter;}
-    virtual void serialWrite(const QDir&) override; //!< write xml file. not const, might reset a modified flag.
-    void serialRead(const prj::srl::FeatureUnion &sUnionIn); //!<initializes this from sBox. not virtual, type already known.
+    
+    virtual void serialWrite(const QDir&) override;
+    void serialRead(const prj::srl::FeatureUnion &sUnionIn);
+    
+    void setTargetPicks(const Picks&);
+    const Picks& getTargetPicks(){return targetPicks;}
+    void setToolPicks(const Picks&);
+    const Picks& getToolPicks(){return toolPicks;}
     
   protected:
     std::unique_ptr<ann::SeerShape> sShape;
     std::unique_ptr<ann::IntersectionMapper> iMapper;
+    
+    Picks targetPicks;
+    Picks toolPicks;
     
   private:
     static QIcon icon;

@@ -30,6 +30,7 @@
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/ordered_index.hpp>
 
+#include <globalutilities.h>
 #include <tools/idtools.h>
 #include <tools/graphtools.h>
 #include <project/serial/xsdcxxoutput/featurebase.h>
@@ -261,6 +262,77 @@ uuid ShapeHistory::evolve(const uuid &featureIdIn, const uuid &shapeIdIn) const
   
   return gu::createNilId();
 }
+
+
+std::vector<boost::uuids::uuid> ShapeHistory::resolveHistories
+(
+  const ShapeHistory &pick,
+  const boost::uuids::uuid &featureId
+) const
+{
+  std::vector<boost::uuids::uuid> out;
+  
+  //find root of pick.
+  Vertex v = boost::graph_traits<Graph>::null_vertex();
+  for (auto its = boost::vertices(pick.shapeHistoryStow->graph); its.first != its.second; ++its.first)
+  {
+    if (boost::in_degree(*its.first, pick.shapeHistoryStow->graph) == 0)
+    {
+      v = *its.first;
+      break;
+    }
+  }
+  assert(v != boost::graph_traits<Graph>::null_vertex());
+  if (v == boost::graph_traits<Graph>::null_vertex())
+  {
+    std::cerr << "WARNING: didn't find shape history pick root in ShapeHistory::resolveHistories" << std::endl;
+    return out;
+  }
+  
+  std::vector<Vertex> pickVertices;
+  gu::BFSLimitVisitor<Vertex> lVisitor(pickVertices);
+  boost::breadth_first_search(pick.shapeHistoryStow->graph, v, boost::visitor(lVisitor));
+  assert(!pickVertices.empty());
+  if (pickVertices.empty())
+  {
+    std::cerr << "WARNING: didn't find any pick vertices in ShapeHistory::resolveHistories" << std::endl;
+    return out;
+  }
+  
+  //anchorId is the first id in the pick history that is also in 'this' graph.
+  uuid anchorId = gu::createNilId();
+  for (const auto &pv : pickVertices)
+  {
+    uuid pid = pick.shapeHistoryStow->graph[pv].shapeId;
+    if (!shapeHistoryStow->hasShape(pid))
+      continue;
+    anchorId = pid;
+    break;
+  }
+  if (anchorId.is_nil())
+    return out;
+  
+  Vertex anchorVertex = shapeHistoryStow->findVertex(anchorId);
+  std::vector<Vertex> allRelatives;
+  gu::BFSLimitVisitor<Vertex> aVisitor(allRelatives); //acendant visitor
+  boost::breadth_first_search(shapeHistoryStow->graph, anchorVertex, boost::visitor(aVisitor));
+  
+  GraphReversed rGraph = boost::make_reverse_graph(shapeHistoryStow->graph);
+  gu::BFSLimitVisitor<VertexReversed> dVisitor(allRelatives); //descendant visitor
+  boost::breadth_first_search(rGraph, anchorVertex, boost::visitor(dVisitor));
+  
+  gu::uniquefy(allRelatives);
+  
+  for (const auto &vertex : allRelatives)
+  {
+    if (shapeHistoryStow->graph[vertex].featureId == featureId)
+      out.push_back(shapeHistoryStow->graph[vertex].shapeId);
+  }
+  
+  return out;
+}
+
+
 
 ShapeHistory ShapeHistory::createEvolveHistory(const uuid &shapeIdIn) const
 {

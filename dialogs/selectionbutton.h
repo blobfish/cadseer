@@ -58,6 +58,7 @@ namespace dlg
     void addMessages(const slc::Messages&);
     
     bool isSingleSelection = false;
+    QString statusPrompt;
     
   Q_SIGNALS:
     void dirty();
@@ -75,6 +76,7 @@ namespace dlg
     void setupDispatcher();
     void selectionAdditionDispatched(const msg::Message&);
     void selectionSubtractionDispatched(const msg::Message&);
+    void selectionMaskDispatched(const msg::Message&);
     
     slc::Messages messages;
   };

@@ -400,21 +400,33 @@ void SeerShape::insertEvolve(const EvolveRecord &recordIn)
 
 void SeerShape::fillInHistory(ftr::ShapeHistory &historyIn, const BID::uuid &featureId) const
 {
+  /* we need to create ids in the history graph for this shape.
+   * these would be the out ids. We need to remember that the evolution container
+   * is not cleared each update and may contain a large number of entries not
+   * relevant to the current update.
+   */
+  
   typedef EvolveContainer::index<EvolveRecord::ByInId>::type List;
   const List &list = evolveContainer.get<EvolveRecord::ByInId>();
   for (List::const_iterator it = list.begin(); it != list.end(); ++it)
   {
+    //if the outid is nil, that means that a shape didn't make it through operation.
+    //if the outid doesn't exist in the actually finished shape, that means this entry is from another update.
+    //we don't need to worry about these conditions.
+    if (it->outId.is_nil() || !hasShapeIdRecord(it->outId))
+      continue;
+    
     if (!it->inId.is_nil())
     {
-//       assert(historyIn.hasShape(it->inId)); //shape should have already been added.
+      //in this case we have a valid shape with a valid id in the out column, but the
+      //in column id doesn't exist in the graph. A prior feature didn't update the history graph correctly.
       if(!historyIn.hasShape(it->inId))
         std::cout << "warning: shape id: " << gu::idToString(it->inId) << " should be in shape history in: " << __PRETTY_FUNCTION__ << std::endl;
     }
-    if (!it->outId.is_nil())
-    {
-      if (!historyIn.hasShape(it->outId)) //might be there already, like a 'merge' situation.
-        historyIn.addShape(featureId, it->outId);
-    }
+    
+    if (!historyIn.hasShape(it->outId)) //might be there already, like a 'merge' situation.
+      historyIn.addShape(featureId, it->outId);
+    
     if (historyIn.hasShape(it->inId) && historyIn.hasShape(it->outId))
       historyIn.addConnection(it->outId, it->inId); //child points to parent.
   }

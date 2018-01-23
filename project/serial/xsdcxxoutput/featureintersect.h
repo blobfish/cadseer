@@ -226,6 +226,122 @@ namespace prj
       //@}
 
       /**
+       * @name targetPicks
+       *
+       * @brief Accessor and modifier functions for the %targetPicks
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::Picks TargetPicksType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< TargetPicksType, char > TargetPicksTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const TargetPicksType&
+      targetPicks () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      TargetPicksType&
+      targetPicks ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      targetPicks (const TargetPicksType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      targetPicks (::std::unique_ptr< TargetPicksType > p);
+
+      //@}
+
+      /**
+       * @name toolPicks
+       *
+       * @brief Accessor and modifier functions for the %toolPicks
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::Picks ToolPicksType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< ToolPicksType, char > ToolPicksTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const ToolPicksType&
+      toolPicks () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      ToolPicksType&
+      toolPicks ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      toolPicks (const ToolPicksType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      toolPicks (::std::unique_ptr< ToolPicksType > p);
+
+      //@}
+
+      /**
        * @name Constructors
        */
       //@{
@@ -235,7 +351,9 @@ namespace prj
        * initializers for required elements and attributes.
        */
       FeatureIntersect (const FeatureBaseType&,
-                        const IntersectionMapperType&);
+                        const IntersectionMapperType&,
+                        const TargetPicksType&,
+                        const ToolPicksType&);
 
       /**
        * @brief Create an instance from the ultimate base and
@@ -246,7 +364,9 @@ namespace prj
        * instead of making copies.
        */
       FeatureIntersect (::std::unique_ptr< FeatureBaseType >,
-                        ::std::unique_ptr< IntersectionMapperType >);
+                        ::std::unique_ptr< IntersectionMapperType >,
+                        ::std::unique_ptr< TargetPicksType >,
+                        ::std::unique_ptr< ToolPicksType >);
 
       /**
        * @brief Create an instance from a DOM element.
@@ -320,6 +440,8 @@ namespace prj
       protected:
       ::xsd::cxx::tree::one< FeatureBaseType > featureBase_;
       ::xsd::cxx::tree::one< IntersectionMapperType > intersectionMapper_;
+      ::xsd::cxx::tree::one< TargetPicksType > targetPicks_;
+      ::xsd::cxx::tree::one< ToolPicksType > toolPicks_;
 
       //@endcond
     };

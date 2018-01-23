@@ -94,6 +94,54 @@ namespace prj
     {
       this->intersectionMapper_.set (std::move (x));
     }
+
+    const FeatureUnion::TargetPicksType& FeatureUnion::
+    targetPicks () const
+    {
+      return this->targetPicks_.get ();
+    }
+
+    FeatureUnion::TargetPicksType& FeatureUnion::
+    targetPicks ()
+    {
+      return this->targetPicks_.get ();
+    }
+
+    void FeatureUnion::
+    targetPicks (const TargetPicksType& x)
+    {
+      this->targetPicks_.set (x);
+    }
+
+    void FeatureUnion::
+    targetPicks (::std::unique_ptr< TargetPicksType > x)
+    {
+      this->targetPicks_.set (std::move (x));
+    }
+
+    const FeatureUnion::ToolPicksType& FeatureUnion::
+    toolPicks () const
+    {
+      return this->toolPicks_.get ();
+    }
+
+    FeatureUnion::ToolPicksType& FeatureUnion::
+    toolPicks ()
+    {
+      return this->toolPicks_.get ();
+    }
+
+    void FeatureUnion::
+    toolPicks (const ToolPicksType& x)
+    {
+      this->toolPicks_.set (x);
+    }
+
+    void FeatureUnion::
+    toolPicks (::std::unique_ptr< ToolPicksType > x)
+    {
+      this->toolPicks_.set (std::move (x));
+    }
   }
 }
 
@@ -108,19 +156,27 @@ namespace prj
 
     FeatureUnion::
     FeatureUnion (const FeatureBaseType& featureBase,
-                  const IntersectionMapperType& intersectionMapper)
+                  const IntersectionMapperType& intersectionMapper,
+                  const TargetPicksType& targetPicks,
+                  const ToolPicksType& toolPicks)
     : ::xml_schema::Type (),
       featureBase_ (featureBase, this),
-      intersectionMapper_ (intersectionMapper, this)
+      intersectionMapper_ (intersectionMapper, this),
+      targetPicks_ (targetPicks, this),
+      toolPicks_ (toolPicks, this)
     {
     }
 
     FeatureUnion::
     FeatureUnion (::std::unique_ptr< FeatureBaseType > featureBase,
-                  ::std::unique_ptr< IntersectionMapperType > intersectionMapper)
+                  ::std::unique_ptr< IntersectionMapperType > intersectionMapper,
+                  ::std::unique_ptr< TargetPicksType > targetPicks,
+                  ::std::unique_ptr< ToolPicksType > toolPicks)
     : ::xml_schema::Type (),
       featureBase_ (std::move (featureBase), this),
-      intersectionMapper_ (std::move (intersectionMapper), this)
+      intersectionMapper_ (std::move (intersectionMapper), this),
+      targetPicks_ (std::move (targetPicks), this),
+      toolPicks_ (std::move (toolPicks), this)
     {
     }
 
@@ -130,7 +186,9 @@ namespace prj
                   ::xml_schema::Container* c)
     : ::xml_schema::Type (x, f, c),
       featureBase_ (x.featureBase_, f, this),
-      intersectionMapper_ (x.intersectionMapper_, f, this)
+      intersectionMapper_ (x.intersectionMapper_, f, this),
+      targetPicks_ (x.targetPicks_, f, this),
+      toolPicks_ (x.toolPicks_, f, this)
     {
     }
 
@@ -140,7 +198,9 @@ namespace prj
                   ::xml_schema::Container* c)
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
       featureBase_ (this),
-      intersectionMapper_ (this)
+      intersectionMapper_ (this),
+      targetPicks_ (this),
+      toolPicks_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -187,6 +247,34 @@ namespace prj
           }
         }
 
+        // targetPicks
+        //
+        if (n.name () == "targetPicks" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< TargetPicksType > r (
+            TargetPicksTraits::create (i, f, this));
+
+          if (!targetPicks_.present ())
+          {
+            this->targetPicks_.set (::std::move (r));
+            continue;
+          }
+        }
+
+        // toolPicks
+        //
+        if (n.name () == "toolPicks" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< ToolPicksType > r (
+            ToolPicksTraits::create (i, f, this));
+
+          if (!toolPicks_.present ())
+          {
+            this->toolPicks_.set (::std::move (r));
+            continue;
+          }
+        }
+
         break;
       }
 
@@ -201,6 +289,20 @@ namespace prj
       {
         throw ::xsd::cxx::tree::expected_element< char > (
           "intersectionMapper",
+          "");
+      }
+
+      if (!targetPicks_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "targetPicks",
+          "");
+      }
+
+      if (!toolPicks_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "toolPicks",
           "");
       }
     }
@@ -220,6 +322,8 @@ namespace prj
         static_cast< ::xml_schema::Type& > (*this) = x;
         this->featureBase_ = x.featureBase_;
         this->intersectionMapper_ = x.intersectionMapper_;
+        this->targetPicks_ = x.targetPicks_;
+        this->toolPicks_ = x.toolPicks_;
       }
 
       return *this;
@@ -541,6 +645,28 @@ namespace prj
             e));
 
         s << i.intersectionMapper ();
+      }
+
+      // targetPicks
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "targetPicks",
+            e));
+
+        s << i.targetPicks ();
+      }
+
+      // toolPicks
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "toolPicks",
+            e));
+
+        s << i.toolPicks ();
       }
     }
 

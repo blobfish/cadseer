@@ -65,6 +65,7 @@ public:
     void connect(const boost::uuids::uuid &parentIn, const boost::uuids::uuid &childIn, const ftr::InputType &type);
      //!< removes all tags from edges with id as target. removes edge if only tag is parameter.
     void removeParentTag(const boost::uuids::uuid &, const std::string&);
+    void clearAllInputs(const boost::uuids::uuid&);
     
     void setFeatureActive(const boost::uuids::uuid&);
     void setFeatureInactive(const boost::uuids::uuid&);

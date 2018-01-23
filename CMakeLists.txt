@@ -328,6 +328,7 @@ SET(FEATURE_SOURCES
     feature/instancelinear.cpp
     feature/instancemirror.cpp
     feature/instancepolar.cpp
+    feature/updatepayload.cpp
     )
     
 SET(ANNEX_SOURCES
@@ -365,6 +366,7 @@ SET(TOOLS_SOURCES
     tools/idtools.cpp
     tools/infotools.cpp
     tools/occtools.cpp
+    tools/featuretools.cpp
     )
     
 SET(DIALOG_SOURCES
@@ -378,6 +380,7 @@ SET(DIALOG_SOURCES
     dialogs/quote.cpp
     dialogs/preferences.cpp
     dialogs/project.cpp
+    dialogs/boolean.cpp
     )
     
 SET(PREFERENCE_SOURCES
@@ -457,6 +460,9 @@ SET(COMMAND_SOURCES
     command/instancelinear.cpp
     command/instancemirror.cpp
     command/instancepolar.cpp
+    command/intersect.cpp
+    command/subtract.cpp
+    command/union.cpp
     )
     
 SET(LIBRARY_SOURCES
@@ -542,6 +548,7 @@ SET(CADSEER_MOC_HDRS
     dialogs/selectionbutton.h
     dialogs/quote.h
     dialogs/project.h
+    dialogs/boolean.h
     )
 
 SET(CADSEER_LIBRARIES

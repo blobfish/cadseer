@@ -30,9 +30,12 @@
 #include <project/serial/xsdcxxoutput/featureunion.h>
 #include <feature/booleanoperation.h>
 #include <feature/shapecheck.h>
+#include <tools/featuretools.h>
 #include <annex/seershape.h>
 #include <annex/intersectionmapper.h>
 #include <feature/union.h>
+
+using boost::uuids::uuid;
 
 using namespace ftr;
 
@@ -52,40 +55,107 @@ Union::Union() : Base(), sShape(new ann::SeerShape()), iMapper(new ann::Intersec
 
 Union::~Union(){}
 
+void Union::setTargetPicks(const Picks &psIn)
+{
+  if (targetPicks == psIn)
+    return;
+  targetPicks = psIn;
+  setModelDirty();
+}
+
+void Union::setToolPicks(const Picks &psIn)
+{
+  if (toolPicks == psIn)
+    return;
+  toolPicks = psIn;
+  setModelDirty();
+}
+
 void Union::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure(); //assume failure until success.
   lastUpdateLog.clear();
   try
   {
-    if
-    (
-      payloadIn.updateMap.count(InputType::target) != 1 ||
-      payloadIn.updateMap.count(InputType::tool) < 1
-    )
-    {
-      //we should have a status message in the base class.
-      std::ostringstream stream;
-      stream << "wrong number of arguments.   " <<
-      "target count is: " << payloadIn.updateMap.count(InputType::target) << "   " <<
-      "tool count is: " << payloadIn.updateMap.count(InputType::tool);
-      throw std::runtime_error(stream.str());
-    }
-    
     //target
-    const ann::SeerShape &targetSeerShape =
-    payloadIn.updateMap.equal_range(InputType::target).first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
-    assert(!targetSeerShape.isNull());
-    //tools
-    occt::ShapeVector toolOCCTShapes;
-    for (auto pairIt = payloadIn.updateMap.equal_range(InputType::tool); pairIt.first != pairIt.second; ++pairIt.first)
+    std::vector<const Base*> targetFeatures = payloadIn.getFeatures(InputType::target);
+    if (targetFeatures.empty())
+      throw std::runtime_error("no target features");
+    for (const Base* f : targetFeatures)
     {
-      const ann::SeerShape &toolSeerShape = pairIt.first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
-      assert(!toolSeerShape.isNull());
-      toolOCCTShapes.push_back(toolSeerShape.getRootOCCTShape());
+      if (!f->hasAnnex(ann::Type::SeerShape))
+        throw std::runtime_error("target feature doesn't have seer shape");
+      const ann::SeerShape &targetSeerShape = f->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+      assert(!targetSeerShape.isNull());
+      if (targetSeerShape.isNull())
+        throw std::runtime_error("target seerShape is null");
+    }
+    auto targetPairs = tls::resolvePicks(targetFeatures, targetPicks, payloadIn.shapeHistory);
+    assert(!targetPairs.empty());
+    if (targetPairs.empty())
+      throw std::runtime_error("no target pairs");
+    occt::ShapeVector targetOCCTShapes;
+    for (const auto &pair : targetPairs)
+    {
+      const ann::SeerShape &tShape = pair.first->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+      if (pair.second.is_nil())
+      {
+        //don't include the compound.
+        const auto &c = tShape.useGetNonCompoundChildren();
+        std::copy(c.begin(), c.end(), std::back_inserter(targetOCCTShapes));
+      }
+      else
+        targetOCCTShapes.push_back(tShape.getOCCTShape(pair.second));
+    }
+    occt::uniquefy(targetOCCTShapes); //just in case.
+    for (auto it = targetOCCTShapes.begin(); it != targetOCCTShapes.end();)
+    {
+      //remove anything below a solid.
+      if (it->ShapeType() > TopAbs_SOLID)
+        it = targetOCCTShapes.erase(it);
+      else
+        ++it;
     }
     
-    BooleanOperation fuser(targetSeerShape.getRootOCCTShape(), toolOCCTShapes, BOPAlgo_FUSE);
+    //tools
+    std::vector<const Base*> toolFeatures = payloadIn.getFeatures(InputType::tool);
+    if (toolFeatures.empty())
+      throw std::runtime_error("no tool features found");
+    for (const Base* tf : toolFeatures) //do some verfication.
+    {
+      assert(tf->hasAnnex(ann::Type::SeerShape)); //make user interface verify the input.
+      if (!tf->hasAnnex(ann::Type::SeerShape))
+        throw std::runtime_error("tool feature has no seer shape");
+      const ann::SeerShape &toolSeerShape = tf->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+      assert(!toolSeerShape.isNull());
+      if (toolSeerShape.isNull())
+        throw std::runtime_error("tool seerShape is null");
+    }
+    auto pairs = tls::resolvePicks(toolFeatures, toolPicks, payloadIn.shapeHistory);
+    occt::ShapeVector toolOCCTShapes;
+    for (const auto &pair : pairs)
+    {
+      const ann::SeerShape &tShape = pair.first->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+      if (pair.second.is_nil())
+      {
+        //don't include the compound.
+        const auto &c = tShape.useGetNonCompoundChildren();
+        std::copy(c.begin(), c.end(), std::back_inserter(toolOCCTShapes));
+      }
+      else
+        toolOCCTShapes.push_back(tShape.getOCCTShape(pair.second));
+    }
+    occt::uniquefy(toolOCCTShapes); //just in case.
+    for (auto it = toolOCCTShapes.begin(); it != toolOCCTShapes.end();)
+    {
+      //remove anything below a solid.
+      if (it->ShapeType() > TopAbs_SOLID)
+        it = toolOCCTShapes.erase(it);
+      else
+        ++it;
+    }
+    
+    BooleanOperation fuser(targetOCCTShapes, toolOCCTShapes, BOPAlgo_FUSE);
     fuser.Build();
     if (!fuser.IsDone())
       throw std::runtime_error("OCC fuse failed");
@@ -97,13 +167,16 @@ void Union::updateModel(const UpdatePayload &payloadIn)
     
     iMapper->go(payloadIn, fuser.getBuilder(), *sShape);
     
-    sShape->shapeMatch(targetSeerShape);
-    for (auto pairIt = payloadIn.updateMap.equal_range(InputType::tool); pairIt.first != pairIt.second; ++pairIt.first)
-      sShape->shapeMatch(pairIt.first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape));
-    sShape->uniqueTypeMatch(targetSeerShape);
-    sShape->outerWireMatch(targetSeerShape);
-    for (auto pairIt = payloadIn.updateMap.equal_range(InputType::tool); pairIt.first != pairIt.second; ++pairIt.first)
-      sShape->outerWireMatch(pairIt.first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape));
+    for (const auto *it : targetFeatures)
+      sShape->shapeMatch(it->getAnnex<ann::SeerShape>(ann::Type::SeerShape));
+    for (const auto *it : toolFeatures)
+      sShape->shapeMatch(it->getAnnex<ann::SeerShape>(ann::Type::SeerShape));
+    for (const auto *it : targetFeatures)
+      sShape->uniqueTypeMatch(it->getAnnex<ann::SeerShape>(ann::Type::SeerShape));
+    for (const auto *it : targetFeatures)
+      sShape->outerWireMatch(it->getAnnex<ann::SeerShape>(ann::Type::SeerShape));
+    for (const auto *it : toolFeatures)
+      sShape->outerWireMatch(it->getAnnex<ann::SeerShape>(ann::Type::SeerShape));
     sShape->derivedMatch();
     sShape->dumpNils(getTypeString()); //only if there are shapes with nil ids.
     sShape->dumpDuplicates(getTypeString());
@@ -137,7 +210,9 @@ void Union::serialWrite(const QDir &dIn)
   prj::srl::FeatureUnion unionOut
   (
     Base::serialOut(),
-    iMapper->serialOut()
+    iMapper->serialOut(),
+    ftr::serialOut(targetPicks),
+    ftr::serialOut(toolPicks)
   );
   
   xml_schema::NamespaceInfomap infoMap;
@@ -149,4 +224,6 @@ void Union::serialRead(const prj::srl::FeatureUnion& sUnionIn)
 {
   Base::serialIn(sUnionIn.featureBase());
   iMapper->serialIn(sUnionIn.intersectionMapper());
+  targetPicks = ftr::serialIn(sUnionIn.targetPicks());
+  toolPicks = ftr::serialIn(sUnionIn.toolPicks());
 }

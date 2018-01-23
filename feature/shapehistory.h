@@ -83,6 +83,22 @@ namespace ftr
      * @return id of shape or nil id if not found.
      */
     boost::uuids::uuid devolve(const boost::uuids::uuid &featureIdIn, const boost::uuids::uuid &shapeIdIn) const;
+    
+    /*! @brief get all shape ids related to shapeId passed in that belong to the feature
+    * 
+    * @param this is the shapehistory graph for the whole project.
+    * @param pick is the shapehistory of a pick created with createDevolveHistory.
+    * @param featureId is the id of the feature we are interested in.
+    * 
+    * @note does a BFS of pick stopping at the first id that is in this graph.
+    * then does another BFS of update (forward and back) to find all relatives in the feature id.
+    */
+    std::vector<boost::uuids::uuid> resolveHistories
+    (
+      const ShapeHistory &pick,
+      const boost::uuids::uuid &featureId
+    ) const;
+    
     //@}
     
     //! create a 'subset', descendants graph related to shape id @shapeIdIn
@@ -100,6 +116,7 @@ namespace ftr
   private:
     std::shared_ptr<ShapeHistoryStow> shapeHistoryStow;
   };
+  
 }
 
 

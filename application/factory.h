@@ -51,9 +51,6 @@ namespace app
     void newCylinderDispatched(const msg::Message&);
     void newSphereDispatched(const msg::Message&);
     void newConeDispatched(const msg::Message&);
-    void newUnionDispatched(const msg::Message&);
-    void newSubtractDispatched(const msg::Message&);
-    void newIntersectDispatched(const msg::Message&);
     void newChamferDispatched(const msg::Message&);
     void newDraftDispatched(const msg::Message&);
     void newDatumPlaneDispatched(const msg::Message&);
