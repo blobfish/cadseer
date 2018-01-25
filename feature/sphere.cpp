@@ -69,7 +69,7 @@ sShape(new ann::SeerShape())
     icon = QIcon(":/resources/images/constructionSphere.svg");
   
   name = QObject::tr("Sphere");
-  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
+  mainSwitch->setUserValue<int>(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   initializeMaps();
   
@@ -247,8 +247,6 @@ void Sphere::serialRead(const prj::srl::FeatureSphere& sSphereIn)
   radius.serialIn(sSphereIn.radius());
   csys.serialIn(sSphereIn.csys());
   csysDragger->serialIn(sSphereIn.csysDragger());
-  
-  csysDragger->dragger->setUserValue(gu::idAttributeTitle, gu::idToString(getId()));
   
   updateIPGroup();
 }

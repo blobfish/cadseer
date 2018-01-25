@@ -417,6 +417,8 @@ void Manager::constructUnionDispatched(const msg::Message&)
   addCommand(u);
 }
 
+
+//editing commands and dispatching.
 void Manager::editFeatureDispatched(const msg::Message&)
 {
   app::Application *application = static_cast<app::Application*>(qApp);
@@ -448,8 +450,23 @@ void Manager::editFeatureDispatched(const msg::Message&)
   addCommand(it->second(feature));
 }
 
+BasePtr editBlend(ftr::Base *feature)
+{
+  std::shared_ptr<Base> command(new BlendEdit(feature));
+  return command;
+}
 
+BasePtr editStrip(ftr::Base *feature)
+{
+  std::shared_ptr<Base> command(new StripEdit(feature));
+  return command;
+}
 
+BasePtr editQuote(ftr::Base *feature)
+{
+  std::shared_ptr<Base> command(new QuoteEdit(feature));
+  return command;
+}
 
 BasePtr editIntersect(ftr::Base *feature)
 {
@@ -471,28 +488,10 @@ BasePtr editUnion(ftr::Base *feature)
 
 void Manager::setupEditFunctionMap()
 {
-  editFunctionMap.insert(std::make_pair(ftr::Type::Blend, std::bind(&Manager::editBlend, this, std::placeholders::_1)));
-  editFunctionMap.insert(std::make_pair(ftr::Type::Strip, std::bind(&Manager::editStrip, this, std::placeholders::_1)));
-  editFunctionMap.insert(std::make_pair(ftr::Type::Quote, std::bind(&Manager::editQuote, this, std::placeholders::_1)));
+  editFunctionMap.insert(std::make_pair(ftr::Type::Blend, std::bind(editBlend, std::placeholders::_1)));
+  editFunctionMap.insert(std::make_pair(ftr::Type::Strip, std::bind(editStrip, std::placeholders::_1)));
+  editFunctionMap.insert(std::make_pair(ftr::Type::Quote, std::bind(editQuote, std::placeholders::_1)));
   editFunctionMap.insert(std::make_pair(ftr::Type::Intersect, std::bind(editIntersect, std::placeholders::_1)));
   editFunctionMap.insert(std::make_pair(ftr::Type::Subtract, std::bind(editSubtract, std::placeholders::_1)));
   editFunctionMap.insert(std::make_pair(ftr::Type::Union, std::bind(editUnion, std::placeholders::_1)));
-}
-
-BasePtr Manager::editBlend(ftr::Base *feature)
-{
-  std::shared_ptr<Base> command(new BlendEdit(feature));
-  return command;
-}
-
-BasePtr Manager::editStrip(ftr::Base *feature)
-{
-  std::shared_ptr<Base> command(new StripEdit(feature));
-  return command;
-}
-
-BasePtr Manager::editQuote(ftr::Base *feature)
-{
-  std::shared_ptr<Base> command(new QuoteEdit(feature));
-  return command;
 }

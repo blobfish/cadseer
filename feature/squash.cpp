@@ -42,7 +42,7 @@ Squash::Squash() : Base(), sShape(new ann::SeerShape())
     icon = QIcon(":/resources/images/constructionSquash.svg");
   
   name = QObject::tr("Squash");
-  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
+  mainSwitch->setUserValue<int>(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   faceId = gu::createRandomId();
   wireId = gu::createRandomId();

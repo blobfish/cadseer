@@ -50,7 +50,7 @@ sShape(new ann::SeerShape())
     icon = QIcon(":/resources/images/constructionHollow.svg");
   
   name = QObject::tr("Hollow");
-  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
+  mainSwitch->setUserValue<int>(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   offset.setConstraint(prm::Constraint::buildNonZero());
   offset.connectValue(boost::bind(&Hollow::setModelDirty, this));

@@ -54,7 +54,7 @@ includeSource(QObject::tr("Include Source"), true)
     icon = QIcon(":/resources/images/constructionInstanceLinear.svg");
   
   name = QObject::tr("Instance Linear");
-  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
+  mainSwitch->setUserValue<int>(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   xOffset.setConstraint(prm::Constraint::buildNonZero());
   yOffset.setConstraint(prm::Constraint::buildNonZero());

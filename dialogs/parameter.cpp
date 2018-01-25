@@ -245,7 +245,7 @@ public:
   ConstantChangedVisitor() = delete;
   ConstantChangedVisitor(Parameter *dialogIn) : dialog(dialogIn){assert(dialog);}
   void operator()(double) const {dialog->constantHasChangedDouble();}
-  void operator()(int) const {}
+  void operator()(int) const {dialog->constantHasChangedInt();}
   void operator()(bool) const {} //don't think bool should be anything other than constant?
   void operator()(const std::string&) const {}
   void operator()(const boost::filesystem::path&) const {}
@@ -380,7 +380,10 @@ void Parameter::valueHasChangedInt()
   assert(lineEdit);
   
   if (parameter->isConstant())
+  {
     lineEdit->setText(QString::number(static_cast<int>(*parameter)));
+    lineEdit->selectAll();
+  }
 }
 
 void Parameter::valueHasChangedBool()
@@ -461,6 +464,11 @@ void Parameter::constantHasChangedDouble()
     eEdit->lineEdit->setReadOnly(true);
   }
   valueHasChangedDouble();
+}
+
+void Parameter::constantHasChangedInt()
+{
+  valueHasChangedInt();
 }
 
 void Parameter::featureRemovedDispatched(const msg::Message &messageIn)
@@ -707,7 +715,8 @@ void Parameter::intChangedSlot()
     }
   }
   
-  //make sure the edit line matches the parameter.
+  //if we fail to set the value, we need to reset the editline.
+  //connection is blocked, so in any case we need to update the edit line.
   lineEdit->setText(QString::number(static_cast<int>(*parameter)));
   lineEdit->selectAll();
 }

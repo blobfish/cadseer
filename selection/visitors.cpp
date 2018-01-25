@@ -39,7 +39,7 @@ MainSwitchVisitor::MainSwitchVisitor(const uuid& idIn):
 void MainSwitchVisitor::apply(osg::Switch& switchIn)
 {
   std::string userValue;
-  if (switchIn.getUserValue(gu::idAttributeTitle, userValue))
+  if (switchIn.getUserValue<std::string>(gu::idAttributeTitle, userValue))
   {
     boost::uuids::uuid switchId = gu::stringToId(userValue);
     if (switchId == id)

@@ -43,7 +43,7 @@ using namespace lbr;
 CSysDragger::CSysDragger()
 {
   this->setNodeMask(mdv::csys);
-  setUserValue(gu::idAttributeTitle, gu::idToString(gu::createNilId()));
+  setUserValue<std::string>(gu::idAttributeTitle, gu::idToString(gu::createNilId()));
   
   autoTransform = new osg::AutoTransform();
   autoTransform->setAutoScaleToScreen(true);

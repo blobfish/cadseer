@@ -10172,6 +10172,73 @@ namespace prj
       //@}
 
       /**
+       * @name featureId
+       *
+       * @brief Accessor and modifier functions for the %featureId
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::xml_schema::String FeatureIdType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< FeatureIdType, char > FeatureIdTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const FeatureIdType&
+      featureId () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      FeatureIdType&
+      featureId ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      featureId (const FeatureIdType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      featureId (::std::unique_ptr< FeatureIdType > p);
+
+      /**
+       * @brief Return the default value for the element.
+       *
+       * @return A read-only (constant) reference to the element's
+       * default value.
+       */
+      static const FeatureIdType&
+      featureId_default_value ();
+
+      //@}
+
+      /**
        * @name Constructors
        */
       //@{
@@ -10181,7 +10248,8 @@ namespace prj
        * initializers for required elements and attributes.
        */
       CSysDragger (const MatrixType&,
-                   const LinkedType&);
+                   const LinkedType&,
+                   const FeatureIdType&);
 
       /**
        * @brief Create an instance from the ultimate base and
@@ -10192,7 +10260,8 @@ namespace prj
        * instead of making copies.
        */
       CSysDragger (::std::unique_ptr< MatrixType >,
-                   const LinkedType&);
+                   const LinkedType&,
+                   const FeatureIdType&);
 
       /**
        * @brief Create an instance from a DOM element.
@@ -10266,6 +10335,8 @@ namespace prj
       protected:
       ::xsd::cxx::tree::one< MatrixType > matrix_;
       ::xsd::cxx::tree::one< LinkedType > linked_;
+      ::xsd::cxx::tree::one< FeatureIdType > featureId_;
+      static const FeatureIdType featureId_default_value_;
 
       //@endcond
     };

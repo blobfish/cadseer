@@ -576,6 +576,53 @@ namespace prj
       //@}
 
       /**
+       * @name draggerVisible
+       *
+       * @brief Accessor and modifier functions for the %draggerVisible
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::xml_schema::Boolean DraggerVisibleType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< DraggerVisibleType, char > DraggerVisibleTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const DraggerVisibleType&
+      draggerVisible () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      DraggerVisibleType&
+      draggerVisible ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      draggerVisible (const DraggerVisibleType& x);
+
+      //@}
+
+      /**
        * @name Constructors
        */
       //@{
@@ -591,7 +638,8 @@ namespace prj
                              const IncludeSourceType&,
                              const ShapePickType&,
                              const PlanePickType&,
-                             const IncludeSourceLabelType&);
+                             const IncludeSourceLabelType&,
+                             const DraggerVisibleType&);
 
       /**
        * @brief Create an instance from the ultimate base and
@@ -608,7 +656,8 @@ namespace prj
                              ::std::unique_ptr< IncludeSourceType >,
                              ::std::unique_ptr< ShapePickType >,
                              ::std::unique_ptr< PlanePickType >,
-                             ::std::unique_ptr< IncludeSourceLabelType >);
+                             ::std::unique_ptr< IncludeSourceLabelType >,
+                             const DraggerVisibleType&);
 
       /**
        * @brief Create an instance from a DOM element.
@@ -688,6 +737,7 @@ namespace prj
       ::xsd::cxx::tree::one< ShapePickType > shapePick_;
       ::xsd::cxx::tree::one< PlanePickType > planePick_;
       ::xsd::cxx::tree::one< IncludeSourceLabelType > includeSourceLabel_;
+      ::xsd::cxx::tree::one< DraggerVisibleType > draggerVisible_;
 
       //@endcond
     };

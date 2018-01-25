@@ -27,6 +27,8 @@
     
     <xs:element name="shapePick" type="srl:Pick"/>
     <xs:element name="axisPick" type="srl:Pick"/>
+    
+    <xs:element name="draggerVisible" type="xs:boolean"/>
   </xs:all>
 </xs:complexType>
 

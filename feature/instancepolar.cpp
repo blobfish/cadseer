@@ -49,7 +49,7 @@ sShape(new ann::SeerShape()),
 iMapper(new ann::InstanceMapper()),
 csysDragger(new ann::CSysDragger(this, &csys)),
 csys(prm::Names::CSys, osg::Matrixd::identity()),
-count(QObject::tr("X Count"), 3),
+count(QObject::tr("Count"), 3),
 angle(prm::Names::Angle, 20.0),
 inclusiveAngle(QObject::tr("Inclusive Angle"), false),
 includeSource(QObject::tr("Include Source"), true)
@@ -58,7 +58,7 @@ includeSource(QObject::tr("Include Source"), true)
     icon = QIcon(":/resources/images/constructionInstancePolar.svg");
   
   name = QObject::tr("Instance Polar");
-  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
+  mainSwitch->setUserValue<int>(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   count.setConstraint(prm::Constraint::buildNonZeroPositive());
   count.connectValue(boost::bind(&InstancePolar::setModelDirty, this));
@@ -362,7 +362,8 @@ void InstancePolar::serialWrite(const QDir &dIn)
     inclusiveAngleLabel->serialOut(),
     includeSourceLabel->serialOut(),
     shapePick.serialOut(),
-    axisPick.serialOut()
+    axisPick.serialOut(),
+    overlaySwitch->containsNode(csysDragger->dragger.get())
   );
   
   xml_schema::NamespaceInfomap infoMap;
@@ -386,5 +387,7 @@ void InstancePolar::serialRead(const prj::srl::FeatureInstancePolar &sip)
   includeSourceLabel->serialIn(sip.includeSourceLabel());
   shapePick.serialIn(sip.shapePick());
   axisPick.serialIn(sip.axisPick());
+  if (sip.draggerVisible())
+    overlaySwitch->addChild(csysDragger->dragger.get());
 }
 

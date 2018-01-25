@@ -382,6 +382,24 @@ namespace prj
     {
       this->axisPick_.set (std::move (x));
     }
+
+    const FeatureInstancePolar::DraggerVisibleType& FeatureInstancePolar::
+    draggerVisible () const
+    {
+      return this->draggerVisible_.get ();
+    }
+
+    FeatureInstancePolar::DraggerVisibleType& FeatureInstancePolar::
+    draggerVisible ()
+    {
+      return this->draggerVisible_.get ();
+    }
+
+    void FeatureInstancePolar::
+    draggerVisible (const DraggerVisibleType& x)
+    {
+      this->draggerVisible_.set (x);
+    }
   }
 }
 
@@ -408,7 +426,8 @@ namespace prj
                           const InclusiveAngleLabelType& inclusiveAngleLabel,
                           const IncludeSourceLabelType& includeSourceLabel,
                           const ShapePickType& shapePick,
-                          const AxisPickType& axisPick)
+                          const AxisPickType& axisPick,
+                          const DraggerVisibleType& draggerVisible)
     : ::xml_schema::Type (),
       featureBase_ (featureBase, this),
       instanceMapper_ (instanceMapper, this),
@@ -423,7 +442,8 @@ namespace prj
       inclusiveAngleLabel_ (inclusiveAngleLabel, this),
       includeSourceLabel_ (includeSourceLabel, this),
       shapePick_ (shapePick, this),
-      axisPick_ (axisPick, this)
+      axisPick_ (axisPick, this),
+      draggerVisible_ (draggerVisible, this)
     {
     }
 
@@ -441,7 +461,8 @@ namespace prj
                           ::std::unique_ptr< InclusiveAngleLabelType > inclusiveAngleLabel,
                           ::std::unique_ptr< IncludeSourceLabelType > includeSourceLabel,
                           ::std::unique_ptr< ShapePickType > shapePick,
-                          ::std::unique_ptr< AxisPickType > axisPick)
+                          ::std::unique_ptr< AxisPickType > axisPick,
+                          const DraggerVisibleType& draggerVisible)
     : ::xml_schema::Type (),
       featureBase_ (std::move (featureBase), this),
       instanceMapper_ (std::move (instanceMapper), this),
@@ -456,7 +477,8 @@ namespace prj
       inclusiveAngleLabel_ (std::move (inclusiveAngleLabel), this),
       includeSourceLabel_ (std::move (includeSourceLabel), this),
       shapePick_ (std::move (shapePick), this),
-      axisPick_ (std::move (axisPick), this)
+      axisPick_ (std::move (axisPick), this),
+      draggerVisible_ (draggerVisible, this)
     {
     }
 
@@ -478,7 +500,8 @@ namespace prj
       inclusiveAngleLabel_ (x.inclusiveAngleLabel_, f, this),
       includeSourceLabel_ (x.includeSourceLabel_, f, this),
       shapePick_ (x.shapePick_, f, this),
-      axisPick_ (x.axisPick_, f, this)
+      axisPick_ (x.axisPick_, f, this),
+      draggerVisible_ (x.draggerVisible_, f, this)
     {
     }
 
@@ -500,7 +523,8 @@ namespace prj
       inclusiveAngleLabel_ (this),
       includeSourceLabel_ (this),
       shapePick_ (this),
-      axisPick_ (this)
+      axisPick_ (this),
+      draggerVisible_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -715,6 +739,17 @@ namespace prj
           }
         }
 
+        // draggerVisible
+        //
+        if (n.name () == "draggerVisible" && n.namespace_ ().empty ())
+        {
+          if (!draggerVisible_.present ())
+          {
+            this->draggerVisible_.set (DraggerVisibleTraits::create (i, f, this));
+            continue;
+          }
+        }
+
         break;
       }
 
@@ -815,6 +850,13 @@ namespace prj
           "axisPick",
           "");
       }
+
+      if (!draggerVisible_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "draggerVisible",
+          "");
+      }
     }
 
     FeatureInstancePolar* FeatureInstancePolar::
@@ -844,6 +886,7 @@ namespace prj
         this->includeSourceLabel_ = x.includeSourceLabel_;
         this->shapePick_ = x.shapePick_;
         this->axisPick_ = x.axisPick_;
+        this->draggerVisible_ = x.draggerVisible_;
       }
 
       return *this;
@@ -1297,6 +1340,17 @@ namespace prj
             e));
 
         s << i.axisPick ();
+      }
+
+      // draggerVisible
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "draggerVisible",
+            e));
+
+        s << i.draggerVisible ();
       }
     }
 

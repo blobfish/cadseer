@@ -238,6 +238,24 @@ namespace prj
     {
       this->includeSourceLabel_.set (std::move (x));
     }
+
+    const FeatureInstanceMirror::DraggerVisibleType& FeatureInstanceMirror::
+    draggerVisible () const
+    {
+      return this->draggerVisible_.get ();
+    }
+
+    FeatureInstanceMirror::DraggerVisibleType& FeatureInstanceMirror::
+    draggerVisible ()
+    {
+      return this->draggerVisible_.get ();
+    }
+
+    void FeatureInstanceMirror::
+    draggerVisible (const DraggerVisibleType& x)
+    {
+      this->draggerVisible_.set (x);
+    }
   }
 }
 
@@ -258,7 +276,8 @@ namespace prj
                            const IncludeSourceType& includeSource,
                            const ShapePickType& shapePick,
                            const PlanePickType& planePick,
-                           const IncludeSourceLabelType& includeSourceLabel)
+                           const IncludeSourceLabelType& includeSourceLabel,
+                           const DraggerVisibleType& draggerVisible)
     : ::xml_schema::Type (),
       featureBase_ (featureBase, this),
       instanceMapper_ (instanceMapper, this),
@@ -267,7 +286,8 @@ namespace prj
       includeSource_ (includeSource, this),
       shapePick_ (shapePick, this),
       planePick_ (planePick, this),
-      includeSourceLabel_ (includeSourceLabel, this)
+      includeSourceLabel_ (includeSourceLabel, this),
+      draggerVisible_ (draggerVisible, this)
     {
     }
 
@@ -279,7 +299,8 @@ namespace prj
                            ::std::unique_ptr< IncludeSourceType > includeSource,
                            ::std::unique_ptr< ShapePickType > shapePick,
                            ::std::unique_ptr< PlanePickType > planePick,
-                           ::std::unique_ptr< IncludeSourceLabelType > includeSourceLabel)
+                           ::std::unique_ptr< IncludeSourceLabelType > includeSourceLabel,
+                           const DraggerVisibleType& draggerVisible)
     : ::xml_schema::Type (),
       featureBase_ (std::move (featureBase), this),
       instanceMapper_ (std::move (instanceMapper), this),
@@ -288,7 +309,8 @@ namespace prj
       includeSource_ (std::move (includeSource), this),
       shapePick_ (std::move (shapePick), this),
       planePick_ (std::move (planePick), this),
-      includeSourceLabel_ (std::move (includeSourceLabel), this)
+      includeSourceLabel_ (std::move (includeSourceLabel), this),
+      draggerVisible_ (draggerVisible, this)
     {
     }
 
@@ -304,7 +326,8 @@ namespace prj
       includeSource_ (x.includeSource_, f, this),
       shapePick_ (x.shapePick_, f, this),
       planePick_ (x.planePick_, f, this),
-      includeSourceLabel_ (x.includeSourceLabel_, f, this)
+      includeSourceLabel_ (x.includeSourceLabel_, f, this),
+      draggerVisible_ (x.draggerVisible_, f, this)
     {
     }
 
@@ -320,7 +343,8 @@ namespace prj
       includeSource_ (this),
       shapePick_ (this),
       planePick_ (this),
-      includeSourceLabel_ (this)
+      includeSourceLabel_ (this),
+      draggerVisible_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -451,6 +475,17 @@ namespace prj
           }
         }
 
+        // draggerVisible
+        //
+        if (n.name () == "draggerVisible" && n.namespace_ ().empty ())
+        {
+          if (!draggerVisible_.present ())
+          {
+            this->draggerVisible_.set (DraggerVisibleTraits::create (i, f, this));
+            continue;
+          }
+        }
+
         break;
       }
 
@@ -509,6 +544,13 @@ namespace prj
           "includeSourceLabel",
           "");
       }
+
+      if (!draggerVisible_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "draggerVisible",
+          "");
+      }
     }
 
     FeatureInstanceMirror* FeatureInstanceMirror::
@@ -532,6 +574,7 @@ namespace prj
         this->shapePick_ = x.shapePick_;
         this->planePick_ = x.planePick_;
         this->includeSourceLabel_ = x.includeSourceLabel_;
+        this->draggerVisible_ = x.draggerVisible_;
       }
 
       return *this;
@@ -919,6 +962,17 @@ namespace prj
             e));
 
         s << i.includeSourceLabel ();
+      }
+
+      // draggerVisible
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "draggerVisible",
+            e));
+
+        s << i.draggerVisible ();
       }
     }
 

@@ -133,7 +133,7 @@ Box::Box() :
     icon = QIcon(":/resources/images/constructionBox.svg");
   
   name = QObject::tr("Box");
-  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
+  mainSwitch->setUserValue<int>(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   initializeMaps();
   
@@ -438,8 +438,6 @@ void Box::serialRead(const prj::srl::FeatureBox& sBox)
   height.serialIn(sBox.height());
   csys.serialIn(sBox.csys());
   csysDragger->serialIn(sBox.csysDragger());
-  
-  csysDragger->dragger->setUserValue(gu::idAttributeTitle, gu::idToString(getId()));
   
   updateIPGroup();
 }

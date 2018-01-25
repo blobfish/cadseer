@@ -851,24 +851,28 @@ ShapesPage::ShapesPage(const ftr::Base &featureIn, QWidget *parent) :
 
 void ShapesPage::buildGui()
 {
-  QVBoxLayout *layout = new QVBoxLayout();
+  QHBoxLayout *layout = new QHBoxLayout();
   
-  QHBoxLayout *bl = new QHBoxLayout();
-  layout->addLayout(bl);
-  boundary = new QPushButton(tr("Show Boundary"), this);
-  boundary->setCheckable(true);
-  bl->addWidget(boundary);
-  bl->addStretch();
-  connect(boundary, &QPushButton::toggled, this, &ShapesPage::goBoundarySlot);
-  
+  QVBoxLayout *tl = new QVBoxLayout();
+  tl->addWidget(new QLabel(tr("Content"), this));
   textEdit = new QTextEdit(this);
   textEdit->setReadOnly(true);
-  QHBoxLayout *tl = new QHBoxLayout();
   tl->addWidget(textEdit);
   tl->addStretch();
   layout->addLayout(tl);
   
-  layout->addStretch();
+  QVBoxLayout *bl = new QVBoxLayout();
+  bl->addWidget(new QLabel(tr("Boundaries"), this));
+  boundaryTable = new QTableWidget(this);
+  boundaryTable->setColumnCount(1);
+  boundaryTable->setHorizontalHeaderLabels(QStringList{tr("Status")});
+  boundaryTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+  boundaryTable->setSelectionMode(QAbstractItemView::SingleSelection);
+  bl->addWidget(boundaryTable);
+  bl->addStretch();
+  layout->addLayout(bl);
+  
+  connect(boundaryTable, &QTableWidget::itemSelectionChanged, this, &ShapesPage::boundaryItemChangedSlot);
   
   this->setLayout(layout);
 }
@@ -879,50 +883,70 @@ void ShapesPage::go()
   BRepTools_ShapeSet set;
   set.Add(seerShape.getRootOCCTShape());
   set.DumpExtent(stream);
-  
   textEdit->setText(QString::fromStdString(stream.str()));
-}
-
-void ShapesPage::showEvent(QShowEvent *)
-{
-  if (boundary->isChecked())
-    selectBoundary();
-}
-
-void ShapesPage::hideEvent(QHideEvent *event)
-{
-  observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
-  QWidget::hideEvent(event);
-}
-
-void ShapesPage::goBoundarySlot(bool checked)
-{
-  if (!checked)
-  {
-    observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
-    return;
-  }
-  selectBoundary();
-}
-
-void ShapesPage::selectBoundary()
-{
-  occt::WireVector wires = occt::getBoundaryWires(seerShape.getRootOCCTShape());
-  //these are wires but not necessarily for the shape. we have to loop and highlight edges.
-  occt::EdgeVector edges;
-  for (const auto &wire : wires)
-  {
-    TopTools_IndexedMapOfShape map;
-    TopExp::MapShapes(wire, TopAbs_EDGE, map);
-    occt::EdgeVector ev = occt::ShapeVectorCast(map);
-    std::copy(ev.begin(), ev.end(), std::back_inserter(edges));
-  }
   
-  for (const auto &e : edges)
+  auto processWire = [&](const TopoDS_Wire &w)
+  {
+    //these are wires only in the sense of a collection of edges.
+    //the wires don't actually exist inside the seershape.
+    TopTools_IndexedMapOfShape map;
+    TopExp::MapShapes(w, TopAbs_EDGE, map);
+    occt::EdgeVector ev = occt::ShapeVectorCast(map);
+    std::vector<uuid> edges;
+    for (const auto &e : ev)
+    {
+      if (!seerShape.hasShapeIdRecord(e))
+      {
+        std::cerr << "WARNING: skipping edge in ShapesPage::go()" << std::endl;
+        continue;
+      }
+      edges.push_back(seerShape.findShapeIdRecord(e).id);
+    }
+    gu::uniquefy(edges);
+    boundaries.push_back(edges);
+  };
+  
+  occt::WireVector closed, open;
+  std::tie(closed, open) = occt::getBoundaryWires(seerShape.getRootOCCTShape());
+  boundaryTable->setRowCount(open.size() + closed.size());
+  int row = 0;
+  for (const auto &w : closed)
+  {
+    processWire(w);
+    boundaryTable->setItem(row, 0, new QTableWidgetItem(tr("Closed")));
+    row++;
+  }
+  for (const auto &w : open)
+  {
+    processWire(w);
+    boundaryTable->setItem(row, 0, new QTableWidgetItem(tr("Open")));
+    row++;
+  }
+}
+
+void ShapesPage::boundaryItemChangedSlot()
+{
+  //remove previous bounding sphere and clear selection.
+  if (boundingSphere.valid()) //remove current boundingSphere.
+  {
+    assert(boundingSphere->getParents().size() == 1);
+    osg::Group *parent = boundingSphere->getParent(0);
+    parent->removeChild(boundingSphere.get()); //this should make boundingSphere invalid.
+  }
+  observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  
+  QList<QTableWidgetItem*> selected = boundaryTable->selectedItems();
+  if (selected.isEmpty())
+    return;
+  int row = selected.front()->row();
+  assert((row >= 0) && (row < static_cast<int>(boundaries.size())));
+  const std::vector<uuid> &eids = boundaries.at(row);
+  occt::ShapeVector ess;
+  for (const auto &e : eids)
   {
     if (!seerShape.hasShapeIdRecord(e))
     {
-      std::cout << "skipping edge in ShapesPage::selectBoundary()" << std::endl;
+      std::cerr << "WARNING: skipping edge in ShapesPage::boundaryItemChangedSlot()" << std::endl;
       continue;
     }
     slc::Message sMessage;
@@ -933,7 +957,26 @@ void ShapesPage::selectBoundary()
     msg::Message message(msg::Request | msg::Selection | msg::Add);
     message.payload = sMessage;
     observer->out(message);
+    
+    ess.push_back(seerShape.findShapeIdRecord(e).shape);
   }
+  TopoDS_Compound c = occt::ShapeVectorCast(ess);
+  osg::BoundingSphered bs = calculateBoundingSphere(c);
+  bs.radius() = std::max(bs.radius(), minBoundingSphere.radius());
+  if (!bs.valid())
+  {
+    observer->out(msg::buildStatusMessage("Unable to calculate bounding sphere"));
+    return;
+  }
+  boundingSphere = buildBoundingSphere(bs);
+  if (feature.getOverlaySwitch()->addChild(boundingSphere.get()))
+    feature.getOverlaySwitch()->setValue(feature.getOverlaySwitch()->getNumChildren() - 1, true);
+}
+
+void ShapesPage::hideEvent(QHideEvent *event)
+{
+  boundaryTable->clearSelection();
+  QWidget::hideEvent(event);
 }
 
 CheckGeometry::CheckGeometry(const ftr::Base &featureIn, QWidget *parent) :

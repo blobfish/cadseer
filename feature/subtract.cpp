@@ -45,7 +45,7 @@ Subtract::Subtract() : Base(), sShape(new ann::SeerShape()), iMapper(new ann::In
     icon = QIcon(":/resources/images/constructionSubtract.svg");
   
   name = QObject::tr("Subtract");
-  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
+  mainSwitch->setUserValue<int>(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
   annexes.insert(std::make_pair(ann::Type::IntersectionMapper, iMapper.get()));

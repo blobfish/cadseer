@@ -61,6 +61,7 @@ namespace dlg
     void valueHasChangedVector();
     
     void constantHasChangedDouble();
+    void constantHasChangedInt();
   private:
     void buildGui();
     void valueHasChanged();

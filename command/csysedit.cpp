@@ -24,6 +24,7 @@
 
 #include <globalutilities.h>
 #include <library/csysdragger.h>
+#include <tools/occtools.h>
 #include <project/project.h>
 #include <message/message.h>
 #include <message/observer.h>
@@ -112,20 +113,47 @@ void CSysEdit::analyzeSelections()
   {
     if (messages.size() == 1)
     {
-      if (messages.at(0).type == slc::Type::Edge) //add face later
+      ftr::Base *feature = dynamic_cast<ftr::Base*>(project->findFeature(messages.at(0).featureId));
+      assert(feature);
+      if (feature->hasAnnex(ann::Type::SeerShape))
       {
-        ftr::Base *feature = dynamic_cast<ftr::Base*>(project->findFeature(messages.at(0).featureId));
-        assert(feature);
         const ann::SeerShape &seerShape = feature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
-        
-        osg::Vec3d direction = gu::gleanVector(seerShape.getOCCTShape(messages.at(0).shapeId), messages.at(0).pointLocation);
-        if (direction.isNaN())
+        assert(!seerShape.isNull());
+        if (seerShape.isNull())
+        {
+          std::cerr << "seershape is null in CSysEdit::analyzeSelections" << std::endl;
+          //remove selection?
           return;
+        }
         
-        updateToVector(direction);
-        
-        sendDone();
-        return;
+        gp_Pnt point(gu::toOcc(messages.at(0).pointLocation).XYZ());
+        if
+        (
+          (messages.at(0).type == slc::Type::Edge)
+          || (messages.at(0).type == slc::Type::Face)
+        )
+        {
+          gp_Vec vector;
+          bool results;
+          std::tie(vector, results) = occt::gleanVector(seerShape.getOCCTShape(messages.at(0).shapeId), point);
+          if (!results)
+          {
+            observer->outBlocked(msg::buildStatusMessage("Couldn't get vector from shape"));
+            //remove selection?
+            return;
+          }
+          osg::Vec3d direction = gu::toOsg(vector);
+          if (direction.isNaN())
+          {
+            observer->outBlocked(msg::buildStatusMessage("Direction is invalid"));
+            //remove selection?
+            return;
+          }
+          
+          updateToVector(direction);
+          sendDone();
+          return;
+        }
       }
     }
     else if ((messages.size() == 2))

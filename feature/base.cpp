@@ -80,7 +80,7 @@ Base::Base()
   mainSwitch = new osg::Switch();
   mainSwitch->setName("feature");
   mainSwitch->setNodeMask(mdv::object);
-  mainSwitch->setUserValue(gu::idAttributeTitle, gu::idToString(id));
+  mainSwitch->setUserValue<std::string>(gu::idAttributeTitle, gu::idToString(id));
   
   mainTransform = new osg::MatrixTransform();
   mainTransform->setName("mainTransform");
@@ -96,7 +96,7 @@ Base::Base()
   overlaySwitch = new osg::Switch();
   overlaySwitch->setNodeMask(mdv::overlaySwitch);
   overlaySwitch->setName("overlay");
-  overlaySwitch->setUserValue(gu::idAttributeTitle, gu::idToString(id));
+  overlaySwitch->setUserValue<std::string>(gu::idAttributeTitle, gu::idToString(id));
   overlaySwitch->setCullingActive(false);
   
   state.set(ftr::StateOffset::ModelDirty, true);
@@ -354,8 +354,8 @@ void Base::serialIn(const prj::srl::FeatureBase& sBaseIn)
   name = QString::fromStdString(sBaseIn.name());
   id = gu::stringToId(sBaseIn.id());
   //didn't investigate why, but was getting exception when  using sBaseIn.id() in next 2 calls.
-  mainSwitch->setUserValue(gu::idAttributeTitle, gu::idToString(id));
-  overlaySwitch->setUserValue(gu::idAttributeTitle, gu::idToString(id));
+  mainSwitch->setUserValue<std::string>(gu::idAttributeTitle, gu::idToString(id));
+  overlaySwitch->setUserValue<std::string>(gu::idAttributeTitle, gu::idToString(id));
   
   if (sBaseIn.seerShape().present())
     getAnnex<ann::SeerShape>(ann::Type::SeerShape).serialIn(sBaseIn.seerShape().get());

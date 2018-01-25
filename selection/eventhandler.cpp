@@ -440,6 +440,7 @@ void EventHandler::requestPreselectionAdditionDispatched(const msg::Message &mes
     return;
   
   //setPrehighlight handles points
+  clearPrehighlight();
   setPrehighlight(container);
 }
 

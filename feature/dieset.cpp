@@ -41,7 +41,7 @@ DieSet::DieSet() : Base(), sShape(new ann::SeerShape())
     icon = QIcon(":/resources/images/constructionDieSet.svg");
   
   name = QObject::tr("DieSet");
-  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
+  mainSwitch->setUserValue<int>(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   length = std::shared_ptr<prm::Parameter>(new prm::Parameter(prm::Names::Length, 1.0));
   length->setConstraint(prm::Constraint::buildNonZeroPositive());

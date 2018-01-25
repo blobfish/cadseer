@@ -286,6 +286,64 @@ namespace prj
       //@}
 
       /**
+       * @name plabel
+       *
+       * @brief Accessor and modifier functions for the %plabel
+       * required element.
+       */
+      //@{
+
+      /**
+       * @brief Element type.
+       */
+      typedef ::prj::srl::PLabel PlabelType;
+
+      /**
+       * @brief Element traits type.
+       */
+      typedef ::xsd::cxx::tree::traits< PlabelType, char > PlabelTraits;
+
+      /**
+       * @brief Return a read-only (constant) reference to the element.
+       *
+       * @return A constant reference to the element.
+       */
+      const PlabelType&
+      plabel () const;
+
+      /**
+       * @brief Return a read-write reference to the element.
+       *
+       * @return A reference to the element.
+       */
+      PlabelType&
+      plabel ();
+
+      /**
+       * @brief Set the element value.
+       *
+       * @param x A new value to set.
+       *
+       * This function makes a copy of its argument and sets it as
+       * the new value of the element.
+       */
+      void
+      plabel (const PlabelType& x);
+
+      /**
+       * @brief Set the element value without copying.
+       *
+       * @param p A new value to use.
+       *
+       * This function will try to use the passed value directly
+       * instead of making a copy.
+       */
+      void
+      plabel (::std::unique_ptr< PlabelType > p);
+
+      //@}
+
+      /**
        * @name Constructors
        */
       //@{
@@ -296,7 +354,8 @@ namespace prj
        */
       AccruePick (const PicksType&,
                   const AccrueTypeType&,
-                  const ParameterType&);
+                  const ParameterType&,
+                  const PlabelType&);
 
       /**
        * @brief Create an instance from the ultimate base and
@@ -308,7 +367,8 @@ namespace prj
        */
       AccruePick (::std::unique_ptr< PicksType >,
                   const AccrueTypeType&,
-                  ::std::unique_ptr< ParameterType >);
+                  ::std::unique_ptr< ParameterType >,
+                  ::std::unique_ptr< PlabelType >);
 
       /**
        * @brief Create an instance from a DOM element.
@@ -383,6 +443,7 @@ namespace prj
       ::xsd::cxx::tree::one< PicksType > picks_;
       ::xsd::cxx::tree::one< AccrueTypeType > accrueType_;
       ::xsd::cxx::tree::one< ParameterType > parameter_;
+      ::xsd::cxx::tree::one< PlabelType > plabel_;
 
       //@endcond
     };

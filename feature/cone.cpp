@@ -85,7 +85,7 @@ Cone::Cone() : Base(),
     icon = QIcon(":/resources/images/constructionCone.svg");
   
   name = QObject::tr("Cone");
-  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
+  mainSwitch->setUserValue<int>(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   initializeMaps();
   
@@ -349,8 +349,6 @@ void Cone::serialRead(const prj::srl::FeatureCone& sCone)
   height.serialIn(sCone.height());
   csys.serialIn(sCone.csys());
   csysDragger->serialIn(sCone.csysDragger());
-  
-  csysDragger->dragger->setUserValue(gu::idAttributeTitle, gu::idToString(getId()));
   
   updateIPGroup();
 }

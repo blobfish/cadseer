@@ -298,6 +298,7 @@
   <xs:all>
     <xs:element name="matrix" type="srl:Matrixd"/>
     <xs:element name="linked" type="xs:boolean"/>
+    <xs:element name="featureId" type="xs:string" default="00000000-0000-0000-0000-000000000000"/>
   </xs:all>
 </xs:complexType>
 

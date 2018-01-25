@@ -41,7 +41,7 @@ Intersect::Intersect() : Base(), sShape(new ann::SeerShape()), iMapper(new ann::
     icon = QIcon(":/resources/images/constructionIntersect.svg");
   
   name = QObject::tr("Intersect");
-  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
+  mainSwitch->setUserValue<int>(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
   annexes.insert(std::make_pair(ann::Type::IntersectionMapper, iMapper.get()));

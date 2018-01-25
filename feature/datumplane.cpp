@@ -777,7 +777,7 @@ DatumPlane::DatumPlane() : Base()
     icon = QIcon(":/resources/images/constructionDatumPlane.svg");
   
   name = QObject::tr("Datum Plane");
-  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
+  mainSwitch->setUserValue<int>(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   radius = std::make_unique<prm::Parameter>(QObject::tr("Radius"), 1.0);
   radius->connectValue(boost::bind(&DatumPlane::setVisualDirty, this));

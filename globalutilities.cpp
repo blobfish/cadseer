@@ -43,7 +43,7 @@ boost::uuids::uuid gu::getId(const osg::Geometry *geometry)
 boost::uuids::uuid gu::getId(const osg::Node *node)
 {
   std::string stringId;
-  if (!node->getUserValue(gu::idAttributeTitle, stringId))
+  if (!node->getUserValue<std::string>(gu::idAttributeTitle, stringId))
       assert(0);
   return gu::stringToId(stringId);
 }
@@ -157,42 +157,6 @@ osg::Vec3d gu::getZVector(const osg::Matrixd& m)
   out.x() = m(2,0);
   out.y() = m(2,1);
   out.z() = m(2,2);
-  
-  return out;
-}
-
-osg::Vec3d gu::gleanVector(const TopoDS_Shape& shapeIn, const osg::Vec3d &pickPoint)
-{
-  osg::Vec3d out;
-  //nan signals couldn't find a vector.
-  out.x() = std::numeric_limits<double>::quiet_NaN();
-  out.y() = std::numeric_limits<double>::quiet_NaN();
-  out.z() = std::numeric_limits<double>::quiet_NaN();
-  
-  if (shapeIn.ShapeType() == TopAbs_EDGE)
-  {
-    BRepAdaptor_Curve cAdaptor(TopoDS::Edge(shapeIn));
-    if (cAdaptor.GetType() == GeomAbs_Line)
-    {
-      osg::Vec3d firstPoint = toOsg(cAdaptor.Value(cAdaptor.FirstParameter()));
-      osg::Vec3d lastPoint = toOsg(cAdaptor.Value(cAdaptor.LastParameter()));
-      double firstDistance = (pickPoint - firstPoint).length2();
-      double secondDistance = (pickPoint - lastPoint).length2();
-      if (firstDistance < secondDistance)
-      {
-	out = firstPoint - lastPoint;
-	out.normalize();
-      }
-      else
-      {
-	out = lastPoint - firstPoint;
-	out.normalize();
-      }
-    }
-  }
-  else if (shapeIn.ShapeType() == TopAbs_FACE)
-  {
-  }
   
   return out;
 }

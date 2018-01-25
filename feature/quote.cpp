@@ -48,7 +48,7 @@ oFile("Output File",  path(static_cast<app::Application*>(qApp)->getProject()->g
     icon = QIcon(":/resources/images/constructionQuote.svg");
   
   name = QObject::tr("Quote");
-  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
+  mainSwitch->setUserValue<int>(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   quoteData.quoteNumber = 0;
   quoteData.customerName = "aCustomer";

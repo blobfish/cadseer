@@ -84,7 +84,7 @@ Cylinder::Cylinder() : Base(),
     icon = QIcon(":/resources/images/constructionCylinder.svg");
   
   name = QObject::tr("Cylinder");
-  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
+  mainSwitch->setUserValue<int>(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   initializeMaps();
   
@@ -322,8 +322,6 @@ void Cylinder::serialRead(const prj::srl::FeatureCylinder& sCylinderIn)
   height.serialIn(sCylinderIn.height());
   csys.serialIn(sCylinderIn.csys());
   csysDragger->serialIn(sCylinderIn.csysDragger());
-  
-  csysDragger->dragger->setUserValue(gu::idAttributeTitle, gu::idToString(getId()));
   
   updateIPGroup();
 }

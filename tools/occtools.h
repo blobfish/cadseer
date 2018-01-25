@@ -144,17 +144,26 @@ namespace occt
   /*! @brief Get the boundary wires of a shape.
    * 
    * @param shapeIn shape to be searched.
-   * @return A vector wires. can be empty.
+   * @return A pair of wire vectors. first are the closed bounds, second is the open bounds.
    */
-  WireVector getBoundaryWires(const TopoDS_Shape &shapeIn);
+  std::pair<WireVector, WireVector> getBoundaryWires(const TopoDS_Shape &shapeIn);
   
   /*! @brief Get normal of a face
    * 
    * @param fIn face for normal calculation
    * @param u parameter in the u direction
    * @param v parameter in the v direction
+   * @return A vector normal to face
    */
   gp_Vec getNormal(const TopoDS_Face &fIn, double u, double v);
+
+  /*! @brief Derive a direction vector from shape.
+   * 
+   * @param shapeIn shape to infer
+   * @param vec where on shape to infer direction 
+   * @return A pair with unit vector and a boolean signaling success.
+   */  
+  std::pair<gp_Vec, bool> gleanVector(const TopoDS_Shape &shapeIn, const gp_Pnt &pIn);
   
   /*! @brief Derive an axis from input
    * 
@@ -163,6 +172,39 @@ namespace occt
    * @note origin of axis will be center point of bounding box of shape projected onto axis.
    */
   std::pair<gp_Ax1, bool> gleanAxis(const TopoDS_Shape sIn);
+  
+  /*! @brief gets and edge parameter closest to a point.
+   * 
+   * @param eIn edge
+   * @return pair with value and boolean signaling success.
+   * @note takes the first solution of extrema
+   */
+  std::pair<double, bool> pointToParameter(const TopoDS_Edge &eIn, const gp_Pnt &pIn);
+  
+  /*! @brief gets the face parameter closest to a point.
+   * 
+   * @param fIn face
+   * @return tuple consisting of parameters and boolean signal.
+   * @note takes the first solution of extrema
+   */
+  std::tuple<double, double, bool> pointToParameter(const TopoDS_Face &fIn, const gp_Pnt &pIn);
+  
+  /*! @brief gets the point at the given edge parameter
+   * 
+   * @param eIn edge
+   * @param u parameter
+   * @return point
+   */
+  gp_Pnt parameterToPoint(const TopoDS_Edge &eIn, double u);
+  
+  /*! @brief gets the point at the given face parameters
+   * 
+   * @param fIn edge
+   * @param u parameter
+   * @param v parameter
+   * @return point
+   */
+  gp_Pnt parameterToPoint(const TopoDS_Face &fIn, double u, double v);
   
   /*! @brief Copy shape at distance.
    * 

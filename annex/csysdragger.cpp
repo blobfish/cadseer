@@ -157,7 +157,7 @@ parameter(pIn)
   dragger->setHandleEvents(false);
   dragger->setupDefaultGeometry();
   dragger->linkToMatrix(fIn->getMainTransform());
-  dragger->setUserValue(gu::idAttributeTitle, gu::idToString(fIn->getId()));
+  dragger->setUserValue<std::string>(gu::idAttributeTitle, gu::idToString(fIn->getId()));
   
   dragger->addDraggerCallback(callBack.get());
 }
@@ -202,7 +202,11 @@ prj::srl::CSysDragger CSysDragger::serialOut()
     m(2,0), m(2,1), m(2,2), m(2,3),
     m(3,0), m(3,1), m(3,2), m(3,3)
   );
-  return prj::srl::CSysDragger(mOut , dragger->isLinked());
+  std::string featureId;
+  bool results = dragger->getUserValue<std::string>(gu::idAttributeTitle, featureId);
+  assert(results);
+  
+  return prj::srl::CSysDragger(mOut, dragger->isLinked(), featureId);
 }
 
 void CSysDragger::serialIn(const prj::srl::CSysDragger &si)
@@ -221,4 +225,6 @@ void CSysDragger::serialIn(const prj::srl::CSysDragger &si)
     dragger->setLink();
   else
     dragger->setUnlink();
+  
+  dragger->setUserValue<std::string>(gu::idAttributeTitle, si.featureId());
 }

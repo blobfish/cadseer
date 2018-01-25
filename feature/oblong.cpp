@@ -126,7 +126,7 @@ Oblong::Oblong() :
     icon = QIcon(":/resources/images/constructionOblong.svg");
   
   name = QObject::tr("Oblong");
-  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
+  mainSwitch->setUserValue<int>(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   initializeMaps();
   
@@ -417,8 +417,6 @@ void Oblong::serialRead(const prj::srl::FeatureOblong &sOblong)
   height.serialIn(sOblong.height());
   csys.serialIn(sOblong.csys());
   csysDragger->serialIn(sOblong.csysDragger());
-  
-  csysDragger->dragger->setUserValue(gu::idAttributeTitle, gu::idToString(getId()));
   
   updateIPGroup();
 }

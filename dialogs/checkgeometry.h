@@ -137,14 +137,13 @@ namespace dlg
     void go();
   private:
     QTextEdit *textEdit;
-    QPushButton *boundary;
+    QTableWidget *boundaryTable;
     void buildGui();
-    void selectBoundary();
+    std::vector<std::vector<boost::uuids::uuid>> boundaries;
   protected:
-    virtual void showEvent(QShowEvent *) override;
     virtual void hideEvent(QHideEvent *) override;
   private Q_SLOTS:
-    void goBoundarySlot(bool checked);
+    void boundaryItemChangedSlot();
   };
   
   /*! @brief dialog for displaying corrupt occt geometry.

@@ -119,6 +119,30 @@ namespace prj
       this->parameter_.set (std::move (x));
     }
 
+    const AccruePick::PlabelType& AccruePick::
+    plabel () const
+    {
+      return this->plabel_.get ();
+    }
+
+    AccruePick::PlabelType& AccruePick::
+    plabel ()
+    {
+      return this->plabel_.get ();
+    }
+
+    void AccruePick::
+    plabel (const PlabelType& x)
+    {
+      this->plabel_.set (x);
+    }
+
+    void AccruePick::
+    plabel (::std::unique_ptr< PlabelType > x)
+    {
+      this->plabel_.set (std::move (x));
+    }
+
 
     // AccruePicks
     // 
@@ -231,22 +255,26 @@ namespace prj
     AccruePick::
     AccruePick (const PicksType& picks,
                 const AccrueTypeType& accrueType,
-                const ParameterType& parameter)
+                const ParameterType& parameter,
+                const PlabelType& plabel)
     : ::xml_schema::Type (),
       picks_ (picks, this),
       accrueType_ (accrueType, this),
-      parameter_ (parameter, this)
+      parameter_ (parameter, this),
+      plabel_ (plabel, this)
     {
     }
 
     AccruePick::
     AccruePick (::std::unique_ptr< PicksType > picks,
                 const AccrueTypeType& accrueType,
-                ::std::unique_ptr< ParameterType > parameter)
+                ::std::unique_ptr< ParameterType > parameter,
+                ::std::unique_ptr< PlabelType > plabel)
     : ::xml_schema::Type (),
       picks_ (std::move (picks), this),
       accrueType_ (accrueType, this),
-      parameter_ (std::move (parameter), this)
+      parameter_ (std::move (parameter), this),
+      plabel_ (std::move (plabel), this)
     {
     }
 
@@ -257,7 +285,8 @@ namespace prj
     : ::xml_schema::Type (x, f, c),
       picks_ (x.picks_, f, this),
       accrueType_ (x.accrueType_, f, this),
-      parameter_ (x.parameter_, f, this)
+      parameter_ (x.parameter_, f, this),
+      plabel_ (x.plabel_, f, this)
     {
     }
 
@@ -268,7 +297,8 @@ namespace prj
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
       picks_ (this),
       accrueType_ (this),
-      parameter_ (this)
+      parameter_ (this),
+      plabel_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -329,6 +359,20 @@ namespace prj
           }
         }
 
+        // plabel
+        //
+        if (n.name () == "plabel" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< PlabelType > r (
+            PlabelTraits::create (i, f, this));
+
+          if (!plabel_.present ())
+          {
+            this->plabel_.set (::std::move (r));
+            continue;
+          }
+        }
+
         break;
       }
 
@@ -352,6 +396,13 @@ namespace prj
           "parameter",
           "");
       }
+
+      if (!plabel_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "plabel",
+          "");
+      }
     }
 
     AccruePick* AccruePick::
@@ -370,6 +421,7 @@ namespace prj
         this->picks_ = x.picks_;
         this->accrueType_ = x.accrueType_;
         this->parameter_ = x.parameter_;
+        this->plabel_ = x.plabel_;
       }
 
       return *this;
@@ -939,6 +991,17 @@ namespace prj
             e));
 
         s << i.parameter ();
+      }
+
+      // plabel
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "plabel",
+            e));
+
+        s << i.plabel ();
       }
     }
 

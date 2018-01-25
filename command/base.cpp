@@ -52,6 +52,7 @@ Base::~Base()
 
 void Base::sendDone()
 {
-  observer->out(msg::Message(msg::Request | msg::Command | msg::Done));
+  msg::Message mOut(msg::Mask(msg::Request | msg::Command | msg::Done));
+  QMetaObject::invokeMethod(qApp, "messageSlot", Qt::QueuedConnection, Q_ARG(msg::Message, mOut));
 }
 

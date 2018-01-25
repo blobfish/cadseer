@@ -188,7 +188,7 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
             if (currentNode && (currentNode->getNodeMask() & mdv::gestureCommand))
             {
                 std::string msgMaskString;
-                if (currentNode->getUserValue(attributeMask, msgMaskString))
+                if (currentNode->getUserValue<std::string>(attributeMask, msgMaskString))
                 {
                     if (spaceballButton != -1)
                     {
@@ -250,7 +250,7 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
         assert(temp.valid());
         
         std::string statusString;
-        if (tempNode->getUserValue(attributeStatus, statusString))
+        if (tempNode->getUserValue<std::string>(attributeStatus, statusString))
           observer->out(msg::buildStatusMessage(statusString));
         
         if (tempDrawable->getName() != "Line")
@@ -418,7 +418,7 @@ void GestureHandler::constructMenu()
     osg::MatrixTransform *out;
     out = gsn::buildMenuNode(resource, iconRadius);
     out->setMatrix(osg::Matrixd::identity());
-    out->setUserValue(attributeStatus, statusText);
+    out->setUserValue<std::string>(attributeStatus, statusText);
     parent->insertChild(parent->getNumChildren() - 2, out);
     
     return out;
@@ -439,8 +439,8 @@ void GestureHandler::constructMenu()
     osg::MatrixTransform *out;
     out = gsn::buildCommandNode(resource, iconRadius);
     out->setMatrix(osg::Matrixd::identity());
-    out->setUserValue(attributeStatus, statusText);
-    out->setUserValue(attributeMask, mask);
+    out->setUserValue<std::string>(attributeStatus, statusText);
+    out->setUserValue<std::string>(attributeMask, mask);
     parent->insertChild(parent->getNumChildren() - 2, out);
     
     return out;

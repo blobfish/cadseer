@@ -59,7 +59,7 @@ Blend::Blend() : Base(), sShape(new ann::SeerShape())
     icon = QIcon(":/resources/images/constructionBlend.svg");
   
   name = QObject::tr("Blend");
-  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
+  mainSwitch->setUserValue<int>(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
 }

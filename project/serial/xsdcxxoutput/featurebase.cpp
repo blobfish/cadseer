@@ -2776,6 +2776,36 @@ namespace prj
     {
       this->linked_.set (x);
     }
+
+    const CSysDragger::FeatureIdType& CSysDragger::
+    featureId () const
+    {
+      return this->featureId_.get ();
+    }
+
+    CSysDragger::FeatureIdType& CSysDragger::
+    featureId ()
+    {
+      return this->featureId_.get ();
+    }
+
+    void CSysDragger::
+    featureId (const FeatureIdType& x)
+    {
+      this->featureId_.set (x);
+    }
+
+    void CSysDragger::
+    featureId (::std::unique_ptr< FeatureIdType > x)
+    {
+      this->featureId_.set (std::move (x));
+    }
+
+    const CSysDragger::FeatureIdType& CSysDragger::
+    featureId_default_value ()
+    {
+      return featureId_default_value_;
+    }
   }
 }
 
@@ -7602,21 +7632,28 @@ namespace prj
     // CSysDragger
     //
 
+    const CSysDragger::FeatureIdType CSysDragger::featureId_default_value_ (
+      "00000000-0000-0000-0000-000000000000");
+
     CSysDragger::
     CSysDragger (const MatrixType& matrix,
-                 const LinkedType& linked)
+                 const LinkedType& linked,
+                 const FeatureIdType& featureId)
     : ::xml_schema::Type (),
       matrix_ (matrix, this),
-      linked_ (linked, this)
+      linked_ (linked, this),
+      featureId_ (featureId, this)
     {
     }
 
     CSysDragger::
     CSysDragger (::std::unique_ptr< MatrixType > matrix,
-                 const LinkedType& linked)
+                 const LinkedType& linked,
+                 const FeatureIdType& featureId)
     : ::xml_schema::Type (),
       matrix_ (std::move (matrix), this),
-      linked_ (linked, this)
+      linked_ (linked, this),
+      featureId_ (featureId, this)
     {
     }
 
@@ -7626,7 +7663,8 @@ namespace prj
                  ::xml_schema::Container* c)
     : ::xml_schema::Type (x, f, c),
       matrix_ (x.matrix_, f, this),
-      linked_ (x.linked_, f, this)
+      linked_ (x.linked_, f, this),
+      featureId_ (x.featureId_, f, this)
     {
     }
 
@@ -7636,7 +7674,8 @@ namespace prj
                  ::xml_schema::Container* c)
     : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
       matrix_ (this),
-      linked_ (this)
+      linked_ (this),
+      featureId_ (this)
     {
       if ((f & ::xml_schema::Flags::base) == 0)
       {
@@ -7680,6 +7719,20 @@ namespace prj
           }
         }
 
+        // featureId
+        //
+        if (n.name () == "featureId" && n.namespace_ ().empty ())
+        {
+          ::std::unique_ptr< FeatureIdType > r (
+            FeatureIdTraits::create (i, f, this));
+
+          if (!featureId_.present ())
+          {
+            this->featureId_.set (::std::move (r));
+            continue;
+          }
+        }
+
         break;
       }
 
@@ -7694,6 +7747,13 @@ namespace prj
       {
         throw ::xsd::cxx::tree::expected_element< char > (
           "linked",
+          "");
+      }
+
+      if (!featureId_.present ())
+      {
+        throw ::xsd::cxx::tree::expected_element< char > (
+          "featureId",
           "");
       }
     }
@@ -7713,6 +7773,7 @@ namespace prj
         static_cast< ::xml_schema::Type& > (*this) = x;
         this->matrix_ = x.matrix_;
         this->linked_ = x.linked_;
+        this->featureId_ = x.featureId_;
       }
 
       return *this;
@@ -9185,6 +9246,17 @@ namespace prj
             e));
 
         s << i.linked ();
+      }
+
+      // featureId
+      //
+      {
+        ::xercesc::DOMElement& s (
+          ::xsd::cxx::xml::dom::create_element (
+            "featureId",
+            e));
+
+        s << i.featureId ();
       }
     }
   }

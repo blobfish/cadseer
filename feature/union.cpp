@@ -47,7 +47,7 @@ Union::Union() : Base(), sShape(new ann::SeerShape()), iMapper(new ann::Intersec
     icon = QIcon(":/resources/images/constructionUnion.svg");
   
   name = QObject::tr("Union");
-  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
+  mainSwitch->setUserValue<int>(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
   annexes.insert(std::make_pair(ann::Type::IntersectionMapper, iMapper.get()));

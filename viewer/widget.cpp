@@ -738,6 +738,10 @@ void Widget::showThreeDDispatched(const msg::Message &msgIn)
   msg::Message mOut(msg::Response | msg::View | msg::Show | msg::ThreeD);
   mOut.payload = msgIn.payload;
   observer->outBlocked(mOut);
+  
+  //see message in toggled for why we do this after the message.
+  HiddenLineVisitor hlv(prf::manager().rootPtr->visual().display().showHiddenLines());
+  v.out->accept(hlv);
 }
 
 void Widget::hideThreeDDispatched(const msg::Message &msgIn)
@@ -788,6 +792,13 @@ void Widget::threeDToggleDispatched(const msg::Message &msgIn)
   msg::Message mOut(maskOut);
   mOut.payload = msgIn.payload;
   observer->outBlocked(mOut);
+  
+  //we don't generate visuals until needed. so hidden and inactive features
+  //have none or bogus osg data. This is the reason for the response message above.
+  //It triggers the project to update the feature's visual data. Now we can run
+  //the hidden line visitor over the generated osg data.
+  HiddenLineVisitor hlv(prf::manager().rootPtr->visual().display().showHiddenLines());
+  v.out->accept(hlv);
 }
 
 void Widget::projectOpenedDispatched(const msg::Message &)
@@ -840,7 +851,7 @@ public:
   virtual void apply(osg::Switch &switchIn) override
   {
     std::string userValue;
-    if (switchIn.getUserValue(gu::idAttributeTitle, userValue))
+    if (switchIn.getUserValue<std::string>(gu::idAttributeTitle, userValue))
     {
       for (const auto &s : states.array())
       {
@@ -908,7 +919,7 @@ public:
   virtual void apply(osg::Switch &switchIn) override
   {
     std::string userValue;
-    if (switchIn.getUserValue(gu::idAttributeTitle, userValue))
+    if (switchIn.getUserValue<std::string>(gu::idAttributeTitle, userValue))
       states.array().push_back(prj::srl::State(userValue, switchIn.getNewChildDefaultValue()));
     
     //only interested in top level children, so don't need to call traverse here.

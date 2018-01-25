@@ -88,10 +88,6 @@ namespace cmd
     typedef std::map<ftr::Type, EditFunction> EditFunctionMap;
     EditFunctionMap editFunctionMap;
     void setupEditFunctionMap();
-    BasePtr editBlend(ftr::Base *);
-    BasePtr editStrip(ftr::Base *);
-    BasePtr editQuote(ftr::Base *);
-    
   };
   
   Manager& manager();

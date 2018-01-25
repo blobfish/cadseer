@@ -41,7 +41,7 @@ Extract::Extract() : Base(), sShape(new ann::SeerShape())
     icon = QIcon(":/resources/images/constructionExtract.svg");
   
   name = QObject::tr("Extract");
-  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
+  mainSwitch->setUserValue<int>(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
 }
@@ -311,7 +311,8 @@ void Extract::serialWrite(const QDir &dIn)
       (
         ::ftr::serialOut(ap.picks),
         accrueMap.left.at(ap.accrueType),
-        ap.parameter->serialOut()
+        ap.parameter->serialOut(),
+        ap.label->serialOut()
       )
     );
   }
@@ -340,9 +341,15 @@ void Extract::serialRead(const prj::srl::FeatureExtract &sExtractIn)
     c.picks = ::ftr::serialIn(ap.picks());
     c.accrueType = accrueMap.right.at(ap.accrueType());
     if (c.accrueType == AccrueType::Tangent)
+    {
       c.parameter = buildAngleParameter(0.0);
+      c.label = new lbr::PLabel(c.parameter.get());
+    }
     if (c.parameter)
       c.parameter->serialIn(ap.parameter());
+    if (c.label)
+      c.label->serialIn(ap.plabel());
+    
     aps.push_back(c);
   }
   this->sync(aps);

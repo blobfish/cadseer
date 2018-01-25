@@ -68,7 +68,6 @@ protected:
     osg::Camera* createBackgroundCamera();
     osg::Camera* createGestureCamera();
     osg::Camera* mainCamera;
-    bool isHiddenLines = false; //!< read from prefs.
     osg::ref_ptr<osg::Group> root;
     osg::ref_ptr<osg::Switch> infoSwitch;
     osg::ref_ptr<slc::EventHandler> selectionHandler;

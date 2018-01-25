@@ -261,7 +261,7 @@ public:
   virtual void apply(osg::Switch &switchIn) override
   {
     std::string userValue;
-    if (switchIn.getUserValue(gu::idAttributeTitle, userValue))
+    if (switchIn.getUserValue<std::string>(gu::idAttributeTitle, userValue))
     {
       for (const auto &s : states.array())
       {
@@ -310,7 +310,7 @@ public:
   virtual void apply(osg::Switch &switchIn) override
   {
     std::string userValue;
-    if (switchIn.getUserValue(gu::idAttributeTitle, userValue))
+    if (switchIn.getUserValue<std::string>(gu::idAttributeTitle, userValue))
       states.array().push_back(prj::srl::State(userValue, switchIn.getNewChildDefaultValue()));
     
     //only interested in top level children, so don't need to call traverse here.

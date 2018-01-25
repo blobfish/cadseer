@@ -50,7 +50,7 @@ sShape(new ann::SeerShape())
     icon = QIcon(":/resources/images/constructionNest.svg");
   
   name = QObject::tr("Nest");
-  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
+  mainSwitch->setUserValue<int>(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   pitch->setConstraint(prm::Constraint::buildNonZeroPositive());
   parameterVector.push_back(pitch.get());

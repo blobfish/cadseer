@@ -48,7 +48,7 @@ sShape(new ann::SeerShape())
     icon = QIcon(":/resources/images/constructionInert.svg");
   
   name = QObject::tr("Inert");
-  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
+  mainSwitch->setUserValue<int>(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   sShape->setOCCTShape(shapeIn);
   sShape->ensureNoNils();
@@ -167,6 +167,4 @@ void Inert::serialRead(const prj::srl::FeatureInert& inert)
   Base::serialIn(inert.featureBase());
   csys.serialIn(inert.csys());
   csysDragger->serialIn(inert.csysDragger());
-  
-  csysDragger->dragger->setUserValue(gu::idAttributeTitle, gu::idToString(getId()));
 }

@@ -51,7 +51,7 @@ includeSource(QObject::tr("Include Source"), true)
     icon = QIcon(":/resources/images/constructionInstanceMirror.svg");
   
   name = QObject::tr("Instance Mirror");
-  mainSwitch->setUserValue(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
+  mainSwitch->setUserValue<int>(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   csys.connectValue(boost::bind(&InstanceMirror::setModelDirty, this));
   includeSource.connectValue(boost::bind(&InstanceMirror::setModelDirty, this));
@@ -289,7 +289,8 @@ void InstanceMirror::serialWrite(const QDir &dIn)
     includeSource.serialOut(),
     shapePick.serialOut(),
     planePick.serialOut(),
-    includeSourceLabel->serialOut()
+    includeSourceLabel->serialOut(),
+    overlaySwitch->containsNode(csysDragger->dragger.get())
   );
   
   xml_schema::NamespaceInfomap infoMap;
@@ -307,4 +308,6 @@ void InstanceMirror::serialRead(const prj::srl::FeatureInstanceMirror &sim)
   shapePick.serialIn(sim.shapePick());
   planePick.serialIn(sim.planePick());
   includeSourceLabel->serialIn(sim.includeSourceLabel());
+  if (sim.draggerVisible())
+    overlaySwitch->addChild(csysDragger->dragger.get());
 }

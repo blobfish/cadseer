@@ -36,6 +36,7 @@
 #include <BRepAdaptor_Surface.hxx>
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepExtrema_ExtPF.hxx>
+#include <BRepExtrema_ExtPC.hxx>
 #include <BRepBuilderAPI_MakeVertex.hxx>
 #include <TopTools_MapIteratorOfMapOfShape.hxx>
 #include <TopoDS_Iterator.hxx>
@@ -440,19 +441,26 @@ TopoDS_Compound occt::getLastUniqueCompound(const TopoDS_Compound& compoundIn)
   return TopoDS_Compound();
 }
 
-WireVector occt::getBoundaryWires(const TopoDS_Shape &shapeIn)
+std::pair<WireVector, WireVector> occt::getBoundaryWires(const TopoDS_Shape &shapeIn)
 {
-  WireVector out;
+  WireVector outClosed;
+  WireVector outOpen;
   
   ShapeAnalysis_FreeBoundsProperties freeCheck(shapeIn);
   freeCheck.Perform();
+  
   for (int i = 1; i <= freeCheck.NbClosedFreeBounds(); ++i)
   {
-    Handle_ShapeAnalysis_FreeBoundData boundData = freeCheck.ClosedFreeBound(1);
-    out.push_back(boundData->FreeBound());
+    Handle_ShapeAnalysis_FreeBoundData boundDataClosed = freeCheck.ClosedFreeBound(i);
+    outClosed.push_back(boundDataClosed->FreeBound());
+  }
+  for (int i = 1; i <= freeCheck.NbOpenFreeBounds(); ++i)
+  {
+    Handle_ShapeAnalysis_FreeBoundData boundDataOpen = freeCheck.OpenFreeBound(i);
+    outOpen.push_back(boundDataOpen->FreeBound());
   }
 
-  return out;
+  return std::make_pair(outClosed, outOpen);
 }
 
 gp_Vec occt::getNormal(const TopoDS_Face& fIn, double u, double v)
@@ -468,6 +476,42 @@ gp_Vec occt::getNormal(const TopoDS_Face& fIn, double u, double v)
     n = -n;
   return n;
 };
+
+std::pair<gp_Vec, bool> occt::gleanVector(const TopoDS_Shape &shapeIn, const gp_Pnt &pIn)
+{
+  if (shapeIn.ShapeType() == TopAbs_EDGE)
+  {
+    BRepAdaptor_Curve cAdaptor(TopoDS::Edge(shapeIn));
+    if (cAdaptor.GetType() == GeomAbs_Line)
+    {
+      gp_Pnt firstPoint = cAdaptor.Value(cAdaptor.FirstParameter()).Transformed(cAdaptor.Trsf());
+      gp_Pnt lastPoint = cAdaptor.Value(cAdaptor.LastParameter()).Transformed(cAdaptor.Trsf());
+      double firstDistance = pIn.SquareDistance(firstPoint);
+      double secondDistance = pIn.SquareDistance(lastPoint);
+      if (firstDistance > secondDistance)
+        return std::make_pair(gp_Vec(firstPoint, lastPoint).Normalized(), true);
+      else
+        return std::make_pair(gp_Vec(lastPoint, firstPoint).Normalized(), true);
+    }
+  }
+  else if (shapeIn.ShapeType() == TopAbs_FACE)
+  {
+    const TopoDS_Face &face = TopoDS::Face(shapeIn);
+    BRepAdaptor_Surface sa(face);
+    if (sa.GetType() == GeomAbs_Plane)
+    {
+      double u,v;
+      bool results;
+      std::tie(u, v, results) = pointToParameter(face, pIn);
+      if (!results)
+        return std::make_pair(gp_Vec(), false);
+      gp_Vec normal = getNormal(face, u, v);
+      return std::make_pair(normal, true);
+    }
+  }
+  
+  return std::make_pair(gp_Vec(), false);
+}
 
 std::pair<gp_Ax1, bool> occt::gleanAxis(const TopoDS_Shape sIn)
 {
@@ -554,6 +598,43 @@ std::pair<gp_Ax1, bool> occt::gleanAxis(const TopoDS_Shape sIn)
   }
   
   return std::make_pair(gp_Ax1(), false);
+}
+
+std::pair<double, bool> occt::pointToParameter(const TopoDS_Edge &eIn, const gp_Pnt &pIn)
+{
+  BRepExtrema_ExtPC e(BRepBuilderAPI_MakeVertex(pIn), eIn);
+  if (!e.IsDone() || e.NbExt() < 1)
+  {
+    std::cerr << "Warning: no solution for extrema in occt::pointToParameter(Edge)" << std::endl;
+    return std::make_pair(0.0, false);
+  }
+  
+  return std::make_pair(e.Parameter(1), true);
+}
+
+std::tuple<double, double, bool> occt::pointToParameter(const TopoDS_Face &fIn, const gp_Pnt &pIn)
+{
+  BRepExtrema_ExtPF e(BRepBuilderAPI_MakeVertex(pIn), fIn, Extrema_ExtFlag_MIN);
+  if (!e.IsDone() || e.NbExt() < 1)
+  {
+    std::cerr << "Warning: no solution for extrema in occt::pointToParameter(Face)" << std::endl;
+    return std::make_tuple(0.0, 0.0, false);
+  }
+  double u, v;
+  e.Parameter(1, u, v);
+  return std::make_tuple(u, v, true);
+}
+
+gp_Pnt occt::parameterToPoint(const TopoDS_Edge &eIn, double u)
+{
+  BRepAdaptor_Curve ca(eIn);
+  return ca.Value(u).Transformed(ca.Trsf());
+}
+
+gp_Pnt occt::parameterToPoint(const TopoDS_Face &fIn, double u, double v)
+{
+  BRepAdaptor_Surface sa(fIn);
+  return sa.Value(u, v).Transformed(sa.Trsf());
 }
 
 BoundingBox::BoundingBox(){}
