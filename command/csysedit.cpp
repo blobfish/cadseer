@@ -28,6 +28,7 @@
 #include <project/project.h>
 #include <message/message.h>
 #include <message/observer.h>
+#include <feature/parameter.h>
 #include <feature/base.h>
 #include <annex/seershape.h>
 #include <annex/csysdragger.h>

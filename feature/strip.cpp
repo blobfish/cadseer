@@ -41,6 +41,7 @@
 #include <feature/shapecheck.h>
 #include <feature/nest.h>
 #include <project/serial/xsdcxxoutput/featurestrip.h>
+#include <feature/updatepayload.h>
 #include <feature/strip.h>
 
 using namespace ftr;
@@ -75,26 +76,26 @@ sShape(new ann::SeerShape())
   annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
   
   feedDirection->connectValue(boost::bind(&Strip::setModelDirty, this));
-  parameterVector.push_back(feedDirection.get());
+  parameters.push_back(feedDirection.get());
   
   pitch->setConstraint(prm::Constraint::buildNonZeroPositive());
   pitch->connectValue(boost::bind(&Strip::setModelDirty, this));
-  parameterVector.push_back(pitch.get());
+  parameters.push_back(pitch.get());
   
   width->setConstraint(prm::Constraint::buildNonZeroPositive());
   width->connectValue(boost::bind(&Strip::setModelDirty, this));
-  parameterVector.push_back(width.get());
+  parameters.push_back(width.get());
   
   widthOffset->setConstraint(prm::Constraint::buildAll());
   widthOffset->connectValue(boost::bind(&Strip::setModelDirty, this));
-  parameterVector.push_back(widthOffset.get());
+  parameters.push_back(widthOffset.get());
   
   gap->setConstraint(prm::Constraint::buildNonZeroPositive());
   gap->connectValue(boost::bind(&Strip::setModelDirty, this));
-  parameterVector.push_back(gap.get());
+  parameters.push_back(gap.get());
   
   autoCalc->connectValue(boost::bind(&Strip::setModelDirty, this));
-  parameterVector.push_back(autoCalc.get());
+  parameters.push_back(autoCalc.get());
   
   feedDirectionLabel = new lbr::PLabel(feedDirection.get());
   feedDirectionLabel->showName = true;

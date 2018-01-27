@@ -27,8 +27,10 @@
 #include <squash/squash.h>
 #include <annex/seershape.h>
 #include <feature/shapecheck.h>
-#include <feature/squash.h>
 #include <project/serial/xsdcxxoutput/featuresquash.h>
+#include <tools/featuretools.h>
+#include <feature/updatepayload.h>
+#include <feature/squash.h>
 
 using namespace ftr;
 
@@ -64,7 +66,7 @@ Squash::Squash() : Base(), sShape(new ann::SeerShape())
   granularity->setConstraint(c);
   
   granularity->connectValue(boost::bind(&Squash::setModelDirty, this));
-  parameterVector.push_back(granularity.get());
+  parameters.push_back(granularity.get());
   
   label = new lbr::PLabel(granularity.get());
   label->showName = true;
@@ -101,17 +103,15 @@ void Squash::updateModel(const UpdatePayload &payloadIn)
   setFailure();
   try
   {
-    if (payloadIn.updateMap.count(InputType::target) != 1)
+    std::vector<const Base*> tfs = payloadIn.getFeatures(InputType::target);
+    if (tfs.size() != 1)
       throw std::runtime_error("wrong number of parents");
-    
-    const ftr::Base *bf = payloadIn.updateMap.equal_range(InputType::target).first->second;
-    if(!bf->hasAnnex(ann::Type::SeerShape))
+    if(!tfs.front()->hasAnnex(ann::Type::SeerShape))
       throw std::runtime_error("no seer shape");
-      
-    const ann::SeerShape &targetSeerShape = bf->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+    const ann::SeerShape &tss = tfs.front()->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     
     //get the shell
-    TopoDS_Shape ss = occt::getFirstNonCompound(targetSeerShape.getRootOCCTShape());
+    TopoDS_Shape ss = occt::getFirstNonCompound(tss.getRootOCCTShape());
     if (ss.IsNull())
       throw std::runtime_error("Shape is null");
     if (ss.ShapeType() != TopAbs_SHELL)
@@ -122,35 +122,42 @@ void Squash::updateModel(const UpdatePayload &payloadIn)
     occt::FaceVector fs;
     bool od = false; //orientation determined.
     bool sr = false; //should reverse.
-    for (const auto &p : picks)
+    
+    
+    
+    auto resolvedPicks = tls::resolvePicks(tfs, picks, payloadIn.shapeHistory);
+    for (const auto &p : resolvedPicks)
     {
-      std::vector<uuid> cps = targetSeerShape.resolvePick(p.shapeHistory);
-      for (const auto &lid : cps)
+      if (p.second.is_nil())
+        continue;
+      assert(tss.hasShapeIdRecord(p.second));
+      if (!tss.hasShapeIdRecord(p.second))
+        continue;
+      const TopoDS_Shape &shape = tss.getOCCTShape(p.second);
+      if (shape.ShapeType() != TopAbs_FACE)
       {
-        const TopoDS_Shape &shape = targetSeerShape.getOCCTShape(lid);
-        if (shape.ShapeType() != TopAbs_FACE)
-        {
-          std::ostringstream sm; sm << "shape is not a face in Squash::updateModel" << std::endl;
-          lastUpdateLog += sm.str();
-          continue;
-        }
-        const TopoDS_Face &f = TopoDS::Face(shape);
-        static const gp_Vec zAxis(0.0, 0.0, 1.0);
-        gp_Vec n = occt::getNormal(f, p.u, p.v);
-        if (!n.IsParallel(zAxis, Precision::Confusion())) //Precision::Angular was too sensitive.
-          throw std::runtime_error("lock face that is not parallel to z axis");
-        if (!od)
-        {
-          od = true;
-          if (n.IsOpposite(zAxis, Precision::Angular()))
-            sr = true;
-        }
-        if (sr)
-          fs.push_back(TopoDS::Face(f.Reversed())); //might not need to reverse these?
-        else
-          fs.push_back(f);
+        std::ostringstream sm; sm << "shape is not a face in Squash::updateModel" << std::endl;
+        lastUpdateLog += sm.str();
+        continue;
       }
+      const TopoDS_Face &f = TopoDS::Face(shape);
+      static const gp_Vec zAxis(0.0, 0.0, 1.0);
+      //following line is flawed! Hack while waiting for pick to be returned with tls::resolvePicks.
+      gp_Vec n = occt::getNormal(f, picks.front().u, picks.front().v);
+      if (!n.IsParallel(zAxis, Precision::Confusion())) //Precision::Angular was too sensitive.
+        throw std::runtime_error("lock face that is not parallel to z axis");
+      if (!od)
+      {
+        od = true;
+        if (n.IsOpposite(zAxis, Precision::Angular()))
+          sr = true;
+      }
+      if (sr)
+        fs.push_back(TopoDS::Face(f.Reversed())); //might not need to reverse these?
+      else
+        fs.push_back(f);
     }
+    
     if (fs.empty())
       throw std::runtime_error("No holding faces");
     if (sr)

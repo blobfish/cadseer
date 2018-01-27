@@ -33,6 +33,9 @@
 #include <feature/shapecheck.h>
 #include <library/plabel.h>
 #include <project/serial/xsdcxxoutput/featurehollow.h>
+#include <tools/featuretools.h>
+#include <feature/updatepayload.h>
+#include <feature/parameter.h>
 #include <feature/hollow.h>
 
 using namespace ftr;
@@ -43,7 +46,7 @@ QIcon Hollow::icon;
 
 Hollow::Hollow() :
 Base(),
-offset(prm::Names::Offset, prf::manager().rootPtr->features().hollow().get().offset()),
+offset(new prm::Parameter(prm::Names::Offset, prf::manager().rootPtr->features().hollow().get().offset())),
 sShape(new ann::SeerShape())
 {
   if (icon.isNull())
@@ -52,10 +55,10 @@ sShape(new ann::SeerShape())
   name = QObject::tr("Hollow");
   mainSwitch->setUserValue<int>(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
-  offset.setConstraint(prm::Constraint::buildNonZero());
-  offset.connectValue(boost::bind(&Hollow::setModelDirty, this));
+  offset->setConstraint(prm::Constraint::buildNonZero());
+  offset->connectValue(boost::bind(&Hollow::setModelDirty, this));
   
-  label = new lbr::PLabel(&offset);
+  label = new lbr::PLabel(offset.get());
   label->valueHasChanged();
   overlaySwitch->addChild(label.get());
   
@@ -77,6 +80,8 @@ Hollow::~Hollow(){}
  * for both 'aBox' and 'result' the max tolerances for both edge and vertex
  * are 1.00000e-03. way too loose. going to let one point release go by
  * and check these results again before trying to get a bug report.
+ * 
+ * will this work with no removal faces?
  */
 
 void Hollow::updateModel(const UpdatePayload &payloadIn)
@@ -85,30 +90,45 @@ void Hollow::updateModel(const UpdatePayload &payloadIn)
   lastUpdateLog.clear();
   try
   {
-    if (payloadIn.updateMap.count(InputType::target) != 1)
+    std::vector<const Base*> tfs = payloadIn.getFeatures(InputType::target);
+    if (tfs.size() != 1)
       throw std::runtime_error("no parent for hollow");
+    if (!tfs.front()->hasAnnex(ann::Type::SeerShape))
+      throw std::runtime_error("parent doesn't have seer shape");
+    const ann::SeerShape &tss= tfs.front()->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     
-    const ann::SeerShape &targetSeerShape =
-    payloadIn.updateMap.equal_range(InputType::target).first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+    occt::ShapeVector closingFaceShapes;
+    std::vector<uuid> solidIds;
+    auto resolvedPicks = tls::resolvePicks(tfs, hollowPicks, payloadIn.shapeHistory);
+    for (const auto &p : resolvedPicks)
+    {
+      if (p.second.is_nil())
+        continue;
+      assert(tss.hasShapeIdRecord(p.second));
+      if (!tss.hasShapeIdRecord(p.second))
+        continue;
+      TopoDS_Shape face = tss.findShapeIdRecord(p.second).shape;
+      if (face.ShapeType() != TopAbs_FACE)
+        continue;
+      closingFaceShapes.push_back(face);
+      std::vector<uuid> sp = tss.useGetParentsOfType(p.second, TopAbs_SOLID);
+      std::copy(sp.begin(), sp.end(), std::back_inserter(solidIds));
+    }
+    if (closingFaceShapes.empty())
+      throw std::runtime_error("no closing faces");
+    gu::uniquefy(solidIds);
+    if (solidIds.size() != 1)
+      throw std::runtime_error("Only works with 1 solid");
     
-    TopTools_ListOfShape closingFaceShapes = resolveClosingFaces(targetSeerShape);
-    
-    if (closingFaceShapes.IsEmpty())
-      throw std::runtime_error("Hollow: no closing faces");
-    
-    std::vector<uuid> firstFaceIds = targetSeerShape.resolvePick(hollowPicks.front().shapeHistory);
-    if (firstFaceIds.empty())
-      throw std::runtime_error("Hollow: can't find first face id");
-    assert(firstFaceIds.size() == 1);
-    const TopoDS_Face &firstFace = TopoDS::Face(targetSeerShape.getOCCTShape(firstFaceIds.front()));
+    const TopoDS_Face &firstFace = TopoDS::Face(closingFaceShapes.front());
     label->setMatrix(osg::Matrixd::translate(hollowPicks.front().getPoint(firstFace)));
     
     BRepOffsetAPI_MakeThickSolid operation;
     operation.MakeThickSolidByJoin
     (
-      targetSeerShape.getRootOCCTShape(),
-      closingFaceShapes,
-      -static_cast<double>(offset), //default direction sucks.
+      tss.getRootOCCTShape(),
+      occt::ShapeVectorCast(closingFaceShapes),
+      -static_cast<double>(*offset), //default direction sucks.
       Precision::Confusion(),
       BRepOffset_Skin,
       Standard_False,
@@ -123,11 +143,11 @@ void Hollow::updateModel(const UpdatePayload &payloadIn)
       throw std::runtime_error("shapeCheck failed in hollow feature");
     
     sShape->setOCCTShape(operation.Shape());
-    sShape->shapeMatch(targetSeerShape);
-    sShape->uniqueTypeMatch(targetSeerShape);
-    sShape->modifiedMatch(operation, targetSeerShape);
-    generatedMatch(operation, targetSeerShape);
-    sShape->outerWireMatch(targetSeerShape);
+    sShape->shapeMatch(tss);
+    sShape->uniqueTypeMatch(tss);
+    sShape->modifiedMatch(operation, tss);
+    generatedMatch(operation, tss);
+    sShape->outerWireMatch(tss);
     sShape->derivedMatch();
     sShape->dumpNils("hollow feature");
     sShape->dumpDuplicates("hollow feature");
@@ -270,7 +290,7 @@ void Hollow::serialWrite(const QDir &dIn)
   (
     Base::serialOut(),
     hPicksOut,
-    offset.serialOut(),
+    offset->serialOut(),
     label->serialOut()
   );
   
@@ -283,8 +303,6 @@ void Hollow::serialRead(const prj::srl::FeatureHollow &sHollowIn)
 {
   Base::serialIn(sHollowIn.featureBase());
   hollowPicks = ::ftr::serialIn(sHollowIn.hollowPicks());
-  offset.serialIn(sHollowIn.offset());
-  offset.connectValue(boost::bind(&Hollow::setModelDirty, this));
+  offset->serialIn(sHollowIn.offset());
   label->serialIn(sHollowIn.plabel());
 }
-

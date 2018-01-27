@@ -32,6 +32,7 @@ namespace ann{class SeerShape;}
 
 namespace ftr
 {
+  namespace prm{class Parameter;}
   struct ChamferPick
   {
     Pick edgePick; //!< id of picked edge or maybe face?

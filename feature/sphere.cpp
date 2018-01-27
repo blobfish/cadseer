@@ -27,6 +27,8 @@
 #include <project/serial/xsdcxxoutput/featuresphere.h>
 #include <annex/csysdragger.h>
 #include <annex/seershape.h>
+#include <feature/parameter.h>
+#include <feature/updatepayload.h>
 #include <feature/sphere.h>
 
 using namespace ftr;
@@ -60,9 +62,9 @@ QIcon Sphere::icon;
 
 Sphere::Sphere() :
 Base(),
-radius(prm::Names::Radius, prf::manager().rootPtr->features().sphere().get().radius()),
-csys(prm::Names::CSys, osg::Matrixd::identity()),
-csysDragger(new ann::CSysDragger(this, &csys)),
+radius(new prm::Parameter(prm::Names::Radius, prf::manager().rootPtr->features().sphere().get().radius())),
+csys(new prm::Parameter(prm::Names::CSys, osg::Matrixd::identity())),
+csysDragger(new ann::CSysDragger(this, csys.get())),
 sShape(new ann::SeerShape())
 {
   if (icon.isNull())
@@ -73,17 +75,17 @@ sShape(new ann::SeerShape())
   
   initializeMaps();
   
-  radius.setConstraint(prm::Constraint::buildNonZeroPositive());
+  radius->setConstraint(prm::Constraint::buildNonZeroPositive());
   
-  parameterVector.push_back(&radius);
-  parameterVector.push_back(&csys);
+  parameters.push_back(radius.get());
+  parameters.push_back(csys.get());
   
   annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
   annexes.insert(std::make_pair(ann::Type::CSysDragger, csysDragger.get()));
   overlaySwitch->addChild(csysDragger->dragger);
   
-  radius.connectValue(boost::bind(&Sphere::setModelDirty, this));
-  csys.connectValue(boost::bind(&Sphere::setModelDirty, this));
+  radius->connectValue(boost::bind(&Sphere::setModelDirty, this));
+  csys->connectValue(boost::bind(&Sphere::setModelDirty, this));
   
   setupIPGroup();
 }
@@ -95,13 +97,13 @@ Sphere::~Sphere()
 
 void Sphere::setRadius(const double& radiusIn)
 {
-  radius.setValue(radiusIn);
+  radius->setValue(radiusIn);
 }
 
 void Sphere::setCSys(const osg::Matrixd &csysIn)
 {
-  osg::Matrixd oldSystem = static_cast<osg::Matrixd>(csys);
-  if (!csys.setValue(csysIn))
+  osg::Matrixd oldSystem = static_cast<osg::Matrixd>(*csys);
+  if (!csys->setValue(csysIn))
     return; // already at this csys
     
   //apply the same transformation to dragger, so dragger moves with it.
@@ -109,9 +111,19 @@ void Sphere::setCSys(const osg::Matrixd &csysIn)
   csysDragger->draggerUpdate(csysDragger->dragger->getMatrix() * diffMatrix);
 }
 
+double Sphere::getRadius() const
+{
+  return static_cast<double>(*radius);
+}
+
+osg::Matrixd Sphere::getCSys() const
+{
+  return static_cast<osg::Matrixd>(*csys);
+}
+
 void Sphere::setupIPGroup()
 {
-  radiusIP = new lbr::IPGroup(&radius);
+  radiusIP = new lbr::IPGroup(radius.get());
   radiusIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 1.0, 0.0)));
   radiusIP->setMatrixDragger(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(-1.0, 0.0, 0.0)));
   radiusIP->setDimsFlipped(true);
@@ -124,7 +136,7 @@ void Sphere::setupIPGroup()
 
 void Sphere::updateIPGroup()
 {
-  radiusIP->setMatrix(static_cast<osg::Matrixd>(csys));
+  radiusIP->setMatrix(static_cast<osg::Matrixd>(*csys));
   radiusIP->valueHasChanged();
   radiusIP->constantHasChanged();
 }
@@ -135,7 +147,7 @@ void Sphere::updateModel(const UpdatePayload&)
   lastUpdateLog.clear();
   try
   {
-    BRepPrimAPI_MakeSphere sphereMaker(gu::toOcc(static_cast<osg::Matrixd>(csys)), static_cast<double>(radius));
+    BRepPrimAPI_MakeSphere sphereMaker(gu::toOcc(static_cast<osg::Matrixd>(*csys)), static_cast<double>(*radius));
     sphereMaker.Build();
     assert(sphereMaker.IsDone());
     sShape->setOCCTShape(sphereMaker.Shape());
@@ -231,8 +243,8 @@ void Sphere::serialWrite(const QDir &dIn)
   prj::srl::FeatureSphere sphereOut
   (
     Base::serialOut(),
-    radius.serialOut(),
-    csys.serialOut(),
+    radius->serialOut(),
+    csys->serialOut(),
     csysDragger->serialOut()
   );
   
@@ -244,8 +256,8 @@ void Sphere::serialWrite(const QDir &dIn)
 void Sphere::serialRead(const prj::srl::FeatureSphere& sSphereIn)
 {
   Base::serialIn(sSphereIn.featureBase());
-  radius.serialIn(sSphereIn.radius());
-  csys.serialIn(sSphereIn.csys());
+  radius->serialIn(sSphereIn.radius());
+  csys->serialIn(sSphereIn.csys());
   csysDragger->serialIn(sSphereIn.csysDragger());
   
   updateIPGroup();

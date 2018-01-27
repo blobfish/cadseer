@@ -26,8 +26,10 @@
 #include <tools/occtools.h>
 #include <annex/seershape.h>
 #include <feature/shapecheck.h>
-#include <feature/extract.h>
 #include <project/serial/xsdcxxoutput/featureextract.h>
+#include <feature/updatepayload.h>
+#include <tools/featuretools.h>
+#include <feature/extract.h>
 
 using namespace ftr;
 
@@ -106,9 +108,9 @@ void Extract::sync(const Extract::AccruePicks &apsIn)
       }
       
       //remove the parameter from the vector.
-      auto it = std::find(parameterVector.begin(), parameterVector.end(), ap.parameter.get());
-      if (it != parameterVector.end())
-        parameterVector.erase(it);
+      auto it = std::find(parameters.begin(), parameters.end(), ap.parameter.get());
+      if (it != parameters.end())
+        parameters.erase(it);
       //shouldn't have to worry about the signal connection between
       //parameter and this feature. parameter does the call back and
       //that will be deleted if gone from apsIn.
@@ -140,7 +142,7 @@ void Extract::sync(const Extract::AccruePicks &apsIn)
         b.parameter = buildAngleParameter(); //assume angle parameter.
       b.parameter->connectValue(boost::bind(&Extract::setModelDirty, this));
       //else the parameter should already be connected if it exists.
-      parameterVector.push_back(b.parameter.get());
+      parameters.push_back(b.parameter.get());
       
       if (!b.label)
         b.label = new lbr::PLabel(b.parameter.get());
@@ -203,62 +205,66 @@ void Extract::updateModel(const UpdatePayload &payloadIn)
   lastUpdateLog.clear();
   try
   {
-    if (payloadIn.updateMap.count(InputType::target) != 1)
-      throw std::runtime_error("wrong number of parents for extract");
+    std::vector<const Base*> targetFeatures = payloadIn.getFeatures(InputType::target);
+    if (targetFeatures.size() != 1)
+      throw std::runtime_error("wrong number of parents");
+    if (!targetFeatures.front()->hasAnnex(ann::Type::SeerShape))
+      throw std::runtime_error("parent doesn't have seer shape");
+    const ann::SeerShape &targetSeerShape = targetFeatures.front()->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     
-    const ann::SeerShape &targetSeerShape = 
-    payloadIn.updateMap.equal_range(InputType::target).first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
-    
-    occt::FaceVector faces;
+    occt::ShapeVector outShapes;
     for (const auto &ap : accruePicks)
     {
+      occt::FaceVector faces;
       bool labelDone = false; //set label position to first pick.
-      for (const auto &p : ap.picks)
+      auto resolvedPicks = tls::resolvePicks(targetFeatures, ap.picks, payloadIn.shapeHistory);
+      for (const auto &p : resolvedPicks)
       {
-        std::vector<uuid> resolvedIds = targetSeerShape.resolvePick(p.shapeHistory);
-        if (resolvedIds.empty())
-        {
-          std::ostringstream s; s << "Extract: can't find target id. Skipping id: " << gu::idToString(p.id) << std::endl;
-          lastUpdateLog += s.str();
+        if (p.second.is_nil())
           continue;
-        }
         
-        for (const auto &resolvedId : resolvedIds)
+        TopoDS_Shape shape = targetSeerShape.getOCCTShape(p.second);
+        assert(!shape.IsNull());
+        if (shape.ShapeType() == TopAbs_FACE)
         {
-          TopoDS_Shape shape = targetSeerShape.getOCCTShape(resolvedId);
-          assert(!shape.IsNull());
-          if (shape.ShapeType() == TopAbs_FACE)
+          TopoDS_Face f = TopoDS::Face(shape);
+          if (ap.accrueType == AccrueType::Tangent)
+            faces = occt::walkTangentFaces(targetSeerShape.getRootOCCTShape(), f, static_cast<double>(*(ap.parameter)));
+          else if (ap.accrueType == AccrueType::None)
+            faces.push_back(f);
+          
+          if (!labelDone)
           {
-            TopoDS_Face f = TopoDS::Face(shape);
-            if (ap.accrueType == AccrueType::Tangent)
-              faces = occt::walkTangentFaces(targetSeerShape.getRootOCCTShape(), f, static_cast<double>(*(ap.parameter)));
-            else if (ap.accrueType == AccrueType::None)
-              faces.push_back(f);
-            
-            if (!labelDone)
-            {
-              labelDone = true;
-              ap.label->setMatrix(osg::Matrixd::translate(p.getPoint(f)));
-            }
+            labelDone = true;
+            ap.label->setMatrix(osg::Matrixd::translate(ap.picks.front().getPoint(f)));
           }
         }
       }
+      //need some shape mapping for sew.
+      TopoDS_Shape sewn;
+      if (!faces.empty())
+        sewn = sew(faces);
+      if (!sewn.IsNull())
+        outShapes.push_back(sewn);
     }
-    TopoDS_Shape out;
-    if (!faces.empty())
-      out = sew(faces);
     
-    if (out.IsNull())
+    if (accruePicks.empty())
     {
-      occt::ShapeVector sv;
-      for (const auto &p : picks)
+      auto resolvedPicks = tls::resolvePicks(targetFeatures, picks, payloadIn.shapeHistory);
+      for (const auto &p : resolvedPicks)
       {
-        std::vector<uuid> resolvedIds = targetSeerShape.resolvePick(p.shapeHistory);
-        for (const auto &lid : resolvedIds)
-          sv.push_back(targetSeerShape.getOCCTShape(lid));
+        if (p.second.is_nil())
+        {
+          occt::ShapeVector children = targetSeerShape.useGetNonCompoundChildren();
+          for (const auto &child : children)
+            outShapes.push_back(child);
+          continue;
+        }
+        assert(targetSeerShape.hasShapeIdRecord(p.second));
+        outShapes.push_back(targetSeerShape.getOCCTShape(p.second));
       }
-      out = static_cast<TopoDS_Compound>(occt::ShapeVectorCast(sv));
     }
+    TopoDS_Compound out = static_cast<TopoDS_Compound>(occt::ShapeVectorCast(outShapes));
     
     if (out.IsNull())
       throw std::runtime_error("null shape");

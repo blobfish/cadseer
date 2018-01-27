@@ -30,6 +30,7 @@ namespace ann{class CSysDragger; class SeerShape;}
 
 namespace ftr
 {
+  namespace prm{class Parameter;}
   class OblongBuilder;
   
   class Oblong : public Base
@@ -44,11 +45,11 @@ namespace ftr
     void setParameters(const double &lengthIn, const double &widthIn, const double &heightIn);
     void setCSys(const osg::Matrixd&);
     
-    double getLength() const {return static_cast<double>(length);}
-    double getWidth() const {return static_cast<double>(width);}
-    double getHeight() const {return static_cast<double>(height);}
+    double getLength() const;
+    double getWidth() const;
+    double getHeight() const;
     void getParameters (double &lengthOut, double &widthOut, double &heightOut) const;
-    osg::Matrixd getCSys() const {return static_cast<osg::Matrixd>(csys);}
+    osg::Matrixd getCSys() const;
     
     virtual void updateModel(const UpdatePayload&) override;
     virtual Type getType() const override {return Type::Oblong;}
@@ -58,10 +59,10 @@ namespace ftr
     virtual void serialWrite(const QDir&) override; //!< write xml file. not const, might reset a modified flag.
     void serialRead(const prj::srl::FeatureOblong &sOblong);
   protected:
-    prm::Parameter length;
-    prm::Parameter width;
-    prm::Parameter height;
-    prm::Parameter csys;
+    std::unique_ptr<prm::Parameter> length;
+    std::unique_ptr<prm::Parameter> width;
+    std::unique_ptr<prm::Parameter> height;
+    std::unique_ptr<prm::Parameter> csys;
   
     std::unique_ptr<ann::CSysDragger> csysDragger;
     std::unique_ptr<ann::SeerShape> sShape;

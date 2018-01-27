@@ -28,6 +28,8 @@
 #include <feature/datumplane.h>
 #include <feature/parameter.h>
 #include <project/serial/xsdcxxoutput/featureinstancelinear.h>
+#include <tools/featuretools.h>
+#include <feature/updatepayload.h>
 #include <feature/instancelinear.h>
 
 using namespace ftr;
@@ -113,14 +115,14 @@ includeSource(QObject::tr("Include Source"), true)
   includeSourceLabel->valueHasChanged();
   overlaySwitch->addChild(includeSourceLabel.get());
   
-  parameterVector.push_back(&xOffset);
-  parameterVector.push_back(&yOffset);
-  parameterVector.push_back(&zOffset);
-  parameterVector.push_back(&xCount);
-  parameterVector.push_back(&yCount);
-  parameterVector.push_back(&zCount);
-  parameterVector.push_back(&csys);
-  parameterVector.push_back(&includeSource);
+  parameters.push_back(&xOffset);
+  parameters.push_back(&yOffset);
+  parameters.push_back(&zOffset);
+  parameters.push_back(&xCount);
+  parameters.push_back(&yCount);
+  parameters.push_back(&zCount);
+  parameters.push_back(&csys);
+  parameters.push_back(&includeSource);
   
   annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
   annexes.insert(std::make_pair(ann::Type::InstanceMapper, iMapper.get()));
@@ -141,55 +143,33 @@ void InstanceLinear::updateModel(const UpdatePayload &payloadIn)
   lastUpdateLog.clear();
   try
   {
-    if (payloadIn.updateMap.count(InputType::target) != 1)
-      throw std::runtime_error("no parent");
-    
-    const Base *targetFeature = payloadIn.updateMap.equal_range(InputType::target).first->second;
-    if (!targetFeature->hasAnnex(ann::Type::SeerShape))
+    std::vector<const Base*> tfs = payloadIn.getFeatures(InputType::target);
+    if (tfs.size() != 1)
+      throw std::runtime_error("wrong number of parents");
+    if (!tfs.front()->hasAnnex(ann::Type::SeerShape))
       throw std::runtime_error("parent doesn't have seer shape.");
-    const ann::SeerShape &targetSeerShape = targetFeature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+    const ann::SeerShape &tss = tfs.front()->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     
     occt::ShapeVector tShapes;
-    uuid resolvedId = gu::createNilId();
     if (pick.id.is_nil())
     {
-      tShapes = targetSeerShape.useGetNonCompoundChildren();
+      tShapes = tss.useGetNonCompoundChildren();
     }
     else
     {
-      if (targetSeerShape.hasShapeIdRecord(pick.id))
-        resolvedId = pick.id;
-      else
+      auto resolvedPicks = tls::resolvePicks(tfs.front(), pick, payloadIn.shapeHistory);
+      for (const auto &p : resolvedPicks)
       {
-        for (const auto &hid : pick.shapeHistory.getAllIds())
-        {
-          if (targetSeerShape.hasShapeIdRecord(hid))
-          {
-            resolvedId = hid;
-            break;
-          }
-        }
+        if (p.second.is_nil())
+          continue;
+        assert(tss.hasShapeIdRecord(p.second));
+        if (!tss.hasShapeIdRecord(p.second))
+          continue;
+        tShapes.push_back(tss.findShapeIdRecord(p.second).shape);
       }
-      if (resolvedId.is_nil())
-      {
-        for (const auto &hid : pick.shapeHistory.getAllIds())
-        {
-          if (!payloadIn.shapeHistory.hasShape(hid))
-            continue;
-          resolvedId = payloadIn.shapeHistory.devolve(targetFeature->getId(), hid);
-          if (resolvedId.is_nil())
-            resolvedId = payloadIn.shapeHistory.evolve(targetFeature->getId(), hid);
-          if (!resolvedId.is_nil())
-            break;
-        }
-      }
-      if (resolvedId.is_nil())
-        throw std::runtime_error("can't find shape to instance nil.");
-      tShapes.push_back(targetSeerShape.getOCCTShape(resolvedId));
     }
-    assert(!tShapes.empty()); //exception should by pass this.
     if (tShapes.empty())
-      throw std::runtime_error("WARNING: No shape found.");
+      throw std::runtime_error("No shapes found.");
     
     occt::ShapeVector out;
     osg::Vec3d xProjection = gu::getXVector(static_cast<osg::Matrixd>(csys)) * static_cast<double>(xOffset);
@@ -225,12 +205,16 @@ void InstanceLinear::updateModel(const UpdatePayload &payloadIn)
     
     TopoDS_Compound result = occt::ShapeVectorCast(out);
     sShape->setOCCTShape(result);
-    iMapper->startMapping(targetSeerShape, resolvedId,  payloadIn.shapeHistory);
-    std::size_t count = 0;
-    for (const auto &si : out)
+    
+    for (const auto &s : tShapes)
     {
-      iMapper->mapIndex(*sShape, si, count);
-      count++;
+      iMapper->startMapping(tss, tss.findShapeIdRecord(s).id,  payloadIn.shapeHistory);
+      std::size_t count = 0;
+      for (const auto &si : out)
+      {
+        iMapper->mapIndex(*sShape, si, count);
+        count++;
+      }
     }
     
     //update label locations.

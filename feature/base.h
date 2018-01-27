@@ -39,8 +39,6 @@
 #include <feature/types.h>
 #include <feature/inputtype.h>
 #include <feature/states.h>
-#include <feature/parameter.h>
-#include <feature/updatepayload.h>
 #include <annex/base.h>
 
 class QDir;
@@ -51,6 +49,10 @@ namespace msg{class Message; class Observer;}
 namespace ftr
 {
 class ShapeHistory;
+class UpdatePayload;
+
+namespace prm{class Parameter; typedef std::vector<Parameter*> Parameters;}
+
 class Base
 {
 public:
@@ -95,7 +97,7 @@ public:
   prm::Parameter* getParameter(const QString &nameIn) const; //!< parameter names are not unique.
   bool hasParameter(const boost::uuids::uuid &idIn) const;
   prm::Parameter* getParameter(const boost::uuids::uuid &idin) const;
-  const prm::Vector& getParameterVector() const{return parameterVector;}
+  const prm::Parameters& getParameters() const{return parameters;}
   
   bool hasAnnex(ann::Type t) const
   {
@@ -130,7 +132,7 @@ protected:
   void serialIn(const prj::srl::FeatureBase& sBaseIn);
   
   QString name;
-  prm::Vector parameterVector;
+  prm::Parameters parameters;
   ann::Annexes annexes;
   
   std::unique_ptr<msg::Observer> observer;

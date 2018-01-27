@@ -23,6 +23,7 @@
 #include <globalutilities.h>
 #include <viewer/widget.h>
 #include <annex/csysdragger.h>
+#include <feature/parameter.h>
 #include <feature/base.h>
 #include <command/systemtofeature.h>
 

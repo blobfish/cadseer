@@ -20,6 +20,8 @@
 #ifndef FTR_SPHERE_H
 #define FTR_SPHERE_H
 
+#include <memory>
+
 #include <osg/ref_ptr>
 
 #include <feature/base.h>
@@ -31,6 +33,7 @@ namespace ann{class CSysDragger; class SeerShape;}
 
 namespace ftr
 {
+  namespace prm{class Parameter;}
   class Sphere : public Base
   {
   public:
@@ -38,8 +41,8 @@ namespace ftr
     virtual ~Sphere() override;
     void setRadius(const double &radiusIn);
     void setCSys(const osg::Matrixd&);
-    double getRadius() const {return static_cast<double>(radius);}
-    osg::Matrixd getCSys() const {return static_cast<osg::Matrixd>(csys);}
+    double getRadius() const;
+    osg::Matrixd getCSys() const;
     
     virtual void updateModel(const UpdatePayload&) override;
     virtual Type getType() const override {return Type::Sphere;}
@@ -50,8 +53,8 @@ namespace ftr
     void serialRead(const prj::srl::FeatureSphere &sSphere); //!<initializes this from sBox. not virtual, type already known.
     
   protected:
-    prm::Parameter radius;
-    prm::Parameter csys;
+    std::unique_ptr<prm::Parameter> radius;
+    std::unique_ptr<prm::Parameter> csys;
   
     std::unique_ptr<ann::CSysDragger> csysDragger;
     std::unique_ptr<ann::SeerShape> sShape;

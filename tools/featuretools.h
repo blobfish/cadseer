@@ -43,6 +43,17 @@ namespace tls
     std::vector<ftr::Pick> picks, //make a work copy of the picks.
     const ftr::ShapeHistory &pHistory
   );
+  
+  /*! @brief Same as overloaded. Just convenience.
+
+   */
+  std::vector<std::pair<const ftr::Base*, boost::uuids::uuid>>
+  resolvePicks
+  (
+    const ftr::Base *feature,
+    const ftr::Pick &pick,
+    const ftr::ShapeHistory &pHistory
+  );
 }
 
 #endif // TLS_FEATURETOOLS_H

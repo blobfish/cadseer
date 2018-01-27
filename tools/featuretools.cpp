@@ -72,3 +72,16 @@ tls::resolvePicks
   
   return out;
 }
+
+std::vector<std::pair<const ftr::Base*, boost::uuids::uuid>>
+tls::resolvePicks
+(
+  const ftr::Base *feature,
+  const ftr::Pick &pick,
+  const ftr::ShapeHistory &pHistory
+)
+{
+  std::vector<const ftr::Base*> features(1, feature);
+  ftr::Picks picks(1, pick);
+  return tls::resolvePicks(features, picks, pHistory);
+}

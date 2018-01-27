@@ -38,6 +38,9 @@
 #include <library/plabel.h>
 #include <project/serial/xsdcxxoutput/featuredraft.h>
 #include <annex/seershape.h>
+#include <tools/featuretools.h>
+#include <feature/updatepayload.h>
+#include <feature/parameter.h>
 #include <feature/draft.h>
 
 using namespace ftr;
@@ -86,11 +89,12 @@ void Draft::updateModel(const UpdatePayload &payloadIn)
   lastUpdateLog.clear();
   try
   {
-    if (payloadIn.updateMap.count(InputType::target) != 1)
-      throw std::runtime_error("no parent for blend");
-    
-    const ann::SeerShape &targetSeerShape = 
-    payloadIn.updateMap.equal_range(InputType::target).first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+    std::vector<const Base*> features = payloadIn.getFeatures(InputType::target);
+    if (features.size() != 1)
+      throw std::runtime_error("no parent for draft");
+    if (!features.front()->hasAnnex(ann::Type::SeerShape))
+      throw std::runtime_error("no seer shape in parent");
+    const ann::SeerShape &targetSeerShape = features.front()->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     
     //neutral plane might be outside of target, if so we should have an input with a type of 'tool'
 //     const TopoDS_Shape &tool; //TODO
@@ -105,38 +109,46 @@ void Draft::updateModel(const UpdatePayload &payloadIn)
     
     BRepOffsetAPI_DraftAngle dMaker(targetSeerShape.getRootOCCTShape());
     
-    std::vector<uuid> neutralIds = targetSeerShape.resolvePick(neutralPick.shapeHistory);
-    if (neutralIds.empty())
-      throw std::runtime_error("couldn't resolve neutral pick");
-    assert(neutralIds.size() == 1);
-    TopoDS_Shape neutralShape = targetSeerShape.getOCCTShape(neutralIds.front());
-    gp_Pln plane = derivePlaneFromShape(neutralShape);
     
+    auto resolvedNeutralPicks = tls::resolvePicks(features.front(), neutralPick, payloadIn.shapeHistory);
+    uuid neutralId = gu::createNilId();
+    for (const auto &p : resolvedNeutralPicks)
+    {
+      if (p.second.is_nil())
+        continue;
+      neutralId = p.second;
+      break;
+    }
+    if (neutralId.is_nil())
+      throw std::runtime_error("neutral id is nil");
+    TopoDS_Shape neutralShape = targetSeerShape.getOCCTShape(neutralId);
+    gp_Pln plane = derivePlaneFromShape(neutralShape);
     double localAngle = osg::DegreesToRadians(static_cast<double>(*angle));
     gp_Dir direction = plane.Axis().Direction();
     bool labelDone = false; //set label position to first pick.
-    for (const auto &p : targetPicks)
+    
+    
+    
+    
+    auto resolvedTargetPicks = tls::resolvePicks(features, targetPicks, payloadIn.shapeHistory);
+    for (const auto &p : resolvedTargetPicks)
     {
-      std::vector<uuid> pickIds = targetSeerShape.resolvePick(p.shapeHistory);
-      if (pickIds.empty())
-      {
-        std::ostringstream s; s << "Draft can't resolve id: " << gu::idToString(p.id) << std::endl;
-        lastUpdateLog += s.str();
+      if (p.second.is_nil())
         continue;
-      }
-      assert(pickIds.size() == 1);
-      const TopoDS_Face &face = TopoDS::Face(targetSeerShape.getOCCTShape(pickIds.front()));
+      assert(targetSeerShape.hasShapeIdRecord(p.second)); //project shape history out of sync.
+      const TopoDS_Face &face = TopoDS::Face(targetSeerShape.getOCCTShape(p.second));
+      
       dMaker.Add(face, direction, localAngle, plane);
       if (!dMaker.AddDone())
       {
-        std::ostringstream s; s << "Draft failed adding face: " << gu::idToString(pickIds.front()) << ". Removing" << std::endl;
+        std::ostringstream s; s << "Draft failed adding face: " << gu::idToString(p.second) << ". Removing" << std::endl;
         lastUpdateLog += s.str();
         dMaker.Remove(face);
       }
       if (!labelDone)
       {
         labelDone = true;
-        label->setMatrix(osg::Matrixd::translate(Pick::point(face, p.u, p.v)));
+        label->setMatrix(osg::Matrixd::translate(Pick::point(face, targetPicks.front().u, targetPicks.front().v)));
       }
     }
     dMaker.Build();
@@ -184,6 +196,8 @@ gp_Pln Draft::derivePlaneFromShape(const TopoDS_Shape &shapeIn)
 {
   //just planar surfaces for now.
   BRepAdaptor_Surface sAdapt(TopoDS::Face(shapeIn));
+  if (sAdapt.GetType() != GeomAbs_Plane)
+    throw std::runtime_error("wrong surface type");
   return sAdapt.Plane();
 }
 

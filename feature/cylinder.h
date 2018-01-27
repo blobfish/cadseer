@@ -30,6 +30,7 @@ namespace ann{class CSysDragger; class SeerShape;}
 
 namespace ftr
 {
+  namespace prm{class Parameter;}
   class CylinderBuilder;
   
   class Cylinder : public Base
@@ -41,10 +42,10 @@ namespace ftr
     void setHeight(const double &heightIn);
     void setParameters(const double &radiusIn, const double &heightIn);
     void setCSys(const osg::Matrixd&);
-    double getRadius() const {return static_cast<double>(radius);}
-    double getHeight() const {return static_cast<double>(height);}
+    double getRadius() const;
+    double getHeight() const;
     void getParameters (double &radiusOut, double &heightOut) const;
-    osg::Matrixd getCSys() const {return static_cast<osg::Matrixd>(csys);}
+    osg::Matrixd getCSys() const;
     
     virtual void updateModel(const UpdatePayload&) override;
     virtual Type getType() const override {return Type::Cylinder;}
@@ -55,9 +56,9 @@ namespace ftr
     void serialRead(const prj::srl::FeatureCylinder &sCylinderIn); //!<initializes this from sBox. not virtual, type already known.
   
   protected:
-    prm::Parameter radius;
-    prm::Parameter height;
-    prm::Parameter csys;
+    std::unique_ptr<prm::Parameter> radius;
+    std::unique_ptr<prm::Parameter> height;
+    std::unique_ptr<prm::Parameter> csys;
     
     std::unique_ptr<ann::CSysDragger> csysDragger;
     std::unique_ptr<ann::SeerShape> sShape;

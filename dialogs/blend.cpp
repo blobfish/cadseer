@@ -55,6 +55,7 @@
 #include <viewer/message.h>
 #include <selection/message.h>
 #include <annex/seershape.h>
+#include <feature/parameter.h>
 #include <feature/blend.h>
 #include <dialogs/widgetgeometry.h>
 #include <dialogs/expressionedit.h>

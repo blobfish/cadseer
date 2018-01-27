@@ -97,12 +97,15 @@ void Extract::go()
     }
     else
     {
+      std::shared_ptr<ftr::Extract> extract(new ftr::Extract());
       ftr::Pick pick;
       pick.id = container.shapeId;
-      pick.shapeHistory = project->getShapeHistory().createDevolveHistory(pick.id);
-      std::shared_ptr<ftr::Extract> extract(new ftr::Extract());
-      ftr::Picks picks({pick});
-      extract->sync(picks);
+      if (!pick.id.is_nil())
+      {
+        pick.shapeHistory = project->getShapeHistory().createDevolveHistory(pick.id);
+        ftr::Picks picks({pick});
+        extract->sync(picks);
+      }
       
       project->addFeature(extract);
       project->connect(baseFeature->getId(), extract->getId(), ftr::InputType{ftr::InputType::target});

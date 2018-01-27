@@ -38,11 +38,15 @@
 
 #include <globalutilities.h>
 #include <tools/idtools.h>
+#include <tools/featuretools.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <project/serial/xsdcxxoutput/featureblend.h>
+#include <feature/parameter.h>
 #include <feature/shapecheck.h>
 #include <annex/seershape.h>
+#include <feature/parameter.h>
+#include <feature/updatepayload.h>
 #include <feature/blend.h>
 
 using namespace ftr;
@@ -134,7 +138,7 @@ void Blend::addSimpleBlendQuiet(const SimpleBlend &simpleBlendIn)
   simpleBlends.back().label->valueHasChanged();
   overlaySwitch->addChild(simpleBlends.back().label.get());
   
-  parameterVector.push_back(simpleBlends.back().radius.get());
+  parameters.push_back(simpleBlends.back().radius.get());
 }
 
 void Blend::addVariableBlend(const VariableBlend &variableBlendIn)
@@ -159,8 +163,8 @@ void Blend::addVariableBlendQuiet(const VariableBlend &variableBlendIn)
     e.label->valueHasChanged();
     overlaySwitch->addChild(e.label.get());
     
-    parameterVector.push_back(e.radius.get());
-    parameterVector.push_back(e.position.get());
+    parameters.push_back(e.radius.get());
+    parameters.push_back(e.position.get());
   }
 }
 
@@ -211,17 +215,14 @@ void Blend::updateModel(const UpdatePayload &payloadIn)
       bool labelDone = false; //set label position to first pick.
       for (const auto &pick : simpleBlend.picks)
       {
-        std::vector<uuid> resolvedIds = targetSeerShape.resolvePick(pick.shapeHistory);
-        if (resolvedIds.empty())
+        auto resolvedPicks = tls::resolvePicks(targetFeature, pick, payloadIn.shapeHistory);
+        for (const auto &rp : resolvedPicks) //resolved pair
         {
-          std::ostringstream s; s << "Blend: can't find target edge id. Skipping id: " << gu::idToString(pick.id) << std::endl;
-          lastUpdateLog += s.str();
-          continue;
-        }
-        for (const auto &resolvedId : resolvedIds)
-        {
-          updateShapeMap(resolvedId, pick.shapeHistory);
-          TopoDS_Shape tempShape = targetSeerShape.getOCCTShape(resolvedId);
+          if (rp.second.is_nil())
+            continue;
+          updateShapeMap(rp.second, pick.shapeHistory);
+          assert(targetSeerShape.hasShapeIdRecord(rp.second)); //project history out of sync with seershape.
+          TopoDS_Shape tempShape = targetSeerShape.getOCCTShape(rp.second);
           assert(!tempShape.IsNull());
           assert(tempShape.ShapeType() == TopAbs_EDGE);
           blendMaker.Add(static_cast<double>(*(simpleBlend.radius)), TopoDS::Edge(tempShape));
@@ -237,32 +238,32 @@ void Blend::updateModel(const UpdatePayload &payloadIn)
     std::size_t vBlendIndex = 1;
     for (const auto &vBlend : variableBlends)
     {
-      std::vector<uuid> resolvedIds = targetSeerShape.resolvePick(vBlend.pick.shapeHistory);
-      if (resolvedIds.empty())
+      std::vector<const Base*> targetFeatures(1, targetFeature);
+      ftr::Picks targetPicks(1, vBlend.pick);
+      auto resolvedPicks = tls::resolvePicks(targetFeature, vBlend.pick, payloadIn.shapeHistory);
+      for (const auto &rp : resolvedPicks) //resolved pair
       {
-        std::ostringstream s; s << "Blend: can't find target edge id. Skipping id: " << gu::idToString(vBlend.pick.id) << std::endl;
-        lastUpdateLog += s.str();
-        continue;
-      }
-      for (const auto &resolvedId : resolvedIds)
-      {
-        updateShapeMap(resolvedId, vBlend.pick.shapeHistory);
-        TopoDS_Shape tempShape = targetSeerShape.getOCCTShape(resolvedId);
+        if (rp.second.is_nil())
+            continue;
+        updateShapeMap(rp.second, vBlend.pick.shapeHistory);
+        assert(targetSeerShape.hasShapeIdRecord(rp.second)); //project history out of sync with seershape.
+        TopoDS_Shape tempShape = targetSeerShape.getOCCTShape(rp.second);
         assert(!tempShape.IsNull());
         assert(tempShape.ShapeType() == TopAbs_EDGE); //TODO faces someday.
         blendMaker.Add(TopoDS::Edge(tempShape));
       }
       for (auto &e : vBlend.entries)
       {
-        std::vector<uuid> resolvedEntryIds = targetSeerShape.resolvePick(e.pick.shapeHistory);
-        if (resolvedEntryIds.empty())
+        ftr::Picks entryPicks(1, e.pick);
+        auto resolvedEntryPicks = tls::resolvePicks(targetFeatures, entryPicks, payloadIn.shapeHistory);
+        if (resolvedEntryPicks.empty())
         {
           std::ostringstream s; s << "Blend: can't find target entry id. Skipping id: " << gu::idToString(e.pick.id) << std::endl;
           lastUpdateLog += s.str();
           continue;
         }
-        assert(resolvedEntryIds.size() == 1);//don't think an entry should ever result in more than one id.
-        const TopoDS_Shape &blendShape = targetSeerShape.getOCCTShape(resolvedEntryIds.front());
+        assert(resolvedEntryPicks.size() == 1);//don't think an entry should ever result in more than one id.
+        const TopoDS_Shape &blendShape = targetSeerShape.getOCCTShape(resolvedEntryPicks.front().second);
         if (blendShape.ShapeType() == TopAbs_VERTEX)
         {
           const TopoDS_Vertex &v = TopoDS::Vertex(blendShape);

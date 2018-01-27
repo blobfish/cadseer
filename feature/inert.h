@@ -27,6 +27,8 @@ namespace ann{class CSysDragger;}
 
 namespace ftr
 {
+  namespace prm{class Parameter;}
+  
   /*! @brief static feature.
    * 
    * feature that has no real parameters or update.
@@ -47,10 +49,10 @@ namespace ftr
     void serialRead(const prj::srl::FeatureInert &sBox);
     
     void setCSys(const osg::Matrixd&);
-    osg::Matrixd getCSys() const {return static_cast<osg::Matrixd>(csys);}
+    osg::Matrixd getCSys() const;
     
   protected:
-    prm::Parameter csys;
+    std::unique_ptr<prm::Parameter> csys;
     std::unique_ptr<ann::CSysDragger> csysDragger;
     std::unique_ptr<ann::SeerShape> sShape;
     

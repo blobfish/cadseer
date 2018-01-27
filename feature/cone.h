@@ -20,6 +20,8 @@
 #ifndef FTR_CONE_H
 #define FTR_CONE_H
 
+#include <memory>
+
 #include <osg/ref_ptr>
 
 #include <feature/base.h>
@@ -30,6 +32,7 @@ namespace ann{class CSysDragger;}
 
 namespace ftr
 {
+  namespace prm{class Parameter;}
   class ConeBuilder;
   
   class Cone : public Base
@@ -42,11 +45,11 @@ namespace ftr
     void setHeight(const double &heightIn);
     void setParameters(const double &radius1In, const double &radius2In, const double &heightIn);
     void setCSys(const osg::Matrixd&);
-    double getRadius1() const {return static_cast<double>(radius1);}
-    double getRadius2() const {return static_cast<double>(radius2);}
-    double getHeight() const {return static_cast<double>(height);}
+    double getRadius1() const;
+    double getRadius2() const;
+    double getHeight() const;
     void getParameters (double &radius1Out, double &radius2Out, double &heightOut) const;
-    osg::Matrixd getCSys() const {return static_cast<osg::Matrixd>(csys);}
+    osg::Matrixd getCSys() const;
     
     virtual void updateModel(const UpdatePayload&) override;
     virtual Type getType() const override {return Type::Cone;}
@@ -57,10 +60,10 @@ namespace ftr
     void serialRead(const prj::srl::FeatureCone &sCone); //!<initializes this from sBox. not virtual, type already known.
     
   protected:
-    prm::Parameter radius1;
-    prm::Parameter radius2; //!< maybe zero.
-    prm::Parameter height;
-    prm::Parameter csys;
+    std::unique_ptr<prm::Parameter> radius1;
+    std::unique_ptr<prm::Parameter> radius2; //!< maybe zero.
+    std::unique_ptr<prm::Parameter> height;
+    std::unique_ptr<prm::Parameter> csys;
   
     std::unique_ptr<ann::CSysDragger> csysDragger;
     std::unique_ptr<ann::SeerShape> sShape;

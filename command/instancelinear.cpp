@@ -22,6 +22,7 @@
 #include <project/project.h>
 #include <message/observer.h>
 #include <selection/eventhandler.h>
+#include <feature/parameter.h>
 #include <feature/instancelinear.h>
 #include <command/instancelinear.h>
 

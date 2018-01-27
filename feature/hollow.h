@@ -32,6 +32,7 @@ namespace prj{namespace srl{class FeatureHollow;}}
 namespace ann{class SeerShape;}
 namespace ftr
 {
+  namespace prm{class Parameter;}
   class Hollow : public Base
   {
   public:
@@ -50,7 +51,7 @@ namespace ftr
     void removeHollowPick(const Pick&);
   private:
     static QIcon icon;
-    prm::Parameter offset;
+    std::unique_ptr<prm::Parameter> offset;
     osg::ref_ptr<lbr::PLabel> label; //!< graphic icon
     Picks hollowPicks;
     std::unique_ptr<ann::SeerShape> sShape;

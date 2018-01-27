@@ -37,6 +37,9 @@
 #include <project/serial/xsdcxxoutput/featurechamfer.h>
 #include <annex/seershape.h>
 #include <feature/shapecheck.h>
+#include <feature/updatepayload.h>
+#include <feature/parameter.h>
+#include <tools/featuretools.h>
 #include <feature/chamfer.h>
 
 using namespace ftr;
@@ -98,11 +101,13 @@ void Chamfer::updateModel(const UpdatePayload &payloadIn)
   lastUpdateLog.clear();
   try
   {
-    if (payloadIn.updateMap.count(InputType::target) != 1)
-      throw std::runtime_error("no parent for chamfer");
-    
-    const ann::SeerShape &targetSeerShape = 
-    payloadIn.updateMap.equal_range(InputType::target).first->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+    std::vector<const Base*> targetFeatures = payloadIn.getFeatures(InputType::target);
+    if (targetFeatures.size() != 1)
+      throw std::runtime_error("wrong number of parents");
+    const Base* tf = targetFeatures.front();
+    if (!tf->hasAnnex(ann::Type::SeerShape))
+      throw std::runtime_error("parent doesn't have seer shape");
+    const ann::SeerShape &targetSeerShape = tf->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     
     BRepFilletAPI_MakeChamfer chamferMaker(targetSeerShape.getRootOCCTShape());
     for (const auto &chamfer : symChamfers)
@@ -111,36 +116,52 @@ void Chamfer::updateModel(const UpdatePayload &payloadIn)
       bool labelDone = false; //set label position to first pick.
       for (const auto &pick : chamfer.picks)
       {
-        std::vector<uuid> resolvedEdgeIds = targetSeerShape.resolvePick(pick.edgePick.shapeHistory);
-        if (resolvedEdgeIds.empty())
+        auto resolvedEdgePicks = tls::resolvePicks(tf, pick.edgePick, payloadIn.shapeHistory);
+        std::vector<uuid> edgeIds;
+        for (const auto &p : resolvedEdgePicks)
         {
-          std::ostringstream s;
-          s << "Chamfer: can't find target edge id. Skipping id: " << gu::idToString(pick.edgePick.id) << std::endl;
-          lastUpdateLog += s.str();
-          continue;
+          if (p.second.is_nil())
+            continue;
+          edgeIds.push_back(p.second);
         }
-        assert(resolvedEdgeIds.size() == 1); //want to examine this condition.
         
-        std::vector<uuid> resolvedFaceIds = targetSeerShape.resolvePick(pick.facePick.shapeHistory);
-        if (resolvedFaceIds.empty())
+        auto resolvedFacePicks = tls::resolvePicks(tf, pick.facePick, payloadIn.shapeHistory);
+        std::vector<uuid> faceIds;
+        for (const auto &p : resolvedFacePicks)
         {
-          std::ostringstream s;
-          s << "Chamfer: can't find target face id. Skipping id: " << gu::idToString(pick.facePick.id) << std::endl;
-          lastUpdateLog += s.str();
-          continue;
+          if (p.second.is_nil())
+            continue;
+          faceIds.push_back(p.second);
         }
-        assert(resolvedFaceIds.size() == 1); //want to examine this condition.
         
-        updateShapeMap(resolvedEdgeIds.front(), pick.edgePick.shapeHistory);
-        updateShapeMap(resolvedFaceIds.front(), pick.facePick.shapeHistory);
-        TopoDS_Edge edge = TopoDS::Edge(targetSeerShape.findShapeIdRecord(resolvedEdgeIds.front()).shape);
-        TopoDS_Face face = TopoDS::Face(targetSeerShape.findShapeIdRecord(resolvedFaceIds.front()).shape);
-        chamferMaker.Add(static_cast<double>(*(chamfer.distance)), edge, face);
-        //update location of parameter label.
-        if (!labelDone)
+        for (const auto &eid : edgeIds)
         {
-          labelDone = true;
-          chamfer.label->setMatrix(osg::Matrixd::translate(pick.edgePick.getPoint(TopoDS::Edge(edge))));
+          uuid faceId = gu::createNilId();
+          std::vector<uuid> parentFaces = targetSeerShape.useGetParentsOfType(eid, TopAbs_FACE);
+          if (parentFaces.empty())
+            throw std::runtime_error("no parent faces of edge");
+          std::vector<uuid> intersectionSet;
+          std::set_intersection(faceIds.begin(), faceIds.end(), parentFaces.begin(), parentFaces.end(), std::back_inserter(intersectionSet));
+          if (intersectionSet.empty())
+            faceId = parentFaces.front();
+          if (intersectionSet.size() > 1)
+            std::cerr << "WARNING: more than 1 reference face in Chamfer::updateModel" << std::endl;
+          faceId = intersectionSet.front();
+          
+          assert(targetSeerShape.hasShapeIdRecord(eid));
+          assert(targetSeerShape.hasShapeIdRecord(faceId));
+          
+          updateShapeMap(eid, pick.edgePick.shapeHistory);
+          updateShapeMap(faceId, pick.facePick.shapeHistory);
+          TopoDS_Edge edge = TopoDS::Edge(targetSeerShape.findShapeIdRecord(eid).shape);
+          TopoDS_Face face = TopoDS::Face(targetSeerShape.findShapeIdRecord(faceId).shape);
+          chamferMaker.Add(static_cast<double>(*(chamfer.distance)), edge, face);
+          //update location of parameter label.
+          if (!labelDone)
+          {
+            labelDone = true;
+            chamfer.label->setMatrix(osg::Matrixd::translate(pick.edgePick.getPoint(TopoDS::Edge(edge))));
+          }
         }
       }
     }

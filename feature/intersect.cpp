@@ -27,6 +27,7 @@
 #include <feature/shapecheck.h>
 #include <annex/seershape.h>
 #include <annex/intersectionmapper.h>
+#include <feature/updatepayload.h>
 #include <feature/intersect.h>
 
 using boost::uuids::uuid;

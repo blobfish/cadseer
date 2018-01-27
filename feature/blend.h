@@ -25,7 +25,6 @@
 #include <osg/ref_ptr>
 
 #include <library/plabel.h>
-#include <feature/parameter.h>
 #include <feature/pick.h>
 #include <feature/base.h>
 
@@ -37,6 +36,7 @@ namespace ann{class SeerShape;}
 namespace ftr
 {
   class ShapeHistory;
+  namespace prm{class Parameter;}
 
 struct SimpleBlend
 {

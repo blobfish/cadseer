@@ -33,6 +33,8 @@
 #include <feature/dieset.h>
 #include <annex/seershape.h>
 #include <project/serial/xsdcxxoutput/featurequote.h>
+#include <feature/updatepayload.h>
+#include <feature/parameter.h>
 #include <feature/quote.h>
 
 using namespace ftr;
@@ -41,8 +43,8 @@ using boost::filesystem::path;
 QIcon Quote::icon;
 
 Quote::Quote() : Base(),
-tFile("Template File", prf::manager().rootPtr->features().quote().get().templateSheet(), prm::PathType::Read),
-oFile("Output File",  path(static_cast<app::Application*>(qApp)->getProject()->getSaveDirectory()) /= "Quote.ods", prm::PathType::Write)
+tFile(new prm::Parameter("Template File", prf::manager().rootPtr->features().quote().get().templateSheet(), prm::PathType::Read)),
+oFile(new prm::Parameter("Output File",  path(static_cast<app::Application*>(qApp)->getProject()->getSaveDirectory()) /= "Quote.ods", prm::PathType::Write))
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionQuote.svg");
@@ -62,15 +64,15 @@ oFile("Output File",  path(static_cast<app::Application*>(qApp)->getProject()->g
   quoteData.processType = "aProcessType";
   quoteData.annualVolume = 0;
   
-  parameterVector.push_back(&tFile);
-  parameterVector.push_back(&oFile);
+  parameters.push_back(tFile.get());
+  parameters.push_back(oFile.get());
   
-  tLabel = new lbr::PLabel(&tFile);
+  tLabel = new lbr::PLabel(tFile.get());
   tLabel->showName = true;
   tLabel->valueHasChanged();
   overlaySwitch->addChild(tLabel.get());
   
-  oLabel = new lbr::PLabel(&oFile);
+  oLabel = new lbr::PLabel(oFile.get());
   oLabel->showName = true;
   oLabel->valueHasChanged();
   overlaySwitch->addChild(oLabel.get());
@@ -110,7 +112,7 @@ void Quote::updateModel(const UpdatePayload &payloadIn)
     osg::Vec3d oLoc = gu::toOsg(sbbox.getCenter()) + osg::Vec3d(0.0, -50.0, 0.0);
     oLabel->setMatrix(osg::Matrixd::translate(oLoc));
     
-    if (!boost::filesystem::exists(static_cast<path>(tFile)))
+    if (!boost::filesystem::exists(static_cast<path>(*tFile)))
       throw std::runtime_error("template file doesn't exist");
     /* we change the entries in a specific sheet and these values are linked into
     * a customer designed sheet. The links are not updated when we open the sheet in calc by default.
@@ -119,12 +121,12 @@ void Quote::updateModel(const UpdatePayload &payloadIn)
     */
     boost::filesystem::copy_file
     (
-      static_cast<path>(tFile),
-      static_cast<path>(oFile),
+      static_cast<path>(*tFile),
+      static_cast<path>(*oFile),
       boost::filesystem::copy_option::overwrite_if_exists
     );
     
-    libzippp::ZipArchive zip(static_cast<path>(oFile).string());
+    libzippp::ZipArchive zip(static_cast<path>(*oFile).string());
     zip.open(libzippp::ZipArchive::WRITE);
     for(const auto &e : zip.getEntries())
     {
@@ -220,8 +222,8 @@ void Quote::serialWrite(const QDir &dIn)
   prj::srl::FeatureQuote qo
   (
     Base::serialOut(),
-    tFile.serialOut(),
-    oFile.serialOut(),
+    tFile->serialOut(),
+    oFile->serialOut(),
     pFile.string(),
     quoteData.quoteNumber,
     quoteData.customerName.toStdString(),
@@ -246,8 +248,8 @@ void Quote::serialWrite(const QDir &dIn)
 void Quote::serialRead(const prj::srl::FeatureQuote &qIn)
 {
   Base::serialIn(qIn.featureBase());
-  tFile.serialIn(qIn.templateFile());
-  oFile.serialIn(qIn.outFile());
+  tFile->serialIn(qIn.templateFile());
+  oFile->serialIn(qIn.outFile());
   pFile = qIn.pictureFile();
   quoteData.quoteNumber = qIn.quoteNumber();
   quoteData.customerName = QString::fromStdString(qIn.customerName());

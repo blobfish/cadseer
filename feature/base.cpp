@@ -21,6 +21,7 @@
 #include <QTextStream>
 
 #include <boost/variant/variant.hpp>
+#include <boost/filesystem/path.hpp>
 
 #include <BRep_Builder.hxx>
 #include <TopoDS_Compound.hxx>
@@ -42,6 +43,7 @@
 #include <message/message.h>
 #include <message/observer.h>
 #include <annex/seershape.h>
+#include <feature/parameter.h>
 #include <feature/shapehistory.h>
 #include <feature/seershapeinfo.h>
 #include <project/serial/xsdcxxoutput/featurebase.h>
@@ -398,7 +400,7 @@ QString Base::buildFilePathName(const QDir &dIn) const
 
 bool Base::hasParameter(const QString &nameIn) const
 {
-  for (const auto &p : parameterVector)
+  for (const auto &p : parameters)
     if (p->getName() == nameIn)
       return true;
     
@@ -407,7 +409,7 @@ bool Base::hasParameter(const QString &nameIn) const
 
 prm::Parameter* Base::getParameter(const QString &nameIn) const
 {
-  for (const auto &p : parameterVector)
+  for (const auto &p : parameters)
     if (p->getName() == nameIn)
       return p;
   assert(0); //no parameter by that name. use hasParameter.
@@ -416,7 +418,7 @@ prm::Parameter* Base::getParameter(const QString &nameIn) const
 
 bool Base::hasParameter(const boost::uuids::uuid &idIn) const
 {
-  for (const auto &p : parameterVector)
+  for (const auto &p : parameters)
     if (p->getId() == idIn)
       return true;
     
@@ -425,7 +427,7 @@ bool Base::hasParameter(const boost::uuids::uuid &idIn) const
 
 prm::Parameter* Base::getParameter(const boost::uuids::uuid &idIn) const
 {
-  for (const auto &p : parameterVector)
+  for (const auto &p : parameters)
     if (p->getId() == idIn)
       return p;
   assert(0); //no parameter by that name. use hasParameter.
@@ -453,10 +455,10 @@ QTextStream& Base::getInfo(QTextStream &stream) const
         << "    Update was successful: " << boolString(isSuccess()) << endl
         << endl << "Last Update: " << QString::fromStdString(lastUpdateLog);
     
-    if (!parameterVector.empty())
+    if (!parameters.empty())
     {
       stream << endl << "Parameters:" << endl;
-      for (const auto &p : parameterVector)
+      for (const auto &p : parameters)
       {
           stream
               << "    Parameter name: " << p->getName()

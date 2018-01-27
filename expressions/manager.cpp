@@ -468,7 +468,7 @@ void Manager::featureRemovedDispatched(const msg::Message &messageIn)
   prj::Message message = boost::get<prj::Message>(messageIn.payload);
   uuid featureId = message.feature->getId();
   
-  const ftr::prm::Vector &pVector = static_cast<app::Application*>(qApp)->getProject()->findFeature(featureId)->getParameterVector();
+  const ftr::prm::Parameters &pVector = static_cast<app::Application*>(qApp)->getProject()->findFeature(featureId)->getParameters();
   
   for (const auto &p : pVector)
   {

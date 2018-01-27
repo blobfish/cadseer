@@ -110,6 +110,12 @@ ShapeVectorCast::ShapeVectorCast(const TopTools_IndexedMapOfShape &mapIn)
     shapeVector.push_back(mapIn(i));
 }
 
+ShapeVectorCast::ShapeVectorCast(const TopTools_ListOfShape &listIn)
+{
+  for (auto it = listIn.cbegin(); it != listIn.cend(); ++it)
+    shapeVector.push_back(*it);
+}
+
 ShapeVectorCast::operator ShapeVector () const
 {
   return shapeVector;
@@ -188,6 +194,30 @@ ShapeVectorCast::operator VertexVector () const
     if (currentShape.ShapeType() == TopAbs_VERTEX)
       out.push_back(TopoDS::Vertex(currentShape));
   }
+  return out;
+}
+
+ShapeVectorCast::operator TopTools_MapOfShape () const
+{
+  TopTools_MapOfShape out;
+  for (const auto &s : shapeVector)
+    out.Add(s);
+  return out;
+}
+
+ShapeVectorCast::operator TopTools_IndexedMapOfShape () const
+{
+  TopTools_IndexedMapOfShape out;
+  for (const auto &s : shapeVector)
+    out.Add(s);
+  return out;
+}
+
+ShapeVectorCast::operator TopTools_ListOfShape () const
+{
+  TopTools_ListOfShape out;
+  for (const auto &s : shapeVector)
+    out.Append(s);
   return out;
 }
 

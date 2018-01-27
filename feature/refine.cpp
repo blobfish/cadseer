@@ -22,6 +22,7 @@
 
 #include <project/serial/xsdcxxoutput/featurerefine.h>
 #include <annex/seershape.h>
+#include <feature/updatepayload.h>
 #include <feature/refine.h>
 
 using namespace ftr;

@@ -31,6 +31,8 @@
 #include <feature/datumplane.h>
 #include <feature/parameter.h>
 #include <project/serial/xsdcxxoutput/featureinstancemirror.h>
+#include <tools/featuretools.h>
+#include <feature/updatepayload.h>
 #include <feature/instancemirror.h>
 
 using namespace ftr;
@@ -66,8 +68,8 @@ includeSource(QObject::tr("Include Source"), true)
   includeSourceLabel->valueHasChanged();
   overlaySwitch->addChild(includeSourceLabel.get());
   
-  parameterVector.push_back(&csys);
-  parameterVector.push_back(&includeSource);
+  parameters.push_back(&csys);
+  parameters.push_back(&includeSource);
   
   annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
   annexes.insert(std::make_pair(ann::Type::InstanceMapper, iMapper.get()));
@@ -102,102 +104,69 @@ void InstanceMirror::updateModel(const UpdatePayload &payloadIn)
   lastUpdateLog.clear();
   try
   {
-    if (payloadIn.updateMap.count(InputType::target) != 1)
-      throw std::runtime_error("no parent");
-    
-    const Base *targetFeature = payloadIn.updateMap.equal_range(InputType::target).first->second;
-    if (!targetFeature->hasAnnex(ann::Type::SeerShape))
+    std::vector<const Base*> tfs = payloadIn.getFeatures(InputType::target);
+    if (tfs.size() != 1)
+      throw std::runtime_error("wrong number of parents");
+    if (!tfs.front()->hasAnnex(ann::Type::SeerShape))
       throw std::runtime_error("parent doesn't have seer shape.");
-    const ann::SeerShape &targetSeerShape = targetFeature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+    const ann::SeerShape &tss = tfs.front()->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     
     
     //get the shapes to mirror.
     occt::ShapeVector tShapes;
-    uuid shapeResolvedId = gu::createNilId();
     if (shapePick.id.is_nil())
     {
-      tShapes = targetSeerShape.useGetNonCompoundChildren();
+      tShapes = tss.useGetNonCompoundChildren();
     }
     else
     {
-      if (targetSeerShape.hasShapeIdRecord(shapePick.id))
-        shapeResolvedId = shapePick.id;
-      else
+      auto resolvedPicks = tls::resolvePicks(tfs.front(), shapePick, payloadIn.shapeHistory);
+      for (const auto &p : resolvedPicks)
       {
-        for (const auto &hid : shapePick.shapeHistory.getAllIds())
-        {
-          if (targetSeerShape.hasShapeIdRecord(hid))
-          {
-            shapeResolvedId = hid;
-            break;
-          }
-        }
+        if (p.second.is_nil())
+          continue;
+        assert(tss.hasShapeIdRecord(p.second));
+        if (!tss.hasShapeIdRecord(p.second))
+          continue;
+        tShapes.push_back(tss.findShapeIdRecord(p.second).shape);
       }
-      if (shapeResolvedId.is_nil())
-      {
-        for (const auto &hid : shapePick.shapeHistory.getAllIds())
-        {
-          if (!payloadIn.shapeHistory.hasShape(hid))
-            continue;
-          shapeResolvedId = payloadIn.shapeHistory.devolve(targetFeature->getId(), hid);
-          if (shapeResolvedId.is_nil())
-            shapeResolvedId = payloadIn.shapeHistory.evolve(targetFeature->getId(), hid);
-          if (!shapeResolvedId.is_nil())
-            break;
-        }
-      }
-      if (shapeResolvedId.is_nil())
-        throw std::runtime_error("can't find shape to instance nil.");
-      tShapes.push_back(targetSeerShape.getOCCTShape(shapeResolvedId));
     }
-    assert(!tShapes.empty()); //exception should by pass this.
     if (tShapes.empty())
-      throw std::runtime_error("WARNING: No shape found.");
+      throw std::runtime_error("No shapes found.");
     
     
     //get the plane
     osg::Matrixd workSystem = static_cast<osg::Matrixd>(csys);
-    if (payloadIn.updateMap.count(InstanceMirror::mirrorPlane) == 1)
+    std::vector<const Base*> mfs = payloadIn.getFeatures(InstanceMirror::mirrorPlane);
+    if (mfs.size() == 1)
     {
       //we have a mirror plane selection so make sure the csysdragger is hidden.
       overlaySwitch->removeChild(csysDragger->dragger.get()); //ok if not present.
       
-      const Base *mirrorFeature = payloadIn.updateMap.equal_range(InstanceMirror::mirrorPlane).first->second;
-      if (mirrorFeature->getType() == Type::DatumPlane)
+      if (mfs.front()->getType() == Type::DatumPlane)
       {
-        const DatumPlane *dp = dynamic_cast<const DatumPlane *>(mirrorFeature);
+        const DatumPlane *dp = dynamic_cast<const DatumPlane *>(mfs.front());
         workSystem = dp->getSystem();
       }
-      else if (mirrorFeature->hasAnnex(ann::Type::SeerShape))
+      else if (mfs.front()->hasAnnex(ann::Type::SeerShape))
       {
-        const ann::SeerShape &mss = mirrorFeature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+        const ann::SeerShape &mss = mfs.front()->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
         if (planePick.id.is_nil())
           throw std::runtime_error("plane pick id is nil");
 
         TopoDS_Shape dsShape;
-        std::vector<uuid> pickIds = planePick.shapeHistory.getAllIds();
-        assert(pickIds.front() == planePick.id); //double check.
-        for (const auto &pid : pickIds) //test all the pick ids against feature first.
+        auto resolvedPicks = tls::resolvePicks(mfs.front(), planePick, payloadIn.shapeHistory);
+        for (const auto &p : resolvedPicks)
         {
-          if (mss.hasShapeIdRecord(pid))
-          {
-            dsShape = mss.getOCCTShape(pid);
-            break;
-          }
+          if (p.second.is_nil())
+            continue;
+          assert(mss.hasShapeIdRecord(p.second));
+          if (!mss.hasShapeIdRecord(p.second))
+            continue;
+          dsShape = mss.findShapeIdRecord(p.second).shape;
+          break;
         }
-        if (dsShape.IsNull())
-        {
-          for (const auto &pid : pickIds) // now use picks against current history.
-          {
-            uuid tid = payloadIn.shapeHistory.devolve(mirrorFeature->getId(), pid);
-            if (tid.is_nil())
-              tid = payloadIn.shapeHistory.evolve(mirrorFeature->getId(), pid);
-            if (tid.is_nil())
-              continue;
-            dsShape = mss.getOCCTShape(tid);
-            break;
-          }
-        }
+
         if (dsShape.IsNull())
           throw std::runtime_error("couldn't find occt shape");
         if(dsShape.ShapeType() == TopAbs_FACE)
@@ -245,12 +214,16 @@ void InstanceMirror::updateModel(const UpdatePayload &payloadIn)
     
     TopoDS_Compound result = occt::ShapeVectorCast(out);
     sShape->setOCCTShape(result);
-    iMapper->startMapping(targetSeerShape, shapeResolvedId,  payloadIn.shapeHistory);
-    std::size_t count = 0;
-    for (const auto &si : out)
+    
+    for (const auto &s : tShapes)
     {
-      iMapper->mapIndex(*sShape, si, count);
-      count++;
+      iMapper->startMapping(tss, tss.findShapeIdRecord(s).id,  payloadIn.shapeHistory);
+      std::size_t count = 0;
+      for (const auto &si : out)
+      {
+        iMapper->mapIndex(*sShape, si, count);
+        count++;
+      }
     }
     
     occt::BoundingBox bb(tShapes);

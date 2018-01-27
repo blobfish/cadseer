@@ -36,7 +36,9 @@
 #include <TopoDS_Vertex.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
+#include <TopTools_ListOfShape.hxx>
 #include <Bnd_Box.hxx>
+
 
 namespace occt
 {
@@ -106,6 +108,7 @@ namespace occt
     ShapeVectorCast(const VertexVector &vertexVectorIn);
     ShapeVectorCast(const TopTools_MapOfShape &mapIn);
     ShapeVectorCast(const TopTools_IndexedMapOfShape &mapIn);
+    ShapeVectorCast(const TopTools_ListOfShape &listIn);
     
     //these will filter for appropriate types.
     operator ShapeVector() const;
@@ -116,6 +119,9 @@ namespace occt
     operator WireVector() const;
     operator EdgeVector() const;
     operator VertexVector() const;
+    operator TopTools_MapOfShape() const;
+    operator TopTools_IndexedMapOfShape() const;
+    operator TopTools_ListOfShape() const;
     
   private:
     ShapeVector shapeVector;

@@ -35,6 +35,8 @@
 #include <annex/instancemapper.h>
 #include <feature/parameter.h>
 #include <project/serial/xsdcxxoutput/featureinstancepolar.h>
+#include <tools/featuretools.h>
+#include <feature/updatepayload.h>
 #include <feature/instancepolar.h>
 
 using namespace ftr;
@@ -62,20 +64,20 @@ includeSource(QObject::tr("Include Source"), true)
   
   count.setConstraint(prm::Constraint::buildNonZeroPositive());
   count.connectValue(boost::bind(&InstancePolar::setModelDirty, this));
-  parameterVector.push_back(&count);
+  parameters.push_back(&count);
   
   csys.connectValue(boost::bind(&InstancePolar::setModelDirty, this));
-  parameterVector.push_back(&csys);
+  parameters.push_back(&csys);
   
   angle.setConstraint(prm::Constraint::buildNonZeroAngle());
   angle.connectValue(boost::bind(&InstancePolar::setModelDirty, this));
-  parameterVector.push_back(&angle);
+  parameters.push_back(&angle);
   
   inclusiveAngle.connectValue(boost::bind(&InstancePolar::setModelDirty, this));
-  parameterVector.push_back(&inclusiveAngle);
+  parameters.push_back(&inclusiveAngle);
   
   includeSource.connectValue(boost::bind(&InstancePolar::setModelDirty, this));
-  parameterVector.push_back(&includeSource);
+  parameters.push_back(&includeSource);
   
   countLabel = new lbr::PLabel(&count);
   countLabel->showName = true;
@@ -132,94 +134,61 @@ void InstancePolar::updateModel(const UpdatePayload &payloadIn)
   lastUpdateLog.clear();
   try
   {
-    if (payloadIn.updateMap.count(InputType::target) != 1)
-      throw std::runtime_error("no parent");
-    
-    const Base *targetFeature = payloadIn.updateMap.equal_range(InputType::target).first->second;
-    if (!targetFeature->hasAnnex(ann::Type::SeerShape))
+    std::vector<const Base*> tfs = payloadIn.getFeatures(InputType::target);
+    if (tfs.size() != 1)
+      throw std::runtime_error("wrong number of parents");
+    if (!tfs.front()->hasAnnex(ann::Type::SeerShape))
       throw std::runtime_error("parent doesn't have seer shape.");
-    const ann::SeerShape &targetSeerShape = targetFeature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+    const ann::SeerShape &tss = tfs.front()->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     
     //get the shapes to mirror.
     occt::ShapeVector tShapes;
-    uuid shapeResolvedId = gu::createNilId();
     if (shapePick.id.is_nil())
     {
-      tShapes = targetSeerShape.useGetNonCompoundChildren();
+      tShapes = tss.useGetNonCompoundChildren();
     }
     else
     {
-      if (targetSeerShape.hasShapeIdRecord(shapePick.id))
-        shapeResolvedId = shapePick.id;
-      else
+      auto resolvedPicks = tls::resolvePicks(tfs.front(), shapePick, payloadIn.shapeHistory);
+      for (const auto &p : resolvedPicks)
       {
-        for (const auto &hid : shapePick.shapeHistory.getAllIds())
-        {
-          if (targetSeerShape.hasShapeIdRecord(hid))
-          {
-            shapeResolvedId = hid;
-            break;
-          }
-        }
+        if (p.second.is_nil())
+          continue;
+        assert(tss.hasShapeIdRecord(p.second));
+        if (!tss.hasShapeIdRecord(p.second))
+          continue;
+        tShapes.push_back(tss.findShapeIdRecord(p.second).shape);
       }
-      if (shapeResolvedId.is_nil())
-      {
-        for (const auto &hid : shapePick.shapeHistory.getAllIds())
-        {
-          if (!payloadIn.shapeHistory.hasShape(hid))
-            continue;
-          shapeResolvedId = payloadIn.shapeHistory.devolve(targetFeature->getId(), hid);
-          if (shapeResolvedId.is_nil())
-            shapeResolvedId = payloadIn.shapeHistory.evolve(targetFeature->getId(), hid);
-          if (!shapeResolvedId.is_nil())
-            break;
-        }
-      }
-      if (shapeResolvedId.is_nil())
-        throw std::runtime_error("can't find shape to instance nil.");
-      tShapes.push_back(targetSeerShape.getOCCTShape(shapeResolvedId));
     }
-    assert(!tShapes.empty()); //exception should by pass this.
     if (tShapes.empty())
-      throw std::runtime_error("WARNING: No shape found.");
-    
+      throw std::runtime_error("No shapes found.");
     
     osg::Matrixd workSystem = static_cast<osg::Matrixd>(csys); // zaxis is the rotation.
-    if (payloadIn.updateMap.count(InstancePolar::rotationAxis) == 1)
+    std::vector<const Base*> rafs = payloadIn.getFeatures(InstancePolar::rotationAxis);
+    if (rafs.size() == 1)
     {
       //we have a rotation axis selection so make sure the csysdragger is hidden.
       overlaySwitch->removeChild(csysDragger->dragger.get()); //ok if not present.
       
-      const Base *axisFeature = payloadIn.updateMap.equal_range(InstancePolar::rotationAxis).first->second;
-      if (!axisFeature->hasAnnex(ann::Type::SeerShape)) //no datum axis exists at this time.
+      if (!rafs.front()->hasAnnex(ann::Type::SeerShape)) //no datum axis exists at this time.
         throw std::runtime_error("Input feature doesn't have seershape");
       if (axisPick.id.is_nil())
         throw std::runtime_error("No id for axis pick");
-      const ann::SeerShape &ass = axisFeature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+      const ann::SeerShape &ass = rafs.front()->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
       
       TopoDS_Shape dsShape;
-      std::vector<uuid> pickIds = axisPick.shapeHistory.getAllIds();
-      assert(pickIds.front() == axisPick.id); //double check.
-      for (const auto &pid : pickIds) //test all the pick ids against feature first.
+      
+      
+      auto resolvedPicks = tls::resolvePicks(rafs.front(), axisPick, payloadIn.shapeHistory);
+      for (const auto &p : resolvedPicks)
       {
-        if (ass.hasShapeIdRecord(pid))
-        {
-          dsShape = ass.getOCCTShape(pid);
-          break;
-        }
-      }
-      if (dsShape.IsNull())
-      {
-        for (const auto &pid : pickIds) // now use picks against current history.
-        {
-          uuid tid = payloadIn.shapeHistory.devolve(axisFeature->getId(), pid);
-          if (tid.is_nil())
-            tid = payloadIn.shapeHistory.evolve(axisFeature->getId(), pid);
-          if (tid.is_nil())
-            continue;
-          dsShape = ass.getOCCTShape(tid);
-          break;
-        }
+        if (p.second.is_nil())
+          continue;
+        assert(ass.hasShapeIdRecord(p.second));
+        if (!ass.hasShapeIdRecord(p.second))
+          continue;
+        dsShape = ass.findShapeIdRecord(p.second).shape;
+        break;
       }
       if (dsShape.IsNull())
         throw std::runtime_error("couldn't find occt shape");
@@ -294,12 +263,16 @@ void InstancePolar::updateModel(const UpdatePayload &payloadIn)
     
     TopoDS_Compound result = occt::ShapeVectorCast(out);
     sShape->setOCCTShape(result);
-    iMapper->startMapping(targetSeerShape, shapeResolvedId,  payloadIn.shapeHistory);
-    std::size_t sc = 0;
-    for (const auto &si : out)
+    
+    for (const auto &s : tShapes)
     {
-      iMapper->mapIndex(*sShape, si, sc);
-      sc++;
+      iMapper->startMapping(tss, tss.findShapeIdRecord(s).id,  payloadIn.shapeHistory);
+      std::size_t sc = 0;
+      for (const auto &si : out)
+      {
+        iMapper->mapIndex(*sShape, si, sc);
+        sc++;
+      }
     }
     
     //update label locations.

@@ -25,6 +25,7 @@
 #include <tools/idtools.h>
 #include <selection/container.h>
 #include <feature/pick.h>
+#include <feature/updatepayload.h>
 #include <feature/base.h>
 
 class QDir;
@@ -35,6 +36,7 @@ namespace prj{namespace srl{class SolverChoice; class FeatureDatumPlane;}}
 
 namespace ftr
 {
+  namespace prm{class Parameter;}
   class ShapeHistory;
   
   enum class DatumPlaneType
@@ -75,7 +77,7 @@ namespace ftr
     DatumPlaneGenre(){};
     virtual ~DatumPlaneGenre(){};
     virtual DatumPlaneType getType() = 0;
-    virtual osg::Matrixd solve(const UpdatePayload::UpdateMap&) = 0; //throw std::runtime;
+    virtual osg::Matrixd solve(const UpdatePayload&) = 0; //throw std::runtime;
     virtual lbr::IPGroup* getIPGroup(){return nullptr;}
     virtual void connect(Base *){}
     virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &, const ShapeHistory&) = 0;
@@ -89,7 +91,7 @@ namespace ftr
     DatumPlanePlanarOffset();
     virtual ~DatumPlanePlanarOffset() override;
     virtual DatumPlaneType getType() override {return DatumPlaneType::PlanarOffset;}
-    virtual osg::Matrixd solve(const UpdatePayload::UpdateMap&) override;
+    virtual osg::Matrixd solve(const UpdatePayload&) override;
     virtual lbr::IPGroup* getIPGroup() override;
     virtual void connect(Base *) override;
     virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &, const ShapeHistory&) override;
@@ -108,7 +110,7 @@ namespace ftr
     DatumPlanePlanarCenter();
     virtual ~DatumPlanePlanarCenter() override;
     virtual DatumPlaneType getType() override {return DatumPlaneType::PlanarCenter;}
-    virtual osg::Matrixd solve(const UpdatePayload::UpdateMap&) override;
+    virtual osg::Matrixd solve(const UpdatePayload&) override;
     virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &, const ShapeHistory&) override;
     virtual void serialOut(prj::srl::SolverChoice &solverChoice) override;
     
@@ -124,7 +126,7 @@ namespace ftr
     DatumPlanePlanarParallelThroughEdge();
     virtual ~DatumPlanePlanarParallelThroughEdge() override;
     virtual DatumPlaneType getType() override {return DatumPlaneType::PlanarParallelThroughEdge;}
-    virtual osg::Matrixd solve(const UpdatePayload::UpdateMap&) override;
+    virtual osg::Matrixd solve(const UpdatePayload&) override;
     virtual DatumPlaneConnections setUpFromSelection(const slc::Containers &, const ShapeHistory&) override;
     virtual void serialOut(prj::srl::SolverChoice &solverChoice) override;
     
@@ -152,7 +154,7 @@ namespace ftr
     
     void setSolver(std::shared_ptr<DatumPlaneGenre> solverIn);
     osg::Matrixd getSystem() const {return transform->getMatrix();}
-    double getRadius() const {return static_cast<double>(*radius);}
+    double getRadius() const;
     
     static std::vector<std::shared_ptr<DatumPlaneGenre> > solversFromSelection(const slc::Containers &);
     

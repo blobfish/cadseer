@@ -31,6 +31,7 @@
 
 #include <feature/states.h>
 #include <feature/inputtype.h>
+#include <feature/updatepayload.h>
 #include <tools/graphtools.h>
 #include <globalutilities.h>
 

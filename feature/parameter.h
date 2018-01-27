@@ -229,7 +229,7 @@ namespace ftr
       mutable ConstantChangedSignal constantChangedSignal;
     };
     
-    typedef std::vector<Parameter*> Vector;
+    typedef std::vector<Parameter*> Parameters;
   }
 }
 

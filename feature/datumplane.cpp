@@ -42,8 +42,11 @@
 #include <library/ipgroup.h>
 #include <modelviz/datumplane.h>
 #include <annex/seershape.h>
-#include <feature/datumplane.h>
+#include <feature/updatepayload.h>
 #include <project/serial/xsdcxxoutput/featuredatumplane.h>
+#include <tools/featuretools.h>
+#include <feature/parameter.h>
+#include <feature/datumplane.h>
 
 using namespace ftr;
 
@@ -106,46 +109,46 @@ DatumPlanePlanarOffset::DatumPlanePlanarOffset():
 DatumPlanePlanarOffset::~DatumPlanePlanarOffset()
 {}
 
-osg::Matrixd DatumPlanePlanarOffset::solve(const UpdatePayload::UpdateMap &mapIn)
+osg::Matrixd DatumPlanePlanarOffset::solve(const UpdatePayload &payloadIn)
 {
-  if (mapIn.size() != 1)
-    throw std::runtime_error("DatumPlanePlanarOffset: wrong number of inputs");
-  
-  UpdatePayload::UpdateMap::const_iterator it = mapIn.find(InputType::create);
-  if (it == mapIn.end())
-    throw std::runtime_error("DatumPlanePlanarOffset: no input feature");
-  
-  const Base* parentFeature = it->second;
+  std::vector<const Base*> features = payloadIn.getFeatures(InputType::create);
+  if (features.size() != 1)
+    throw std::runtime_error("DatumPlanePlanarOffset: Wrong number of 'create' inputs");
   
   osg::Matrixd faceSystem, datumSystem;
   faceSystem = datumSystem = osg::Matrixd::identity();
-  if (parentFeature->getType() == Type::DatumPlane)
+  if (features.front()->getType() == Type::DatumPlane)
   {
-    const DatumPlane *inputPlane = dynamic_cast<const DatumPlane*>(parentFeature);
+    const DatumPlane *inputPlane = dynamic_cast<const DatumPlane*>(features.front());
     assert(inputPlane);
     faceSystem = inputPlane->getSystem();
     
     // just size this plane to the source plane.
     radius = inputPlane->getRadius();
   }
-  else //assuming seer shape.
+  else //look for seer shape.
   {
     if (facePick.id.is_nil())
       throw std::runtime_error("DatumPlanePlanarOffset: nil faceId");
-    assert(parentFeature->hasAnnex(ann::Type::SeerShape));
-    const ann::SeerShape &shape = parentFeature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+    if (!features.front()->hasAnnex(ann::Type::SeerShape))
+      throw std::runtime_error("Parent feature doesn't have seer shape.");
+    const ann::SeerShape &shape = features.front()->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     
-    std::vector<uuid> resolvedFaceIds = shape.resolvePick(facePick.shapeHistory);
-    if (resolvedFaceIds.empty())
+    auto resolvedPicks = tls::resolvePicks(features.front(), facePick, payloadIn.shapeHistory);
+    if (resolvedPicks.front().second.is_nil())
     {
       std::ostringstream stream;
       stream << "DatumPlanePlanarOffset: can't find target face id. Skipping id: " << gu::idToString(facePick.id);
       throw std::runtime_error(stream.str());
     }
-    assert(resolvedFaceIds.size() == 1);
-    
-    const TopoDS_Shape &faceShape = shape.getOCCTShape(resolvedFaceIds.front());
+    assert(shape.hasShapeIdRecord(resolvedPicks.front().second));
+    if (!shape.hasShapeIdRecord(resolvedPicks.front().second))
+      throw std::runtime_error("DatumPlanePlanarOffset: seer shape doesn't have id");
+      
+    const TopoDS_Shape &faceShape = shape.getOCCTShape(resolvedPicks.front().second);
     assert(faceShape.ShapeType() == TopAbs_FACE);
+    if (faceShape.ShapeType() != TopAbs_FACE)
+      throw std::runtime_error("DatumPlanePlanarOffset: shape is not a face");
     
     //get coordinate system
     BRepAdaptor_Surface adaptor(TopoDS::Face(faceShape));
@@ -241,132 +244,108 @@ DatumPlanePlanarCenter::DatumPlanePlanarCenter()
 DatumPlanePlanarCenter::~DatumPlanePlanarCenter()
   {}
 
-osg::Matrixd DatumPlanePlanarCenter::solve(const UpdatePayload::UpdateMap &mapIn)
+osg::Matrixd DatumPlanePlanarCenter::solve(const UpdatePayload &payloadIn)
 {
+  std::vector<const Base*> features = payloadIn.getFeatures(InputType::create);
+  if (features.empty() || features.size() > 2)
+    throw std::runtime_error("DatumPlanePlanarCenter: Wrong number of 'create' inputs");
+  
   osg::Matrixd face1System, face2System;
   face1System = face2System = osg::Matrixd::identity();
   double tempRadius = 1.0;
   
-  if (mapIn.size() == 1)
+  Picks picks;
+  if (!facePick1.id.is_nil())
+    picks.push_back(facePick1);
+  if (!facePick2.id.is_nil())
+  picks.push_back(facePick2);
+  auto resolvedPicks = tls::resolvePicks(features, picks, payloadIn.shapeHistory);
+  
+  if (features.size() == 1)
   {
     //note: can't do a center with only 1 datum plane. so we know this condition must be a shape.
-    UpdatePayload::UpdateMap::const_iterator it = mapIn.find(InputType::create);
-    if (it == mapIn.end())
-      throw std::runtime_error("DatumPlanePlanarCenter: Conflict between map size and count");
-    if (!it->second->hasAnnex(ann::Type::SeerShape))
+    if (!features.front()->hasAnnex(ann::Type::SeerShape))
       throw std::runtime_error("DatumPlanePlanarCenter: null seer shape");
-    const Base* parentFeature = it->second;
-    const ann::SeerShape &shape = parentFeature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+    const ann::SeerShape &shape = features.front()->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     
-    std::vector<uuid> resolvedFaceIds1 = shape.resolvePick(facePick1.shapeHistory);
-    if (resolvedFaceIds1.empty())
+    std::vector<uuid> ids;
+    for (const auto &p : resolvedPicks)
     {
-      std::ostringstream stream;
-      stream << "DatumPlanePlanarCenter: can't find target face1 id. Skipping id: " << gu::idToString(facePick1.id);
-      throw std::runtime_error(stream.str());
+      if (p.second.is_nil())
+        continue;
+      ids.push_back(p.second);
     }
-    assert(resolvedFaceIds1.size() == 1);
+    if (ids.size() != 2)
+      throw std::runtime_error("DatumPlanePlanarCenter: wrong number of resolved ids");
+    assert(shape.hasShapeIdRecord(ids.front()) && shape.hasShapeIdRecord(ids.back()));
+    if ((!shape.hasShapeIdRecord(ids.front())) || (!shape.hasShapeIdRecord(ids.back())))
+      throw std::runtime_error("DatumPlanePlanarCenter: ids not in shape.");
     
-    std::vector<uuid> resolvedFaceIds2 = shape.resolvePick(facePick2.shapeHistory);
-    if (resolvedFaceIds2.empty())
-    {
-      std::ostringstream stream;
-      stream << "DatumPlanePlanarCenter: can't find target face2 id. Skipping id: " << gu::idToString(facePick2.id);
-      throw std::runtime_error(stream.str());
-    }
-    assert(resolvedFaceIds2.size() == 1);
-    
-    TopoDS_Shape face1 = shape.getOCCTShape(resolvedFaceIds1.front()); assert(!face1.IsNull());
-    TopoDS_Shape face2 = shape.getOCCTShape(resolvedFaceIds2.front()); assert(!face2.IsNull());
+    TopoDS_Shape face1 = shape.getOCCTShape(ids.front()); assert(!face1.IsNull());
+    TopoDS_Shape face2 = shape.getOCCTShape(ids.back()); assert(!face2.IsNull());
     if (face1.IsNull() || face2.IsNull())
       throw std::runtime_error("DatumPlanePlanarCenter: null faces");
     face1System = getFaceSystem(face1);
     face2System = getFaceSystem(face2);
     
     //calculate size.
-    
     tempRadius = std::max(std::sqrt(getBoundingBox(face1).SquareExtent()), std::sqrt(getBoundingBox(face2).SquareExtent())) / 2.0;
   }
-  else if (mapIn.size() == 2)
+  else if (features.size() == 2)
   {
     //with 2 inputs, either one can be a face or a datum.
     double radius1, radius2;
-    auto it = mapIn.equal_range(InputType::create);
-    assert(std::distance(it.first, it.second) == 2);
-    const Base *feature1 = it.first->second;
-    it.first++;
-    const Base *feature2 = it.first->second;
     
+    bool system1Set = false;
+    bool system2Set = false;
     
-    if (feature1->getType() == Type::DatumPlane)
+    for (const auto &p : resolvedPicks)
     {
-      const DatumPlane *inputPlane = dynamic_cast<const DatumPlane*>(feature1);
-      assert(inputPlane);
-      face1System = inputPlane->getSystem();
-      radius1 = inputPlane->getRadius();
-    }
-    else
-    {
-      if (!feature1->hasAnnex(ann::Type::SeerShape))
-        throw std::runtime_error("DatumPlanePlanarCenter: expected seer shape not found");
-      const ann::SeerShape &shape1 = feature1->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
-      
-      std::vector<uuid> resolvedFaceIds1 = shape1.resolvePick(facePick1.shapeHistory);
-      if (resolvedFaceIds1.empty())
+      if (p.first->getType() == Type::DatumPlane && p.second.is_nil())
       {
-        resolvedFaceIds1 = shape1.resolvePick(facePick2.shapeHistory);
-        if (resolvedFaceIds1.empty())
+        const DatumPlane *inputPlane = dynamic_cast<const DatumPlane*>(p.first);
+        assert(inputPlane);
+        if (!system1Set)
         {
-          std::ostringstream stream;
-          stream << "DatumPlanePlanarCenter: can't find target face1";
-          throw std::runtime_error(stream.str());
+          face1System = inputPlane->getSystem();
+          radius1 = inputPlane->getRadius();
+          system1Set = true;
+        }
+        else if (!system2Set)
+        {
+          face2System = inputPlane->getSystem();
+          radius2 = inputPlane->getRadius();
+          system2Set = true;
         }
       }
-      assert(resolvedFaceIds1.size() == 1);
-      
-      TopoDS_Shape face1 = shape1.getOCCTShape(resolvedFaceIds1.front());
-      if (face1.IsNull())
-        throw std::runtime_error("DatumPlanePlanarCenter: input 1 has null shape");
-      if (face1.ShapeType() != TopAbs_FACE)
-        throw std::runtime_error("DatumPlanePlanarCenter: shape is not of type face");
-      face1System = getFaceSystem(face1);
-      radius1 = std::sqrt(getBoundingBox(face1).SquareExtent()) / 2.0;
-    }
-    
-    if (feature2->getType() == Type::DatumPlane)
-    {
-      const DatumPlane *inputPlane = dynamic_cast<const DatumPlane*>(feature2);
-      assert(inputPlane);
-      face2System = inputPlane->getSystem();
-      radius2 = inputPlane->getRadius();
-    }
-    else
-    {
-      if (!feature2->hasAnnex(ann::Type::SeerShape))
-        throw std::runtime_error("DatumPlanePlanarCenter: expected seer shape not found");
-      const ann::SeerShape &shape2 = feature2->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
-      
-      std::vector<uuid> resolvedFaceIds2 = shape2.resolvePick(facePick1.shapeHistory);
-      if (resolvedFaceIds2.empty())
+      else if (p.first->hasAnnex(ann::Type::SeerShape) && (!p.second.is_nil()))
       {
-        resolvedFaceIds2 = shape2.resolvePick(facePick2.shapeHistory);
-        if (resolvedFaceIds2.empty())
+        const ann::SeerShape &shape = p.first->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+        assert(shape.hasShapeIdRecord(p.second));
+        if (!shape.hasShapeIdRecord(p.second))
+          throw std::runtime_error("DatumPlanePlanarCenter: expected id not found in seershape.");
+        TopoDS_Shape face = shape.getOCCTShape(p.second);
+        if (face.IsNull())
+          throw std::runtime_error("DatumPlanePlanarCenter: input has null shape");
+        if (face.ShapeType() != TopAbs_FACE)
+          throw std::runtime_error("DatumPlanePlanarCenter: shape is not of type face");
+        if (!system1Set)
         {
-          std::ostringstream stream;
-          stream << "DatumPlanePlanarCenter: can't find target face2";
-          throw std::runtime_error(stream.str());
+          face1System = getFaceSystem(face);
+          radius1 = std::sqrt(getBoundingBox(face).SquareExtent()) / 2.0;
+          system1Set = true;
+        }
+        else if (!system2Set)
+        {
+          face2System = getFaceSystem(face);
+          radius2 = std::sqrt(getBoundingBox(face).SquareExtent()) / 2.0;
+          system2Set = true;
         }
       }
-      assert(resolvedFaceIds2.size() == 1);
-      
-      TopoDS_Shape face2 = shape2.getOCCTShape(resolvedFaceIds2.front());
-      if (face2.IsNull())
-        throw std::runtime_error("DatumPlanePlanarCenter: input 2 has null shape");
-      if (face2.ShapeType() != TopAbs_FACE)
-        throw std::runtime_error("DatumPlanePlanarCenter: face2 is not of type face");
-      face2System = getFaceSystem(face2);
-      radius2 = std::sqrt(getBoundingBox(face2).SquareExtent()) / 2.0;
     }
+    
+    if ((!system1Set) || (!system2Set))
+      throw std::runtime_error("DatumPlanePlanarCenter: couldn't get both systems.");
     tempRadius = std::max(radius1, radius2);
   }
   else
@@ -465,7 +444,7 @@ DatumPlanePlanarParallelThroughEdge::DatumPlanePlanarParallelThroughEdge(){}
 
 DatumPlanePlanarParallelThroughEdge::~DatumPlanePlanarParallelThroughEdge(){}
 
-osg::Matrixd DatumPlanePlanarParallelThroughEdge::solve(const UpdatePayload::UpdateMap &mapIn)
+osg::Matrixd DatumPlanePlanarParallelThroughEdge::solve(const UpdatePayload &payloadIn)
 {
   auto getEdgeVector = [](const TopoDS_Shape &edgeShapeIn)
   {
@@ -494,44 +473,61 @@ osg::Matrixd DatumPlanePlanarParallelThroughEdge::solve(const UpdatePayload::Upd
     return point1 + direction;
   };
   
+  std::vector<const Base*> features = payloadIn.getFeatures(InputType::create);
+  if (features.empty() || features.size() > 2)
+    throw std::runtime_error("DatumPlanarParallelThroughEdge: Wrong number of 'create' inputs");
+  
   osg::Matrixd outSystem = osg::Matrixd::identity();
   osg::Vec3d origin, direction;
   double tempRadius = 1.0;
   
-  if (mapIn.size() == 1)
+  if (features.size() == 1)
   {
-    //if only one 'in' connection that means we have a face and an edge belonging to
-    //the same object.
-    UpdatePayload::UpdateMap::const_iterator it = mapIn.find(InputType::create);
-    if (it == mapIn.end())
-      throw std::runtime_error("DatumPlanarParallelThroughEdge: Conflict between map size and count");
-    
-    if (!it->second->hasAnnex(ann::Type::SeerShape))
+    //if only one 'in' connection that means we have a face and an edge belonging to the same object.
+    if (!features.front()->hasAnnex(ann::Type::SeerShape))
       throw std::runtime_error("DatumPlanarParallelThroughEdge: no seer shape");
-    const ann::SeerShape &shape = it->second->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+    const ann::SeerShape &shape = features.front()->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     
-    std::vector<uuid> resolvedFaceIds = shape.resolvePick(facePick.shapeHistory);
-    if (resolvedFaceIds.empty())
+    uuid faceId = gu::createNilId();
+    auto resolvedFacePick = tls::resolvePicks(features.front(), facePick, payloadIn.shapeHistory);
+    for (const auto &p : resolvedFacePick)
     {
-      std::ostringstream stream;
-      stream << "DatumPlanarParallelThroughEdge: can't resolve target face id. Skipping id: " << gu::idToString(facePick.id);
-      throw std::runtime_error(stream.str());
+      if (p.second.is_nil())
+        continue;
+      faceId = p.second;
+      break;
     }
-    assert(resolvedFaceIds.size() == 1);
+    if (faceId.is_nil())
+      throw std::runtime_error("DatumPlanarParallelThroughEdge: couldn't get face id");
+    assert(shape.hasShapeIdRecord(faceId));
+    if (!shape.hasShapeIdRecord(faceId))
+      throw std::runtime_error("DatumPlanarParallelThroughEdge: seershape doesn't have face id");
     
-    std::vector<uuid> resolvedEdgeIds = shape.resolvePick(edgePick.shapeHistory);
-    if (resolvedEdgeIds.empty())
+    uuid edgeId = gu::createNilId();
+    auto resolvedEdgePick = tls::resolvePicks(features.front(), edgePick, payloadIn.shapeHistory);
+    for (const auto &p : resolvedEdgePick)
     {
-      std::ostringstream stream;
-      stream << "DatumPlanarParallelThroughEdge: can't resolve target edge id. Skipping id: " << gu::idToString(edgePick.id);
-      throw std::runtime_error(stream.str());
+      if (p.second.is_nil())
+        continue;
+      edgeId = p.second;
+      break;
     }
-    assert(resolvedEdgeIds.size() == 1);
+    if (edgeId.is_nil())
+      throw std::runtime_error("DatumPlanarParallelThroughEdge: couldn't get edge id");
+    assert(shape.hasShapeIdRecord(edgeId));
+    if (!shape.hasShapeIdRecord(edgeId))
+      throw std::runtime_error("DatumPlanarParallelThroughEdge: seershape doesn't have edge id");
     
-    const TopoDS_Shape &face = shape.getOCCTShape(resolvedFaceIds.front()); assert(!face.IsNull()); assert(face.ShapeType() == TopAbs_FACE);
-    const TopoDS_Shape &edge = shape.getOCCTShape(resolvedEdgeIds.front()); assert(!edge.IsNull()); assert(edge.ShapeType() == TopAbs_EDGE);
-    if (face.IsNull() || edge.IsNull())
-      throw std::runtime_error("DatumPlanarParallelThroughEdge: null edge or face");
+    const TopoDS_Shape &face = shape.getOCCTShape(faceId);
+    assert(!face.IsNull());
+    assert(face.ShapeType() == TopAbs_FACE);
+    
+    const TopoDS_Shape &edge = shape.getOCCTShape(edgeId);
+    assert(!edge.IsNull());
+    assert(edge.ShapeType() == TopAbs_EDGE);
+    
+    if (face.IsNull() || edge.IsNull() || (edge.ShapeType() != TopAbs_EDGE) || (face.ShapeType() != TopAbs_FACE))
+      throw std::runtime_error("DatumPlanarParallelThroughEdge: invalid topods shapes");
     outSystem = getFaceSystem(face);
     direction = getEdgeVector(edge);
     origin = getOrigin(edge);
@@ -543,109 +539,48 @@ osg::Matrixd DatumPlanePlanarParallelThroughEdge::solve(const UpdatePayload::Upd
     
     outSystem.setTrans(origin);
   }
-  else if (mapIn.size() == 2)
+  else if (features.size() == 2)
   {
     bool foundPlane = false;
     bool foundEdge = false;
-    auto it = mapIn.equal_range(InputType::create);
-    assert(std::distance(it.first, it.second) == 2);
-    const Base *feature1 = it.first->second;
-    it.first++;
-    const Base *feature2 = it.first->second;
     
-    if (feature1->getType() == Type::DatumPlane)
+    Picks picks;
+    if (!facePick.id.is_nil())
+      picks.push_back(facePick);
+    if (!edgePick.id.is_nil())
+    picks.push_back(edgePick);
+    auto resolvedPicks = tls::resolvePicks(features, picks, payloadIn.shapeHistory);
+    
+    for (const auto &p : resolvedPicks)
     {
-      const DatumPlane *dPlane = dynamic_cast<const DatumPlane*>(feature1);
-      assert(dPlane);
-      outSystem = dPlane->getSystem();
-      tempRadius = dPlane->getRadius();
-      foundPlane = true;
-    }
-    else
-    {
-      if (!feature1->hasAnnex(ann::Type::SeerShape))
-        throw std::runtime_error("DatumPlanarParallelThroughEdge: expected seer shape not found");
-      const ann::SeerShape &shape = feature1->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
-      
-      std::vector<uuid> resolvedId1;
-      if (!facePick.id.is_nil()) //when datum is selected shape id is nil.
-        resolvedId1 = shape.resolvePick(facePick.shapeHistory);
-      if (resolvedId1.empty())
+      if (p.first->getType() == Type::DatumPlane && p.second.is_nil() && !foundPlane)
       {
-        if (!edgePick.id.is_nil()) //future datum axis will have nil id.
-        {
-          resolvedId1 = shape.resolvePick(edgePick.shapeHistory);
-          if (resolvedId1.empty())
-          {
-            std::ostringstream stream;
-            stream << "DatumPlanarParallelThroughEdge: can't resolve id 1.";
-            throw std::runtime_error(stream.str());
-          }
-          else
-          {
-            assert(resolvedId1.size() == 1);
-            const TopoDS_Shape &edge = shape.getOCCTShape(resolvedId1.front()); assert(!edge.IsNull());
-            direction = getEdgeVector(edge);
-            origin = getOrigin(edge);
-            foundEdge = true;
-          }
-        }
-      }
-      else
-      {
-        assert(resolvedId1.size() == 1);
-        const TopoDS_Shape &face = shape.getOCCTShape(resolvedId1.front()); assert(!face.IsNull());
-        outSystem = getFaceSystem(face);
-        tempRadius = std::sqrt(getBoundingBox(face).SquareExtent()) / 2.0;
+        const DatumPlane *dPlane = dynamic_cast<const DatumPlane*>(p.first);
+        assert(dPlane);
+        outSystem = dPlane->getSystem();
+        tempRadius = dPlane->getRadius();
         foundPlane = true;
       }
-    }
-    
-    if (feature2->getType() == Type::DatumPlane)
-    {
-      const DatumPlane *dPlane = dynamic_cast<const DatumPlane*>(feature2);
-      assert(dPlane);
-      outSystem = dPlane->getSystem();
-      tempRadius = dPlane->getRadius();
-      foundPlane = true;
-    }
-    else
-    {
-      if (!feature2->hasAnnex(ann::Type::SeerShape))
-        throw std::runtime_error("DatumPlanarParallelThroughEdge: no seer shape");
-      const ann::SeerShape &shape = feature2->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
-      
-      std::vector<uuid> resolvedId2;
-      if (!facePick.id.is_nil()) //when datum is selected shape id is nil.
-        resolvedId2 = shape.resolvePick(facePick.shapeHistory);
-      if (resolvedId2.empty())
+      else if (p.first->hasAnnex(ann::Type::SeerShape) && (!p.second.is_nil()))
       {
-        if (!edgePick.id.is_nil()) //future datum axis will have nil id.
+        const ann::SeerShape &shape = p.first->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+        assert(shape.hasShapeIdRecord(p.second));
+        if (!shape.hasShapeIdRecord(p.second))
+          throw std::runtime_error("DatumPlanarParallelThroughEdge: seer shape doesn't have expected shape");
+        const TopoDS_Shape &occShape = shape.getOCCTShape(p.second);
+        assert(!occShape.IsNull());
+        if (occShape.ShapeType() == TopAbs_FACE && !foundPlane)
         {
-          resolvedId2 = shape.resolvePick(edgePick.shapeHistory);
-          if (resolvedId2.empty())
-          {
-            std::ostringstream stream;
-            stream << "DatumPlanarParallelThroughEdge: can't resolve id 2.";
-            throw std::runtime_error(stream.str());
-          }
-          else
-          {
-            assert(resolvedId2.size() == 1);
-            const TopoDS_Shape &edge = shape.getOCCTShape(resolvedId2.front()); assert(!edge.IsNull());
-            direction = getEdgeVector(edge);
-            origin = getOrigin(edge);
-            foundEdge = true;
-          }
+          outSystem = getFaceSystem(occShape);
+          tempRadius = std::sqrt(getBoundingBox(occShape).SquareExtent()) / 2.0;
+          foundPlane = true;
         }
-      }
-      else
-      {
-        assert(resolvedId2.size() == 1);
-        const TopoDS_Shape &face = shape.getOCCTShape(resolvedId2.front()); assert(!face.IsNull());
-        outSystem = getFaceSystem(face);
-        tempRadius = std::sqrt(getBoundingBox(face).SquareExtent()) / 2.0;
-        foundPlane = true;
+        else if (occShape.ShapeType() == TopAbs_EDGE && !foundEdge)
+        {
+          direction = getEdgeVector(occShape);
+          origin = getOrigin(occShape);
+          foundEdge = true;
+        }
       }
     }
     
@@ -781,11 +716,11 @@ DatumPlane::DatumPlane() : Base()
   
   radius = std::make_unique<prm::Parameter>(QObject::tr("Radius"), 1.0);
   radius->connectValue(boost::bind(&DatumPlane::setVisualDirty, this));
-  parameterVector.push_back(radius.get());
+  parameters.push_back(radius.get());
   
   autoSize = std::make_unique<prm::Parameter>(QObject::tr("Auto Size"), true);
   autoSize->connectValue(boost::bind(&DatumPlane::setVisualDirty, this));
-  parameterVector.push_back(autoSize.get());
+  parameters.push_back(autoSize.get());
   
   display = new mdv::DatumPlane();
   
@@ -808,9 +743,14 @@ void DatumPlane::setSolver(std::shared_ptr<DatumPlaneGenre> solverIn)
   if (g)
   {
     overlaySwitch->addChild(g);
-    parameterVector.push_back(g->getParameter());
+    parameters.push_back(g->getParameter());
   }
   solver->connect(this);
+}
+
+double DatumPlane::getRadius() const
+{
+  return static_cast<double>(*radius);
 }
 
 void DatumPlane::updateModel(const UpdatePayload &payloadIn)
@@ -829,7 +769,7 @@ void DatumPlane::updateModel(const UpdatePayload &payloadIn)
     if (!solver)
       throw std::runtime_error("no solver");
     
-    transform->setMatrix(solver->solve(payloadIn.updateMap));
+    transform->setMatrix(solver->solve(payloadIn));
     radius->setValue(solver->radius);
     
     setSuccess();

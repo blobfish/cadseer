@@ -23,6 +23,7 @@
 #include <tools/idtools.h>
 #include <application/application.h>
 #include <message/observer.h>
+#include <feature/parameter.h>
 #include <feature/base.h>
 #include <library/csysdragger.h>
 #include <preferences/preferencesXML.h>

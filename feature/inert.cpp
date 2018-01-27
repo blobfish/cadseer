@@ -31,6 +31,8 @@
 #include <library/csysdragger.h>
 #include <annex/seershape.h>
 #include <annex/csysdragger.h>
+#include <feature/parameter.h>
+#include <feature/updatepayload.h>
 #include <feature/inert.h>
 
 using namespace ftr;
@@ -40,8 +42,8 @@ QIcon Inert::icon;
 
 Inert::Inert(const TopoDS_Shape &shapeIn) :
 Base(),
-csys(prm::Names::CSys, osg::Matrixd::identity()),
-csysDragger(new ann::CSysDragger(this, &csys)),
+csys(new prm::Parameter(prm::Names::CSys, osg::Matrixd::identity())),
+csysDragger(new ann::CSysDragger(this, csys.get())),
 sShape(new ann::SeerShape())
 {
   if (icon.isNull())
@@ -53,20 +55,31 @@ sShape(new ann::SeerShape())
   sShape->setOCCTShape(shapeIn);
   sShape->ensureNoNils();
   
-  parameterVector.push_back(&csys);
+  parameters.push_back(csys.get());
   
   annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
   annexes.insert(std::make_pair(ann::Type::CSysDragger, csysDragger.get()));
   overlaySwitch->addChild(csysDragger->dragger);
   
   //sync transformations.
-  csys.setValue(gu::toOsg(sShape->getRootOCCTShape().Location().Transformation()));
+  csys->setValue(gu::toOsg(sShape->getRootOCCTShape().Location().Transformation()));
   csysDragger->draggerUpdate(); //set dragger to parameter.
   
-  csys.connectValue(boost::bind(&Inert::setModelDirty, this));
+  csys->connectValue(boost::bind(&Inert::setModelDirty, this));
 }
 
 Inert::~Inert(){}
+
+
+void Inert::setCSys(const osg::Matrixd &mIn)
+{
+  csys->setValue(mIn);
+}
+
+osg::Matrixd Inert::getCSys() const
+{
+  return static_cast<osg::Matrixd>(*csys);
+}
 
 void Inert::updateModel(const UpdatePayload&)
 {
@@ -93,7 +106,7 @@ void Inert::updateModel(const UpdatePayload&)
     uuid oldRootId = sShape->getRootShapeId();
     
     TopoDS_Shape tempShape(sShape->getRootOCCTShape());
-    gp_Ax3 tempAx3(gu::toOcc(osg::Matrixd::inverse(static_cast<osg::Matrixd>(csys))));
+    gp_Ax3 tempAx3(gu::toOcc(osg::Matrixd::inverse(static_cast<osg::Matrixd>(*csys))));
     gp_Trsf tempTrsf;
     tempTrsf.SetTransformation(tempAx3);
     TopLoc_Location freshLocation(tempTrsf);
@@ -153,7 +166,7 @@ void Inert::serialWrite(const QDir &dIn)
   prj::srl::FeatureInert inertOut
   (
     Base::serialOut(),
-    csys.serialOut(),
+    csys->serialOut(),
     csysDragger->serialOut()
   );
   
@@ -165,6 +178,6 @@ void Inert::serialWrite(const QDir &dIn)
 void Inert::serialRead(const prj::srl::FeatureInert& inert)
 {
   Base::serialIn(inert.featureBase());
-  csys.serialIn(inert.csys());
+  csys->serialIn(inert.csys());
   csysDragger->serialIn(inert.csysDragger());
 }

@@ -30,6 +30,7 @@
 #include <feature/shapecheck.h>
 #include <tools/occtools.h>
 #include <project/serial/xsdcxxoutput/featurenest.h>
+#include <feature/updatepayload.h>
 #include <feature/nest.h>
 
 using namespace ftr;
@@ -53,15 +54,15 @@ sShape(new ann::SeerShape())
   mainSwitch->setUserValue<int>(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
   pitch->setConstraint(prm::Constraint::buildNonZeroPositive());
-  parameterVector.push_back(pitch.get());
+  parameters.push_back(pitch.get());
   //pitch does not get wired up to dirty.
   
   gap->setConstraint(prm::Constraint::buildNonZeroPositive());
   gap->connectValue(boost::bind(&Nest::setModelDirty, this));
-  parameterVector.push_back(gap.get());
+  parameters.push_back(gap.get());
   
   feedDirection->connectValue(boost::bind(&Nest::setModelDirty, this));
-  parameterVector.push_back(feedDirection.get());
+  parameters.push_back(feedDirection.get());
   
   gapLabel = new lbr::PLabel(gap.get());
   gapLabel->showName = true;

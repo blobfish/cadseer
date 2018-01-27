@@ -18,6 +18,7 @@
  */
 
 #include <boost/graph/graphviz.hpp>
+#include <boost/variant/variant.hpp>
 
 #include <tools/idtools.h>
 #include <feature/base.h>

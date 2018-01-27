@@ -27,6 +27,8 @@
 #include <project/serial/xsdcxxoutput/featureoblong.h>
 #include <annex/csysdragger.h>
 #include <feature/oblongbuilder.h>
+#include <feature/updatepayload.h>
+#include <feature/parameter.h>
 #include <feature/oblong.h>
 
 using namespace ftr;
@@ -115,11 +117,11 @@ static const std::map<FeatureTag, std::string> featureTagMap =
 
 Oblong::Oblong() :
   Base(),
-  length(prm::Names::Length, prf::manager().rootPtr->features().oblong().get().length()),
-  width(prm::Names::Width, prf::manager().rootPtr->features().oblong().get().width()),
-  height(prm::Names::Height, prf::manager().rootPtr->features().oblong().get().height()),
-  csys(prm::Names::CSys, osg::Matrixd::identity()),
-  csysDragger(new ann::CSysDragger(this, &csys)),
+  length(new prm::Parameter(prm::Names::Length, prf::manager().rootPtr->features().oblong().get().length())),
+  width(new prm::Parameter(prm::Names::Width, prf::manager().rootPtr->features().oblong().get().width())),
+  height(new prm::Parameter(prm::Names::Height, prf::manager().rootPtr->features().oblong().get().height())),
+  csys(new prm::Parameter(prm::Names::CSys, osg::Matrixd::identity())),
+  csysDragger(new ann::CSysDragger(this, csys.get())),
   sShape(new ann::SeerShape())
 {
   if (icon.isNull())
@@ -130,23 +132,23 @@ Oblong::Oblong() :
   
   initializeMaps();
   
-  length.setConstraint(prm::Constraint::buildNonZeroPositive());
-  width.setConstraint(prm::Constraint::buildNonZeroPositive());
-  height.setConstraint(prm::Constraint::buildNonZeroPositive());
+  length->setConstraint(prm::Constraint::buildNonZeroPositive());
+  width->setConstraint(prm::Constraint::buildNonZeroPositive());
+  height->setConstraint(prm::Constraint::buildNonZeroPositive());
   
-  parameterVector.push_back(&length);
-  parameterVector.push_back(&width);
-  parameterVector.push_back(&height);
-  parameterVector.push_back(&csys);
+  parameters.push_back(length.get());
+  parameters.push_back(width.get());
+  parameters.push_back(height.get());
+  parameters.push_back(csys.get());
   
   annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
   annexes.insert(std::make_pair(ann::Type::CSysDragger, csysDragger.get()));
   overlaySwitch->addChild(csysDragger->dragger);
   
-  length.connectValue(boost::bind(&Oblong::setModelDirty, this));
-  width.connectValue(boost::bind(&Oblong::setModelDirty, this));
-  height.connectValue(boost::bind(&Oblong::setModelDirty, this));
-  csys.connectValue(boost::bind(&Oblong::setModelDirty, this));
+  length->connectValue(boost::bind(&Oblong::setModelDirty, this));
+  width->connectValue(boost::bind(&Oblong::setModelDirty, this));
+  height->connectValue(boost::bind(&Oblong::setModelDirty, this));
+  csys->connectValue(boost::bind(&Oblong::setModelDirty, this));
   
   setupIPGroup();
 }
@@ -216,17 +218,17 @@ void Oblong::initializeMaps()
 
 void Oblong::setLength(const double &lengthIn)
 {
-  length.setValue(lengthIn);
+  length->setValue(lengthIn);
 }
 
 void Oblong::setWidth(const double &widthIn)
 {
-  width.setValue(widthIn);
+  width->setValue(widthIn);
 }
 
 void Oblong::setHeight(const double &heightIn)
 {
-  height.setValue(heightIn);
+  height->setValue(heightIn);
 }
 
 void Oblong::setParameters(const double &lengthIn, const double &widthIn, const double &heightIn)
@@ -238,13 +240,40 @@ void Oblong::setParameters(const double &lengthIn, const double &widthIn, const 
 
 void Oblong::setCSys(const osg::Matrixd &csysIn)
 {
-  osg::Matrixd oldSystem = static_cast<osg::Matrixd>(csys);
-  if (!csys.setValue(csysIn))
+  osg::Matrixd oldSystem = static_cast<osg::Matrixd>(*csys);
+  if (!csys->setValue(csysIn))
     return; // already at this csys
     
   //apply the same transformation to dragger, so dragger moves with it.
   osg::Matrixd diffMatrix = osg::Matrixd::inverse(oldSystem) * csysIn;
   csysDragger->draggerUpdate(csysDragger->dragger->getMatrix() * diffMatrix);
+}
+
+double Oblong::getLength() const
+{
+  return static_cast<double>(*length);
+}
+
+double Oblong::getWidth() const
+{
+  return static_cast<double>(*width);
+}
+
+double Oblong::getHeight() const
+{
+  return static_cast<double>(*height);
+}
+
+void Oblong::getParameters (double &lengthOut, double &widthOut, double &heightOut) const
+{
+  lengthOut = static_cast<double>(*length);
+  widthOut = static_cast<double>(*width);
+  heightOut = static_cast<double>(*height);
+}
+
+osg::Matrixd Oblong::getCSys() const
+{
+  return static_cast<osg::Matrixd>(*csys);
 }
 
 void Oblong::updateModel(const UpdatePayload&)
@@ -253,15 +282,15 @@ void Oblong::updateModel(const UpdatePayload&)
   lastUpdateLog.clear();
   try
   {
-    if (!(static_cast<double>(length) > static_cast<double>(width)))
+    if (!(static_cast<double>(*length) > static_cast<double>(*width)))
       throw std::runtime_error("length must be greater than width");
     
     OblongBuilder oblongMaker
     (
-      static_cast<double>(length),
-      static_cast<double>(width),
-      static_cast<double>(height),
-      gu::toOcc(static_cast<osg::Matrixd>(csys))
+      static_cast<double>(*length),
+      static_cast<double>(*width),
+      static_cast<double>(*height),
+      gu::toOcc(static_cast<osg::Matrixd>(*csys))
     );
     sShape->setOCCTShape(oblongMaker.getSolid());
     updateResult(oblongMaker);
@@ -339,21 +368,21 @@ void Oblong::updateResult(const OblongBuilder& oblongMakerIn)
 
 void Oblong::setupIPGroup()
 {
-  lengthIP = new lbr::IPGroup(&length);
+  lengthIP = new lbr::IPGroup(length.get());
   lengthIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 0.0, -1.0)));
   lengthIP->noAutoRotateDragger();
   lengthIP->setRotationAxis(osg::Vec3d(1.0, 0.0, 0.0), osg::Vec3d(0.0, 0.0, 1.0));
   overlaySwitch->addChild(lengthIP.get());
   csysDragger->dragger->linkToMatrix(lengthIP.get());
   
-  widthIP = new lbr::IPGroup(&width);
+  widthIP = new lbr::IPGroup(width.get());
   //   widthIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 0.0, -1.0)));
   widthIP->noAutoRotateDragger();
   widthIP->setRotationAxis(osg::Vec3d(0.0, 1.0, 0.0), osg::Vec3d(0.0, 0.0, -1.0));
   overlaySwitch->addChild(widthIP.get());
   csysDragger->dragger->linkToMatrix(widthIP.get());
   
-  heightIP = new lbr::IPGroup(&height);
+  heightIP = new lbr::IPGroup(height.get());
   heightIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(1.0, 0.0, 0.0)));
   heightIP->noAutoRotateDragger();
   heightIP->setRotationAxis(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(0.0, 1.0, 0.0));
@@ -365,23 +394,23 @@ void Oblong::setupIPGroup()
 
 void Oblong::updateIPGroup()
 {
-  lengthIP->setMatrix(static_cast<osg::Matrixd>(csys));
-  widthIP->setMatrix(static_cast<osg::Matrixd>(csys));
-  heightIP->setMatrix(static_cast<osg::Matrixd>(csys));
+  lengthIP->setMatrix(static_cast<osg::Matrixd>(*csys));
+  widthIP->setMatrix(static_cast<osg::Matrixd>(*csys));
+  heightIP->setMatrix(static_cast<osg::Matrixd>(*csys));
   
   osg::Matrix lMatrix;
   lMatrix.setRotate(osg::Quat(osg::PI_2, osg::Vec3d(0.0, 1.0, 0.0)));
-  lMatrix.setTrans(osg::Vec3d(0.0, static_cast<double>(width) / 2.0, static_cast<double>(height) / 2.0));
+  lMatrix.setTrans(osg::Vec3d(0.0, static_cast<double>(*width) / 2.0, static_cast<double>(*height) / 2.0));
   lengthIP->setMatrixDragger(lMatrix);
   
   osg::Matrix wMatrix;
   wMatrix.setRotate(osg::Quat(osg::PI_2, osg::Vec3d(-1.0, 0.0, 0.0)));
-  wMatrix.setTrans(osg::Vec3d(static_cast<double>(length) / 2.0, 0.0, static_cast<double>(height) / 2.0));
+  wMatrix.setTrans(osg::Vec3d(static_cast<double>(*length) / 2.0, 0.0, static_cast<double>(*height) / 2.0));
   widthIP->setMatrixDragger(wMatrix);
   
   osg::Matrix hMatrix;
   //no need to rotate
-  hMatrix.setTrans(osg::Vec3d(static_cast<double>(length) / 2.0, static_cast<double>(width) / 2.0, 0.0));
+  hMatrix.setTrans(osg::Vec3d(static_cast<double>(*length) / 2.0, static_cast<double>(*width) / 2.0, 0.0));
   heightIP->setMatrixDragger(hMatrix);
   
   lengthIP->valueHasChanged();
@@ -397,10 +426,10 @@ void Oblong::serialWrite(const QDir &dIn)
   prj::srl::FeatureOblong oblongOut
   (
     Base::serialOut(),
-    length.serialOut(),
-    width.serialOut(),
-    height.serialOut(),
-    csys.serialOut(),
+    length->serialOut(),
+    width->serialOut(),
+    height->serialOut(),
+    csys->serialOut(),
     csysDragger->serialOut()
   );
   
@@ -412,10 +441,10 @@ void Oblong::serialWrite(const QDir &dIn)
 void Oblong::serialRead(const prj::srl::FeatureOblong &sOblong)
 {
   Base::serialIn(sOblong.featureBase());
-  length.serialIn(sOblong.length());
-  width.serialIn(sOblong.width());
-  height.serialIn(sOblong.height());
-  csys.serialIn(sOblong.csys());
+  length->serialIn(sOblong.length());
+  width->serialIn(sOblong.width());
+  height->serialIn(sOblong.height());
+  csys->serialIn(sOblong.csys());
   csysDragger->serialIn(sOblong.csysDragger());
   
   updateIPGroup();

@@ -33,6 +33,7 @@
 #include <tools/featuretools.h>
 #include <annex/seershape.h>
 #include <annex/intersectionmapper.h>
+#include <feature/updatepayload.h>
 #include <feature/union.h>
 
 using boost::uuids::uuid;

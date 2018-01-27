@@ -31,6 +31,8 @@ namespace prj{namespace srl{class FeatureQuote;}}
 
 namespace ftr
 {
+  namespace prm{class Parameter;}
+  
   struct QuoteData
   {
     int quoteNumber;
@@ -64,8 +66,8 @@ namespace ftr
     virtual void serialWrite(const QDir&) override;
     void serialRead(const prj::srl::FeatureQuote &);
     
-    prm::Parameter tFile; //!< template file.
-    prm::Parameter oFile; //!< output file.
+    std::unique_ptr<prm::Parameter> tFile; //!< template file.
+    std::unique_ptr<prm::Parameter> oFile; //!< output file.
     boost::filesystem::path pFile; //!< picture file.
     
     osg::ref_ptr<lbr::PLabel> tLabel;

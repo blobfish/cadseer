@@ -30,6 +30,8 @@
 #include <annex/csysdragger.h>
 #include <feature/cylinderbuilder.h>
 #include <annex/seershape.h>
+#include <feature/updatepayload.h>
+#include <feature/parameter.h>
 #include <feature/cylinder.h>
 
 using namespace ftr;
@@ -74,10 +76,10 @@ static const std::map<FeatureTag, std::string> featureTagMap =
 QIcon Cylinder::icon;
 
 Cylinder::Cylinder() : Base(),
-  radius(prm::Names::Radius, prf::manager().rootPtr->features().cylinder().get().radius()),
-  height(prm::Names::Height, prf::manager().rootPtr->features().cylinder().get().height()),
-  csys(prm::Names::CSys, osg::Matrixd::identity()),
-  csysDragger(new ann::CSysDragger(this, &csys)),
+  radius(new prm::Parameter(prm::Names::Radius, prf::manager().rootPtr->features().cylinder().get().radius())),
+  height(new prm::Parameter(prm::Names::Height, prf::manager().rootPtr->features().cylinder().get().height())),
+  csys(new prm::Parameter(prm::Names::CSys, osg::Matrixd::identity())),
+  csysDragger(new ann::CSysDragger(this, csys.get())),
   sShape(new ann::SeerShape())
 {
   if (icon.isNull())
@@ -88,20 +90,20 @@ Cylinder::Cylinder() : Base(),
   
   initializeMaps();
   
-  radius.setConstraint(prm::Constraint::buildNonZeroPositive());
-  height.setConstraint(prm::Constraint::buildNonZeroPositive());
+  radius->setConstraint(prm::Constraint::buildNonZeroPositive());
+  height->setConstraint(prm::Constraint::buildNonZeroPositive());
   
-  parameterVector.push_back(&radius);
-  parameterVector.push_back(&height);
-  parameterVector.push_back(&csys);
+  parameters.push_back(radius.get());
+  parameters.push_back(height.get());
+  parameters.push_back(csys.get());
   
   annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
   annexes.insert(std::make_pair(ann::Type::CSysDragger, csysDragger.get()));
   overlaySwitch->addChild(csysDragger->dragger);
   
-  radius.connectValue(boost::bind(&Cylinder::setModelDirty, this));
-  height.connectValue(boost::bind(&Cylinder::setModelDirty, this));
-  csys.connectValue(boost::bind(&Cylinder::setModelDirty, this));
+  radius->connectValue(boost::bind(&Cylinder::setModelDirty, this));
+  height->connectValue(boost::bind(&Cylinder::setModelDirty, this));
+  csys->connectValue(boost::bind(&Cylinder::setModelDirty, this));
   
   setupIPGroup();
 }
@@ -113,13 +115,13 @@ Cylinder::~Cylinder()
 
 void Cylinder::setupIPGroup()
 {
-  heightIP = new lbr::IPGroup(&height);
+  heightIP = new lbr::IPGroup(height.get());
   heightIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(1.0, 0.0, 0.0)));
   heightIP->setRotationAxis(osg::Vec3d(0.0, 0.0, 1.0), osg::Vec3d(0.0, -1.0, 0.0));
   overlaySwitch->addChild(heightIP.get());
   csysDragger->dragger->linkToMatrix(heightIP.get());
   
-  radiusIP = new lbr::IPGroup(&radius);
+  radiusIP = new lbr::IPGroup(radius.get());
   radiusIP->setMatrixDims(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(0.0, 1.0, 0.0)));
   radiusIP->setMatrixDragger(osg::Matrixd::rotate(osg::PI_2, osg::Vec3d(-1.0, 0.0, 0.0)));
   radiusIP->setDimsFlipped(true);
@@ -135,17 +137,17 @@ void Cylinder::updateIPGroup()
   //height of radius dragger
   osg::Matrixd freshMatrix;
   freshMatrix.setRotate(osg::Quat(osg::PI_2, osg::Vec3d(-1.0, 0.0, 0.0)));
-  freshMatrix.setTrans(osg::Vec3d (0.0, 0.0, static_cast<double>(height) / 2.0));
+  freshMatrix.setTrans(osg::Vec3d (0.0, 0.0, static_cast<double>(*height) / 2.0));
   radiusIP->setMatrixDragger(freshMatrix);
   
-  heightIP->setMatrix(static_cast<osg::Matrixd>(csys));
-  radiusIP->setMatrix(static_cast<osg::Matrixd>(csys));
+  heightIP->setMatrix(static_cast<osg::Matrixd>(*csys));
+  radiusIP->setMatrix(static_cast<osg::Matrixd>(*csys));
   
-  heightIP->mainDim->setSqueeze(static_cast<double>(radius));
-  heightIP->mainDim->setExtensionOffset(static_cast<double>(radius));
+  heightIP->mainDim->setSqueeze(static_cast<double>(*radius));
+  heightIP->mainDim->setExtensionOffset(static_cast<double>(*radius));
   
-  radiusIP->mainDim->setSqueeze(static_cast<double>(height) / 2.0);
-  radiusIP->mainDim->setExtensionOffset(static_cast<double>(height) / 2.0);
+  radiusIP->mainDim->setSqueeze(static_cast<double>(*height) / 2.0);
+  radiusIP->mainDim->setExtensionOffset(static_cast<double>(*height) / 2.0);
   
   heightIP->valueHasChanged();
   heightIP->constantHasChanged();
@@ -155,12 +157,12 @@ void Cylinder::updateIPGroup()
 
 void Cylinder::setRadius(const double& radiusIn)
 {
-  radius.setValue(radiusIn);
+  radius->setValue(radiusIn);
 }
 
 void Cylinder::setHeight(const double& heightIn)
 {
-  height.setValue(heightIn);
+  height->setValue(heightIn);
 }
 
 void Cylinder::setParameters(const double& radiusIn, const double& heightIn)
@@ -171,8 +173,8 @@ void Cylinder::setParameters(const double& radiusIn, const double& heightIn)
 
 void Cylinder::setCSys(const osg::Matrixd &csysIn)
 {
-  osg::Matrixd oldSystem = static_cast<osg::Matrixd>(csys);
-  if (!csys.setValue(csysIn))
+  osg::Matrixd oldSystem = static_cast<osg::Matrixd>(*csys);
+  if (!csys->setValue(csysIn))
     return; // already at this csys
     
   //apply the same transformation to dragger, so dragger moves with it.
@@ -180,10 +182,25 @@ void Cylinder::setCSys(const osg::Matrixd &csysIn)
   csysDragger->draggerUpdate(csysDragger->dragger->getMatrix() * diffMatrix);
 }
 
+double Cylinder::getRadius() const
+{
+  return static_cast<double>(*radius);
+}
+
+double Cylinder::getHeight() const
+{
+  return static_cast<double>(*height);
+}
+
 void Cylinder::getParameters(double& radiusOut, double& heightOut) const
 {
-  radiusOut = static_cast<double>(radius);
-  heightOut = static_cast<double>(height);
+  radiusOut = static_cast<double>(*radius);
+  heightOut = static_cast<double>(*height);
+}
+
+osg::Matrixd Cylinder::getCSys() const
+{
+  return static_cast<osg::Matrixd>(*csys);
 }
 
 void Cylinder::updateModel(const UpdatePayload&)
@@ -194,9 +211,9 @@ void Cylinder::updateModel(const UpdatePayload&)
   {
     CylinderBuilder cylinderMaker
     (
-      static_cast<double>(radius),
-      static_cast<double>(height),
-      gu::toOcc(static_cast<osg::Matrixd>(csys))
+      static_cast<double>(*radius),
+      static_cast<double>(*height),
+      gu::toOcc(static_cast<osg::Matrixd>(*csys))
     );
     sShape->setOCCTShape(cylinderMaker.getSolid());
     updateResult(cylinderMaker);
@@ -304,9 +321,9 @@ void Cylinder::serialWrite(const QDir &dIn)
   prj::srl::FeatureCylinder cylinderOut
   (
     Base::serialOut(),
-    radius.serialOut(),
-    height.serialOut(),
-    csys.serialOut(),
+    radius->serialOut(),
+    height->serialOut(),
+    csys->serialOut(),
     csysDragger->serialOut()
   );
   
@@ -318,9 +335,9 @@ void Cylinder::serialWrite(const QDir &dIn)
 void Cylinder::serialRead(const prj::srl::FeatureCylinder& sCylinderIn)
 {
   Base::serialIn(sCylinderIn.featureBase());
-  radius.serialIn(sCylinderIn.radius());
-  height.serialIn(sCylinderIn.height());
-  csys.serialIn(sCylinderIn.csys());
+  radius->serialIn(sCylinderIn.radius());
+  height->serialIn(sCylinderIn.height());
+  csys->serialIn(sCylinderIn.csys());
   csysDragger->serialIn(sCylinderIn.csysDragger());
   
   updateIPGroup();

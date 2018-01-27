@@ -34,6 +34,7 @@ namespace prj{namespace srl{class FeatureDraft;}}
 namespace ann{class SeerShape;}
 namespace ftr
 {
+  namespace prm{class Parameter;}
   struct DraftConvey
   {
     Picks targets;
