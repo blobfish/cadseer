@@ -61,7 +61,6 @@ namespace ftr
      */ 
     std::map<boost::uuids::uuid, boost::uuids::uuid> shapeMap;
     
-    TopTools_ListOfShape resolveClosingFaces(const ann::SeerShape &);
     void generatedMatch(BRepOffsetAPI_MakeThickSolid&, const ann::SeerShape &);
   };
 }

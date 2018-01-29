@@ -23,15 +23,44 @@
 #include <feature/base.h>
 #include <tools/featuretools.h>
 
-std::vector <std::pair<const ftr::Base*, boost::uuids::uuid>>
-tls::resolvePicks
+using namespace tls;
+
+Resolved::Resolved(const ftr::Base *fIn, const boost::uuids::uuid &idIn, const ftr::Pick &pIn):
+feature(fIn),
+resultId(idIn),
+pick(pIn)
+{}
+
+bool Resolved::operator< (const Resolved &other)
+{
+  if (feature < other.feature)
+    return true;
+  if (resultId < other.resultId)
+    return true;
+  
+  return false;
+}
+
+bool Resolved::operator== (const Resolved &other)
+{
+  if
+  (
+    (feature == other.feature)
+    && (resultId == other.resultId)
+  )
+  return true;
+  
+  return false;
+}
+
+std::vector<Resolved> tls::resolvePicks
 (
   const std::vector<const ftr::Base*> &features,
   std::vector<ftr::Pick> picks, //make a work copy of the picks.
   const ftr::ShapeHistory &pHistory
 )
 {
-  std::vector <std::pair<const ftr::Base*, boost::uuids::uuid>> out;
+  std::vector<Resolved> out;
   
   for (const auto *tf : features)
   {
@@ -55,26 +84,25 @@ tls::resolvePicks
         ++it;
         continue;
       }
-      foundPick = true;
-      it = picks.erase(it);
       for (const auto rid : rids)
       {
         assert(toolSeerShape.hasShapeIdRecord(rid)); //project shape history and the feature shapeid records out of sync.
         if (!toolSeerShape.hasShapeIdRecord(rid))
           continue;
-        out.push_back(std::make_pair(tf, rid));
+        out.push_back(Resolved(tf, rid, *it));
       }
+      foundPick = true;
+      it = picks.erase(it);
     }
     if (!foundPick) //we assume the whole shape.
-      out.push_back(std::make_pair(tf, gu::createNilId()));
+      out.push_back(Resolved(tf, gu::createNilId(), ftr::Pick()));
   }
   gu::uniquefy(out);
   
   return out;
 }
 
-std::vector<std::pair<const ftr::Base*, boost::uuids::uuid>>
-tls::resolvePicks
+std::vector<Resolved> tls::resolvePicks
 (
   const ftr::Base *feature,
   const ftr::Pick &pick,

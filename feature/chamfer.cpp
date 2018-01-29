@@ -118,20 +118,20 @@ void Chamfer::updateModel(const UpdatePayload &payloadIn)
       {
         auto resolvedEdgePicks = tls::resolvePicks(tf, pick.edgePick, payloadIn.shapeHistory);
         std::vector<uuid> edgeIds;
-        for (const auto &p : resolvedEdgePicks)
+        for (const auto &resolved : resolvedEdgePicks)
         {
-          if (p.second.is_nil())
+          if (resolved.resultId.is_nil())
             continue;
-          edgeIds.push_back(p.second);
+          edgeIds.push_back(resolved.resultId);
         }
         
         auto resolvedFacePicks = tls::resolvePicks(tf, pick.facePick, payloadIn.shapeHistory);
         std::vector<uuid> faceIds;
-        for (const auto &p : resolvedFacePicks)
+        for (const auto &resolved : resolvedFacePicks)
         {
-          if (p.second.is_nil())
+          if (resolved.resultId.is_nil())
             continue;
-          faceIds.push_back(p.second);
+          faceIds.push_back(resolved.resultId);
         }
         
         for (const auto &eid : edgeIds)

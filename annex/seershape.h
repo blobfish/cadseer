@@ -296,7 +296,6 @@ namespace ann
     void insertEvolve(const EvolveRecord&); //!< add entry into evolve container
     void fillInHistory(ftr::ShapeHistory &, const BID::uuid&) const;
     void replaceId(const BID::uuid &, const BID::uuid &, const ftr::ShapeHistory &);
-    std::vector<BID::uuid> resolvePick(const ftr::ShapeHistory&) const;
     //@}
     
     //@{

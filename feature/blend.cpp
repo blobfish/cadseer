@@ -216,13 +216,13 @@ void Blend::updateModel(const UpdatePayload &payloadIn)
       for (const auto &pick : simpleBlend.picks)
       {
         auto resolvedPicks = tls::resolvePicks(targetFeature, pick, payloadIn.shapeHistory);
-        for (const auto &rp : resolvedPicks) //resolved pair
+        for (const auto &resolved : resolvedPicks) //resolved pair
         {
-          if (rp.second.is_nil())
+          if (resolved.resultId.is_nil())
             continue;
-          updateShapeMap(rp.second, pick.shapeHistory);
-          assert(targetSeerShape.hasShapeIdRecord(rp.second)); //project history out of sync with seershape.
-          TopoDS_Shape tempShape = targetSeerShape.getOCCTShape(rp.second);
+          updateShapeMap(resolved.resultId, pick.shapeHistory);
+          assert(targetSeerShape.hasShapeIdRecord(resolved.resultId)); //project history out of sync with seershape.
+          TopoDS_Shape tempShape = targetSeerShape.getOCCTShape(resolved.resultId);
           assert(!tempShape.IsNull());
           assert(tempShape.ShapeType() == TopAbs_EDGE);
           blendMaker.Add(static_cast<double>(*(simpleBlend.radius)), TopoDS::Edge(tempShape));
@@ -241,13 +241,13 @@ void Blend::updateModel(const UpdatePayload &payloadIn)
       std::vector<const Base*> targetFeatures(1, targetFeature);
       ftr::Picks targetPicks(1, vBlend.pick);
       auto resolvedPicks = tls::resolvePicks(targetFeature, vBlend.pick, payloadIn.shapeHistory);
-      for (const auto &rp : resolvedPicks) //resolved pair
+      for (const auto &resolved : resolvedPicks) //resolved pair
       {
-        if (rp.second.is_nil())
+        if (resolved.resultId.is_nil())
             continue;
-        updateShapeMap(rp.second, vBlend.pick.shapeHistory);
-        assert(targetSeerShape.hasShapeIdRecord(rp.second)); //project history out of sync with seershape.
-        TopoDS_Shape tempShape = targetSeerShape.getOCCTShape(rp.second);
+        updateShapeMap(resolved.resultId, vBlend.pick.shapeHistory);
+        assert(targetSeerShape.hasShapeIdRecord(resolved.resultId)); //project history out of sync with seershape.
+        TopoDS_Shape tempShape = targetSeerShape.getOCCTShape(resolved.resultId);
         assert(!tempShape.IsNull());
         assert(tempShape.ShapeType() == TopAbs_EDGE); //TODO faces someday.
         blendMaker.Add(TopoDS::Edge(tempShape));
@@ -256,14 +256,10 @@ void Blend::updateModel(const UpdatePayload &payloadIn)
       {
         ftr::Picks entryPicks(1, e.pick);
         auto resolvedEntryPicks = tls::resolvePicks(targetFeatures, entryPicks, payloadIn.shapeHistory);
-        if (resolvedEntryPicks.empty())
-        {
-          std::ostringstream s; s << "Blend: can't find target entry id. Skipping id: " << gu::idToString(e.pick.id) << std::endl;
-          lastUpdateLog += s.str();
-          continue;
-        }
         assert(resolvedEntryPicks.size() == 1);//don't think an entry should ever result in more than one id.
-        const TopoDS_Shape &blendShape = targetSeerShape.getOCCTShape(resolvedEntryPicks.front().second);
+        if (resolvedEntryPicks.size() != 1)
+          continue;
+        const TopoDS_Shape &blendShape = targetSeerShape.getOCCTShape(resolvedEntryPicks.front().resultId);
         if (blendShape.ShapeType() == TopAbs_VERTEX)
         {
           const TopoDS_Vertex &v = TopoDS::Vertex(blendShape);

@@ -123,17 +123,15 @@ void Squash::updateModel(const UpdatePayload &payloadIn)
     bool od = false; //orientation determined.
     bool sr = false; //should reverse.
     
-    
-    
     auto resolvedPicks = tls::resolvePicks(tfs, picks, payloadIn.shapeHistory);
-    for (const auto &p : resolvedPicks)
+    for (const auto &resolved : resolvedPicks)
     {
-      if (p.second.is_nil())
+      if (resolved.resultId.is_nil())
         continue;
-      assert(tss.hasShapeIdRecord(p.second));
-      if (!tss.hasShapeIdRecord(p.second))
+      assert(tss.hasShapeIdRecord(resolved.resultId));
+      if (!tss.hasShapeIdRecord(resolved.resultId))
         continue;
-      const TopoDS_Shape &shape = tss.getOCCTShape(p.second);
+      const TopoDS_Shape &shape = tss.getOCCTShape(resolved.resultId);
       if (shape.ShapeType() != TopAbs_FACE)
       {
         std::ostringstream sm; sm << "shape is not a face in Squash::updateModel" << std::endl;
@@ -142,8 +140,7 @@ void Squash::updateModel(const UpdatePayload &payloadIn)
       }
       const TopoDS_Face &f = TopoDS::Face(shape);
       static const gp_Vec zAxis(0.0, 0.0, 1.0);
-      //following line is flawed! Hack while waiting for pick to be returned with tls::resolvePicks.
-      gp_Vec n = occt::getNormal(f, picks.front().u, picks.front().v);
+      gp_Vec n = occt::getNormal(f, resolved.pick.u, resolved.pick.v);
       if (!n.IsParallel(zAxis, Precision::Confusion())) //Precision::Angular was too sensitive.
         throw std::runtime_error("lock face that is not parallel to z axis");
       if (!od)

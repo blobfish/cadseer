@@ -485,19 +485,6 @@ void SeerShape::replaceId(const uuid &staleId, const uuid &freshId, const ftr::S
   //I don't think I need to update the IdSet is either?
 }
 
-std::vector<uuid> SeerShape::resolvePick(const ftr::ShapeHistory &pickHistory) const
-{
-  std::vector<uuid> out;
-  
-  for (const auto &id : pickHistory.getAllIds())
-  {
-    if (hasShapeIdRecord(id))
-      out.push_back(id);
-  }
-  
-  return out;
-}
-
 uuid SeerShape::featureTagId(const std::string& tagIn)
 {
   typedef FeatureTagContainer::index<FeatureTagRecord::ByTag>::type List;

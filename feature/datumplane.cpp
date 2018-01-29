@@ -135,17 +135,17 @@ osg::Matrixd DatumPlanePlanarOffset::solve(const UpdatePayload &payloadIn)
     const ann::SeerShape &shape = features.front()->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     
     auto resolvedPicks = tls::resolvePicks(features.front(), facePick, payloadIn.shapeHistory);
-    if (resolvedPicks.front().second.is_nil())
+    if (resolvedPicks.front().resultId.is_nil())
     {
       std::ostringstream stream;
       stream << "DatumPlanePlanarOffset: can't find target face id. Skipping id: " << gu::idToString(facePick.id);
       throw std::runtime_error(stream.str());
     }
-    assert(shape.hasShapeIdRecord(resolvedPicks.front().second));
-    if (!shape.hasShapeIdRecord(resolvedPicks.front().second))
+    assert(shape.hasShapeIdRecord(resolvedPicks.front().resultId));
+    if (!shape.hasShapeIdRecord(resolvedPicks.front().resultId))
       throw std::runtime_error("DatumPlanePlanarOffset: seer shape doesn't have id");
       
-    const TopoDS_Shape &faceShape = shape.getOCCTShape(resolvedPicks.front().second);
+    const TopoDS_Shape &faceShape = shape.getOCCTShape(resolvedPicks.front().resultId);
     assert(faceShape.ShapeType() == TopAbs_FACE);
     if (faceShape.ShapeType() != TopAbs_FACE)
       throw std::runtime_error("DatumPlanePlanarOffset: shape is not a face");
@@ -269,11 +269,11 @@ osg::Matrixd DatumPlanePlanarCenter::solve(const UpdatePayload &payloadIn)
     const ann::SeerShape &shape = features.front()->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     
     std::vector<uuid> ids;
-    for (const auto &p : resolvedPicks)
+    for (const auto &resolved : resolvedPicks)
     {
-      if (p.second.is_nil())
+      if (resolved.resultId.is_nil())
         continue;
-      ids.push_back(p.second);
+      ids.push_back(resolved.resultId);
     }
     if (ids.size() != 2)
       throw std::runtime_error("DatumPlanePlanarCenter: wrong number of resolved ids");
@@ -299,11 +299,11 @@ osg::Matrixd DatumPlanePlanarCenter::solve(const UpdatePayload &payloadIn)
     bool system1Set = false;
     bool system2Set = false;
     
-    for (const auto &p : resolvedPicks)
+    for (const auto &resolved : resolvedPicks)
     {
-      if (p.first->getType() == Type::DatumPlane && p.second.is_nil())
+      if (resolved.feature->getType() == Type::DatumPlane && resolved.resultId.is_nil())
       {
-        const DatumPlane *inputPlane = dynamic_cast<const DatumPlane*>(p.first);
+        const DatumPlane *inputPlane = dynamic_cast<const DatumPlane*>(resolved.feature);
         assert(inputPlane);
         if (!system1Set)
         {
@@ -318,13 +318,13 @@ osg::Matrixd DatumPlanePlanarCenter::solve(const UpdatePayload &payloadIn)
           system2Set = true;
         }
       }
-      else if (p.first->hasAnnex(ann::Type::SeerShape) && (!p.second.is_nil()))
+      else if (resolved.feature->hasAnnex(ann::Type::SeerShape) && (!resolved.resultId.is_nil()))
       {
-        const ann::SeerShape &shape = p.first->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
-        assert(shape.hasShapeIdRecord(p.second));
-        if (!shape.hasShapeIdRecord(p.second))
+        const ann::SeerShape &shape = resolved.feature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+        assert(shape.hasShapeIdRecord(resolved.resultId));
+        if (!shape.hasShapeIdRecord(resolved.resultId))
           throw std::runtime_error("DatumPlanePlanarCenter: expected id not found in seershape.");
-        TopoDS_Shape face = shape.getOCCTShape(p.second);
+        TopoDS_Shape face = shape.getOCCTShape(resolved.resultId);
         if (face.IsNull())
           throw std::runtime_error("DatumPlanePlanarCenter: input has null shape");
         if (face.ShapeType() != TopAbs_FACE)
@@ -490,11 +490,11 @@ osg::Matrixd DatumPlanePlanarParallelThroughEdge::solve(const UpdatePayload &pay
     
     uuid faceId = gu::createNilId();
     auto resolvedFacePick = tls::resolvePicks(features.front(), facePick, payloadIn.shapeHistory);
-    for (const auto &p : resolvedFacePick)
+    for (const auto &resolved : resolvedFacePick)
     {
-      if (p.second.is_nil())
+      if (resolved.resultId.is_nil())
         continue;
-      faceId = p.second;
+      faceId = resolved.resultId;
       break;
     }
     if (faceId.is_nil())
@@ -505,11 +505,11 @@ osg::Matrixd DatumPlanePlanarParallelThroughEdge::solve(const UpdatePayload &pay
     
     uuid edgeId = gu::createNilId();
     auto resolvedEdgePick = tls::resolvePicks(features.front(), edgePick, payloadIn.shapeHistory);
-    for (const auto &p : resolvedEdgePick)
+    for (const auto &resolved : resolvedEdgePick)
     {
-      if (p.second.is_nil())
+      if (resolved.resultId.is_nil())
         continue;
-      edgeId = p.second;
+      edgeId = resolved.resultId;
       break;
     }
     if (edgeId.is_nil())
@@ -551,23 +551,23 @@ osg::Matrixd DatumPlanePlanarParallelThroughEdge::solve(const UpdatePayload &pay
     picks.push_back(edgePick);
     auto resolvedPicks = tls::resolvePicks(features, picks, payloadIn.shapeHistory);
     
-    for (const auto &p : resolvedPicks)
+    for (const auto &resolved : resolvedPicks)
     {
-      if (p.first->getType() == Type::DatumPlane && p.second.is_nil() && !foundPlane)
+      if (resolved.feature->getType() == Type::DatumPlane && resolved.resultId.is_nil() && !foundPlane)
       {
-        const DatumPlane *dPlane = dynamic_cast<const DatumPlane*>(p.first);
+        const DatumPlane *dPlane = dynamic_cast<const DatumPlane*>(resolved.feature);
         assert(dPlane);
         outSystem = dPlane->getSystem();
         tempRadius = dPlane->getRadius();
         foundPlane = true;
       }
-      else if (p.first->hasAnnex(ann::Type::SeerShape) && (!p.second.is_nil()))
+      else if (resolved.feature->hasAnnex(ann::Type::SeerShape) && (!resolved.resultId.is_nil()))
       {
-        const ann::SeerShape &shape = p.first->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
-        assert(shape.hasShapeIdRecord(p.second));
-        if (!shape.hasShapeIdRecord(p.second))
+        const ann::SeerShape &shape = resolved.feature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+        assert(shape.hasShapeIdRecord(resolved.resultId));
+        if (!shape.hasShapeIdRecord(resolved.resultId))
           throw std::runtime_error("DatumPlanarParallelThroughEdge: seer shape doesn't have expected shape");
-        const TopoDS_Shape &occShape = shape.getOCCTShape(p.second);
+        const TopoDS_Shape &occShape = shape.getOCCTShape(resolved.resultId);
         assert(!occShape.IsNull());
         if (occShape.ShapeType() == TopAbs_FACE && !foundPlane)
         {

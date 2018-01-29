@@ -158,14 +158,14 @@ void InstanceLinear::updateModel(const UpdatePayload &payloadIn)
     else
     {
       auto resolvedPicks = tls::resolvePicks(tfs.front(), pick, payloadIn.shapeHistory);
-      for (const auto &p : resolvedPicks)
+      for (const auto &resolved : resolvedPicks)
       {
-        if (p.second.is_nil())
+        if (resolved.resultId.is_nil())
           continue;
-        assert(tss.hasShapeIdRecord(p.second));
-        if (!tss.hasShapeIdRecord(p.second))
+        assert(tss.hasShapeIdRecord(resolved.resultId));
+        if (!tss.hasShapeIdRecord(resolved.resultId))
           continue;
-        tShapes.push_back(tss.findShapeIdRecord(p.second).shape);
+        tShapes.push_back(tss.findShapeIdRecord(resolved.resultId).shape);
       }
     }
     if (tShapes.empty())

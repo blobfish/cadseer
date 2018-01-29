@@ -150,14 +150,14 @@ void InstancePolar::updateModel(const UpdatePayload &payloadIn)
     else
     {
       auto resolvedPicks = tls::resolvePicks(tfs.front(), shapePick, payloadIn.shapeHistory);
-      for (const auto &p : resolvedPicks)
+      for (const auto &resolved : resolvedPicks)
       {
-        if (p.second.is_nil())
+        if (resolved.resultId.is_nil())
           continue;
-        assert(tss.hasShapeIdRecord(p.second));
-        if (!tss.hasShapeIdRecord(p.second))
+        assert(tss.hasShapeIdRecord(resolved.resultId));
+        if (!tss.hasShapeIdRecord(resolved.resultId))
           continue;
-        tShapes.push_back(tss.findShapeIdRecord(p.second).shape);
+        tShapes.push_back(tss.findShapeIdRecord(resolved.resultId).shape);
       }
     }
     if (tShapes.empty())
@@ -180,14 +180,14 @@ void InstancePolar::updateModel(const UpdatePayload &payloadIn)
       
       
       auto resolvedPicks = tls::resolvePicks(rafs.front(), axisPick, payloadIn.shapeHistory);
-      for (const auto &p : resolvedPicks)
+      for (const auto &resolved : resolvedPicks)
       {
-        if (p.second.is_nil())
+        if (resolved.resultId.is_nil())
           continue;
-        assert(ass.hasShapeIdRecord(p.second));
-        if (!ass.hasShapeIdRecord(p.second))
+        assert(ass.hasShapeIdRecord(resolved.resultId));
+        if (!ass.hasShapeIdRecord(resolved.resultId))
           continue;
-        dsShape = ass.findShapeIdRecord(p.second).shape;
+        dsShape = ass.findShapeIdRecord(resolved.resultId).shape;
         break;
       }
       if (dsShape.IsNull())

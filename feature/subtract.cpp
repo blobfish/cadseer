@@ -89,22 +89,19 @@ void Subtract::updateModel(const UpdatePayload &payloadIn)
       if (targetSeerShape.isNull())
         throw std::runtime_error("target seerShape is null");
     }
-    auto targetPairs = tls::resolvePicks(targetFeatures, targetPicks, payloadIn.shapeHistory);
-    assert(!targetPairs.empty());
-    if (targetPairs.empty())
-      throw std::runtime_error("no target pairs");
+    auto resolves = tls::resolvePicks(targetFeatures, targetPicks, payloadIn.shapeHistory);
     occt::ShapeVector targetOCCTShapes;
-    for (const auto &pair : targetPairs)
+    for (const auto &resolved : resolves)
     {
-      const ann::SeerShape &tShape = pair.first->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
-      if (pair.second.is_nil())
+      const ann::SeerShape &tShape = resolved.feature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+      if (resolved.resultId.is_nil())
       {
         //don't include the compound.
         const auto &c = tShape.useGetNonCompoundChildren();
         std::copy(c.begin(), c.end(), std::back_inserter(targetOCCTShapes));
       }
       else
-        targetOCCTShapes.push_back(tShape.getOCCTShape(pair.second));
+        targetOCCTShapes.push_back(tShape.getOCCTShape(resolved.resultId));
     }
     occt::uniquefy(targetOCCTShapes); //just in case.
     for (auto it = targetOCCTShapes.begin(); it != targetOCCTShapes.end();)
@@ -130,19 +127,19 @@ void Subtract::updateModel(const UpdatePayload &payloadIn)
       if (toolSeerShape.isNull())
         throw std::runtime_error("tool seerShape is null");
     }
-    auto pairs = tls::resolvePicks(toolFeatures, toolPicks, payloadIn.shapeHistory);
+    auto resolves2 = tls::resolvePicks(toolFeatures, toolPicks, payloadIn.shapeHistory);
     occt::ShapeVector toolOCCTShapes;
-    for (const auto &pair : pairs)
+    for (const auto &resolved : resolves2)
     {
-      const ann::SeerShape &tShape = pair.first->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
-      if (pair.second.is_nil())
+      const ann::SeerShape &tShape = resolved.feature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+      if (resolved.resultId.is_nil())
       {
         //don't include the compound.
         const auto &c = tShape.useGetNonCompoundChildren();
         std::copy(c.begin(), c.end(), std::back_inserter(toolOCCTShapes));
       }
       else
-        toolOCCTShapes.push_back(tShape.getOCCTShape(pair.second));
+        toolOCCTShapes.push_back(tShape.getOCCTShape(resolved.resultId));
     }
     occt::uniquefy(toolOCCTShapes); //just in case.
     for (auto it = toolOCCTShapes.begin(); it != toolOCCTShapes.end();)

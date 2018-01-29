@@ -218,12 +218,12 @@ void Extract::updateModel(const UpdatePayload &payloadIn)
       occt::FaceVector faces;
       bool labelDone = false; //set label position to first pick.
       auto resolvedPicks = tls::resolvePicks(targetFeatures, ap.picks, payloadIn.shapeHistory);
-      for (const auto &p : resolvedPicks)
+      for (const auto &resolved : resolvedPicks)
       {
-        if (p.second.is_nil())
+        if (resolved.resultId.is_nil()) //accrue doesn't work with whole features.
           continue;
         
-        TopoDS_Shape shape = targetSeerShape.getOCCTShape(p.second);
+        TopoDS_Shape shape = targetSeerShape.getOCCTShape(resolved.resultId);
         assert(!shape.IsNull());
         if (shape.ShapeType() == TopAbs_FACE)
         {
@@ -236,7 +236,7 @@ void Extract::updateModel(const UpdatePayload &payloadIn)
           if (!labelDone)
           {
             labelDone = true;
-            ap.label->setMatrix(osg::Matrixd::translate(ap.picks.front().getPoint(f)));
+            ap.label->setMatrix(osg::Matrixd::translate(resolved.pick.getPoint(f)));
           }
         }
       }
@@ -251,17 +251,17 @@ void Extract::updateModel(const UpdatePayload &payloadIn)
     if (accruePicks.empty())
     {
       auto resolvedPicks = tls::resolvePicks(targetFeatures, picks, payloadIn.shapeHistory);
-      for (const auto &p : resolvedPicks)
+      for (const auto &resolved : resolvedPicks)
       {
-        if (p.second.is_nil())
+        if (resolved.resultId.is_nil())
         {
           occt::ShapeVector children = targetSeerShape.useGetNonCompoundChildren();
           for (const auto &child : children)
             outShapes.push_back(child);
           continue;
         }
-        assert(targetSeerShape.hasShapeIdRecord(p.second));
-        outShapes.push_back(targetSeerShape.getOCCTShape(p.second));
+        assert(targetSeerShape.hasShapeIdRecord(resolved.resultId));
+        outShapes.push_back(targetSeerShape.getOCCTShape(resolved.resultId));
       }
     }
     TopoDS_Compound out = static_cast<TopoDS_Compound>(occt::ShapeVectorCast(outShapes));

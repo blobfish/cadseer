@@ -121,14 +121,14 @@ void InstanceMirror::updateModel(const UpdatePayload &payloadIn)
     else
     {
       auto resolvedPicks = tls::resolvePicks(tfs.front(), shapePick, payloadIn.shapeHistory);
-      for (const auto &p : resolvedPicks)
+      for (const auto &resolved : resolvedPicks)
       {
-        if (p.second.is_nil())
+        if (resolved.resultId.is_nil())
           continue;
-        assert(tss.hasShapeIdRecord(p.second));
-        if (!tss.hasShapeIdRecord(p.second))
+        assert(tss.hasShapeIdRecord(resolved.resultId));
+        if (!tss.hasShapeIdRecord(resolved.resultId))
           continue;
-        tShapes.push_back(tss.findShapeIdRecord(p.second).shape);
+        tShapes.push_back(tss.findShapeIdRecord(resolved.resultId).shape);
       }
     }
     if (tShapes.empty())
@@ -156,14 +156,14 @@ void InstanceMirror::updateModel(const UpdatePayload &payloadIn)
 
         TopoDS_Shape dsShape;
         auto resolvedPicks = tls::resolvePicks(mfs.front(), planePick, payloadIn.shapeHistory);
-        for (const auto &p : resolvedPicks)
+        for (const auto &resolved : resolvedPicks)
         {
-          if (p.second.is_nil())
+          if (resolved.resultId.is_nil())
             continue;
-          assert(mss.hasShapeIdRecord(p.second));
-          if (!mss.hasShapeIdRecord(p.second))
+          assert(mss.hasShapeIdRecord(resolved.resultId));
+          if (!mss.hasShapeIdRecord(resolved.resultId))
             continue;
-          dsShape = mss.findShapeIdRecord(p.second).shape;
+          dsShape = mss.findShapeIdRecord(resolved.resultId).shape;
           break;
         }
 

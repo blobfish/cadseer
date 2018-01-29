@@ -112,11 +112,11 @@ void Draft::updateModel(const UpdatePayload &payloadIn)
     
     auto resolvedNeutralPicks = tls::resolvePicks(features.front(), neutralPick, payloadIn.shapeHistory);
     uuid neutralId = gu::createNilId();
-    for (const auto &p : resolvedNeutralPicks)
+    for (const auto &resolved : resolvedNeutralPicks)
     {
-      if (p.second.is_nil())
+      if (resolved.resultId.is_nil())
         continue;
-      neutralId = p.second;
+      neutralId = resolved.resultId;
       break;
     }
     if (neutralId.is_nil())
@@ -127,28 +127,25 @@ void Draft::updateModel(const UpdatePayload &payloadIn)
     gp_Dir direction = plane.Axis().Direction();
     bool labelDone = false; //set label position to first pick.
     
-    
-    
-    
     auto resolvedTargetPicks = tls::resolvePicks(features, targetPicks, payloadIn.shapeHistory);
-    for (const auto &p : resolvedTargetPicks)
+    for (const auto &resolved : resolvedTargetPicks)
     {
-      if (p.second.is_nil())
+      if (resolved.resultId.is_nil())
         continue;
-      assert(targetSeerShape.hasShapeIdRecord(p.second)); //project shape history out of sync.
-      const TopoDS_Face &face = TopoDS::Face(targetSeerShape.getOCCTShape(p.second));
+      assert(targetSeerShape.hasShapeIdRecord(resolved.resultId)); //project shape history out of sync.
+      const TopoDS_Face &face = TopoDS::Face(targetSeerShape.getOCCTShape(resolved.resultId));
       
       dMaker.Add(face, direction, localAngle, plane);
       if (!dMaker.AddDone())
       {
-        std::ostringstream s; s << "Draft failed adding face: " << gu::idToString(p.second) << ". Removing" << std::endl;
+        std::ostringstream s; s << "Draft failed adding face: " << gu::idToString(resolved.resultId) << ". Removing" << std::endl;
         lastUpdateLog += s.str();
         dMaker.Remove(face);
       }
       if (!labelDone)
       {
         labelDone = true;
-        label->setMatrix(osg::Matrixd::translate(Pick::point(face, targetPicks.front().u, targetPicks.front().v)));
+        label->setMatrix(osg::Matrixd::translate(resolved.pick.getPoint(face)));
       }
     }
     dMaker.Build();

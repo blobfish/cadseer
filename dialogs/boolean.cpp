@@ -123,8 +123,8 @@ void Boolean::setEditDialog()
     toolPicks = onion->getToolPicks();
   }
   
-  auto targetPairs = tls::resolvePicks(targets, targetPicks, project->getShapeHistory());
-  auto toolPairs = tls::resolvePicks(tools, toolPicks, project->getShapeHistory());
+  auto resolvedTargets = tls::resolvePicks(targets, targetPicks, project->getShapeHistory());
+  auto resolvedTools = tls::resolvePicks(tools, toolPicks, project->getShapeHistory());
   
   auto isFeatureValid = [](const ftr::Base *f) -> bool
   {
@@ -138,14 +138,14 @@ void Boolean::setEditDialog()
   };
   
   //need reference capture to capture the isFeatureValid lambda
-  auto createsMessages = [&](const auto &pairs) -> slc::Messages
+  auto createsMessages = [&](const auto &Resolves) -> slc::Messages
   {
     slc::Messages out;
     
-    for (const auto &pair : pairs)
+    for (const auto &resolved : Resolves)
     {
-      const ftr::Base* f = pair.first;
-      uuid shapeId = pair.second;
+      const ftr::Base* f = resolved.feature;
+      uuid shapeId = resolved.resultId;
       if (!isFeatureValid(f)) //this should filter invalid picks.
         continue;
       const ann::SeerShape &seerShape = f->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
@@ -170,8 +170,8 @@ void Boolean::setEditDialog()
     return out;
   };
     
-  slc::Messages targetMessages = createsMessages(targetPairs);
-  slc::Messages toolMessages = createsMessages(toolPairs);
+  slc::Messages targetMessages = createsMessages(resolvedTargets);
+  slc::Messages toolMessages = createsMessages(resolvedTools);
   
   targetButton->setMessages(targetMessages);
   toolButton->setMessages(toolMessages);

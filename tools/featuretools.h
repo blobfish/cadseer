@@ -24,10 +24,25 @@
 
 #include <boost/uuid/uuid.hpp>
 
-namespace ftr{class Base; class Pick; class ShapeHistory;}
+#include <feature/pick.h>
+
+namespace ftr{class Base; class ShapeHistory;}
 
 namespace tls
 {
+  /*! @brief Output of pick resolution
+   * 
+   */
+  struct Resolved
+  {
+    Resolved(const ftr::Base *, const boost::uuids::uuid&, const ftr::Pick&);  
+    const ftr::Base *feature; //!< feature containing the result
+    boost::uuids::uuid resultId; //!< result id of pick in feature.
+    ftr::Pick pick; //!< pick to resolve.
+    bool operator<(const Resolved&);
+    bool operator==(const Resolved&);
+  };
+  
   /*! @brief Get feature and shape id pairs.
    * 
    * @param features input features that contain the result of the id.
@@ -36,7 +51,7 @@ namespace tls
    * @return vector of pairs containing the parent feature pointer and the shapeid.
    * @note pilot test for this is the booleans.
    */
-  std::vector<std::pair<const ftr::Base*, boost::uuids::uuid>>
+  std::vector<Resolved>
   resolvePicks
   (
     const std::vector<const ftr::Base*> &features,
@@ -47,7 +62,7 @@ namespace tls
   /*! @brief Same as overloaded. Just convenience.
 
    */
-  std::vector<std::pair<const ftr::Base*, boost::uuids::uuid>>
+  std::vector<Resolved>
   resolvePicks
   (
     const ftr::Base *feature,
