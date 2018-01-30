@@ -48,15 +48,27 @@ void Refine::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
   lastUpdateLog.clear();
+  sShape->reset();
   try
   {
-    if (payloadIn.updateMap.count(ftr::InputType::target) != 1)
-      throw std::runtime_error("couldn't find 'target' input");
-    const ftr::Base *pbf = payloadIn.updateMap.equal_range(ftr::InputType::target).first->second;
-    if(!pbf->hasAnnex(ann::Type::SeerShape))
+    std::vector<const Base*> tfs = payloadIn.getFeatures(ftr::InputType::target);
+    if (tfs.size() != 1)
+      throw std::runtime_error("wrong number of 'target' inputs");
+    if(!tfs.front()->hasAnnex(ann::Type::SeerShape))
       throw std::runtime_error("no seer shape for target");
-    const ann::SeerShape &tss = pbf->getAnnex<ann::SeerShape>(ann::Type::SeerShape); //target seer shape.
+    const ann::SeerShape &tss = tfs.front()->getAnnex<ann::SeerShape>(ann::Type::SeerShape); //target seer shape.
+    if (tss.isNull())
+      throw std::runtime_error("target seer shape is null");
     const TopoDS_Shape &shape = tss.getRootOCCTShape();
+    
+    //setup new failure state.
+    sShape->setOCCTShape(tss.getRootOCCTShape());
+    sShape->shapeMatch(tss);
+    sShape->uniqueTypeMatch(tss);
+    sShape->outerWireMatch(tss);
+    sShape->derivedMatch();
+    sShape->ensureNoNils(); //just in case
+    sShape->ensureNoDuplicates(); //just in case
     
     ShapeUpgrade_UnifySameDomain usd(shape);
     usd.Build();

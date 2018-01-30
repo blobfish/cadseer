@@ -76,6 +76,7 @@ void Union::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure(); //assume failure until success.
   lastUpdateLog.clear();
+  sShape->reset();
   try
   {
     //target
@@ -114,6 +115,19 @@ void Union::updateModel(const UpdatePayload &payloadIn)
       else
         ++it;
     }
+    
+    //set to new failed state.
+    TopoDS_Compound tc = occt::ShapeVectorCast(targetOCCTShapes);
+    sShape->setOCCTShape(tc);
+    for (const auto *it : targetFeatures)
+      sShape->shapeMatch(it->getAnnex<ann::SeerShape>(ann::Type::SeerShape));
+    for (const auto *it : targetFeatures)
+      sShape->uniqueTypeMatch(it->getAnnex<ann::SeerShape>(ann::Type::SeerShape));
+    for (const auto *it : targetFeatures)
+      sShape->outerWireMatch(it->getAnnex<ann::SeerShape>(ann::Type::SeerShape));
+    sShape->derivedMatch();
+    sShape->ensureNoNils(); //just in case
+    sShape->ensureNoDuplicates(); //just in case
     
     //tools
     std::vector<const Base*> toolFeatures = payloadIn.getFeatures(InputType::tool);

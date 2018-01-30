@@ -169,27 +169,32 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
   lastUpdateLog.clear();
+  sShape->reset();
   try
   {
-    if (payloadIn.updateMap.count(part) != 1)
-      throw std::runtime_error("couldn't find 'part' input");
-    const ftr::Base *pbf = payloadIn.updateMap.equal_range(part).first->second;
-    if(!pbf->hasAnnex(ann::Type::SeerShape))
+    std::vector<const Base*> pfs = payloadIn.getFeatures(part);
+    if (pfs.size() != 1)
+      throw std::runtime_error("wrong number of 'part' inputs");
+    if(!pfs.front()->hasAnnex(ann::Type::SeerShape))
       throw std::runtime_error("no seer shape for part");
-    const ann::SeerShape &pss = pbf->getAnnex<ann::SeerShape>(ann::Type::SeerShape); //part seer shape.
+    const ann::SeerShape &pss = pfs.front()->getAnnex<ann::SeerShape>(ann::Type::SeerShape); //part seer shape.
+    if (pss.isNull())
+      throw std::runtime_error("part seer shape is null");
     const TopoDS_Shape &ps = occt::getFirstNonCompound(pss.getRootOCCTShape()); //part shape.
-      
-    if (payloadIn.updateMap.count(blank) != 1)
-      throw std::runtime_error("couldn't find 'blank' input");
-    const ftr::Base *bbf = payloadIn.updateMap.equal_range(blank).first->second;
-    if(!bbf->hasAnnex(ann::Type::SeerShape))
+    
+    std::vector<const Base*> bfs = payloadIn.getFeatures(blank);
+    if (bfs.size() != 1)
+      throw std::runtime_error("wrong number of 'blank' inputs");
+    if(!bfs.front()->hasAnnex(ann::Type::SeerShape))
       throw std::runtime_error("no seer shape for blank");
-    const ann::SeerShape &bss = bbf->getAnnex<ann::SeerShape>(ann::Type::SeerShape); //blank seer shape.
+    const ann::SeerShape &bss = bfs.front()->getAnnex<ann::SeerShape>(ann::Type::SeerShape); //blank seer shape.
+    if (bss.isNull())
+      throw std::runtime_error("blank seer shape is null");
     const TopoDS_Shape &bs = occt::getFirstNonCompound(bss.getRootOCCTShape()); //blank shape.
-      
-    if (payloadIn.updateMap.count(nest) != 1)
+    
+    std::vector<const Base*> nfs = payloadIn.getFeatures(blank);
+    if (nfs.size() != 1)
       throw std::runtime_error("couldn't find 'nest' input");
-    const ftr::Base *nbf = payloadIn.updateMap.equal_range(nest).first->second;
     
     occt::BoundingBox bbbox(bs); //blank bounding box.
     
@@ -202,7 +207,7 @@ void Strip::updateModel(const UpdatePayload &payloadIn)
       widthOffsetLabel->setTextColor(cIn);
       gapLabel->setTextColor(cIn);
       
-      const Nest *nf = dynamic_cast<const Nest *>(nbf);
+      const Nest *nf = dynamic_cast<const Nest *>(nfs.front());
       assert(nf);
       if (!nf)
         throw std::runtime_error("Bad cast to Nest");

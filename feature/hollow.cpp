@@ -88,6 +88,7 @@ void Hollow::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
   lastUpdateLog.clear();
+  sShape->reset();
   try
   {
     std::vector<const Base*> tfs = payloadIn.getFeatures(InputType::target);
@@ -96,6 +97,17 @@ void Hollow::updateModel(const UpdatePayload &payloadIn)
     if (!tfs.front()->hasAnnex(ann::Type::SeerShape))
       throw std::runtime_error("parent doesn't have seer shape");
     const ann::SeerShape &tss= tfs.front()->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+    if (tss.isNull())
+      throw std::runtime_error("target seer shape is null");
+    
+    //setup new failure state.
+    sShape->setOCCTShape(tss.getRootOCCTShape());
+    sShape->shapeMatch(tss);
+    sShape->uniqueTypeMatch(tss);
+    sShape->outerWireMatch(tss);
+    sShape->derivedMatch();
+    sShape->ensureNoNils(); //just in case
+    sShape->ensureNoDuplicates(); //just in case
     
     bool labelSet = false;
     occt::ShapeVector closingFaceShapes;

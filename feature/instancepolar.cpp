@@ -132,6 +132,7 @@ void InstancePolar::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
   lastUpdateLog.clear();
+  sShape->reset();
   try
   {
     std::vector<const Base*> tfs = payloadIn.getFeatures(InputType::target);
@@ -140,6 +141,10 @@ void InstancePolar::updateModel(const UpdatePayload &payloadIn)
     if (!tfs.front()->hasAnnex(ann::Type::SeerShape))
       throw std::runtime_error("parent doesn't have seer shape.");
     const ann::SeerShape &tss = tfs.front()->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+    if (tss.isNull())
+      throw std::runtime_error("target seer shape is null");
+    
+    //no new failure state.
     
     //get the shapes to mirror.
     occt::ShapeVector tShapes;

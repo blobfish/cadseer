@@ -203,6 +203,7 @@ void Extract::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
   lastUpdateLog.clear();
+  sShape->reset();
   try
   {
     std::vector<const Base*> targetFeatures = payloadIn.getFeatures(InputType::target);
@@ -211,6 +212,10 @@ void Extract::updateModel(const UpdatePayload &payloadIn)
     if (!targetFeatures.front()->hasAnnex(ann::Type::SeerShape))
       throw std::runtime_error("parent doesn't have seer shape");
     const ann::SeerShape &targetSeerShape = targetFeatures.front()->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+    if (targetSeerShape.isNull())
+      throw std::runtime_error("target seer shape is null");
+    
+    //no new failure state.
     
     occt::ShapeVector outShapes;
     for (const auto &ap : accruePicks)

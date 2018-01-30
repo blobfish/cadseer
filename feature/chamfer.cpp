@@ -99,6 +99,7 @@ void Chamfer::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
   lastUpdateLog.clear();
+  sShape->reset();
   try
   {
     std::vector<const Base*> targetFeatures = payloadIn.getFeatures(InputType::target);
@@ -108,6 +109,17 @@ void Chamfer::updateModel(const UpdatePayload &payloadIn)
     if (!tf->hasAnnex(ann::Type::SeerShape))
       throw std::runtime_error("parent doesn't have seer shape");
     const ann::SeerShape &targetSeerShape = tf->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+    if (targetSeerShape.isNull())
+      throw std::runtime_error("target seer shape is null");
+    
+    //setup failure state.
+    sShape->setOCCTShape(targetSeerShape.getRootOCCTShape());
+    sShape->shapeMatch(targetSeerShape);
+    sShape->uniqueTypeMatch(targetSeerShape);
+    sShape->outerWireMatch(targetSeerShape);
+    sShape->derivedMatch();
+    sShape->ensureNoNils();
+    sShape->ensureNoDuplicates();
     
     BRepFilletAPI_MakeChamfer chamferMaker(targetSeerShape.getRootOCCTShape());
     for (const auto &chamfer : symChamfers)

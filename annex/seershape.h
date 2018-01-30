@@ -259,6 +259,7 @@ namespace ann
     virtual Type getType(){return Type::SeerShape;}
     
     void setOCCTShape(const TopoDS_Shape& shapeIn); //!< resets container and graphs!
+    void reset(); //!< clears data and this isNull() == true;
     
     const TopoDS_Shape& getRootOCCTShape() const;
     const TopoDS_Shape& getOCCTShape(const BID::uuid &) const;

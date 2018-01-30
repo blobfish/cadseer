@@ -89,22 +89,26 @@ void Quote::updateModel(const UpdatePayload &payloadIn)
   lastUpdateLog.clear();
   try
   {
-    if (payloadIn.updateMap.count(strip) != 1)
-      throw std::runtime_error("couldn't find 'strip' input");
-    const Strip *sf = dynamic_cast<const Strip*>(payloadIn.updateMap.equal_range(strip).first->second);
+    std::vector<const Base*> stripFeatures = payloadIn.getFeatures(strip);
+    if (stripFeatures.size() != 1)
+      throw std::runtime_error("wrong number of 'strip' inputs");
+    const Strip *sf = dynamic_cast<const Strip*>(stripFeatures.front());
     assert(sf);
     if(!sf)
       throw std::runtime_error("can not cast to strip feature");
     
-    if (payloadIn.updateMap.count(dieSet) != 1)
-      throw std::runtime_error("couldn't find 'dieset' input");
-    const DieSet *dsf = dynamic_cast<const DieSet*>(payloadIn.updateMap.equal_range(dieSet).first->second);
+    std::vector<const Base*> diesetFeatures = payloadIn.getFeatures(dieSet);
+    if (diesetFeatures.size() != 1)
+      throw std::runtime_error("wrong number of 'dieset' inputs");
+    const DieSet *dsf = dynamic_cast<const DieSet*>(diesetFeatures.front());
     assert(dsf);
     if (!dsf)
       throw std::runtime_error("can not cast to dieset feature");
     
     //place labels
     const ann::SeerShape &dss = dsf->getAnnex<ann::SeerShape>(ann::Type::SeerShape); //part seer shape.
+    if (dss.isNull())
+      throw std::runtime_error("die set seer shape is null");
     const TopoDS_Shape &ds = dss.getRootOCCTShape(); //part shape.
     occt::BoundingBox sbbox(ds); //blank bounding box.
     osg::Vec3d tLoc = gu::toOsg(sbbox.getCenter()) + osg::Vec3d(0.0, 50.0, 0.0);

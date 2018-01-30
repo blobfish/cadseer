@@ -151,6 +151,7 @@ void DieSet::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
   lastUpdateLog.clear();
+  sShape->reset();
   try
   {
     double h = 50.0; //height

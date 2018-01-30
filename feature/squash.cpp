@@ -101,6 +101,7 @@ void Squash::updateModel(const UpdatePayload &payloadIn)
   overlaySwitch->addChild(label.get());
   
   setFailure();
+  sShape->reset();
   try
   {
     std::vector<const Base*> tfs = payloadIn.getFeatures(InputType::target);
@@ -109,6 +110,10 @@ void Squash::updateModel(const UpdatePayload &payloadIn)
     if(!tfs.front()->hasAnnex(ann::Type::SeerShape))
       throw std::runtime_error("no seer shape");
     const ann::SeerShape &tss = tfs.front()->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+    if (tss.isNull())
+      throw std::runtime_error("target seer shape is null");
+    
+    //no new failure state.
     
     //get the shell
     TopoDS_Shape ss = occt::getFirstNonCompound(tss.getRootOCCTShape());

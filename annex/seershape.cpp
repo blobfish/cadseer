@@ -102,15 +102,16 @@ ostream& ann::operator<<(ostream& os, const FeatureTagContainer& container)
   return os;
 }
 
-SeerShape::SeerShape() : Base(){}
+SeerShape::SeerShape() : Base()
+{
+  reset();
+}
+
 SeerShape::~SeerShape(){}
 
 void SeerShape::setOCCTShape(const TopoDS_Shape& shapeIn)
 {
-  rootShapeId = gu::createNilId();
-  shapeIdContainer.get<ShapeIdRecord::ById>().clear();
-  graph = Graph();
-  rGraph = graph;
+  reset();
   
   if (shapeIn.IsNull())
     return;
@@ -143,6 +144,14 @@ void SeerShape::setOCCTShape(const TopoDS_Shape& shapeIn)
   rGraph = graph; //now graph and rGraph are equal, edgeless graphs.
   
   updateGraphs();
+}
+
+void SeerShape::reset()
+{
+  rootShapeId = gu::createNilId();
+  shapeIdContainer.get<ShapeIdRecord::ById>().clear();
+  graph = Graph();
+  rGraph = graph;
 }
 
 void SeerShape::updateGraphs()

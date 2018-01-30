@@ -201,13 +201,26 @@ void Blend::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
   lastUpdateLog.clear();
+  sShape->reset();
   try
   {
-    if (payloadIn.updateMap.count(InputType::target) != 1)
-      throw std::runtime_error("no parent for blend");
+    std::vector<const Base*> features = payloadIn.getFeatures(InputType::target);
+    if (features.size() != 1)
+      throw std::runtime_error("wrong number of target inputs");
+    if (!features.front()->hasAnnex(ann::Type::SeerShape))
+      throw std::runtime_error("no seer shape in parent");
+    const ann::SeerShape &targetSeerShape = features.front()->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+    if (targetSeerShape.isNull())
+      throw std::runtime_error("target seer shape is null");
     
-    const Base *targetFeature = payloadIn.updateMap.equal_range(InputType::target).first->second;
-    const ann::SeerShape &targetSeerShape = targetFeature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+    //parent is good. Set up seershape in case of failure.
+    sShape->setOCCTShape(targetSeerShape.getRootOCCTShape());
+    sShape->shapeMatch(targetSeerShape);
+    sShape->uniqueTypeMatch(targetSeerShape);
+    sShape->outerWireMatch(targetSeerShape);
+    sShape->derivedMatch();
+    sShape->ensureNoNils();
+    sShape->ensureNoDuplicates();
     
     BRepFilletAPI_MakeFillet blendMaker(targetSeerShape.getRootOCCTShape());
     for (const auto &simpleBlend : simpleBlends)
@@ -215,7 +228,7 @@ void Blend::updateModel(const UpdatePayload &payloadIn)
       bool labelDone = false; //set label position to first pick.
       for (const auto &pick : simpleBlend.picks)
       {
-        auto resolvedPicks = tls::resolvePicks(targetFeature, pick, payloadIn.shapeHistory);
+        auto resolvedPicks = tls::resolvePicks(features.front(), pick, payloadIn.shapeHistory);
         for (const auto &resolved : resolvedPicks) //resolved pair
         {
           if (resolved.resultId.is_nil())
@@ -238,9 +251,7 @@ void Blend::updateModel(const UpdatePayload &payloadIn)
     std::size_t vBlendIndex = 1;
     for (const auto &vBlend : variableBlends)
     {
-      std::vector<const Base*> targetFeatures(1, targetFeature);
-      ftr::Picks targetPicks(1, vBlend.pick);
-      auto resolvedPicks = tls::resolvePicks(targetFeature, vBlend.pick, payloadIn.shapeHistory);
+      auto resolvedPicks = tls::resolvePicks(features.front(), vBlend.pick, payloadIn.shapeHistory);
       for (const auto &resolved : resolvedPicks) //resolved pair
       {
         if (resolved.resultId.is_nil())
@@ -255,12 +266,16 @@ void Blend::updateModel(const UpdatePayload &payloadIn)
       for (auto &e : vBlend.entries)
       {
         ftr::Picks entryPicks(1, e.pick);
-        auto resolvedEntryPicks = tls::resolvePicks(targetFeatures, entryPicks, payloadIn.shapeHistory);
-        assert(resolvedEntryPicks.size() == 1);//don't think an entry should ever result in more than one id.
-        if (resolvedEntryPicks.size() != 1)
-          continue;
-        const TopoDS_Shape &blendShape = targetSeerShape.getOCCTShape(resolvedEntryPicks.front().resultId);
-        if (blendShape.ShapeType() == TopAbs_VERTEX)
+        auto resolvedEntryPicks = tls::resolvePicks(features, entryPicks, payloadIn.shapeHistory);
+        TopoDS_Shape blendShape;
+        for (const auto &rep : resolvedEntryPicks)
+        {
+          if (rep.resultId.is_nil())
+            continue;
+          blendShape = targetSeerShape.getOCCTShape(rep.resultId);
+          break;
+        }
+        if ((!blendShape.IsNull()) && (blendShape.ShapeType() == TopAbs_VERTEX))
         {
           const TopoDS_Vertex &v = TopoDS::Vertex(blendShape);
           blendMaker.SetRadius(static_cast<double>(*e.radius), vBlendIndex, v);

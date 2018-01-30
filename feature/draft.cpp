@@ -87,14 +87,26 @@ void Draft::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();
   lastUpdateLog.clear();
+  sShape->reset();
   try
   {
     std::vector<const Base*> features = payloadIn.getFeatures(InputType::target);
     if (features.size() != 1)
-      throw std::runtime_error("no parent for draft");
+      throw std::runtime_error("no parent");
     if (!features.front()->hasAnnex(ann::Type::SeerShape))
       throw std::runtime_error("no seer shape in parent");
     const ann::SeerShape &targetSeerShape = features.front()->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+    if (targetSeerShape.isNull())
+      throw std::runtime_error("target seer shape is null");
+    
+    //setup new failure state.
+    sShape->setOCCTShape(targetSeerShape.getRootOCCTShape());
+    sShape->shapeMatch(targetSeerShape);
+    sShape->uniqueTypeMatch(targetSeerShape);
+    sShape->outerWireMatch(targetSeerShape);
+    sShape->derivedMatch();
+    sShape->ensureNoNils(); //just in case
+    sShape->ensureNoDuplicates(); //just in case
     
     //neutral plane might be outside of target, if so we should have an input with a type of 'tool'
 //     const TopoDS_Shape &tool; //TODO
@@ -171,7 +183,7 @@ void Draft::updateModel(const UpdatePayload &payloadIn)
   }
   catch (const Standard_Failure &e)
   {
-    std::ostringstream s; s << "Error in draft update: " << e.GetMessageString() << std::endl;
+    std::ostringstream s; s << "OCC Error in draft update: " << e.GetMessageString() << std::endl;
     lastUpdateLog += s.str();
   }
   catch (const std::exception &e)
