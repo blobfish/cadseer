@@ -43,11 +43,11 @@ QIcon InstanceMirror::icon;
 
 InstanceMirror::InstanceMirror() :
 Base(),
+csys(new prm::Parameter(prm::Names::CSys, osg::Matrixd::identity())),
+includeSource(new prm::Parameter(QObject::tr("Include Source"), true)),
 sShape(new ann::SeerShape()),
 iMapper(new ann::InstanceMapper()),
-csysDragger(new ann::CSysDragger(this, &csys)),
-csys(prm::Names::CSys, osg::Matrixd::identity()),
-includeSource(QObject::tr("Include Source"), true)
+csysDragger(new ann::CSysDragger(this, csys.get()))
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionInstanceMirror.svg");
@@ -55,21 +55,21 @@ includeSource(QObject::tr("Include Source"), true)
   name = QObject::tr("Instance Mirror");
   mainSwitch->setUserValue<int>(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
-  csys.connectValue(boost::bind(&InstanceMirror::setModelDirty, this));
-  includeSource.connectValue(boost::bind(&InstanceMirror::setModelDirty, this));
+  csys->connectValue(boost::bind(&InstanceMirror::setModelDirty, this));
+  includeSource->connectValue(boost::bind(&InstanceMirror::setModelDirty, this));
   
   csysDragger->dragger->unlinkToMatrix(getMainTransform());
   csysDragger->dragger->hide(lbr::CSysDragger::SwitchIndexes::LinkIcon);
   //don't worry about adding dragger. update takes care of it.
 //   overlaySwitch->addChild(csysDragger->dragger);
   
-  includeSourceLabel = new lbr::PLabel(&includeSource);
+  includeSourceLabel = new lbr::PLabel(includeSource.get());
   includeSourceLabel->showName = true;
   includeSourceLabel->valueHasChanged();
   overlaySwitch->addChild(includeSourceLabel.get());
   
-  parameters.push_back(&csys);
-  parameters.push_back(&includeSource);
+  parameters.push_back(csys.get());
+  parameters.push_back(includeSource.get());
   
   annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
   annexes.insert(std::make_pair(ann::Type::InstanceMapper, iMapper.get()));
@@ -95,7 +95,17 @@ void InstanceMirror::setPlanePick(const Pick &pIn)
 
 void InstanceMirror::setCSys(const osg::Matrixd &mIn)
 {
-  csys.setValue(mIn);
+  csys->setValue(mIn);
+}
+
+bool InstanceMirror::getIncludeSource()
+{
+  return static_cast<bool>(*includeSource);
+}
+
+void InstanceMirror::setIncludeSource(bool in)
+{
+  includeSource->setValue(in);
 }
 
 void InstanceMirror::updateModel(const UpdatePayload &payloadIn)
@@ -140,7 +150,7 @@ void InstanceMirror::updateModel(const UpdatePayload &payloadIn)
     
     
     //get the plane
-    osg::Matrixd workSystem = static_cast<osg::Matrixd>(csys);
+    osg::Matrixd workSystem = static_cast<osg::Matrixd>(*csys);
     std::vector<const Base*> mfs = payloadIn.getFeatures(InstanceMirror::mirrorPlane);
     if (mfs.size() == 1)
     {
@@ -177,7 +187,7 @@ void InstanceMirror::updateModel(const UpdatePayload &payloadIn)
         {
           osg::Vec3d norm = gu::toOsg(occt::getNormal(TopoDS::Face(dsShape), planePick.u, planePick.v));
           osg::Vec3d origin = planePick.getPoint(TopoDS::Face(dsShape));
-          osg::Matrixd cs = static_cast<osg::Matrixd>(csys); // current system
+          osg::Matrixd cs = static_cast<osg::Matrixd>(*csys); // current system
           osg::Vec3d cz = gu::getZVector(cs);
           if (norm.isNaN())
             throw std::runtime_error("invalid normal from face");
@@ -200,7 +210,7 @@ void InstanceMirror::updateModel(const UpdatePayload &payloadIn)
         overlaySwitch->addChild(csysDragger->dragger.get());
     }
     
-    csys.setValueQuiet(workSystem);
+    csys->setValueQuiet(workSystem);
     csysDragger->draggerUpdate(); //keep dragger in sync with parameter.
     
     gp_Trsf mt; //mirror transform.
@@ -262,8 +272,8 @@ void InstanceMirror::serialWrite(const QDir &dIn)
     Base::serialOut(),
     iMapper->serialOut(),
     csysDragger->serialOut(),
-    csys.serialOut(),
-    includeSource.serialOut(),
+    csys->serialOut(),
+    includeSource->serialOut(),
     shapePick.serialOut(),
     planePick.serialOut(),
     includeSourceLabel->serialOut(),
@@ -280,8 +290,8 @@ void InstanceMirror::serialRead(const prj::srl::FeatureInstanceMirror &sim)
   Base::serialIn(sim.featureBase());
   iMapper->serialIn(sim.instanceMapper());
   csysDragger->serialIn(sim.csysDragger());
-  csys.serialIn(sim.csys());
-  includeSource.serialIn(sim.includeSource());
+  csys->serialIn(sim.csys());
+  includeSource->serialIn(sim.includeSource());
   shapePick.serialIn(sim.shapePick());
   planePick.serialIn(sim.planePick());
   includeSourceLabel->serialIn(sim.includeSourceLabel());

@@ -19,6 +19,9 @@
 
 #include <memory>
 
+#include <application/application.h>
+#include <application/mainwindow.h>
+#include <viewer/widget.h>
 #include <project/project.h>
 #include <message/observer.h>
 #include <selection/eventhandler.h>
@@ -64,6 +67,8 @@ void InstanceLinear::go()
     if (!pick.id.is_nil())
       pick.shapeHistory = project->getShapeHistory().createDevolveHistory(pick.id);
     instance->setPick(pick);
+    
+    instance->setCSys(viewer->getCurrentSystem());
     
     project->addFeature(instance);
     project->connect(c.featureId, instance->getId(), ftr::InputType{ftr::InputType::target});

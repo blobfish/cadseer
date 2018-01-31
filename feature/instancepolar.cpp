@@ -47,14 +47,14 @@ QIcon InstancePolar::icon;
 
 InstancePolar::InstancePolar() :
 Base(),
+csys(new prm::Parameter(prm::Names::CSys, osg::Matrixd::identity())),
+count(new prm::Parameter(QObject::tr("Count"), 3)),
+angle(new prm::Parameter(prm::Names::Angle, 20.0)),
+inclusiveAngle(new prm::Parameter(QObject::tr("Inclusive Angle"), false)),
+includeSource(new prm::Parameter(QObject::tr("Include Source"), true)),
 sShape(new ann::SeerShape()),
 iMapper(new ann::InstanceMapper()),
-csysDragger(new ann::CSysDragger(this, &csys)),
-csys(prm::Names::CSys, osg::Matrixd::identity()),
-count(QObject::tr("Count"), 3),
-angle(prm::Names::Angle, 20.0),
-inclusiveAngle(QObject::tr("Inclusive Angle"), false),
-includeSource(QObject::tr("Include Source"), true)
+csysDragger(new ann::CSysDragger(this, csys.get()))
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionInstancePolar.svg");
@@ -62,34 +62,34 @@ includeSource(QObject::tr("Include Source"), true)
   name = QObject::tr("Instance Polar");
   mainSwitch->setUserValue<int>(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
-  count.setConstraint(prm::Constraint::buildNonZeroPositive());
-  count.connectValue(boost::bind(&InstancePolar::setModelDirty, this));
-  parameters.push_back(&count);
+  count->setConstraint(prm::Constraint::buildNonZeroPositive());
+  count->connectValue(boost::bind(&InstancePolar::setModelDirty, this));
+  parameters.push_back(count.get());
   
-  csys.connectValue(boost::bind(&InstancePolar::setModelDirty, this));
-  parameters.push_back(&csys);
+  csys->connectValue(boost::bind(&InstancePolar::setModelDirty, this));
+  parameters.push_back(csys.get());
   
-  angle.setConstraint(prm::Constraint::buildNonZeroAngle());
-  angle.connectValue(boost::bind(&InstancePolar::setModelDirty, this));
-  parameters.push_back(&angle);
+  angle->setConstraint(prm::Constraint::buildNonZeroAngle());
+  angle->connectValue(boost::bind(&InstancePolar::setModelDirty, this));
+  parameters.push_back(angle.get());
   
-  inclusiveAngle.connectValue(boost::bind(&InstancePolar::setModelDirty, this));
-  parameters.push_back(&inclusiveAngle);
+  inclusiveAngle->connectValue(boost::bind(&InstancePolar::setModelDirty, this));
+  parameters.push_back(inclusiveAngle.get());
   
-  includeSource.connectValue(boost::bind(&InstancePolar::setModelDirty, this));
-  parameters.push_back(&includeSource);
+  includeSource->connectValue(boost::bind(&InstancePolar::setModelDirty, this));
+  parameters.push_back(includeSource.get());
   
-  countLabel = new lbr::PLabel(&count);
+  countLabel = new lbr::PLabel(count.get());
   countLabel->showName = true;
   countLabel->valueHasChanged();
   overlaySwitch->addChild(countLabel.get());
   
-  angleLabel = new lbr::PLabel(&angle);
+  angleLabel = new lbr::PLabel(angle.get());
   angleLabel->showName = true;
   angleLabel->valueHasChanged();
   overlaySwitch->addChild(angleLabel.get());
   
-  inclusiveAngleLabel = new lbr::PLabel(&inclusiveAngle);
+  inclusiveAngleLabel = new lbr::PLabel(inclusiveAngle.get());
   inclusiveAngleLabel->showName = true;
   inclusiveAngleLabel->valueHasChanged();
   overlaySwitch->addChild(inclusiveAngleLabel.get());
@@ -99,7 +99,7 @@ includeSource(QObject::tr("Include Source"), true)
   //don't worry about adding dragger. update takes care of it.
 //   overlaySwitch->addChild(csysDragger->dragger);
   
-  includeSourceLabel = new lbr::PLabel(&includeSource);
+  includeSourceLabel = new lbr::PLabel(includeSource.get());
   includeSourceLabel->showName = true;
   includeSourceLabel->valueHasChanged();
   overlaySwitch->addChild(includeSourceLabel.get());
@@ -125,7 +125,7 @@ void InstancePolar::setAxisPick(const Pick &aIn)
 
 void InstancePolar::setCSys(const osg::Matrixd &mIn)
 {
-  csys.setValue(mIn);
+  csys->setValue(mIn);
 }
 
 void InstancePolar::updateModel(const UpdatePayload &payloadIn)
@@ -168,7 +168,7 @@ void InstancePolar::updateModel(const UpdatePayload &payloadIn)
     if (tShapes.empty())
       throw std::runtime_error("No shapes found.");
     
-    osg::Matrixd workSystem = static_cast<osg::Matrixd>(csys); // zaxis is the rotation.
+    osg::Matrixd workSystem = static_cast<osg::Matrixd>(*csys); // zaxis is the rotation.
     std::vector<const Base*> rafs = payloadIn.getFeatures(InstancePolar::rotationAxis);
     if (rafs.size() == 1)
     {
@@ -223,11 +223,11 @@ void InstancePolar::updateModel(const UpdatePayload &payloadIn)
         overlaySwitch->addChild(csysDragger->dragger.get());
     }
     
-    csys.setValueQuiet(workSystem);
+    csys->setValueQuiet(workSystem);
     csysDragger->draggerUpdate(); //keep dragger in sync with parameter.
     
-    int ac = static_cast<int>(count); //actual count
-    double aa = static_cast<double>(angle); //actual angle
+    int ac = static_cast<int>(*count); //actual count
+    double aa = static_cast<double>(*angle); //actual angle
     bool ai = static_cast<bool>(inclusiveAngle); //actual inclusive angle
     
     if (ai)
@@ -242,7 +242,7 @@ void InstancePolar::updateModel(const UpdatePayload &payloadIn)
       //stay under 360. don't overlap.
       int maxCount = static_cast<int>(360.0 / std::fabs(aa));
       ac = std::min(ac, maxCount);
-      if (ac != static_cast<int>(count))
+      if (ac != static_cast<int>(*count))
       {
         std::ostringstream s; s << "Count has been limited to less than full rotation"  << std::endl;
         lastUpdateLog.append(s.str());
@@ -330,11 +330,11 @@ void InstancePolar::serialWrite(const QDir &dIn)
     Base::serialOut(),
     iMapper->serialOut(),
     csysDragger->serialOut(),
-    csys.serialOut(),
-    count.serialOut(),
-    angle.serialOut(),
-    inclusiveAngle.serialOut(),
-    includeSource.serialOut(),
+    csys->serialOut(),
+    count->serialOut(),
+    angle->serialOut(),
+    inclusiveAngle->serialOut(),
+    includeSource->serialOut(),
     countLabel->serialOut(),
     angleLabel->serialOut(),
     inclusiveAngleLabel->serialOut(),
@@ -354,11 +354,11 @@ void InstancePolar::serialRead(const prj::srl::FeatureInstancePolar &sip)
   Base::serialIn(sip.featureBase());
   iMapper->serialIn(sip.instanceMapper());
   csysDragger->serialIn(sip.csysDragger());
-  csys.serialIn(sip.csys());
-  count.serialIn(sip.count());
-  angle.serialIn(sip.angle());
-  inclusiveAngle.serialIn(sip.inclusiveAngle());
-  includeSource.serialIn(sip.includeSource());
+  csys->serialIn(sip.csys());
+  count->serialIn(sip.count());
+  angle->serialIn(sip.angle());
+  inclusiveAngle->serialIn(sip.inclusiveAngle());
+  includeSource->serialIn(sip.includeSource());
   countLabel->serialIn(sip.countLabel());
   angleLabel->serialIn(sip.angleLabel());
   inclusiveAngleLabel->serialIn(sip.inclusiveAngleLabel());

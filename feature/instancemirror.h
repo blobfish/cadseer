@@ -56,16 +56,16 @@ namespace ftr
     const Pick& getPlanePick(){return planePick;}
     void setPlanePick(const Pick&);
     void setCSys(const osg::Matrixd&); //when no plane pick
-    bool getIncludeSource(){return static_cast<bool>(includeSource);}
-    void setIncludeSource(bool in){includeSource.setValue(in);}
+    bool getIncludeSource();
+    void setIncludeSource(bool in);
     
   protected:
+    std::unique_ptr<prm::Parameter> csys;
+    std::unique_ptr<prm::Parameter> includeSource;
+    
     std::unique_ptr<ann::SeerShape> sShape;
     std::unique_ptr<ann::InstanceMapper> iMapper;
     std::unique_ptr<ann::CSysDragger> csysDragger;
-    
-    prm::Parameter csys;
-    prm::Parameter includeSource;
     
     osg::ref_ptr<lbr::PLabel> includeSourceLabel;
     

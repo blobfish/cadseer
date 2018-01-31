@@ -40,17 +40,17 @@ QIcon InstanceLinear::icon;
 
 InstanceLinear::InstanceLinear() :
 Base(),
+xOffset(new prm::Parameter(QObject::tr("X Offset"), 20.0)),
+yOffset(new prm::Parameter(QObject::tr("Y Offset"), 20.0)),
+zOffset(new prm::Parameter(QObject::tr("Z Offset"), 20.0)),
+xCount(new prm::Parameter(QObject::tr("X Count"), 2)),
+yCount(new prm::Parameter(QObject::tr("Y Count"), 2)),
+zCount(new prm::Parameter(QObject::tr("Z Count"), 2)),
+csys(new prm::Parameter(prm::Names::CSys, osg::Matrixd::identity())),
+includeSource(new prm::Parameter(QObject::tr("Include Source"), true)),
 sShape(new ann::SeerShape()),
 iMapper(new ann::InstanceMapper()),
-csysDragger(new ann::CSysDragger(this, &csys)),
-xOffset(QObject::tr("X Offset"), 20.0),
-yOffset(QObject::tr("Y Offset"), 20.0),
-zOffset(QObject::tr("Z Offset"), 20.0),
-xCount(QObject::tr("X Count"), 2),
-yCount(QObject::tr("Y Count"), 2),
-zCount(QObject::tr("Z Count"), 2),
-csys(prm::Names::CSys, osg::Matrixd::identity()),
-includeSource(QObject::tr("Include Source"), true)
+csysDragger(new ann::CSysDragger(this, csys.get()))
 {
   if (icon.isNull())
     icon = QIcon(":/resources/images/constructionInstanceLinear.svg");
@@ -58,48 +58,48 @@ includeSource(QObject::tr("Include Source"), true)
   name = QObject::tr("Instance Linear");
   mainSwitch->setUserValue<int>(gu::featureTypeAttributeTitle, static_cast<int>(getType()));
   
-  xOffset.setConstraint(prm::Constraint::buildNonZero());
-  yOffset.setConstraint(prm::Constraint::buildNonZero());
-  zOffset.setConstraint(prm::Constraint::buildNonZero());
+  xOffset->setConstraint(prm::Constraint::buildNonZero());
+  yOffset->setConstraint(prm::Constraint::buildNonZero());
+  zOffset->setConstraint(prm::Constraint::buildNonZero());
   
-  xCount.setConstraint(prm::Constraint::buildNonZeroPositive());
-  yCount.setConstraint(prm::Constraint::buildNonZeroPositive());
-  zCount.setConstraint(prm::Constraint::buildNonZeroPositive());
+  xCount->setConstraint(prm::Constraint::buildNonZeroPositive());
+  yCount->setConstraint(prm::Constraint::buildNonZeroPositive());
+  zCount->setConstraint(prm::Constraint::buildNonZeroPositive());
   
-  xOffset.connectValue(boost::bind(&InstanceLinear::setModelDirty, this));
-  yOffset.connectValue(boost::bind(&InstanceLinear::setModelDirty, this));
-  zOffset.connectValue(boost::bind(&InstanceLinear::setModelDirty, this));
+  xOffset->connectValue(boost::bind(&InstanceLinear::setModelDirty, this));
+  yOffset->connectValue(boost::bind(&InstanceLinear::setModelDirty, this));
+  zOffset->connectValue(boost::bind(&InstanceLinear::setModelDirty, this));
   
-  xCount.connectValue(boost::bind(&InstanceLinear::setModelDirty, this));
-  yCount.connectValue(boost::bind(&InstanceLinear::setModelDirty, this));
-  zCount.connectValue(boost::bind(&InstanceLinear::setModelDirty, this));
+  xCount->connectValue(boost::bind(&InstanceLinear::setModelDirty, this));
+  yCount->connectValue(boost::bind(&InstanceLinear::setModelDirty, this));
+  zCount->connectValue(boost::bind(&InstanceLinear::setModelDirty, this));
   
-  csys.connectValue(boost::bind(&InstanceLinear::setModelDirty, this));
+  csys->connectValue(boost::bind(&InstanceLinear::setModelDirty, this));
   
-  includeSource.connectValue(boost::bind(&InstanceLinear::setModelDirty, this));
+  includeSource->connectValue(boost::bind(&InstanceLinear::setModelDirty, this));
   
-  xOffsetLabel = new lbr::PLabel(&xOffset);
+  xOffsetLabel = new lbr::PLabel(xOffset.get());
   xOffsetLabel->showName = true;
   xOffsetLabel->valueHasChanged();
   overlaySwitch->addChild(xOffsetLabel.get());
-  yOffsetLabel = new lbr::PLabel(&yOffset);
+  yOffsetLabel = new lbr::PLabel(yOffset.get());
   yOffsetLabel->showName = true;
   yOffsetLabel->valueHasChanged();
   overlaySwitch->addChild(yOffsetLabel.get());
-  zOffsetLabel = new lbr::PLabel(&zOffset);
+  zOffsetLabel = new lbr::PLabel(zOffset.get());
   zOffsetLabel->showName = true;
   zOffsetLabel->valueHasChanged();
   overlaySwitch->addChild(zOffsetLabel.get());
   
-  xCountLabel = new lbr::PLabel(&xCount);
+  xCountLabel = new lbr::PLabel(xCount.get());
   xCountLabel->showName = true;
   xCountLabel->valueHasChanged();
   overlaySwitch->addChild(xCountLabel.get());
-  yCountLabel = new lbr::PLabel(&yCount);
+  yCountLabel = new lbr::PLabel(yCount.get());
   yCountLabel->showName = true;
   yCountLabel->valueHasChanged();
   overlaySwitch->addChild(yCountLabel.get());
-  zCountLabel = new lbr::PLabel(&zCount);
+  zCountLabel = new lbr::PLabel(zCount.get());
   zCountLabel->showName = true;
   zCountLabel->valueHasChanged();
   overlaySwitch->addChild(zCountLabel.get());
@@ -110,19 +110,19 @@ includeSource(QObject::tr("Include Source"), true)
   csysDragger->dragger->hide(lbr::CSysDragger::SwitchIndexes::Origin);
   overlaySwitch->addChild(csysDragger->dragger);
   
-  includeSourceLabel = new lbr::PLabel(&includeSource);
+  includeSourceLabel = new lbr::PLabel(includeSource.get());
   includeSourceLabel->showName = true;
   includeSourceLabel->valueHasChanged();
   overlaySwitch->addChild(includeSourceLabel.get());
   
-  parameters.push_back(&xOffset);
-  parameters.push_back(&yOffset);
-  parameters.push_back(&zOffset);
-  parameters.push_back(&xCount);
-  parameters.push_back(&yCount);
-  parameters.push_back(&zCount);
-  parameters.push_back(&csys);
-  parameters.push_back(&includeSource);
+  parameters.push_back(xOffset.get());
+  parameters.push_back(yOffset.get());
+  parameters.push_back(zOffset.get());
+  parameters.push_back(xCount.get());
+  parameters.push_back(yCount.get());
+  parameters.push_back(zCount.get());
+  parameters.push_back(csys.get());
+  parameters.push_back(includeSource.get());
   
   annexes.insert(std::make_pair(ann::Type::SeerShape, sShape.get()));
   annexes.insert(std::make_pair(ann::Type::InstanceMapper, iMapper.get()));
@@ -135,6 +135,22 @@ void InstanceLinear::setPick(const Pick &pIn)
 {
   pick = pIn;
   setModelDirty();
+}
+
+void InstanceLinear::setCSys(const osg::Matrixd &mIn)
+{
+  csys->setValue(mIn);
+  csysDragger->draggerUpdate();
+}
+
+bool InstanceLinear::getIncludeSource()
+{
+  return static_cast<bool>(*includeSource);
+}
+
+void InstanceLinear::setIncludeSource(bool in)
+{
+  includeSource->setValue(in);
 }
 
 void InstanceLinear::updateModel(const UpdatePayload &payloadIn)
@@ -177,21 +193,21 @@ void InstanceLinear::updateModel(const UpdatePayload &payloadIn)
       throw std::runtime_error("No shapes found.");
     
     occt::ShapeVector out;
-    osg::Vec3d xProjection = gu::getXVector(static_cast<osg::Matrixd>(csys)) * static_cast<double>(xOffset);
-    osg::Vec3d yProjection = gu::getYVector(static_cast<osg::Matrixd>(csys)) * static_cast<double>(yOffset);
-    osg::Vec3d zProjection = gu::getZVector(static_cast<osg::Matrixd>(csys)) * static_cast<double>(zOffset);
+    osg::Vec3d xProjection = gu::getXVector(static_cast<osg::Matrixd>(*csys)) * static_cast<double>(*xOffset);
+    osg::Vec3d yProjection = gu::getYVector(static_cast<osg::Matrixd>(*csys)) * static_cast<double>(*yOffset);
+    osg::Vec3d zProjection = gu::getZVector(static_cast<osg::Matrixd>(*csys)) * static_cast<double>(*zOffset);
     for (const auto &tShape : tShapes)
     {
       osg::Matrixd shapeBase = gu::toOsg(tShape.Location().Transformation());
       osg::Vec3d baseTrans = shapeBase.getTrans();
       
-      for (int z = 0; z < static_cast<int>(zCount); ++z)
+      for (int z = 0; z < static_cast<int>(*zCount); ++z)
       {
-        for (int y = 0; y < static_cast<int>(yCount); ++y)
+        for (int y = 0; y < static_cast<int>(*yCount); ++y)
         {
-          for (int x = 0; x < static_cast<int>(xCount); ++x)
+          for (int x = 0; x < static_cast<int>(*xCount); ++x)
           {
-            if ((x == 0) && (y == 0) && (z == 0) && (!static_cast<bool>(includeSource)))
+            if ((x == 0) && (y == 0) && (z == 0) && (!static_cast<bool>(*includeSource)))
               continue;
             osg::Vec3d no = baseTrans; //new origin
             no += zProjection * static_cast<double>(z);
@@ -226,9 +242,9 @@ void InstanceLinear::updateModel(const UpdatePayload &payloadIn)
     //the origin of the system doesn't matter, so just put at shape center.
     occt::BoundingBox bb(tShapes);
     osg::Vec3d origin = gu::toOsg(bb.getCenter());
-    osg::Matrixd tsys = static_cast<osg::Matrixd>(csys);
+    osg::Matrixd tsys = static_cast<osg::Matrixd>(*csys);
     tsys.setTrans(origin);
-    csys.setValueQuiet(tsys);
+    csys->setValueQuiet(tsys);
     csysDragger->draggerUpdate();
     
     xOffsetLabel->setMatrix(tsys * osg::Matrixd::translate(xProjection * 0.5));
@@ -238,9 +254,9 @@ void InstanceLinear::updateModel(const UpdatePayload &payloadIn)
     //if we do instancing only on the x axis, y and z count = 1, then
     //the y and z labels overlap at zero. so we cheat.
     auto cheat = [](int c) -> int{return std::max(c - 1, 1);};
-    xCountLabel->setMatrix(tsys * osg::Matrixd::translate(xProjection * cheat(static_cast<int>(xCount))));
-    yCountLabel->setMatrix(tsys * osg::Matrixd::translate(yProjection * cheat(static_cast<int>(yCount))));
-    zCountLabel->setMatrix(tsys * osg::Matrixd::translate(zProjection * cheat(static_cast<int>(zCount))));
+    xCountLabel->setMatrix(tsys * osg::Matrixd::translate(xProjection * cheat(static_cast<int>(*xCount))));
+    yCountLabel->setMatrix(tsys * osg::Matrixd::translate(yProjection * cheat(static_cast<int>(*yCount))));
+    zCountLabel->setMatrix(tsys * osg::Matrixd::translate(zProjection * cheat(static_cast<int>(*zCount))));
     
     includeSourceLabel->setMatrix(osg::Matrixd::translate(origin + osg::Vec3d(0.0, 0.0, -bb.getHeight() / 2.0)));
     
@@ -273,14 +289,14 @@ void InstanceLinear::serialWrite(const QDir &dIn)
     Base::serialOut(),
     iMapper->serialOut(),
     csysDragger->serialOut(),
-    xOffset.serialOut(),
-    yOffset.serialOut(),
-    zOffset.serialOut(),
-    xCount.serialOut(),
-    yCount.serialOut(),
-    zCount.serialOut(),
-    csys.serialOut(),
-    includeSource.serialOut(),
+    xOffset->serialOut(),
+    yOffset->serialOut(),
+    zOffset->serialOut(),
+    xCount->serialOut(),
+    yCount->serialOut(),
+    zCount->serialOut(),
+    csys->serialOut(),
+    includeSource->serialOut(),
     pick.serialOut(),
     xOffsetLabel->serialOut(),
     yOffsetLabel->serialOut(),
@@ -301,14 +317,14 @@ void InstanceLinear::serialRead(const prj::srl::FeatureInstanceLinear &sil)
   Base::serialIn(sil.featureBase());
   iMapper->serialIn(sil.instanceMapper());
   csysDragger->serialIn(sil.csysDragger());
-  xOffset.serialIn(sil.xOffset());
-  yOffset.serialIn(sil.yOffset());
-  zOffset.serialIn(sil.zOffset());
-  xCount.serialIn(sil.xCount());
-  yCount.serialIn(sil.yCount());
-  zCount.serialIn(sil.zCount());
-  csys.serialIn(sil.csys());
-  includeSource.serialIn(sil.includeSource());
+  xOffset->serialIn(sil.xOffset());
+  yOffset->serialIn(sil.yOffset());
+  zOffset->serialIn(sil.zOffset());
+  xCount->serialIn(sil.xCount());
+  yCount->serialIn(sil.yCount());
+  zCount->serialIn(sil.zCount());
+  csys->serialIn(sil.csys());
+  includeSource->serialIn(sil.includeSource());
   pick.serialIn(sil.pick());
   xOffsetLabel->serialIn(sil.xOffsetLabel());
   yOffsetLabel->serialIn(sil.yOffsetLabel());

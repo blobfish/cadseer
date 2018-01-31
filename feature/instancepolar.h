@@ -58,15 +58,15 @@ namespace ftr
     void setCSys(const osg::Matrixd&);
     
   protected:
+    std::unique_ptr<prm::Parameter> csys;
+    std::unique_ptr<prm::Parameter> count;
+    std::unique_ptr<prm::Parameter> angle;
+    std::unique_ptr<prm::Parameter> inclusiveAngle;
+    std::unique_ptr<prm::Parameter> includeSource;
+    
     std::unique_ptr<ann::SeerShape> sShape;
     std::unique_ptr<ann::InstanceMapper> iMapper;
     std::unique_ptr<ann::CSysDragger> csysDragger;
-    
-    prm::Parameter csys;
-    prm::Parameter count;
-    prm::Parameter angle;
-    prm::Parameter inclusiveAngle;
-    prm::Parameter includeSource;
     
     osg::ref_ptr<lbr::PLabel> countLabel;
     osg::ref_ptr<lbr::PLabel> angleLabel;

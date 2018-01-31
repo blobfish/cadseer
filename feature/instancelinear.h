@@ -56,25 +56,27 @@ namespace ftr
     
     const Pick& getPick(){return pick;}
     void setPick(const Pick&);
-    bool getIncludeSource(){return static_cast<bool>(includeSource);}
-    void setIncludeSource(bool in){includeSource.setValue(in);}
+    bool getIncludeSource();
+    void setIncludeSource(bool);
+    void setCSys(const osg::Matrixd&);
+    
     
   protected:
+    std::unique_ptr<prm::Parameter> xOffset;
+    std::unique_ptr<prm::Parameter> yOffset;
+    std::unique_ptr<prm::Parameter> zOffset;
+  
+    std::unique_ptr<prm::Parameter> xCount;
+    std::unique_ptr<prm::Parameter> yCount;
+    std::unique_ptr<prm::Parameter> zCount;
+  
+    std::unique_ptr<prm::Parameter> csys;
+  
+    std::unique_ptr<prm::Parameter> includeSource;
+    
     std::unique_ptr<ann::SeerShape> sShape;
     std::unique_ptr<ann::InstanceMapper> iMapper;
     std::unique_ptr<ann::CSysDragger> csysDragger;
-    
-    prm::Parameter xOffset;
-    prm::Parameter yOffset;
-    prm::Parameter zOffset;
-    
-    prm::Parameter xCount;
-    prm::Parameter yCount;
-    prm::Parameter zCount;
-    
-    prm::Parameter csys;
-    
-    prm::Parameter includeSource;
     
     osg::ref_ptr<lbr::PLabel> xOffsetLabel;
     osg::ref_ptr<lbr::PLabel> yOffsetLabel;
