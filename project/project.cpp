@@ -532,21 +532,27 @@ void Project::setupDispatcher()
   
   mask = msg::Request | msg::Project | msg::Feature | msg::Reorder;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::reorderFeatureDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Feature | msg::Skipped | msg::Toggle;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Project::toggleSkippedDispatched, this, _1)));
 }
 
 void Project::featureStateChangedDispatched(const msg::Message &messageIn)
 {
+  //here we want to dirty depenedent features when applicable.
   ftr::Message fMessage = boost::get<ftr::Message>(messageIn.payload);
-  //this could be a performance problem. we are visiting children and setting model
-  //dirty when ever a state change happens with a model dirty feature. we only need to
-  //do this when the model dirty changes not all the other state changes.
-  if (!fMessage.state.test(ftr::StateOffset::ModelDirty))
+  std::size_t co = fMessage.stateOffset; //changed offset.
+  
+  //we only care about dirty and skipped states.
+  if ((co != ftr::StateOffset::ModelDirty) && (co != ftr::StateOffset::Skipped))
+    return;
+  
+  //we don't care about feature set to clean.
+  if ((co == ftr::StateOffset::ModelDirty) && (!fMessage.state.test(ftr::StateOffset::ModelDirty)))
     return;
     
-//   indexVerticesEdges();
-  
   //this code blocks all incoming messages to the project while it
-  //executes. This prevents the cycles from setting a dependent dirty.
+  //executes. This prevents the cycles from setting a dependent fetures dirty.
   auto block = observer->createBlocker();
   
   Vertex vertex = stow->findVertex(fMessage.featureId);
@@ -852,6 +858,25 @@ void Project::reorderFeatureDispatched(const msg::Message &mIn)
   updateVisual();
 }
 
+void Project::toggleSkippedDispatched(const msg::Message &mIn)
+{
+  //log action to git.
+  std::ostringstream gitMessage;
+  gitMessage << QObject::tr("Toggling skip status for: ").toStdString();
+  
+  const prj::Message &pm = boost::get<prj::Message>(mIn.payload);
+  for (const auto& id : pm.featureIds)
+  {
+    ftr::Base *f = stow->findFeature(id);
+    if (f->isSkipped())
+      f->setNotSkipped();
+    else
+      f->setSkipped();
+    gitMessage << f->getName().toStdString() << " " << gu::idToString(id) << "    ";
+  }
+  gitManager->appendGitMessage(gitMessage.str());
+}
+
 void Project::setAllVisualDirty()
 {
   for (auto its = boost::vertices(stow->graph); its.first != its.second; ++its.first)
@@ -1085,7 +1110,7 @@ void Project::open()
         addFeature(featurePtr);
         
         //send state message
-        ftr::Message fMessage(featurePtr->getId(), featurePtr->getState());
+        ftr::Message fMessage(featurePtr->getId(), featurePtr->getState(), ftr::StateOffset::Loading);
         msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
         mMessage.payload = fMessage;
         observer->outBlocked(mMessage);
@@ -1099,7 +1124,7 @@ void Project::open()
       stow->graph[stow->findVertex(fId)].state = fState;
       
       //send state message
-      ftr::Message fMessage(fId, fState);
+      ftr::Message fMessage(fId, fState, ftr::StateOffset::Loading);
       msg::Message mMessage(msg::Response | msg::Project | msg::Feature | msg::Status);
       mMessage.payload = fMessage;
       observer->outBlocked(mMessage);

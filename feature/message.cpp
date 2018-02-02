@@ -29,9 +29,10 @@ Message::Message() :
   state(0)
 {}
 
-Message::Message(const uuid &idIn, State stateIn) :
+Message::Message(const uuid &idIn, State stateIn, std::size_t stateOffsetIn) :
   featureId(idIn),
-  state(stateIn)
+  state(stateIn),
+  stateOffset(stateOffsetIn)
 {}
 
 Message::Message(const uuid &idIn, const QString &stringIn) :

@@ -77,15 +77,19 @@ void Intersect::updateModel(const UpdatePayload &payloadIn)
     std::vector<const Base*> targetFeatures = payloadIn.getFeatures(InputType::target);
     if (targetFeatures.empty())
       throw std::runtime_error("no target features");
-    for (const Base* f : targetFeatures)
+    for (auto f = targetFeatures.begin(); f != targetFeatures.end();)
     {
-      if (!f->hasAnnex(ann::Type::SeerShape))
+      assert((*f)->hasAnnex(ann::Type::SeerShape));
+      if (!(*f)->hasAnnex(ann::Type::SeerShape))
         throw std::runtime_error("target feature doesn't have seer shape");
-      const ann::SeerShape &targetSeerShape = f->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
-      assert(!targetSeerShape.isNull());
+      const ann::SeerShape &targetSeerShape = (*f)->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
       if (targetSeerShape.isNull())
-        throw std::runtime_error("target seerShape is null");
+        f = targetFeatures.erase(f);
+      else
+        f++;
     }
+    if (targetFeatures.empty())
+      throw std::runtime_error("target features empty after seer shape check");
     auto resolves = tls::resolvePicks(targetFeatures, targetPicks, payloadIn.shapeHistory);
     occt::ShapeVector targetOCCTShapes;
     for (const auto &resolved : resolves)
@@ -109,6 +113,8 @@ void Intersect::updateModel(const UpdatePayload &payloadIn)
       else
         ++it;
     }
+    if (targetOCCTShapes.empty())
+      throw std::runtime_error("target shapes is empty");
     
     //set to new failed state.
     TopoDS_Compound tc = occt::ShapeVectorCast(targetOCCTShapes);
@@ -123,20 +129,29 @@ void Intersect::updateModel(const UpdatePayload &payloadIn)
     sShape->ensureNoNils(); //just in case
     sShape->ensureNoDuplicates(); //just in case
     
+    if (isSkipped())
+    {
+      setSuccess();
+      throw std::runtime_error("feature is skipped");
+    }
+    
     //tools
     std::vector<const Base*> toolFeatures = payloadIn.getFeatures(InputType::tool);
     if (toolFeatures.empty())
       throw std::runtime_error("no tool features found");
-    for (const Base* tf : toolFeatures) //do some verfication.
+    for (auto tf = toolFeatures.begin(); tf != toolFeatures.end();) //do some verfication.
     {
-      assert(tf->hasAnnex(ann::Type::SeerShape)); //make user interface verify the input.
-      if (!tf->hasAnnex(ann::Type::SeerShape))
+      assert((*tf)->hasAnnex(ann::Type::SeerShape)); //make user interface verify the input.
+      if (!(*tf)->hasAnnex(ann::Type::SeerShape))
         throw std::runtime_error("tool feature has no seer shape");
-      const ann::SeerShape &toolSeerShape = tf->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
-      assert(!toolSeerShape.isNull());
+      const ann::SeerShape &toolSeerShape = (*tf)->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
       if (toolSeerShape.isNull())
-        throw std::runtime_error("tool seerShape is null");
+        tf = toolFeatures.erase(tf);
+      else
+        tf++;
     }
+    if (toolFeatures.empty())
+      throw std::runtime_error("tool features empty after seer shape check");
     auto resolves2 = tls::resolvePicks(toolFeatures, toolPicks, payloadIn.shapeHistory);
     occt::ShapeVector toolOCCTShapes;
     for (const auto &resolved : resolves2)

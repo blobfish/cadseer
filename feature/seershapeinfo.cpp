@@ -63,10 +63,22 @@ SeerShapeInfo::~SeerShapeInfo(){}
 QTextStream& SeerShapeInfo::getShapeInfo(QTextStream &streamIn, const boost::uuids::uuid &idIn )
 {
     assert(functionMapper);
-    assert(seerShape.hasShapeIdRecord(idIn));
-    const TopoDS_Shape &shape = seerShape.findShapeIdRecord(idIn).shape;
-    
     streamIn << endl << "Shape information: " << endl;
+    if (seerShape.isNull())
+    {
+      streamIn << "    SeerShape is null" << endl;
+      return streamIn;
+    }
+    assert(seerShape.hasShapeIdRecord(idIn));
+    if (!seerShape.hasShapeIdRecord(idIn))
+      return streamIn;
+    const TopoDS_Shape &shape = seerShape.findShapeIdRecord(idIn).shape;
+    if (shape.IsNull())
+    {
+      streamIn << "    TopoDS_Shape is null" << endl;
+      return streamIn;
+    }
+    
     functionMapper->functionMap.at(shape.ShapeType())(streamIn, shape);
     //common to all shapes.
     streamIn << "    Orientation: " << ((shape.Orientation() == TopAbs_FORWARD) ? ("Forward") : ("Reversed")) << endl

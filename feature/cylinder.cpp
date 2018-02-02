@@ -207,8 +207,15 @@ void Cylinder::updateModel(const UpdatePayload&)
 {
   setFailure();
   lastUpdateLog.clear();
+  sShape->reset();
   try
   {
+    if (isSkipped())
+    {
+      setSuccess();
+      throw std::runtime_error("feature is skipped");
+    }
+    
     CylinderBuilder cylinderMaker
     (
       static_cast<double>(*radius),

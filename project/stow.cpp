@@ -164,7 +164,7 @@ void Stow::setFeatureActive(Vertex vIn)
   if (isFeatureActive(vIn))
     return; //already active.
   graph[vIn].state.set(ftr::StateOffset::Inactive, false);
-  sendStateMessage(vIn);
+  sendStateMessage(vIn, ftr::StateOffset::Inactive);
 }
 
 void Stow::setFeatureInactive(Vertex vIn)
@@ -172,7 +172,7 @@ void Stow::setFeatureInactive(Vertex vIn)
   if (isFeatureInactive(vIn))
     return;
   graph[vIn].state.set(ftr::StateOffset::Inactive, true);
-  sendStateMessage(vIn);
+  sendStateMessage(vIn, ftr::StateOffset::Inactive);
 }
 
 bool Stow::isFeatureActive(Vertex vIn)
@@ -190,7 +190,7 @@ void Stow::setFeatureLeaf(Vertex vIn)
   if (isFeatureLeaf(vIn))
     return;
   graph[vIn].state.set(ftr::StateOffset::NonLeaf, false);
-  sendStateMessage(vIn);
+  sendStateMessage(vIn, ftr::StateOffset::NonLeaf);
 }
 
 void Stow::setFeatureNonLeaf(Vertex vIn)
@@ -198,7 +198,7 @@ void Stow::setFeatureNonLeaf(Vertex vIn)
   if (isFeatureNonLeaf(vIn))
     return;
   graph[vIn].state.set(ftr::StateOffset::NonLeaf, true);
-  sendStateMessage(vIn);
+  sendStateMessage(vIn, ftr::StateOffset::NonLeaf);
 }
 
 bool Stow::isFeatureLeaf(Vertex vIn)
@@ -211,9 +211,9 @@ bool Stow::isFeatureNonLeaf(Vertex vIn)
   return graph[vIn].state.test(ftr::StateOffset::NonLeaf);
 }
 
-void Stow::sendStateMessage(const Vertex &v)
+void Stow::sendStateMessage(const Vertex &v, std::size_t stateOffset)
 {
-  ftr::Message fMessage(graph[v].feature->getId(), graph[v].state);
+  ftr::Message fMessage(graph[v].feature->getId(), graph[v].state, stateOffset);
   msg::Message mMessage(msg::Response | msg::Project | msg::Feature | msg::Status);
   mMessage.payload = fMessage;
   observer->outBlocked(mMessage);

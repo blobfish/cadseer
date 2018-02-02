@@ -95,7 +95,7 @@ namespace prj
     Graph graph;
   private:
     std::unique_ptr<msg::Observer> observer;
-    void sendStateMessage(const Vertex&);
+    void sendStateMessage(const Vertex&, std::size_t);
   };
   
   //works with straight adjacency iterator. if parent map wanted, pass in reversed graph.

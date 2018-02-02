@@ -64,12 +64,14 @@ public:
   bool isVisualDirty() const {return state.test(ftr::StateOffset::VisualDirty);}
   bool isVisualClean() const {return !(state.test(ftr::StateOffset::VisualDirty));}
   void setVisualDirty();
-  
+  bool isSkipped() const {return state.test(StateOffset::Skipped);}
+  bool isNotSkipped() const {return !(state.test(StateOffset::Skipped));}
+  void setSkipped();
+  void setNotSkipped();
   bool isVisible3D() const;
   bool isHidden3D() const;
   bool isVisibleOverlay() const;
   bool isHiddenOverlay() const;
-  
   bool isSuccess() const {return !(state.test(ftr::StateOffset::Failure));}
   bool isFailure() const {return state.test(ftr::StateOffset::Failure);}
   void setName(const QString &nameIn);
@@ -127,6 +129,7 @@ protected:
   void setVisualClean(); //!< clean can only set through virtual visual update.
   void setFailure(); //!< set only through virtual update.
   void setSuccess(); //!< set only through virtual update.
+  void sendStateMessage(std::size_t); //!< just convenience.
   
   prj::srl::FeatureBase serialOut(); //!<convert this into serializable object. no const, we update the result container with offset
   void serialIn(const prj::srl::FeatureBase& sBaseIn);

@@ -285,8 +285,15 @@ void Box::updateModel(const UpdatePayload&)
 {
   setFailure();
   lastUpdateLog.clear();
+  sShape->reset();
   try
   {
+    if (isSkipped())
+    {
+      setSuccess();
+      throw std::runtime_error("feature is skipped");
+    }
+    
     BoxBuilder boxMaker
     (
       static_cast<double>(*length),

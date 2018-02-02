@@ -109,6 +109,12 @@ void Hollow::updateModel(const UpdatePayload &payloadIn)
     sShape->ensureNoNils(); //just in case
     sShape->ensureNoDuplicates(); //just in case
     
+    if (isSkipped())
+    {
+      setSuccess();
+      throw std::runtime_error("feature is skipped");
+    }
+    
     bool labelSet = false;
     occt::ShapeVector closingFaceShapes;
     std::vector<uuid> solidIds;

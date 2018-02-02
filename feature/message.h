@@ -31,10 +31,11 @@ namespace ftr
   struct Message
   {
     Message();
-    Message(const boost::uuids::uuid&, State);
+    Message(const boost::uuids::uuid&, State, std::size_t);
     Message(const boost::uuids::uuid&, const QString&);
     boost::uuids::uuid featureId;
     State state;
+    std::size_t stateOffset;
     QString string;
   };
 }

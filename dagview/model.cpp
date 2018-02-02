@@ -152,6 +152,8 @@ Model::Model(QObject *parentIn) : QGraphicsScene(parentIn), stow(new Stow())
   pendingPixmap = pendingIcon.pixmap(iconSize, iconSize);
   QIcon inactiveIcon(":/resources/images/dagViewInactive.svg");
   inactivePixmap = inactiveIcon.pixmap(iconSize, iconSize);
+  QIcon skippedIcon(":/resources/images/dagViewSkipped.svg");
+  skippedPixmap = skippedIcon.pixmap(iconSize, iconSize);
 }
 
 Model::~Model()
@@ -386,9 +388,8 @@ void Model::featureStateChangedDispatched(const msg::Message &messageIn)
     return;
   
   //this is the feature state change from the actual feature.
-  //so clear out the lower 3 bits and set to new state
-  stow->graph[vertex].state &= ftr::State("11000");
-  stow->graph[vertex].state |= (ftr::State("00111") & fMessage.state);
+  stow->graph[vertex].state &= ftr::StateOffset::ProjectMask;
+  stow->graph[vertex].state |= (ftr::StateOffset::FeatureMask & fMessage.state);
   
   stateUpdate(vertex);
 }
@@ -401,9 +402,8 @@ void Model::projectFeatureStateChangedDispatched(const msg::Message &mIn)
     return;
   
   //this is the feature state change from the PROJECT.
-  //so clear out the upper 2 bits and set to new state
-  stow->graph[vertex].state &= ftr::State("00111");
-  stow->graph[vertex].state |= (ftr::State("11000") & fMessage.state);
+  stow->graph[vertex].state &= ftr::StateOffset::FeatureMask;
+  stow->graph[vertex].state |= (ftr::StateOffset::ProjectMask & fMessage.state);
   
   stateUpdate(vertex);
 }
@@ -418,6 +418,8 @@ void Model::stateUpdate(Vertex vIn)
   //from highest to lowest priority.
   if (cState.test(ftr::StateOffset::Inactive))
     stow->graph[vIn].stateIconShared->setPixmap(inactivePixmap);
+  else if (cState.test(ftr::StateOffset::Skipped))
+    stow->graph[vIn].stateIconShared->setPixmap(skippedPixmap);
   else if (cState.test(ftr::StateOffset::ModelDirty))
     stow->graph[vIn].stateIconShared->setPixmap(pendingPixmap);
   else if (cState.test(ftr::StateOffset::Failure))
@@ -449,6 +451,8 @@ void Model::stateUpdate(Vertex vIn)
   "<td>" << tr("Visual Dirty") << "</td><td>" << ((cState.test(ftr::StateOffset::VisualDirty)) ? ts : fs) << "</td>" <<
   "</tr><tr>" <<
   "<td>" << tr("Failure") << "</td><td>" << ((cState.test(ftr::StateOffset::Failure)) ? ts : fs) << "</td>" <<
+  "</tr><tr>" <<
+  "<td>" << tr("Skipped") << "</td><td>" << ((cState.test(ftr::StateOffset::Skipped)) ? ts : fs) << "</td>" <<
   "</tr><tr>" <<
   "<td>" << tr("Inactive") << "</td><td>" << ((cState.test(ftr::StateOffset::Inactive)) ? ts : fs) << "</td>" <<
   "</tr><tr>" <<
@@ -1259,6 +1263,10 @@ void Model::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     QAction* setCurrentLeafAction = contextMenu.addAction(leafIcon, tr("Set Current Leaf"));
     connect(setCurrentLeafAction, SIGNAL(triggered()), this, SLOT(setCurrentLeafSlot()));
     
+    static QIcon skippedIcon(":/resources/images/dagViewSkipped.svg");
+    QAction* toggleSkippedAction = contextMenu.addAction(skippedIcon, tr("Toggle Skipped"));
+    connect(toggleSkippedAction, SIGNAL(triggered()), this, SLOT(toggleSkippedSlot()));
+    
     static QIcon removeIcon(":/resources/images/dagViewRemove.svg");
     QAction* removeFeatureAction = contextMenu.addAction(removeIcon, tr("Remove Feature"));
     connect(removeFeatureAction, SIGNAL(triggered()), this, SLOT(removeFeatureSlot()));
@@ -1375,6 +1383,21 @@ void Model::infoFeatureSlot()
 void Model::checkGeometrySlot()
 {
   observer->out(msg::Message(msg::Request | msg::CheckGeometry));
+}
+
+void Model::toggleSkippedSlot()
+{
+  std::vector<Vertex> selections = stow->getAllSelected();
+  if (selections.empty())
+    return;
+  prj::Message pm;
+  for (const auto &v : selections)
+    pm.featureIds.push_back(stow->graph[v].featureId);
+  
+  observer->out(msg::Message(msg::Request | msg::Feature | msg::Skipped | msg::Toggle, pm));
+  
+  if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
+    observer->out(msg::Mask(msg::Request | msg::Project | msg::Update));
 }
 
 void Model::renameAcceptedSlot()

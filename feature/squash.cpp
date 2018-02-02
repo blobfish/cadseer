@@ -114,6 +114,11 @@ void Squash::updateModel(const UpdatePayload &payloadIn)
       throw std::runtime_error("target seer shape is null");
     
     //no new failure state.
+    if (isSkipped())
+    {
+      setSuccess();
+      throw std::runtime_error("feature is skipped");
+    }
     
     //get the shell
     TopoDS_Shape ss = occt::getFirstNonCompound(tss.getRootOCCTShape());

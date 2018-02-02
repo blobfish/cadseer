@@ -39,11 +39,10 @@ namespace ftr
   public:
     ShapeCheck(const TopoDS_Shape&);
     ~ShapeCheck();
-    bool isValid();
-    bool wasSuccessfulRun(){return successfulRun;}
+    bool isValid(){return validity;}
     const BRepCheck_Analyzer& getChecker();
   private:
-    bool successfulRun = false;
+    bool validity = false;
     std::unique_ptr<ShapeCheckPrivate> shapeCheckPrivate;
   };
 }

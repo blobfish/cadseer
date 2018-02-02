@@ -121,6 +121,12 @@ void Chamfer::updateModel(const UpdatePayload &payloadIn)
     sShape->ensureNoNils();
     sShape->ensureNoDuplicates();
     
+    if (isSkipped())
+    {
+      setSuccess();
+      throw std::runtime_error("feature is skipped");
+    }
+    
     BRepFilletAPI_MakeChamfer chamferMaker(targetSeerShape.getRootOCCTShape());
     for (const auto &chamfer : symChamfers)
     {
@@ -156,9 +162,10 @@ void Chamfer::updateModel(const UpdatePayload &payloadIn)
           std::set_intersection(faceIds.begin(), faceIds.end(), parentFaces.begin(), parentFaces.end(), std::back_inserter(intersectionSet));
           if (intersectionSet.empty())
             faceId = parentFaces.front();
+          else
+            faceId = intersectionSet.front();
           if (intersectionSet.size() > 1)
             std::cerr << "WARNING: more than 1 reference face in Chamfer::updateModel" << std::endl;
-          faceId = intersectionSet.front();
           
           assert(targetSeerShape.hasShapeIdRecord(eid));
           assert(targetSeerShape.hasShapeIdRecord(faceId));

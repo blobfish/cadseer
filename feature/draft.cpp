@@ -108,6 +108,12 @@ void Draft::updateModel(const UpdatePayload &payloadIn)
     sShape->ensureNoNils(); //just in case
     sShape->ensureNoDuplicates(); //just in case
     
+    if (isSkipped())
+    {
+      setSuccess();
+      throw std::runtime_error("feature is skipped");
+    }
+    
     //neutral plane might be outside of target, if so we should have an input with a type of 'tool'
 //     const TopoDS_Shape &tool; //TODO
     

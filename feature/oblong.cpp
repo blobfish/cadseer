@@ -280,8 +280,15 @@ void Oblong::updateModel(const UpdatePayload&)
 {
   setFailure();
   lastUpdateLog.clear();
+  sShape->reset();
   try
   {
+    if (isSkipped())
+    {
+      setSuccess();
+      throw std::runtime_error("feature is skipped");
+    }
+    
     if (!(static_cast<double>(*length) > static_cast<double>(*width)))
       throw std::runtime_error("length must be greater than width");
     

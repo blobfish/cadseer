@@ -145,8 +145,15 @@ void Sphere::updateModel(const UpdatePayload&)
 {
   setFailure();
   lastUpdateLog.clear();
+  sShape->reset();
   try
   {
+    if (isSkipped())
+    {
+      setSuccess();
+      throw std::runtime_error("feature is skipped");
+    }
+    
     BRepPrimAPI_MakeSphere sphereMaker(gu::toOcc(static_cast<osg::Matrixd>(*csys)), static_cast<double>(*radius));
     sphereMaker.Build();
     assert(sphereMaker.IsDone());

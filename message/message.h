@@ -139,6 +139,7 @@ namespace msg
     static const Mask InstanceLinear(Mask().set(                99));//!< command, move.
     static const Mask InstanceMirror(Mask().set(               100));//!< command, move.
     static const Mask InstancePolar(Mask().set(                101));//!< command, move.
+    static const Mask Skipped(Mask().set(                      102));//!< project action. move up.
   
     typedef boost::variant
     <

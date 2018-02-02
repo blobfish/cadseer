@@ -83,6 +83,7 @@ namespace dag
     void renameRejectedSlot();
     void infoFeatureSlot();
     void checkGeometrySlot();
+    void toggleSkippedSlot();
     
   private:
     std::unique_ptr<msg::Observer> observer;
@@ -147,6 +148,7 @@ namespace dag
     QPixmap failPixmap;
     QPixmap pendingPixmap;
     QPixmap inactivePixmap;
+    QPixmap skippedPixmap;
     
     QAction *renameAction;
     QAction *editingFinishedAction;

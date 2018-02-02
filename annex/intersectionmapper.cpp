@@ -1042,14 +1042,18 @@ void IntersectionMapper::go(const ftr::UpdatePayload &payloadIn, BOPAlgo_Builder
   for (auto its = payloadIn.updateMap.equal_range(ftr::InputType::target); its.first != its.second; ++its.first)
   {
     assert((*its.first).second->hasAnnex(ann::Type::SeerShape)); //no seershape for feature.
-    seerShapes.push_back((*its.first).second->getAnnex<ann::SeerShape>(ann::Type::SeerShape));
-    assert(!seerShapes.back().get().isNull());
+    const ann::SeerShape &tShape = (*its.first).second->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+    if (tShape.isNull())
+      continue;
+    seerShapes.push_back(tShape);
   }
   for (auto its = payloadIn.updateMap.equal_range(ftr::InputType::tool); its.first != its.second; ++its.first)
   {
     assert((*its.first).second->hasAnnex(ann::Type::SeerShape)); //no seershape for feature.
-    seerShapes.push_back((*its.first).second->getAnnex<ann::SeerShape>(ann::Type::SeerShape));
-    assert(!seerShapes.back().get().isNull());
+    const ann::SeerShape &tShape = (*its.first).second->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+    if (tShape.isNull())
+      continue;
+    seerShapes.push_back(tShape);
   }
   
   //cache builder info

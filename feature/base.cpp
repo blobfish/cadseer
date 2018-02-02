@@ -104,6 +104,7 @@ Base::Base()
   state.set(ftr::StateOffset::ModelDirty, true);
   state.set(ftr::StateOffset::VisualDirty, true);
   state.set(ftr::StateOffset::Failure, false);
+  state.set(ftr::StateOffset::Skipped, false);
   
   observer = std::move(std::unique_ptr<msg::Observer>(new msg::Observer()));
 }
@@ -120,11 +121,7 @@ void Base::setModelDirty()
   if (isModelClean())
   {
     state.set(ftr::StateOffset::ModelDirty, true);
-    
-    ftr::Message fMessage(id, state);
-    msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
-    mMessage.payload = fMessage;
-    observer->out(mMessage);
+    sendStateMessage(StateOffset::ModelDirty);
   }
   setVisualDirty();
 }
@@ -134,11 +131,7 @@ void Base::setModelClean()
   if (isModelClean())
     return;
   state.set(ftr::StateOffset::ModelDirty, false);
-  
-  ftr::Message fMessage(id, state);
-  msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
-  mMessage.payload = fMessage;
-  observer->out(mMessage);
+  sendStateMessage(StateOffset::ModelDirty);
 }
 
 void Base::setVisualClean()
@@ -146,11 +139,7 @@ void Base::setVisualClean()
   if (isVisualClean())
     return;
   state.set(ftr::StateOffset::VisualDirty, false);
-  
-  ftr::Message fMessage(id, state);
-  msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
-  mMessage.payload = fMessage;
-  observer->out(mMessage);
+  sendStateMessage(StateOffset::VisualDirty);
 }
 
 void Base::setVisualDirty()
@@ -158,8 +147,28 @@ void Base::setVisualDirty()
   if(isVisualDirty())
     return;
   state.set(ftr::StateOffset::VisualDirty, true);
-  
-  ftr::Message fMessage(id, state);
+  sendStateMessage(StateOffset::VisualDirty);
+}
+
+void Base::setSkipped()
+{
+  if (isSkipped())
+    return;
+  state.set(StateOffset::Skipped, true);
+  sendStateMessage(StateOffset::Skipped);
+}
+
+void Base::setNotSkipped()
+{
+  if (isNotSkipped())
+    return;
+  state.set(StateOffset::Skipped, false);
+  sendStateMessage(StateOffset::Skipped);
+}
+
+void Base::sendStateMessage(std::size_t stateOffset)
+{
+  ftr::Message fMessage(id, state, stateOffset);
   msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
   mMessage.payload = fMessage;
   observer->out(mMessage);
@@ -297,7 +306,7 @@ void Base::setSuccess()
     return; //already success
   state.set(ftr::StateOffset::Failure, false);
   
-  ftr::Message fMessage(id, state);
+  ftr::Message fMessage(id, state, ftr::StateOffset::Failure);
   msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
   mMessage.payload = fMessage;
   observer->out(mMessage);
@@ -309,7 +318,7 @@ void Base::setFailure()
     return; //already failure
   state.set(ftr::StateOffset::Failure, true);
   
-  ftr::Message fMessage(id, state);
+  ftr::Message fMessage(id, state, ftr::StateOffset::Failure);
   msg::Message mMessage(msg::Response | msg::Feature | msg::Status);
   mMessage.payload = fMessage;
   observer->out(mMessage);

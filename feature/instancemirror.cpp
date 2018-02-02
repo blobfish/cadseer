@@ -125,6 +125,11 @@ void InstanceMirror::updateModel(const UpdatePayload &payloadIn)
       throw std::runtime_error("target seer shape is null");
     
     //no new failure state.
+    if (isSkipped())
+    {
+      setSuccess();
+      throw std::runtime_error("feature is skipped");
+    }
     
     //get the shapes to mirror.
     occt::ShapeVector tShapes;

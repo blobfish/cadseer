@@ -20,7 +20,8 @@
 #include <TopoDS_Shape.hxx>
 #include <BRepCheck_Analyzer.hxx>
 
-#include "shapecheck.h"
+#include <tools/occtools.h>
+#include <feature/shapecheck.h>
 
 namespace ftr
 {
@@ -31,6 +32,27 @@ namespace ftr
       shape(shapeIn),
       checker(shape)
     {}
+    bool isEmpty()
+    {
+      if (shape.IsNull())
+        return true;
+      occt::ShapeVector ss = occt::mapShapes(shape);
+      bool foundValid = false;
+      for (const auto &s : ss)
+      {
+        if
+        (
+          (s.ShapeType() != TopAbs_SHAPE)
+          && (s.ShapeType() != TopAbs_COMPOUND)
+          && (s.ShapeType() != TopAbs_COMPSOLID)
+        )
+        {
+          foundValid = true;
+          break;
+        }
+      }
+      return !foundValid;
+    }
     const TopoDS_Shape &shape;
     BRepCheck_Analyzer checker;
   };
@@ -42,27 +64,49 @@ ShapeCheck::ShapeCheck(const TopoDS_Shape &shapeIn)
 {
   try
   {
+    //defaults to invalid.
+    if (shapeIn.IsNull())
+      return;
+    
     shapeCheckPrivate = std::unique_ptr<ShapeCheckPrivate>(new ShapeCheckPrivate(shapeIn));
-    successfulRun = true;
+    if (!shapeCheckPrivate->checker.IsValid())
+      return;
+    
+    //look for something 'concrete' in the shape.
+    occt::ShapeVector ss = occt::mapShapes(shapeIn);
+    bool foundValid = false;
+    for (const auto &s : ss)
+    {
+      if
+      (
+        (s.ShapeType() != TopAbs_SHAPE)
+        && (s.ShapeType() != TopAbs_COMPOUND)
+        && (s.ShapeType() != TopAbs_COMPSOLID)
+      )
+      {
+        foundValid = true;
+        break;
+      }
+    }
+    if (!foundValid)
+      return;
+    
+    validity = true;
+    
   }
   catch (const Standard_Failure &e)
   {
     std::cout << std::endl << "OCCT Exception in ShapeCheck: " << e.GetMessageString() << std::endl;
+  }
+  catch (...)
+  {
+    std::cout << std::endl << "Unknown error in ShapeCheck: " << std::endl;
   }
 }
 
 ShapeCheck::~ShapeCheck()
 {
 
-}
-
-bool ShapeCheck::isValid()
-{
-  if (!successfulRun)
-    return false;
-  if (!shapeCheckPrivate->checker.IsValid())
-    return false;
-  return true;
 }
 
 const BRepCheck_Analyzer& ShapeCheck::getChecker()

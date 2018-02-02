@@ -222,6 +222,12 @@ void Blend::updateModel(const UpdatePayload &payloadIn)
     sShape->ensureNoNils();
     sShape->ensureNoDuplicates();
     
+    if (isSkipped())
+    {
+      setSuccess();
+      throw std::runtime_error("feature is skipped");
+    }
+    
     BRepFilletAPI_MakeFillet blendMaker(targetSeerShape.getRootOCCTShape());
     for (const auto &simpleBlend : simpleBlends)
     {
