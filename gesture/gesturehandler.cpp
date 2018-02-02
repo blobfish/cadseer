@@ -89,7 +89,7 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
             msg::Mask msgMask(maskString);
             msg::Message messageOut;
             messageOut.mask = msgMask;
-            observer->out(messageOut);
+            QMetaObject::invokeMethod(qApp, "messageSlot", Qt::QueuedConnection, Q_ARG(msg::Message, messageOut));
           }
         }
         else
@@ -108,6 +108,12 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
     }
   }
   
+  /* hot keys are a little different than the spaceball buttons. The keyboard focus can be taken
+   * away from the gesture handler by a command launching a dialog. This results in never receiving
+   * the KEYUP message and the hot key value not reaching -1 as it should. This results in the hotkey
+   * being assigned to the command launched by the menu. To avoid this we set the hotkey to -1 right after
+   * it is used.
+   */
   if (eventAdapter.getEventType() == osgGA::GUIEventAdapter::KEYDOWN)
   {
     if (!rightButtonDown)
@@ -127,16 +133,17 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
         msg::Mask msgMask(maskString);
         msg::Message messageOut;
         messageOut.mask = msgMask;
-        observer->out(messageOut);
+        QMetaObject::invokeMethod(qApp, "messageSlot", Qt::QueuedConnection, Q_ARG(msg::Message, messageOut));
       }
+      hotKey = -1;
     }
     return true;
   }
   if (eventAdapter.getEventType() == osgGA::GUIEventAdapter::KEYUP)
   {
+    hotKey = -1;
     if (!rightButtonDown)
       return false;
-    hotKey = -1;
     observer->out(msg::buildStatusMessage(""));
     return true;
   }
@@ -152,11 +159,11 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
     {
         if (dragStarted)
         {
-        clearStatus();
-        GestureAllSwitchesOffVisitor visitor;
-        gestureCamera->accept(visitor);
-        dragStarted = false;
-        gestureSwitch->setAllChildrenOff();
+          clearStatus();
+          GestureAllSwitchesOffVisitor visitor;
+          gestureCamera->accept(visitor);
+          dragStarted = false;
+          gestureSwitch->setAllChildrenOff();
         }
         return false;
     }
@@ -199,12 +206,12 @@ bool GestureHandler::handle(const osgGA::GUIEventAdapter& eventAdapter,
                     {
                       prf::manager().setHotKey(hotKey, msgMaskString);
                       prf::manager().saveConfig();
+                      hotKey = -1;
                     }
                     
                     msg::Mask msgMask(msgMaskString);
                     msg::Message messageOut;
                     messageOut.mask = msgMask;
-//                     observer->out(messageOut);
                     QMetaObject::invokeMethod(qApp, "messageSlot", Qt::QueuedConnection, Q_ARG(msg::Message, messageOut));
                 }
                 else
