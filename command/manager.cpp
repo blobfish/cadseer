@@ -37,6 +37,7 @@
 #include <command/blend.h>
 #include <command/extract.h>
 #include <command/featurereposition.h>
+#include <command/systemtoselection.h>
 #include <command/squash.h>
 #include <command/strip.h>
 #include <command/nest.h>
@@ -111,6 +112,9 @@ void Manager::setupDispatcher()
   
   mask = msg::Request | msg::FeatureReposition;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::featureRepositionDispatched, this, _1)));
+  
+  mask = msg::Request | msg::SystemToSelection;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::systemToSelectionDispatched, this, _1)));
   
   mask = msg::Request | msg::CheckGeometry;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::checkGeometryDispatched, this, _1)));
@@ -367,6 +371,12 @@ void Manager::featureRepositionDispatched(const msg::Message&)
 {
   std::shared_ptr<FeatureReposition> fr(new FeatureReposition());
   addCommand(fr);
+}
+
+void Manager::systemToSelectionDispatched(const msg::Message&)
+{
+  std::shared_ptr<SystemToSelection> c(new SystemToSelection());
+  addCommand(c);
 }
 
 void Manager::measureLinearDispatched(const msg::Message&)

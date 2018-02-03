@@ -463,6 +463,7 @@ SET(COMMAND_SOURCES
     command/intersect.cpp
     command/subtract.cpp
     command/union.cpp
+    command/systemtoselection.cpp
     )
     
 SET(LIBRARY_SOURCES

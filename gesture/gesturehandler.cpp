@@ -981,6 +981,13 @@ void GestureHandler::constructMenu()
       (msg::Request | msg::SystemToFeature).to_string(),
       systemBase
     );
+    constructCommandNode
+    (
+      ":/resources/images/systemToSelection.svg",
+      QObject::tr("Coordinate System To Selection").toStdString(),
+      (msg::Request | msg::SystemToSelection).to_string(),
+      systemBase
+    );
   }
   osg::MatrixTransform *inspectBase = constructMenuNode
   (
