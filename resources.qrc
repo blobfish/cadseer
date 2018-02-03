@@ -99,6 +99,7 @@
     <file>resources/images/systemBase.svg</file>
     <file>resources/images/systemReset.svg</file>
     <file>resources/images/systemToggle.svg</file>
+    <file>resources/images/systemToSelection.svg</file>
     <file>resources/images/debugBase.svg</file>
     <file>resources/images/debugCheckShapeIds.svg</file>
     <file>resources/images/debugDump.svg</file>
