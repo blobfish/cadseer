@@ -270,7 +270,7 @@ void Blend::finishDialog()
     updateBlendFeature();
     
     project->addFeature(blendSmart);
-    project->connect(blendParent->getId(), blendSmart->getId(), ftr::InputType{ftr::InputType::target});
+    project->connectInsert(blendParent->getId(), blendSmart->getId(), ftr::InputType{ftr::InputType::target});
     
     observer->outBlocked(msg::buildHideThreeD(blendParent->getId()));
     observer->outBlocked(msg::buildHideOverlay(blendParent->getId()));

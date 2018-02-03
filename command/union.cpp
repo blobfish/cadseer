@@ -107,7 +107,7 @@ void Union::go()
   unite->setColor(tf->getColor());
   
   project->addFeature(unite);
-  project->connect(tf->getId(), unite->getId(), ftr::InputType{ftr::InputType::target});
+  project->connectInsert(tf->getId(), unite->getId(), ftr::InputType{ftr::InputType::target});
   
   observer->outBlocked(msg::buildHideThreeD(tf->getId()));
   observer->outBlocked(msg::buildHideOverlay(tf->getId()));

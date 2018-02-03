@@ -467,6 +467,46 @@ void Project::connect(const boost::uuids::uuid& parentIn, const boost::uuids::uu
   stow->connect(parent, child, type);
 }
 
+void Project::connectInsert(const uuid& parentIn, const uuid& childIn, const ftr::InputType &type)
+{
+  Vertex parent = stow->findVertex(parentIn);
+  Vertex child = stow->findVertex(childIn);
+  if
+  (
+    (boost::out_degree(parent, stow->graph) == 0)
+    || (stow->graph[child].feature->getDescriptor() != ftr::Descriptor::Alter)
+  )
+  {
+    stow->connect(parent, child, type);
+    return;
+  }
+  Vertex insertTarget = NullVertex();
+  Edge insertEdge;
+  for (auto its = boost::adjacent_vertices(parent, stow->graph); its.first != its.second; ++its.first)
+  {
+    if (stow->graph[*its.first].feature->getDescriptor() == ftr::Descriptor::Alter)
+    {
+      bool r;
+      std::tie(insertEdge, r) = boost::edge(parent, *its.first, stow->graph);
+      assert(r);
+      if (stow->graph[insertEdge].inputType.has(ftr::InputType::target))
+      {
+        insertTarget = *its.first;
+        break;
+      }
+    }
+  }
+  if (insertTarget == NullVertex())
+  {
+    stow->connect(parent, child, type);
+    return;
+  }
+  stow->connect(child, insertTarget, stow->graph[insertEdge].inputType);
+  stow->disconnect(insertEdge);
+  stow->connect(parent, child, type);
+  stow->graph[insertTarget].feature->setModelDirty();
+}
+
 void Project::removeParentTag(const uuid &targetIn, const std::string &tagIn)
 {
   RemovedGraph removedGraph = buildRemovedGraph(stow->graph); //children

@@ -298,7 +298,7 @@ void Boolean::finishDialog()
     }
     for (const auto &tid : targetIds)
     {
-      p->connect(tid, booleanId, {ftr::InputType::target});
+      p->connectInsert(tid, booleanId, {ftr::InputType::target});
       observer->outBlocked(msg::buildHideThreeD(tid));
       observer->outBlocked(msg::buildHideOverlay(tid));
     }

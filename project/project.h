@@ -63,6 +63,14 @@ public:
     void removeFeature(const boost::uuids::uuid &idIn);
     void setCurrentLeaf(const boost::uuids::uuid &idIn);
     void connect(const boost::uuids::uuid &parentIn, const boost::uuids::uuid &childIn, const ftr::InputType &type);
+    
+    /*! @brief Connects and possibly inserts
+    * 
+    * @param parentIn id of parent/source feature.
+    * @param childIn id of child/target feature.
+    * @param type input type.
+    */
+    void connectInsert(const boost::uuids::uuid &parentIn, const boost::uuids::uuid &childIn, const ftr::InputType &type);
      //!< removes all tags from edges with id as target. removes edge if only tag is parameter.
     void removeParentTag(const boost::uuids::uuid &, const std::string&);
     void clearAllInputs(const boost::uuids::uuid&);

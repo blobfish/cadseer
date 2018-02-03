@@ -114,7 +114,7 @@ void Blend::go()
     {
       std::shared_ptr<ftr::Blend> blend(new ftr::Blend());
       project->addFeature(blend);
-      project->connect(targetFeatureId, blend->getId(), ftr::InputType{ftr::InputType::target});
+      project->connectInsert(targetFeatureId, blend->getId(), ftr::InputType{ftr::InputType::target});
       if (!simpleBlend.picks.empty())
         blend->addSimpleBlend(simpleBlend);
       

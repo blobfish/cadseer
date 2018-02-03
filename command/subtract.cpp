@@ -108,7 +108,7 @@ void Subtract::go()
   subtract->setColor(tf->getColor());
   
   project->addFeature(subtract);
-  project->connect(tf->getId(), subtract->getId(), ftr::InputType{ftr::InputType::target});
+  project->connectInsert(tf->getId(), subtract->getId(), ftr::InputType{ftr::InputType::target});
   
   observer->outBlocked(msg::buildHideThreeD(tf->getId()));
   observer->outBlocked(msg::buildHideOverlay(tf->getId()));

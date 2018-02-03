@@ -59,7 +59,7 @@ void Refine::go()
     
     std::shared_ptr<ftr::Refine> refine(new ftr::Refine());
     project->addFeature(refine);
-    project->connect(c.featureId, refine->getId(), ftr::InputType{ftr::InputType::target});
+    project->connectInsert(c.featureId, refine->getId(), ftr::InputType{ftr::InputType::target});
     
     observer->outBlocked(msg::buildHideThreeD(c.featureId));
     observer->outBlocked(msg::buildHideOverlay(c.featureId));

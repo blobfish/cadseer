@@ -110,7 +110,7 @@ void Intersect::go()
   intersect->setColor(tf->getColor());
   
   project->addFeature(intersect);
-  project->connect(tf->getId(), intersect->getId(), ftr::InputType{ftr::InputType::target});
+  project->connectInsert(tf->getId(), intersect->getId(), ftr::InputType{ftr::InputType::target});
   
   observer->outBlocked(msg::buildHideThreeD(tf->getId()));
   observer->outBlocked(msg::buildHideOverlay(tf->getId()));

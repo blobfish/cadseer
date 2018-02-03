@@ -372,7 +372,7 @@ void Factory::newChamferDispatched(const msg::Message&)
   std::shared_ptr<ftr::Chamfer> chamfer(new ftr::Chamfer());
   chamfer->addSymChamfer(symChamfer);
   project->addFeature(chamfer);
-  project->connect(targetFeatureId, chamfer->getId(), ftr::InputType{ftr::InputType::target});
+  project->connectInsert(targetFeatureId, chamfer->getId(), ftr::InputType{ftr::InputType::target});
   
   ftr::Base *targetFeature = project->findFeature(targetFeatureId);
   chamfer->setColor(targetFeature->getColor());
@@ -424,7 +424,7 @@ void Factory::newDraftDispatched(const msg::Message&)
   std::shared_ptr<ftr::Draft> draft(new ftr::Draft());
   draft->setDraft(convey);
   project->addFeature(draft);
-  project->connect(targetFeatureId, draft->getId(), ftr::InputType{ftr::InputType::target});
+  project->connectInsert(targetFeatureId, draft->getId(), ftr::InputType{ftr::InputType::target});
   
   ftr::Base *targetFeature = project->findFeature(targetFeatureId);
   draft->setColor(targetFeature->getColor());
@@ -505,7 +505,7 @@ void Factory::newHollowDispatched(const msg::Message&)
   std::shared_ptr<ftr::Hollow> hollow(new ftr::Hollow());
   hollow->setHollowPicks(hollowPicks);
   project->addFeature(hollow);
-  project->connect(targetFeatureId, hollow->getId(), ftr::InputType{ftr::InputType::target});
+  project->connectInsert(targetFeatureId, hollow->getId(), ftr::InputType{ftr::InputType::target});
   hollow->setColor(targetFeature->getColor());
   
   observer->outBlocked(msg::buildHideThreeD(targetFeatureId));
