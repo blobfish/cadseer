@@ -670,6 +670,13 @@ void GestureHandler::constructMenu()
         (msg::Request | msg::Construct | msg::Refine).to_string(),
         constructionFinishing
       );
+      constructCommandNode
+      (
+        ":/resources/images/constructionOffset.svg",
+        QObject::tr("Offset Command").toStdString(),
+        (msg::Request | msg::Construct | msg::Offset).to_string(),
+        constructionFinishing
+      );
     }
     osg::MatrixTransform *constructionBoolean = constructMenuNode
     (

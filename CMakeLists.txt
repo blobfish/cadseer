@@ -329,6 +329,7 @@ SET(FEATURE_SOURCES
     feature/instancemirror.cpp
     feature/instancepolar.cpp
     feature/updatepayload.cpp
+    feature/offset.cpp
     )
     
 SET(ANNEX_SOURCES
@@ -423,6 +424,7 @@ SET(PROJECT_SOURCES
     project/serial/xsdcxxoutput/featureinstancelinear.cpp
     project/serial/xsdcxxoutput/featureinstancemirror.cpp
     project/serial/xsdcxxoutput/featureinstancepolar.cpp
+    project/serial/xsdcxxoutput/featureoffset.cpp
     )
     
 SET(APPLICATION_SOURCES
@@ -464,6 +466,7 @@ SET(COMMAND_SOURCES
     command/subtract.cpp
     command/union.cpp
     command/systemtoselection.cpp
+    command/offset.cpp
     )
     
 SET(LIBRARY_SOURCES

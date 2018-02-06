@@ -52,6 +52,7 @@
 #include <command/intersect.h>
 #include <command/subtract.h>
 #include <command/union.h>
+#include <command/offset.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <selection/message.h>
@@ -181,6 +182,9 @@ void Manager::setupDispatcher()
   
   mask = msg::Request | msg::Construct | msg::Union;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::constructUnionDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Construct | msg::Offset;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::constructOffsetDispatched, this, _1)));
 }
 
 void Manager::cancelCommandDispatched(const msg::Message &)
@@ -425,6 +429,12 @@ void Manager::constructUnionDispatched(const msg::Message&)
 {
   std::shared_ptr<Union> u(new Union());
   addCommand(u);
+}
+
+void Manager::constructOffsetDispatched(const msg::Message&)
+{
+  std::shared_ptr<Offset> f(new Offset());
+  addCommand(f);
 }
 
 

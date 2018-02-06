@@ -44,6 +44,7 @@
 #include <feature/instancelinear.h>
 #include <feature/instancemirror.h>
 #include <feature/instancepolar.h>
+#include <feature/offset.h>
 #include <project/serial/xsdcxxoutput/featurebox.h>
 #include <project/serial/xsdcxxoutput/featurecylinder.h>
 #include <project/serial/xsdcxxoutput/featuresphere.h>
@@ -68,6 +69,7 @@
 #include <project/serial/xsdcxxoutput/featureinstancelinear.h>
 #include <project/serial/xsdcxxoutput/featureinstancemirror.h>
 #include <project/serial/xsdcxxoutput/featureinstancepolar.h>
+#include <project/serial/xsdcxxoutput/featureoffset.h>
 
 #include "featureload.h"
 
@@ -103,6 +105,7 @@ directory(directoryIn), fileExtension(".fetr")
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::InstanceLinear), std::bind(&FeatureLoad::loadInstanceLinear, this, std::placeholders::_1, std::placeholders::_2)));
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::InstanceMirror), std::bind(&FeatureLoad::loadInstanceMirror, this, std::placeholders::_1, std::placeholders::_2)));
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::InstancePolar), std::bind(&FeatureLoad::loadInstancePolar, this, std::placeholders::_1, std::placeholders::_2)));
+  functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Offset), std::bind(&FeatureLoad::loadOffset, this, std::placeholders::_1, std::placeholders::_2)));
 }
 
 FeatureLoad::~FeatureLoad()
@@ -423,4 +426,16 @@ std::shared_ptr<ftr::Base> FeatureLoad::loadInstancePolar(const std::string &fil
   freshInstancePolar->serialRead(*sr);
   
   return freshInstancePolar;
+}
+
+std::shared_ptr<ftr::Base> FeatureLoad::loadOffset(const std::string &fileNameIn, std::size_t shapeOffsetIn)
+{
+  auto sr = srl::offset(fileNameIn, ::xml_schema::Flags::dont_validate);
+  assert(sr);
+  
+  std::shared_ptr<ftr::Offset> offset(new ftr::Offset);
+  offset->getAnnex<ann::SeerShape>(ann::Type::SeerShape).setOCCTShape(shapeVector.at(shapeOffsetIn));
+  offset->serialRead(*sr);
+  
+  return offset;
 }

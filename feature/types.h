@@ -55,7 +55,8 @@ namespace ftr
     Refine, //!< feature refine class.
     InstanceLinear, //!< feature for linear patterns.
     InstanceMirror, //!< feature for mirrored patterns.
-    InstancePolar //!< feature for polar patterns.
+    InstancePolar, //!< feature for polar patterns.
+    Offset //!< feature for offset shapes.
   };
   
   inline const static std::string& toString(Type typeIn)
@@ -89,7 +90,8 @@ namespace ftr
       {Type::Refine, "Refine"},
       {Type::InstanceLinear, "InstanceLinear"},
       {Type::InstanceMirror, "InstanceMirror"},
-      {Type::InstancePolar, "InstancePolar"}
+      {Type::InstancePolar, "InstancePolar"},
+      {Type::Offset, "Offset"}
     };
     
     assert(strings.count(typeIn) > 0);
