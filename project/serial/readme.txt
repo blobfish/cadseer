@@ -55,4 +55,5 @@ xsdcxx cxx-tree --std c++11 --generate-serialization --generate-doxygen --type-n
 xsdcxx cxx-tree --std c++11 --generate-serialization --generate-doxygen --type-naming ucc --hxx-suffix .h --cxx-suffix .cpp --guard-prefix PRJ_SRL --extern-xml-schema ../../../xmlbase.xsd ../featureinstancemirror.xsd
 xsdcxx cxx-tree --std c++11 --generate-serialization --generate-doxygen --type-naming ucc --hxx-suffix .h --cxx-suffix .cpp --guard-prefix PRJ_SRL --extern-xml-schema ../../../xmlbase.xsd ../featureinstancepolar.xsd
 xsdcxx cxx-tree --std c++11 --generate-serialization --generate-doxygen --type-naming ucc --hxx-suffix .h --cxx-suffix .cpp --guard-prefix PRJ_SRL --extern-xml-schema ../../../xmlbase.xsd ../featureoffset.xsd
+xsdcxx cxx-tree --std c++11 --generate-serialization --generate-doxygen --type-naming ucc --hxx-suffix .h --cxx-suffix .cpp --guard-prefix PRJ_SRL --extern-xml-schema ../../../xmlbase.xsd ../featurethicken.xsd
 

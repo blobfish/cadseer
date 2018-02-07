@@ -598,7 +598,7 @@ Container EventHandler::messageToContainer(const Message &messageIn)
     const ann::SeerShape &seerShape = feature->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
     if (messageIn.type == slc::Type::Object)
     {
-      container.selectionIds = seerShape.useGetChildrenOfType(seerShape.getRootOCCTShape(), TopAbs_FACE);
+      container.selectionIds = seerShape.useGetChildrenOfType(seerShape.getRootShapeId(), TopAbs_FACE);
     }
     //skip feature for now.
     else if

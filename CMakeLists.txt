@@ -330,6 +330,7 @@ SET(FEATURE_SOURCES
     feature/instancepolar.cpp
     feature/updatepayload.cpp
     feature/offset.cpp
+    feature/thicken.cpp
     )
     
 SET(ANNEX_SOURCES
@@ -425,6 +426,7 @@ SET(PROJECT_SOURCES
     project/serial/xsdcxxoutput/featureinstancemirror.cpp
     project/serial/xsdcxxoutput/featureinstancepolar.cpp
     project/serial/xsdcxxoutput/featureoffset.cpp
+    project/serial/xsdcxxoutput/featurethicken.cpp
     )
     
 SET(APPLICATION_SOURCES
@@ -467,6 +469,7 @@ SET(COMMAND_SOURCES
     command/union.cpp
     command/systemtoselection.cpp
     command/offset.cpp
+    command/thicken.cpp
     )
     
 SET(LIBRARY_SOURCES

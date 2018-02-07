@@ -310,7 +310,7 @@ namespace ann
     std::vector<BID::uuid> useGetParentsOfType(const BID::uuid &, const TopAbs_ShapeEnum &) const;
     occt::ShapeVector useGetParentsOfType(const TopoDS_Shape &, const TopAbs_ShapeEnum &) const;
     std::vector<BID::uuid> useGetChildrenOfType(const BID::uuid &, const TopAbs_ShapeEnum &) const;
-    std::vector<BID::uuid> useGetChildrenOfType(const TopoDS_Shape &, const TopAbs_ShapeEnum &) const;
+    occt::ShapeVector useGetChildrenOfType(const TopoDS_Shape &, const TopAbs_ShapeEnum &) const;
     BID::uuid useGetWire(const BID::uuid &, const BID::uuid &) const;
     BID::uuid useGetClosestWire(const BID::uuid &faceIn, const osg::Vec3d &pointIn) const;
     std::vector<BID::uuid> useGetFacelessWires(const BID::uuid &edgeIn) const;

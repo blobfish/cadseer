@@ -74,6 +74,7 @@ namespace prj
     std::shared_ptr<ftr::Base> loadInstanceMirror(const std::string &, std::size_t);
     std::shared_ptr<ftr::Base> loadInstancePolar(const std::string &, std::size_t);
     std::shared_ptr<ftr::Base> loadOffset(const std::string &, std::size_t);
+    std::shared_ptr<ftr::Base> loadThicken(const std::string &, std::size_t);
   };
 }
 

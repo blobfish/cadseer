@@ -56,7 +56,8 @@ namespace ftr
     InstanceLinear, //!< feature for linear patterns.
     InstanceMirror, //!< feature for mirrored patterns.
     InstancePolar, //!< feature for polar patterns.
-    Offset //!< feature for offset shapes.
+    Offset, //!< feature for offset shapes.
+    Thicken //!< feature for thickening sheets.
   };
   
   inline const static std::string& toString(Type typeIn)
@@ -91,7 +92,8 @@ namespace ftr
       {Type::InstanceLinear, "InstanceLinear"},
       {Type::InstanceMirror, "InstanceMirror"},
       {Type::InstancePolar, "InstancePolar"},
-      {Type::Offset, "Offset"}
+      {Type::Offset, "Offset"},
+      {Type::Thicken, "Thicken"}
     };
     
     assert(strings.count(typeIn) > 0);

@@ -581,7 +581,7 @@ std::vector<uuid> SeerShape::useGetChildrenOfType
   return idsOut;
 }
 
-std::vector<uuid> SeerShape::useGetChildrenOfType
+occt::ShapeVector SeerShape::useGetChildrenOfType
   (const TopoDS_Shape &shapeIn, const TopAbs_ShapeEnum &shapeTypeIn) const
 {
   assert(hasShapeIdRecord(shapeIn));
@@ -591,10 +591,10 @@ std::vector<uuid> SeerShape::useGetChildrenOfType
   boost::breadth_first_search(graph, findShapeIdRecord(shapeIn).graphVertex, boost::visitor(vis));
 
   std::vector<Vertex>::const_iterator vit;
-  std::vector<uuid> idsOut;
+  occt::ShapeVector out;
   for (vit = vertices.begin(); vit != vertices.end(); ++vit)
-      idsOut.push_back(findShapeIdRecord(*vit).id);
-  return idsOut;
+      out.push_back(findShapeIdRecord(*vit).shape);
+  return out;
 }
 
 uuid SeerShape::useGetWire

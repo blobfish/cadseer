@@ -677,6 +677,13 @@ void GestureHandler::constructMenu()
         (msg::Request | msg::Construct | msg::Offset).to_string(),
         constructionFinishing
       );
+      constructCommandNode
+      (
+        ":/resources/images/constructionThicken.svg",
+        QObject::tr("Thicken Command").toStdString(),
+        (msg::Request | msg::Construct | msg::Thicken).to_string(),
+        constructionFinishing
+      );
     }
     osg::MatrixTransform *constructionBoolean = constructMenuNode
     (

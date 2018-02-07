@@ -53,6 +53,7 @@
 #include <command/subtract.h>
 #include <command/union.h>
 #include <command/offset.h>
+#include <command/thicken.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <selection/message.h>
@@ -185,6 +186,9 @@ void Manager::setupDispatcher()
   
   mask = msg::Request | msg::Construct | msg::Offset;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::constructOffsetDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Construct | msg::Thicken;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::constructThickenDispatched, this, _1)));
 }
 
 void Manager::cancelCommandDispatched(const msg::Message &)
@@ -434,6 +438,12 @@ void Manager::constructUnionDispatched(const msg::Message&)
 void Manager::constructOffsetDispatched(const msg::Message&)
 {
   std::shared_ptr<Offset> f(new Offset());
+  addCommand(f);
+}
+
+void Manager::constructThickenDispatched(const msg::Message&)
+{
+  std::shared_ptr<Thicken> f(new Thicken());
   addCommand(f);
 }
 
