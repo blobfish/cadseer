@@ -85,6 +85,7 @@ namespace cmd
     void constructUnionDispatched(const msg::Message&);
     void constructOffsetDispatched(const msg::Message&);
     void constructThickenDispatched(const msg::Message&);
+    void constructSewDispatched(const msg::Message&);
     
     //editing functions
     typedef std::function<BasePtr (ftr::Base *)> EditFunction;

@@ -152,55 +152,6 @@ void Extract::sync(const Extract::AccruePicks &apsIn)
   }
 }
 
-/* keeping for reference
-TopoDS_Shape sew(const occt::FaceVector &faces)
-{
-  //move to occ tools eventually.
-  //all parameters are the default values from occ documentation.
-  BRepBuilderAPI_Sewing builder(0.000001, true, true, true, false);
-  for (const auto& f : faces)
-    builder.Add(f);
-  builder.Perform(); //Perform Sewing
-//   builder.Dump();
-  
-  //sewing function is very liberal. Meaning that it really doesn't care if
-  //faces are connected or not. It will put a dozen disconnected faces
-  //into a compound and return the compound as a result. So we do some post
-  //operation analysis to decide what is a success or failure. The criteria
-  //for success and failure is up for debate.
-  
-  //for now we are just looking for a shell.
-  TopoDS_Shape out;
-  TopoDS_Shape output = builder.SewedShape();
-  if (output.IsNull())
-    return out;
-  
-  TopoDS_Shape nc = occt::getFirstNonCompound(output);
-  if (nc.IsNull())
-    return out;
-  
-  if (nc.ShapeType() == TopAbs_SHELL)
-  {
-    out = nc;
-    //try to make a solid.
-    if (nc.Closed())
-    {
-      BRepBuilderAPI_MakeSolid solidMaker(TopoDS::Shell(nc));
-      if (solidMaker.IsDone())
-      {
-        TopoDS_Solid temp = solidMaker.Solid();
-        //contrary to the occ docs the return value OrientCloseSolid doesn't
-        //indicate whether the shell was open or not. It returns true with an
-        //open shell and we end up with an invalid solid.
-        if (BRepLib::OrientClosedSolid(temp))
-          out = temp;
-      }
-    }
-  }
-  return out;
-}
-*/
-
 void Extract::updateModel(const UpdatePayload &payloadIn)
 {
   setFailure();

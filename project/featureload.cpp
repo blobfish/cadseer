@@ -46,6 +46,7 @@
 #include <feature/instancepolar.h>
 #include <feature/offset.h>
 #include <feature/thicken.h>
+#include <feature/sew.h>
 #include <project/serial/xsdcxxoutput/featurebox.h>
 #include <project/serial/xsdcxxoutput/featurecylinder.h>
 #include <project/serial/xsdcxxoutput/featuresphere.h>
@@ -72,6 +73,7 @@
 #include <project/serial/xsdcxxoutput/featureinstancepolar.h>
 #include <project/serial/xsdcxxoutput/featureoffset.h>
 #include <project/serial/xsdcxxoutput/featurethicken.h>
+#include <project/serial/xsdcxxoutput/featuresew.h>
 
 #include "featureload.h"
 
@@ -109,6 +111,7 @@ directory(directoryIn), fileExtension(".fetr")
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::InstancePolar), std::bind(&FeatureLoad::loadInstancePolar, this, std::placeholders::_1, std::placeholders::_2)));
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Offset), std::bind(&FeatureLoad::loadOffset, this, std::placeholders::_1, std::placeholders::_2)));
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Thicken), std::bind(&FeatureLoad::loadThicken, this, std::placeholders::_1, std::placeholders::_2)));
+  functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Sew), std::bind(&FeatureLoad::loadSew, this, std::placeholders::_1, std::placeholders::_2)));
 }
 
 FeatureLoad::~FeatureLoad()
@@ -453,4 +456,16 @@ std::shared_ptr<ftr::Base> FeatureLoad::loadThicken(const std::string &fileNameI
   thicken->serialRead(*sr);
   
   return thicken;
+}
+
+std::shared_ptr<ftr::Base> FeatureLoad::loadSew(const std::string &fileNameIn, std::size_t shapeOffsetIn)
+{
+  auto sr = srl::sew(fileNameIn, ::xml_schema::Flags::dont_validate);
+  assert(sr);
+  
+  std::shared_ptr<ftr::Sew> sew(new ftr::Sew);
+  sew->getAnnex<ann::SeerShape>(ann::Type::SeerShape).setOCCTShape(shapeVector.at(shapeOffsetIn));
+  sew->serialRead(*sr);
+  
+  return sew;
 }

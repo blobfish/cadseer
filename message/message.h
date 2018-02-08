@@ -143,6 +143,7 @@ namespace msg
     static const Mask SystemToSelection(Mask().set(            103));//!< command. move up
     static const Mask Offset(Mask().set(                       104));//!< command. move up
     static const Mask Thicken(Mask().set(                      105));//!< command. move up
+    static const Mask Sew(Mask().set(                          106));//!< command. move up
   
     typedef boost::variant
     <
