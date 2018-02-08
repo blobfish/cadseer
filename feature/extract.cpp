@@ -18,9 +18,9 @@
  */
 
 #include <TopoDS.hxx>
-#include <BRepBuilderAPI_Sewing.hxx>
 #include <BRepBuilderAPI_MakeSolid.hxx>
 #include <BRepLib.hxx>
+#include <BRepTools_Quilt.hxx>
 
 #include <globalutilities.h>
 #include <tools/occtools.h>
@@ -152,6 +152,7 @@ void Extract::sync(const Extract::AccruePicks &apsIn)
   }
 }
 
+/* keeping for reference
 TopoDS_Shape sew(const occt::FaceVector &faces)
 {
   //move to occ tools eventually.
@@ -198,6 +199,7 @@ TopoDS_Shape sew(const occt::FaceVector &faces)
   }
   return out;
 }
+*/
 
 void Extract::updateModel(const UpdatePayload &payloadIn)
 {
@@ -245,12 +247,13 @@ void Extract::updateModel(const UpdatePayload &payloadIn)
           }
         }
       }
-      //need some shape mapping for sew.
-      TopoDS_Shape sewn;
-      if (!faces.empty())
-        sewn = sew(faces);
-      if (!sewn.IsNull())
-        outShapes.push_back(sewn);
+      
+      BRepTools_Quilt quilter;
+      for (const auto &f : faces)
+        quilter.Add(f);
+      occt::ShellVector quilts = occt::ShapeVectorCast(TopoDS::Compound(quilter.Shells()));
+      for (const auto &s : quilts)
+        outShapes.push_back(s);
     }
     
     if (accruePicks.empty())
