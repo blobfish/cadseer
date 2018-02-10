@@ -691,6 +691,13 @@ void GestureHandler::constructMenu()
         (msg::Request | msg::Construct | msg::Sew).to_string(),
         constructionFinishing
       );
+      constructCommandNode
+      (
+        ":/resources/images/constructionTrim.svg",
+        QObject::tr("Trim Command").toStdString(),
+        (msg::Request | msg::Construct | msg::Trim).to_string(),
+        constructionFinishing
+      );
     }
     osg::MatrixTransform *constructionBoolean = constructMenuNode
     (

@@ -332,6 +332,7 @@ SET(FEATURE_SOURCES
     feature/offset.cpp
     feature/thicken.cpp
     feature/sew.cpp
+    feature/trim.cpp
     )
     
 SET(ANNEX_SOURCES
@@ -429,6 +430,7 @@ SET(PROJECT_SOURCES
     project/serial/xsdcxxoutput/featureoffset.cpp
     project/serial/xsdcxxoutput/featurethicken.cpp
     project/serial/xsdcxxoutput/featuresew.cpp
+    project/serial/xsdcxxoutput/featuretrim.cpp
     )
     
 SET(APPLICATION_SOURCES
@@ -473,6 +475,7 @@ SET(COMMAND_SOURCES
     command/offset.cpp
     command/thicken.cpp
     command/sew.cpp
+    command/trim.cpp
     )
     
 SET(LIBRARY_SOURCES

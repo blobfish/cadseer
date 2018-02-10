@@ -58,7 +58,8 @@ namespace ftr
     InstancePolar, //!< feature for polar patterns.
     Offset, //!< feature for offset shapes.
     Thicken, //!< feature for thickening sheets.
-    Sew //!< feature for sewing sheets.
+    Sew, //!< feature for sewing sheets.
+    Trim //!< feature for trimming solids.
   };
   
   inline const static std::string& toString(Type typeIn)
@@ -95,15 +96,13 @@ namespace ftr
       {Type::InstancePolar, "InstancePolar"},
       {Type::Offset, "Offset"},
       {Type::Thicken, "Thicken"},
-      {Type::Sew, "Sew"}
+      {Type::Sew, "Sew"},
+      {Type::Trim, "Trim"}
     };
     
     assert(strings.count(typeIn) > 0);
     return strings.at(typeIn);
   }
 }
-
-
-
 
 #endif //FTR_TYPES_H
