@@ -48,6 +48,8 @@ namespace cmd
     virtual void activate() = 0;
     virtual void deactivate() = 0;
     
+    bool getShouldUpdate(){return shouldUpdate;}
+    
   protected:
     std::unique_ptr<msg::Observer> observer;
     void sendDone();
@@ -60,6 +62,7 @@ namespace cmd
     vwr::Widget *viewer;
     
     bool isActive;
+    bool shouldUpdate = true;
   };
   
   typedef std::shared_ptr<Base> BasePtr;

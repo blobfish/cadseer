@@ -23,7 +23,10 @@
 
 using namespace cmd;
 
-Revision::Revision() : Base() {}
+Revision::Revision() : Base()
+{
+  shouldUpdate = false;
+}
 
 Revision::~Revision()
 {

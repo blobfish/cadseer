@@ -236,16 +236,18 @@ void Manager::addCommand(BasePtr pointerIn)
 
 void Manager::doneSlot()
 {
+  bool shouldCommandUpdate = true; //default to update.
   //only active command should trigger it is done.
   if (!stack.empty())
   {
+    shouldCommandUpdate = stack.top()->getShouldUpdate();
     stack.top()->deactivate();
     stack.pop();
   }
   clearSelection();
   observer->outBlocked(msg::buildStatusMessage(""));
   
-  if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish())
+  if (prf::manager().rootPtr->dragger().triggerUpdateOnFinish() && shouldCommandUpdate)
   {
     observer->outBlocked(msg::Mask(msg::Request | msg::Project | msg::Update));
   }
