@@ -97,6 +97,7 @@ public:
     std::vector<boost::uuids::uuid> getLeafChildren(const boost::uuids::uuid&) const;
     
     expr::Manager& getManager(){return *expressionManager;}
+    GitManager& getGitManager(){return *gitManager;}
     
     QTextStream& getInfo(QTextStream&) const;
     

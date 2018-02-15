@@ -980,6 +980,13 @@ void GestureHandler::constructMenu()
       (msg::Request | msg::Save | msg::Project).to_string(),
       fileBase
     );
+    constructCommandNode
+    (
+      ":/resources/images/fileRevision.svg",
+      QObject::tr("Manage Revisions Command").toStdString(),
+      (msg::Request | msg::Project | msg::Revision | msg::Dialog).to_string(),
+      fileBase
+    );
   }
   osg::MatrixTransform *systemBase = constructMenuNode
   (

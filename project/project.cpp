@@ -1119,7 +1119,6 @@ void Project::open()
   app::WaitCursor waitCursor;
   
   isLoading = true;
-  gitManager->appendGitMessage("Project Open");
   observer->out(msg::Message(msg::Request | msg::Git | msg::Freeze));
   
   std::string projectPath = saveDirectory + QDir::separator().toLatin1() + "project.prjt";

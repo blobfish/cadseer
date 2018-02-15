@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>690</width>
-    <height>517</height>
+    <width>581</width>
+    <height>392</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,14 +15,33 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
       <widget class="QPushButton" name="newButton">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Create a new project using name edit or directory browse&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
        <property name="whatsThis">
-        <string>Create a new project</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Create a new project using name edit or directory browse&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="text">
         <string>New</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="newNameEdit">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Name of new project to be created in the default project location. If this is empty when the new button is pressed, a directory browser will be presented and you can browse to an empty directory for your new project. If the default project location has not been set or is an invalid directory this will be disabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="whatsThis">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Name of new project to be created in the default project location. If this is empty when the new button is pressed, a directory browser will be presented and you can browse to an empty directory for your new project. If the default project location has not been set or is an invalid directory this will be disabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="placeholderText">
+        <string>Name of new project</string>
        </property>
       </widget>
      </item>
@@ -31,9 +50,12 @@
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>40</width>
+         <width>68</width>
          <height>20</height>
         </size>
        </property>
@@ -41,6 +63,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="openButton">
+       <property name="toolTip">
+        <string>Open an existing project</string>
+       </property>
        <property name="whatsThis">
         <string>Open an existing project</string>
        </property>
@@ -59,6 +84,9 @@
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QTableWidget" name="recentTableWidget">
+        <property name="toolTip">
+         <string>List of recently opened projects</string>
+        </property>
         <property name="whatsThis">
          <string>List of recently opened projects</string>
         </property>
@@ -92,6 +120,13 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>newNameEdit</tabstop>
+  <tabstop>newButton</tabstop>
+  <tabstop>openButton</tabstop>
+  <tabstop>recentTableWidget</tabstop>
+  <tabstop>recentTableWidget_2</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
@@ -101,8 +136,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>438</x>
-     <y>464</y>
+     <x>444</x>
+     <y>385</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -117,8 +152,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>506</x>
-     <y>470</y>
+     <x>512</x>
+     <y>385</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>

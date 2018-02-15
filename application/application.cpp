@@ -341,6 +341,8 @@ void Application::setupDispatcher()
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Application::newProjectRequestDispatched, this, _1)));
   mask = msg::Request | msg::Open | msg::Project;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Application::openProjectRequestDispatched, this, _1)));
+  mask = msg::Request | msg::Close | msg::Project;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Application::closeProjectRequestDispatched, this, _1)));
   mask = msg::Request | msg::Project | msg::Dialog;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Application::ProjectDialogRequestDispatched, this, _1)));
 }
@@ -401,6 +403,13 @@ void Application::openProjectRequestDispatched(const msg::Message &messageIn)
   
   openProject(pMessage.directory);
 }
+
+void Application::closeProjectRequestDispatched(const msg::Message&)
+{
+  if (project)
+    closeProject();
+}
+
 
 WaitCursor::WaitCursor()
 {

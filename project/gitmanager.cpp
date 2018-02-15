@@ -18,10 +18,12 @@
  */
 
 #include <cassert>
+#include <ostream>
 
 #include <boost/variant.hpp>
 
 #include <project/libgit2pp/src/index.hpp>
+#include <project/libgit2pp/src/object.hpp>
 #include <project/libgit2pp/src/commit.hpp>
 #include <project/libgit2pp/src/branch.hpp>
 #include <project/libgit2pp/src/ref.hpp>
@@ -98,7 +100,19 @@ GitManager::~GitManager()
 
 void GitManager::create(const std::string& pathIn)
 {
-  repo = Repository::init(pathIn, false);
+  git_repository_init_options opts = GIT_REPOSITORY_INIT_OPTIONS_INIT;
+  opts.flags |= GIT_REPOSITORY_INIT_MKPATH;
+  repo = Repository::init
+  (
+    pathIn,
+    opts.flags,
+    opts.mode,
+    "",
+    "CadSeer", //description
+    "",
+    "main", //initial head
+    ""
+  );
   
   assert(updateIndex());
   
@@ -136,7 +150,7 @@ void GitManager::save()
   git2::OId headCommit = repo.head().target();
   git2::Tree headTree = repo.lookupCommit(headCommit).tree();
   
-  std::string masterName = "refs/heads/master";
+  std::string masterName = "refs/heads/main";
   git2::Commit masterCommit = repo.lookupCommit(repo.lookupReference(masterName).target());
   git2::Tree masterTree = masterCommit.tree();
   
@@ -175,7 +189,7 @@ void GitManager::save()
   
   git2::OId newCommitId = repo.createCommit
   (
-    "refs/heads/master",
+    "refs/heads/main",
     sig,
     sig,
     stream.str(),
@@ -277,6 +291,52 @@ void GitManager::createBranch(const std::string& nameIn)
 {
   git2::Commit c = repo.lookupCommit(repo.lookupReferenceOId("HEAD"));
   git2::Branch b = repo.createBranch(nameIn, c, true);
+}
+
+std::vector<git2::Commit> GitManager::getCommitsHeadToNamed(const std::string &referenceNameIn)
+{
+  git2::OId rid; //reference id.
+  
+  auto setIdOfPrefix = [&](const std::string &prefix)
+  {
+    std::ostringstream stream;
+    stream << prefix << referenceNameIn;
+    try {rid = repo.lookupReferenceOId(stream.str());}
+    catch(const git2::Exception &) {}
+  };
+  
+  std::vector<git2::Commit> out;
+  
+  if (!rid.isValid())
+    setIdOfPrefix("refs/heads/");
+  if (!rid.isValid())
+    setIdOfPrefix("refs/tags/");
+  if (!rid.isValid())
+    return out;
+  
+  try
+  {
+    git2::Commit rCommit = repo.lookupCommit(rid);
+    git2::RevWalk walker = repo.createRevWalk(); //why is createRevWalk not const?
+    walker.pushHead();
+    git2::OId nextId;
+    while(walker.next(nextId) && nextId != rCommit.oid())
+      out.push_back(repo.lookupCommit(nextId));
+  }
+  catch(const git2::Exception &)
+  {
+    out.clear();
+  }
+  
+  return out;
+}
+
+void GitManager::resetHard(const std::string &commitIn)
+{
+  git2::OId cId;
+  cId.fromString(commitIn);
+  git2::Commit c = repo.lookupCommit(cId); 
+  repo.reset(c, GIT_RESET_HARD);
 }
 
 void GitManager::setupDispatcher()

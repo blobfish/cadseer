@@ -75,6 +75,7 @@ private:
     void setupDispatcher();
     void newProjectRequestDispatched(const msg::Message &);
     void openProjectRequestDispatched(const msg::Message &);
+    void closeProjectRequestDispatched(const msg::Message &);
     void ProjectDialogRequestDispatched(const msg::Message &);
 };
 

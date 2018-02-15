@@ -23,6 +23,7 @@
 #include <memory>
 
 #include <project/libgit2pp/src/repository.hpp>
+#include <project/libgit2pp/src/commit.hpp>
 
 namespace msg{class Message; class Observer;}
 
@@ -41,6 +42,20 @@ namespace prj
     void freezeGitMessages(){gitMessagesFrozen = true;}
     void thawGitMessages(){gitMessagesFrozen = false;}
     bool areGitMessagesFrozen(){return gitMessagesFrozen;}
+    
+    /*! @brief get all commits from current head to given name.
+    * 
+    * @parameter referenceNameIn. just name, no directory prefixes
+    * @return vector of commits
+    * @note does not include commit of given name. will look in ref/heads and ref/tags
+    */
+    std::vector<git2::Commit> getCommitsHeadToNamed(const std::string &referenceNameIn);
+    
+    /*! @brief do a hard reset of the current head to given commit.
+    * 
+    * @parameter commitIn.
+    */
+    void resetHard(const std::string &commitIn);
     
   private:
     bool updateIndex(); //false means nothing has changed.

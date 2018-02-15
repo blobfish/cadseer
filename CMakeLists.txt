@@ -385,6 +385,8 @@ SET(DIALOG_SOURCES
     dialogs/preferences.cpp
     dialogs/project.cpp
     dialogs/boolean.cpp
+    dialogs/revision.cpp
+    dialogs/commitwidget.cpp
     )
     
 SET(PREFERENCE_SOURCES
@@ -476,6 +478,7 @@ SET(COMMAND_SOURCES
     command/thicken.cpp
     command/sew.cpp
     command/trim.cpp
+    command/revision.cpp
     )
     
 SET(LIBRARY_SOURCES
@@ -562,6 +565,8 @@ SET(CADSEER_MOC_HDRS
     dialogs/quote.h
     dialogs/project.h
     dialogs/boolean.h
+    dialogs/revision.h
+    dialogs/commitwidget.h
     )
 
 SET(CADSEER_LIBRARIES

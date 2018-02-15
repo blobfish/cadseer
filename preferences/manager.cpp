@@ -83,6 +83,7 @@ Manager::Manager()
     
   assert(rootPtr);
   ensureDefaults();
+  saveConfig(); //ensure may set values so lets right them out.
   ok = true;
 }
 
@@ -247,6 +248,15 @@ void Manager::ensureDefaults()
       tld = atld;
   }
   rootPtr->project().lastDirectory() = tld.absolutePath().toStdString();
+  
+  if (rootPtr->project().gitName().empty())
+    rootPtr->project().gitName() = qgetenv("USER").constData();
+  if (rootPtr->project().gitName().empty())
+    rootPtr->project().gitName() = qgetenv("USERNAME").constData();
+  if (rootPtr->project().gitName().empty())
+    rootPtr->project().gitName() = "Holden McGroyn";
+  if (rootPtr->project().gitEmail().empty())
+    rootPtr->project().gitEmail() = rootPtr->project().gitName() + "@somewhere.com";
   
   auto &features = rootPtr->features();
   

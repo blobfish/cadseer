@@ -33,6 +33,8 @@
 #include <dialogs/project.h>
 #include <ui_project.h> //in build directory
 
+using namespace boost::filesystem;
+
 using namespace dlg;
 
 Project::Project(QWidget *parent) : QDialog(parent), ui(new Ui::projectDialog)
@@ -53,6 +55,16 @@ Project::Project(QWidget *parent) : QDialog(parent), ui(new Ui::projectDialog)
   ui->recentTableWidget->horizontalHeader()->restoreState(settings.value("header").toByteArray());
   settings.endGroup();
   settings.endGroup();
+  
+  //test the default project directory.
+  boost::filesystem::path p = prf::manager().rootPtr->project().basePath();
+  if (!boost::filesystem::exists(p))
+  {
+    ui->newNameEdit->setPlaceholderText(QObject::tr("Default project location doesn't exist"));
+    ui->newNameEdit->setDisabled(true);
+  }
+  else
+    ui->newNameEdit->setFocus();
 }
 
 Project::~Project()
@@ -112,26 +124,68 @@ bool Project::validateDir(const QDir& dir)
 
 void Project::goNewSlot()
 {
-  QString browseStart = QString::fromStdString(prf::manager().rootPtr->project().basePath());
-  QDir browseStartDir(browseStart);
-  if (!browseStartDir.exists() || browseStart.isEmpty())
-    browseStart = QString::fromStdString(prf::manager().rootPtr->project().lastDirectory().get());
-  QString freshDirectory = QFileDialog::getExistingDirectory
-  (
-    this,
-    tr("Browse to new project directory"),
-    browseStart
-  );
-  if (freshDirectory.isEmpty())
-    return;
-  
-  boost::filesystem::path p = freshDirectory.toStdString();
-  prf::manager().rootPtr->project().lastDirectory() = p.string();
-  prf::manager().saveConfig();
-  
-  result = Result::New;
-  directory = QDir(freshDirectory);
-  addToRecentList();
+  path basePath = prf::manager().rootPtr->project().basePath();
+  QString newNameText = ui->newNameEdit->text();
+  if (exists(basePath) && (!newNameText.isEmpty()))
+  {
+    path newProjectPath = basePath /= newNameText.toStdString();
+    if (exists(newProjectPath))
+    {
+      QMessageBox::critical(this, tr("Error"), tr("Project with name already exists"));
+      return;
+    }
+    if (!create_directory(newProjectPath))
+    {
+      QMessageBox::critical(this, tr("Error"), tr("Couldn't create directory"));
+      return;
+    }
+    result = Result::New;
+    directory = QDir(QString::fromStdString(newProjectPath.string()));
+    addToRecentList();
+  }
+  else
+  {
+    //browse dialog.
+    path browsePath = basePath;
+    if (!exists(browsePath))
+      browsePath = prf::manager().rootPtr->project().lastDirectory().get();
+    if (!exists(browsePath))
+    {
+      const char *home = std::getenv("HOME");
+      if (home == NULL)
+      {
+        QMessageBox::critical(this, tr("Error"), tr("REALLY!? no home directory"));
+        return;
+      }
+      
+      browsePath = home;
+      if (!exists(browsePath))
+      {
+        QMessageBox::critical(this, tr("Error"), tr("home directory doesn't exist"));
+        return;
+      }
+    }
+    
+    QString freshDirectory = QFileDialog::getExistingDirectory
+    (
+      this,
+      tr("Browse to new project directory"),
+      QString::fromStdString(browsePath.string())
+    );
+    if (freshDirectory.isEmpty())
+      return;
+    browsePath = freshDirectory.toStdString();
+    if (!is_empty(browsePath))
+    {
+      QMessageBox::critical(this, tr("Error"), tr("Expecting an empty directory"));
+      return;
+    }
+    prf::manager().rootPtr->project().lastDirectory() = browsePath.string();
+    prf::manager().saveConfig();
+    result = Result::New;
+    directory = QDir(freshDirectory);
+    addToRecentList();
+  }
   
   this->accept();
 }

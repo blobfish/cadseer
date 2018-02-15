@@ -56,6 +56,7 @@
 #include <command/thicken.h>
 #include <command/sew.h>
 #include <command/trim.h>
+#include <command/revision.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <selection/message.h>
@@ -197,6 +198,9 @@ void Manager::setupDispatcher()
   
   mask = msg::Request | msg::Construct | msg::Trim;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::constructTrimDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Project | msg::Revision | msg::Dialog;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::revisionDispatched, this, _1)));
 }
 
 void Manager::cancelCommandDispatched(const msg::Message &)
@@ -464,6 +468,12 @@ void Manager::constructSewDispatched(const msg::Message&)
 void Manager::constructTrimDispatched(const msg::Message&)
 {
   std::shared_ptr<Trim> c(new Trim());
+  addCommand(c);
+}
+
+void Manager::revisionDispatched(const msg::Message&)
+{
+  std::shared_ptr<Revision> c(new Revision());
   addCommand(c);
 }
 
