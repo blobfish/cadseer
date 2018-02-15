@@ -1037,6 +1037,7 @@ void Project::serialWrite()
   //write out master compound
   std::ostringstream masterName;
   masterName << saveDirectory << QDir::separator().toLatin1() << "project.brep";
+  BRepTools::Clean(compound);
   BRepTools::Write(compound, masterName.str().c_str());
   
   prj::srl::Connections connections;
