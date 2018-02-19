@@ -387,6 +387,7 @@ SET(DIALOG_SOURCES
     dialogs/boolean.cpp
     dialogs/revision.cpp
     dialogs/commitwidget.cpp
+    dialogs/tagwidget.cpp
     )
     
 SET(PREFERENCE_SOURCES

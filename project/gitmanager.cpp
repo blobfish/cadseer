@@ -293,6 +293,21 @@ void GitManager::createBranch(const std::string& nameIn)
   git2::Branch b = repo.createBranch(nameIn, c, true);
 }
 
+git2::Commit GitManager::getCurrentHead()
+{
+  git2::Commit out;
+  try
+  {
+    out = repo.lookupCommit(repo.head().target());
+  }
+  catch(const git2::Exception &e)
+  {
+    std::cerr << "ERROR: " << e.message() << ", in GitManager::getCurrentHead" << std::endl;
+  }
+  
+  return out;
+}
+
 std::vector<git2::Commit> GitManager::getCommitsHeadToNamed(const std::string &referenceNameIn)
 {
   git2::OId rid; //reference id.
@@ -337,6 +352,87 @@ void GitManager::resetHard(const std::string &commitIn)
   cId.fromString(commitIn);
   git2::Commit c = repo.lookupCommit(cId); 
   repo.reset(c, GIT_RESET_HARD);
+}
+
+std::vector<git2::Tag> GitManager::getTags()
+{
+  /* keep in mind that git has 2 types of tags: lightweight and annotate.
+   * this was throwing me off as the lightweight tags have no object
+   * in the git object database. We get an exception when lookupTag gets passed
+   * a lightweights reference id, which is a commit. so we catch that and skip
+   * as we are only interested in the annotation tags in this context.
+   */
+  std::vector<git2::Tag> out;
+  
+  std::list<std::string> tagStrings = repo.listTags();
+  try
+  {
+    for (const auto &ts : tagStrings)
+    {
+      std::ostringstream stream;
+      stream << "refs/tags/" << ts;
+      try {out.push_back(repo.lookupTag(repo.lookupReferenceOId(stream.str())));}
+      catch(const git2::Exception &e) {} //assuming lightweight tag.
+    }
+  }
+  catch(const git2::Exception &e)
+  {
+    std::cerr << "ERROR: " << e.message() << ", in GitManager::getTags" << std::endl;
+  }
+  
+  return out;
+}
+
+void GitManager::createTag(const std::string &name, const std::string &message)
+{
+  try
+  {
+    SignatureBuilder sigBuilder(prf::manager().rootPtr->project().gitName(), prf::manager().rootPtr->project().gitEmail());
+    Signature sig(sigBuilder);
+    
+    repo.createTag
+    (
+      name,
+      getCurrentHead(),
+      sig,
+      message,
+      false //don't overwrite
+    );
+  }
+  catch(const git2::Exception &e)
+  {
+    std::cerr << "ERROR: " << e.message() << ", in GitManager::createTag" << std::endl;
+  }
+}
+
+void GitManager::destroyTag(const std::string &name)
+{
+  try
+  {
+    repo.deleteTag(name);
+  }
+  catch(const git2::Exception &e)
+  {
+    std::cerr << "ERROR: " << e.message() << ", in GitManager::destroyTag" << std::endl;
+  }
+}
+
+void GitManager::checkoutTag(const git2::Tag &tag)
+{
+  try
+  {
+    git2::Commit tagCommit = repo.lookupCommit(tag.targetOid());
+    git2::Branch newMain = repo.createBranch("main", tagCommit, true);
+    //we can't overwrite the branch if head is pointing to it, so switch head temporarily.
+    repo.setHead("refs/heads/main");
+    git2::Branch newTransaction = repo.createBranch(transName, tagCommit, true);
+    repo.setHead("refs/heads/transaction");
+    repo.reset(tagCommit, GIT_RESET_HARD);
+  }
+  catch(const git2::Exception &e)
+  {
+    std::cerr << "ERROR: " << e.message() << ", in GitManager::checkOutTag" << std::endl;
+  }
 }
 
 void GitManager::setupDispatcher()

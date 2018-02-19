@@ -27,13 +27,14 @@
 class QListWidget;
 class QTextEdit;
 class QTabWidget;
+class QAction;
 
 namespace msg{class Message; class Observer;}
 
 namespace dlg
 {
   class CommitWidget;
-  
+  class TagWidget;
   
   class UndoPage : public QWidget
   {
@@ -56,6 +57,34 @@ namespace dlg
     void resetActionSlot();
   };
   
+  class AdvancedPage : public QWidget
+  {
+    Q_OBJECT
+  public:
+    AdvancedPage(QWidget*);
+    virtual ~AdvancedPage() override;
+    
+  protected:
+    std::unique_ptr<msg::Observer> observer;
+    struct Data;
+    std::unique_ptr<Data> data;
+    QListWidget *tagList;
+    TagWidget *tagWidget;
+    QAction *createTagAction;
+    QAction *checkoutTagAction;
+    QAction *destroyTagAction;
+    
+    void init();
+    void buildGui();
+    void fillInTagList();
+    void setCurrentHead();
+    
+    void tagRowChangedSlot(int);
+    void createTagSlot();
+    void destroyTagSlot();
+    void checkoutTagSlot();
+  };
+  
   /**
   * @todo write docs
   */
@@ -72,7 +101,6 @@ namespace dlg
     
     std::unique_ptr<msg::Observer> observer;
     struct Data;
-    std::unique_ptr<Data> data;
     QTabWidget *tabWidget;
   };
 }

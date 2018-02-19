@@ -17,9 +17,12 @@
  *
  */
 
+#include <QMessageBox>
 #include <QDialogButtonBox>
 #include <QListWidget>
 #include <QTabWidget>
+#include <QLabel>
+#include <QLineEdit>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QTextEdit>
@@ -36,18 +39,22 @@
 #include <project/message.h>
 #include <dialogs/widgetgeometry.h>
 #include <dialogs/commitwidget.h>
+#include <dialogs/tagwidget.h>
 #include <application/splitterdecorated.h>
 #include <dialogs/revision.h>
 
 namespace dlg
 {
-  struct Revision::Data
-  {
-    std::vector<git2::Commit> commits;
-  };
   struct UndoPage::Data
   {
     std::vector<git2::Commit> commits;
+  };
+  
+  struct AdvancedPage::Data
+  {
+    std::vector<git2::Tag> tags;
+    git2::Commit currentHead;
+    QIcon headIcon;
   };
 }
 
@@ -147,10 +154,268 @@ void UndoPage::resetActionSlot()
   application->postEvent(parentDialog, new QCloseEvent());
 }
 
+
+
+AdvancedPage::AdvancedPage(QWidget *parent) :
+QWidget(parent),
+observer(new msg::Observer()),
+data(new AdvancedPage::Data())
+{
+  observer->name = "dlg::AdvancedPage";
+  data->headIcon = QIcon(":/resources/images/trafficGreen.svg");
+  
+  buildGui();
+  init();
+}
+
+AdvancedPage::~AdvancedPage(){}
+
+void AdvancedPage::init()
+{
+  tagList->clear();
+  tagWidget->clear();
+  data->tags.clear();
+  
+  setCurrentHead();
+  fillInTagList();
+  if (!data->tags.empty())
+  {
+    tagList->setCurrentRow(0);
+    tagList->item(0)->setSelected(true);
+  }
+}
+
+void AdvancedPage::buildGui()
+{
+  QLabel *revisionLabel = new QLabel(tr("Revisions:"), this);
+  QHBoxLayout *rhl = new QHBoxLayout();
+  rhl->addWidget(revisionLabel);
+  rhl->addStretch();
+  
+  tagList = new QListWidget(this);
+  tagList->setSelectionMode(QAbstractItemView::SingleSelection);
+  tagList->setContextMenuPolicy(Qt::ActionsContextMenu);
+  tagList->setWhatsThis
+  (
+    tr
+    (
+      "List of project revisions. "
+      "Traffic signal labels a revision that is current. "
+      "Can not have identical revisions"
+    )
+  );
+  QVBoxLayout *revisionLayout = new QVBoxLayout();
+  revisionLayout->setContentsMargins(0, 0, 0, 0);
+  revisionLayout->addLayout(rhl);
+  revisionLayout->addWidget(tagList);
+  
+  //splitter will only take a widget.
+  QWidget *dummy = new QWidget(this);
+  dummy->setContentsMargins(0, 0, 0, 0);
+  dummy->setLayout(revisionLayout);
+  
+  tagWidget = new TagWidget(this);
+  
+  SplitterDecorated *splitter = new SplitterDecorated(this);
+  splitter->setChildrenCollapsible(false);
+  splitter->setOrientation(Qt::Horizontal);
+  splitter->addWidget(dummy);
+  splitter->addWidget(tagWidget);
+  
+  QVBoxLayout *mainLayout = new QVBoxLayout();
+  mainLayout->addWidget(splitter);
+  
+  this->setLayout(mainLayout);
+  
+  splitter->restoreSettings("dlg::AdvancedPage");
+  
+  createTagAction = new QAction(tr("Create New Revision"), this);
+  tagList->addAction(createTagAction);
+  connect(createTagAction, &QAction::triggered, this, &AdvancedPage::createTagSlot);
+  
+  checkoutTagAction = new QAction(tr("Checkout Revision"), this);
+  tagList->addAction(checkoutTagAction);
+  connect(checkoutTagAction, &QAction::triggered, this, &AdvancedPage::checkoutTagSlot);
+  
+  destroyTagAction = new QAction(tr("Destroy Selected Revision"), this);
+  tagList->addAction(destroyTagAction);
+  connect(destroyTagAction, &QAction::triggered, this, &AdvancedPage::destroyTagSlot);
+  
+  connect(tagList, &QListWidget::currentRowChanged, this, &AdvancedPage::tagRowChangedSlot);
+}
+
+void AdvancedPage::tagRowChangedSlot(int r)
+{
+  if (r == -1)
+  {
+    tagWidget->clear();
+    destroyTagAction->setDisabled(true);
+    checkoutTagAction->setDisabled(true);
+    return;
+  }
+  assert(static_cast<std::size_t>(r) < data->tags.size());
+  tagWidget->setTag(data->tags.at(r));
+  if (data->tags.at(r).targetOid() == data->currentHead.oid())
+    checkoutTagAction->setDisabled(true);
+  else
+    checkoutTagAction->setEnabled(true);
+  destroyTagAction->setEnabled(true);
+}
+
+void AdvancedPage::createTagSlot()
+{
+  //hack together a dialog.
+  std::unique_ptr<QDialog> ntDialog(new QDialog(this));
+  ntDialog->setWindowTitle(tr("Create New Revision"));
+  QVBoxLayout *mainLayout = new QVBoxLayout();
+  
+  QLabel *nameLabel = new QLabel(tr("Name:"), ntDialog.get());
+  QLineEdit *nameEdit = new QLineEdit(ntDialog.get());
+  nameEdit->setWhatsThis(tr("Name For The New Revision"));
+  nameEdit->setPlaceholderText(tr("Name For The New Revision"));
+  QHBoxLayout *nameLayout = new QHBoxLayout();
+  nameLayout->addWidget(nameLabel);
+  nameLayout->addWidget(nameEdit);
+  mainLayout->addLayout(nameLayout);
+  
+  QTextEdit *messageEdit = new QTextEdit(ntDialog.get());
+  messageEdit->setWhatsThis(tr("Message For The New Revision"));
+  messageEdit->setPlaceholderText(tr("Message For The New Revision"));
+  mainLayout->addWidget(messageEdit);
+  
+  QDialogButtonBox *bb = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, ntDialog.get());
+  mainLayout->addWidget(bb);
+  connect(bb, &QDialogButtonBox::accepted, ntDialog.get(), &QDialog::accept);
+  connect(bb, &QDialogButtonBox::rejected, ntDialog.get(), &QDialog::reject);
+  
+  ntDialog->setLayout(mainLayout);
+  
+  if (ntDialog->exec() != QDialog::Accepted)
+    return;
+  
+  //make sure we don't already have a tag with that name
+  std::string name = nameEdit->text().toStdString();
+  for (const auto &t : data->tags)
+  {
+    if (t.name() == name)
+    {
+      QMessageBox::critical(ntDialog.get(), tr("Error"), tr("Name already exists"));
+      return;
+    }
+  }
+  
+  prj::Project *p = static_cast<app::Application*>(qApp)->getProject();
+  assert(p);
+  prj::GitManager &gm = p->getGitManager();
+  gm.createTag(name, messageEdit->toPlainText().toStdString());
+  init();
+}
+
+void AdvancedPage::destroyTagSlot()
+{
+  QList<QListWidgetItem*> items = tagList->selectedItems();
+  if (items.isEmpty())
+    return;
+  int row = tagList->row(items.front());
+  assert(row >= 0 && static_cast<std::size_t>(row) < data->tags.size());
+  if (row < 0 || static_cast<std::size_t>(row) > data->tags.size())
+    return;
+  prj::Project *p = static_cast<app::Application*>(qApp)->getProject();
+  assert(p);
+  prj::GitManager &gm = p->getGitManager();
+  gm.destroyTag(data->tags.at(static_cast<std::size_t>(row)).name());
+  init();
+}
+
+void AdvancedPage::checkoutTagSlot()
+{
+  // we disable the checkout action when selected tag equals the current head
+  // so we should be good to go here.
+  
+  QList<QListWidgetItem*> items = tagList->selectedItems();
+  if (items.isEmpty())
+    return;
+  int row = tagList->row(items.front());
+  assert(row >= 0 && static_cast<std::size_t>(row) < data->tags.size());
+  if (row < 0 || static_cast<std::size_t>(row) > data->tags.size())
+    return;
+  
+  //lets warn user if current head is not tagged.
+  bool currentTagged = false;
+  for (const auto &t : data->tags)
+  {
+    if (t.targetOid() == data->currentHead.oid())
+      currentTagged = true;
+  }
+  if (!currentTagged)
+  {
+    if
+    (
+      QMessageBox::question
+      (
+        this,
+        tr("Warning"),
+        tr("No revision at current state. Work will be lost. Continue?")
+      ) != QMessageBox::Yes
+    )
+    return;
+  }
+  
+  /* 1) close the project
+   * 2) update the git repo.
+   * 3) reopen the project
+   * see not in UndoPage::resetActionSlot() why we dynamicly allocate a new git manager.
+   */
+  app::Application *application = static_cast<app::Application*>(qApp);
+  std::string pdir = application->getProject()->getSaveDirectory();
+  observer->out(msg::Mask(msg::Request | msg::Close | msg::Project));
+  
+  std::unique_ptr<prj::GitManager> localManager(new prj::GitManager());
+  localManager->open(pdir);
+  localManager->checkoutTag(data->tags.at(static_cast<std::size_t>(row)));
+  localManager.release();
+  
+  prj::Message pMessage;
+  pMessage.directory = pdir;
+  observer->out(msg::Message(msg::Mask(msg::Request | msg::Open | msg::Project), pMessage));
+  
+  //addTab reparents so the constructor argument is not really the parent.
+  QWidget *parentDialog = this->parentWidget()->parentWidget()->parentWidget();
+  application->postEvent(parentDialog, new QCloseEvent()); //close dialog
+}
+
+void AdvancedPage::fillInTagList()
+{
+  createTagAction->setEnabled(true);
+  
+  prj::Project *p = static_cast<app::Application*>(qApp)->getProject();
+  assert(p);
+  prj::GitManager &gm = p->getGitManager();
+  data->tags = gm.getTags();
+  for (const auto &t : data->tags)
+  {
+    if (t.targetOid() == data->currentHead.oid())
+    {
+      new QListWidgetItem(data->headIcon, QString::fromStdString(t.name()), tagList);
+      createTagAction->setDisabled(true); //don't create more than 1 tag at any one commit.
+    }
+    else
+      tagList->addItem(QString::fromStdString(t.name()));
+  }
+}
+
+void AdvancedPage::setCurrentHead()
+{
+  prj::Project *p = static_cast<app::Application*>(qApp)->getProject();
+  assert(p);
+  prj::GitManager &gm = p->getGitManager();
+  data->currentHead = gm.getCurrentHead();
+}
+
+
 Revision::Revision(QWidget *parent) :
 QDialog(parent),
-observer(new msg::Observer()),
-data(new Revision::Data())
+observer(new msg::Observer())
 {
   this->setWindowTitle(tr("Revisions"));
   
@@ -176,6 +441,7 @@ void Revision::buildGui()
   
   tabWidget = new QTabWidget(this);
   tabWidget->addTab(new UndoPage(tabWidget), tr("Undo")); //addTab reparents.
+  tabWidget->addTab(new AdvancedPage(tabWidget), tr("Advanced"));
   mainLayout->addWidget(tabWidget);
   
   QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Close, this);
