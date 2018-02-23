@@ -26,6 +26,7 @@
 #include <selection/container.h>
 #include <feature/pick.h>
 #include <feature/updatepayload.h>
+#include <feature/inputtype.h>
 #include <feature/base.h>
 
 class QDir;

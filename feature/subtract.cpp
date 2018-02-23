@@ -25,6 +25,8 @@
 #include <BRepTools.hxx>
 #include <BOPDS_DS.hxx>
 
+#include <osg/Switch>
+
 #include <feature/booleanoperation.h>
 #include <feature/shapecheck.h>
 #include <project/serial/xsdcxxoutput/featuresubtract.h>
@@ -32,6 +34,7 @@
 #include <annex/intersectionmapper.h>
 #include <tools/featuretools.h>
 #include <feature/updatepayload.h>
+#include <feature/inputtype.h>
 #include <feature/subtract.h>
 
 using boost::uuids::uuid;

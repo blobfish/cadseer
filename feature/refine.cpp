@@ -20,9 +20,12 @@
 #include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <BRepTools_History.hxx>
 
+#include <osg/Switch>
+
 #include <project/serial/xsdcxxoutput/featurerefine.h>
 #include <annex/seershape.h>
 #include <feature/updatepayload.h>
+#include <feature/inputtype.h>
 #include <feature/refine.h>
 
 using namespace ftr;

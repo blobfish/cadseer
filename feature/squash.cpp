@@ -19,6 +19,9 @@
 
 #include <TopoDS.hxx>
 #include <BRepTools.hxx>
+#include <Precision.hxx>
+
+#include <osg/Switch>
 
 #include <globalutilities.h>
 #include <preferences/preferencesXML.h>
@@ -30,6 +33,7 @@
 #include <project/serial/xsdcxxoutput/featuresquash.h>
 #include <tools/featuretools.h>
 #include <feature/updatepayload.h>
+#include <feature/inputtype.h>
 #include <feature/squash.h>
 
 using namespace ftr;

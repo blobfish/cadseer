@@ -36,6 +36,7 @@
 #include <feature/parameter.h>
 #include <project/serial/xsdcxxoutput/featureinstancepolar.h>
 #include <tools/featuretools.h>
+#include <feature/inputtype.h>
 #include <feature/updatepayload.h>
 #include <feature/instancepolar.h>
 

@@ -22,6 +22,8 @@
 #include <BRepLib.hxx>
 #include <BRepTools_Quilt.hxx>
 
+#include <osg/Switch>
+
 #include <globalutilities.h>
 #include <tools/occtools.h>
 #include <annex/seershape.h>
@@ -29,6 +31,7 @@
 #include <project/serial/xsdcxxoutput/featureextract.h>
 #include <feature/updatepayload.h>
 #include <tools/featuretools.h>
+#include <feature/inputtype.h>
 #include <feature/extract.h>
 
 using namespace ftr;

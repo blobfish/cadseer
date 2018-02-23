@@ -27,6 +27,8 @@
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <BOPAlgo_Builder.hxx>
 
+#include <osg/Switch>
+
 #include <project/serial/xsdcxxoutput/featureunion.h>
 #include <feature/booleanoperation.h>
 #include <feature/shapecheck.h>
@@ -34,6 +36,7 @@
 #include <annex/seershape.h>
 #include <annex/intersectionmapper.h>
 #include <feature/updatepayload.h>
+#include <feature/inputtype.h>
 #include <feature/union.h>
 
 using boost::uuids::uuid;

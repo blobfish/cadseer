@@ -30,6 +30,9 @@
 #include <TopExp.hxx>
 #include <Standard_StdAllocator.hxx>
 
+#include <osg/Switch>
+#include <osg/MatrixTransform>
+#include <osg/LOD>
 #include <osg/KdTree>
 #include <osg/LightModel>
 

@@ -32,6 +32,7 @@
 #include <feature/parameter.h>
 #include <project/serial/xsdcxxoutput/featureinstancemirror.h>
 #include <tools/featuretools.h>
+#include <feature/inputtype.h>
 #include <feature/updatepayload.h>
 #include <feature/instancemirror.h>
 

@@ -20,6 +20,8 @@
 #include <TopoDS.hxx>
 #include <BRepOffsetAPI_MakeOffsetShape.hxx>
 
+#include <osg/Switch>
+
 #include <globalutilities.h>
 #include <tools/occtools.h>
 #include <library/plabel.h>
@@ -27,6 +29,7 @@
 #include <tools/featuretools.h>
 #include <project/serial/xsdcxxoutput/featureoffset.h>
 #include <feature/updatepayload.h>
+#include <feature/inputtype.h>
 #include <feature/parameter.h>
 #include <feature/offset.h>
 

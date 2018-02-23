@@ -21,6 +21,8 @@
 #include <BRepExtrema_Poly.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
 
+#include <osg/Switch>
+
 #include <globalutilities.h>
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
@@ -31,6 +33,7 @@
 #include <tools/occtools.h>
 #include <project/serial/xsdcxxoutput/featurenest.h>
 #include <feature/updatepayload.h>
+#include <feature/inputtype.h>
 #include <feature/nest.h>
 
 using namespace ftr;

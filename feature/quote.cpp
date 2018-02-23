@@ -21,6 +21,8 @@
 
 #include <libzippp.h>
 
+#include <osg/Switch>
+
 #include <globalutilities.h>
 #include <tools/occtools.h>
 #include <application/application.h>
@@ -34,6 +36,7 @@
 #include <annex/seershape.h>
 #include <project/serial/xsdcxxoutput/featurequote.h>
 #include <feature/updatepayload.h>
+#include <feature/inputtype.h>
 #include <feature/parameter.h>
 #include <feature/quote.h>
 

@@ -22,6 +22,8 @@
 #include <BRepBuilderAPI_MakeVertex.hxx>
 #include <BRepExtrema_DistShapeShape.hxx>
 
+#include <osg/Switch>
+
 #include <globalutilities.h>
 #include <tools/occtools.h>
 #include <tools/idtools.h>
@@ -33,6 +35,7 @@
 #include <feature/shapecheck.h>
 #include <feature/updatepayload.h>
 #include <feature/parameter.h>
+#include <feature/inputtype.h>
 #include <feature/trim.h>
 
 using namespace ftr;

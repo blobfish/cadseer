@@ -25,6 +25,9 @@
 #include <Geom_Surface.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Wire.hxx>
+#include <Precision.hxx>
+
+#include <osg/Switch>
 
 #include <globalutilities.h>
 #include <preferences/preferencesXML.h>
@@ -35,6 +38,7 @@
 #include <project/serial/xsdcxxoutput/featurehollow.h>
 #include <tools/featuretools.h>
 #include <feature/updatepayload.h>
+#include <feature/inputtype.h>
 #include <feature/parameter.h>
 #include <feature/hollow.h>
 

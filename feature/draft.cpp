@@ -30,6 +30,8 @@
 #include <BRepAdaptor_Surface.hxx>
 #include <Geom_Surface.hxx>
 
+#include <osg/Switch>
+
 #include <globalutilities.h>
 #include <tools/idtools.h>
 #include <preferences/preferencesXML.h>
@@ -40,6 +42,7 @@
 #include <annex/seershape.h>
 #include <tools/featuretools.h>
 #include <feature/updatepayload.h>
+#include <feature/inputtype.h>
 #include <feature/parameter.h>
 #include <feature/draft.h>
 

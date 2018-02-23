@@ -48,6 +48,7 @@
 #include <osg/Geometry>
 #include <osg/BlendFunc>
 #include <osg/PolygonMode>
+#include <osg/Switch>
 
 #include <application/application.h>
 #include <feature/base.h>

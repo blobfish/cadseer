@@ -28,22 +28,19 @@
 #include <QIcon>
 #include <QString>
 
-#include <TopoDS_Compound.hxx> //used in for wrapper.
-#include <Standard_Failure.hxx> //used in derived classes.
-#include <Precision.hxx> //used in derived classes.
-
-#include <osg/Switch>
-#include <osg/MatrixTransform>
-#include <osg/LOD>
+#include <osg/ref_ptr>
+#include <osg/Vec4>
 
 #include <feature/types.h>
-#include <feature/inputtype.h>
 #include <feature/states.h>
 #include <annex/base.h>
 
+class TopoDS_Compound;
+class TopoDS_Shape;
 class QDir;
 class QTextStream;
 
+namespace osg{class Switch; class MatrixTransform; class LOD;}
 namespace prj{namespace srl{class FeatureBase;}}
 namespace msg{class Message; class Observer;}
 namespace ftr
@@ -52,6 +49,27 @@ class ShapeHistory;
 class UpdatePayload;
 
 namespace prm{class Parameter; typedef std::vector<Parameter*> Parameters;}
+
+enum class Descriptor
+{
+  None,
+  Create,
+  Alter
+};
+
+inline const static std::string& getDescriptorString(Descriptor descriptorIn)
+{
+  const static std::vector<std::string> strings =
+  {
+    "None",
+    "Create",
+    "Alter"
+  };
+  
+  std::size_t casted = static_cast<std::size_t>(descriptorIn);
+  assert(casted < strings.size());
+  return strings.at(casted);
+}
 
 class Base
 {

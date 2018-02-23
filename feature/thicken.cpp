@@ -21,6 +21,8 @@
 #include <BRepOffsetAPI_MakeOffsetShape.hxx>
 #include <BRepTools.hxx>
 
+#include <osg/Switch>
+
 #include <globalutilities.h>
 #include <tools/occtools.h>
 #include <tools/idtools.h>
@@ -30,6 +32,7 @@
 #include <project/serial/xsdcxxoutput/featurethicken.h>
 #include <feature/updatepayload.h>
 #include <feature/parameter.h>
+#include <feature/inputtype.h>
 #include <feature/thicken.h>
 
 using namespace ftr;

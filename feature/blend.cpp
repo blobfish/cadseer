@@ -36,6 +36,9 @@
 #include <BRep_Tool.hxx>
 #include <Geom_Curve.hxx>
 
+#include <osg/Switch>
+#include <feature/inputtype.h>
+
 #include <globalutilities.h>
 #include <tools/idtools.h>
 #include <tools/featuretools.h>

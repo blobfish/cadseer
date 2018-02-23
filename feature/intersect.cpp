@@ -21,6 +21,8 @@
 #include <TopExp.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 
+#include <osg/Switch>
+
 #include <tools/featuretools.h>
 #include <feature/booleanoperation.h>
 #include <project/serial/xsdcxxoutput/featureintersect.h>
@@ -28,6 +30,7 @@
 #include <annex/seershape.h>
 #include <annex/intersectionmapper.h>
 #include <feature/updatepayload.h>
+#include <feature/inputtype.h>
 #include <feature/intersect.h>
 
 using boost::uuids::uuid;

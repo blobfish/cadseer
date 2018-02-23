@@ -20,6 +20,8 @@
 #include <boost/graph/graphviz.hpp>
 #include <boost/variant/variant.hpp>
 
+#include <osg/Node> //yuck
+
 #include <tools/idtools.h>
 #include <feature/base.h>
 #include <message/message.h>

@@ -33,6 +33,7 @@
 
 #include <osg/Geometry>
 #include <osg/MatrixTransform>
+#include <osg/Switch>
 
 #include <tools/infotools.h>
 #include <globalutilities.h>

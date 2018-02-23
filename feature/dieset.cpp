@@ -17,6 +17,8 @@
  *
  */
 
+#include <osg/Switch>
+
 #include <globalutilities.h>
 #include <library/plabel.h>
 #include <tools/occtools.h>
@@ -27,6 +29,7 @@
 #include <feature/shapecheck.h>
 #include <feature/boxbuilder.h>
 #include <project/serial/xsdcxxoutput/featuredieset.h>
+#include <feature/inputtype.h>
 #include <feature/updatepayload.h>
 #include <feature/dieset.h>
 

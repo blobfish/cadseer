@@ -30,6 +30,7 @@
 #include <feature/base.h>
 #include <feature/shapehistory.h>
 #include <feature/updatepayload.h>
+#include <feature/inputtype.h>
 #include <annex/seershape.h>
 #include <project/serial/xsdcxxoutput/featurebase.h>
 #include <annex/intersectionmapper.h>

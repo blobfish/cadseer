@@ -41,6 +41,8 @@
 #include <TopoDS.hxx>
 #include <BRepFilletAPI_MakeFillet.hxx>
 
+#include <osg/Switch>
+
 #include <tools/idtools.h>
 #include <application/application.h>
 #include <application/mainwindow.h>

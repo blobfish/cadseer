@@ -66,27 +66,6 @@ namespace ftr
     
     std::set<std::string> tags;
   };
-  
-  enum class Descriptor
-  {
-    None,
-    Create,
-    Alter
-  };
-  
-  inline const static std::string& getDescriptorString(Descriptor descriptorIn)
-  {
-    const static std::vector<std::string> strings =
-    {
-      "None",
-      "Create",
-      "Alter"
-    };
-    
-    std::size_t casted = static_cast<std::size_t>(descriptorIn);
-    assert(casted < strings.size());
-    return strings.at(casted);
-  }
 }
 
 #endif //FTR_INPUTTYPE_H

@@ -28,6 +28,7 @@
 #include <osg/AutoTransform>
 #include <osgQt/QFontImplementation>
 #include <osgText/Text>
+#include <osg/Switch>
 
 #include <libzippp.h>
 #include <libreoffice/odshack.h>
@@ -42,6 +43,7 @@
 #include <feature/nest.h>
 #include <project/serial/xsdcxxoutput/featurestrip.h>
 #include <feature/updatepayload.h>
+#include <feature/inputtype.h>
 #include <feature/strip.h>
 
 using namespace ftr;

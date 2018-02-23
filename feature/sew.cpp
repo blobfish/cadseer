@@ -23,12 +23,15 @@
 #include <BRepBuilderAPI_Sewing.hxx>
 #include <BRepBuilderAPI_MakeSolid.hxx>
 
+#include <osg/Switch>
+
 #include <globalutilities.h>
 #include <tools/occtools.h>
 #include <tools/idtools.h>
 #include <annex/seershape.h>
 #include <project/serial/xsdcxxoutput/featuresew.h>
 #include <feature/updatepayload.h>
+#include <feature/inputtype.h>
 #include <feature/sew.h>
 
 using namespace ftr;

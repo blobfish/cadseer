@@ -29,6 +29,7 @@
 #include <feature/parameter.h>
 #include <project/serial/xsdcxxoutput/featureinstancelinear.h>
 #include <tools/featuretools.h>
+#include <feature/inputtype.h>
 #include <feature/updatepayload.h>
 #include <feature/instancelinear.h>
 
