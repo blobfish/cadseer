@@ -17,6 +17,8 @@
  *
  */
 
+#include <osgDB/ObjectWrapper>
+#include <osgDB/Registry>
 #include <osgFX/Registry>
 
 #include "hiddenlinetechnique.h"
@@ -27,19 +29,34 @@ using namespace mdv;
 
 Registry::Proxy proxy(new HiddenLineEffect());
 
+REGISTER_OBJECT_WRAPPER( mdv_HiddenLinEffect_Wrapper,
+                         new mdv::HiddenLineEffect,
+                         mdv::HiddenLineEffect,
+                         "osg::Object osg::Node osg::Group osgFX::Effect mdv::HiddenLineEffect" )
+{
+  ADD_BOOL_SERIALIZER(HiddenLine, false);
+}
+
 HiddenLineEffect::HiddenLineEffect() : Effect()
 {
 }
 
 HiddenLineEffect::HiddenLineEffect(const HiddenLineEffect& copy, const osg::CopyOp& op) : Effect(copy, op)
 {
+  hiddenLine = copy.hiddenLine;
 }
 
 HiddenLineEffect::~HiddenLineEffect() {}
 
 void HiddenLineEffect::setHiddenLine(bool freshValue)
 {
-  if (freshValue)
+  hiddenLine = freshValue;
+  updateHiddenLine();
+}
+
+void HiddenLineEffect::updateHiddenLine()
+{
+  if (hiddenLine)
     selectTechnique(1);
   else
     selectTechnique(0);
@@ -49,6 +66,6 @@ bool HiddenLineEffect::define_techniques()
 {
   addTechnique(new NoHiddenLineTechnique());
   addTechnique(new HiddenLineTechnique());
-  selectTechnique(1);
+  selectTechnique(0);
   return true;
 }

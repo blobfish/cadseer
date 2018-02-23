@@ -19,9 +19,11 @@
 
 #include <cassert>
 
+#include <globalutilities.h>
 #include <tools/idtools.h>
 #include <modelviz/nodemaskdefs.h>
-#include <globalutilities.h>
+#include <application/application.h>
+#include <project/project.h>
 #include <feature/base.h>
 #include <annex/seershape.h>
 #include <modelviz/shapegeometry.h>
@@ -98,6 +100,11 @@ void Interpreter::go()
       continue;
     }
     
+    ftr::Base *bf = static_cast<app::Application*>(qApp)->getProject()->findFeature(container.featureId);
+    assert(bf);
+    assert(bf->hasAnnex(ann::Type::SeerShape));
+    const ann::SeerShape &sShape = bf->getAnnex<ann::SeerShape>(ann::Type::SeerShape);
+    
     std::size_t pSetIndex = shapeGeometry->getPSetFromPrimitive(intersection.primitiveIndex);
     uuid selectedId = shapeGeometry->getId(pSetIndex);
     
@@ -128,7 +135,7 @@ void Interpreter::go()
 
         if (canSelectEndPoints(selectionMask))
         {
-            std::vector<osg::Vec3d> endPoints = shapeGeometry->seerShape.useGetEndPoints(selectedId);
+            std::vector<osg::Vec3d> endPoints = sShape.useGetEndPoints(selectedId);
             if (endPoints.size() > 0)
             {
                 std::vector<osg::Vec3d> startPoint;
@@ -147,28 +154,28 @@ void Interpreter::go()
 
         if (canSelectMidPoints(selectionMask))
         {
-            std::vector<osg::Vec3d> midPoints = shapeGeometry->seerShape.useGetMidPoint(selectedId);
+            std::vector<osg::Vec3d> midPoints = sShape.useGetMidPoint(selectedId);
             if (updateSnaps(midPoints))
                 sType = slc::Type::MidPoint;
         }
 
         if (canSelectCenterPoints(selectionMask))
         {
-            std::vector<osg::Vec3d> centerPoints = shapeGeometry->seerShape.useGetCenterPoint(selectedId);
+            std::vector<osg::Vec3d> centerPoints = sShape.useGetCenterPoint(selectedId);
             if (updateSnaps(centerPoints))
                 sType = slc::Type::CenterPoint;
         }
 
         if (canSelectQuadrantPoints(selectionMask))
         {
-            std::vector<osg::Vec3d> quadrantPoints = shapeGeometry->seerShape.useGetQuadrantPoints(selectedId);
+            std::vector<osg::Vec3d> quadrantPoints = sShape.useGetQuadrantPoints(selectedId);
             if (updateSnaps(quadrantPoints))
                 sType = slc::Type::QuadrantPoint;
         }
 
         if (canSelectNearestPoints(selectionMask))
         {
-            std::vector<osg::Vec3d> nearestPoints = shapeGeometry->seerShape.useGetNearestPoint(selectedId, worldPoint);
+            std::vector<osg::Vec3d> nearestPoints = sShape.useGetNearestPoint(selectedId, worldPoint);
             if (updateSnaps(nearestPoints))
             sType = slc::Type::NearestPoint;
         }
@@ -191,11 +198,11 @@ void Interpreter::go()
         //face intersection.
 
         uuid edgeId = selectedId;
-        std::vector<uuid> wireIds = shapeGeometry->seerShape.useGetFacelessWires(edgeId);
+        std::vector<uuid> wireIds = sShape.useGetFacelessWires(edgeId);
         if (!wireIds.empty())
         {
             container.selectionType = Type::Wire;
-            container.selectionIds = shapeGeometry->seerShape.useGetChildrenOfType(wireIds.front(), TopAbs_EDGE);
+            container.selectionIds = sShape.useGetChildrenOfType(wireIds.front(), TopAbs_EDGE);
             container.shapeId = wireIds.front();
             add(containersOut, container);
         }
@@ -205,10 +212,10 @@ void Interpreter::go()
     {
       if (canSelectWires(selectionMask))
       {
-        uuid wire = shapeGeometry->seerShape.useGetClosestWire(selectedId, worldPoint);
+        uuid wire = sShape.useGetClosestWire(selectedId, worldPoint);
         if (!wire.is_nil())
         {
-            container.selectionIds = shapeGeometry->seerShape.useGetChildrenOfType(wire, TopAbs_EDGE);
+            container.selectionIds = sShape.useGetChildrenOfType(wire, TopAbs_EDGE);
             container.selectionType = Type::Wire;
             container.shapeId = wire;
             add(containersOut, container);
@@ -223,21 +230,21 @@ void Interpreter::go()
       }
       if (canSelectShells(selectionMask))
       {
-        std::vector<uuid> shells = shapeGeometry->seerShape.useGetParentsOfType(selectedId, TopAbs_SHELL);
+        std::vector<uuid> shells = sShape.useGetParentsOfType(selectedId, TopAbs_SHELL);
         if (shells.size() == 1)
         {
             container.selectionType = Type::Shell;
             container.shapeId = shells.at(0);
             if (!has(containersOut, container)) //don't run again
             {
-                container.selectionIds = shapeGeometry->seerShape.useGetChildrenOfType(shells.at(0), TopAbs_FACE);
+                container.selectionIds = sShape.useGetChildrenOfType(shells.at(0), TopAbs_FACE);
                 add(containersOut, container);
             }
         }
       }
       if (canSelectSolids(selectionMask))
       {
-        std::vector<uuid> solids = shapeGeometry->seerShape.useGetParentsOfType(selectedId, TopAbs_SOLID);
+        std::vector<uuid> solids = sShape.useGetParentsOfType(selectedId, TopAbs_SOLID);
         //should be only 1 solid
         if (solids.size() == 1)
         {
@@ -245,21 +252,21 @@ void Interpreter::go()
             container.shapeId = solids.at(0);
             if (!has(containersOut, container)) //don't run again
             {
-                container.selectionIds = shapeGeometry->seerShape.useGetChildrenOfType(solids.at(0), TopAbs_FACE);
+                container.selectionIds = sShape.useGetChildrenOfType(solids.at(0), TopAbs_FACE);
                 add(containersOut, container);
             }
         }
       }
       if (canSelectObjects(selectionMask))
       {
-        uuid object = shapeGeometry->seerShape.getRootShapeId();
+        uuid object = sShape.getRootShapeId();
         if (!object.is_nil())
         {
             container.selectionType = Type::Object;
             container.shapeId = gu::createNilId();
             if (!has(containersOut, container)) //don't run again
             {
-                container.selectionIds = shapeGeometry->seerShape.useGetChildrenOfType(object, TopAbs_FACE);
+                container.selectionIds = sShape.useGetChildrenOfType(object, TopAbs_FACE);
                 add(containersOut, container);
             }
         }

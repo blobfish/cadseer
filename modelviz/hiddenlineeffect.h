@@ -32,18 +32,21 @@ namespace mdv
     
     META_Effect
     (
-      osgFX,
+      mdv,
       HiddenLineEffect,
       "HiddenLineEffect",
       "Draw hidden lines",
       "Thomas Anderson"
     );
     
-    void setHiddenLine(bool); //true equal hidden lines are shown.
+    void setHiddenLine(bool);
+    bool getHiddenLine() const {return hiddenLine;}
+    void updateHiddenLine();
     
   protected:
     virtual ~HiddenLineEffect() override;
     virtual bool define_techniques() override;
+    bool hiddenLine = false; //true shows hidden lines.
   };
 }
 

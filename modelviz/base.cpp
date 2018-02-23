@@ -17,11 +17,14 @@
  *
  */
 
+#include <osgDB/ObjectWrapper>
+#include <osgDB/Registry>
+
 #include <modelviz/base.h>
 
 using namespace mdv;
 
-Base::Base()
+Base::Base() : osg::Geometry()
 {
 
 }
@@ -45,4 +48,15 @@ void Base::setPreHighlightColor(const osg::Vec4& colorIn)
 void Base::setHighlightColor(const osg::Vec4& colorIn)
 {
   colorHighlight = colorIn;
+}
+
+
+REGISTER_OBJECT_WRAPPER( mdv_Base_Wrapper,
+                         new mdv::Base,
+                         mdv::Base,
+                         "osg::Object osg::Node osg::Drawable osg::Geometry mdv::Base" )
+{
+  ADD_VEC4_SERIALIZER( Color, osg::Vec4() );
+  ADD_VEC4_SERIALIZER( PreHighlightColor, osg::Vec4() );
+  ADD_VEC4_SERIALIZER( HighlightColor, osg::Vec4() );
 }

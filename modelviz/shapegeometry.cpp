@@ -28,11 +28,14 @@
 #include <Poly_PolygonOnTriangulation.hxx>
 #include <GeomLib.hxx>
 
+#include <osgDB/ObjectWrapper>
+#include <osgDB/Registry>
 #include <osg/Switch>
 #include <osg/Depth>
 #include <osg/LineWidth>
 #include <osg/Point>
 
+#include <tools/idtools.h>
 #include <annex/seershape.h>
 #include <modelviz/hiddenlineeffect.h>
 #include <modelviz/shapegeometryprivate.h>
@@ -42,12 +45,110 @@
 using namespace mdv;
 using namespace osg;
 
-ShapeGeometry::ShapeGeometry(const ann::SeerShape &sIn) : Base(), seerShape(sIn)
+static bool checkIdPSet(const mdv::ShapeGeometry &)
+{
+  //lets always write for now.
+  return true;
+}
+
+static bool writeIdPSet(osgDB::OutputStream& os, const mdv::ShapeGeometry &sgIn)
+{
+  const IdPSetWrapper &ipsw = sgIn.getIdPSetWrapper();
+  
+  typedef IdPSetContainer::index<IdPSetRecord::ById>::type List;
+  const List &list = ipsw.idPSetContainer.get<IdPSetRecord::ById>();
+  
+  os << list.size() << os.BEGIN_BRACKET << std::endl;
+  for (const auto &r : list)
+    os << gu::idToString(r.id) << r.primitiveSetIndex << std::endl;
+  os << os.END_BRACKET << std::endl;
+  
+  return true;
+}
+
+static bool readIdPSet(osgDB::InputStream& is, mdv::ShapeGeometry &sgIn)
+{
+  std::shared_ptr<IdPSetWrapper> ipsw(new IdPSetWrapper());
+  
+  std::size_t size = 0;
+  is >> size >> is.BEGIN_BRACKET;
+  for (std::size_t index = 0; index < size; ++index)
+  {
+    std::string idString;
+    std::size_t pSetIndex;
+    is >> idString >> pSetIndex;
+    IdPSetRecord r;
+    r.id = gu::stringToId(idString);
+    r.primitiveSetIndex = pSetIndex;
+    ipsw->idPSetContainer.insert(r);
+  }
+  is >> is.END_BRACKET;
+  
+  sgIn.setIdPSetWrapper(ipsw);
+  return true;
+}
+
+static bool checkPSetPrimitive(const mdv::ShapeGeometry &)
+{
+  //lets always write for now.
+  return true;
+}
+
+static bool writePSetPrimitive(osgDB::OutputStream& os, const mdv::ShapeGeometry &sgIn)
+{
+  const PSetPrimitiveWrapper &pspw = sgIn.getPSetPrimitiveWrapper();
+  
+  typedef PSetPrimitiveContainer::index<PSetPrimitiveRecord::ByPSet>::type List;
+  const List &list = pspw.pSetPrimitiveContainer.get<PSetPrimitiveRecord::ByPSet>();
+  
+  os << list.size() << os.BEGIN_BRACKET << std::endl;
+  for (const auto &r : list)
+    os << r.primitiveSetIndex << r.primitiveIndex << std::endl;
+  os << os.END_BRACKET << std::endl;
+  
+  return true;
+}
+
+static bool readPSetPrimitive(osgDB::InputStream& is, mdv::ShapeGeometry &sgIn)
+{
+  std::shared_ptr<PSetPrimitiveWrapper> pspw(new PSetPrimitiveWrapper());
+  
+  std::size_t size = 0;
+  is >> size >> is.BEGIN_BRACKET;
+  for (std::size_t index = 0; index < size; ++index)
+  {
+    std::size_t pSetIndex;
+    std::size_t pIndex;
+    is >> pSetIndex >> pIndex;
+    PSetPrimitiveRecord r;
+    r.primitiveSetIndex = pSetIndex;
+    r.primitiveIndex = pIndex;
+    pspw->pSetPrimitiveContainer.insert(r);
+  }
+  is >> is.END_BRACKET;
+  
+  sgIn.setPSetPrimitiveWrapper(pspw);
+  return true;
+}
+
+REGISTER_OBJECT_WRAPPER( mdv_ShapeGeometry_Wrapper,
+                         new mdv::ShapeGeometry,
+                         mdv::ShapeGeometry,
+                         "osg::Object osg::Node osg::Drawable osg::Geometry mdv::Base mdv::ShapeGeometry" )
+{
+  ADD_USER_SERIALIZER(IdPSet);
+  ADD_USER_SERIALIZER(PSetPrimitive);
+}
+
+
+
+
+ShapeGeometry::ShapeGeometry() : Base()
 {
 }
 
 ShapeGeometry::ShapeGeometry(const ShapeGeometry &rhs, const CopyOp& copyOperation) :
-  Base(rhs, copyOperation), seerShape(rhs.seerShape)
+  Base(rhs, copyOperation)
 {
   if (rhs.idPSetWrapper)
     idPSetWrapper = std::shared_ptr<IdPSetWrapper>(new IdPSetWrapper(*rhs.idPSetWrapper));
@@ -61,6 +162,16 @@ void ShapeGeometry::setIdPSetWrapper(std::shared_ptr<IdPSetWrapper> &mapIn)
 void ShapeGeometry::setPSetPrimitiveWrapper(std::shared_ptr<PSetPrimitiveWrapper> &wrapperIn)
 {
   pSetVertexWrapper = wrapperIn;
+}
+
+const IdPSetWrapper& ShapeGeometry::getIdPSetWrapper() const
+{
+  return *idPSetWrapper;
+}
+
+const PSetPrimitiveWrapper& ShapeGeometry::getPSetPrimitiveWrapper() const
+{
+  return *pSetVertexWrapper;
 }
 
 void ShapeGeometry::setColor(const Vec4& colorIn)
@@ -180,7 +291,7 @@ void ShapeGeometryBuilder::initialize()
   
   if (shouldBuildFaces)
   {
-    faceGeometry = new ShapeGeometry(seerShape);
+    faceGeometry = new ShapeGeometry();
     faceGeometry->setNodeMask(mdv::face);
     faceGeometry->setName("faces");
     faceGeometry->getOrCreateStateSet()->setAttribute(faceDepth.get());
@@ -209,7 +320,7 @@ void ShapeGeometryBuilder::initialize()
     faceGeometry.release();
   if (shouldBuildEdges)
   {
-    edgeGeometry = new ShapeGeometry(seerShape);
+    edgeGeometry = new ShapeGeometry();
     edgeGeometry->setNodeMask(mdv::edge);
     edgeGeometry->setName("edges");
     edgeGeometry->getOrCreateStateSet()->setAttribute(lineWidth.get());
@@ -239,7 +350,7 @@ void ShapeGeometryBuilder::initialize()
   if (shouldBuildVertices)
   {
     //not using vertices at time of writing, so has bugs.
-    vertexGeometry = new ShapeGeometry(seerShape);
+    vertexGeometry = new ShapeGeometry();
     vertexGeometry->setNodeMask(mdv::vertex);
     vertexGeometry->setName("vertices");
     vertexGeometry->getOrCreateStateSet()->setAttribute(new osg::Point(5.0));
@@ -349,9 +460,9 @@ void ShapeGeometryBuilder::faceConstruct(const TopoDS_Face &faceIn)
   for (int index(uvNodes.Lower()); index < uvNodes.Upper() + 1; ++index)
   {
     gp_Dir direction;
-    GeomLib::NormEstim(surface, uvNodes.Value(index), Precision::Confusion(), direction);
-    if(!identity)
-      direction.Transform(transformation);
+    int result = GeomLib::NormEstim(surface, uvNodes.Value(index), Precision::Confusion(), direction);
+    if (result != 0)
+      std::cout << "WARNING: GeomLib::NormEstim failed in mdv::ShapeGeometryBuilder::faceConstruct" << std::endl;
     if (!signalOrientation)
       direction.Reverse();
     normals->push_back(osg::Vec3(direction.X(), direction.Y(), direction.Z()));

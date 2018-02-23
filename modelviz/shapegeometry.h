@@ -44,18 +44,11 @@ namespace mdv
   class ShapeGeometry : public Base
   {
   public:
-    ShapeGeometry() = delete;
-    ShapeGeometry(const ann::SeerShape&);
+    ShapeGeometry();
     ShapeGeometry(const ShapeGeometry &rhs, const osg::CopyOp& copyOperation = osg::CopyOp::SHALLOW_COPY);
-
-    virtual osg::Object* cloneType() const override {return new ShapeGeometry(seerShape);}
-    virtual osg::Object* clone(const osg::CopyOp& copyOperation) const override {return new ShapeGeometry(*this, copyOperation);}
-    virtual bool isSameKindAs(const osg::Object* obj) const override {return dynamic_cast<const ShapeGeometry*>(obj)!=NULL;}
-    /* using same libray name and class name as parent let the geometry be included
-     * in the exported osg file. Don't know the implications */
-    virtual const char* libraryName() const override {return "osg";}
-    virtual const char* className() const override {return "Geometry";}
     
+    META_Node(mdv, ShapeGeometry)
+
     void setIdPSetWrapper(std::shared_ptr<IdPSetWrapper> &);
     void setPSetPrimitiveWrapper(std::shared_ptr<PSetPrimitiveWrapper> &);
     boost::uuids::uuid getId(std::size_t) const;
@@ -67,7 +60,9 @@ namespace mdv
     void setToPreHighlight(const boost::uuids::uuid&); //!< set to prehighlight of primitive index.
     void setToHighlight(const boost::uuids::uuid&); //!< set to highlight of primitive index.
     
-    const ann::SeerShape &seerShape;
+    //need these for serialize
+    const IdPSetWrapper& getIdPSetWrapper() const;
+    const PSetPrimitiveWrapper& getPSetPrimitiveWrapper() const;
     
   protected:
     void setColor(const boost::uuids::uuid&, const osg::Vec4&); //set color of primitive index.

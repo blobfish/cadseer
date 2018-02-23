@@ -68,6 +68,7 @@
 #include <preferences/manager.h>
 #include <project/serial/xsdcxxoutput/view.h>
 #include <application/application.h>
+#include <application/mainwindow.h>
 #include <project/project.h>
 
 using namespace vwr;
@@ -500,7 +501,7 @@ void Widget::exportOSGDispatched(const msg::Message&)
   
   QString fileName = QFileDialog::getSaveFileName
   (
-    this,
+    static_cast<app::Application*>(qApp)->getMainWindow(),
     tr("Save File"),
     QString::fromStdString(prf::manager().rootPtr->project().lastDirectory().get()),
     tr("Scene (*.osgt *.osgx *.osgb *.osg *.ive)")

@@ -30,18 +30,14 @@ namespace mdv
       Base();
       Base(const Base &rhs, const osg::CopyOp& copyOperation = osg::CopyOp::SHALLOW_COPY);
       
-      virtual osg::Object* cloneType() const override {return new Base();}
-      virtual osg::Object* clone(const osg::CopyOp& copyOperation) const override {return new Base(*this, copyOperation);}
-      virtual bool isSameKindAs(const osg::Object* obj) const override {return dynamic_cast<const Base*>(obj)!=NULL;}
-      /* using same libray name and class name as parent, lets the geometry be included
-      * in the exported osg file. Don't know the implications */
-      virtual const char* libraryName() const override {return "osg";}
-      virtual const char* className() const override {return "Geometry";}
+      META_Node(mdv, Base)
       
       virtual void setColor(const osg::Vec4 &colorIn); //!< used to change the object color.
-      osg::Vec4 getColor() const {return color;}
+      const osg::Vec4& getColor() const {return color;}
       void setPreHighlightColor(const osg::Vec4 &colorIn);
+      const osg::Vec4& getPreHighlightColor() const {return colorPreHighlight;}
       void setHighlightColor(const osg::Vec4 &colorIn);
+      const osg::Vec4& getHighlightColor() const {return colorHighlight;}
       
       virtual void setToColor(){}
       virtual void setToPreHighlight(){}
