@@ -36,7 +36,7 @@
 #include <osg/Point>
 
 #include <tools/idtools.h>
-#include <annex/seershape.h>
+#include <annex/shapeidhelper.h>
 #include <modelviz/hiddenlineeffect.h>
 #include <modelviz/shapegeometryprivate.h>
 #include <modelviz/shapegeometry.h>
@@ -228,9 +228,9 @@ std::size_t ShapeGeometry::getPSetFromPrimitive(std::size_t primitiveIndexIn) co
   return pSetVertexWrapper->findPSetFromPrimitive(primitiveIndexIn);
 }
 
-ShapeGeometryBuilder::ShapeGeometryBuilder(const ann::SeerShape &seerShapeIn) : 
-  originalShape(seerShapeIn.getRootOCCTShape()), copiedShape(seerShapeIn.getRootOCCTShape()),
-  seerShape(seerShapeIn), bound(), edgeToFace(),
+ShapeGeometryBuilder::ShapeGeometryBuilder(const TopoDS_Shape &shapeIn, const ann::ShapeIdHelper &shapeIdHelperIn) : 
+  copiedShape(shapeIn),
+  shapeIdHelper(shapeIdHelperIn), bound(), edgeToFace(),
   processed(), idPSetWrapperFace(new IdPSetWrapper()), idPSetWrapperEdge(new IdPSetWrapper())
 {
   BRepBndLib::Add(copiedShape, bound);
@@ -251,6 +251,8 @@ void ShapeGeometryBuilder::go(double deflection, double angle)
 {
   assert(!copiedShape.IsNull());
   success = false;
+  warnings.clear();
+  errors.clear();
   
   initialize();
   
@@ -258,7 +260,32 @@ void ShapeGeometryBuilder::go(double deflection, double angle)
   {
     BRepTools::Clean(copiedShape);//might call this several times for same shape;
     processed.Clear();
-    BRepMesh_IncrementalMesh(copiedShape, deflection, Standard_False, angle,Standard_True);
+    
+    /* default constructor values for parameters.
+            Parameters()
+              :
+            Angle(0.1),
+            Deflection(0.001),
+            MinSize(Precision::Confusion()),
+            InParallel(Standard_False),
+            Relative(Standard_False),
+            AdaptiveMin(Standard_False),
+            InternalVerticesMode(Standard_True),
+            ControlSurfaceDeflection(Standard_True)
+            {
+            }
+     */
+    BRepMesh_FastDiscret::Parameters prms;
+    prms.Angle = angle;
+    prms.Deflection = deflection;
+//     prms.MinSize = Precision::Confusion(); //leave default
+    prms.InParallel = Standard_True;
+//     prms.Relative = Standard_False; //leave default
+//     prms.AdaptiveMin = Standard_True; //leave default
+//     prms.InternalVerticesMode = Standard_True; //leave default
+//     prms.ControlSurfaceDeflection = Standard_True; //leave default
+    
+    BRepMesh_IncrementalMesh(copiedShape, prms);
 
     processed.Add(copiedShape);
     if (copiedShape.ShapeType() == TopAbs_FACE)
@@ -270,24 +297,35 @@ void ShapeGeometryBuilder::go(double deflection, double angle)
   }
   catch(const Standard_Failure &error)
   {
-    std::cout << "OCC Error: failure building model vizualization. Message: " <<
-        error.GetMessageString() << std::endl;
+    std::ostringstream stream;
+    stream
+    << "OCC Error: failure building model vizualization. Message: "
+    << error.GetMessageString()
+    << std::endl;
+    errors.push_back(stream.str());
   }
   catch(const std::exception &error)
   {
-    std::cout << "Internal Error: failure building model vizualization. Message: " <<
-        error.what() << std::endl;
+    std::ostringstream stream;
+    stream
+    << "Internal Error: failure building model vizualization. Message: "
+    << error.what()
+    << std::endl;
+    errors.push_back(stream.str());
   }
   catch(...)
   {
-    std::cout << "Unknown Error: failure building model vizualization. Message: " << std::endl;
+    std::ostringstream stream;
+    stream
+    << "Unknown Error: failure building model vizualization."
+    << std::endl;
+    errors.push_back(stream.str());
   }
 }
 
 void ShapeGeometryBuilder::initialize()
 {
-  if (!out)
-    out = new osg::Switch();
+  out = new osg::Switch();
   
   if (shouldBuildFaces)
   {
@@ -372,9 +410,8 @@ void ShapeGeometryBuilder::recursiveConstruct(const TopoDS_Shape &shapeIn)
     if (processed.Contains(currentShape))
       continue;
     processed.Add(currentShape);
-    if (!(seerShape.hasShapeIdRecord(currentShape)))
+    if (!(shapeIdHelper.find(currentShape)))
       continue; //probably seam edge.
-
     if
     (
       (currentType == TopAbs_COMPOUND) ||
@@ -403,8 +440,12 @@ void ShapeGeometryBuilder::recursiveConstruct(const TopoDS_Shape &shapeIn)
     }
     catch(const std::exception &error)
     {
-      std::cout << "Warning! Problem building model vizualization. Message: " <<
-		    error.what() << std::endl;
+      std::ostringstream stream;
+      stream
+      << "Warning! Problem building model vizualization. Message: "
+      << error.what()
+      << std::endl;
+      warnings.push_back(stream.str());
     }
   }
 }
@@ -462,7 +503,13 @@ void ShapeGeometryBuilder::faceConstruct(const TopoDS_Face &faceIn)
     gp_Dir direction;
     int result = GeomLib::NormEstim(surface, uvNodes.Value(index), Precision::Confusion(), direction);
     if (result != 0)
-      std::cout << "WARNING: GeomLib::NormEstim failed in mdv::ShapeGeometryBuilder::faceConstruct" << std::endl;
+    {
+      std::ostringstream stream;
+      stream
+      << "WARNING: GeomLib::NormEstim failed in mdv::ShapeGeometryBuilder::faceConstruct"
+      << std::endl;
+      warnings.push_back(stream.str());
+    }
     if (!signalOrientation)
       direction.Reverse();
     normals->push_back(osg::Vec3(direction.X(), direction.Y(), direction.Z()));
@@ -499,7 +546,7 @@ void ShapeGeometryBuilder::faceConstruct(const TopoDS_Face &faceIn)
     primitiveCountFace++;
   }
   faceGeometry->addPrimitiveSet(indices.get());
-  boost::uuids::uuid id = seerShape.findShapeIdRecord(faceIn).id;
+  boost::uuids::uuid id = *shapeIdHelper.find(faceIn);
   std::size_t lastPrimitiveIndex = faceGeometry->getNumPrimitiveSets() - 1;
   if (!idPSetWrapperFace->hasId(id))
   {
@@ -605,7 +652,7 @@ void ShapeGeometryBuilder::edgeConstruct(const TopoDS_Edge &edgeIn)
   }
   
   edgeGeometry->addPrimitiveSet(indices.get());
-  boost::uuids::uuid id = seerShape.findShapeIdRecord(edgeIn).id;
+  boost::uuids::uuid id = *shapeIdHelper.find(edgeIn);
   std::size_t lastPrimitiveIndex = edgeGeometry->getNumPrimitiveSets() - 1;
   if (!idPSetWrapperEdge->hasId(id))
   {

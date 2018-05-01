@@ -21,9 +21,11 @@
 
 #include <osg/Switch>
 #include <osg/ValueObject>
+#include <osg/PagedLOD>
 
 #include <globalutilities.h>
 #include <tools/idtools.h>
+#include <modelviz/nodemaskdefs.h>
 #include <modelviz/shapegeometry.h>
 #include <selection/visitors.h>
 
@@ -115,4 +117,36 @@ void HighlightVisitor::apply(osg::Geometry& geometryIn)
   }
   
   //don't need to call traverse because geometry should be 'end of line'
+}
+
+PLODPathVisitor::PLODPathVisitor(const std::string &pathIn) : 
+NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN),
+path(pathIn){}
+void PLODPathVisitor::apply(osg::PagedLOD &lodIn)
+{
+  lodIn.setDatabasePath(path);
+  traverse(lodIn);
+}
+
+PLODIdVisitor::PLODIdVisitor(const boost::uuids::uuid &idIn) :
+NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN),
+id(idIn){}
+void PLODIdVisitor::apply(osg::Switch &switchIn)
+{
+  //this filters the traversal to only feature id.
+  if (switchIn.getNodeMask() != mdv::object)
+    return;
+  std::string uValue;
+  switchIn.getUserValue<std::string>(gu::idAttributeTitle, uValue);
+  assert(!uValue.empty());
+  boost::uuids::uuid nodeId = gu::stringToId(uValue);
+  if (nodeId != id)
+    return;
+  traverse(switchIn);
+}
+void PLODIdVisitor::apply(osg::PagedLOD &lodIn)
+{
+  assert(out == nullptr); //how can we ever get here twice?
+  out = &lodIn;
+  //shouldn't need to traverse deeper.
 }

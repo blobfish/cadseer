@@ -35,6 +35,7 @@
 #include <globalutilities.h>
 #include <tools/occtools.h>
 #include <tools/idtools.h>
+#include <annex/shapeidhelper.h>
 #include <annex/base.h>
 
 namespace osg{class Vec3d;}
@@ -412,6 +413,9 @@ namespace ann
      * evolve container.
      */
     SeerShape createWorkCopy() const;
+    
+    /*! @brief generate shape id helper for viz generation*/
+    ShapeIdHelper buildHelper() const;
     
   private:
     BID::uuid rootShapeId;

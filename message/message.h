@@ -31,6 +31,7 @@
 #include <application/message.h>
 #include <viewer/message.h>
 #include <feature/message.h>
+#include <lod/message.h>
 
 namespace msg
 {
@@ -146,6 +147,7 @@ namespace msg
     static const Mask Sew(Mask().set(                          106));//!< command. move up
     static const Mask Trim(Mask().set(                         107));//!< command. move up
     static const Mask Revision(Mask().set(                     108));//!< command. move up
+    static const Mask LOD(Mask().set(                          109));//!< command. move up
   
     typedef boost::variant
     <
@@ -153,7 +155,8 @@ namespace msg
       slc::Message,
       app::Message,
       vwr::Message,
-      ftr::Message
+      ftr::Message,
+      lod::Message
     > Payload;
   
     struct Message

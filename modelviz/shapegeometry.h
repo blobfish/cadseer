@@ -34,7 +34,7 @@
 namespace boost{namespace uuids{class uuid;}}
 class TopoDS_Face; class TopoDS_Edge;
 namespace osg{class Switch; class Depth; class LineWidth;}
-namespace ann{class SeerShape;}
+namespace ann{class ShapeIdHelper;}
 
 namespace mdv
 {
@@ -75,7 +75,7 @@ namespace mdv
   {
   public:
     ShapeGeometryBuilder() = delete;
-    ShapeGeometryBuilder(const ann::SeerShape&);
+    ShapeGeometryBuilder(const TopoDS_Shape&, const ann::ShapeIdHelper&);
     ~ShapeGeometryBuilder();
     void go(double, double);
     void buildFaces(bool in){shouldBuildFaces = in;}
@@ -83,14 +83,15 @@ namespace mdv
     void buildVertices(bool in){shouldBuildVertices = in;}
     osg::ref_ptr<osg::Switch> out;
     bool success = false;
+    const std::vector<std::string>& getWarnings(){return warnings;}
+    const std::vector<std::string>& getErrors(){return errors;}
   private:
     void initialize();
     void recursiveConstruct(const TopoDS_Shape &shapeIn);
     void edgeConstruct(const TopoDS_Edge &edgeIn);
     void faceConstruct(const TopoDS_Face &faceIn);
-    const TopoDS_Shape &originalShape;
     TopoDS_Shape copiedShape;
-    const ann::SeerShape &seerShape;
+    const ann::ShapeIdHelper &shapeIdHelper;
     Bnd_Box bound;
     TopTools_IndexedDataMapOfShapeListOfShape edgeToFace;
     TopTools_MapOfShape processed;
@@ -108,6 +109,8 @@ namespace mdv
     osg::ref_ptr<osg::LineWidth> lineWidth;
     std::size_t primitiveCountFace;
     std::size_t primitiveCountEdge;
+    std::vector<std::string> warnings;
+    std::vector<std::string> errors;
   };
 }
 

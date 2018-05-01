@@ -43,6 +43,7 @@ public:
   vwr::Message operator()(const app::Message&) const {return vwr::Message();}
   vwr::Message operator()(const vwr::Message &mIn) const {return mIn;}
   vwr::Message operator()(const ftr::Message&) const {return vwr::Message();}
+  vwr::Message operator()(const lod::Message&) const {return vwr::Message();}
 };
 void Isolate::setFromMessage(const msg::Message &mIn)
 {

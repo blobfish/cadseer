@@ -17,11 +17,14 @@
  *
  */
 
+#include <limits.h>
+
 #include <QDir>
 #include <QTextStream>
 
 #include <boost/variant/variant.hpp>
 #include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
 
 #include <BRep_Builder.hxx>
 #include <TopoDS_Compound.hxx>
@@ -29,15 +32,21 @@
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopExp.hxx>
 #include <Standard_StdAllocator.hxx>
+#include <Precision.hxx>
+#include <BinTools.hxx>
 
 #include <osg/Switch>
 #include <osg/MatrixTransform>
-#include <osg/LOD>
+#include <osg/PagedLOD>
+#include <osgDB/Options>
 #include <osg/KdTree>
 #include <osg/LightModel>
+#include <osgDB/WriteFile>
 
 #include <tools/idtools.h>
 #include <tools/infotools.h>
+#include <application/application.h> //need project directory for viz
+#include <project/project.h> //need project directory for viz
 #include <preferences/preferencesXML.h>
 #include <preferences/manager.h>
 #include <modelviz/nodemaskdefs.h>
@@ -45,6 +54,7 @@
 #include <globalutilities.h>
 #include <message/message.h>
 #include <message/observer.h>
+#include <lod/message.h>
 #include <annex/seershape.h>
 #include <feature/parameter.h>
 #include <feature/shapehistory.h>
@@ -92,10 +102,14 @@ Base::Base()
   mainTransform->setMatrix(osg::Matrixd::identity());
   mainSwitch->addChild(mainTransform);
   
-  lod = new osg::LOD();
+  lod = new osg::PagedLOD();
   lod->setName("lod");
   lod->setNodeMask(mdv::lod);
   lod->setRangeMode(osg::LOD::PIXEL_SIZE_ON_SCREEN);
+  //not using database path in options. setting path directly on lod node in visitor within viewer.
+  osgDB::Options *options = new osgDB::Options();
+  options->setBuildKdTreesHint(osgDB::Options::BUILD_KDTREES);
+  lod->setDatabaseOptions(options);
   mainTransform->addChild(lod.get());
   
   overlaySwitch = new osg::Switch();
@@ -223,19 +237,90 @@ void Base::updateVisual()
   
   if ((!hasAnnex(ann::Type::SeerShape)) || (getAnnex<ann::SeerShape>(ann::Type::SeerShape).isNull()))
     return;
+  const ann::SeerShape &ss = getAnnex<ann::SeerShape>(ann::Type::SeerShape);
 
-  //get deflection values.
   double linear = prf::manager().rootPtr->visual().mesh().linearDeflection();
-  double angular = prf::manager().rootPtr->visual().mesh().angularDeflection();
-
-  mdv::ShapeGeometryBuilder sBuilder(getAnnex<ann::SeerShape>(ann::Type::SeerShape));
-  sBuilder.go(linear, angular);
-  assert(sBuilder.success);
+  double angular = osg::DegreesToRadians(prf::manager().rootPtr->visual().mesh().angularDeflection());
+  float screenHeight = osg::DisplaySettings::instance()->getScreenHeight(); 
   
+  occt::BoundingBox bbox(ss.getRootOCCTShape());
+  double diagonal = bbox.getDiagonal();
+  if (diagonal < Precision::Confusion())
+  {
+    std::cout << "WARNING: bounding box diagonal is less than confusion in Base::updateVisual()" << std::endl;
+    diagonal = 1.0;
+  }
+  
+  ann::ShapeIdHelper helper = ss.buildHelper();
+  mdv::ShapeGeometryBuilder sBuilder(ss.getRootOCCTShape(), helper);
+  
+  sBuilder.go
+  (
+    linear * prf::manager().rootPtr->visual().mesh().lod().get().LODEntry01().linearFactor(),
+    angular * prf::manager().rootPtr->visual().mesh().lod().get().LODEntry01().angularFactor()
+  );
+  assert(sBuilder.success);
+  lod->setCenter(sBuilder.out->getBound().center());
   lod->setRadius(sBuilder.out->getBound().radius());
-  lod->addChild(sBuilder.out.get(), 0.0, 1000000.0);
-//   lod->addChild(geode,0.0f,100.0f);
-//   lod->addChild(cessna,100.0f,10000.0f);
+  
+  boost::filesystem::path filePathBase;
+  filePathBase = static_cast<app::Application*>(qApp)->getProject()->getSaveDirectory();
+  filePathBase /= ".scratch";
+  boost::filesystem::path filePath00 = filePathBase / (gu::idToString(id) + "_00.osgb");
+  boost::filesystem::path filePath01 = filePathBase / (gu::idToString(id) + "_01.osgb");
+  boost::filesystem::path filePath02 = filePathBase / (gu::idToString(id) + "_02.osgb");
+  //make sure old files are gone.
+  boost::filesystem::remove(filePath00);
+  boost::filesystem::remove(filePath01);
+  boost::filesystem::remove(filePath02);
+  
+  double partition00 = screenHeight * prf::manager().rootPtr->visual().mesh().lod().get().partition00();
+  double partition01 = screenHeight * prf::manager().rootPtr->visual().mesh().lod().get().partition01();
+  lod->addChild(sBuilder.out, partition00, partition01, filePath00.string());
+  
+  //each subsequent meshing operation will take linear deflection / 10.
+  //but we don't that here. that will be done in another process.
+  //for now we will just copy the course mesh file to the other filenames.
+  //hopefully other process can overwrite the files and pagedlod will figure it out.
+  //follow up: that didn't work. going to have to generate and update pagedlod node.
+
+  //the binary format seems to be a bit of a black box.
+  //I just chose to use the brp extension. Couldn't find the accepted binary file extension.
+  boost::filesystem::path filePathOCCT = filePathBase / (gu::idToString(id) + ".brp");
+  BinTools::Write(getAnnex<ann::SeerShape>(ann::Type::SeerShape).getRootOCCTShape(), filePathOCCT.string().c_str());
+  
+  boost::filesystem::path filePathIds = filePathBase / (gu::idToString(id) + ".ids");
+  helper.write(filePathIds);
+
+  double partition02 = screenHeight * prf::manager().rootPtr->visual().mesh().lod().get().partition02();
+  lod::Message m1
+  (
+    id,
+    filePathOCCT,
+    filePath01,
+    filePathIds,
+    linear * prf::manager().rootPtr->visual().mesh().lod().get().LODEntry02().linearFactor(),
+    angular * prf::manager().rootPtr->visual().mesh().lod().get().LODEntry02().angularFactor(),
+    partition01,
+    partition02
+  );
+  observer->outBlocked(msg::Message(msg::Mask(msg::Request | msg::Construct | msg::LOD), m1));
+  lod->addChild(sBuilder.out, partition01, partition02, filePath00.string());
+  
+  double partition03 = prf::manager().rootPtr->visual().mesh().lod().get().partition03();
+  lod::Message m2
+  (
+    id,
+    filePathOCCT,
+    filePath02,
+    filePathIds,
+    linear * prf::manager().rootPtr->visual().mesh().lod().get().LODEntry03().linearFactor(),
+    angular * prf::manager().rootPtr->visual().mesh().lod().get().LODEntry03().angularFactor(),
+    partition02,
+    partition03
+  );
+  observer->outBlocked(msg::Message(msg::Mask(msg::Request | msg::Construct | msg::LOD), m2));
+  lod->addChild(sBuilder.out, partition02, partition03, filePath00.string());
   
   osg::ref_ptr<osg::KdTreeBuilder> kdTreeBuilder = new osg::KdTreeBuilder();
   lod->accept(*kdTreeBuilder);

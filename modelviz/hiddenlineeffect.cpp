@@ -44,6 +44,7 @@ HiddenLineEffect::HiddenLineEffect() : Effect()
 HiddenLineEffect::HiddenLineEffect(const HiddenLineEffect& copy, const osg::CopyOp& op) : Effect(copy, op)
 {
   hiddenLine = copy.hiddenLine;
+  selectTechnique(copy.getSelectedTechnique());
 }
 
 HiddenLineEffect::~HiddenLineEffect() {}
@@ -66,6 +67,5 @@ bool HiddenLineEffect::define_techniques()
 {
   addTechnique(new NoHiddenLineTechnique());
   addTechnique(new HiddenLineTechnique());
-  selectTechnique(0);
   return true;
 }

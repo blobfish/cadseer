@@ -387,4 +387,19 @@ void Manager::ensureDefaults()
   
   if (!rootPtr->visual().display().samples().present())
     rootPtr->visual().display().samples() = prf::Display::samples_default_value();
+  
+  if (!rootPtr->visual().mesh().lod().present())
+  {
+    prf::LOD level
+    (
+      0.0,
+      prf::LODEntry(1.0, 1.0),
+      0.1,
+      prf::LODEntry(0.1, 0.5),
+      2.0,
+      prf::LODEntry(0.01, 0.25),
+      std::numeric_limits<float>::max()
+    );
+    rootPtr->visual().mesh().lod() = level;
+  }
 }

@@ -92,6 +92,17 @@ void Preferences::initialize()
   ui->angularDeflectionEdit->setValidator(positiveDouble);
   ui->linearDeflectionEdit->setText(QString().setNum(manager->rootPtr->visual().mesh().linearDeflection()));
   ui->angularDeflectionEdit->setText(QString().setNum(manager->rootPtr->visual().mesh().angularDeflection()));
+  
+  const auto &lodRef = manager->rootPtr->visual().mesh().lod().get();
+  ui->level1LinearEdit->setText(QString().setNum(lodRef.LODEntry01().linearFactor()));
+  ui->level1AngularEdit->setText(QString().setNum(lodRef.LODEntry01().angularFactor()));
+  ui->levelEdit01->setText(QString().setNum(lodRef.partition01()));
+  ui->level2LinearEdit->setText(QString().setNum(lodRef.LODEntry02().linearFactor()));
+  ui->level2AngularEdit->setText(QString().setNum(lodRef.LODEntry02().angularFactor()));
+  ui->levelEdit02->setText(QString().setNum(lodRef.partition02()));
+  ui->level3LinearEdit->setText(QString().setNum(lodRef.LODEntry03().linearFactor()));
+  ui->level3AngularEdit->setText(QString().setNum(lodRef.LODEntry03().angularFactor()));
+  
   if (manager->rootPtr->visual().display().showHiddenLines())
     ui->hiddenLineCombo->setCurrentIndex(0);
   else
@@ -190,6 +201,82 @@ void Preferences::updateVisual()
   {
     manager->rootPtr->visual().mesh().angularDeflection() = tempAngularDeflection;
     visualDirty = true;
+  }
+  
+  double partition00 = manager->rootPtr->visual().mesh().lod().get().partition00(); //constant value of 0.0
+  double level01Linear = ui->level1LinearEdit->text().toDouble(&dummy);
+  double level01Angular = ui->level1AngularEdit->text().toDouble(&dummy);
+  double partition01 = ui->levelEdit01->text().toDouble(&dummy);
+  double level02Linear = ui->level2LinearEdit->text().toDouble(&dummy);
+  double level02Angular = ui->level2AngularEdit->text().toDouble(&dummy);
+  double partition02 = ui->levelEdit02->text().toDouble(&dummy);
+  double level03Linear = ui->level3LinearEdit->text().toDouble(&dummy);
+  double level03Angular = ui->level3AngularEdit->text().toDouble(&dummy);
+  double partition03 = manager->rootPtr->visual().mesh().lod().get().partition03(); //constant value of float max
+  
+  if //new paritions are valid
+  (
+    (partition00 < partition01) &&
+    (partition01 < partition02) &&
+    (partition02 < partition03)
+  )
+  {
+    if //factors are valid
+    (
+      (level01Linear > 0.0) &&
+      (level01Angular > 0.0) &&
+      (level02Linear > 0.0) &&
+      (level02Angular > 0.0) &&
+      (level03Linear > 0.0) &&
+      (level03Angular > 0.0)
+    )
+    {
+      //partition00 is always 0.0, so skip
+      if (level01Linear != manager->rootPtr->visual().mesh().lod().get().LODEntry01().linearFactor())
+      {
+        manager->rootPtr->visual().mesh().lod().get().LODEntry01().linearFactor() = level01Linear;
+        visualDirty = true;
+      }
+      if (level01Angular != manager->rootPtr->visual().mesh().lod().get().LODEntry01().angularFactor())
+      {
+        manager->rootPtr->visual().mesh().lod().get().LODEntry01().angularFactor() = level01Angular;
+        visualDirty = true;
+      }
+      
+      if (partition01 != manager->rootPtr->visual().mesh().lod().get().partition01())
+      {
+        manager->rootPtr->visual().mesh().lod().get().partition01() = partition01;
+        visualDirty = true;
+      }
+      
+      if (level02Linear != manager->rootPtr->visual().mesh().lod().get().LODEntry02().linearFactor())
+      {
+        manager->rootPtr->visual().mesh().lod().get().LODEntry02().linearFactor() = level02Linear;
+        visualDirty = true;
+      }
+      if (level02Angular != manager->rootPtr->visual().mesh().lod().get().LODEntry02().angularFactor())
+      {
+        manager->rootPtr->visual().mesh().lod().get().LODEntry02().angularFactor() = level02Angular;
+        visualDirty = true;
+      }
+      
+      if (partition02 != manager->rootPtr->visual().mesh().lod().get().partition02())
+      {
+        manager->rootPtr->visual().mesh().lod().get().partition02() = partition02;
+        visualDirty = true;
+      }
+      
+      if (level03Linear != manager->rootPtr->visual().mesh().lod().get().LODEntry03().linearFactor())
+      {
+        manager->rootPtr->visual().mesh().lod().get().LODEntry03().linearFactor() = level03Linear;
+        visualDirty = true;
+      }
+      if (level03Angular != manager->rootPtr->visual().mesh().lod().get().LODEntry03().angularFactor())
+      {
+        manager->rootPtr->visual().mesh().lod().get().LODEntry03().angularFactor() = level03Angular;
+        visualDirty = true;
+      }
+    }
   }
   
   bool hiddenLines = ui->hiddenLineCombo->currentIndex() == 0;

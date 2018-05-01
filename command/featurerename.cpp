@@ -64,6 +64,7 @@ public:
   ftr::Message operator()(const app::Message&) const {return ftr::Message();}
   ftr::Message operator()(const vwr::Message&) const {return ftr::Message();}
   ftr::Message operator()(const ftr::Message &mIn) const {return mIn;}
+  ftr::Message operator()(const lod::Message&) const {return ftr::Message();}
 };
 void FeatureRename::setFromMessage(const msg::Message &mIn)
 {

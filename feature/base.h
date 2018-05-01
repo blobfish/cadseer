@@ -40,7 +40,7 @@ class TopoDS_Shape;
 class QDir;
 class QTextStream;
 
-namespace osg{class Switch; class MatrixTransform; class LOD;}
+namespace osg{class Switch; class MatrixTransform; class PagedLOD;}
 namespace prj{namespace srl{class FeatureBase;}}
 namespace msg{class Message; class Observer;}
 namespace ftr
@@ -165,7 +165,7 @@ protected:
   osg::ref_ptr<osg::Switch> mainSwitch;
   osg::ref_ptr<osg::MatrixTransform> mainTransform;
   osg::ref_ptr<osg::Switch> overlaySwitch;
-  osg::ref_ptr<osg::LOD> lod;
+  osg::ref_ptr<osg::PagedLOD> lod;
   
   osg::Vec4 color;
   std::string lastUpdateLog;

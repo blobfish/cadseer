@@ -71,6 +71,8 @@
 namespace prf
 {
   class DecPositive;
+  class LODEntry;
+  class LOD;
   class Mesh;
   class RenderStyle;
   class Display;
@@ -130,7 +132,7 @@ namespace prf
    *
    * @nosubgrouping
    */
-  class DecPositive: public ::xsd::cxx::tree::fundamental_base< ::xml_schema::Decimal, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::decimal >
+  class DecPositive: public ::xsd::cxx::tree::fundamental_base< ::xml_schema::Double, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::double_ >
   {
     public:
     /**
@@ -142,7 +144,7 @@ namespace prf
      * @brief Create an instance from the ultimate base and
      * initializers for required elements and attributes.
      */
-    DecPositive (const ::xml_schema::Decimal&);
+    DecPositive (const ::xml_schema::Double&);
 
     /**
      * @brief Create an instance from a DOM element.
@@ -217,6 +219,735 @@ namespace prf
      */
     virtual 
     ~DecPositive ();
+  };
+
+  /**
+   * @brief Class corresponding to the %LODEntry schema type.
+   *
+   * @nosubgrouping
+   */
+  class LODEntry: public ::xml_schema::Type
+  {
+    public:
+    /**
+     * @name linearFactor
+     *
+     * @brief Accessor and modifier functions for the %linearFactor
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::DecPositive LinearFactorType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< LinearFactorType, char > LinearFactorTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const LinearFactorType&
+    linearFactor () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    LinearFactorType&
+    linearFactor ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    linearFactor (const LinearFactorType& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly
+     * instead of making a copy.
+     */
+    void
+    linearFactor (::std::unique_ptr< LinearFactorType > p);
+
+    //@}
+
+    /**
+     * @name angularFactor
+     *
+     * @brief Accessor and modifier functions for the %angularFactor
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::DecPositive AngularFactorType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< AngularFactorType, char > AngularFactorTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const AngularFactorType&
+    angularFactor () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    AngularFactorType&
+    angularFactor ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    angularFactor (const AngularFactorType& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly
+     * instead of making a copy.
+     */
+    void
+    angularFactor (::std::unique_ptr< AngularFactorType > p);
+
+    //@}
+
+    /**
+     * @name Constructors
+     */
+    //@{
+
+    /**
+     * @brief Create an instance from the ultimate base and
+     * initializers for required elements and attributes.
+     */
+    LODEntry (const LinearFactorType&,
+              const AngularFactorType&);
+
+    /**
+     * @brief Create an instance from a DOM element.
+     *
+     * @param e A DOM element to extract the data from.
+     * @param f Flags to create the new instance with.
+     * @param c A pointer to the object that will contain the new
+     * instance.
+     */
+    LODEntry (const ::xercesc::DOMElement& e,
+              ::xml_schema::Flags f = 0,
+              ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy constructor.
+     *
+     * @param x An instance to make a copy of.
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    LODEntry (const LODEntry& x,
+              ::xml_schema::Flags f = 0,
+              ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy the instance polymorphically.
+     *
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     * @return A pointer to the dynamically allocated copy.
+     *
+     * This function ensures that the dynamic type of the instance is
+     * used for copying and should be used for polymorphic object
+     * models instead of the copy constructor.
+     */
+    virtual LODEntry*
+    _clone (::xml_schema::Flags f = 0,
+            ::xml_schema::Container* c = 0) const;
+
+    /**
+     * @brief Copy assignment operator.
+     *
+     * @param x An instance to make a copy of.
+     * @return A reference to itself.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    LODEntry&
+    operator= (const LODEntry& x);
+
+    //@}
+
+    /**
+     * @brief Destructor.
+     */
+    virtual 
+    ~LODEntry ();
+
+    // Implementation.
+    //
+
+    //@cond
+
+    protected:
+    void
+    parse (::xsd::cxx::xml::dom::parser< char >&,
+           ::xml_schema::Flags);
+
+    protected:
+    ::xsd::cxx::tree::one< LinearFactorType > linearFactor_;
+    ::xsd::cxx::tree::one< AngularFactorType > angularFactor_;
+
+    //@endcond
+  };
+
+  /**
+   * @brief Class corresponding to the %LOD schema type.
+   *
+   * @nosubgrouping
+   */
+  class LOD: public ::xml_schema::Type
+  {
+    public:
+    /**
+     * @name partition00
+     *
+     * @brief Accessor and modifier functions for the %partition00
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::xml_schema::Double Partition00Type;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< Partition00Type, char, ::xsd::cxx::tree::schema_type::double_ > Partition00Traits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const Partition00Type&
+    partition00 () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    Partition00Type&
+    partition00 ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    partition00 (const Partition00Type& x);
+
+    //@}
+
+    /**
+     * @name LODEntry01
+     *
+     * @brief Accessor and modifier functions for the %LODEntry01
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::LODEntry LODEntry01Type;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< LODEntry01Type, char > LODEntry01Traits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const LODEntry01Type&
+    LODEntry01 () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    LODEntry01Type&
+    LODEntry01 ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    LODEntry01 (const LODEntry01Type& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly
+     * instead of making a copy.
+     */
+    void
+    LODEntry01 (::std::unique_ptr< LODEntry01Type > p);
+
+    //@}
+
+    /**
+     * @name partition01
+     *
+     * @brief Accessor and modifier functions for the %partition01
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::DecPositive Partition01Type;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< Partition01Type, char > Partition01Traits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const Partition01Type&
+    partition01 () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    Partition01Type&
+    partition01 ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    partition01 (const Partition01Type& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly
+     * instead of making a copy.
+     */
+    void
+    partition01 (::std::unique_ptr< Partition01Type > p);
+
+    //@}
+
+    /**
+     * @name LODEntry02
+     *
+     * @brief Accessor and modifier functions for the %LODEntry02
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::LODEntry LODEntry02Type;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< LODEntry02Type, char > LODEntry02Traits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const LODEntry02Type&
+    LODEntry02 () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    LODEntry02Type&
+    LODEntry02 ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    LODEntry02 (const LODEntry02Type& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly
+     * instead of making a copy.
+     */
+    void
+    LODEntry02 (::std::unique_ptr< LODEntry02Type > p);
+
+    //@}
+
+    /**
+     * @name partition02
+     *
+     * @brief Accessor and modifier functions for the %partition02
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::DecPositive Partition02Type;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< Partition02Type, char > Partition02Traits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const Partition02Type&
+    partition02 () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    Partition02Type&
+    partition02 ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    partition02 (const Partition02Type& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly
+     * instead of making a copy.
+     */
+    void
+    partition02 (::std::unique_ptr< Partition02Type > p);
+
+    //@}
+
+    /**
+     * @name LODEntry03
+     *
+     * @brief Accessor and modifier functions for the %LODEntry03
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::LODEntry LODEntry03Type;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< LODEntry03Type, char > LODEntry03Traits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const LODEntry03Type&
+    LODEntry03 () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    LODEntry03Type&
+    LODEntry03 ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    LODEntry03 (const LODEntry03Type& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly
+     * instead of making a copy.
+     */
+    void
+    LODEntry03 (::std::unique_ptr< LODEntry03Type > p);
+
+    //@}
+
+    /**
+     * @name partition03
+     *
+     * @brief Accessor and modifier functions for the %partition03
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::DecPositive Partition03Type;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< Partition03Type, char > Partition03Traits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const Partition03Type&
+    partition03 () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    Partition03Type&
+    partition03 ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    partition03 (const Partition03Type& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly
+     * instead of making a copy.
+     */
+    void
+    partition03 (::std::unique_ptr< Partition03Type > p);
+
+    //@}
+
+    /**
+     * @name Constructors
+     */
+    //@{
+
+    /**
+     * @brief Create an instance from the ultimate base and
+     * initializers for required elements and attributes.
+     */
+    LOD (const Partition00Type&,
+         const LODEntry01Type&,
+         const Partition01Type&,
+         const LODEntry02Type&,
+         const Partition02Type&,
+         const LODEntry03Type&,
+         const Partition03Type&);
+
+    /**
+     * @brief Create an instance from the ultimate base and
+     * initializers for required elements and attributes
+     * (::std::unique_ptr version).
+     *
+     * This constructor will try to use the passed values directly
+     * instead of making copies.
+     */
+    LOD (const Partition00Type&,
+         ::std::unique_ptr< LODEntry01Type >,
+         const Partition01Type&,
+         ::std::unique_ptr< LODEntry02Type >,
+         const Partition02Type&,
+         ::std::unique_ptr< LODEntry03Type >,
+         const Partition03Type&);
+
+    /**
+     * @brief Create an instance from a DOM element.
+     *
+     * @param e A DOM element to extract the data from.
+     * @param f Flags to create the new instance with.
+     * @param c A pointer to the object that will contain the new
+     * instance.
+     */
+    LOD (const ::xercesc::DOMElement& e,
+         ::xml_schema::Flags f = 0,
+         ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy constructor.
+     *
+     * @param x An instance to make a copy of.
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    LOD (const LOD& x,
+         ::xml_schema::Flags f = 0,
+         ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy the instance polymorphically.
+     *
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     * @return A pointer to the dynamically allocated copy.
+     *
+     * This function ensures that the dynamic type of the instance is
+     * used for copying and should be used for polymorphic object
+     * models instead of the copy constructor.
+     */
+    virtual LOD*
+    _clone (::xml_schema::Flags f = 0,
+            ::xml_schema::Container* c = 0) const;
+
+    /**
+     * @brief Copy assignment operator.
+     *
+     * @param x An instance to make a copy of.
+     * @return A reference to itself.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    LOD&
+    operator= (const LOD& x);
+
+    //@}
+
+    /**
+     * @brief Destructor.
+     */
+    virtual 
+    ~LOD ();
+
+    // Implementation.
+    //
+
+    //@cond
+
+    protected:
+    void
+    parse (::xsd::cxx::xml::dom::parser< char >&,
+           ::xml_schema::Flags);
+
+    protected:
+    ::xsd::cxx::tree::one< Partition00Type > partition00_;
+    ::xsd::cxx::tree::one< LODEntry01Type > LODEntry01_;
+    ::xsd::cxx::tree::one< Partition01Type > partition01_;
+    ::xsd::cxx::tree::one< LODEntry02Type > LODEntry02_;
+    ::xsd::cxx::tree::one< Partition02Type > partition02_;
+    ::xsd::cxx::tree::one< LODEntry03Type > LODEntry03_;
+    ::xsd::cxx::tree::one< Partition03Type > partition03_;
+
+    //@endcond
   };
 
   /**
@@ -360,6 +1091,82 @@ namespace prf
     //@}
 
     /**
+     * @name lod
+     *
+     * @brief Accessor and modifier functions for the %lod
+     * optional element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::LOD LodType;
+
+    /**
+     * @brief Element optional container type.
+     */
+    typedef ::xsd::cxx::tree::optional< LodType > LodOptional;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< LodType, char > LodTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element
+     * container.
+     *
+     * @return A constant reference to the optional container.
+     */
+    const LodOptional&
+    lod () const;
+
+    /**
+     * @brief Return a read-write reference to the element container.
+     *
+     * @return A reference to the optional container.
+     */
+    LodOptional&
+    lod ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    lod (const LodType& x);
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x An optional container with the new value to set.
+     *
+     * If the value is present in @a x then this function makes a copy 
+     * of this value and sets it as the new value of the element.
+     * Otherwise the element container is set the 'not present' state.
+     */
+    void
+    lod (const LodOptional& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly instead
+     * of making a copy.
+     */
+    void
+    lod (::std::unique_ptr< LodType > p);
+
+    //@}
+
+    /**
      * @name Constructors
      */
     //@{
@@ -443,6 +1250,7 @@ namespace prf
     protected:
     ::xsd::cxx::tree::one< LinearDeflectionType > linearDeflection_;
     ::xsd::cxx::tree::one< AngularDeflectionType > angularDeflection_;
+    LodOptional lod_;
 
     //@endcond
   };
@@ -8457,6 +9265,12 @@ namespace prf
   void
   operator<< (::xml_schema::ListStream&,
               const DecPositive&);
+
+  void
+  operator<< (::xercesc::DOMElement&, const LODEntry&);
+
+  void
+  operator<< (::xercesc::DOMElement&, const LOD&);
 
   void
   operator<< (::xercesc::DOMElement&, const Mesh&);

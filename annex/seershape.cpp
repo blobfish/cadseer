@@ -1457,3 +1457,19 @@ SeerShape SeerShape::createWorkCopy() const
   
   return target;
 }
+
+ShapeIdHelper SeerShape::buildHelper() const
+{
+  //make sure we store in occt::mapshapes order
+  //that is the order the external viz generation will use.
+  ShapeIdHelper out;
+  occt::ShapeVector shapes = occt::mapShapes(getRootOCCTShape());
+  std::cout << std::endl;
+  for (const auto &shape : shapes)
+  {
+    uuid id = findShapeIdRecord(shape).id;
+    out.add(id, shape);
+  }
+  
+  return out;
+}

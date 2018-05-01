@@ -45,6 +45,7 @@
 #include <osg/ValueObject>
 #include <osg/DisplaySettings>
 
+#include <application/application.h>
 #include <viewer/spaceballmanipulator.h>
 #include <viewer/widget.h>
 #include <viewer/gleventwidget.h>
@@ -61,6 +62,7 @@
 #include <selection/visitors.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
+#include <lod/message.h>
 #include <viewer/textcamera.h>
 #include <viewer/overlay.h>
 #include <feature/base.h>
@@ -188,8 +190,17 @@ Widget::Widget(osgViewer::ViewerBase::ThreadingModel threadingModel) : QWidget()
     QHBoxLayout *layout = new QHBoxLayout();
     layout->addWidget(windowQt->getGLWidget());
     setLayout(layout);
+    
+    //get screen resolution.
+    osg::GraphicsContext::WindowingSystemInterface *wsi = windowQt->getWindowingSystemInterface();
+    assert(wsi->getNumScreens() > 0);
+    osg::GraphicsContext::ScreenSettings settings;
+    wsi->getScreenSettings(osg::GraphicsContext::ScreenIdentifier(0), settings);
+    //wsi->getDisplaySettings is null here and also in myUpdate.
+    osg::DisplaySettings::instance()->setScreenHeight(static_cast<float>(settings.height));
+    osg::DisplaySettings::instance()->setScreenWidth(static_cast<float>(settings.width));
 
-    timer->start(10);
+    timer->start(10); //this calls QWidget::update which triggers a paint event.
 }
 
 Widget::~Widget() //for forward declarations.
@@ -609,6 +620,9 @@ void Widget::setupDispatcher()
   
   mask = msg::Response | msg::Post | msg::Project | msg::Update | msg::Model;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::projectUpdatedDispatched, this, _1)));
+  
+  mask = msg::Response | msg::Construct | msg::LOD;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Widget::lodGeneratedDispatched, this, _1)));
 }
 
 void Widget::featureAddedDispatched(const msg::Message &messageIn)
@@ -619,6 +633,9 @@ void Widget::featureAddedDispatched(const msg::Message &messageIn)
   
   prj::Message message = boost::get<prj::Message>(messageIn.payload);
   root->addChild(message.feature->getMainSwitch());
+  
+  slc::PLODPathVisitor visitor(app::instance()->getProject()->getSaveDirectory());
+  message.feature->getMainSwitch()->accept(visitor);
 }
 
 void Widget::featureRemovedDispatched(const msg::Message &messageIn)
@@ -818,6 +835,71 @@ void Widget::projectUpdatedDispatched(const msg::Message &)
   msg::dispatch().dumpString(debug.str());
   
   serialWrite();
+}
+
+void Widget::lodGeneratedDispatched(const msg::Message &mIn)
+{
+  const lod::Message &m = boost::get<lod::Message>(mIn.payload);
+  slc::PLODIdVisitor vis(m.featureId);
+  root->accept(vis);
+  assert(vis.out != nullptr); //temp for development. feature might have been deleted.
+  if (vis.out == nullptr)
+  {
+    std::cout << "WARNING: can't find paged lod node in Widget::lodGeneratedDispatched" << std::endl;
+    return;
+  }
+  if (!boost::filesystem::exists(m.filePathOSG))
+  {
+    std::cout
+    << "Warning: file doesn't exist"
+    << m.filePathOSG.string()
+    << " in Widget::lodGeneratedDispatched"
+    << std::endl;
+    return;
+  }
+  osg::Node *fileNode = osgDB::readNodeFile(m.filePathOSG.string());
+  if (!fileNode)
+  {
+    std::cout
+    << "Warning: failed to load file "
+    << m.filePathOSG.string()
+    << " in Widget::lodGeneratedDispatched"
+    << std::endl;
+    return;
+  }
+  
+  HiddenLineVisitor v(prf::manager().rootPtr->visual().display().showHiddenLines());
+  fileNode->accept(v);
+  
+  //find child to remove.
+  bool foundChild = false;
+  for (unsigned int i = 0; i < vis.out->getNumChildren(); ++i)
+  {
+    float tempMin = vis.out->getMinRange(i);
+    float tempMax = vis.out->getMaxRange(i);
+    if
+    (
+      (tempMin == static_cast<float>(m.rangeMin))
+      && (tempMax == static_cast<float>(m.rangeMax))
+    )
+    {
+      vis.out->removeChild(i);
+      foundChild = true;
+      break;
+    }
+  }
+  assert(foundChild);
+  if (!foundChild)
+  {
+    std::cout
+    << "Warning: failed to find child for "
+    << m.filePathOSG.string()
+    << " in Widget::lodGeneratedDispatched"
+    << std::endl;
+    return;
+  }
+  
+  vis.out->addChild(fileNode, static_cast<float>(m.rangeMin), static_cast<float>(m.rangeMax), m.filePathOSG.string());
 }
 
 void Widget::screenCapture(const std::string &fp, const std::string &e)

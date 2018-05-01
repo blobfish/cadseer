@@ -46,6 +46,224 @@ namespace prf
   // 
 
 
+  // LODEntry
+  // 
+
+  const LODEntry::LinearFactorType& LODEntry::
+  linearFactor () const
+  {
+    return this->linearFactor_.get ();
+  }
+
+  LODEntry::LinearFactorType& LODEntry::
+  linearFactor ()
+  {
+    return this->linearFactor_.get ();
+  }
+
+  void LODEntry::
+  linearFactor (const LinearFactorType& x)
+  {
+    this->linearFactor_.set (x);
+  }
+
+  void LODEntry::
+  linearFactor (::std::unique_ptr< LinearFactorType > x)
+  {
+    this->linearFactor_.set (std::move (x));
+  }
+
+  const LODEntry::AngularFactorType& LODEntry::
+  angularFactor () const
+  {
+    return this->angularFactor_.get ();
+  }
+
+  LODEntry::AngularFactorType& LODEntry::
+  angularFactor ()
+  {
+    return this->angularFactor_.get ();
+  }
+
+  void LODEntry::
+  angularFactor (const AngularFactorType& x)
+  {
+    this->angularFactor_.set (x);
+  }
+
+  void LODEntry::
+  angularFactor (::std::unique_ptr< AngularFactorType > x)
+  {
+    this->angularFactor_.set (std::move (x));
+  }
+
+
+  // LOD
+  // 
+
+  const LOD::Partition00Type& LOD::
+  partition00 () const
+  {
+    return this->partition00_.get ();
+  }
+
+  LOD::Partition00Type& LOD::
+  partition00 ()
+  {
+    return this->partition00_.get ();
+  }
+
+  void LOD::
+  partition00 (const Partition00Type& x)
+  {
+    this->partition00_.set (x);
+  }
+
+  const LOD::LODEntry01Type& LOD::
+  LODEntry01 () const
+  {
+    return this->LODEntry01_.get ();
+  }
+
+  LOD::LODEntry01Type& LOD::
+  LODEntry01 ()
+  {
+    return this->LODEntry01_.get ();
+  }
+
+  void LOD::
+  LODEntry01 (const LODEntry01Type& x)
+  {
+    this->LODEntry01_.set (x);
+  }
+
+  void LOD::
+  LODEntry01 (::std::unique_ptr< LODEntry01Type > x)
+  {
+    this->LODEntry01_.set (std::move (x));
+  }
+
+  const LOD::Partition01Type& LOD::
+  partition01 () const
+  {
+    return this->partition01_.get ();
+  }
+
+  LOD::Partition01Type& LOD::
+  partition01 ()
+  {
+    return this->partition01_.get ();
+  }
+
+  void LOD::
+  partition01 (const Partition01Type& x)
+  {
+    this->partition01_.set (x);
+  }
+
+  void LOD::
+  partition01 (::std::unique_ptr< Partition01Type > x)
+  {
+    this->partition01_.set (std::move (x));
+  }
+
+  const LOD::LODEntry02Type& LOD::
+  LODEntry02 () const
+  {
+    return this->LODEntry02_.get ();
+  }
+
+  LOD::LODEntry02Type& LOD::
+  LODEntry02 ()
+  {
+    return this->LODEntry02_.get ();
+  }
+
+  void LOD::
+  LODEntry02 (const LODEntry02Type& x)
+  {
+    this->LODEntry02_.set (x);
+  }
+
+  void LOD::
+  LODEntry02 (::std::unique_ptr< LODEntry02Type > x)
+  {
+    this->LODEntry02_.set (std::move (x));
+  }
+
+  const LOD::Partition02Type& LOD::
+  partition02 () const
+  {
+    return this->partition02_.get ();
+  }
+
+  LOD::Partition02Type& LOD::
+  partition02 ()
+  {
+    return this->partition02_.get ();
+  }
+
+  void LOD::
+  partition02 (const Partition02Type& x)
+  {
+    this->partition02_.set (x);
+  }
+
+  void LOD::
+  partition02 (::std::unique_ptr< Partition02Type > x)
+  {
+    this->partition02_.set (std::move (x));
+  }
+
+  const LOD::LODEntry03Type& LOD::
+  LODEntry03 () const
+  {
+    return this->LODEntry03_.get ();
+  }
+
+  LOD::LODEntry03Type& LOD::
+  LODEntry03 ()
+  {
+    return this->LODEntry03_.get ();
+  }
+
+  void LOD::
+  LODEntry03 (const LODEntry03Type& x)
+  {
+    this->LODEntry03_.set (x);
+  }
+
+  void LOD::
+  LODEntry03 (::std::unique_ptr< LODEntry03Type > x)
+  {
+    this->LODEntry03_.set (std::move (x));
+  }
+
+  const LOD::Partition03Type& LOD::
+  partition03 () const
+  {
+    return this->partition03_.get ();
+  }
+
+  LOD::Partition03Type& LOD::
+  partition03 ()
+  {
+    return this->partition03_.get ();
+  }
+
+  void LOD::
+  partition03 (const Partition03Type& x)
+  {
+    this->partition03_.set (x);
+  }
+
+  void LOD::
+  partition03 (::std::unique_ptr< Partition03Type > x)
+  {
+    this->partition03_.set (std::move (x));
+  }
+
+
   // Mesh
   // 
 
@@ -76,7 +294,7 @@ namespace prf
   Mesh::LinearDeflectionType Mesh::
   linearDeflection_default_value ()
   {
-    return LinearDeflectionType (.25);
+    return LinearDeflectionType (1.0);
   }
 
   const Mesh::AngularDeflectionType& Mesh::
@@ -106,7 +324,37 @@ namespace prf
   Mesh::AngularDeflectionType Mesh::
   angularDeflection_default_value ()
   {
-    return AngularDeflectionType (.5);
+    return AngularDeflectionType (120.0);
+  }
+
+  const Mesh::LodOptional& Mesh::
+  lod () const
+  {
+    return this->lod_;
+  }
+
+  Mesh::LodOptional& Mesh::
+  lod ()
+  {
+    return this->lod_;
+  }
+
+  void Mesh::
+  lod (const LodType& x)
+  {
+    this->lod_.set (x);
+  }
+
+  void Mesh::
+  lod (const LodOptional& x)
+  {
+    this->lod_ = x;
+  }
+
+  void Mesh::
+  lod (::std::unique_ptr< LodType > x)
+  {
+    this->lod_.set (std::move (x));
   }
 
 
@@ -2241,8 +2489,8 @@ namespace prf
   //
 
   DecPositive::
-  DecPositive (const ::xml_schema::Decimal& _xsd_Decimal_base)
-  : ::xsd::cxx::tree::fundamental_base< ::xml_schema::Decimal, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::decimal > (_xsd_Decimal_base)
+  DecPositive (const ::xml_schema::Double& _xsd_Double_base)
+  : ::xsd::cxx::tree::fundamental_base< ::xml_schema::Double, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::double_ > (_xsd_Double_base)
   {
   }
 
@@ -2250,7 +2498,7 @@ namespace prf
   DecPositive (const DecPositive& x,
                ::xml_schema::Flags f,
                ::xml_schema::Container* c)
-  : ::xsd::cxx::tree::fundamental_base< ::xml_schema::Decimal, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::decimal > (x, f, c)
+  : ::xsd::cxx::tree::fundamental_base< ::xml_schema::Double, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::double_ > (x, f, c)
   {
   }
 
@@ -2258,7 +2506,7 @@ namespace prf
   DecPositive (const ::xercesc::DOMElement& e,
                ::xml_schema::Flags f,
                ::xml_schema::Container* c)
-  : ::xsd::cxx::tree::fundamental_base< ::xml_schema::Decimal, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::decimal > (e, f, c)
+  : ::xsd::cxx::tree::fundamental_base< ::xml_schema::Double, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::double_ > (e, f, c)
   {
   }
 
@@ -2266,7 +2514,7 @@ namespace prf
   DecPositive (const ::xercesc::DOMAttr& a,
                ::xml_schema::Flags f,
                ::xml_schema::Container* c)
-  : ::xsd::cxx::tree::fundamental_base< ::xml_schema::Decimal, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::decimal > (a, f, c)
+  : ::xsd::cxx::tree::fundamental_base< ::xml_schema::Double, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::double_ > (a, f, c)
   {
   }
 
@@ -2275,7 +2523,7 @@ namespace prf
                const ::xercesc::DOMElement* e,
                ::xml_schema::Flags f,
                ::xml_schema::Container* c)
-  : ::xsd::cxx::tree::fundamental_base< ::xml_schema::Decimal, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::decimal > (s, e, f, c)
+  : ::xsd::cxx::tree::fundamental_base< ::xml_schema::Double, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::double_ > (s, e, f, c)
   {
   }
 
@@ -2291,6 +2539,388 @@ namespace prf
   {
   }
 
+  // LODEntry
+  //
+
+  LODEntry::
+  LODEntry (const LinearFactorType& linearFactor,
+            const AngularFactorType& angularFactor)
+  : ::xml_schema::Type (),
+    linearFactor_ (linearFactor, this),
+    angularFactor_ (angularFactor, this)
+  {
+  }
+
+  LODEntry::
+  LODEntry (const LODEntry& x,
+            ::xml_schema::Flags f,
+            ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    linearFactor_ (x.linearFactor_, f, this),
+    angularFactor_ (x.angularFactor_, f, this)
+  {
+  }
+
+  LODEntry::
+  LODEntry (const ::xercesc::DOMElement& e,
+            ::xml_schema::Flags f,
+            ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    linearFactor_ (this),
+    angularFactor_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void LODEntry::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // linearFactor
+      //
+      if (n.name () == "linearFactor" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< LinearFactorType > r (
+          LinearFactorTraits::create (i, f, this));
+
+        if (!linearFactor_.present ())
+        {
+          this->linearFactor_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      // angularFactor
+      //
+      if (n.name () == "angularFactor" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< AngularFactorType > r (
+          AngularFactorTraits::create (i, f, this));
+
+        if (!angularFactor_.present ())
+        {
+          this->angularFactor_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!linearFactor_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "linearFactor",
+        "");
+    }
+
+    if (!angularFactor_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "angularFactor",
+        "");
+    }
+  }
+
+  LODEntry* LODEntry::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class LODEntry (*this, f, c);
+  }
+
+  LODEntry& LODEntry::
+  operator= (const LODEntry& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->linearFactor_ = x.linearFactor_;
+      this->angularFactor_ = x.angularFactor_;
+    }
+
+    return *this;
+  }
+
+  LODEntry::
+  ~LODEntry ()
+  {
+  }
+
+  // LOD
+  //
+
+  LOD::
+  LOD (const Partition00Type& partition00,
+       const LODEntry01Type& LODEntry01,
+       const Partition01Type& partition01,
+       const LODEntry02Type& LODEntry02,
+       const Partition02Type& partition02,
+       const LODEntry03Type& LODEntry03,
+       const Partition03Type& partition03)
+  : ::xml_schema::Type (),
+    partition00_ (partition00, this),
+    LODEntry01_ (LODEntry01, this),
+    partition01_ (partition01, this),
+    LODEntry02_ (LODEntry02, this),
+    partition02_ (partition02, this),
+    LODEntry03_ (LODEntry03, this),
+    partition03_ (partition03, this)
+  {
+  }
+
+  LOD::
+  LOD (const Partition00Type& partition00,
+       ::std::unique_ptr< LODEntry01Type > LODEntry01,
+       const Partition01Type& partition01,
+       ::std::unique_ptr< LODEntry02Type > LODEntry02,
+       const Partition02Type& partition02,
+       ::std::unique_ptr< LODEntry03Type > LODEntry03,
+       const Partition03Type& partition03)
+  : ::xml_schema::Type (),
+    partition00_ (partition00, this),
+    LODEntry01_ (std::move (LODEntry01), this),
+    partition01_ (partition01, this),
+    LODEntry02_ (std::move (LODEntry02), this),
+    partition02_ (partition02, this),
+    LODEntry03_ (std::move (LODEntry03), this),
+    partition03_ (partition03, this)
+  {
+  }
+
+  LOD::
+  LOD (const LOD& x,
+       ::xml_schema::Flags f,
+       ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    partition00_ (x.partition00_, f, this),
+    LODEntry01_ (x.LODEntry01_, f, this),
+    partition01_ (x.partition01_, f, this),
+    LODEntry02_ (x.LODEntry02_, f, this),
+    partition02_ (x.partition02_, f, this),
+    LODEntry03_ (x.LODEntry03_, f, this),
+    partition03_ (x.partition03_, f, this)
+  {
+  }
+
+  LOD::
+  LOD (const ::xercesc::DOMElement& e,
+       ::xml_schema::Flags f,
+       ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    partition00_ (this),
+    LODEntry01_ (this),
+    partition01_ (this),
+    LODEntry02_ (this),
+    partition02_ (this),
+    LODEntry03_ (this),
+    partition03_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void LOD::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // partition00
+      //
+      if (n.name () == "partition00" && n.namespace_ ().empty ())
+      {
+        if (!partition00_.present ())
+        {
+          this->partition00_.set (Partition00Traits::create (i, f, this));
+          continue;
+        }
+      }
+
+      // LODEntry01
+      //
+      if (n.name () == "LODEntry01" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< LODEntry01Type > r (
+          LODEntry01Traits::create (i, f, this));
+
+        if (!LODEntry01_.present ())
+        {
+          this->LODEntry01_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      // partition01
+      //
+      if (n.name () == "partition01" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< Partition01Type > r (
+          Partition01Traits::create (i, f, this));
+
+        if (!partition01_.present ())
+        {
+          this->partition01_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      // LODEntry02
+      //
+      if (n.name () == "LODEntry02" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< LODEntry02Type > r (
+          LODEntry02Traits::create (i, f, this));
+
+        if (!LODEntry02_.present ())
+        {
+          this->LODEntry02_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      // partition02
+      //
+      if (n.name () == "partition02" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< Partition02Type > r (
+          Partition02Traits::create (i, f, this));
+
+        if (!partition02_.present ())
+        {
+          this->partition02_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      // LODEntry03
+      //
+      if (n.name () == "LODEntry03" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< LODEntry03Type > r (
+          LODEntry03Traits::create (i, f, this));
+
+        if (!LODEntry03_.present ())
+        {
+          this->LODEntry03_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      // partition03
+      //
+      if (n.name () == "partition03" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< Partition03Type > r (
+          Partition03Traits::create (i, f, this));
+
+        if (!partition03_.present ())
+        {
+          this->partition03_.set (::std::move (r));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!partition00_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "partition00",
+        "");
+    }
+
+    if (!LODEntry01_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "LODEntry01",
+        "");
+    }
+
+    if (!partition01_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "partition01",
+        "");
+    }
+
+    if (!LODEntry02_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "LODEntry02",
+        "");
+    }
+
+    if (!partition02_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "partition02",
+        "");
+    }
+
+    if (!LODEntry03_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "LODEntry03",
+        "");
+    }
+
+    if (!partition03_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "partition03",
+        "");
+    }
+  }
+
+  LOD* LOD::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class LOD (*this, f, c);
+  }
+
+  LOD& LOD::
+  operator= (const LOD& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->partition00_ = x.partition00_;
+      this->LODEntry01_ = x.LODEntry01_;
+      this->partition01_ = x.partition01_;
+      this->LODEntry02_ = x.LODEntry02_;
+      this->partition02_ = x.partition02_;
+      this->LODEntry03_ = x.LODEntry03_;
+      this->partition03_ = x.partition03_;
+    }
+
+    return *this;
+  }
+
+  LOD::
+  ~LOD ()
+  {
+  }
+
   // Mesh
   //
 
@@ -2299,7 +2929,8 @@ namespace prf
         const AngularDeflectionType& angularDeflection)
   : ::xml_schema::Type (),
     linearDeflection_ (linearDeflection, this),
-    angularDeflection_ (angularDeflection, this)
+    angularDeflection_ (angularDeflection, this),
+    lod_ (this)
   {
   }
 
@@ -2309,7 +2940,8 @@ namespace prf
         ::xml_schema::Container* c)
   : ::xml_schema::Type (x, f, c),
     linearDeflection_ (x.linearDeflection_, f, this),
-    angularDeflection_ (x.angularDeflection_, f, this)
+    angularDeflection_ (x.angularDeflection_, f, this),
+    lod_ (x.lod_, f, this)
   {
   }
 
@@ -2319,7 +2951,8 @@ namespace prf
         ::xml_schema::Container* c)
   : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
     linearDeflection_ (this),
-    angularDeflection_ (this)
+    angularDeflection_ (this),
+    lod_ (this)
   {
     if ((f & ::xml_schema::Flags::base) == 0)
     {
@@ -2366,6 +2999,20 @@ namespace prf
         }
       }
 
+      // lod
+      //
+      if (n.name () == "lod" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< LodType > r (
+          LodTraits::create (i, f, this));
+
+        if (!this->lod_)
+        {
+          this->lod_.set (::std::move (r));
+          continue;
+        }
+      }
+
       break;
     }
 
@@ -2399,6 +3046,7 @@ namespace prf
       static_cast< ::xml_schema::Type& > (*this) = x;
       this->linearDeflection_ = x.linearDeflection_;
       this->angularDeflection_ = x.angularDeflection_;
+      this->lod_ = x.lod_;
     }
 
     return *this;
@@ -6448,20 +7096,131 @@ namespace prf
   void
   operator<< (::xercesc::DOMElement& e, const DecPositive& i)
   {
-    e << static_cast< const ::xsd::cxx::tree::fundamental_base< ::xml_schema::Decimal, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::decimal >& > (i);
+    e << static_cast< const ::xsd::cxx::tree::fundamental_base< ::xml_schema::Double, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::double_ >& > (i);
   }
 
   void
   operator<< (::xercesc::DOMAttr& a, const DecPositive& i)
   {
-    a << static_cast< const ::xsd::cxx::tree::fundamental_base< ::xml_schema::Decimal, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::decimal >& > (i);
+    a << static_cast< const ::xsd::cxx::tree::fundamental_base< ::xml_schema::Double, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::double_ >& > (i);
   }
 
   void
   operator<< (::xml_schema::ListStream& l,
               const DecPositive& i)
   {
-    l << static_cast< const ::xsd::cxx::tree::fundamental_base< ::xml_schema::Decimal, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::decimal >& > (i);
+    l << static_cast< const ::xsd::cxx::tree::fundamental_base< ::xml_schema::Double, char, ::xml_schema::SimpleType, ::xsd::cxx::tree::schema_type::double_ >& > (i);
+  }
+
+  void
+  operator<< (::xercesc::DOMElement& e, const LODEntry& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // linearFactor
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "linearFactor",
+          e));
+
+      s << i.linearFactor ();
+    }
+
+    // angularFactor
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "angularFactor",
+          e));
+
+      s << i.angularFactor ();
+    }
+  }
+
+  void
+  operator<< (::xercesc::DOMElement& e, const LOD& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // partition00
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "partition00",
+          e));
+
+      s << ::xml_schema::AsDouble(i.partition00 ());
+    }
+
+    // LODEntry01
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "LODEntry01",
+          e));
+
+      s << i.LODEntry01 ();
+    }
+
+    // partition01
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "partition01",
+          e));
+
+      s << i.partition01 ();
+    }
+
+    // LODEntry02
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "LODEntry02",
+          e));
+
+      s << i.LODEntry02 ();
+    }
+
+    // partition02
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "partition02",
+          e));
+
+      s << i.partition02 ();
+    }
+
+    // LODEntry03
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "LODEntry03",
+          e));
+
+      s << i.LODEntry03 ();
+    }
+
+    // partition03
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "partition03",
+          e));
+
+      s << i.partition03 ();
+    }
   }
 
   void
@@ -6489,6 +7248,18 @@ namespace prf
           e));
 
       s << i.angularDeflection ();
+    }
+
+    // lod
+    //
+    if (i.lod ())
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "lod",
+          e));
+
+      s << *i.lod ();
     }
   }
 

@@ -89,6 +89,28 @@ namespace slc
   protected:
     std::vector<T*> &collection;
   };
+  
+  class PLODPathVisitor : public osg::NodeVisitor
+  {
+  public:
+    PLODPathVisitor(const std::string &pathIn);
+    virtual void apply(osg::PagedLOD&) override;
+    
+  protected:
+    const std::string &path;
+  };
+  
+  class PLODIdVisitor : public osg::NodeVisitor
+  {
+  public:
+    PLODIdVisitor(const boost::uuids::uuid&);
+    virtual void apply(osg::PagedLOD&) override;
+    virtual void apply(osg::Switch&) override;
+    osg::PagedLOD *out = nullptr;
+    
+  protected:
+    const boost::uuids::uuid &id;
+  };
 }
 
 #endif // SLC_VISITORS_H

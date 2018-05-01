@@ -41,6 +41,7 @@
 #include <message/observer.h>
 #include <application/factory.h>
 #include <command/manager.h>
+#include <lod/manager.h>
 #include <dialogs/project.h>
 
 #include <spnav.h>
@@ -49,7 +50,8 @@
 using namespace app;
 
 Application::Application(int &argc, char **argv) :
-    QApplication(argc, argv)
+  QApplication(argc, argv),
+  lodManager(new lod::Manager(arguments().at(0).toStdString()))
 {
     qRegisterMetaType<msg::Message>("msg::Message");
   
@@ -127,6 +129,11 @@ void Application::quittingSlot()
     {
 //        std::cout << "couldn't disconnect spaceball" << std::endl;
     }
+}
+
+void Application::queuedMessage(msg::Message message)
+{
+  QMetaObject::invokeMethod(this, "messageSlot", Qt::QueuedConnection, Q_ARG(msg::Message, message));
 }
 
 void Application::messageSlot(msg::Message messageIn)

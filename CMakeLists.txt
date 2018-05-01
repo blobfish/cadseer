@@ -15,7 +15,11 @@ find_package(Qt5Svg REQUIRED)
 SET(QT_LIBRARIES Qt5::Core Qt5::Widgets Qt5::OpenGL Qt5::X11Extras Qt5::Svg)
 add_definitions(${Qt5Widgets_DEFINITIONS})
 
+#need to add process to the components list. can't for my version of find_boost cmake.
+#process was added in boost 1.64, so that is the minimum
+#process is header only so don't need to be in find
 find_package(Boost REQUIRED COMPONENTS system graph timer filesystem)
+#message(${Boost_LIBRARIES})
 
 # OCCT_PROJECT_PATH lets user define cmake variables based on a locally built and
 # non-installed copy of the OCCT source code. assumes standard OCCT path
@@ -341,6 +345,7 @@ SET(ANNEX_SOURCES
     annex/seershape.cpp
     annex/intersectionmapper.cpp
     annex/instancemapper.cpp
+    annex/shapeidhelper.cpp
     )
     
 SET(EXPRESSION_SOURCES
@@ -515,6 +520,11 @@ SET(LIBREOFFICE_SOURCES
     libreoffice/libzippp/src/libzippp.cpp
 )
 
+SET(LOD_SOURCES
+    lod/message.cpp
+    lod/manager.cpp
+)
+
 SET(CADSEER_SOURCES
     main.cpp
     dagview/view.cpp
@@ -540,6 +550,7 @@ SET(CADSEER_SOURCES
     ${VIEWER_SOURCES}
     ${SQUASH_SOURCES}
     ${LIBREOFFICE_SOURCES}
+    ${LOD_SOURCES}
     )
 
 SET(CADSEER_MOC_HDRS
@@ -568,6 +579,7 @@ SET(CADSEER_MOC_HDRS
     dialogs/boolean.h
     dialogs/revision.h
     dialogs/commitwidget.h
+    lod/manager.h
     )
 
 SET(CADSEER_LIBRARIES
@@ -599,3 +611,23 @@ qt5_wrap_ui(CADSEER_UIS_WRAPPED ${CADSEER_UIS} )
 qt5_wrap_cpp(CADSEER_MOC_SRCS ${CADSEER_MOC_HDRS} ${CADSEER_UIS_WRAPPED})
 add_executable(cadseer ${CADSEER_SOURCES} ${CADSEER_MOC_SRCS} ${CADSEER_RESOURCES_RCC})
 TARGET_LINK_LIBRARIES(cadseer ${CADSEER_LIBRARIES})
+
+#lod generator
+SET(LODGENERATOR_SOURCES
+    lod/main.cpp
+    tools/occtools.cpp
+    tools/idtools.cpp
+    annex/shapeidhelper.cpp
+    modelviz/base.cpp
+    modelviz/hiddenlineeffect.cpp
+    modelviz/hiddenlinetechnique.cpp
+    modelviz/shapegeometry.cpp
+)
+SET(LODGENERATOR_LIBRARIES
+    ${Boost_LIBRARIES}
+    ${OPENSCENEGRAPH_LIBRARIES}
+    ${OCE_LIBRARIES}
+    )
+add_executable(lodgenerator ${LODGENERATOR_SOURCES})
+target_link_libraries(lodgenerator ${LODGENERATOR_LIBRARIES})
+    

@@ -226,7 +226,7 @@ void InstanceMirror::updateModel(const UpdatePayload &payloadIn)
     occt::ShapeVector out;
     for (const auto &tShape : tShapes)
     {
-      if (static_cast<bool>(includeSource))
+      if (static_cast<bool>(*includeSource))
         out.push_back(tShape);
       bt.Perform(tShape);
       out.push_back(bt.Shape());

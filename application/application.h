@@ -36,6 +36,7 @@ class QSettings;
 namespace prf{class Manager;}
 namespace prj{class Project;}
 namespace msg{class Observer;}
+namespace lod{class Manager;}
 
 namespace app
 {
@@ -54,6 +55,7 @@ public:
     MainWindow* getMainWindow(){return mainWindow.get();}
     QDir getApplicationDirectory();
     QSettings& getUserSettings();
+    void queuedMessage(msg::Message); //queue message into qt event loop
     
 public Q_SLOTS:
     void quittingSlot();
@@ -64,6 +66,7 @@ private:
     std::unique_ptr<MainWindow> mainWindow;
     std::unique_ptr<prj::Project> project;
     std::unique_ptr<Factory> factory;
+    std::unique_ptr<lod::Manager> lodManager;
     bool spaceballPresent;
     
     void createNewProject(const std::string &);
@@ -78,6 +81,8 @@ private:
     void closeProjectRequestDispatched(const msg::Message &);
     void ProjectDialogRequestDispatched(const msg::Message &);
 };
+
+static Application* instance(){return static_cast<Application*>(qApp);}
 
 struct WaitCursor
 {

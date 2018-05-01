@@ -21,6 +21,7 @@
 #include <ostream>
 
 #include <boost/variant.hpp>
+#include <boost/filesystem.hpp>
 
 #include <project/libgit2pp/src/index.hpp>
 #include <project/libgit2pp/src/object.hpp>
@@ -136,11 +137,47 @@ void GitManager::create(const std::string& pathIn)
   std::string refName = "refs/heads/"; //seems a little hacky
   refName += transName;
   repo.setHead(refName);
+  
+  //build scratch directory
+  namespace bfs = boost::filesystem;
+  bfs::path scratchPath(pathIn);
+  std::string scratchName = ".scratch";
+  scratchPath /= scratchName;
+  bool result = bfs::create_directory(scratchPath);
+  assert(result);
+  if (!result)
+    std::cout << "WARNING: can't create scratch directory in GitManager::create" << std::endl;
+  
+  //ignore is a little weird. Api doesn't seem to be setup to modify the exclude file.
+  //so I will add the directory to the runtime ignore to work for the initial creation.
+  //also add manually to the exclude file for future project opening.
+  repo.addIgnoreRule(scratchName + " \n");
+  bfs::path excludePath(bfs::path(pathIn) / ".git" / "info" / "exclude");
+  std::ofstream excludeStream(excludePath.string(), std::ios_base::app | std::ios_base::out);
+  if (!excludeStream.is_open())
+  {
+    std::cout << "WARING: can't open exclude file in GitManager::create" << std::endl;
+    return;
+  }
+  excludeStream << scratchName << std::endl;
+  excludeStream.close();
 }
 
 void GitManager::open(const std::string& pathIn)
 {
   repo = Repository::open(pathIn);
+  
+  //ensure scratch directory
+  namespace bfs = boost::filesystem;
+  bfs::path scratchPath(pathIn);
+  scratchPath /= ".scratch";
+  if (!bfs::exists(scratchPath))
+  {
+    bool result = bfs::create_directory(scratchPath);
+    assert(result);
+    if (!result)
+      std::cout << "WARNING: can't create scratch directory in GitManager::open" << std::endl;
+  }
 }
 
 void GitManager::save()
