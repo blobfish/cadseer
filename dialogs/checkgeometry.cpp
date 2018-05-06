@@ -65,59 +65,53 @@
 using namespace dlg;
 using boost::uuids::uuid;
 
-QString checkStatusToString(int index)
+QString checkStatusToString(BRepCheck_Status status)
 {
-  static const QStringList names = 
+  static const std::map<BRepCheck_Status, QString> names
   {
-    "No Error",                           //    BRepCheck_NoError
-    "Invalid Point On Curve",             //    BRepCheck_InvalidPointOnCurve
-    "Invalid Point On Curve On Surface",  //    BRepCheck_InvalidPointOnCurveOnSurface
-    "Invalid Point On Surface",           //    BRepCheck_InvalidPointOnSurface
-    "No 3D Curve",                        //    BRepCheck_No3DCurve
-    "Multiple 3D Curve",                  //    BRepCheck_Multiple3DCurve
-    "Invalid 3D Curve",                   //    BRepCheck_Invalid3DCurve
-    "No Curve On Surface",                //    BRepCheck_NoCurveOnSurface
-    "Invalid Curve On Surface",           //    BRepCheck_InvalidCurveOnSurface
-    "Invalid Curve On Closed Surface",    //    BRepCheck_InvalidCurveOnClosedSurface
-    "Invalid Same Range Flag",            //    BRepCheck_InvalidSameRangeFlag
-    "Invalid Same Parameter Flag",        //    BRepCheck_InvalidSameParameterFlag
-    "Invalid Degenerated Flag",           //    BRepCheck_InvalidDegeneratedFlag
-    "Free Edge",                          //    BRepCheck_FreeEdge
-    "Invalid MultiConnexity",             //    BRepCheck_InvalidMultiConnexity
-    "Invalid Range",                      //    BRepCheck_InvalidRange
-    "Empty Wire",                         //    BRepCheck_EmptyWire
-    "Redundant Edge",                     //    BRepCheck_RedundantEdge
-    "Self Intersecting Wire",             //    BRepCheck_SelfIntersectingWire
-    "No Surface",                         //    BRepCheck_NoSurface
-    "Invalid Wire",                       //    BRepCheck_InvalidWire
-    "Redundant Wire",                     //    BRepCheck_RedundantWire
-    "Intersecting Wires",                 //    BRepCheck_IntersectingWires
-    "Invalid Imbrication Of Wires",       //    BRepCheck_InvalidImbricationOfWires
-    "Empty Shell",                        //    BRepCheck_EmptyShell
-    "Redundant Face",                     //    BRepCheck_RedundantFace
-    "Unorientable Shape",                 //    BRepCheck_UnorientableShape
-    "Not Closed",                         //    BRepCheck_NotClosed
-    "Not Connected",                      //    BRepCheck_NotConnected
-    "Sub Shape Not In Shape",             //    BRepCheck_SubshapeNotInShape
-    "Bad Orientation",                    //    BRepCheck_BadOrientation
-    "Bad Orientation Of Sub Shape",       //    BRepCheck_BadOrientationOfSubshape
-    "Invalid Tolerance Value",            //    BRepCheck_InvalidToleranceValue
-    "Check Failed"                        //    BRepCheck_CheckFail
+    std::make_pair(BRepCheck_NoError, QObject::tr("No Error")),
+    std::make_pair(BRepCheck_InvalidPointOnCurve, QObject::tr("Invalid Point On Curve")),
+    std::make_pair(BRepCheck_InvalidPointOnCurveOnSurface, QObject::tr("Invalid Point On Curve On Surface")),
+    std::make_pair(BRepCheck_InvalidPointOnSurface, QObject::tr("Invalid Point On Surface")),
+    std::make_pair(BRepCheck_No3DCurve, QObject::tr("No 3D Curve")),
+    std::make_pair(BRepCheck_Multiple3DCurve, QObject::tr("Multiple 3D Curve")),
+    std::make_pair(BRepCheck_Invalid3DCurve, QObject::tr("Invalid 3D Curve")),
+    std::make_pair(BRepCheck_NoCurveOnSurface, QObject::tr("No Curve On Surface")),
+    std::make_pair(BRepCheck_InvalidCurveOnSurface, QObject::tr("Invalid Curve On Surface")),
+    std::make_pair(BRepCheck_InvalidCurveOnClosedSurface, QObject::tr("Invalid Curve On Closed Surface")),
+    std::make_pair(BRepCheck_InvalidSameRangeFlag, QObject::tr("Invalid Same Range Flag")),
+    std::make_pair(BRepCheck_InvalidSameParameterFlag, QObject::tr("Invalid Same Parameter Flag")),
+    std::make_pair(BRepCheck_InvalidDegeneratedFlag, QObject::tr("Invalid Degenerated Flag")),
+    std::make_pair(BRepCheck_FreeEdge, QObject::tr("Free Edge")),
+    std::make_pair(BRepCheck_InvalidMultiConnexity, QObject::tr("Invalid MultiConnexity")),
+    std::make_pair(BRepCheck_InvalidRange, QObject::tr("Invalid Range")),
+    std::make_pair(BRepCheck_EmptyWire, QObject::tr("Empty Wire")),
+    std::make_pair(BRepCheck_RedundantEdge, QObject::tr("Redundant Edge")),
+    std::make_pair(BRepCheck_SelfIntersectingWire, QObject::tr("Self Intersecting Wire")),
+    std::make_pair(BRepCheck_NoSurface, QObject::tr("No Surface")),
+    std::make_pair(BRepCheck_InvalidWire, QObject::tr("Invalid Wire")),
+    std::make_pair(BRepCheck_RedundantWire, QObject::tr("Redundant Wire")),
+    std::make_pair(BRepCheck_IntersectingWires, QObject::tr("Intersecting Wires")),
+    std::make_pair(BRepCheck_InvalidImbricationOfWires, QObject::tr("Invalid Imbrication Of Wires")),
+    std::make_pair(BRepCheck_EmptyShell, QObject::tr("Empty Shell")),
+    std::make_pair(BRepCheck_RedundantFace, QObject::tr("Redundant Face")),
+    std::make_pair(BRepCheck_InvalidImbricationOfShells, QObject::tr("Invalid Imbrication Of Shells")),
+    std::make_pair(BRepCheck_UnorientableShape, QObject::tr("Unorientable Shape")),
+    std::make_pair(BRepCheck_NotClosed, QObject::tr("Not Closed")),
+    std::make_pair(BRepCheck_NotConnected, QObject::tr("Not Connected")),
+    std::make_pair(BRepCheck_SubshapeNotInShape, QObject::tr("Sub Shape Not In Shape")),
+    std::make_pair(BRepCheck_BadOrientation, QObject::tr("Bad Orientation")),
+    std::make_pair(BRepCheck_BadOrientationOfSubshape, QObject::tr("Bad Orientation Of Sub Shape")),
+    std::make_pair(BRepCheck_InvalidPolygonOnTriangulation, QObject::tr("Invalid Polygon On Triangulation")),
+    std::make_pair(BRepCheck_InvalidToleranceValue, QObject::tr("Invalid Tolerance Value")),
+    std::make_pair(BRepCheck_EnclosedRegion, QObject::tr("Enclosed Region")),
+    std::make_pair(BRepCheck_CheckFail, QObject::tr("Check Failed"))
   };
   
-  if (index == -1)
-  {
-    return QString(QObject::tr("No Result"));
-  }
-  if (index > 33 || index < 0)
-  {
-    QString message(QObject::tr("Out Of Enum Range: "));
-    QString number;
-    number.setNum(index);
-    message += number;
-    return message;
-  }
-  return names.at(index);
+  if (names.count(status) == 0)
+    return (QObject::tr("Out Of Enum Range"));
+  else
+    return names.at(status);
 }
 
 QString BOPCheckStatusToString(BOPAlgo_CheckStatus status)
@@ -324,7 +318,7 @@ void BasicCheckPage::recursiveCheck(const BRepCheck_Analyzer &shapeCheck, const 
       QTreeWidgetItem *entry = new QTreeWidgetItem(itemStack.top());
       entry->setData(0, Qt::DisplayRole, QString::fromStdString(gu::idToString(shapeId)));
       entry->setData(1, Qt::DisplayRole, QString::fromStdString(shapeStrings.at(shape.ShapeType())));
-      entry->setData(2, Qt::DisplayRole, checkStatusToString(static_cast<int>(listIt.Value())));
+      entry->setData(2, Qt::DisplayRole, checkStatusToString(listIt.Value()));
       itemStack.push(entry);
   
       if (shape.ShapeType() == TopAbs_SOLID)
@@ -391,7 +385,7 @@ void BasicCheckPage::checkSub(const BRepCheck_Analyzer &shapeCheck, const TopoDS
           QTreeWidgetItem *entry = new QTreeWidgetItem(itemStack.top());
           entry->setData(0, Qt::DisplayRole, QString::fromStdString(gu::idToString(subId)));
           entry->setData(1, Qt::DisplayRole, QString::fromStdString(shapeStrings.at(sub.ShapeType())));
-          entry->setData(2, Qt::DisplayRole, checkStatusToString(static_cast<int>(itl.Value())));
+          entry->setData(2, Qt::DisplayRole, checkStatusToString(itl.Value()));
 //           dispatchError(entry, itl.Value());
         }
       }
