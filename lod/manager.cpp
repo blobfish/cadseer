@@ -27,6 +27,7 @@
 #include <application/application.h>
 #include <message/observer.h>
 #include <feature/states.h>
+#include <feature/base.h>
 #include <lod/manager.h>
 
 using namespace lod;
@@ -151,7 +152,7 @@ void Manager::setupDispatcher()
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::constructLODRequestDispatched, this, _1)));
   
   mask = msg::Response | msg::Pre | msg::Remove | msg::Feature;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::featureStateChangedDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::featureRemovedDispatched, this, _1)));
   
   mask = msg::Response | msg::Feature | msg::Status;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::featureStateChangedDispatched, this, _1)));
@@ -165,8 +166,8 @@ void Manager::constructLODRequestDispatched(const msg::Message &mIn)
 
 void Manager::featureRemovedDispatched(const msg::Message &mIn)
 {
-  ftr::Message fm = boost::get<ftr::Message>(mIn.payload);
-  cleanMessages(fm.featureId);
+  prj::Message pm = boost::get<prj::Message>(mIn.payload);
+  cleanMessages(pm.feature->getId());
 }
 
 void Manager::featureStateChangedDispatched(const msg::Message &mIn)
