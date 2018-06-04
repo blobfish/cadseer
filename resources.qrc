@@ -67,6 +67,7 @@
     <file>resources/images/constructionThicken.svg</file>
     <file>resources/images/constructionSew.svg</file>
     <file>resources/images/constructionTrim.svg</file>
+    <file>resources/images/constructionRemoveFaces.svg</file>
     <file>resources/images/editBase.svg</file>
     <file>resources/images/editRemove.svg</file>
     <file>resources/images/editUpdate.svg</file>
