@@ -1058,14 +1058,15 @@ void IntersectionMapper::go(const ftr::UpdatePayload &payloadIn, BOPAlgo_Builder
   }
   
   //cache builder info
-  const BOPCol_DataMapOfShapeListOfShape &splits = builder.Splits();
-  const BOPCol_DataMapOfShapeListOfShape &origins = builder.Origins();
-  const BOPCol_DataMapOfShapeListOfShape &images = builder.Images();
+  //splits() is gone from occt 7.3. need to fix.
+  const TopTools_DataMapOfShapeListOfShape splits;// = builder.Splits();
+  const TopTools_DataMapOfShapeListOfShape &origins = builder.Origins();
+  const TopTools_DataMapOfShapeListOfShape &images = builder.Images();
 
   //start of face splits  
   for (auto &fs : data->faceSplits)
     fs.start();
-  BOPCol_DataMapOfShapeListOfShape::Iterator splitIt(splits);
+  TopTools_DataMapOfShapeListOfShape::Iterator splitIt(splits);
   for (; splitIt.More(); splitIt.Next())
   {
     //splits contain only face types.

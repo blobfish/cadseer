@@ -41,7 +41,7 @@ IF(OCCT_PROJECT_PATH)
     
     include_directories(${OCCT_INCLUDE_DIRS})
     
-    set(OCCT_BUILD_LIB "${OCCT_PROJECT_PATH}/build/lin64/gcc/lib")
+    set(OCCT_BUILD_LIB "${OCCT_PROJECT_PATH}/build/lin64/gcc/libd")
     if(NOT EXISTS ${OCCT_BUILD_LIB})
         message(FATAL_ERROR "build library path not valid. ${OCCT_BUILD_LIB}")
     endif(NOT EXISTS ${OCCT_BUILD_LIB})

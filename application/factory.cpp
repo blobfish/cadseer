@@ -1083,8 +1083,8 @@ void Factory::osgToDotTestDispatched(const msg::Message&)
   QString fileName = static_cast<app::Application *>(qApp)->getApplicationDirectory().path();
   fileName += QDir::separator();
   fileName += "osg";
-  osgDB::Options options;
-  options.setOptionString("rankdir = TB;");
+  osg::ref_ptr<osgDB::Options> options(new osgDB::Options());
+  options->setOptionString("rankdir = TB;");
   
   osg::Switch *overlay = feature->getOverlaySwitch();
   std::vector<lbr::LinearDimension*> dimensions;
@@ -1094,7 +1094,7 @@ void Factory::osgToDotTestDispatched(const msg::Message&)
   for (unsigned int i = 0; i < dimensions.size(); ++i)
   {
     QString cFileName = fileName + "_" + QString::number(i) + ".dot";
-    osgDB::writeNodeFile(*(dimensions.at(i)), cFileName.toStdString(), &options);
+    osgDB::writeNodeFile(*(dimensions.at(i)), cFileName.toStdString(), options);
   }
   
 //   QDesktopServices::openUrl(QUrl(fileName));
