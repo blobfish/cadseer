@@ -524,20 +524,21 @@ void Factory::importOCCDispatched(const msg::Message&)
   app::Application *application = dynamic_cast<app::Application *>(qApp);
   assert(application);
   
-  QString fileName = QFileDialog::getOpenFileName
+  QStringList fileNames = QFileDialog::getOpenFileNames
   (
     application->getMainWindow(),
     QObject::tr("Open File"),
     QString::fromStdString(prf::manager().rootPtr->project().lastDirectory().get()),
     QObject::tr("brep (*.brep *.brp)")
   );
-  if (fileName.isEmpty())
+  if (fileNames.isEmpty())
       return;
   
   assert(project);
-  project->readOCC(fileName.toStdString());
+  for (const auto &fn : fileNames)
+    project->readOCC(fn.toStdString());
   
-  boost::filesystem::path p = fileName.toStdString();
+  boost::filesystem::path p = fileNames.at(0).toStdString();
   prf::manager().rootPtr->project().lastDirectory() = p.remove_filename().string();
   prf::manager().saveConfig();
   
