@@ -77,6 +77,7 @@ namespace prj
     std::shared_ptr<ftr::Base> loadThicken(const std::string &, std::size_t);
     std::shared_ptr<ftr::Base> loadSew(const std::string &, std::size_t);
     std::shared_ptr<ftr::Base> loadTrim(const std::string &, std::size_t);
+    std::shared_ptr<ftr::Base> loadRemoveFaces(const std::string &, std::size_t);
   };
 }
 

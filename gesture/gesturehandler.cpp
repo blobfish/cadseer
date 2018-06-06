@@ -698,6 +698,13 @@ void GestureHandler::constructMenu()
         (msg::Request | msg::Construct | msg::Trim).to_string(),
         constructionFinishing
       );
+      constructCommandNode
+      (
+        ":/resources/images/constructionRemoveFaces.svg",
+        QObject::tr("Remove faces from body").toStdString(),
+        (msg::Request | msg::Construct | msg::RemoveFaces).to_string(),
+        constructionFinishing
+      );
     }
     osg::MatrixTransform *constructionBoolean = constructMenuNode
     (
