@@ -72,6 +72,7 @@ namespace app
     
     void messageStressTestDispatched(const msg::Message&); //testing
     void osgToDotTestDispatched(const msg::Message&); //testing
+    void bopalgoTestDispatched(const msg::Message&); //testing
   };
 }
 

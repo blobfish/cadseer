@@ -1058,49 +1058,70 @@ void IntersectionMapper::go(const ftr::UpdatePayload &payloadIn, BOPAlgo_Builder
   }
   
   //cache builder info
-  //splits() is gone from occt 7.3. need to fix.
-  const TopTools_DataMapOfShapeListOfShape splits;// = builder.Splits();
-  const TopTools_DataMapOfShapeListOfShape &origins = builder.Origins();
-  const TopTools_DataMapOfShapeListOfShape &images = builder.Images();
+  const TopTools_DataMapOfShapeListOfShape &images = builder.Images(); // evolve/forward
+  const TopTools_DataMapOfShapeListOfShape &origins = builder.Origins(); // devolve/backward
 
   //start of face splits  
   for (auto &fs : data->faceSplits)
     fs.start();
-  TopTools_DataMapOfShapeListOfShape::Iterator splitIt(splits);
-  for (; splitIt.More(); splitIt.Next())
+  
+  occt::ShapeVector resultFaces = sShape.useGetChildrenOfType(sShape.getRootOCCTShape(), TopAbs_FACE);
+  for (const auto &resultFace : resultFaces)
   {
-    //splits contain only face types.
-    occt::FaceVector faces;
-    for (const auto &shape : splitIt.Value())
-    {
-      assert(shape.ShapeType() == TopAbs_FACE);
-      if (sShape.hasShapeIdRecord(shape))
-        faces.push_back(TopoDS::Face(shape));
-    }
-    if (faces.empty())
+    assert(resultFace.ShapeType() == TopAbs_FACE);
+    if (!sShape.findShapeIdRecord(resultFace).id.is_nil())
       continue;
-    
-    const TopoDS_Shape &key = TopoDS::Face(splitIt.Key());
-    uuid keyId = gu::createNilId();
-    for (const auto &ss : seerShapes)
+    uuid protoId = gu::createNilId();
+    occt::FaceVector faces;
+    if (!origins.IsBound(resultFace))
     {
-      if (ss.get().hasShapeIdRecord(key))
+      //face is not modified. try to find proto id.
+      faces.push_back(TopoDS::Face(resultFace));
+      for (const auto &seerShape : seerShapes)
       {
-        keyId = ss.get().findShapeIdRecord(key).id;
+        if (!seerShape.get().hasShapeIdRecord(resultFace))
+          continue;
+        protoId = seerShape.get().findShapeIdRecord(resultFace).id;
         break;
       }
     }
-    if (keyId.is_nil())
+    else //result face is modified and in origins.
     {
-      //same domain causes some funning split results and will trigger the following warning. FYI
-      std::cout << "WARNING: can't find keyId for face split in IntersectionMapper::go" << std::endl;
-      continue;
+      const auto &originFaces = origins(resultFace);
+      if (originFaces.Size() != 1)
+        continue; //same domain, so skip for now.
+      const auto &imageFaces = images(originFaces.First());
+      if (imageFaces.IsEmpty())
+        continue;
+      for (const auto &shape : imageFaces)
+      {
+        assert(shape.ShapeType() == TopAbs_FACE);
+        if (sShape.hasShapeIdRecord(shape))
+          faces.push_back(TopoDS::Face(shape));
+      }
+      if (faces.empty())
+        continue;
+      
+      for (const auto &ss : seerShapes)
+      {
+        if (ss.get().hasShapeIdRecord(originFaces.First()))
+        {
+          protoId = ss.get().findShapeIdRecord(originFaces.First()).id;
+          break;
+        }
+      }
+      if (protoId.is_nil())
+      {
+        //same domain causes some funning split results and will trigger the following warning. FYI
+        std::cout << "WARNING: can't find keyId for face split in IntersectionMapper::go" << std::endl;
+        continue;
+      }
     }
     
     bool foundMatch = false;
     for (auto &fs : data->faceSplits)
     {
-      if (!fs.isMatch(keyId))
+      if (!fs.isMatch(protoId))
         continue;
       foundMatch = true;
       fs.match(faces);
@@ -1111,12 +1132,12 @@ void IntersectionMapper::go(const ftr::UpdatePayload &payloadIn, BOPAlgo_Builder
     if (!foundMatch)
     {
       FaceSplit nfs; //new face split
-      nfs.faceHistory = payloadIn.shapeHistory.createDevolveHistory(keyId);
+      nfs.faceHistory = payloadIn.shapeHistory.createDevolveHistory(protoId);
       nfs.match(faces);
       for (const auto &cid : nfs.getResults())
       {
         sShape.updateShapeIdRecord(cid.face, cid.faceId);
-        sShape.insertEvolve(keyId, cid.faceId);
+        sShape.insertEvolve(protoId, cid.faceId);
         const TopoDS_Shape &wire = BRepTools::OuterWire(cid.face);
         if(!wire.IsNull())
         {
@@ -1209,9 +1230,6 @@ void IntersectionMapper::go(const ftr::UpdatePayload &payloadIn, BOPAlgo_Builder
   for (auto &es : data->edgeIntersections)
     es.start();
   
-  //bopalgo doesn't have edges created by face intersection in there
-  //exposed data structures. So we get down and dirty with BOP_DS.
-  const BOPDS_DS &bopDS = *(builder.PDS());
   
   struct TempEdgeIntersection
   {
@@ -1235,54 +1253,61 @@ void IntersectionMapper::go(const ftr::UpdatePayload &payloadIn, BOPAlgo_Builder
     return teis.back().pairs;
   };
   
-  for (int index = 0; index < bopDS.NbShapes(); ++index)
+  //bopalgo doesn't have edges created by face intersection in there
+  //exposed data structures. So we get down and dirty with BOP_DS.
+  //we pass in a dummy builder so bopds maybe null.
+  if (builder.PDS())
   {
-    //work with a valid edge.
-    if (!bopDS.IsNewShape(index))
-      continue;
-    const TopoDS_Shape &shape = bopDS.Shape(index);
-    if (shape.ShapeType() != TopAbs_EDGE)
-      continue;
-    if (!sShape.hasShapeIdRecord(shape))
-      continue;
-    if (!sShape.findShapeIdRecord(shape).id.is_nil())
-      continue;
-    
-    std::vector<uuid> faceIds;
-    occt::ShapeVector parentShapes = sShape.useGetParentsOfType(shape, TopAbs_FACE);
-    gp_Vec2d tc; //tempCenter
-    
-    for (const auto &cShape : parentShapes)
+    const BOPDS_DS &bopDS = *(builder.PDS());
+    for (int index = 0; index < bopDS.NbShapes(); ++index)
     {
-      for (const auto &sil : origins(cShape)) //sil = shape in list
+      //work with a valid edge.
+      if (!bopDS.IsNewShape(index))
+        continue;
+      const TopoDS_Shape &shape = bopDS.Shape(index);
+      if (shape.ShapeType() != TopAbs_EDGE)
+        continue;
+      if (!sShape.hasShapeIdRecord(shape))
+        continue;
+      if (!sShape.findShapeIdRecord(shape).id.is_nil())
+        continue;
+      
+      std::vector<uuid> faceIds;
+      occt::ShapeVector parentShapes = sShape.useGetParentsOfType(shape, TopAbs_FACE);
+      gp_Vec2d tc; //tempCenter
+      
+      for (const auto &cShape : parentShapes)
       {
-        for (const auto &ss : seerShapes)
+        for (const auto &sil : origins(cShape)) //sil = shape in list
         {
-          if (ss.get().hasShapeIdRecord(sil))
+          for (const auto &ss : seerShapes)
           {
-            faceIds.push_back(ss.get().findShapeIdRecord(sil).id);
-            
-            //get the current center
-            double umin, umax, vmin, vmax;
-            BRepTools::UVBounds(TopoDS::Face(cShape), TopoDS::Edge(shape), umin, umax, vmin, vmax);
-            gp_Vec2d minc(umin, vmin);
-            gp_Vec2d maxc(umax, vmax);
-            gp_Vec2d center = minc + ((maxc - minc) * 0.5);
-            
-            //'average' in the new center to old.
-            if (tc.Magnitude() != 0.0)
-              tc = tc + ((center - tc) * 0.5);
-            
-            break;
+            if (ss.get().hasShapeIdRecord(sil))
+            {
+              faceIds.push_back(ss.get().findShapeIdRecord(sil).id);
+              
+              //get the current center
+              double umin, umax, vmin, vmax;
+              BRepTools::UVBounds(TopoDS::Face(cShape), TopoDS::Edge(shape), umin, umax, vmin, vmax);
+              gp_Vec2d minc(umin, vmin);
+              gp_Vec2d maxc(umax, vmax);
+              gp_Vec2d center = minc + ((maxc - minc) * 0.5);
+              
+              //'average' in the new center to old.
+              if (tc.Magnitude() != 0.0)
+                tc = tc + ((center - tc) * 0.5);
+              
+              break;
+            }
           }
         }
       }
+      gu::uniquefy(faceIds);
+      if (faceIds.size() != 2) //should we have a warning here?
+        continue;
+      auto &te = getTempEntry(faceIds.front(), faceIds.back());
+      te.push_back(std::make_pair(TopoDS::Edge(shape), tc));
     }
-    gu::uniquefy(faceIds);
-    if (faceIds.size() != 2) //should we have a warning here?
-      continue;
-    auto &te = getTempEntry(faceIds.front(), faceIds.back());
-    te.push_back(std::make_pair(TopoDS::Edge(shape), tc));
   }
   
   //loop through temp edge intersections and try to match up

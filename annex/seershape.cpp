@@ -1113,6 +1113,7 @@ void SeerShape::ensureNoNils()
     auto freshId = gu::createRandomId();
     updateShapeIdRecord(shape, freshId);
     insertEvolve(gu::createNilId(), freshId);
+    std::cout << "nil id of " << occt::getShapeTypeString(shape) << ", assigned to: " << gu::idToString(freshId) << std::endl;
   }
 }
 

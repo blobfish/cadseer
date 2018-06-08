@@ -42,6 +42,7 @@
 #include <STEPControl_Writer.hxx>
 #include <STEPControl_Reader.hxx>
 #include <APIHeaderSection_MakeHeader.hxx>
+#include <BOPAlgo_Builder.hxx>
 
 #include <osgDB/WriteFile>
 
@@ -170,7 +171,7 @@ void Factory::setupDispatcher()
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::newHollowDispatched, this, _1)));
   
   mask = msg::Request | msg::DebugInquiry;
-  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::osgToDotTestDispatched, this, _1)));
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Factory::bopalgoTestDispatched, this, _1)));
 }
 
 void Factory::newProjectDispatched(const msg::Message& /*messageIn*/)
@@ -1099,4 +1100,249 @@ void Factory::osgToDotTestDispatched(const msg::Message&)
   }
   
 //   QDesktopServices::openUrl(QUrl(fileName));
+}
+
+void Factory::bopalgoTestDispatched(const msg::Message&)
+{
+  auto formatNumber = [](int number) -> std::string
+  {
+    std::ostringstream out;
+    if (number < 100)
+      out << "0";
+    if (number < 10)
+      out << "0";
+    out << number;
+    return out.str();
+  };
+  
+  assert(project);
+  if (containers.size() < 2)
+    return;
+  
+  std::vector<std::reference_wrapper<const ann::SeerShape>> sShapes;
+  occt::ShapeVector shapes;
+  for (const auto &cs : containers)
+  {
+    if (cs.selectionType != slc::Type::Object)
+      continue;
+    const ftr::Base* fb = project->findFeature(cs.featureId);
+    if (!fb->hasAnnex(ann::Type::SeerShape))
+      continue;
+    sShapes.push_back(fb->getAnnex<ann::SeerShape>(ann::Type::SeerShape));
+    shapes.push_back(sShapes.back().get().getRootOCCTShape());
+  }
+  observer->out(msg::Message(msg::Request | msg::Selection | msg::Clear));
+  if (sShapes.size() < 2 || shapes.size() < 2)
+    return;
+  
+  //when splitting edges we will have to compare the number of output edges to
+  //the input edges too see if the operation did anything.
+    
+  //images is a map from input to output.
+  //origins is a map from output to input.
+  
+  try
+  {
+    BOPAlgo_Builder bopBuilder;
+    for (const auto &s : shapes)
+      bopBuilder.AddArgument(s);
+
+    bopBuilder.Perform();
+    if (bopBuilder.HasErrors())
+    {
+      std::ostringstream error;
+      error << "error with bopBuilder. error code: "
+      << std::endl;
+      bopBuilder.DumpErrors(error);
+      throw std::runtime_error(error.str());
+    }
+    
+    const TopTools_DataMapOfShapeListOfShape &images = bopBuilder.Images();
+    TopTools_DataMapOfShapeListOfShape::Iterator imageIt(images);
+    for (int index = 0; imageIt.More(); imageIt.Next(), index++)
+    {
+      const TopoDS_Shape &key = imageIt.Key();
+      std::ostringstream keyBase;
+      keyBase << "Output_Images_key_" << formatNumber(index);
+      std::ostringstream keyName;
+      keyName << keyBase.str() << "_source_shapetype:" << occt::getShapeTypeString(key);
+      project->addOCCShape(key, keyName.str());
+      
+      int count = 0;
+      for (const auto &sil : imageIt.Value()) //shape in list
+      {
+        count++;
+        assert(key.ShapeType() == sil.ShapeType());
+        
+        std::ostringstream mappedName;
+        mappedName << keyBase.str() << "_result_shape_" << formatNumber(count);
+        
+        project->addOCCShape(sil, mappedName.str());
+      }
+    }
+    
+    //splits was removed in occt v7.3
+    //it appears splits only contain faces that have been split. It ignores edges.
+//     const TopTools_DataMapOfShapeListOfShape &splits = bopBuilder.Splits();
+//     TopTools_DataMapOfShapeListOfShape::Iterator splitIt(splits);
+//     for (int index = 0; splitIt.More(); splitIt.Next(), index++)
+//     {
+//       const TopoDS_Shape &key = splitIt.Key();
+//       std::ostringstream keyBase;
+//       keyBase << "Output_Splits_key_" << ((index < 10) ? "0" : "") << index;
+//       std::ostringstream keyName;
+//       keyName << keyBase.str() << "_source_shapetype:" << shapeText(key.ShapeType());
+//       addFeature(keyName.str(), key);
+//       
+//       int count = 0;
+//       for (const auto &sil : splitIt.Value()) //shape in list
+//       {
+//         count++;
+//         assert(key.ShapeType() == sil.ShapeType());
+//         
+//         std::ostringstream mappedName;
+//         mappedName << keyBase.str() << "_result_shape_" << ((count < 10) ? "0" : "") << count;
+//         
+//         addFeature(mappedName.str(), sil);
+//       }
+//     }
+    
+    //origins. the keys are the new shapes and the mapped are the originals.
+    //allows to trace resultant geometry to source geometry. ignores at least compounds and wires.
+    const TopTools_DataMapOfShapeListOfShape &origins = bopBuilder.Origins();
+    TopTools_DataMapOfShapeListOfShape::Iterator originIt(origins);
+    for (int index = 0; originIt.More(); originIt.Next(), index++)
+    {
+      const TopoDS_Shape &key = originIt.Key();
+      std::ostringstream keyBase;
+      keyBase << "Output_Origins_key_" << ((index < 10) ? "0" : "") << index;
+      std::ostringstream keyName;
+      keyName << keyBase.str() << "_source_shapetype:" << occt::getShapeTypeString(key);
+      project->addOCCShape(key, keyName.str());
+      int mappedCount = 0;
+      for (const auto &sil : origins(key)) //shape in list
+      {
+        assert(key.ShapeType() == sil.ShapeType());
+        
+        std::ostringstream mappedName;
+        mappedName << keyBase.str() << "_result_shape_" << formatNumber(mappedCount);
+        
+        project->addOCCShape(sil, mappedName.str());
+        mappedCount++;
+      }
+    }
+    
+    //shapesSD. This is empty for the 2 face intersect.
+    const TopTools_DataMapOfShapeShape &shapesSD = bopBuilder.ShapesSD();
+    TopTools_DataMapOfShapeShape::Iterator shapesSDIt(shapesSD);
+    for (int index = 0; shapesSDIt.More(); shapesSDIt.Next(), index++)
+    {
+      const TopoDS_Shape &key = shapesSDIt.Key();
+      const TopoDS_Shape &mapped = shapesSD(key);
+      assert(key.ShapeType() == mapped.ShapeType());
+      
+      std::ostringstream keyBase;
+      keyBase << "Output_ShapesSD_key_" << formatNumber(index);
+      std::ostringstream keyName;
+      keyName << keyBase.str() << "_source_shapetype:" << occt::getShapeTypeString(key);
+      std::ostringstream mappedName;
+      mappedName << keyBase.str() << "_result_shape";
+      
+      project->addOCCShape(key, keyName.str());
+      project->addOCCShape(mapped, mappedName.str());
+    }
+    
+    //following uses source shapes as key. so we will cache them here.
+    std::vector<occt::ShapeVector> allSubShapes;
+    for (const auto &s : shapes)
+      allSubShapes.push_back(occt::mapShapes(s));
+    
+
+    
+    int count = 0;
+    //Generated for inputs.
+    for (const auto &subShapes : allSubShapes)
+    {
+      int index = 0;
+      for (const auto &subShape : subShapes)
+      {
+        occt::ShapeVector mappedVector = occt::ShapeVectorCast(bopBuilder.Generated(subShape));
+        if (mappedVector.empty())
+          continue;
+          
+        std::ostringstream keyBase;
+        keyBase << "Output_Generated_base" << formatNumber(count) << "_Shape" << formatNumber(index);
+        std::ostringstream keyName;
+        keyName << keyBase.str() << "_source_shapetype:" << occt::getShapeTypeString(subShape);
+        
+        std::ostringstream mappedName;
+        mappedName << keyBase.str() << "_result_count_" << mappedVector.size();
+        
+        project->addOCCShape(subShape, keyName.str());
+        project->addOCCShape(static_cast<TopoDS_Compound>(occt::ShapeVectorCast(mappedVector)), mappedName.str());
+        index++;
+      }
+      count++;
+    }
+    
+    //Modified for input 1. ignores at least compounds, shells and wires.
+    count = 0;
+    for (const auto &subShapes : allSubShapes)
+    {
+      int index = 0;
+      for (const auto &subShape : subShapes)
+      {
+        occt::ShapeVector mappedVector = occt::ShapeVectorCast(bopBuilder.Modified(subShape));
+        if (mappedVector.empty())
+          continue;
+        std::ostringstream keyBase;
+        keyBase << "Output_Modified_base" << formatNumber(count) << "_Shape" << formatNumber(index);
+        std::ostringstream keyName;
+        keyName << keyBase.str() << "_source_shapetype:" << occt::getShapeTypeString(subShape);
+        project->addOCCShape(subShape, keyName.str());
+        
+        int mappedCount = 0;
+        for (const auto &sil : mappedVector) //shape in list
+        {
+          std::ostringstream mappedName;
+          mappedName << keyBase.str() << "_result_shape_" << formatNumber(mappedCount);
+          
+          project->addOCCShape(sil, mappedName.str());
+          mappedCount++;
+        }
+        index++;
+      }
+      count++;
+    }
+    
+    //IsDeleted for inputs.
+    count = 0;
+    for (const auto &subShapes : allSubShapes)
+    {
+      int index = 0;
+      for (const auto &subShape : subShapes)
+      {
+        if (!bopBuilder.IsDeleted(subShape))
+          continue;
+        
+        std::ostringstream keyBase;
+        keyBase << "Input_Deleted_base" << formatNumber(count) << "_Shape" << formatNumber(index);
+        keyBase << "_shapetype:" << occt::getShapeTypeString(subShape);
+        
+        project->addOCCShape(subShape, keyBase.str());
+        index++;
+      }
+      count++;
+    }
+  }
+  catch (const Standard_Failure &e)
+  {
+    std::cout << "OCC Error: " << e.GetMessageString() << std::endl;
+  }
+  catch (const std::exception &error)
+  {
+    std::cout << "My Error: " << error.what() << std::endl;
+  }
+  
+  observer->out(msg::Mask(msg::Request | msg::Project | msg::Update));
 }

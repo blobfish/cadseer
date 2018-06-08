@@ -126,6 +126,8 @@ void Subtract::updateModel(const UpdatePayload &payloadIn)
     //set to new failed state.
     TopoDS_Compound tc = occt::ShapeVectorCast(targetOCCTShapes);
     sShape->setOCCTShape(tc);
+    BOPAlgo_Builder dummy;
+    iMapper->go(payloadIn, dummy, *sShape);
     for (const auto *it : targetFeatures)
       sShape->shapeMatch(it->getAnnex<ann::SeerShape>(ann::Type::SeerShape));
     for (const auto *it : targetFeatures)
