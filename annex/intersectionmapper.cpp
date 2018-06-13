@@ -1131,6 +1131,11 @@ void IntersectionMapper::go(const ftr::UpdatePayload &payloadIn, BOPAlgo_Builder
     }
     if (!foundMatch)
     {
+      if (!payloadIn.shapeHistory.hasShape(protoId))
+      {
+        std::cout << "warning: shape id: " << gu::idToString(protoId) << " should be in shape history in: " << __PRETTY_FUNCTION__ << std::endl;
+        continue;
+      }
       FaceSplit nfs; //new face split
       nfs.faceHistory = payloadIn.shapeHistory.createDevolveHistory(protoId);
       nfs.match(faces);

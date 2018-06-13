@@ -367,13 +367,13 @@ void Base::applyColor()
   if (!hasAnnex(ann::Type::SeerShape))
     return;
   
-  if (lod->getNumChildren() == 0)
-    return;
-  
-  mdv::ShapeGeometry *shapeViz = dynamic_cast<mdv::ShapeGeometry*>
-    (lod->getChild(0)->asSwitch()->getChild(0));
-  if (shapeViz)
-    shapeViz->setColor(color);
+  for (unsigned int i = 0; i < lod->getNumChildren(); ++i)
+  {
+    mdv::ShapeGeometry *shapeViz = dynamic_cast<mdv::ShapeGeometry*>
+      (lod->getChild(i)->asSwitch()->getChild(0));
+    if (shapeViz)
+      shapeViz->setColor(color);
+  }
 }
 
 void Base::fillInHistory(ShapeHistory &historyIn)

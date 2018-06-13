@@ -900,6 +900,9 @@ void Widget::lodGeneratedDispatched(const msg::Message &mIn)
   }
   
   vis.out->addChild(fileNode, static_cast<float>(m.rangeMin), static_cast<float>(m.rangeMax), m.filePathOSG.string());
+  ftr::Base *f = app::instance()->getProject()->findFeature(m.featureId);
+  assert(f);
+  f->applyColor();
 }
 
 void Widget::screenCapture(const std::string &fp, const std::string &e)

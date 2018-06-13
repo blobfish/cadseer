@@ -28,6 +28,7 @@
 #include <annex/seershape.h>
 #include <tools/featuretools.h>
 #include <project/serial/xsdcxxoutput/featureoffset.h>
+#include <feature/shapecheck.h>
 #include <feature/updatepayload.h>
 #include <feature/inputtype.h>
 #include <feature/parameter.h>
@@ -160,6 +161,9 @@ void Offset::updateModel(const UpdatePayload &payloadIn)
       );
       if (!builder.IsDone())
         throw std::runtime_error(getErrorString(builder.MakeOffset()));
+      ShapeCheck check(builder.Shape());
+      if (!check.isValid())
+        throw std::runtime_error("shapeCheck failed");
       
       sShape->setOCCTShape(builder.Shape());
       sShape->shapeMatch(tss);
@@ -259,6 +263,9 @@ void Offset::updateModel(const UpdatePayload &payloadIn)
       builder.MakeOffsetShape();
       if (!builder.IsDone())
         throw std::runtime_error(getErrorString(builder));
+      ShapeCheck check(builder.Shape());
+      if (!check.isValid())
+        throw std::runtime_error("shapeCheck failed");
       
       sShape->setOCCTShape(builder.Shape());
       sShape->shapeMatch(tss);
@@ -323,13 +330,13 @@ void Offset::offsetMatch(const BRepOffset_MakeOffset &offseter, const ann::SeerS
   auto update = [&](const TopoDS_Shape &original, const TopoDS_Shape &offsetShape)
   {
     assert(tss.hasShapeIdRecord(original));
+    assert(sShape->hasShapeIdRecord(offsetShape));
     uuid oid = tss.findShapeIdRecord(original).id;
     uuid nid = gu::createRandomId();
     if (sShape->hasEvolveRecordIn(oid))
       nid = sShape->evolve(oid).front(); //should be 1 to 1.
     else
       sShape->insertEvolve(oid, nid);
-    
     sShape->updateShapeIdRecord(offsetShape, nid);
   };
   
