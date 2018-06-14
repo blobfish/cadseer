@@ -194,8 +194,9 @@ bool IPGroup::processMotion(const osgManipulator::MotionCommand &commandIn)
     originStart = tCommand->getTranslation() * tCommand->getLocalToWorld();
     lastTranslation = 0.0;
     
-    osg::Matrixd temp = differenceDim->getMatrix();
-    temp.setTrans(temp.getRotate() * osg::Vec3d(0.0, value, 0.0));
+    //assumes differenceDim and mainDim have same orientation.
+    osg::Matrixd temp = mainDim->getMatrix();
+    temp.setTrans(osg::Vec3d(0.0, value, 0.0) * temp);
     differenceDim->setMatrix(temp);
     differenceDim->setSpread(0.0);
     

@@ -338,6 +338,7 @@ SET(FEATURE_SOURCES
     feature/sew.cpp
     feature/trim.cpp
     feature/removefaces.cpp
+    feature/torus.cpp
     )
     
 SET(ANNEX_SOURCES
@@ -441,6 +442,7 @@ SET(PROJECT_SOURCES
     project/serial/xsdcxxoutput/featuresew.cpp
     project/serial/xsdcxxoutput/featuretrim.cpp
     project/serial/xsdcxxoutput/featureremovefaces.cpp
+    project/serial/xsdcxxoutput/featuretorus.cpp
     )
     
 SET(APPLICATION_SOURCES

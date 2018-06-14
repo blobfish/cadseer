@@ -382,6 +382,15 @@ void Manager::ensureDefaults()
     );
   }
   
+  if (!features.torus().present())
+  {
+    features.torus() = prf::Torus
+    (
+      prf::Torus::radius1_default_value(),
+      prf::Torus::radius2_default_value()
+    );
+  }
+  
   if (!rootPtr->visual().display().renderStyle().present())
     rootPtr->visual().display().renderStyle() = prf::Display::renderStyle_default_value();
   

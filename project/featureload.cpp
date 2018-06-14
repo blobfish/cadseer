@@ -49,6 +49,7 @@
 #include <feature/sew.h>
 #include <feature/trim.h>
 #include <feature/removefaces.h>
+#include <feature/torus.h>
 #include <project/serial/xsdcxxoutput/featurebox.h>
 #include <project/serial/xsdcxxoutput/featurecylinder.h>
 #include <project/serial/xsdcxxoutput/featuresphere.h>
@@ -78,6 +79,7 @@
 #include <project/serial/xsdcxxoutput/featuresew.h>
 #include <project/serial/xsdcxxoutput/featuretrim.h>
 #include <project/serial/xsdcxxoutput/featureremovefaces.h>
+#include <project/serial/xsdcxxoutput/featuretorus.h>
 
 #include "featureload.h"
 
@@ -118,6 +120,7 @@ directory(directoryIn), fileExtension(".fetr")
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Sew), std::bind(&FeatureLoad::loadSew, this, std::placeholders::_1, std::placeholders::_2)));
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Trim), std::bind(&FeatureLoad::loadTrim, this, std::placeholders::_1, std::placeholders::_2)));
   functionMap.insert(std::make_pair(ftr::toString(ftr::Type::RemoveFaces), std::bind(&FeatureLoad::loadRemoveFaces, this, std::placeholders::_1, std::placeholders::_2)));
+  functionMap.insert(std::make_pair(ftr::toString(ftr::Type::Torus), std::bind(&FeatureLoad::loadTorus, this, std::placeholders::_1, std::placeholders::_2)));
 }
 
 FeatureLoad::~FeatureLoad()
@@ -498,4 +501,16 @@ std::shared_ptr<ftr::Base> FeatureLoad::loadRemoveFaces(const std::string &fileN
   rfs->serialRead(*sr);
   
   return rfs;
+}
+
+std::shared_ptr<ftr::Base> FeatureLoad::loadTorus(const std::string &fileNameIn, std::size_t shapeOffsetIn)
+{
+  auto st = srl::torus(fileNameIn, ::xml_schema::Flags::dont_validate);
+  assert(st);
+  
+  std::shared_ptr<ftr::Torus> tf(new ftr::Torus);
+  tf->getAnnex<ann::SeerShape>(ann::Type::SeerShape).setOCCTShape(shapeVector.at(shapeOffsetIn));
+  tf->serialRead(*st);
+  
+  return tf;
 }

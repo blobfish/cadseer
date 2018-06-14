@@ -620,6 +620,13 @@ void GestureHandler::constructMenu()
         (msg::Request | msg::Construct | msg::Oblong).to_string(),
         constructionPrimitives
       );
+      constructCommandNode
+      (
+        ":/resources/images/constructionTorus.svg",
+        QObject::tr("Torus Command").toStdString(),
+        (msg::Request | msg::Construct | msg::Torus).to_string(),
+        constructionPrimitives
+      );
     }
     osg::MatrixTransform *constructionFinishing = constructMenuNode
     (

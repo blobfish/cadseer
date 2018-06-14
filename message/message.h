@@ -149,6 +149,7 @@ namespace msg
     static const Mask Revision(Mask().set(                     108));//!< command. move up
     static const Mask LOD(Mask().set(                          109));//!< command. move up
     static const Mask RemoveFaces(Mask().set(                  110));//!< command. move up
+    static const Mask Torus(Mask().set(                        111));//!< command. move up
   
     typedef boost::variant
     <

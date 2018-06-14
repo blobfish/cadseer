@@ -1855,6 +1855,58 @@ namespace prf
   }
 
 
+  // Torus
+  // 
+
+  const Torus::Radius1Type& Torus::
+  radius1 () const
+  {
+    return this->radius1_.get ();
+  }
+
+  Torus::Radius1Type& Torus::
+  radius1 ()
+  {
+    return this->radius1_.get ();
+  }
+
+  void Torus::
+  radius1 (const Radius1Type& x)
+  {
+    this->radius1_.set (x);
+  }
+
+  Torus::Radius1Type Torus::
+  radius1_default_value ()
+  {
+    return Radius1Type (10.0);
+  }
+
+  const Torus::Radius2Type& Torus::
+  radius2 () const
+  {
+    return this->radius2_.get ();
+  }
+
+  Torus::Radius2Type& Torus::
+  radius2 ()
+  {
+    return this->radius2_.get ();
+  }
+
+  void Torus::
+  radius2 (const Radius2Type& x)
+  {
+    this->radius2_.set (x);
+  }
+
+  Torus::Radius2Type Torus::
+  radius2_default_value ()
+  {
+    return Radius2Type (2.0);
+  }
+
+
   // Features
   // 
 
@@ -2306,6 +2358,36 @@ namespace prf
   strip (::std::unique_ptr< StripType > x)
   {
     this->strip_.set (std::move (x));
+  }
+
+  const Features::TorusOptional& Features::
+  torus () const
+  {
+    return this->torus_;
+  }
+
+  Features::TorusOptional& Features::
+  torus ()
+  {
+    return this->torus_;
+  }
+
+  void Features::
+  torus (const TorusType& x)
+  {
+    this->torus_.set (x);
+  }
+
+  void Features::
+  torus (const TorusOptional& x)
+  {
+    this->torus_ = x;
+  }
+
+  void Features::
+  torus (::std::unique_ptr< TorusType > x)
+  {
+    this->torus_.set (std::move (x));
   }
 
 
@@ -6209,6 +6291,118 @@ namespace prf
   {
   }
 
+  // Torus
+  //
+
+  Torus::
+  Torus (const Radius1Type& radius1,
+         const Radius2Type& radius2)
+  : ::xml_schema::Type (),
+    radius1_ (radius1, this),
+    radius2_ (radius2, this)
+  {
+  }
+
+  Torus::
+  Torus (const Torus& x,
+         ::xml_schema::Flags f,
+         ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    radius1_ (x.radius1_, f, this),
+    radius2_ (x.radius2_, f, this)
+  {
+  }
+
+  Torus::
+  Torus (const ::xercesc::DOMElement& e,
+         ::xml_schema::Flags f,
+         ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    radius1_ (this),
+    radius2_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void Torus::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // radius1
+      //
+      if (n.name () == "radius1" && n.namespace_ ().empty ())
+      {
+        if (!radius1_.present ())
+        {
+          this->radius1_.set (Radius1Traits::create (i, f, this));
+          continue;
+        }
+      }
+
+      // radius2
+      //
+      if (n.name () == "radius2" && n.namespace_ ().empty ())
+      {
+        if (!radius2_.present ())
+        {
+          this->radius2_.set (Radius2Traits::create (i, f, this));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!radius1_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "radius1",
+        "");
+    }
+
+    if (!radius2_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "radius2",
+        "");
+    }
+  }
+
+  Torus* Torus::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class Torus (*this, f, c);
+  }
+
+  Torus& Torus::
+  operator= (const Torus& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->radius1_ = x.radius1_;
+      this->radius2_ = x.radius2_;
+    }
+
+    return *this;
+  }
+
+  Torus::
+  ~Torus ()
+  {
+  }
+
   // Features
   //
 
@@ -6229,7 +6423,8 @@ namespace prf
     quote_ (this),
     sphere_ (this),
     squash_ (this),
-    strip_ (this)
+    strip_ (this),
+    torus_ (this)
   {
   }
 
@@ -6252,7 +6447,8 @@ namespace prf
     quote_ (x.quote_, f, this),
     sphere_ (x.sphere_, f, this),
     squash_ (x.squash_, f, this),
-    strip_ (x.strip_, f, this)
+    strip_ (x.strip_, f, this),
+    torus_ (x.torus_, f, this)
   {
   }
 
@@ -6275,7 +6471,8 @@ namespace prf
     quote_ (this),
     sphere_ (this),
     squash_ (this),
-    strip_ (this)
+    strip_ (this),
+    torus_ (this)
   {
     if ((f & ::xml_schema::Flags::base) == 0)
     {
@@ -6504,6 +6701,20 @@ namespace prf
         }
       }
 
+      // torus
+      //
+      if (n.name () == "torus" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< TorusType > r (
+          TorusTraits::create (i, f, this));
+
+        if (!this->torus_)
+        {
+          this->torus_.set (::std::move (r));
+          continue;
+        }
+      }
+
       break;
     }
   }
@@ -6536,6 +6747,7 @@ namespace prf
       this->sphere_ = x.sphere_;
       this->squash_ = x.squash_;
       this->strip_ = x.strip_;
+      this->torus_ = x.torus_;
     }
 
     return *this;
@@ -8051,6 +8263,34 @@ namespace prf
   }
 
   void
+  operator<< (::xercesc::DOMElement& e, const Torus& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // radius1
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "radius1",
+          e));
+
+      s << ::xml_schema::AsDouble(i.radius1 ());
+    }
+
+    // radius2
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "radius2",
+          e));
+
+      s << ::xml_schema::AsDouble(i.radius2 ());
+    }
+  }
+
+  void
   operator<< (::xercesc::DOMElement& e, const Features& i)
   {
     e << static_cast< const ::xml_schema::Type& > (i);
@@ -8233,6 +8473,18 @@ namespace prf
           e));
 
       s << *i.strip ();
+    }
+
+    // torus
+    //
+    if (i.torus ())
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "torus",
+          e));
+
+      s << *i.torus ();
     }
   }
 

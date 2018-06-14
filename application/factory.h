@@ -48,6 +48,7 @@ namespace app
     void selectionSubtractionDispatched(const msg::Message&);
     void newBoxDispatched(const msg::Message&);
     void newOblongDispatched(const msg::Message&);
+    void newTorusDispatched(const msg::Message&);
     void newCylinderDispatched(const msg::Message&);
     void newSphereDispatched(const msg::Message&);
     void newConeDispatched(const msg::Message&);

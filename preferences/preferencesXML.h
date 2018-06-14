@@ -102,6 +102,7 @@ namespace prf
   class Sphere;
   class Squash;
   class Strip;
+  class Torus;
   class Features;
   class Root;
 }
@@ -7208,6 +7209,212 @@ namespace prf
   };
 
   /**
+   * @brief Class corresponding to the %Torus schema type.
+   *
+   * @nosubgrouping
+   */
+  class Torus: public ::xml_schema::Type
+  {
+    public:
+    /**
+     * @name radius1
+     *
+     * @brief Accessor and modifier functions for the %radius1
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::xml_schema::Double Radius1Type;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< Radius1Type, char, ::xsd::cxx::tree::schema_type::double_ > Radius1Traits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const Radius1Type&
+    radius1 () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    Radius1Type&
+    radius1 ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    radius1 (const Radius1Type& x);
+
+    /**
+     * @brief Return the default value for the element.
+     *
+     * @return The element's default value.
+     */
+    static Radius1Type
+    radius1_default_value ();
+
+    //@}
+
+    /**
+     * @name radius2
+     *
+     * @brief Accessor and modifier functions for the %radius2
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::xml_schema::Double Radius2Type;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< Radius2Type, char, ::xsd::cxx::tree::schema_type::double_ > Radius2Traits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const Radius2Type&
+    radius2 () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    Radius2Type&
+    radius2 ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    radius2 (const Radius2Type& x);
+
+    /**
+     * @brief Return the default value for the element.
+     *
+     * @return The element's default value.
+     */
+    static Radius2Type
+    radius2_default_value ();
+
+    //@}
+
+    /**
+     * @name Constructors
+     */
+    //@{
+
+    /**
+     * @brief Create an instance from the ultimate base and
+     * initializers for required elements and attributes.
+     */
+    Torus (const Radius1Type&,
+           const Radius2Type&);
+
+    /**
+     * @brief Create an instance from a DOM element.
+     *
+     * @param e A DOM element to extract the data from.
+     * @param f Flags to create the new instance with.
+     * @param c A pointer to the object that will contain the new
+     * instance.
+     */
+    Torus (const ::xercesc::DOMElement& e,
+           ::xml_schema::Flags f = 0,
+           ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy constructor.
+     *
+     * @param x An instance to make a copy of.
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    Torus (const Torus& x,
+           ::xml_schema::Flags f = 0,
+           ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy the instance polymorphically.
+     *
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     * @return A pointer to the dynamically allocated copy.
+     *
+     * This function ensures that the dynamic type of the instance is
+     * used for copying and should be used for polymorphic object
+     * models instead of the copy constructor.
+     */
+    virtual Torus*
+    _clone (::xml_schema::Flags f = 0,
+            ::xml_schema::Container* c = 0) const;
+
+    /**
+     * @brief Copy assignment operator.
+     *
+     * @param x An instance to make a copy of.
+     * @return A reference to itself.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    Torus&
+    operator= (const Torus& x);
+
+    //@}
+
+    /**
+     * @brief Destructor.
+     */
+    virtual 
+    ~Torus ();
+
+    // Implementation.
+    //
+
+    //@cond
+
+    protected:
+    void
+    parse (::xsd::cxx::xml::dom::parser< char >&,
+           ::xml_schema::Flags);
+
+    protected:
+    ::xsd::cxx::tree::one< Radius1Type > radius1_;
+    ::xsd::cxx::tree::one< Radius2Type > radius2_;
+
+    //@endcond
+  };
+
+  /**
    * @brief Class corresponding to the %Features schema type.
    *
    * @nosubgrouping
@@ -8356,6 +8563,82 @@ namespace prf
     //@}
 
     /**
+     * @name torus
+     *
+     * @brief Accessor and modifier functions for the %torus
+     * optional element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::Torus TorusType;
+
+    /**
+     * @brief Element optional container type.
+     */
+    typedef ::xsd::cxx::tree::optional< TorusType > TorusOptional;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< TorusType, char > TorusTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element
+     * container.
+     *
+     * @return A constant reference to the optional container.
+     */
+    const TorusOptional&
+    torus () const;
+
+    /**
+     * @brief Return a read-write reference to the element container.
+     *
+     * @return A reference to the optional container.
+     */
+    TorusOptional&
+    torus ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    torus (const TorusType& x);
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x An optional container with the new value to set.
+     *
+     * If the value is present in @a x then this function makes a copy 
+     * of this value and sets it as the new value of the element.
+     * Otherwise the element container is set the 'not present' state.
+     */
+    void
+    torus (const TorusOptional& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly instead
+     * of making a copy.
+     */
+    void
+    torus (::std::unique_ptr< TorusType > p);
+
+    //@}
+
+    /**
      * @name Constructors
      */
     //@{
@@ -8451,6 +8734,7 @@ namespace prf
     SphereOptional sphere_;
     SquashOptional squash_;
     StripOptional strip_;
+    TorusOptional torus_;
 
     //@endcond
   };
@@ -9365,6 +9649,9 @@ namespace prf
 
   void
   operator<< (::xercesc::DOMElement&, const Strip&);
+
+  void
+  operator<< (::xercesc::DOMElement&, const Torus&);
 
   void
   operator<< (::xercesc::DOMElement&, const Features&);

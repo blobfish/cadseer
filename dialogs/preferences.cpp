@@ -154,6 +154,8 @@ void Preferences::initialize()
   ui->quoteTSheetEdit->setText(QString::fromStdString(manager->rootPtr->features().quote().get().templateSheet()));
   ui->squashGEdit->setText(QString().setNum(manager->rootPtr->features().squash().get().granularity()));
   ui->stripGapEdit->setText(QString().setNum(manager->rootPtr->features().strip().get().gap()));
+  ui->torusRadius1Edit->setText(QString().setNum(manager->rootPtr->features().torus().get().radius1()));
+  ui->torusRadius2Edit->setText(QString().setNum(manager->rootPtr->features().torus().get().radius2()));
 }
 
 void Preferences::accept()
@@ -505,6 +507,22 @@ void Preferences::updateFeature()
   if (temp < 0.0)
     temp = prf::Strip::gap_default_value();
   manager->rootPtr->features().strip().get().gap() = temp;
+
+  temp = ui->torusRadius1Edit->text().toDouble();
+  if (temp <= 0.0)
+    temp = prf::Torus::radius1_default_value();
+  manager->rootPtr->features().torus().get().radius1() = temp;
+  
+  temp = ui->torusRadius2Edit->text().toDouble();
+  if (temp <= 0.0)
+    temp = prf::Torus::radius2_default_value();
+  manager->rootPtr->features().torus().get().radius2() = temp;
+  
+  if (!(manager->rootPtr->features().torus().get().radius1() > manager->rootPtr->features().torus().get().radius2()))
+  {
+    manager->rootPtr->features().torus().get().radius1() = prf::Torus::radius1_default_value();
+    manager->rootPtr->features().torus().get().radius2() = prf::Torus::radius2_default_value();
+  }
 }
 
 void Preferences::basePathBrowseSlot()

@@ -233,6 +233,13 @@
   </xs:all>
 </xs:complexType>
 
+<xs:complexType name="Torus">
+  <xs:all>
+    <xs:element name="radius1" type="xs:double" default="10.0"/>
+    <xs:element name="radius2" type="xs:double" default="2.0"/>
+  </xs:all>
+</xs:complexType>
+
 <xs:complexType name="Features">
   <xs:all>
     <xs:element name="blend" type="Blend"  minOccurs="0" maxOccurs="1"/>
@@ -250,6 +257,7 @@
     <xs:element name="sphere" type="Sphere"  minOccurs="0" maxOccurs="1"/>
     <xs:element name="squash" type="Squash"  minOccurs="0" maxOccurs="1"/>
     <xs:element name="strip" type="Strip"  minOccurs="0" maxOccurs="1"/>
+    <xs:element name="torus" type="Torus"  minOccurs="0" maxOccurs="1"/>
   </xs:all>
 </xs:complexType>
 

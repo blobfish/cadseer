@@ -60,7 +60,8 @@ namespace ftr
     Thicken, //!< feature for thickening sheets.
     Sew, //!< feature for sewing sheets.
     Trim, //!< feature for trimming solids.
-    RemoveFaces //!< feature for trimming solids.
+    RemoveFaces, //!< feature for simplifing solids.
+    Torus //!< feature for torus primitive
   };
   
   inline const static std::string& toString(Type typeIn)
@@ -99,7 +100,8 @@ namespace ftr
       {Type::Thicken, "Thicken"},
       {Type::Sew, "Sew"},
       {Type::Trim, "Trim"},
-      {Type::RemoveFaces, "RemoveFaces"}
+      {Type::RemoveFaces, "RemoveFaces"},
+      {Type::Torus, "Torus"}
     };
     
     assert(strings.count(typeIn) > 0);
