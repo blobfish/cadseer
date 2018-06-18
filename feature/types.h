@@ -61,7 +61,8 @@ namespace ftr
     Sew, //!< feature for sewing sheets.
     Trim, //!< feature for trimming solids.
     RemoveFaces, //!< feature for simplifing solids.
-    Torus //!< feature for torus primitive
+    Torus, //!< feature for torus primitive
+    Thread //!< feature for screw threads
   };
   
   inline const static std::string& toString(Type typeIn)
@@ -101,7 +102,8 @@ namespace ftr
       {Type::Sew, "Sew"},
       {Type::Trim, "Trim"},
       {Type::RemoveFaces, "RemoveFaces"},
-      {Type::Torus, "Torus"}
+      {Type::Torus, "Torus"},
+      {Type::Thread, "Thread"}
     };
     
     assert(strings.count(typeIn) > 0);

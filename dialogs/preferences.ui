@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>634</width>
-    <height>499</height>
+    <width>836</width>
+    <height>579</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -126,7 +126,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>578</width>
+            <width>780</width>
             <height>576</height>
            </rect>
           </property>
@@ -824,6 +824,11 @@
           </item>
           <item>
            <property name="text">
+            <string>Thread</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
             <string>Torus</string>
            </property>
           </item>
@@ -837,7 +842,7 @@
          <x>319</x>
          <y>74</y>
          <width>342</width>
-         <height>476</height>
+         <height>497</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="featuresLayout02">
@@ -1572,8 +1577,183 @@
             </item>
            </layout>
           </widget>
+          <widget class="QWidget" name="Thread">
+           <layout class="QVBoxLayout" name="verticalLayout_25">
+            <item>
+             <widget class="QLabel" name="threadDefaultLabel">
+              <property name="text">
+               <string>Default Parameters:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QGridLayout" name="gridLayout_24">
+              <item row="0" column="0">
+               <widget class="QLabel" name="threadDiameterLabel">
+                <property name="text">
+                 <string>Diameter</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="threadDiameterEdit">
+                <property name="placeholderText">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="threadPitchLabel">
+                <property name="text">
+                 <string>Pitch</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="threadPitchEdit">
+                <property name="placeholderText">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="threadLengthLabel">
+                <property name="text">
+                 <string>Length</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QLineEdit" name="threadLengthEdit">
+                <property name="placeholderText">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="threadAngleLabel">
+                <property name="text">
+                 <string>Angle</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QLineEdit" name="threadAngleEdit">
+                <property name="placeholderText">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0">
+               <widget class="QLabel" name="threadInternalLabel">
+                <property name="text">
+                 <string>Internal</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="1">
+               <widget class="QComboBox" name="threadInternalBox">
+                <item>
+                 <property name="text">
+                  <string>True</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>False</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item row="5" column="0">
+               <widget class="QLabel" name="threadFakeLabel">
+                <property name="text">
+                 <string>Fake</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="1">
+               <widget class="QComboBox" name="threadFakeBox">
+                <item>
+                 <property name="text">
+                  <string>True</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>False</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item row="6" column="0">
+               <widget class="QLabel" name="threadLeftHandedLabel">
+                <property name="text">
+                 <string>Left Handed</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="1">
+               <widget class="QComboBox" name="threadLeftHandedBox">
+                <item>
+                 <property name="text">
+                  <string>True</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>False</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <spacer name="verticalSpacer_21">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>188</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
           <widget class="QWidget" name="torusPage">
            <layout class="QVBoxLayout" name="verticalLayout_24">
+            <item>
+             <widget class="QLabel" name="torusDefaultLabel">
+              <property name="text">
+               <string>Default Parameters:</string>
+              </property>
+             </widget>
+            </item>
             <item>
              <layout class="QGridLayout" name="gridLayout_23">
               <item row="0" column="0">
@@ -1593,6 +1773,9 @@
                 </property>
                </widget>
               </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="torusRadius2Edit"/>
+              </item>
               <item row="1" column="0">
                <widget class="QLabel" name="torusRadius2Label">
                 <property name="text">
@@ -1602,9 +1785,6 @@
                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                 </property>
                </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QLineEdit" name="torusRadius2Edit"/>
               </item>
              </layout>
             </item>
@@ -1622,6 +1802,8 @@
              </spacer>
             </item>
            </layout>
+           <zorder>torusRadius2Label</zorder>
+           <zorder>torusDefaultLabel</zorder>
           </widget>
          </widget>
         </item>

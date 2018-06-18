@@ -233,6 +233,18 @@
   </xs:all>
 </xs:complexType>
 
+<xs:complexType name="Thread">
+  <xs:all>
+    <xs:element name="diameter" type="xs:double" default="10.0"/>
+    <xs:element name="pitch" type="xs:double" default="1.5"/>
+    <xs:element name="length" type="xs:double" default="15.0"/>
+    <xs:element name="angle" type="xs:double" default="60.0"/>
+    <xs:element name="internal" type="xs:boolean" default="false"/>
+    <xs:element name="fake" type="xs:boolean" default="true"/>
+    <xs:element name="leftHanded" type="xs:boolean" default="false"/>
+  </xs:all>
+</xs:complexType>
+
 <xs:complexType name="Torus">
   <xs:all>
     <xs:element name="radius1" type="xs:double" default="10.0"/>
@@ -257,6 +269,7 @@
     <xs:element name="sphere" type="Sphere"  minOccurs="0" maxOccurs="1"/>
     <xs:element name="squash" type="Squash"  minOccurs="0" maxOccurs="1"/>
     <xs:element name="strip" type="Strip"  minOccurs="0" maxOccurs="1"/>
+    <xs:element name="thread" type="Thread"  minOccurs="0" maxOccurs="1"/>
     <xs:element name="torus" type="Torus"  minOccurs="0" maxOccurs="1"/>
   </xs:all>
 </xs:complexType>

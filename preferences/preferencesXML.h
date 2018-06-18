@@ -102,6 +102,7 @@ namespace prf
   class Sphere;
   class Squash;
   class Strip;
+  class Thread;
   class Torus;
   class Features;
   class Root;
@@ -7209,6 +7210,497 @@ namespace prf
   };
 
   /**
+   * @brief Class corresponding to the %Thread schema type.
+   *
+   * @nosubgrouping
+   */
+  class Thread: public ::xml_schema::Type
+  {
+    public:
+    /**
+     * @name diameter
+     *
+     * @brief Accessor and modifier functions for the %diameter
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::xml_schema::Double DiameterType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< DiameterType, char, ::xsd::cxx::tree::schema_type::double_ > DiameterTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const DiameterType&
+    diameter () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    DiameterType&
+    diameter ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    diameter (const DiameterType& x);
+
+    /**
+     * @brief Return the default value for the element.
+     *
+     * @return The element's default value.
+     */
+    static DiameterType
+    diameter_default_value ();
+
+    //@}
+
+    /**
+     * @name pitch
+     *
+     * @brief Accessor and modifier functions for the %pitch
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::xml_schema::Double PitchType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< PitchType, char, ::xsd::cxx::tree::schema_type::double_ > PitchTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const PitchType&
+    pitch () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    PitchType&
+    pitch ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    pitch (const PitchType& x);
+
+    /**
+     * @brief Return the default value for the element.
+     *
+     * @return The element's default value.
+     */
+    static PitchType
+    pitch_default_value ();
+
+    //@}
+
+    /**
+     * @name length
+     *
+     * @brief Accessor and modifier functions for the %length
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::xml_schema::Double LengthType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< LengthType, char, ::xsd::cxx::tree::schema_type::double_ > LengthTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const LengthType&
+    length () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    LengthType&
+    length ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    length (const LengthType& x);
+
+    /**
+     * @brief Return the default value for the element.
+     *
+     * @return The element's default value.
+     */
+    static LengthType
+    length_default_value ();
+
+    //@}
+
+    /**
+     * @name angle
+     *
+     * @brief Accessor and modifier functions for the %angle
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::xml_schema::Double AngleType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< AngleType, char, ::xsd::cxx::tree::schema_type::double_ > AngleTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const AngleType&
+    angle () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    AngleType&
+    angle ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    angle (const AngleType& x);
+
+    /**
+     * @brief Return the default value for the element.
+     *
+     * @return The element's default value.
+     */
+    static AngleType
+    angle_default_value ();
+
+    //@}
+
+    /**
+     * @name internal
+     *
+     * @brief Accessor and modifier functions for the %internal
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::xml_schema::Boolean InternalType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< InternalType, char > InternalTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const InternalType&
+    internal () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    InternalType&
+    internal ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    internal (const InternalType& x);
+
+    /**
+     * @brief Return the default value for the element.
+     *
+     * @return The element's default value.
+     */
+    static InternalType
+    internal_default_value ();
+
+    //@}
+
+    /**
+     * @name fake
+     *
+     * @brief Accessor and modifier functions for the %fake
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::xml_schema::Boolean FakeType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< FakeType, char > FakeTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const FakeType&
+    fake () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    FakeType&
+    fake ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    fake (const FakeType& x);
+
+    /**
+     * @brief Return the default value for the element.
+     *
+     * @return The element's default value.
+     */
+    static FakeType
+    fake_default_value ();
+
+    //@}
+
+    /**
+     * @name leftHanded
+     *
+     * @brief Accessor and modifier functions for the %leftHanded
+     * required element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::xml_schema::Boolean LeftHandedType;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< LeftHandedType, char > LeftHandedTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element.
+     *
+     * @return A constant reference to the element.
+     */
+    const LeftHandedType&
+    leftHanded () const;
+
+    /**
+     * @brief Return a read-write reference to the element.
+     *
+     * @return A reference to the element.
+     */
+    LeftHandedType&
+    leftHanded ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    leftHanded (const LeftHandedType& x);
+
+    /**
+     * @brief Return the default value for the element.
+     *
+     * @return The element's default value.
+     */
+    static LeftHandedType
+    leftHanded_default_value ();
+
+    //@}
+
+    /**
+     * @name Constructors
+     */
+    //@{
+
+    /**
+     * @brief Create an instance from the ultimate base and
+     * initializers for required elements and attributes.
+     */
+    Thread (const DiameterType&,
+            const PitchType&,
+            const LengthType&,
+            const AngleType&,
+            const InternalType&,
+            const FakeType&,
+            const LeftHandedType&);
+
+    /**
+     * @brief Create an instance from a DOM element.
+     *
+     * @param e A DOM element to extract the data from.
+     * @param f Flags to create the new instance with.
+     * @param c A pointer to the object that will contain the new
+     * instance.
+     */
+    Thread (const ::xercesc::DOMElement& e,
+            ::xml_schema::Flags f = 0,
+            ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy constructor.
+     *
+     * @param x An instance to make a copy of.
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    Thread (const Thread& x,
+            ::xml_schema::Flags f = 0,
+            ::xml_schema::Container* c = 0);
+
+    /**
+     * @brief Copy the instance polymorphically.
+     *
+     * @param f Flags to create the copy with.
+     * @param c A pointer to the object that will contain the copy.
+     * @return A pointer to the dynamically allocated copy.
+     *
+     * This function ensures that the dynamic type of the instance is
+     * used for copying and should be used for polymorphic object
+     * models instead of the copy constructor.
+     */
+    virtual Thread*
+    _clone (::xml_schema::Flags f = 0,
+            ::xml_schema::Container* c = 0) const;
+
+    /**
+     * @brief Copy assignment operator.
+     *
+     * @param x An instance to make a copy of.
+     * @return A reference to itself.
+     *
+     * For polymorphic object models use the @c _clone function instead.
+     */
+    Thread&
+    operator= (const Thread& x);
+
+    //@}
+
+    /**
+     * @brief Destructor.
+     */
+    virtual 
+    ~Thread ();
+
+    // Implementation.
+    //
+
+    //@cond
+
+    protected:
+    void
+    parse (::xsd::cxx::xml::dom::parser< char >&,
+           ::xml_schema::Flags);
+
+    protected:
+    ::xsd::cxx::tree::one< DiameterType > diameter_;
+    ::xsd::cxx::tree::one< PitchType > pitch_;
+    ::xsd::cxx::tree::one< LengthType > length_;
+    ::xsd::cxx::tree::one< AngleType > angle_;
+    ::xsd::cxx::tree::one< InternalType > internal_;
+    ::xsd::cxx::tree::one< FakeType > fake_;
+    ::xsd::cxx::tree::one< LeftHandedType > leftHanded_;
+
+    //@endcond
+  };
+
+  /**
    * @brief Class corresponding to the %Torus schema type.
    *
    * @nosubgrouping
@@ -8563,6 +9055,82 @@ namespace prf
     //@}
 
     /**
+     * @name thread
+     *
+     * @brief Accessor and modifier functions for the %thread
+     * optional element.
+     */
+    //@{
+
+    /**
+     * @brief Element type.
+     */
+    typedef ::prf::Thread ThreadType;
+
+    /**
+     * @brief Element optional container type.
+     */
+    typedef ::xsd::cxx::tree::optional< ThreadType > ThreadOptional;
+
+    /**
+     * @brief Element traits type.
+     */
+    typedef ::xsd::cxx::tree::traits< ThreadType, char > ThreadTraits;
+
+    /**
+     * @brief Return a read-only (constant) reference to the element
+     * container.
+     *
+     * @return A constant reference to the optional container.
+     */
+    const ThreadOptional&
+    thread () const;
+
+    /**
+     * @brief Return a read-write reference to the element container.
+     *
+     * @return A reference to the optional container.
+     */
+    ThreadOptional&
+    thread ();
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x A new value to set.
+     *
+     * This function makes a copy of its argument and sets it as
+     * the new value of the element.
+     */
+    void
+    thread (const ThreadType& x);
+
+    /**
+     * @brief Set the element value.
+     *
+     * @param x An optional container with the new value to set.
+     *
+     * If the value is present in @a x then this function makes a copy 
+     * of this value and sets it as the new value of the element.
+     * Otherwise the element container is set the 'not present' state.
+     */
+    void
+    thread (const ThreadOptional& x);
+
+    /**
+     * @brief Set the element value without copying.
+     *
+     * @param p A new value to use.
+     *
+     * This function will try to use the passed value directly instead
+     * of making a copy.
+     */
+    void
+    thread (::std::unique_ptr< ThreadType > p);
+
+    //@}
+
+    /**
      * @name torus
      *
      * @brief Accessor and modifier functions for the %torus
@@ -8734,6 +9302,7 @@ namespace prf
     SphereOptional sphere_;
     SquashOptional squash_;
     StripOptional strip_;
+    ThreadOptional thread_;
     TorusOptional torus_;
 
     //@endcond
@@ -9649,6 +10218,9 @@ namespace prf
 
   void
   operator<< (::xercesc::DOMElement&, const Strip&);
+
+  void
+  operator<< (::xercesc::DOMElement&, const Thread&);
 
   void
   operator<< (::xercesc::DOMElement&, const Torus&);

@@ -50,6 +50,7 @@ namespace ftr
       static const QString Angle = "Angle"; //!< draft
       static const QString Offset = "Offset"; //!< datum plane
       static const QString CSys = "Coordinate System"; //!< feature with a coordinate system.
+      static const QString Diameter = "Diameter"; //!< feature with a coordinate system.
     }
     
     /*! Descriptor for path parameters.*/

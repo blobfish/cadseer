@@ -58,6 +58,7 @@
 #include <command/trim.h>
 #include <command/revision.h>
 #include <command/removefaces.h>
+#include <command/thread.h>
 #include <message/dispatch.h>
 #include <message/observer.h>
 #include <selection/message.h>
@@ -202,6 +203,9 @@ void Manager::setupDispatcher()
   
   mask = msg::Request | msg::Construct | msg::RemoveFaces;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::constructRemoveFacesDispatched, this, _1)));
+  
+  mask = msg::Request | msg::Construct | msg::Thread;
+  observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::constructThreadDispatched, this, _1)));
   
   mask = msg::Request | msg::Project | msg::Revision | msg::Dialog;
   observer->dispatcher.insert(std::make_pair(mask, boost::bind(&Manager::revisionDispatched, this, _1)));
@@ -486,6 +490,12 @@ void Manager::revisionDispatched(const msg::Message&)
 void Manager::constructRemoveFacesDispatched(const msg::Message&)
 {
   std::shared_ptr<RemoveFaces> rf(new RemoveFaces());
+  addCommand(rf);
+}
+
+void Manager::constructThreadDispatched(const msg::Message&)
+{
+  std::shared_ptr<Thread> rf(new Thread());
   addCommand(rf);
 }
 

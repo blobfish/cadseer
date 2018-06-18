@@ -88,6 +88,7 @@ namespace cmd
     void constructSewDispatched(const msg::Message&);
     void constructTrimDispatched(const msg::Message&);
     void constructRemoveFacesDispatched(const msg::Message&);
+    void constructThreadDispatched(const msg::Message&);
     void revisionDispatched(const msg::Message&);
     
     //editing functions

@@ -154,6 +154,22 @@ void Preferences::initialize()
   ui->quoteTSheetEdit->setText(QString::fromStdString(manager->rootPtr->features().quote().get().templateSheet()));
   ui->squashGEdit->setText(QString().setNum(manager->rootPtr->features().squash().get().granularity()));
   ui->stripGapEdit->setText(QString().setNum(manager->rootPtr->features().strip().get().gap()));
+  ui->threadDiameterEdit->setText(QString().setNum(manager->rootPtr->features().thread().get().diameter()));
+  ui->threadPitchEdit->setText(QString().setNum(manager->rootPtr->features().thread().get().pitch()));
+  ui->threadLengthEdit->setText(QString().setNum(manager->rootPtr->features().thread().get().length()));
+  ui->threadAngleEdit->setText(QString().setNum(manager->rootPtr->features().thread().get().angle()));
+  if (manager->rootPtr->features().thread().get().internal())
+    ui->threadInternalBox->setCurrentIndex(0);
+  else
+    ui->threadInternalBox->setCurrentIndex(1);
+  if (manager->rootPtr->features().thread().get().fake())
+    ui->threadFakeBox->setCurrentIndex(0);
+  else
+    ui->threadFakeBox->setCurrentIndex(1);
+  if (manager->rootPtr->features().thread().get().leftHanded())
+    ui->threadLeftHandedBox->setCurrentIndex(0);
+  else
+    ui->threadLeftHandedBox->setCurrentIndex(1);
   ui->torusRadius1Edit->setText(QString().setNum(manager->rootPtr->features().torus().get().radius1()));
   ui->torusRadius2Edit->setText(QString().setNum(manager->rootPtr->features().torus().get().radius2()));
 }
@@ -507,6 +523,35 @@ void Preferences::updateFeature()
   if (temp < 0.0)
     temp = prf::Strip::gap_default_value();
   manager->rootPtr->features().strip().get().gap() = temp;
+  
+  temp = ui->threadDiameterEdit->text().toDouble();
+  if (temp <= 0.0)
+    temp = prf::Thread::diameter_default_value();
+  manager->rootPtr->features().thread().get().diameter() = temp;
+  
+  temp = ui->threadPitchEdit->text().toDouble();
+  if (temp <= 0.0)
+    temp = prf::Thread::pitch_default_value();
+  manager->rootPtr->features().thread().get().pitch() = temp;
+  
+  temp = ui->threadLengthEdit->text().toDouble();
+  if (temp <= 0.0)
+    temp = prf::Thread::length_default_value();
+  manager->rootPtr->features().thread().get().length() = temp;
+  
+  temp = ui->threadAngleEdit->text().toDouble();
+  if (temp <= 0.0)
+    temp = prf::Thread::angle_default_value();
+  manager->rootPtr->features().thread().get().angle() = temp;
+  
+  bool bv = (ui->threadInternalBox->currentIndex() == 0) ? true : false;
+  manager->rootPtr->features().thread().get().internal() = bv;
+  
+  bv = (ui->threadFakeBox->currentIndex() == 0) ? true : false;
+  manager->rootPtr->features().thread().get().fake() = bv;
+  
+  bv = (ui->threadLeftHandedBox->currentIndex() == 0) ? true : false;
+  manager->rootPtr->features().thread().get().leftHanded() = bv;
 
   temp = ui->torusRadius1Edit->text().toDouble();
   if (temp <= 0.0)

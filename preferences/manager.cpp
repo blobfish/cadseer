@@ -382,6 +382,20 @@ void Manager::ensureDefaults()
     );
   }
   
+  if (!features.thread().present())
+  {
+    features.thread() = prf::Thread
+    (
+      prf::Thread::diameter_default_value(),
+      prf::Thread::pitch_default_value(),
+      prf::Thread::length_default_value(),
+      prf::Thread::angle_default_value(),
+      prf::Thread::internal_default_value(),
+      prf::Thread::fake_default_value(),
+      prf::Thread::leftHanded_default_value()
+    );
+  }
+  
   if (!features.torus().present())
   {
     features.torus() = prf::Torus

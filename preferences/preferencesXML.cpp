@@ -1855,6 +1855,178 @@ namespace prf
   }
 
 
+  // Thread
+  // 
+
+  const Thread::DiameterType& Thread::
+  diameter () const
+  {
+    return this->diameter_.get ();
+  }
+
+  Thread::DiameterType& Thread::
+  diameter ()
+  {
+    return this->diameter_.get ();
+  }
+
+  void Thread::
+  diameter (const DiameterType& x)
+  {
+    this->diameter_.set (x);
+  }
+
+  Thread::DiameterType Thread::
+  diameter_default_value ()
+  {
+    return DiameterType (10.0);
+  }
+
+  const Thread::PitchType& Thread::
+  pitch () const
+  {
+    return this->pitch_.get ();
+  }
+
+  Thread::PitchType& Thread::
+  pitch ()
+  {
+    return this->pitch_.get ();
+  }
+
+  void Thread::
+  pitch (const PitchType& x)
+  {
+    this->pitch_.set (x);
+  }
+
+  Thread::PitchType Thread::
+  pitch_default_value ()
+  {
+    return PitchType (1.5);
+  }
+
+  const Thread::LengthType& Thread::
+  length () const
+  {
+    return this->length_.get ();
+  }
+
+  Thread::LengthType& Thread::
+  length ()
+  {
+    return this->length_.get ();
+  }
+
+  void Thread::
+  length (const LengthType& x)
+  {
+    this->length_.set (x);
+  }
+
+  Thread::LengthType Thread::
+  length_default_value ()
+  {
+    return LengthType (15.0);
+  }
+
+  const Thread::AngleType& Thread::
+  angle () const
+  {
+    return this->angle_.get ();
+  }
+
+  Thread::AngleType& Thread::
+  angle ()
+  {
+    return this->angle_.get ();
+  }
+
+  void Thread::
+  angle (const AngleType& x)
+  {
+    this->angle_.set (x);
+  }
+
+  Thread::AngleType Thread::
+  angle_default_value ()
+  {
+    return AngleType (60.0);
+  }
+
+  const Thread::InternalType& Thread::
+  internal () const
+  {
+    return this->internal_.get ();
+  }
+
+  Thread::InternalType& Thread::
+  internal ()
+  {
+    return this->internal_.get ();
+  }
+
+  void Thread::
+  internal (const InternalType& x)
+  {
+    this->internal_.set (x);
+  }
+
+  Thread::InternalType Thread::
+  internal_default_value ()
+  {
+    return InternalType (false);
+  }
+
+  const Thread::FakeType& Thread::
+  fake () const
+  {
+    return this->fake_.get ();
+  }
+
+  Thread::FakeType& Thread::
+  fake ()
+  {
+    return this->fake_.get ();
+  }
+
+  void Thread::
+  fake (const FakeType& x)
+  {
+    this->fake_.set (x);
+  }
+
+  Thread::FakeType Thread::
+  fake_default_value ()
+  {
+    return FakeType (true);
+  }
+
+  const Thread::LeftHandedType& Thread::
+  leftHanded () const
+  {
+    return this->leftHanded_.get ();
+  }
+
+  Thread::LeftHandedType& Thread::
+  leftHanded ()
+  {
+    return this->leftHanded_.get ();
+  }
+
+  void Thread::
+  leftHanded (const LeftHandedType& x)
+  {
+    this->leftHanded_.set (x);
+  }
+
+  Thread::LeftHandedType Thread::
+  leftHanded_default_value ()
+  {
+    return LeftHandedType (false);
+  }
+
+
   // Torus
   // 
 
@@ -2358,6 +2530,36 @@ namespace prf
   strip (::std::unique_ptr< StripType > x)
   {
     this->strip_.set (std::move (x));
+  }
+
+  const Features::ThreadOptional& Features::
+  thread () const
+  {
+    return this->thread_;
+  }
+
+  Features::ThreadOptional& Features::
+  thread ()
+  {
+    return this->thread_;
+  }
+
+  void Features::
+  thread (const ThreadType& x)
+  {
+    this->thread_.set (x);
+  }
+
+  void Features::
+  thread (const ThreadOptional& x)
+  {
+    this->thread_ = x;
+  }
+
+  void Features::
+  thread (::std::unique_ptr< ThreadType > x)
+  {
+    this->thread_.set (std::move (x));
   }
 
   const Features::TorusOptional& Features::
@@ -6291,6 +6493,233 @@ namespace prf
   {
   }
 
+  // Thread
+  //
+
+  Thread::
+  Thread (const DiameterType& diameter,
+          const PitchType& pitch,
+          const LengthType& length,
+          const AngleType& angle,
+          const InternalType& internal,
+          const FakeType& fake,
+          const LeftHandedType& leftHanded)
+  : ::xml_schema::Type (),
+    diameter_ (diameter, this),
+    pitch_ (pitch, this),
+    length_ (length, this),
+    angle_ (angle, this),
+    internal_ (internal, this),
+    fake_ (fake, this),
+    leftHanded_ (leftHanded, this)
+  {
+  }
+
+  Thread::
+  Thread (const Thread& x,
+          ::xml_schema::Flags f,
+          ::xml_schema::Container* c)
+  : ::xml_schema::Type (x, f, c),
+    diameter_ (x.diameter_, f, this),
+    pitch_ (x.pitch_, f, this),
+    length_ (x.length_, f, this),
+    angle_ (x.angle_, f, this),
+    internal_ (x.internal_, f, this),
+    fake_ (x.fake_, f, this),
+    leftHanded_ (x.leftHanded_, f, this)
+  {
+  }
+
+  Thread::
+  Thread (const ::xercesc::DOMElement& e,
+          ::xml_schema::Flags f,
+          ::xml_schema::Container* c)
+  : ::xml_schema::Type (e, f | ::xml_schema::Flags::base, c),
+    diameter_ (this),
+    pitch_ (this),
+    length_ (this),
+    angle_ (this),
+    internal_ (this),
+    fake_ (this),
+    leftHanded_ (this)
+  {
+    if ((f & ::xml_schema::Flags::base) == 0)
+    {
+      ::xsd::cxx::xml::dom::parser< char > p (e, true, false, false);
+      this->parse (p, f);
+    }
+  }
+
+  void Thread::
+  parse (::xsd::cxx::xml::dom::parser< char >& p,
+         ::xml_schema::Flags f)
+  {
+    for (; p.more_content (); p.next_content (false))
+    {
+      const ::xercesc::DOMElement& i (p.cur_element ());
+      const ::xsd::cxx::xml::qualified_name< char > n (
+        ::xsd::cxx::xml::dom::name< char > (i));
+
+      // diameter
+      //
+      if (n.name () == "diameter" && n.namespace_ ().empty ())
+      {
+        if (!diameter_.present ())
+        {
+          this->diameter_.set (DiameterTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      // pitch
+      //
+      if (n.name () == "pitch" && n.namespace_ ().empty ())
+      {
+        if (!pitch_.present ())
+        {
+          this->pitch_.set (PitchTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      // length
+      //
+      if (n.name () == "length" && n.namespace_ ().empty ())
+      {
+        if (!length_.present ())
+        {
+          this->length_.set (LengthTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      // angle
+      //
+      if (n.name () == "angle" && n.namespace_ ().empty ())
+      {
+        if (!angle_.present ())
+        {
+          this->angle_.set (AngleTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      // internal
+      //
+      if (n.name () == "internal" && n.namespace_ ().empty ())
+      {
+        if (!internal_.present ())
+        {
+          this->internal_.set (InternalTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      // fake
+      //
+      if (n.name () == "fake" && n.namespace_ ().empty ())
+      {
+        if (!fake_.present ())
+        {
+          this->fake_.set (FakeTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      // leftHanded
+      //
+      if (n.name () == "leftHanded" && n.namespace_ ().empty ())
+      {
+        if (!leftHanded_.present ())
+        {
+          this->leftHanded_.set (LeftHandedTraits::create (i, f, this));
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    if (!diameter_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "diameter",
+        "");
+    }
+
+    if (!pitch_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "pitch",
+        "");
+    }
+
+    if (!length_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "length",
+        "");
+    }
+
+    if (!angle_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "angle",
+        "");
+    }
+
+    if (!internal_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "internal",
+        "");
+    }
+
+    if (!fake_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "fake",
+        "");
+    }
+
+    if (!leftHanded_.present ())
+    {
+      throw ::xsd::cxx::tree::expected_element< char > (
+        "leftHanded",
+        "");
+    }
+  }
+
+  Thread* Thread::
+  _clone (::xml_schema::Flags f,
+          ::xml_schema::Container* c) const
+  {
+    return new class Thread (*this, f, c);
+  }
+
+  Thread& Thread::
+  operator= (const Thread& x)
+  {
+    if (this != &x)
+    {
+      static_cast< ::xml_schema::Type& > (*this) = x;
+      this->diameter_ = x.diameter_;
+      this->pitch_ = x.pitch_;
+      this->length_ = x.length_;
+      this->angle_ = x.angle_;
+      this->internal_ = x.internal_;
+      this->fake_ = x.fake_;
+      this->leftHanded_ = x.leftHanded_;
+    }
+
+    return *this;
+  }
+
+  Thread::
+  ~Thread ()
+  {
+  }
+
   // Torus
   //
 
@@ -6424,6 +6853,7 @@ namespace prf
     sphere_ (this),
     squash_ (this),
     strip_ (this),
+    thread_ (this),
     torus_ (this)
   {
   }
@@ -6448,6 +6878,7 @@ namespace prf
     sphere_ (x.sphere_, f, this),
     squash_ (x.squash_, f, this),
     strip_ (x.strip_, f, this),
+    thread_ (x.thread_, f, this),
     torus_ (x.torus_, f, this)
   {
   }
@@ -6472,6 +6903,7 @@ namespace prf
     sphere_ (this),
     squash_ (this),
     strip_ (this),
+    thread_ (this),
     torus_ (this)
   {
     if ((f & ::xml_schema::Flags::base) == 0)
@@ -6701,6 +7133,20 @@ namespace prf
         }
       }
 
+      // thread
+      //
+      if (n.name () == "thread" && n.namespace_ ().empty ())
+      {
+        ::std::unique_ptr< ThreadType > r (
+          ThreadTraits::create (i, f, this));
+
+        if (!this->thread_)
+        {
+          this->thread_.set (::std::move (r));
+          continue;
+        }
+      }
+
       // torus
       //
       if (n.name () == "torus" && n.namespace_ ().empty ())
@@ -6747,6 +7193,7 @@ namespace prf
       this->sphere_ = x.sphere_;
       this->squash_ = x.squash_;
       this->strip_ = x.strip_;
+      this->thread_ = x.thread_;
       this->torus_ = x.torus_;
     }
 
@@ -8263,6 +8710,89 @@ namespace prf
   }
 
   void
+  operator<< (::xercesc::DOMElement& e, const Thread& i)
+  {
+    e << static_cast< const ::xml_schema::Type& > (i);
+
+    // diameter
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "diameter",
+          e));
+
+      s << ::xml_schema::AsDouble(i.diameter ());
+    }
+
+    // pitch
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "pitch",
+          e));
+
+      s << ::xml_schema::AsDouble(i.pitch ());
+    }
+
+    // length
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "length",
+          e));
+
+      s << ::xml_schema::AsDouble(i.length ());
+    }
+
+    // angle
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "angle",
+          e));
+
+      s << ::xml_schema::AsDouble(i.angle ());
+    }
+
+    // internal
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "internal",
+          e));
+
+      s << i.internal ();
+    }
+
+    // fake
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "fake",
+          e));
+
+      s << i.fake ();
+    }
+
+    // leftHanded
+    //
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "leftHanded",
+          e));
+
+      s << i.leftHanded ();
+    }
+  }
+
+  void
   operator<< (::xercesc::DOMElement& e, const Torus& i)
   {
     e << static_cast< const ::xml_schema::Type& > (i);
@@ -8473,6 +9003,18 @@ namespace prf
           e));
 
       s << *i.strip ();
+    }
+
+    // thread
+    //
+    if (i.thread ())
+    {
+      ::xercesc::DOMElement& s (
+        ::xsd::cxx::xml::dom::create_element (
+          "thread",
+          e));
+
+      s << *i.thread ();
     }
 
     // torus
